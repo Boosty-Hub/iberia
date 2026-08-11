@@ -36,6 +36,12 @@ el **Documento de Arquitectura de IA**.
   `campo`, `btn-*`, `insignia`, `rotulo`, `prosa`). Tailwind 4 **no** permite
   `@apply` de una clase definida en el mismo layer — las variantes de botón heredan
   la base por selector agrupado.
+- **Un solo lenguaje visual en todo el aplicativo.** El estilo salió del canal y se
+  adoptó para el panel y el informe: **DM Sans** global, fondo `#f6f7f9`, superficies
+  blancas con esquina `rounded-2xl`, borde tenue y una sola sombra
+  (`--sombra-tarjeta`). Nada de superficies oscuras: la barra lateral, el login y el
+  pie del informe son claros. El carbón (`marca-800`) queda para texto y para la
+  acción secundaria de peso (`.btn-primario`).
 ## Marca
 
 La app va con la identidad de **Industrias Iberia**, no la de Boosty.

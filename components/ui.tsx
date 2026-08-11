@@ -19,7 +19,7 @@ export function EncabezadoPagina({
     <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
       <div className="min-w-0">
         {rotulo && <p className="rotulo mb-2">{rotulo}</p>}
-        <h1 className="text-2xl font-bold tracking-tight text-marca-800">{titulo}</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-marca-900">{titulo}</h1>
         {descripcion && (
           <p className="mt-1.5 max-w-2xl text-sm text-marca-600">{descripcion}</p>
         )}
@@ -90,7 +90,7 @@ export function EstadoVacio({
 }) {
   return (
     <div className="tarjeta flex flex-col items-center px-6 py-14 text-center">
-      <h2 className="text-base font-semibold text-marca-800">{titulo}</h2>
+      <h2 className="text-base font-semibold text-marca-900">{titulo}</h2>
       {descripcion && (
         <p className="mt-1.5 max-w-md text-sm text-marca-600">{descripcion}</p>
       )}
@@ -118,7 +118,7 @@ export function Metrica({
   const contenido = (
     <>
       <p className="flex items-baseline gap-1.5">
-        <span className="text-3xl font-bold tracking-tight text-marca-800">{valor}</span>
+        <span className="text-3xl font-bold tracking-tight text-marca-900">{valor}</span>
         {sufijo && <span className="text-sm text-marca-500">{sufijo}</span>}
       </p>
       <p className="mt-1 text-xs font-medium tracking-wide text-marca-500 uppercase">

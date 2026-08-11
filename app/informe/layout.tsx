@@ -13,7 +13,7 @@ export default async function InformeLayout({ children }: LayoutProps<'/informe'
   const { perfil } = await requerirSesion()
 
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-white">
+    <div className="flex min-h-full flex-1 flex-col">
       <header className="sticky top-0 z-10 border-b border-[var(--borde)] bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-3 lg:px-8">
           <Marca />
@@ -40,12 +40,12 @@ export default async function InformeLayout({ children }: LayoutProps<'/informe'
 
       <main className="flex-1">{children}</main>
 
-      <footer className="border-t border-[var(--borde)] bg-marca-900 px-5 py-6 lg:px-8">
+      <footer className="border-t border-[var(--borde)] bg-[var(--fondo)] px-5 py-6 lg:px-8">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
-          <p className="text-xs text-white/50">
+          <p className="text-xs text-marca-500">
             Información confidencial de Industrias Iberia bajo acuerdo de confidencialidad.
           </p>
-          <p className="text-xs text-white/40">
+          <p className="text-xs text-marca-400">
             Boosty International LLC · Anthropic Partner
           </p>
         </div>

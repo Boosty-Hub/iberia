@@ -27,6 +27,14 @@ const PRINCIPALES: Item[] = [
   { href: '/dashboard/informe', etiqueta: 'Editor del informe', Icono: IconoInforme },
 ]
 
+/**
+ * Sobre fondo claro el destino activo se marca con rojo tenue y texto rojo, no
+ * con un bloque sólido: en una barra blanca, una pastilla roja llena pesa como
+ * un botón de acción y compite con los de la página.
+ */
+const ACTIVO = 'bg-acento-50 font-semibold text-acento-700'
+const INACTIVO = 'text-marca-600 hover:bg-marca-50 hover:text-marca-900'
+
 export function NavLateral({ esAdmin }: { esAdmin: boolean }) {
   const pathname = usePathname()
 
@@ -35,7 +43,7 @@ export function NavLateral({ esAdmin }: { esAdmin: boolean }) {
 
   return (
     <nav className="flex flex-col gap-1 p-3">
-      <p className="px-3 pt-2 pb-2 text-[10px] font-semibold tracking-[0.14em] text-white/35 uppercase">
+      <p className="px-3 pt-2 pb-2 text-[10px] font-semibold tracking-[0.14em] text-marca-400 uppercase">
         Levantamiento
       </p>
 
@@ -45,10 +53,8 @@ export function NavLateral({ esAdmin }: { esAdmin: boolean }) {
           href={href}
           aria-current={activo(href) ? 'page' : undefined}
           className={cn(
-            'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
-            activo(href)
-              ? 'bg-acento-600 font-medium text-white'
-              : 'text-white/65 hover:bg-white/8 hover:text-white'
+            'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors',
+            activo(href) ? ACTIVO : INACTIVO
           )}
         >
           <Icono className="h-[18px] w-[18px] shrink-0" />
@@ -58,17 +64,17 @@ export function NavLateral({ esAdmin }: { esAdmin: boolean }) {
 
       {esAdmin && (
         <>
-          <p className="px-3 pt-5 pb-2 text-[10px] font-semibold tracking-[0.14em] text-white/35 uppercase">
+          <p className="px-3 pt-5 pb-2 text-[10px] font-semibold tracking-[0.14em] text-marca-400 uppercase">
             Administración
           </p>
           <Link
             href="/dashboard/usuarios"
             aria-current={activo('/dashboard/usuarios') ? 'page' : undefined}
             className={cn(
-              'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
+              'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors',
               activo('/dashboard/usuarios')
-                ? 'bg-white/12 font-medium text-white'
-                : 'text-white/65 hover:bg-white/6 hover:text-white'
+                ? 'bg-marca-100 font-semibold text-marca-900'
+                : INACTIVO
             )}
           >
             <IconoUsuarios className="h-[18px] w-[18px] shrink-0" />
@@ -77,10 +83,10 @@ export function NavLateral({ esAdmin }: { esAdmin: boolean }) {
         </>
       )}
 
-      <div className="mt-5 border-t border-white/10 pt-3">
+      <div className="mt-5 border-t border-[var(--borde)] pt-3">
         <Link
           href="/informe"
-          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-acento-200 transition-colors hover:bg-white/6 hover:text-white"
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-acento-700 transition-colors hover:bg-acento-50"
         >
           <IconoVerInforme className="h-[18px] w-[18px] shrink-0" />
           Ver el informe

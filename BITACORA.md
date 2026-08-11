@@ -98,6 +98,14 @@ a abrir siempre.
 - Objetivos táctiles por debajo de 44 px (logo de la cabecera, enlaces de volver) y
   nombres recortados en el directorio: «Alberto García-Ra…» no le sirve a nadie.
 
+**Unificado**
+
+El estilo del canal se adoptó como el del producto entero, por indicación de Gabriel.
+DM Sans en todas partes, fondo claro, tarjetas `rounded-2xl` con una sola sombra. Las
+superficies oscuras desaparecieron: la barra lateral del panel, el login y el pie del
+informe ahora son claros, y el informe se lee como una hoja blanca sobre la mesa. El
+carbón queda para el texto y para la acción secundaria de peso.
+
 **Dónde quedamos**
 
 El canal funciona de extremo a extremo en local y está verificado por vista en teléfono.

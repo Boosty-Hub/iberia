@@ -12,16 +12,17 @@ export default async function DashboardLayout({ children }: LayoutProps<'/dashbo
 
   return (
     <div className="flex min-h-full flex-1">
-      {/* Barra lateral */}
-      <aside className="hidden w-64 shrink-0 flex-col bg-marca-900 lg:flex">
-        <div className="border-b border-white/10 px-5 py-4">
-          <Marca tono="oscuro" />
+      {/* Barra lateral. En claro, como el canal: el carbón oscuro partía el
+          producto en dos mitades que no parecían la misma aplicación. */}
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-[var(--borde)] bg-white lg:flex">
+        <div className="border-b border-[var(--borde)] px-5 py-4">
+          <Marca />
         </div>
         <div className="flex-1 overflow-y-auto">
           <NavLateral esAdmin={esAdmin(perfil)} />
         </div>
-        <div className="border-t border-white/10 px-5 py-3">
-          <p className="text-[11px] text-white/40">
+        <div className="border-t border-[var(--borde)] px-5 py-3">
+          <p className="text-[11px] leading-relaxed text-marca-400">
             Fase 1 · Entender
             <br />
             Boosty Digital
@@ -63,7 +64,7 @@ export default async function DashboardLayout({ children }: LayoutProps<'/dashbo
         </header>
 
         {/* Navegación compacta para móvil */}
-        <div className="border-b border-[var(--borde)] bg-marca-900 lg:hidden">
+        <div className="border-b border-[var(--borde)] bg-white lg:hidden">
           <NavLateral esAdmin={esAdmin(perfil)} />
         </div>
 

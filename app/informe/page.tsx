@@ -38,30 +38,34 @@ export default async function InformePage() {
 
   if (conContenido.length === 0) {
     return (
-      <div className="mx-auto max-w-3xl px-5 py-20 text-center lg:px-8">
-        <p className="rotulo justify-center">Fase 1 · Entender</p>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight text-marca-800">
-          El informe está en construcción
-        </h1>
-        <p className="mx-auto mt-3 max-w-lg text-marca-600">
-          Todavía no hay secciones publicadas. El levantamiento de procesos y el Documento de
-          Arquitectura de IA se irán publicando a medida que avance el diagnóstico.
-        </p>
-        {puedeEditar && (
-          <Link href="/dashboard/informe" className="btn-acento mt-6">
-            Empezar a escribir
-          </Link>
-        )}
+      <div className="mx-auto w-full max-w-3xl px-5 py-12 lg:px-8">
+        <div className="tarjeta px-6 py-16 text-center">
+          <p className="rotulo justify-center">Fase 1 · Entender</p>
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-marca-900">
+            El informe está en construcción
+          </h1>
+          <p className="mx-auto mt-3 max-w-lg text-marca-600">
+            Todavía no hay secciones publicadas. El levantamiento de procesos y el Documento de
+            Arquitectura de IA se irán publicando a medida que avance el diagnóstico.
+          </p>
+          {puedeEditar && (
+            <Link href="/dashboard/informe" className="btn-acento mt-6">
+              Empezar a escribir
+            </Link>
+          )}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-5 py-10 lg:px-8 lg:py-14">
+    // El informe se lee como un documento sobre la mesa: una hoja blanca con
+    // el mismo borde y la misma curva que las tarjetas del resto del producto.
+    <div className="tarjeta mx-4 my-8 px-5 py-10 lg:mx-auto lg:my-12 lg:max-w-5xl lg:px-10 lg:py-14">
       {/* Portada */}
       <header className="border-b border-[var(--borde)] pb-10">
         <p className="rotulo mb-4">Programa de Adopción de IA · Fase 1</p>
-        <h1 className="max-w-3xl text-3xl leading-tight font-bold tracking-tight text-marca-800 sm:text-4xl">
+        <h1 className="max-w-3xl text-3xl leading-tight font-bold tracking-tight text-marca-900 sm:text-4xl">
           Levantamiento del proceso y{' '}
           <span className="text-acento-600">arquitectura de IA</span>
         </h1>
