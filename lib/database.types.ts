@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      accesos: {
+        Row: {
+          canal: string
+          created_at: string
+          empleado_id: string
+          enviado_en: string | null
+          expira_en: string
+          id: string
+          publicacion_id: string | null
+          token_hash: string
+          usado_en: string | null
+        }
+        Insert: {
+          canal?: string
+          created_at?: string
+          empleado_id: string
+          enviado_en?: string | null
+          expira_en: string
+          id?: string
+          publicacion_id?: string | null
+          token_hash: string
+          usado_en?: string | null
+        }
+        Update: {
+          canal?: string
+          created_at?: string
+          empleado_id?: string
+          enviado_en?: string | null
+          expira_en?: string
+          id?: string
+          publicacion_id?: string | null
+          token_hash?: string
+          usado_en?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accesos_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "empleados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accesos_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicaciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       archivos: {
         Row: {
           area_id: string | null
@@ -124,6 +175,249 @@ export type Database = {
           },
         ]
       }
+      comentarios: {
+        Row: {
+          created_at: string
+          empleado_id: string
+          estado: string
+          id: string
+          moderado_por: string | null
+          publicacion_id: string
+          texto: string
+        }
+        Insert: {
+          created_at?: string
+          empleado_id: string
+          estado?: string
+          id?: string
+          moderado_por?: string | null
+          publicacion_id: string
+          texto: string
+        }
+        Update: {
+          created_at?: string
+          empleado_id?: string
+          estado?: string
+          id?: string
+          moderado_por?: string | null
+          publicacion_id?: string
+          texto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comentarios_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "empleados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comentarios_moderado_por_fkey"
+            columns: ["moderado_por"]
+            isOneToOne: false
+            referencedRelation: "empleados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comentarios_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicaciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conexiones: {
+        Row: {
+          created_at: string
+          estado: string
+          id: string
+          recibe_id: string
+          resuelta_en: string | null
+          solicita_id: string
+        }
+        Insert: {
+          created_at?: string
+          estado?: string
+          id?: string
+          recibe_id: string
+          resuelta_en?: string | null
+          solicita_id: string
+        }
+        Update: {
+          created_at?: string
+          estado?: string
+          id?: string
+          recibe_id?: string
+          resuelta_en?: string | null
+          solicita_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conexiones_recibe_id_fkey"
+            columns: ["recibe_id"]
+            isOneToOne: false
+            referencedRelation: "empleados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conexiones_solicita_id_fkey"
+            columns: ["solicita_id"]
+            isOneToOne: false
+            referencedRelation: "empleados"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversacion_participantes: {
+        Row: {
+          conversacion_id: string
+          empleado_id: string
+          id: string
+          silenciado: boolean
+          visto_en: string | null
+        }
+        Insert: {
+          conversacion_id: string
+          empleado_id: string
+          id?: string
+          silenciado?: boolean
+          visto_en?: string | null
+        }
+        Update: {
+          conversacion_id?: string
+          empleado_id?: string
+          id?: string
+          silenciado?: boolean
+          visto_en?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversacion_participantes_conversacion_id_fkey"
+            columns: ["conversacion_id"]
+            isOneToOne: false
+            referencedRelation: "conversaciones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversacion_participantes_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "empleados"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversaciones: {
+        Row: {
+          created_at: string
+          grupo_id: string | null
+          id: string
+          tipo: string
+        }
+        Insert: {
+          created_at?: string
+          grupo_id?: string | null
+          id?: string
+          tipo: string
+        }
+        Update: {
+          created_at?: string
+          grupo_id?: string | null
+          id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversaciones_grupo_id_fkey"
+            columns: ["grupo_id"]
+            isOneToOne: false
+            referencedRelation: "grupos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      empleados: {
+        Row: {
+          activo: boolean
+          area_id: string | null
+          busqueda: unknown
+          cargo: string | null
+          cedula: string
+          created_at: string
+          email: string | null
+          es_moderador: boolean
+          fecha_ingreso: string | null
+          foto_url: string | null
+          id: string
+          nivel: string
+          nombre_completo: string
+          perfil_id: string | null
+          puede_publicar: boolean
+          sede: string | null
+          telefono: string | null
+          tipo_nomina: string
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          area_id?: string | null
+          busqueda?: unknown
+          cargo?: string | null
+          cedula: string
+          created_at?: string
+          email?: string | null
+          es_moderador?: boolean
+          fecha_ingreso?: string | null
+          foto_url?: string | null
+          id?: string
+          nivel?: string
+          nombre_completo: string
+          perfil_id?: string | null
+          puede_publicar?: boolean
+          sede?: string | null
+          telefono?: string | null
+          tipo_nomina?: string
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          area_id?: string | null
+          busqueda?: unknown
+          cargo?: string | null
+          cedula?: string
+          created_at?: string
+          email?: string | null
+          es_moderador?: boolean
+          fecha_ingreso?: string | null
+          foto_url?: string | null
+          id?: string
+          nivel?: string
+          nombre_completo?: string
+          perfil_id?: string | null
+          puede_publicar?: boolean
+          sede?: string | null
+          telefono?: string | null
+          tipo_nomina?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "empleados_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "empleados_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       entrevistas: {
         Row: {
           area_id: string | null
@@ -207,6 +501,93 @@ export type Database = {
             columns: ["entrevistado_id"]
             isOneToOne: false
             referencedRelation: "personas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grupo_miembros: {
+        Row: {
+          created_at: string
+          empleado_id: string
+          grupo_id: string
+          id: string
+          rol: string
+        }
+        Insert: {
+          created_at?: string
+          empleado_id: string
+          grupo_id: string
+          id?: string
+          rol?: string
+        }
+        Update: {
+          created_at?: string
+          empleado_id?: string
+          grupo_id?: string
+          id?: string
+          rol?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grupo_miembros_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "empleados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grupo_miembros_grupo_id_fkey"
+            columns: ["grupo_id"]
+            isOneToOne: false
+            referencedRelation: "grupos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grupos: {
+        Row: {
+          activo: boolean
+          area_id: string | null
+          creador_id: string | null
+          created_at: string
+          id: string
+          nombre: string
+          proposito: string | null
+          tipo: string
+        }
+        Insert: {
+          activo?: boolean
+          area_id?: string | null
+          creador_id?: string | null
+          created_at?: string
+          id?: string
+          nombre: string
+          proposito?: string | null
+          tipo?: string
+        }
+        Update: {
+          activo?: boolean
+          area_id?: string | null
+          creador_id?: string | null
+          created_at?: string
+          id?: string
+          nombre?: string
+          proposito?: string | null
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grupos_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grupos_creador_id_fkey"
+            columns: ["creador_id"]
+            isOneToOne: false
+            referencedRelation: "empleados"
             referencedColumns: ["id"]
           },
         ]
@@ -329,6 +710,48 @@ export type Database = {
         }
         Relationships: []
       }
+      mensajes: {
+        Row: {
+          autor_id: string
+          conversacion_id: string
+          created_at: string
+          estado: string
+          id: string
+          texto: string
+        }
+        Insert: {
+          autor_id: string
+          conversacion_id: string
+          created_at?: string
+          estado?: string
+          id?: string
+          texto: string
+        }
+        Update: {
+          autor_id?: string
+          conversacion_id?: string
+          created_at?: string
+          estado?: string
+          id?: string
+          texto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mensajes_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "empleados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mensajes_conversacion_id_fkey"
+            columns: ["conversacion_id"]
+            isOneToOne: false
+            referencedRelation: "conversaciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       personas: {
         Row: {
           area_id: string | null
@@ -420,6 +843,159 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      publicacion_lecturas: {
+        Row: {
+          empleado_id: string
+          id: string
+          leido_en: string
+          origen: string | null
+          publicacion_id: string
+        }
+        Insert: {
+          empleado_id: string
+          id?: string
+          leido_en?: string
+          origen?: string | null
+          publicacion_id: string
+        }
+        Update: {
+          empleado_id?: string
+          id?: string
+          leido_en?: string
+          origen?: string | null
+          publicacion_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publicacion_lecturas_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "empleados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "publicacion_lecturas_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicaciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      publicaciones: {
+        Row: {
+          audiencia: string
+          audiencia_area_id: string | null
+          autor_id: string | null
+          bajada: string | null
+          busqueda: unknown
+          created_at: string
+          cuerpo_md: string | null
+          estado: string
+          fijado: boolean
+          id: string
+          imagen_url: string | null
+          oficial: boolean
+          permite_comentarios: boolean
+          publicado_en: string | null
+          tipo: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          audiencia?: string
+          audiencia_area_id?: string | null
+          autor_id?: string | null
+          bajada?: string | null
+          busqueda?: unknown
+          created_at?: string
+          cuerpo_md?: string | null
+          estado?: string
+          fijado?: boolean
+          id?: string
+          imagen_url?: string | null
+          oficial?: boolean
+          permite_comentarios?: boolean
+          publicado_en?: string | null
+          tipo?: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          audiencia?: string
+          audiencia_area_id?: string | null
+          autor_id?: string | null
+          bajada?: string | null
+          busqueda?: unknown
+          created_at?: string
+          cuerpo_md?: string | null
+          estado?: string
+          fijado?: boolean
+          id?: string
+          imagen_url?: string | null
+          oficial?: boolean
+          permite_comentarios?: boolean
+          publicado_en?: string | null
+          tipo?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "publicaciones_audiencia_area_id_fkey"
+            columns: ["audiencia_area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "publicaciones_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "empleados"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reacciones: {
+        Row: {
+          created_at: string
+          empleado_id: string
+          id: string
+          publicacion_id: string
+          tipo: string
+        }
+        Insert: {
+          created_at?: string
+          empleado_id: string
+          id?: string
+          publicacion_id: string
+          tipo?: string
+        }
+        Update: {
+          created_at?: string
+          empleado_id?: string
+          id?: string
+          publicacion_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reacciones_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "empleados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reacciones_publicacion_id_fkey"
+            columns: ["publicacion_id"]
+            isOneToOne: false
+            referencedRelation: "publicaciones"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sesion_participantes: {
         Row: {
@@ -514,7 +1090,10 @@ export type Database = {
     Functions: {
       es_admin: { Args: never; Returns: boolean }
       es_editor: { Args: never; Returns: boolean }
+      mensajes_sin_leer: { Args: never; Returns: number }
+      mi_empleado: { Args: never; Returns: string }
       mi_rol: { Args: never; Returns: string }
+      puede_publicar: { Args: never; Returns: boolean }
       renombrar_hablante: {
         Args: { p_entrevista: string; p_etiqueta: string; p_nombre: string }
         Returns: number

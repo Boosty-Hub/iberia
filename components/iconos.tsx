@@ -168,6 +168,59 @@ export const IconoAlerta = (p: Props) => (
   </Base>
 )
 
+// --- Canal de comunicación interna -------------------------------------------
+
+export const IconoCasa = (p: Props) => (
+  <Base {...p}>
+    <path d="M4 10.5 12 4l8 6.5" />
+    <path d="M5.5 9.5V19a1.5 1.5 0 0 0 1.5 1.5h10a1.5 1.5 0 0 0 1.5-1.5V9.5" />
+    <path d="M9.5 20.5v-5.5h5v5.5" />
+  </Base>
+)
+
+export const IconoChat = (p: Props) => (
+  <Base {...p}>
+    <path d="M20 12.5a7.5 7.5 0 0 1-10.9 6.7L4 20.5l1.4-4.8A7.5 7.5 0 1 1 20 12.5Z" />
+  </Base>
+)
+
+export const IconoGrupo = (p: Props) => (
+  <Base {...p}>
+    <circle cx="8.5" cy="9" r="2.8" />
+    <path d="M3.5 19a5 5 0 0 1 10 0" />
+    <circle cx="16.5" cy="7.5" r="2.2" />
+    <path d="M15.5 13.6A4.6 4.6 0 0 1 20.5 18" />
+  </Base>
+)
+
+export const IconoPersona = (p: Props) => (
+  <Base {...p}>
+    <circle cx="12" cy="8.5" r="3.4" />
+    <path d="M5 20a7 7 0 0 1 14 0" />
+  </Base>
+)
+
+export const IconoCampana = (p: Props) => (
+  <Base {...p}>
+    <path d="M18 9a6 6 0 1 0-12 0c0 4.5-1.5 5.8-1.5 5.8h15S18 13.5 18 9Z" />
+    <path d="M10.3 18.5a2 2 0 0 0 3.4 0" />
+  </Base>
+)
+
+export const IconoEnviar = (p: Props) => (
+  <Base {...p}>
+    <path d="M21 3 10.5 13.5" />
+    <path d="M21 3l-6.8 18-3.7-7.5L3 9.8Z" />
+  </Base>
+)
+
+export const IconoOficial = (p: Props) => (
+  <Base {...p}>
+    <path d="m12 3 2.6 1.9 3.2-.2.6 3.2 2.4 2.2-1.7 2.7.6 3.2-3.1.9L14.7 20 12 18.6 9.3 20l-1.9-2.9-3.1-.9.6-3.2L3.2 10l2.4-2.2.6-3.2 3.2.2Z" />
+    <path d="m9.3 12 2 2 3.4-3.6" />
+  </Base>
+)
+
 export const IconoVerInforme = (p: Props) => (
   <Base {...p}>
     <path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12Z" />

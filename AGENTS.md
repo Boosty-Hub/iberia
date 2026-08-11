@@ -63,11 +63,37 @@ La app va con la identidad de **Industrias Iberia**, no la de Boosty.
 - **Cuidado con los reemplazos masivos de clases**: `translate-` contiene la
   cadena `slate`. Un `slate- → marca-` a ciegas lo rompe.
 
+## El canal (`/canal`) — mobile first
+
+La app de comunicación interna es **otra cosa que el dashboard**, aunque comparta
+proyecto y sesión. Se diseña para el teléfono de un operador de planta, no para el
+escritorio de un consultor.
+
+- **Tipografía propia**: DM Sans (`--font-canal`), autoalojada por `next/font/google`.
+- **Paleta clara**: fondo `#f6f7f9`, tarjetas blancas muy redondeadas, el rojo de Iberia
+  para la acción y `oro-300` (`#FFD036`) para lo oficial.
+- **44 px de objetivo táctil** en todo lo que se toca (`.toque`). El pulgar llega abajo:
+  la navegación principal va al pie, no arriba.
+- **Vocabulario y reglas en `lib/canal.ts`.** `requiereSolicitud(mío, otro)` es la regla
+  de convivencia: entre niveles vecinos se solicita conexión; hacia arriba —dos niveles
+  o más— se escribe directo. Es norma social, no límite de seguridad: se aplica en la
+  aplicación, no en RLS.
+- **El enlace de WhatsApp es la credencial** del personal sin correo. En `accesos` se
+  guarda el hash, nunca el token en claro, y la tabla no se lee desde el cliente.
+
+```
+npm run probar:canal   -- --password "<clave>"   # 21 comprobaciones de RLS reales
+npm run capturar:canal -- --password "<clave>" --flujo   # iPhone 14 + flujo de mensaje
+```
+
+`capturar:canal` mide lo que una captura no muestra: desbordes horizontales y objetivos
+táctiles menores de 44 px.
+
 ## Seguridad — no negociable
 
 Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).
 
-- **RLS activo en las 7 tablas.** Nada es legible sin sesión. Al crear una tabla,
+- **RLS activa en todas las tablas.** Nada es legible sin sesión. Al crear una tabla,
   habilitar RLS y escribir sus políticas en la misma migración.
 - **Autorización en dos capas**: `lib/auth.ts` (`requerirSesion`, `requerirEditor`,
   `requerirAdmin`) en el servidor, y RLS en la base. Una página nunca confía solo en
@@ -85,6 +111,14 @@ Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).
 
 ## Trampas conocidas
 
+- **Una política RLS que se pregunta por su propia tabla entra en recursión.**
+  «Soy participante si existe una fila donde soy participante» → Postgres responde
+  `infinite recursion detected in policy` y la operación falla **en silencio** desde el
+  cliente. La salida es una función `security definer` que consulta sin volver a pasar
+  por RLS: `participo_en`, `soy_miembro`, `coordino_grupo`, `cabe_otro_participante`.
+- **`.insert().select()` bajo RLS falla si la política de SELECT aún no te alcanza.**
+  Al crear una conversación todavía no participas en ella, así que el `RETURNING` vuelve
+  vacío. Generar el id con `crypto.randomUUID()` antes de insertar.
 - Un módulo `'use server'` solo puede exportar funciones async. Las constantes
   compartidas van aparte — por eso existe `lib/storage.ts`.
 - Los tipos de ruta (`PageProps<'/…'>`) se generan: tras añadir una ruta, correr
@@ -115,5 +149,7 @@ npm run tipos               # tsc --noEmit
 npm run probar:fireflies    # 50 verificaciones del parser (sin red)
 npm run probar:acceso       -- --password "<clave admin>"   # políticas RLS reales
 npm run probar:paginas      -- --password "<clave admin>"   # render con sesión real
+npm run probar:canal        -- --password "<clave>"         # RLS del canal
+npm run capturar:canal      -- --password "<clave>" --flujo # el canal en teléfono
 npm run crear:usuario       -- --email … --password … --rol …
 ```

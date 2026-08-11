@@ -16,7 +16,9 @@
     "capturar": "node --env-file=.env.local scripts/capturar-ui.mjs",
     "documento": "node scripts/generar-pdf.mjs",
     "crear:usuario": "node --env-file=.env.local scripts/crear-usuario.mjs",
-    "cambiar:clave": "node --env-file=.env.local scripts/cambiar-clave.mjs"
+    "cambiar:clave": "node --env-file=.env.local scripts/cambiar-clave.mjs",
+    "probar:canal": "node --env-file=.env.local scripts/probar-canal.mjs",
+    "capturar:canal": "node --env-file=.env.local scripts/capturar-canal.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

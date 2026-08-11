@@ -40,8 +40,23 @@
   --color-marca-900: #1e1c1b;
   --color-marca-950: #121110;
 
+  /* Amarillo Iberia — muestreado del sitio corporativo (#FFD036), donde cubre
+     más del triple de superficie que el rojo. Es color de marca, no acento. */
+  --color-oro-50: #fffbeb;
+  --color-oro-100: #fff4c7;
+  --color-oro-200: #ffe88a;
+  --color-oro-300: #ffd036;
+  --color-oro-400: #f2b705;
+  --color-oro-500: #d99a00;
+  --color-oro-600: #b87700;
+  --color-oro-700: #935b00;
+  --color-oro-800: #7a4a08;
+  --color-oro-900: #683e0d;
+
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  /* Tipografía del canal de comunicación interna. */
+  --font-canal: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
@@ -197,3 +212,55 @@ body {
 .tabla-scroll {
   @apply overflow-x-auto;
 }
+
+/* =============================================================================
+   CANAL · el aplicativo de comunicación interna
+   Pensado para el teléfono primero. Formas del demo aprobado —tarjetas blancas
+   muy redondeadas sobre fondo claro, sombras suaves— con la identidad de
+   Iberia y DM Sans.
+   ========================================================================== */
+
+.canal {
+  font-family: var(--font-canal);
+  background: #f6f7f9;
+  color: #1e1c1b;
+  /* Respeta la barra de gestos y el notch del teléfono. */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@layer components {
+  /* Tarjeta del feed. Más redondeada que en el dashboard: en el teléfono la
+     curva es lo que separa una publicación de la siguiente. */
+  .tarjeta-canal {
+    @apply rounded-2xl border border-marca-200/60 bg-white shadow-[0_1px_3px_rgba(30,28,27,0.06)];
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium;
+  }
+
+  /* Objetivo táctil de 44 px: el mínimo cómodo con guantes en planta. */
+  .toque {
+    @apply flex min-h-11 items-center justify-center;
+  }
+
+  .btn-canal {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5
+           text-[15px] font-semibold transition-colors
+           focus-visible:ring-2 focus-visible:ring-acento-500/40 focus-visible:outline-none
+           disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-canal-rojo {
+    @apply bg-acento-600 text-white active:bg-acento-700;
+  }
+
+  .btn-canal-oro {
+    @apply bg-oro-300 text-marca-900 active:bg-oro-400;
+  }
+
+  .btn-canal-suave {
+    @apply border border-marca-200 bg-white text-marca-800 active:bg-marca-50;
+  }
+}
+
