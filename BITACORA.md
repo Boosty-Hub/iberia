@@ -20,11 +20,12 @@ dashboard) y `AGENTS.md` para las convenciones técnicas.
 | **Hallazgos** | 0 — pendiente de extraer del material ya cargado |
 | **Informe** | 21 secciones estructuradas, todas vacías |
 | **Próximo entregable de software** | App de comunicación interna (a la espera de indicación de Gabriel) |
+| **Repositorio** | `Boosty-Hub/iberia` — privado |
 
 ### Pendiente inmediato
 
-- **Identificar hablantes** en SES-002, SES-004 y SES-005. Sin nombre, lo que se dijo
-  no se puede citar en el informe.
+- **Identificar hablantes** en SES-002 y SES-005. Sin nombre, lo que se dijo no se
+  puede citar en el informe. SES-001, SES-003 y SES-004 ya están completas.
 - **Extraer hallazgos** de las 5 sesiones cargadas.
 - Confirmación de Iberia: día del rodaje, nombres de los 9 entrevistados, tarjeta para
   las licencias.
@@ -79,6 +80,9 @@ Primera sesión de construcción. Se levantó el dashboard completo desde cero.
   Gustavo **Carballo** (no Carvallo), **Martha** Fuentes (no Marta). 536 turnos
   reatribuidos.
 - Luis Daniel **Agostini** (no Agustín). 25 turnos.
+- SES-004: Fireflies partió a Flaviano Tucci en dos etiquetas. Fusionadas — 187 turnos
+  más, con lo que el recorrido de planta completo (línea de mayonesa, molino,
+  laboratorio, envasado) queda atribuible y citable.
 
 **Entregado**
 
