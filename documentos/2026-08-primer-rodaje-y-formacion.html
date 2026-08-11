@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Primer rodaje de entrevistas y formación dirigente · Industrias Iberia</title>
+    <style>
+      /* ===================================================================
+         Identidad de Industrias Iberia: rojo #D4332C sobre carbón cálido.
+         =================================================================== */
+      :root {
+        --rojo: #d4332c;
+        --rojo-claro: #fdf3f2;
+        --rojo-borde: #f7c8c4;
+        --carbon: #1e1c1b;
+        --carbon-medio: #474342;
+        --gris: #6d6765;
+        --gris-claro: #b8b3b1;
+        --borde: #e4e1e0;
+        --fondo-suave: #f8f7f7;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        font-size: 10.5pt;
+        line-height: 1.55;
+        color: var(--carbon-medio);
+      }
+
+      h1, h2, h3 { color: var(--carbon); margin: 0; }
+
+      /* --- Portada -------------------------------------------------------- */
+      .portada { border-bottom: 3px solid var(--rojo); padding-bottom: 20px; margin-bottom: 28px; }
+      .portada img { height: 34px; width: auto; display: block; margin-bottom: 22px; }
+      .rotulo {
+        font-size: 8pt; font-weight: 700; letter-spacing: 0.16em;
+        text-transform: uppercase; color: var(--rojo); margin-bottom: 8px;
+      }
+      .portada h1 { font-size: 21pt; line-height: 1.2; letter-spacing: -0.01em; }
+      .portada .bajada { font-size: 11pt; color: var(--gris); margin-top: 10px; }
+
+      /* --- Secciones ------------------------------------------------------ */
+      section { margin-bottom: 26px; }
+      section > h2 {
+        font-size: 13pt; margin-bottom: 4px;
+        padding-bottom: 6px; border-bottom: 1px solid var(--borde);
+      }
+      .num { color: var(--rojo); font-family: ui-monospace, monospace; font-size: 10pt; margin-right: 8px; }
+      section > .intro { color: var(--gris); margin: 10px 0 14px; }
+
+      h3 { font-size: 10.5pt; margin: 16px 0 6px; }
+
+      p { margin: 0 0 9px; }
+      ul { margin: 0 0 10px; padding-left: 18px; }
+      li { margin-bottom: 4px; }
+      strong { color: var(--carbon); font-weight: 600; }
+
+      /* --- Tablas --------------------------------------------------------- */
+      table { width: 100%; border-collapse: collapse; font-size: 9.5pt; margin: 10px 0 14px; }
+      thead { background: var(--carbon); color: #fff; }
+      th { text-align: left; padding: 7px 9px; font-weight: 600; font-size: 9pt; }
+      td { padding: 7px 9px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+      tbody tr:nth-child(even) { background: var(--fondo-suave); }
+      .hora { font-family: ui-monospace, monospace; font-size: 8.5pt; white-space: nowrap; color: var(--carbon); }
+
+      /* --- Bloques destacados --------------------------------------------- */
+      .aviso {
+        border: 1px solid var(--rojo-borde); background: var(--rojo-claro);
+        border-left: 3px solid var(--rojo); padding: 12px 14px; margin: 12px 0 14px;
+        break-inside: avoid;
+      }
+      .aviso h3 { color: var(--rojo); margin-top: 0; }
+      .aviso p:last-child { margin-bottom: 0; }
+
+      .nota {
+        background: var(--fondo-suave); border-left: 3px solid var(--gris-claro);
+        padding: 10px 14px; margin: 12px 0; font-size: 9.5pt;
+      }
+      .nota p:last-child { margin-bottom: 0; }
+
+      .opciones { display: flex; gap: 8px; margin: 4px 0 0; flex-wrap: wrap; }
+      .opcion {
+        border: 1px solid var(--rojo-borde); background: var(--rojo-claro); color: var(--carbon);
+        border-radius: 4px; padding: 5px 11px; font-size: 9.5pt; font-weight: 600;
+      }
+
+      .pista { display: inline-block; font-size: 8pt; font-weight: 700; padding: 1px 6px;
+               border-radius: 9px; white-space: nowrap; }
+      .pista-a { background: var(--rojo); color: #fff; }
+      .pista-b { background: var(--carbon); color: #fff; }
+
+      .salto { break-before: page; }
+      .juntos { break-inside: avoid; }
+
+      footer.cierre {
+        margin-top: 30px; padding-top: 14px; border-top: 1px solid var(--borde);
+        font-size: 8.5pt; color: var(--gris);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="portada">
+      <img src="../public/marca/iberia.png" alt="Industrias Iberia" />
+      <p class="rotulo">Programa de Adopción de IA · Fase 1 · Entender</p>
+      <h1>Primer rodaje de entrevistas y formación dirigente</h1>
+      <p class="bajada">
+        Propuesta de agenda para la semana del 18 de agosto: nueve entrevistas de
+        levantamiento en la planta de Cagua y la primera formación en IA para el
+        equipo directivo.
+      </p>
+    </div>
+
+    <!-- ================================================================== -->
+    <section>
+      <h2><span class="num">01</span>Propuesta de agenda</h2>
+      <p class="intro">
+        Dos jornadas dentro de la semana del 18 de agosto. Iberia elige el día de
+        cada una entre las tres opciones disponibles.
+      </p>
+
+      <table>
+        <thead>
+          <tr><th style="width:34%">Jornada</th><th style="width:22%">Dónde</th><th>Duración</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Entrevistas de levantamiento</strong><br />Nueve entrevistas</td>
+            <td>Planta de Cagua</td>
+            <td>Jornada completa</td>
+          </tr>
+          <tr>
+            <td><strong>Formación 1 · Nivel directivo</strong></td>
+            <td>Caracas</td>
+            <td>Tres horas</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Días disponibles</h3>
+      <div class="opciones">
+        <span class="opcion">Martes 18 de agosto</span>
+        <span class="opcion">Miércoles 19 de agosto</span>
+        <span class="opcion">Jueves 20 de agosto</span>
+      </div>
+      <p style="margin-top:10px">
+        Cada jornada ocupa un día distinto. Proponemos esta semana para mantener el
+        ritmo de arranque del programa; si a Iberia le conviene otra, lo ajustamos.
+      </p>
+    </section>
+
+    <!-- ================================================================== -->
+    <section>
+      <h2><span class="num">02</span>Jornada de entrevistas · Planta de Cagua</h2>
+      <p class="intro">
+        Nueve entrevistas en un solo día, en dos pistas simultáneas conducidas por
+        Gabriel Montiel y Ruth Velázquez. Cada entrevista dura cincuenta minutos.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width:17%">Hora</th>
+            <th style="width:41%"><span class="pista pista-a">Pista A</span> Gabriel Montiel</th>
+            <th><span class="pista pista-b">Pista B</span> Ruth Velázquez</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="hora">06:00 – 07:30</td><td colspan="2">Traslado Caracas → Cagua</td></tr>
+          <tr><td class="hora">07:30 – 08:00</td><td colspan="2">Encuadre con los líderes del proyecto</td></tr>
+          <tr><td class="hora">08:00 – 08:50</td><td>Gerente de Planta</td><td>Jefe de Almacén de Materia Prima</td></tr>
+          <tr><td class="hora">09:00 – 09:50</td><td>Jefe de Producción</td><td>Jefe de Mantenimiento</td></tr>
+          <tr><td class="hora">09:50 – 10:10</td><td colspan="2">Pausa</td></tr>
+          <tr><td class="hora">10:10 – 11:00</td><td>Gerente de Compras</td><td>Jefe de Laboratorio</td></tr>
+          <tr><td class="hora">11:10 – 12:00</td><td>Jefe de Diseño y Desarrollo</td><td>Gerente de Calidad</td></tr>
+          <tr><td class="hora">12:00 – 13:00</td><td colspan="2">Almuerzo</td></tr>
+          <tr><td class="hora">13:00 – 13:50</td><td>Gerente de Distribución</td><td>—</td></tr>
+          <tr><td class="hora">14:00 – 14:45</td><td colspan="2">Cierre con los líderes del proyecto</td></tr>
+          <tr><td class="hora">15:00</td><td colspan="2">Regreso a Caracas</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Participantes convocados</h3>
+
+      <table>
+        <thead>
+          <tr><th style="width:38%">Cargo</th><th style="width:38%">Área</th><th>Entrevista con</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Gerente de Planta</strong></td><td>Operaciones</td><td>Gabriel Montiel</td></tr>
+          <tr><td><strong>Jefe de Producción</strong></td><td>Operaciones · Planta</td><td>Gabriel Montiel</td></tr>
+          <tr><td><strong>Gerente de Compras</strong></td><td>Finanzas</td><td>Gabriel Montiel</td></tr>
+          <tr><td><strong>Jefe de Diseño y Desarrollo</strong></td><td>Calidad y Logística</td><td>Gabriel Montiel</td></tr>
+          <tr><td><strong>Gerente de Distribución</strong></td><td>Calidad y Logística</td><td>Gabriel Montiel</td></tr>
+          <tr><td><strong>Jefe de Almacén de Materia Prima</strong></td><td>Operaciones · Planta</td><td>Ruth Velázquez</td></tr>
+          <tr><td><strong>Jefe de Mantenimiento</strong></td><td>Operaciones</td><td>Ruth Velázquez</td></tr>
+          <tr><td><strong>Jefe de Laboratorio</strong></td><td>Calidad y Logística</td><td>Ruth Velázquez</td></tr>
+          <tr><td><strong>Gerente de Calidad</strong></td><td>Calidad y Logística</td><td>Ruth Velázquez</td></tr>
+        </tbody>
+      </table>
+
+    </section>
+
+    <!-- ================================================================== -->
+    <section class="salto">
+      <h2><span class="num">03</span>Formación 1 · Nivel directivo</h2>
+      <p class="intro">
+        Primera de las tres formaciones del programa. Sesión de tres horas en
+        Caracas, práctica y sobre información propia de Iberia.
+      </p>
+
+      <h3>Participantes</h3>
+      <table>
+        <thead><tr><th style="width:38%">Persona</th><th>Cargo</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Alberto García-Ramos</strong></td><td>Director Gerente General</td></tr>
+          <tr><td><strong>Antonio Sorrentino</strong></td><td>Director de Comercialización</td></tr>
+          <tr><td><strong>Flaviano Tucci</strong></td><td>Director de Operaciones y de Calidad y Logística</td></tr>
+          <tr><td><strong>Dora Luciche</strong></td><td>Directora de Finanzas</td></tr>
+          <tr><td><strong>Gustavo Carballo</strong></td><td>Director de Capital Humano</td></tr>
+          <tr><td><strong>Martha Fuentes</strong></td><td>Gerente de Tecnología de la Información · líder del proyecto</td></tr>
+          <tr><td><strong>Luis Daniel Agostini</strong></td><td>Gerente de Desarrollo Comercial · líder del proyecto</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Contenido</h3>
+      <ul>
+        <li>Análisis de información propia de Iberia dentro del chat, con datos reales de cada área.</li>
+        <li>Construcción de escenarios y comparación de alternativas.</li>
+        <li>Lectura crítica de lo que la IA propone: alcance y límites de la herramienta.</li>
+        <li>Elaboración de reportería y artefactos de trabajo.</li>
+        <li>Criterios de uso de la información de Iberia dentro de la herramienta.</li>
+      </ul>
+
+      <h3>Requisitos</h3>
+      <ul>
+        <li><strong>Cada participante con su laptop.</strong> La sesión es práctica y se trabaja sobre casos reales de cada área.</li>
+        <li>Sala con proyector o pantalla y conexión estable a internet.</li>
+        <li>Tres horas de dedicación sin interrupciones operativas.</li>
+        <li>Licencias corporativas activas, según el punto siguiente.</li>
+      </ul>
+    </section>
+
+    <!-- ================================================================== -->
+    <section class="juntos">
+      <h2><span class="num">04</span>Licencias corporativas</h2>
+
+      <div class="aviso">
+        <h3>Requisito previo a la formación</h3>
+        <p>
+          Las licencias todavía no están contratadas. Son necesarias para que la
+          sesión sea práctica, por lo que conviene resolverlas antes de fijar la
+          fecha definitiva.
+        </p>
+      </div>
+
+      <table>
+        <thead><tr><th style="width:30%">Concepto</th><th>Detalle</th></tr></thead>
+        <tbody>
+          <tr><td>Qué se contrata</td><td>Licencias corporativas de Claude (Anthropic) para uso organizacional de Iberia.</td></tr>
+          <tr><td>Cuántas</td><td><strong>Siete</strong> para esta primera cohorte. Escalan a unas veinte al incorporar las gerencias.</td></tr>
+          <tr><td>Costo</td><td>USD 25 por usuario al mes. Siete licencias: <strong>USD 175 mensuales</strong>.</td></tr>
+          <tr><td>A nombre de</td><td>Industrias Iberia, directamente. Boosty no intermedia el costo.</td></tr>
+          <tr><td>Forma de pago</td><td><strong>Tarjeta Visa o Mastercard internacional.</strong> No es viable la transferencia internacional.</td></tr>
+          <tr><td>Gestión</td><td>Boosty acompaña la contratación y la configuración. Iberia queda como titular de la cuenta.</td></tr>
+          <tr><td>Plazo sugerido</td><td>Tarjeta disponible el <strong>viernes 14 de agosto</strong>, para dejar las cuentas creadas y probadas antes de la sesión.</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        Recomendamos destinar una tarjeta específica del programa. Sobre ella irán
+        también, más adelante, la infraestructura en la nube y el consumo de la API
+        de IA, lo que facilita llevar el control separado del costo del proyecto.
+      </p>
+    </section>
+
+    <!-- ================================================================== -->
+    <section>
+      <h2><span class="num">05</span>Formaciones 2 y 3</h2>
+      <p class="intro">
+        Las dos formaciones restantes del programa. Quedan por definir en fecha y
+        modalidad.
+      </p>
+
+      <table>
+        <thead>
+          <tr><th style="width:22%">Formación</th><th>A quién</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>2 · Gerencias</strong></td>
+            <td>
+              Las trece gerencias restantes: Ventas, Ventas Olympia, Entrenamiento en
+              Ventas, Distribuidores, Cuentas Clave, Recursos Humanos, Planta,
+              Mantenimiento, Distribución, Calidad, Compras, Contabilidad y Tesorería.
+            </td>
+          </tr>
+          <tr>
+            <td><strong>3 · Líderes</strong></td>
+            <td>Las jefaturas y coordinaciones de todas las direcciones.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p><strong>Dos definiciones necesarias:</strong></p>
+      <ul>
+        <li>
+          <strong>Modalidad.</strong> Presencial en Cagua o virtual. Puede ser distinta
+          para cada formación.
+        </li>
+        <li>
+          <strong>Equipos.</strong> En ambas modalidades cada participante necesita
+          laptop. Conviene verificar con antelación quiénes no disponen de una.
+        </li>
+      </ul>
+    </section>
+
+    <!-- ================================================================== -->
+    <section class="juntos">
+      <h2><span class="num">06</span>Siguientes pasos</h2>
+
+      <table>
+        <thead><tr><th style="width:44%">Acción</th><th style="width:30%">Responsable</th><th>Fecha</th></tr></thead>
+        <tbody>
+          <tr><td>Elegir el día de la jornada de entrevistas y el de la formación</td><td>Martha Fuentes y Luis Daniel Agostini</td><td class="hora">Viernes 14 de agosto</td></tr>
+          <tr><td>Confirmar los nueve participantes de las entrevistas</td><td>Martha Fuentes y Luis Daniel Agostini</td><td class="hora">Viernes 14 de agosto</td></tr>
+          <tr><td>Disponer la tarjeta para las licencias corporativas</td><td>Dora Luciche</td><td class="hora">Viernes 14 de agosto</td></tr>
+          <tr><td>Confirmar sala y horario de la formación</td><td>Martha Fuentes y Luis Daniel Agostini</td><td class="hora">Viernes 14 de agosto</td></tr>
+          <tr><td>Contratación y configuración de las licencias</td><td>Boosty, con Iberia como titular</td><td class="hora">Lunes 17 de agosto</td></tr>
+          <tr><td>Traslado Caracas → Cagua del equipo consultor</td><td>Martha Fuentes y Luis Daniel Agostini</td><td class="hora">Día de las entrevistas</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer class="cierre">
+      Programa de Adopción de IA · Industrias Iberia. Información confidencial,
+      manejada bajo acuerdo de confidencialidad.<br />
+      Boosty Digital · Anthropic Partner · Agosto de 2026
+    </footer>
+  </body>
+</html>

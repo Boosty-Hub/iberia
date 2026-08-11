@@ -1,0 +1,56 @@
+{
+  "title": "Entrevista Finanzas - Conciliación y cobranzas",
+  "date": 1786032000000,
+  "duration": 52,
+  "transcript_url": "https://app.fireflies.ai/view/ejemplo-finanzas",
+  "participants": [{ "name": "Gabriel Montiel" }, { "name": "María Gómez" }],
+  "summary": {
+    "overview": "La conciliación bancaria es manual y consume dos días al cierre de cada mes. La cobranza se sigue en un Excel paralelo al ERP, y el estado real de la cartera solo lo conoce la coordinadora.",
+    "action_items": "- María Gómez: compartir el formato de conciliación y el reporte de antigüedad de saldos\n- Gabriel Montiel: revisar qué expone el ERP por API",
+    "keywords": ["conciliación bancaria", "cobranzas", "cartera", "cierre mensual"]
+  },
+  "sentences": [
+    {
+      "index": 0,
+      "speaker_name": "Gabriel Montiel",
+      "text": "María, cuéntame cómo es el cierre del mes en finanzas.",
+      "start_time": 4.2,
+      "end_time": 8.9
+    },
+    {
+      "index": 1,
+      "speaker_name": "María Gómez",
+      "text": "El cierre arranca con la conciliación bancaria. Descargo el estado de cuenta de cada banco, lo abro en Excel y voy cruzando partida por partida contra lo que tiene el ERP. Son cuatro cuentas y me toma dos días completos, a veces tres si hay muchas transferencias de clientes sin identificar.",
+      "start_time": 9.4,
+      "end_time": 34.1
+    },
+    {
+      "index": 2,
+      "speaker_name": "Gabriel Montiel",
+      "text": "¿Sin identificar en qué sentido?",
+      "start_time": 34.8,
+      "end_time": 37.0
+    },
+    {
+      "index": 3,
+      "speaker_name": "María Gómez",
+      "text": "El cliente transfiere y no avisa, o paga tres facturas juntas con un solo monto. Yo tengo que adivinar a qué factura aplicarlo. Llamo al vendedor, el vendedor llama al cliente, y mientras tanto esa plata está en el banco pero no está aplicada en la cartera.",
+      "start_time": 37.6,
+      "end_time": 58.3
+    },
+    {
+      "index": 4,
+      "speaker_name": "Gabriel Montiel",
+      "text": "¿Y la cobranza cómo se sigue?",
+      "start_time": 59.0,
+      "end_time": 61.5
+    },
+    {
+      "index": 5,
+      "speaker_name": "María Gómez",
+      "text": "En un Excel mío. El ERP tiene la antigüedad de saldos pero no me deja anotar la gestión: a quién llamé, qué me prometió, cuándo vuelvo a llamar. Eso lo llevo aparte y solo yo lo entiendo. Si me voy de vacaciones, la cobranza se detiene esa semana.",
+      "start_time": 62.1,
+      "end_time": 88.7
+    }
+  ]
+}

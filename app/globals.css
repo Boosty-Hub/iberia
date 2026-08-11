@@ -1,26 +1,199 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+/* =============================================================================
+   Industrias Iberia · Programa de Adopción de IA
+
+   Paleta tomada del logo de Iberia: el rojo #D4332C muestreado del máster, y
+   un carbón cálido como estructura — un gris neutro apagaría el rojo y un azul
+   competiría con él.
+
+   El rojo es a la vez color de marca y señal de peligro. Se resuelve por forma,
+   no por tono: acción principal = rojo sólido, acción destructiva = rojo
+   perfilado sobre blanco y siempre con icono. El resaltado de búsqueda usa
+   ámbar, porque un resaltado rojo sobre texto se lee como error.
+   ========================================================================== */
+
+@theme {
+  /* Rojo Iberia — identidad, acciones principales, estados activos */
+  --color-acento-50: #fdf3f2;
+  --color-acento-100: #fbe3e1;
+  --color-acento-200: #f7c8c4;
+  --color-acento-300: #eda19b;
+  --color-acento-400: #e0736a;
+  --color-acento-500: #d4332c;
+  --color-acento-600: #bd2a23;
+  --color-acento-700: #9c221c;
+  --color-acento-800: #7c1d18;
+  --color-acento-900: #641a16;
+  --color-acento-950: #380d0b;
+
+  /* Carbón cálido — navegación, encabezados, texto */
+  --color-marca-50: #f8f7f7;
+  --color-marca-100: #efeded;
+  --color-marca-200: #dbd8d7;
+  --color-marca-300: #b8b3b1;
+  --color-marca-400: #8d8785;
+  --color-marca-500: #6d6765;
+  --color-marca-600: #575251;
+  --color-marca-700: #474342;
+  --color-marca-800: #2f2c2b;
+  --color-marca-900: #1e1c1b;
+  --color-marca-950: #121110;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --fondo: #f7f6f6;
+  --superficie: #ffffff;
+  --texto: #1e1c1b;
+  --texto-suave: #6d6765;
+  --borde: #e4e1e0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* -----------------------------------------------------------------------------
+   Primitivas reutilizadas en todo el dashboard
+   -------------------------------------------------------------------------- */
+
+@layer components {
+  .tarjeta {
+    @apply rounded-lg border border-[var(--borde)] bg-white shadow-sm;
+  }
+
+  .etiqueta {
+    @apply mb-1.5 block text-sm font-medium text-marca-800;
+  }
+
+  .campo {
+    @apply w-full rounded-md border border-[var(--borde)] bg-white px-3 py-2 text-sm text-marca-900
+           placeholder:text-marca-400
+           focus:border-acento-500 focus:ring-2 focus:ring-acento-500/20 focus:outline-none
+           disabled:cursor-not-allowed disabled:bg-marca-50 disabled:text-marca-500;
+  }
+
+  /* Base compartida de los botones. Tailwind 4 no permite `@apply` de una clase
+     definida en este mismo layer, así que las variantes la heredan por selector
+     agrupado en lugar de por composición. */
+  .btn,
+  .btn-primario,
+  .btn-acento,
+  .btn-neutro,
+  .btn-peligro {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium
+           transition-colors focus-visible:ring-2 focus-visible:ring-acento-500/40 focus-visible:outline-none
+           disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  /* Acción principal: rojo Iberia sólido. */
+  .btn-acento {
+    @apply bg-acento-600 text-white hover:bg-acento-500 active:bg-acento-700;
+  }
+
+  /* Acción secundaria de peso (filtrar, aplicar): carbón. */
+  .btn-primario {
+    @apply bg-marca-800 text-white hover:bg-marca-700 active:bg-marca-900;
+  }
+
+  .btn-neutro {
+    @apply border border-[var(--borde)] bg-white text-marca-800 hover:bg-marca-50;
+  }
+
+  /* Destructiva: mismo rojo, forma distinta — perfilada, nunca sólida. */
+  .btn-peligro {
+    @apply border border-acento-200 bg-white text-acento-700
+           hover:border-acento-300 hover:bg-acento-50 active:bg-acento-100;
+  }
+
+  .insignia {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  /* Viñeta roja que precede a los rótulos de sección. */
+  .rotulo {
+    @apply flex items-center gap-2 text-xs font-semibold tracking-[0.14em] text-acento-700 uppercase;
+  }
+
+  .rotulo::before {
+    content: '';
+    @apply inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-acento-500;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   Prosa del informe — se usa en la página del informe y en las vistas previas
+   -------------------------------------------------------------------------- */
+
+.prosa {
+  @apply text-[15px] leading-7 text-marca-700;
+}
+.prosa > * + * {
+  @apply mt-4;
+}
+.prosa h1 {
+  @apply mt-0 text-2xl font-bold text-marca-900;
+}
+.prosa h2 {
+  @apply mt-8 text-xl font-bold text-marca-900;
+}
+.prosa h3 {
+  @apply mt-6 text-base font-semibold text-marca-900;
+}
+.prosa p {
+  @apply text-marca-700;
+}
+.prosa strong {
+  @apply font-semibold text-marca-900;
+}
+.prosa a {
+  @apply text-acento-700 underline decoration-acento-300 underline-offset-2 hover:decoration-acento-600;
+}
+.prosa ul {
+  @apply list-disc space-y-1.5 pl-5;
+}
+.prosa ol {
+  @apply list-decimal space-y-1.5 pl-5;
+}
+.prosa blockquote {
+  @apply border-l-2 border-acento-400 bg-acento-50/60 py-2 pl-4 text-marca-600 italic;
+}
+.prosa code {
+  @apply rounded bg-marca-100 px-1.5 py-0.5 font-mono text-[13px] text-marca-800;
+}
+.prosa pre {
+  @apply overflow-x-auto rounded-lg bg-marca-900 p-4 text-[13px] text-marca-50;
+}
+.prosa pre code {
+  @apply bg-transparent p-0 text-inherit;
+}
+.prosa table {
+  @apply w-full border-collapse text-sm;
+}
+.prosa thead {
+  @apply bg-marca-800 text-white;
+}
+.prosa th {
+  @apply px-3 py-2 text-left font-semibold;
+}
+.prosa td {
+  @apply border-b border-[var(--borde)] px-3 py-2 align-top;
+}
+.prosa tbody tr:nth-child(even) {
+  @apply bg-marca-50/60;
+}
+.prosa hr {
+  @apply my-8 border-[var(--borde)];
+}
+
+/* Tabla del informe: nunca desborda el ancho de la página. */
+.prosa .tabla-scroll,
+.tabla-scroll {
+  @apply overflow-x-auto;
 }
