@@ -32,7 +32,8 @@
     "subir:fichas": "node --env-file=.env.local --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=ExperimentalWarning scripts/subir-fichas.mjs",
     "probar:certificado": "node --env-file=.env.local scripts/probar-certificado.mjs",
     "probar:recordatorios": "node --env-file=.env.local --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=ExperimentalWarning scripts/probar-recordatorios.mjs",
-    "probar:padron": "node --env-file=.env.local --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=ExperimentalWarning scripts/probar-padron.mjs"
+    "probar:padron": "node --env-file=.env.local --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=ExperimentalWarning scripts/probar-padron.mjs",
+    "probar:supabase": "node --env-file=.env.local scripts/probar-supabase.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",

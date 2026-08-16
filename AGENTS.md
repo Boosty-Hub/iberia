@@ -412,7 +412,16 @@ npm run subir:fichas                        # al bucket privado
 npm run probar:certificado                  # guardas de emisión y vista, con capturas
 npm run probar:recordatorios                # la escalera del empujón y los mensajes
 npm run probar:padron                       # el enlace como credencial · 25 comprobaciones
+npm run probar:supabase                     # que todo exista de verdad en el proyecto
 ```
+
+**`probar:supabase` no comprueba que el código compile, sino que lo que el código da por
+hecho existe en el proyecto real.** Son dos cosas distintas y se separan solas el día del
+despliegue. Mira que las tablas, vistas, columnas y funciones estén; que **la RLS cierre
+de verdad** —pidiendo cada tabla con la clave pública y sin sesión, no preguntando por el
+flag—; que los tres buckets sean privados y tengan dentro los 70 audios y las 10 fichas;
+y que no queden fichas ni cuentas de prueba en el padrón, que las verificaciones corren
+contra producción.
 
 Las migraciones se aplican con el CLI, que ya está enlazado al proyecto:
 
