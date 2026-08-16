@@ -415,6 +415,12 @@ npm run probar:padron                       # el enlace como credencial · 25 co
 npm run probar:supabase                     # que todo exista de verdad en el proyecto
 ```
 
+**Las claves son las nuevas, nunca los JWT antiguos.** `sb_publishable_…` y `sb_secret_…`,
+en `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` y `SUPABASE_SECRET_KEY`. Las de `anon` y
+`service_role` que empiezan por `eyJ` están apagadas en el proyecto: una clave vieja
+funciona perfectamente hasta el minuto en que la apagan, así que esto se comprueba por el
+formato y no por que responda. `probar:supabase` falla si alguien vuelve a meter una.
+
 **`probar:supabase` no comprueba que el código compile, sino que lo que el código da por
 hecho existe en el proyecto real.** Son dos cosas distintas y se separan solas el día del
 despliegue. Mira que las tablas, vistas, columnas y funciones estén; que **la RLS cierre

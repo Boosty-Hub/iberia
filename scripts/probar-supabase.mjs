@@ -59,6 +59,54 @@ comprobar(
 )
 comprobar('es un proyecto alojado', /^https:\/\/[a-z]{20}\.supabase\.co$/.test(URL_SUPA), URL_SUPA)
 
+// --- 0) las claves, del formato nuevo ----------------------------------------
+//
+// Supabase va a apagar las claves antiguas —los JWT de `anon` y `service_role`,
+// los que empiezan por `eyJ`— y el día que las apague, cualquier cosa que
+// todavía las use deja de responder. Las nuevas son `sb_publishable_…` y
+// `sb_secret_…`.
+//
+// Esto se comprueba por el formato y no por que «funcione»: una clave vieja
+// funciona perfectamente hasta el minuto en que la apagan, así que probarla no
+// dice nada. Lo que dice es cómo empieza.
+
+console.log('\nLas claves\n')
+
+/** Qué es cada clave, sin imprimirla. */
+function formato(valor) {
+  if (!valor) return 'vacía'
+  if (valor.startsWith('sb_publishable_')) return 'nueva · publishable'
+  if (valor.startsWith('sb_secret_')) return 'nueva · secret'
+  if (valor.startsWith('sbp_')) return 'token personal del CLI'
+  if (valor.startsWith('eyJ')) return 'LEGACY JWT'
+  return 'desconocido'
+}
+
+{
+  const publica = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? ''
+  const secreta = process.env.SUPABASE_SECRET_KEY ?? ''
+
+  comprobar(
+    `la clave pública es del formato nuevo (${formato(publica)})`,
+    publica.startsWith('sb_publishable_'),
+    formato(publica)
+  )
+  comprobar(
+    `la clave secreta es del formato nuevo (${formato(secreta)})`,
+    secreta.startsWith('sb_secret_'),
+    formato(secreta)
+  )
+  comprobar('ninguna es un JWT legacy', !publica.startsWith('eyJ') && !secreta.startsWith('eyJ'))
+
+  // La secreta bypasea la RLS: si alguna vez sale al navegador, se acabó.
+  comprobar(
+    'la clave secreta no está expuesta como NEXT_PUBLIC_',
+    !Object.entries(process.env).some(
+      ([nombre, valor]) => nombre.startsWith('NEXT_PUBLIC_') && (valor ?? '').startsWith('sb_secret_')
+    )
+  )
+}
+
 // --- 1) lo que el código da por hecho ----------------------------------------
 
 console.log('\nLas tablas y vistas del adiestramiento\n')
