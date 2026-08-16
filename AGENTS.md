@@ -21,6 +21,10 @@ El contexto de fondo del encargo está en `CONTEXTO_IBERIA.md`, cargado en el m�
 archivos del dashboard: contrato, mapa de personas con sus notas de manejo, vocabulario
 obligatorio hacia el cliente y reglas de comunicación.
 
+**Lo que falta está en `PENDIENTES.md`** —ordenado por lo que bloquea y con el nombre de
+quién tiene cada cosa— y cómo poner esto en línea, en `DESPLIEGUE.md`. Al cerrar algo, se
+tacha ahí: si hay dos listas de pendientes, en dos semanas dicen cosas distintas.
+
 Dashboard interno del programa de adopción de IA que **Boosty Digital** ejecuta para
 **Industrias Iberia** (Fase 1 · Entender, 5 meses). Alimenta el entregable de cierre:
 el **Documento de Arquitectura de IA**.

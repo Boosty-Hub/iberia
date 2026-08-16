@@ -5,7 +5,9 @@ quedamos. **Se actualiza al cierre de cada sesión, añadiendo la entrada más r
 arriba.**
 
 Contexto de fondo: `CONTEXTO_IBERIA.md` (cargado en el módulo de archivos del
-dashboard) y `AGENTS.md` para las convenciones técnicas.
+dashboard) y `AGENTS.md` para las convenciones técnicas. **Lo que falta está en
+`PENDIENTES.md`**, con el nombre de quién tiene cada cosa; y cómo poner esto en línea,
+en `DESPLIEGUE.md`.
 
 ---
 
@@ -26,51 +28,17 @@ dashboard) y `AGENTS.md` para las convenciones técnicas.
 
 ### Pendiente inmediato
 
-- **Identificar hablantes** en SES-002 y SES-005. Sin nombre, lo que se dijo no se
-  puede citar en el informe. SES-001, SES-003 y SES-004 ya están completas.
-- **Extraer hallazgos** de las 5 sesiones cargadas. En espera del rodaje de entrevistas,
-  por indicación de Gabriel.
-- **Padrón real** de las ~280 personas, de Capital Humano: hoy hay 17 fichas de muestra.
-- **Cuenta de WhatsApp Business** de Iberia — Martha Fuentes. Todo lo demás está listo:
-  la conexión se pega en `/dashboard/adiestramiento/recordatorios` y se enciende un
-  interruptor. Hay que pedir también la **aprobación de la plantilla** de recordatorio,
-  que es lo que suele tardar. Mientras tanto los mensajes se copian y se mandan a mano.
-- **Que los recordatorios lleven el enlace personal**, no el del curso. El mecanismo ya
-  existe (`/dashboard/empleados`); falta enganchar `{enlace}` de `recordatorios.md` al
-  token de cada quien en vez de a la URL general.
-- **Lista completa de nombres y cargos** del personal — Gabriel la pidió. Cierra las
-  familias de oficio del adiestramiento; hasta entonces todo lo que bifurca es
-  provisional.
-- **Avatares de planta** a Martica: operadora de envasado, montacarguista, técnico,
-  despachador. Los 18 que mandó la agencia son de oficina.
-- **Probar la transcripción con audio real de Cagua**, con ruido y acento de planta —no
-  con la voz sintética, que es fácil de entender.
-- **Intentar la API de transcripción rápida** con un recurso de tipo Speech: bajaría los
-  datos que sube el trabajador de ~34 MB a ~1 MB por persona.
-- **Crédito en la cuenta de Anthropic.** La clave ya está puesta y sirve; lo que falta es
-  saldo (`Your credit balance is too low`). Consola de Anthropic → **Plans & Billing**. Es
-  lo único que separa a Ajito de contestar: el circuito está montado y verificado menos
-  la llamada al modelo. Con unos **$60** sobra para las 200 personas del curso completo.
-  **Va por la API, no por las licencias de asiento** que Iberia está contratando para las
-  formaciones: una licencia es una persona delante de una ventana; esto es un programa
-  llamando doscientas veces al día. Hay que decirlo en la próxima reunión.
-- **Registrar los certificados en Capital Humano** — con Gustavo Carballo. La aplicación
-  los emite y los imprime; que consten en el expediente de cada quien es acuerdo, no
-  código.
-- **Las portadas de lección.** Dentro de la aplicación ya las hace el encabezado; harían
-  falta si el curso sale por WhatsApp.
-- **«Guardarlo» y «Mandárselo a alguien»**, los dos botones que el guion pone bajo el
-  certificado. Hoy el certificado es una página, no una imagen, así que no se guarda en
-  la galería ni se manda por WhatsApp. Hacerlo pide un rasterizador en el servidor
-  —dependencia nativa— o aceptar que la imagen salga de un lote que corra Boosty. Es una
-  decisión, no un olvido.
-- **Las variantes por oficio de los audios que bifurcan.** Salen de
-  `lib/adiestramiento.ts`, no del guion, y el generador todavía no las toca.
-- **Regenerar la clave de Azure Speech** cuando se termine de configurar: quedó
-  visible en una captura de pantalla.
-- Confirmación de Iberia: día del rodaje, nombres de los 9 entrevistados, tarjeta para
-  las licencias.
-- Desplegar el dashboard y el canal para que Martha y Luis puedan entrar.
+**La lista completa vive en `PENDIENTES.md`**, ordenada por lo que bloquea y con el
+nombre de quién tiene cada cosa. Aquí solo lo que impide abrir el curso:
+
+- **Saldo en la cuenta de Anthropic** (~$60) — Boosty. Sin esto Ajito no contesta.
+- **Cuenta de WhatsApp Business y su plantilla aprobada** — Martha Fuentes.
+- **Padrón real con teléfonos** — Gustavo Carballo. Sin teléfono no hay enlace.
+- **Lista de nombres y cargos** — cierra las familias de oficio.
+- **Aprobación de Milagro Salas**: la lista de confidencialidad de la lección 7 y la
+  retención de las fotos, que hay que decidir antes de grabar la lección 0.
+- **Regenerar la clave de Azure Speech**, que quedó visible en una captura.
+- **Probar la transcripción con audio real de Cagua**, con ruido y acento de planta.
 
 ---
 
