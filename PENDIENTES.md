@@ -25,7 +25,7 @@ Nada de lo demás importa hasta que estas estén.
 | **Aprobación de la lista de confidencialidad** (lección 7, audio 6) | Milagro Salas · y Martha Fuentes si hay algo escrito | Qué no se le cuenta a una IA de afuera no lo inventamos nosotros |
 | **Decidir la retención de las fotos** | Milagro Salas | Propuesta: borrarlas a las 24 h. Hay que decidirlo **antes de grabar la lección 0**, porque el audio lo tiene que decir |
 | **Regenerar `AZURE_SPEECH_KEY`** | **Boosty** | Quedó visible en una captura de pantalla. Consola de Azure → Keys and Endpoint → Regenerate Key 1 |
-| **Borrar las dos claves legacy de `.env.local`** (líneas `# NEXT_PUBLIC_SUPABASE_ANON_KEY` y `# SUPABASE_SERVICE_ROLE_KEY`) | **Boosty** | Están comentadas y **ningún código las usa**, pero hasta que se apaguen los JWT legacy en Supabase, la de `service_role` es una llave que bypasea la RLS entera, en texto plano, en una carpeta que sincroniza OneDrive. `probar:supabase` falla mientras sigan ahí |
+| **Apagar los JWT legacy en Supabase** | **Boosty** | El código no los usa y las copias ya no están en `.env.local`. Falta apagarlos en el panel para que dejen de existir. ⚠️ Antes, comprobar que nada **fuera de este repositorio** los use: alguna integración, un script suelto, algo conectado por otro lado |
 | **Probar la transcripción con audio real de Cagua** | **Boosty** | Lo verificado es voz sintética, que es fácil de entender. Con ruido de planta y acento de verdad puede ser otra cosa — y la transcripción es la puerta del curso |
 
 ---
@@ -122,3 +122,6 @@ Para que no se repita en la próxima reunión:
   doscientas veces al día.
 - ~~¿Cuánto cuesta?~~ **~$117 en servicios** para las 200 personas: voz, modelo y
   transcripción. El desglose está en `contenido/adiestramiento/herramientas.md`.
+- ~~¿Usamos claves legacy de Supabase?~~ **No.** Todo va por `sb_publishable_` y
+  `sb_secret_`, y las copias comentadas que quedaban en `.env.local` están borradas.
+  `probar:supabase` falla si alguien vuelve a meter una.
