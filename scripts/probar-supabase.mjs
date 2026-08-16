@@ -19,6 +19,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { readFileSync } from 'node:fs'
 
 const URL_SUPA = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SECRETO = process.env.SUPABASE_SECRET_KEY
@@ -105,6 +106,32 @@ function formato(valor) {
       ([nombre, valor]) => nombre.startsWith('NEXT_PUBLIC_') && (valor ?? '').startsWith('sb_secret_')
     )
   )
+
+  // Y que no queden guardadas ni comentadas.
+  //
+  // No basta con mirar las variables cargadas: una clave `service_role`
+  // comentada en el archivo sigue siendo una clave de `service_role` —bypasea
+  // la RLS entera— en texto plano, y esta carpeta la sincroniza OneDrive. Es la
+  // misma historia que la de Azure, que acabó en una captura de pantalla.
+  //
+  // Se buscan en el archivo y no con `grep`, porque las herramientas de
+  // búsqueda respetan el `.gitignore` y `.env.local` está ignorado: fue justo
+  // así como se pasaron por alto la primera vez.
+  try {
+    const texto = readFileSync('.env.local', 'utf8')
+    const restos = [...texto.matchAll(/^[^\n]*eyJhbGciOi[^\n]*/gm)].map((m) =>
+      m[0].split('=')[0].replace(/^#\s*/, '').trim()
+    )
+    comprobar(
+      'no quedan claves legacy guardadas en .env.local, ni comentadas',
+      restos.length === 0,
+      restos.join(', ')
+    )
+  } catch {
+    // Sin archivo —en un servidor, por ejemplo— no hay nada que mirar.
+    pasadas++
+    console.log('  · sin .env.local que revisar')
+  }
 }
 
 // --- 1) lo que el código da por hecho ----------------------------------------
