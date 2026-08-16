@@ -1,8 +1,20 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-/** Rutas accesibles sin sesión. Todo lo demás exige autenticación. */
-const RUTAS_PUBLICAS = ['/login', '/auth']
+/**
+ * Rutas accesibles sin sesión. Todo lo demás exige autenticación.
+ *
+ * `/entrar` es la puerta del personal de planta: llega con su enlace personal de
+ * WhatsApp y **todavía no tiene sesión** — abrirla es justo lo que hace esa
+ * ruta. Si no estuviera aquí, el proxy lo mandaría al login, que es la pantalla
+ * que el enlace viene a evitar. La ruta comprueba el token antes de acuñar nada;
+ * estar abierta no la deja abierta a cualquiera.
+ *
+ * `/canal/entrar` es la pantalla donde cae quien llegó con un enlace muerto: si
+ * exigiera sesión, el aviso de «este enlace ya no sirve» sería inalcanzable
+ * justo para quien necesita leerlo.
+ */
+const RUTAS_PUBLICAS = ['/login', '/auth', '/entrar', '/canal/entrar']
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request })

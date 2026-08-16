@@ -271,3 +271,38 @@ body {
   }
 }
 
+
+/* -----------------------------------------------------------------------------
+ * Impresión
+ *
+ * Solo la usan los certificados, y son doscientos: se mandan a imprimir de una
+ * y el Gerente de Planta los entrega en mano. Lo que se imprime es la hoja
+ * —una por página— sin la navegación ni los rótulos de la pantalla.
+ * -------------------------------------------------------------------------- */
+@media print {
+  .no-imprimir,
+  nav,
+  header:has(nav) {
+    display: none !important;
+  }
+
+  .hoja {
+    /* `avoid` no basta en Chromium para forzar un salto entre hermanos: el
+       certificado siguiente se le sube al anterior si cabe medio. */
+    break-after: page;
+    page-break-after: always;
+    max-width: none;
+  }
+
+  .hoja:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  /* La sombra sale como una mancha gris en papel, y el borde no hace falta:
+     la hoja ya tiene bordes. */
+  .hoja .tarjeta-canal {
+    box-shadow: none;
+    border-color: transparent;
+  }
+}

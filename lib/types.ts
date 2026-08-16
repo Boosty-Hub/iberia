@@ -16,6 +16,12 @@ export type Segmento = Row<'transcripcion_segmentos'>
 export type Hallazgo = Row<'hallazgos'>
 export type Archivo = Row<'archivos'>
 export type InformeSeccion = Row<'informe_secciones'>
+export type Curso = Row<'cursos'>
+export type Leccion = Row<'lecciones'>
+export type Matricula = Row<'matriculas'>
+export type Avance = Row<'avances'>
+export type Respuesta = Row<'respuestas'>
+export type Certificado = Row<'certificados'>
 
 // -----------------------------------------------------------------------------
 // Vocabulario del dominio. Las claves espejan los CHECK constraints del schema;

@@ -1,0 +1,1691 @@
+{
+  "generado": "scripts/generar-guion.mjs",
+  "lecciones": [
+    {
+      "numero": 0,
+      "archivo": "leccion-00-bienvenida.md",
+      "titulo": "Bienvenida",
+      "pasos": [
+        {
+          "numero": "0.1",
+          "titulo": "Entrada",
+          "bloques": [
+            {
+              "tipo": "pieza",
+              "descripcion": "media1.mp4 — la animación de bienvenida de Ajito (2,5 MB, ya producida)",
+              "clase": "otra",
+              "lineas": [],
+              "sufijo": ""
+            },
+            {
+              "tipo": "audio",
+              "id": "1",
+              "texto": "¡Epa! Yo soy Ajito.\n\nFíjate bien cómo me hicieron: la cabeza es un ajo y el cuerpo es un ají. Me\nparece bien, porque de eso vive esta casa.\n\nVengo de parte de Industrias Iberia a enseñarte una cosa que se llama\ninteligencia artificial. Y antes de que te asustes con el nombre: es más fácil\nde lo que suena, y tú ya la venías usando sin saber.\n\nSon nueve clases de tres minutos. No hay examen. Al final te dan un certificado\ncon tu nombre.",
+              "segundos": 35
+            },
+            {
+              "tipo": "texto",
+              "texto": "Empecemos."
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Vamos"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "0.2",
+          "titulo": "Quién eres",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "2",
+              "texto": "Antes de arrancar. En la lista que me pasó Capital Humano dice que tú eres\nYulimar Rodríguez, de envasado.\n\nDime si está bien, porque de ahí depende lo que te vaya a mostrar. A un\nmontacarguista no le voy a poner los mismos ejercicios que a ti.",
+              "segundos": 22
+            },
+            {
+              "tipo": "texto",
+              "texto": "¿Eres tú?"
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Sí, esa soy",
+                "Ese no soy yo"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "0.3",
+          "titulo": "Cómo te digo",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "3",
+              "texto": "¿Y cómo te digo? No el nombre del carnet. Como te dicen aquí.",
+              "segundos": 12
+            },
+            {
+              "tipo": "texto",
+              "texto": "Escríbelo o mándame un audio. Como tú quieras."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 1,
+              "clave": "apodo",
+              "nota": "entrada libre, voz o texto"
+            }
+          ]
+        },
+        {
+          "numero": "0.4",
+          "titulo": "El primer toque",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "4",
+              "texto": "Ahora quiero que hagas una cosa. Mándame lo que sea. Una pregunta, un saludo,\nlo primero que se te ocurra.\n\nEscríbeme sin pena, que yo no me ofendo ni me canso. Es para que veas de una\nvez de qué se trata todo esto.",
+              "segundos": 25
+            },
+            {
+              "tipo": "texto",
+              "texto": "Mándame lo que sea."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 2,
+              "clave": "primer-toque",
+              "nota": "entrada libre, voz o texto"
+            },
+            {
+              "tipo": "audio",
+              "id": "5",
+              "texto": "¿Viste? Eso fue todo.\n\nNo hay clave, no hay botón especial, no hay que saber de computadora. Le hablas\nnormal, como le hablas a un compañero, y te responde.\n\nEso es lo que vas a aprender a hacer bien.",
+              "segundos": 20
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Seguir"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "0.5",
+          "titulo": "Ya la usabas",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "6",
+              "texto": "Y otra cosa que quiero que sepas de una: tú ya venías usando esto.\n\nCuando escribes en el teléfono y él solito te adivina la palabra que sigue —\neso es.\n\nCuando le pones el filtro a una foto y te arregla la cara — eso es.\n\nCuando el banco te llama porque le pareció raro un movimiento tuyo — eso\ntambién es.\n\nNadie te avisó y ahí estaba, desde hace rato. Lo único nuevo es que ahora le\npuedes hablar.",
+              "segundos": 32
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "No sabía",
+                "Ya lo sabía"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "0.6",
+          "titulo": "Lo que se guarda",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "7",
+              "texto": "Ahora algo que te tengo que decir claro, porque es tu derecho saberlo.\n\nTodo lo que me escribas o me hables aquí se guarda. Sí.\n\nPero tu supervisor no lo lee. Tu jefe no lo lee. Nadie de tu área lo lee.\n\nLo único que se mira es cuántas lecciones llevas, y eso es porque de ahí sale\ntu certificado.\n\nY si me cuentas algo del trabajo que sirva para mejorar algo, se usa sin tu\nnombre. Nunca con tu nombre.",
+              "segundos": 32
+            },
+            {
+              "tipo": "texto",
+              "texto": "¿Alguna duda con eso?"
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Está claro",
+                "Explícamelo más fácil"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "0.7",
+          "titulo": "Qué viene",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "8",
+              "texto": "Te cuento qué viene, y te suelto.\n\nNueve clases. En cada una te muestro una cosa distinta que yo puedo hacer:\nentender lo que me dices, oírte cuando hablas, ver una foto, dibujarte algo,\nhablarte, sacar cuentas. Y también dónde me equivoco yo, que eso también hay\nque saberlo.\n\nTres minutos cada una. Cuando tú quieras y donde tú quieras. Si lo dejas por la\nmitad, yo te espero.",
+              "segundos": 32
+            },
+            {
+              "tipo": "pieza",
+              "descripcion": "Ficha de bolsillo — vertical, letra grande",
+              "clase": "ficha",
+              "lineas": [
+                "SOY AJITO",
+                "Háblame normal, como a un compañero.",
+                "Si no entiendes algo, dime explícamelo más fácil.",
+                "Te espero cuando puedas."
+              ],
+              "sufijo": ""
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Sigo ahora",
+                "Sigo mañana"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "numero": 1,
+      "archivo": "leccion-01-ajito-entiende.md",
+      "titulo": "Ajito entiende lo que le dices",
+      "pasos": [
+        {
+          "numero": "1.1",
+          "titulo": "Portada",
+          "bloques": [
+            {
+              "tipo": "pieza",
+              "descripcion": "Tarjeta cuadrada — IBERIA · Nuevo Sabor, Lección 1 · Ajito entiende, avance 1 de 9.",
+              "clase": "portada",
+              "lineas": [],
+              "sufijo": ""
+            }
+          ]
+        },
+        {
+          "numero": "1.2",
+          "titulo": "La clase",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "1",
+              "texto": "Ya nos conocimos. Ahora vamos a lo que sirve.\n\nHay gente que cree que para hablar con una cosa como yo hay que saber palabras\nespeciales, o meter un código, o darle a un botón. Nada de eso.\n\nA mí se me habla como le hablas a un compañero en el comedor. En criollo, con\nlas palabras que tú usas. Yo entiendo así.\n\nVamos a probarlo de una.",
+              "segundos": 34
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Probemos"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "1.3",
+          "titulo": "Primera vuelta",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "2",
+              "texto": "Pregúntame algo. Lo que sea, de tu día o de lo que quieras saber. Corto, como\nte salga.",
+              "segundos": 18
+            },
+            {
+              "tipo": "texto",
+              "texto": "Pregúntame algo."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 1,
+              "clave": "pregunta-corta",
+              "nota": "voz o texto"
+            }
+          ]
+        },
+        {
+          "numero": "1.4",
+          "titulo": "El descubrimiento",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "3",
+              "texto": "Te respondí. Pero te respondí a medias, y no es culpa tuya: es que me contaste\npoquito.\n\nMira la diferencia. Si alguien me dice «¿qué hago con esto?», yo no sé qué\ncontestarle. Si me dice «tengo un saco abierto que se me quedó de ayer, ¿qué\nhago con esto?», ahí sí te puedo ayudar.\n\nEs la misma pregunta. Lo que cambió fue que me contaste dónde estás parado.\n\nMientras más me cuentas, mejor te respondo. Eso es todo el secreto, y ya lo\nsabes.",
+              "segundos": 36
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Otra vez, contándote más"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "1.5",
+          "titulo": "Segunda vuelta",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "4",
+              "texto": "Hazme la misma pregunta de hace un rato, pero esta vez cuéntame más. Dónde\nestás, qué tienes delante, para qué lo quieres saber.\n\nY si te da flojera escribir tanto, mándamelo hablando.",
+              "segundos": 22
+            },
+            {
+              "tipo": "texto",
+              "texto": "La misma pregunta, pero contándome más."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 2,
+              "clave": "pregunta-con-contexto",
+              "nota": "voz o texto"
+            }
+          ]
+        },
+        {
+          "numero": "1.6",
+          "titulo": "La llave",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "5",
+              "texto": "Ahora te voy a dar la herramienta más útil de todo este curso. Es una frase.\n\nCada vez que yo te conteste algo y no lo entiendas, o te suene muy rebuscado, o\nsea muy largo, me dices: «explícamelo más fácil».\n\nY yo te lo vuelvo a decir, más sencillo, las veces que haga falta. No me molesta\ny no me canso.\n\nTambién sirve «dímelo más corto», o «dímelo como si se lo estuvieras contando a\nun muchachito».",
+              "segundos": 32
+            },
+            {
+              "tipo": "texto",
+              "texto": "Pídemelo tú."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 3,
+              "clave": "mas-facil",
+              "nota": "la persona pide que le expliquen algo más fácil"
+            },
+            {
+              "tipo": "audio",
+              "id": "6",
+              "texto": "¿Ves? No hay pena en pedir eso. Al contrario: el que pide que se lo expliquen\nmás fácil es el que de verdad quiere entender.",
+              "segundos": 16
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Entendido"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "1.7",
+          "titulo": "La pregunta de campo",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "7",
+              "texto": "Una pregunta antes de soltarte, y contéstala hablando.",
+              "segundos": 20
+            },
+            {
+              "tipo": "texto",
+              "texto": "Mándame un audio."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 4,
+              "clave": "campo",
+              "nota": "voz o texto"
+            }
+          ]
+        },
+        {
+          "numero": "1.8",
+          "titulo": "Cierre",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "8",
+              "texto": "Recogiendo:\n\nA mí se me habla normal, en criollo, sin códigos ni claves.\n\nMientras más me cuentas, mejor te respondo.\n\nY si no entiendes algo, me dices «explícamelo más fácil» y yo lo hago las veces\nque haga falta.\n\nEn la próxima no vas a tener que escribir nada. Te toca hablarme.",
+              "segundos": 20
+            },
+            {
+              "tipo": "pieza",
+              "descripcion": "Ficha de bolsillo",
+              "clase": "ficha",
+              "lineas": [
+                "AJITO ENTIENDE",
+                "Háblame en criollo, sin códigos.",
+                "Mientras más me cuentas, mejor te respondo.",
+                "Si no entiendes: explícamelo más fácil."
+              ],
+              "sufijo": ""
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Sigo ahora",
+                "Sigo después"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "numero": 2,
+      "archivo": "leccion-02-ajito-te-escucha.md",
+      "titulo": "Ajito te escucha",
+      "pasos": [
+        {
+          "numero": "2.1",
+          "titulo": "Portada",
+          "bloques": [
+            {
+              "tipo": "pieza",
+              "descripcion": "Tarjeta cuadrada — Lección 2 · Ajito te escucha, avance 2 de 9.",
+              "clase": "portada",
+              "lineas": [],
+              "sufijo": ""
+            }
+          ]
+        },
+        {
+          "numero": "2.2",
+          "titulo": "La clase",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "1",
+              "texto": "Hoy te tengo una buena.\n\nNo tienes que escribirme nunca más si no quieres. Yo te oigo. Me mandas una\nnota de voz como se la mandas a cualquiera, y yo te entiendo igual.\n\nY a mí me sirve mejor así, te digo por qué: hablando cuentas más. Cuando uno\nescribe, corta. Cuando uno habla, se explaya. Y ya sabes que mientras más me\ncuentas, mejor te respondo.",
+              "segundos": 32
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Vamos"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "2.3",
+          "titulo": "Primera nota de voz",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "2",
+              "texto": "Mándame una nota de voz contándome cómo te fue hoy. Como se lo contarías a un\ncompañero. Sin apuro.",
+              "segundos": 18
+            },
+            {
+              "tipo": "texto",
+              "texto": "Mándame una nota de voz."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 1,
+              "clave": "como-te-fue",
+              "nota": "voz"
+            },
+            {
+              "tipo": "texto",
+              "texto": "Esto fue lo que te entendí:"
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Así fue",
+                "Me entendiste mal"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "2.4",
+          "titulo": "Qué acaba de pasar",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "3",
+              "texto": "Fíjate en lo que acaba de pasar, que es más de lo que parece.\n\nTú hablaste. Yo te oí, lo pasé a letra, y te lo mostré para que me dijeras si\nestaba bien. Eso último es importante: yo te pregunto antes de darlo por\nbueno, porque a veces oigo mal.\n\nUn ruido, una máquina cerca, una palabra rápida, y me confundo. Cuando eso pase,\nme lo dices y lo repetimos. No hay que pelear con eso.",
+              "segundos": 26
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Seguimos"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "2.5",
+          "titulo": "Lo enredado, ordenado",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "4",
+              "texto": "Ahora lo bueno de verdad.\n\nCuéntame de corrido, como te salga, sin ordenar nada:",
+              "segundos": 30
+            },
+            {
+              "tipo": "texto",
+              "texto": "Cuéntamelo de corrido."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 2,
+              "clave": "proceso",
+              "nota": "voz"
+            },
+            {
+              "tipo": "audio",
+              "id": "5",
+              "texto": "Eso que te devolví es exactamente lo que tú dijiste. Yo no le puse nada mío.\nSolo lo puse en orden.\n\nY ahí lo tienes escrito. Eso que tú sabes de memoria y que nunca nadie anotó,\nahí está.",
+              "segundos": 24
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Qué fino"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "2.6",
+          "titulo": "El truco",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "6",
+              "texto": "Un consejo para que te salga mejor:\n\nNo hables bonito. Habla normal. Si dices «este… bueno… lo que pasa es que»,\nno importa, yo eso lo limpio.\n\nLo que sí ayuda es que no haya mucho ruido detrás. Búscate un rincón del salón o\ndel comedor y ya.",
+              "segundos": 22
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Anotado"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "2.7",
+          "titulo": "La pregunta de campo",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "7",
+              "texto": "La pregunta de hoy, y contéstala hablando, que ya sabes.\n\nEn tu trabajo, ¿qué es lo que te toca contar o avisar hablando todos los días?\n¿Y a quién se lo cuentas?",
+              "segundos": 20
+            },
+            {
+              "tipo": "texto",
+              "texto": "Mándame un audio."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 3,
+              "clave": "campo",
+              "nota": "voz o texto"
+            }
+          ]
+        },
+        {
+          "numero": "2.8",
+          "titulo": "Cierre",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "8",
+              "texto": "Recogiendo:\n\nNo tienes que escribir. Me hablas y ya.\n\nYo te muestro lo que entendí antes de darlo por bueno, y si me equivoqué me\ncorriges.\n\nY lo que me cuentas enredado, te lo devuelvo en orden.\n\nEn la próxima no me vas a hablar ni escribir. Me vas a mostrar.",
+              "segundos": 20
+            },
+            {
+              "tipo": "pieza",
+              "descripcion": "Ficha de bolsillo",
+              "clase": "ficha",
+              "lineas": [
+                "AJITO TE ESCUCHA",
+                "Mándame una nota de voz, no escribas.",
+                "Te muestro lo que entendí antes de contestar.",
+                "Lo enredado te lo devuelvo en orden."
+              ],
+              "sufijo": ""
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Sigo ahora",
+                "Sigo después"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "numero": 3,
+      "archivo": "leccion-03-ajito-ve.md",
+      "titulo": "Ajito ve",
+      "pasos": [
+        {
+          "numero": "3.1",
+          "titulo": "Portada",
+          "bloques": [
+            {
+              "tipo": "pieza",
+              "descripcion": "Tarjeta cuadrada — sello IBERIA · Nuevo Sabor, Ajito con una foto en la mano, Lección 3 · Ajito ve, barra de avance en 3 de 9.",
+              "clase": "portada",
+              "lineas": [],
+              "sufijo": ""
+            }
+          ]
+        },
+        {
+          "numero": "3.2",
+          "titulo": "La clase",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "1",
+              "texto": "Yuli, hoy toca algo que a mí me gusta.\n\nHasta ahora me has escrito y me has hablado. Hoy te toca mostrarme.\n\nYo veo fotos. Le tomas una foto a lo que sea, me la mandas, y yo te digo qué\nhay ahí. Te leo lo que está escrito aunque esté chiquito, aunque esté medio\nborroso. Te cuento cuántas cosas hay. Te digo de qué color son.\n\nY ojo con esto, que es lo más importante de hoy: yo veo la foto que tú me\nmandas, y nada más. Yo no tengo cámara. Yo no estoy viendo la planta. Yo no\nsé dónde estás. Veo lo que tú me pones en la mano, y hasta ahí llego.",
+              "segundos": 48
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Vamos a probar"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "3.3",
+          "titulo": "Primero lo divertido",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "2",
+              "texto": "Vamos a empezar por lo bueno. Tómate una foto tú, así como estés, y me la\nmandas. Yo te digo qué veo. No te arregles, que esto no es para el carnet.\n\nAh, y una cosa: en el área de producción no se toman fotos, tú sabes eso mejor\nque yo. Hazla en el salón, en el comedor, en la entrada, o en tu casa cuando\nsalgas. Yo te espero.",
+              "segundos": 26
+            },
+            {
+              "tipo": "texto",
+              "texto": "Una foto tuya, fuera del área de producción."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 1,
+              "clave": "selfie",
+              "nota": "foto"
+            }
+          ]
+        },
+        {
+          "numero": "3.4",
+          "titulo": "Ahora un compañero",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "3",
+              "texto": "Ahora una con un compañero, en el salón o donde estén tranquilos.\n\nPero pídele permiso primero. Esa foto es de él, no es mía ni es tuya. Si te\ndice que no, tómale una foto a lo que tengas al lado y con eso vamos bien.",
+              "segundos": 24
+            },
+            {
+              "tipo": "texto",
+              "texto": "Con permiso del compañero."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 2,
+              "clave": "companero",
+              "nota": "foto"
+            },
+            {
+              "tipo": "audio",
+              "id": "4",
+              "texto": "Fíjate en una cosa antes de seguir.\n\nYo no sé quién es esa persona. No la conozco, no tengo su nombre, no la tengo\nen ninguna lista. Yo vi una foto y dije lo que hay.\n\nEso es todo lo que yo hago con una foto.",
+              "segundos": 22
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Entendido"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "3.5",
+          "titulo": "Cómo sirve esto en el trabajo — la foto la pone Ajito",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "5",
+              "texto": "Eso está bien para reírnos un rato, pero yo sirvo para más.\n\nComo en producción no se puede fotografiar, la pongo yo. Mira esto.",
+              "segundos": 26
+            },
+            {
+              "tipo": "pieza",
+              "descripcion": "Foto autorizada, según el área de la persona:",
+              "clase": "otra",
+              "lineas": [],
+              "sufijo": ""
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Ahora me toca"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "3.6",
+          "titulo": "Tu turno: la etiqueta de tu casa",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "6",
+              "texto": "Ahora te toca, pero en tu casa.\n\nBúscate algo de Iberia en tu cocina. La mayonesa, la salsa de soya, un adobo,\nun caldo, lo que tengas. Tómale la foto a la etiqueta —la parte de atrás, la de\nla letra chiquita— y me la mandas.\n\nYo te leo todo lo que dice ahí. Y después me cuentas si tú tuviste algo que ver\ncon ese frasco.",
+              "segundos": 30
+            },
+            {
+              "tipo": "texto",
+              "texto": "La etiqueta de algo de Iberia que tengas en tu casa."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 3,
+              "clave": "etiqueta-casa",
+              "nota": "foto"
+            }
+          ]
+        },
+        {
+          "numero": "3.7",
+          "titulo": "La pregunta de campo",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "7",
+              "texto": "Una pregunta y te suelto. Y esta contéstala hablando, que es más fácil.\n\nEn tu puesto, ¿qué es lo que te toca leer o revisar con los ojos todos los\ndías? Una etiqueta, un número, un tablero, una planilla.\n\n¿Qué es lo que más te toca mirar?",
+              "segundos": 20
+            },
+            {
+              "tipo": "texto",
+              "texto": "Mándame un audio."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 4,
+              "clave": "campo",
+              "nota": "voz o texto"
+            }
+          ]
+        },
+        {
+          "numero": "3.8",
+          "titulo": "Cierre",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "8",
+              "texto": "Repasemos rapidito.\n\nYo veo la foto que tú me mandes, nada más.\n\nTe leo lo que está escrito, aunque esté chiquito.\n\nY no sé quién sale en la foto ni dónde la tomaste, salvo que tú me lo digas.\n\nNos vemos en la cuatro. Ahí te voy a dibujar algo.",
+              "segundos": 22
+            },
+            {
+              "tipo": "pieza",
+              "descripcion": "Ficha de bolsillo — vertical, letra grande",
+              "clase": "ficha",
+              "lineas": [
+                "AJITO VE",
+                "Mándame una foto y te digo qué hay.",
+                "Te leo la letra chiquita.",
+                "Solo veo lo que tú me mandas."
+              ],
+              "sufijo": ""
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Sigo ahora",
+                "Sigo después"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "numero": 4,
+      "archivo": "leccion-04-ajito-dibuja.md",
+      "titulo": "Ajito dibuja",
+      "pasos": [
+        {
+          "numero": "4.1",
+          "titulo": "Portada",
+          "bloques": [
+            {
+              "tipo": "pieza",
+              "descripcion": "Tarjeta cuadrada — Lección 4 · Ajito dibuja, avance 4 de 9.",
+              "clase": "portada",
+              "lineas": [],
+              "sufijo": ""
+            }
+          ]
+        },
+        {
+          "numero": "4.2",
+          "titulo": "La clase",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "1",
+              "texto": "Hasta ahora te he hablado, te he oído y he visto tus fotos. Hoy te toca verme\nhacer algo.\n\nYo dibujo. Tú me describes con palabras lo que quieres ver, y yo te lo hago.\n\nNo lo busco por ahí, no lo copio de ningún lado. Lo hago en el momento, y sale\ndistinto cada vez.",
+              "segundos": 28
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Muéstrame"
+              ]
+            },
+            {
+              "tipo": "pieza",
+              "descripcion": "Tres ejemplos ya hechos, mandados de una: Ajito en la playa · Ajito manejando un montacargas · Ajito con un tapaboca y un gorro de cocina.",
+              "clase": "otra",
+              "lineas": [],
+              "sufijo": ""
+            }
+          ]
+        },
+        {
+          "numero": "4.3",
+          "titulo": "Pídelo tú",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "2",
+              "texto": "Ahora pide tú. Lo que se te ocurra, no tiene que ser del trabajo.\n\nUn perro en una moto, tu equipo de béisbol, tu pueblo. Descríbemelo y yo te lo\nhago.",
+              "segundos": 22
+            },
+            {
+              "tipo": "texto",
+              "texto": "Descríbeme lo que quieras ver."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 1,
+              "clave": "libre",
+              "nota": "voz o texto → devuelve imagen"
+            }
+          ]
+        },
+        {
+          "numero": "4.4",
+          "titulo": "Mientras mejor lo cuentes",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "3",
+              "texto": "Aquí pasa lo mismo que con las preguntas, ¿te acuerdas? Mientras más me\ncuentas, mejor sale.\n\nSi me dices «un perro», te hago un perro cualquiera. Si me dices «un perro\ncriollo, negro, echado en el porche de una casa de pueblo, a mediodía», ahí\ntienes otra cosa.\n\nEl color, la hora del día, dónde está, cómo se siente. Todo eso cuenta.",
+              "segundos": 28
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Ahora sí"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "4.5",
+          "titulo": "El escudo",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "4",
+              "texto": "Ahora una en serio, pero de las divertidas.\n\nVamos a hacerle un escudo a tu gente. Como el de un equipo.",
+              "segundos": 26
+            },
+            {
+              "tipo": "texto",
+              "texto": "Descríbeme el escudo."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 2,
+              "clave": "escudo",
+              "nota": "voz o texto → devuelve imagen"
+            },
+            {
+              "tipo": "texto",
+              "texto": "Si te gustó, mándaselo a tu gente."
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Publicarlo en el canal",
+                "Solo para mí"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "4.6",
+          "titulo": "Lo que hay que saber",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "5",
+              "texto": "Ahora te tengo que decir algo importante, y esto sirve más para tu vida que\npara tu trabajo.\n\nTodo lo que acabas de ver yo lo inventé. No existe. No es una foto de nada.\n\nY fíjate en esto: si yo puedo hacer esos dibujos, también puedo hacer una imagen\nque parezca una foto de verdad. De una persona, de un lugar, de algo que nunca\npasó.\n\nPor eso, cuando te llegue por ahí una foto rara —de alguien conocido haciendo\nalgo que no cuadra, o de algo increíble— antes de reenviarla, pregúntate si no\nla habrá hecho una máquina como yo.\n\nEso es lo que te quiero dejar hoy.",
+              "segundos": 38
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Entendido"
+              ]
+            },
+            {
+              "tipo": "audio",
+              "id": "6",
+              "texto": "Y si alguna vez tienes dudas de una foto que te llegó, mándamela y la vemos\njuntos. Yo no siempre acierto, pero entre los dos vemos.",
+              "segundos": 16
+            }
+          ]
+        },
+        {
+          "numero": "4.7",
+          "titulo": "La pregunta de campo",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "7",
+              "texto": "La pregunta de hoy, hablando.\n\nEn tu trabajo, ¿hay algo que sería más fácil de explicar con un dibujo que con\npalabras? ¿Qué cosa?",
+              "segundos": 18
+            },
+            {
+              "tipo": "texto",
+              "texto": "Mándame un audio."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 3,
+              "clave": "campo",
+              "nota": "voz o texto"
+            }
+          ]
+        },
+        {
+          "numero": "4.8",
+          "titulo": "Cierre",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "8",
+              "texto": "Recogiendo:\n\nCon palabras se hacen imágenes, y mientras mejor las cuentes, mejor salen.\n\nY lo más importante: una imagen puede estar hecha y parecer de verdad. No\nlo olvides cuando te llegue algo raro por ahí.\n\nEn la próxima te voy a contar un secreto sobre mí.",
+              "segundos": 20
+            },
+            {
+              "tipo": "pieza",
+              "descripcion": "Ficha de bolsillo",
+              "clase": "ficha",
+              "lineas": [
+                "AJITO DIBUJA",
+                "Descríbeme lo que quieras ver.",
+                "Mientras mejor lo cuentes, mejor sale.",
+                "Una foto puede estar hecha así. Revisa antes de reenviar."
+              ],
+              "sufijo": ""
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Sigo ahora",
+                "Sigo después"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "numero": 5,
+      "archivo": "leccion-05-ajito-habla.md",
+      "titulo": "Ajito habla",
+      "pasos": [
+        {
+          "numero": "5.1",
+          "titulo": "Portada",
+          "bloques": [
+            {
+              "tipo": "pieza",
+              "descripcion": "Tarjeta cuadrada — Lección 5 · Ajito habla, avance 5 de 9.",
+              "clase": "portada",
+              "lineas": [],
+              "sufijo": ""
+            }
+          ]
+        },
+        {
+          "numero": "5.2",
+          "titulo": "El secreto",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "1",
+              "texto": "Te tengo que confesar algo, y te lo digo hoy porque hoy toca.\n\nEsta voz que has estado oyendo desde el primer día no es de nadie. No hay una\npersona sentada grabando esto. La hizo una computadora, palabra por palabra.\n\nLo mismo que hago con los dibujos, lo hago con la voz.\n\nY ya que lo sabes: ¿te sonaba a persona? Porque de eso se trata la lección de\nhoy.",
+              "segundos": 34
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "No lo sabía",
+                "Me lo imaginaba"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "5.3",
+          "titulo": "Pídemelo tú",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "2",
+              "texto": "Pídeme que te diga algo con la voz. Lo que sea: un chiste, un refrán, el\nnombre de tus hijos, algo en otro idioma.\n\nYo te lo digo.",
+              "segundos": 20
+            },
+            {
+              "tipo": "texto",
+              "texto": "¿Qué quieres que te diga?"
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 1,
+              "clave": "dime-algo",
+              "nota": "voz o texto → responde en audio"
+            }
+          ]
+        },
+        {
+          "numero": "5.4",
+          "titulo": "Para qué sirve de verdad",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "3",
+              "texto": "Ahora lo que te va a servir.\n\nYo te leo en voz alta lo que tú me mandes. Cualquier cosa escrita: un mensaje\nlargo que te llegó, una hoja, un instructivo, la carta del colegio del\nmuchacho, un contrato.\n\nMe lo mandas escrito o me mandas la foto, y yo te lo leo. Y si es muy largo, me\ndices «cuéntamelo corto» y te digo nada más lo importante.\n\nSirve cuando andas con las manos ocupadas, cuando la letra está muy chiquita, o\ncuando sencillamente no tienes cabeza para ponerte a leer.",
+              "segundos": 32
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Probemos"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "5.5",
+          "titulo": "El ejercicio",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "4",
+              "texto": "Búscate algo escrito que tengas por ahí y que no hayas terminado de leer. Un\nmensaje largo, un papel, una hoja de instrucciones, lo que sea. Que no sea del\ntrabajo, que ya sabes la norma.\n\nMándamelo escrito o en foto, y yo te lo leo.",
+              "segundos": 22
+            },
+            {
+              "tipo": "texto",
+              "texto": "Mándame algo escrito y te lo leo."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 2,
+              "clave": "leeme-esto",
+              "nota": "texto o foto → responde en audio"
+            },
+            {
+              "tipo": "texto",
+              "texto": "¿Te lo leo completo?"
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Sí, completo",
+                "Así está bien"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "5.6",
+          "titulo": "La pregunta de campo",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "5",
+              "texto": "La pregunta de hoy, hablando.\n\n¿Qué papel te toca leer en tu trabajo que sea largo, o que tenga la letra muy\nchiquita, o que cueste entender?",
+              "segundos": 20
+            },
+            {
+              "tipo": "texto",
+              "texto": "Mándame un audio."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 3,
+              "clave": "campo",
+              "nota": "voz o texto"
+            }
+          ]
+        },
+        {
+          "numero": "5.7",
+          "titulo": "Cierre",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "6",
+              "texto": "Recogiendo:\n\nEsta voz está hecha por computadora. No es de nadie.\n\nYo te leo en voz alta lo que me mandes, escrito o en foto.\n\nY si es muy largo, me dices «cuéntamelo corto».\n\nEn la próxima vamos a sacar cuentas. Trae números.",
+              "segundos": 22
+            },
+            {
+              "tipo": "audio",
+              "id": "7",
+              "texto": "Ah, y algo que se me quedaba: lo de leerte cosas en voz alta no es solo para\nhoy. Cuando quieras, me mandas un papel y te lo leo. No hay que pedir permiso.",
+              "segundos": 14
+            },
+            {
+              "tipo": "pieza",
+              "descripcion": "Ficha de bolsillo",
+              "clase": "ficha",
+              "lineas": [
+                "AJITO HABLA",
+                "Mándame algo escrito o una foto y te lo leo en voz alta.",
+                "Si es largo: cuéntamelo corto.",
+                "Esta voz la hace una computadora."
+              ],
+              "sufijo": ""
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Sigo ahora",
+                "Sigo después"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "numero": 6,
+      "archivo": "leccion-06-ajito-saca-cuentas.md",
+      "titulo": "Ajito saca cuentas",
+      "pasos": [
+        {
+          "numero": "6.1",
+          "titulo": "Portada",
+          "bloques": [
+            {
+              "tipo": "pieza",
+              "descripcion": "Tarjeta cuadrada — Lección 6 · Ajito saca cuentas, avance 6 de 9.",
+              "clase": "portada",
+              "lineas": [],
+              "sufijo": ""
+            }
+          ]
+        },
+        {
+          "numero": "6.2",
+          "titulo": "La clase",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "1",
+              "texto": "Hoy vamos con números, pero tranquilo, que las cuentas las hago yo.\n\nTú me sueltas los números como te salgan, hablando, en desorden, y yo te saco el\ntotal, el promedio, cuál es el más alto, cuánto es la diferencia. Lo que\nnecesites.\n\nY no hace falta que me los des bonitos. Me los dices como los tienes en la\ncabeza.",
+              "segundos": 30
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Probemos"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "6.3",
+          "titulo": "Los números del oficio",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "2",
+              "texto": "Dame cinco números de los que tú manejas. Hablando, uno detrás de otro:",
+              "segundos": 24
+            },
+            {
+              "tipo": "texto",
+              "texto": "Dímelos hablando."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 1,
+              "clave": "numeros-oficio",
+              "nota": "voz o texto"
+            }
+          ]
+        },
+        {
+          "numero": "6.4",
+          "titulo": "No solo sumar",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "3",
+              "texto": "Y fíjate que no solo sumo.\n\nTe los pongo en orden de mayor a menor. Te digo cuánto es uno comparado con\notro. Te digo si van subiendo o bajando. Te saco el porcentaje.\n\nY si me cuentas de qué son esos números, te digo qué me llama la atención de\nellos.",
+              "segundos": 26
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Interesante"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "6.5",
+          "titulo": "La cuenta que sí te importa",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "4",
+              "texto": "Ahora una que te va a servir de verdad, y no es del trabajo.\n\nCuéntame cuánto gastas en pasaje al día, o en comida, o en lo que quieras. Y\ncuántos días trabajas al mes.\n\nYo te saco cuánto es eso al mes y al año. Y si quieres le metemos más cosas y\nhacemos la cuenta completa.\n\nEsto lo puedes usar cuando quieras, para lo que sea.",
+              "segundos": 30
+            },
+            {
+              "tipo": "texto",
+              "texto": "Cuéntame tus números."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 2,
+              "clave": "cuenta-propia",
+              "nota": "voz o texto"
+            }
+          ]
+        },
+        {
+          "numero": "6.6",
+          "titulo": "Revísame",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "5",
+              "texto": "Ahora una advertencia, y en serio.\n\nYo saco cuentas rápido, pero no soy una calculadora. Yo trabajo con\npalabras, y a veces me enredo con los números, sobre todo cuando son muchos o\ncuando me los das confusos.\n\nAsí que cuando la cuenta importe de verdad —cuando sea plata, o cuando alguien\nvaya a tomar una decisión con eso— revísame. Con calculadora, con lápiz,\ncomo quieras.\n\nYo te ayudo a llegar rápido. El que responde eres tú.",
+              "segundos": 28
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Entendido"
+              ]
+            },
+            {
+              "tipo": "audio",
+              "id": "6",
+              "texto": "Y si me pillas en un error, dímelo. No me molesta y no me da pena. Corrijo y\nseguimos.",
+              "segundos": 14
+            }
+          ]
+        },
+        {
+          "numero": "6.7",
+          "titulo": "La pregunta de campo",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "7",
+              "texto": "La pregunta de hoy, hablando.\n\n¿Qué cuenta te toca sacar en tu trabajo que hoy haces de cabeza, o en un papel,\no con la calculadora del teléfono?",
+              "segundos": 20
+            },
+            {
+              "tipo": "texto",
+              "texto": "Mándame un audio."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 3,
+              "clave": "campo",
+              "nota": "voz o texto"
+            }
+          ]
+        },
+        {
+          "numero": "6.8",
+          "titulo": "Cierre",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "8",
+              "texto": "Recogiendo:\n\nMe sueltas los números hablando y yo saco el total, el promedio y lo que haga\nfalta.\n\nTambién ordeno y comparo.\n\nY cuando la cuenta importe, me revisas.\n\nEso último nos lleva a la próxima, que es la más importante de todas: dónde me\nequivoco yo.",
+              "segundos": 20
+            },
+            {
+              "tipo": "pieza",
+              "descripcion": "Ficha de bolsillo",
+              "clase": "ficha",
+              "lineas": [
+                "AJITO SACA CUENTAS",
+                "Dime los números hablando, en desorden.",
+                "Total, promedio, el más alto, el porcentaje.",
+                "Si la cuenta importa, revísame."
+              ],
+              "sufijo": ""
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Sigo ahora",
+                "Sigo después"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "numero": 7,
+      "archivo": "leccion-07-ajito-se-equivoca.md",
+      "titulo": "Ajito se equivoca",
+      "pasos": [
+        {
+          "numero": "7.1",
+          "titulo": "Portada",
+          "bloques": [
+            {
+              "tipo": "pieza",
+              "descripcion": "Tarjeta cuadrada — Lección 7 · Ajito se equivoca, avance 7 de 9.",
+              "clase": "portada",
+              "lineas": [],
+              "sufijo": ""
+            }
+          ]
+        },
+        {
+          "numero": "7.2",
+          "titulo": "La clase",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "1",
+              "texto": "Hoy toca la lección que menos me conviene y la que más te sirve.\n\nYo me equivoco.\n\nY lo peor no es que me equivoque. Lo peor es cómo me equivoco: con la misma\nvoz tranquila y segura con la que te digo las cosas ciertas. No se me nota. No\nte aviso.\n\nAsí que hoy no te voy a enseñar nada nuevo que yo sepa hacer. Te voy a enseñar\na pillarme.",
+              "segundos": 32
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "A ver"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "7.3",
+          "titulo": "Píllame",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "2",
+              "texto": "Vamos a probarlo ya. Pregúntame algo de aquí adentro. Algo que solo se sepa en\ntu área:",
+              "segundos": 24
+            },
+            {
+              "tipo": "texto",
+              "texto": "Pregúntame algo que solo se sepa aquí."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 1,
+              "clave": "pillame",
+              "nota": "voz o texto"
+            },
+            {
+              "tipo": "audio",
+              "id": "3",
+              "texto": "¿Viste que te lo dije derecho?\n\nPues hay veces que no lo hago. A veces, en vez de decirte «no sé», te armo\nuna respuesta que suena perfecta y es mentira. Un número que no existe, un\nnombre que me inventé, una fecha cualquiera.\n\nY tú la habrías creído, porque yo la digo igual de tranquilo.",
+              "segundos": 28
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Y eso por qué"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "7.4",
+          "titulo": "Por qué pasa",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "4",
+              "texto": "Te explico por qué, que es sencillo.\n\nYo aprendí leyendo cosas escritas por todo el mundo. Millones de páginas. De ahí\nsaqué cómo se habla y cómo se responde.\n\nPero de tu línea no hay nada escrito en ninguna parte. De tu turno, de tu\nmáquina, de tu bache de ayer, no hay una sola página en el mundo. Eso lo sabes\ntú y lo saben tus compañeros, y ya.\n\nEntonces cuando me preguntas de eso, yo no tengo de dónde sacarlo. Y como yo\nestoy hecho para responder, a veces respondo igual. Y ahí es donde invento.\n\nSi tú me lo cuentas, lo uso. Si no me lo cuentas, no lo sé.",
+              "segundos": 32
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Ya entendí"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "7.5",
+          "titulo": "Cómo pillarme",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "5",
+              "texto": "Tres cosas y ya sabes defenderte:\n\nUno. Si te doy un número, una fecha o un nombre de aquí adentro, no me\ncreas. Revísalo.\n\nDos. Pregúntame de dónde lo saqué. Si no te puedo decir de dónde, es que me\nlo inventé.\n\nTres. Si algo te suena raro, dímelo. «¿Estás seguro?» funciona. Muchas veces\nahí me corrijo.\n\nY lo más importante de todo: lo que tú sabes de tu puesto vale más que lo que\nyo te diga. Yo estoy para ayudarte a pensar, no para pensar por ti.",
+              "segundos": 30
+            },
+            {
+              "tipo": "texto",
+              "texto": "Vuelve a preguntarme lo mismo, pero contándomelo tú primero."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 2,
+              "clave": "ahora-cuentame",
+              "nota": "voz o texto"
+            }
+          ]
+        },
+        {
+          "numero": "7.6",
+          "titulo": "Lo que no se me cuenta",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "6",
+              "texto": "Y va la última, que es una regla de la casa.\n\nHay cosas de Iberia que no se le cuentan a una máquina de afuera. Ni a mí ni a\nninguna otra:\n\nLas fórmulas. Los precios y lo que se le cobra a cada cliente. Los datos de la\ngente: cédulas, sueldos, direcciones. Y todo lo que esté bajo llave o marcado\ncomo confidencial.\n\nSi tienes dudas de si algo se puede o no, la regla es fácil: si no se lo\ncontarías a alguien de la calle, no me lo cuentes a mí.",
+              "segundos": 30
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Clarísimo"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "7.7",
+          "titulo": "La pregunta de campo",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "7",
+              "texto": "Y ahora la pregunta que más me interesa de todo el curso. Contéstala hablando,\ncon calma.\n\nAcabo de decirte que hay cosas de tu trabajo que no están escritas en ninguna\nparte, y que por eso yo no las sé.\n\n¿Qué sabes tú de tu puesto que no esté escrito en ningún lado?\n\nEso que uno aprende con los años y que no está en ningún manual. Un truco, una\nmaña, algo que se nota por el ruido o por el olor. Lo que le enseñarías a alguien\nel primer día.",
+              "segundos": 24
+            },
+            {
+              "tipo": "texto",
+              "texto": "Mándame un audio. Tómate el tiempo que quieras."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 3,
+              "clave": "campo",
+              "nota": "voz o texto"
+            }
+          ]
+        },
+        {
+          "numero": "7.8",
+          "titulo": "Cierre",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "8",
+              "texto": "Recogiendo, que esto es lo que hay que llevarse:\n\nYo invento cuando no sé, y no se me nota.\n\nDe aquí adentro no sé nada si tú no me lo cuentas.\n\nRevísame siempre que la cosa importe.\n\nY lo que no le contarías a alguien de la calle, no me lo cuentes a mí.\n\nNos queda una sola. Nos vemos.",
+              "segundos": 22
+            },
+            {
+              "tipo": "pieza",
+              "descripcion": "Ficha de bolsillo",
+              "clase": "ficha",
+              "lineas": [
+                "AJITO SE EQUIVOCA",
+                "Invento cuando no sé, y suena igual de seguro.",
+                "De aquí adentro no sé nada si no me lo cuentas.",
+                "Si no se lo contarías a alguien de la calle, no me lo cuentes."
+              ],
+              "sufijo": ""
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Sigo ahora",
+                "Sigo después"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "numero": 8,
+      "archivo": "leccion-08-cierre.md",
+      "titulo": "Cierre y certificado",
+      "pasos": [
+        {
+          "numero": "8.1",
+          "titulo": "Portada",
+          "bloques": [
+            {
+              "tipo": "pieza",
+              "descripcion": "Tarjeta cuadrada — Lección 8 · Ya sabes, avance 9 de 9 completo.",
+              "clase": "portada",
+              "lineas": [],
+              "sufijo": ""
+            }
+          ]
+        },
+        {
+          "numero": "8.2",
+          "titulo": "El repaso",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "1",
+              "texto": "Llegaste. Repasemos lo que aprendiste, que es más de lo que crees.\n\nQue se me habla normal, en criollo, y que mientras más me cuentas, mejor te\nrespondo.\n\nQue me puedes hablar en vez de escribir, y que lo enredado te lo devuelvo en\norden.\n\nQue veo una foto y te leo hasta la letra chiquita.\n\nQue dibujo con palabras — y que por eso una imagen puede estar hecha y parecer\nde verdad.\n\nQue te leo en voz alta lo que quieras.\n\nQue saco cuentas, pero que hay que revisarme.\n\nY que me equivoco, que invento cuando no sé, y que de aquí adentro no sé nada\nsi tú no me lo cuentas.",
+              "segundos": 38
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Todo eso"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "8.3",
+          "titulo": "Lo que hay que saber",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "2",
+              "texto": "Si de todo el curso te vas a quedar con una sola cosa, que sea esta:\n\nEsto es una herramienta. Como una llave o un montacargas. Sirve para lo que\nsirve, y no sirve para lo que no.\n\nEl que sabe de tu puesto eres tú. Yo puedo ayudarte a ir más rápido, a\nordenar lo que tienes en la cabeza, a leerte lo que no da tiempo de leer. Pero\nel que responde por el trabajo eres tú, y eso no cambia.",
+              "segundos": 26
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Entendido"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "8.4",
+          "titulo": "La pregunta grande",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "3",
+              "texto": "Y ahora la pregunta que te vengo guardando desde el primer día. Contéstala\nhablando, sin apuro, y di lo que pienses de verdad.\n\nYa sabes lo que yo puedo hacer y lo que no.\n\nEn tu puesto, en lo que tú haces todos los días, ¿en qué te ayudaría a ti algo\ncomo yo?\n\nNo pienses en la empresa. Piensa en tu turno, en tu día, en lo que te fastidia o\nte quita tiempo.",
+              "segundos": 26
+            },
+            {
+              "tipo": "texto",
+              "texto": "Mándame un audio. Tómate el tiempo que quieras."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 1,
+              "clave": "campo",
+              "nota": "voz o texto"
+            }
+          ]
+        },
+        {
+          "numero": "8.5",
+          "titulo": "Cómo te fue",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "4",
+              "texto": "Una última y te suelto: ¿cómo te pareció el curso? Dime la verdad, que a mí no\nme duele.\n\nQué te sirvió, qué no, qué le falta.",
+              "segundos": 18
+            },
+            {
+              "tipo": "texto",
+              "texto": "Mándame un audio."
+            },
+            {
+              "tipo": "ejercicio",
+              "indice": 2,
+              "clave": "como-te-fue-el-curso",
+              "nota": "voz o texto"
+            }
+          ]
+        },
+        {
+          "numero": "8.6",
+          "titulo": "El certificado",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "5",
+              "texto": "Ya está. Terminaste las nueve.\n\nTu certificado está listo y sale a nombre tuyo, con tu cédula. Queda registrado\nen Capital Humano como adiestramiento, igual que cualquier otro que hayas hecho\naquí.\n\nY no es un papelito de adorno: de las doscientas y pico de personas de Iberia,\ntú eres de las primeras en pasar por esto.",
+              "segundos": 24
+            },
+            {
+              "tipo": "pieza",
+              "descripcion": "El certificado — sello IBERIA · Nuevo Sabor, nombre y cédula, cargo, área, fecha, y Ajito en una esquina.",
+              "clase": "otra",
+              "lineas": [],
+              "sufijo": ""
+            },
+            {
+              "tipo": "texto",
+              "texto": "Tu certificado."
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Guardarlo",
+                "Mandárselo a alguien"
+              ]
+            }
+          ]
+        },
+        {
+          "numero": "8.7",
+          "titulo": "Despedida — versión A · asistente_libre_activo apagado",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "6-A",
+              "texto": "Con esto me despido, por ahora.\n\nLo que aprendiste no se te va: eso de hablarle a una máquina y que te entienda\nya lo sabes hacer, y sirve con cualquiera, no solo conmigo. En el teléfono tienes\nvarias.\n\nY estate pendiente, que Iberia va a seguir con esto y yo voy a andar por ahí.\nCuando haya algo nuevo, te aviso.\n\nFue un gusto. Cuídate mucho.",
+              "segundos": 26
+            },
+            {
+              "tipo": "pieza",
+              "descripcion": "Ficha final — el resumen de las siete formas en una sola imagen vertical, para guardar en la galería.",
+              "clase": "ficha",
+              "lineas": [
+                "LAS SIETE COSAS QUE HAGO",
+                "Entiendo lo que me dices, aunque me lo digas enredado.",
+                "Te escucho: mándame una nota de voz y no escribas.",
+                "Veo: mándame una foto y te digo qué hay.",
+                "Dibujo lo que me describas con palabras.",
+                "Hablo: te leo en voz alta lo que quieras.",
+                "Saco cuentas con los números que me des.",
+                "Y me equivoco. De aquí adentro no sé nada si no me lo cuentas."
+              ],
+              "sufijo": "-A"
+            }
+          ]
+        },
+        {
+          "numero": "8.7",
+          "titulo": "Despedida — versión B · asistente_libre_activo encendido",
+          "bloques": [
+            {
+              "tipo": "audio",
+              "id": "6-B",
+              "texto": "Y ahora la buena de verdad.\n\nYo me quedo aquí contigo. Se acabaron las lecciones, pero yo no me voy.\n\nCuando quieras preguntarme algo, lo que sea, me escribes o me mandas un audio y\nya. No hay lección, no hay ejercicio y no hay nadie calificando.\n\nLo que te dije en la siete sigue valiendo: yo me equivoco, y de aquí adentro no\nsé lo que no me cuenten. Pero para todo lo demás, aquí estoy.\n\nCuídate mucho. Nos hablamos.",
+              "segundos": 30
+            },
+            {
+              "tipo": "texto",
+              "texto": "Escríbeme cuando quieras."
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Preguntarle algo a Ajito"
+              ]
+            },
+            {
+              "tipo": "pieza",
+              "descripcion": "Ficha final — las siete formas, más una línea al pie: «Ajito se quedó. Escríbele cuando quieras.»",
+              "clase": "ficha",
+              "lineas": [
+                "LAS SIETE COSAS QUE HAGO",
+                "Entiendo lo que me dices, aunque me lo digas enredado.",
+                "Te escucho: mándame una nota de voz y no escribas.",
+                "Veo: mándame una foto y te digo qué hay.",
+                "Dibujo lo que me describas con palabras.",
+                "Hablo: te leo en voz alta lo que quieras.",
+                "Saco cuentas con los números que me des.",
+                "Y me equivoco. De aquí adentro no sé nada si no me lo cuentas.",
+                "Ajito se quedó. Escríbele cuando quieras."
+              ],
+              "sufijo": "-B"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

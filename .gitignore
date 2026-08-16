@@ -55,4 +55,17 @@ desktop.ini
 /capturas/
 
 # Volcado local del material de Iberia (confidencial, se regenera)
-/contenido/
+/contenido/*
+
+# ...menos el guion del adiestramiento, que no es volcado: es código fuente del
+# curso. La aplicación **importa `guion.json` al compilar** y lee
+# `recordatorios.md` en ejecución, así que sin esto no compila desde un clon
+# limpio y no hay despliegue posible. Las transcripciones y los archivos de
+# entrevistas —que es el material que esta regla vino a proteger— siguen fuera.
+!/contenido/adiestramiento/
+
+# Lo generado del curso sí se queda fuera: los 70 MP3 y las 10 fichas se
+# reconstruyen con `generar:audios` y `generar:fichas`, y donde los lee la
+# aplicación es en el bucket privado, no en el repositorio.
+/contenido/adiestramiento/audio/
+/contenido/adiestramiento/fichas/

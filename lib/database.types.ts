@@ -22,9 +22,13 @@ export type Database = {
           enviado_en: string | null
           expira_en: string
           id: string
+          mensaje: string | null
+          motivo: string
           publicacion_id: string | null
           token_hash: string
+          ultimo_uso: string | null
           usado_en: string | null
+          usos: number
         }
         Insert: {
           canal?: string
@@ -33,9 +37,13 @@ export type Database = {
           enviado_en?: string | null
           expira_en: string
           id?: string
+          mensaje?: string | null
+          motivo?: string
           publicacion_id?: string | null
           token_hash: string
+          ultimo_uso?: string | null
           usado_en?: string | null
+          usos?: number
         }
         Update: {
           canal?: string
@@ -44,9 +52,13 @@ export type Database = {
           enviado_en?: string | null
           expira_en?: string
           id?: string
+          mensaje?: string | null
+          motivo?: string
           publicacion_id?: string | null
           token_hash?: string
+          ultimo_uso?: string | null
           usado_en?: string | null
+          usos?: number
         }
         Relationships: [
           {
@@ -57,10 +69,74 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "accesos_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accesos_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["empleado_id"]
+          },
+          {
             foreignKeyName: "accesos_publicacion_id_fkey"
             columns: ["publicacion_id"]
             isOneToOne: false
             referencedRelation: "publicaciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ajustes_whatsapp: {
+        Row: {
+          activo: boolean
+          actualizado_en: string
+          actualizado_por: string | null
+          id: boolean
+          id_numero: string | null
+          numero_visible: string | null
+          plantilla: string | null
+          probado_detalle: string | null
+          probado_en: string | null
+          probado_ok: boolean | null
+          token: string | null
+        }
+        Insert: {
+          activo?: boolean
+          actualizado_en?: string
+          actualizado_por?: string | null
+          id?: boolean
+          id_numero?: string | null
+          numero_visible?: string | null
+          plantilla?: string | null
+          probado_detalle?: string | null
+          probado_en?: string | null
+          probado_ok?: boolean | null
+          token?: string | null
+        }
+        Update: {
+          activo?: boolean
+          actualizado_en?: string
+          actualizado_por?: string | null
+          id?: boolean
+          id_numero?: string | null
+          numero_visible?: string | null
+          plantilla?: string | null
+          probado_detalle?: string | null
+          probado_en?: string | null
+          probado_ok?: boolean | null
+          token?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ajustes_whatsapp_actualizado_por_fkey"
+            columns: ["actualizado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -175,6 +251,126 @@ export type Database = {
           },
         ]
       }
+      avances: {
+        Row: {
+          completada_en: string | null
+          estado: string
+          id: string
+          iniciada_en: string
+          leccion_id: string
+          matricula_id: string
+          paso: number
+        }
+        Insert: {
+          completada_en?: string | null
+          estado?: string
+          id?: string
+          iniciada_en?: string
+          leccion_id: string
+          matricula_id: string
+          paso?: number
+        }
+        Update: {
+          completada_en?: string | null
+          estado?: string
+          id?: string
+          iniciada_en?: string
+          leccion_id?: string
+          matricula_id?: string
+          paso?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avances_leccion_id_fkey"
+            columns: ["leccion_id"]
+            isOneToOne: false
+            referencedRelation: "lecciones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avances_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "matriculas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avances_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["matricula_id"]
+          },
+          {
+            foreignKeyName: "avances_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["matricula_id"]
+          },
+        ]
+      }
+      certificados: {
+        Row: {
+          area_nombre: string | null
+          cargo: string | null
+          cedula: string
+          codigo: string
+          created_at: string
+          emitido_en: string
+          entregado_en: string | null
+          id: string
+          matricula_id: string
+          nombre_completo: string
+        }
+        Insert: {
+          area_nombre?: string | null
+          cargo?: string | null
+          cedula: string
+          codigo: string
+          created_at?: string
+          emitido_en?: string
+          entregado_en?: string | null
+          id?: string
+          matricula_id: string
+          nombre_completo: string
+        }
+        Update: {
+          area_nombre?: string | null
+          cargo?: string | null
+          cedula?: string
+          codigo?: string
+          created_at?: string
+          emitido_en?: string
+          entregado_en?: string | null
+          id?: string
+          matricula_id?: string
+          nombre_completo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificados_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: true
+            referencedRelation: "matriculas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificados_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: true
+            referencedRelation: "padron_estado"
+            referencedColumns: ["matricula_id"]
+          },
+          {
+            foreignKeyName: "certificados_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: true
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["matricula_id"]
+          },
+        ]
+      }
       comentarios: {
         Row: {
           created_at: string
@@ -212,11 +408,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "comentarios_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comentarios_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["empleado_id"]
+          },
+          {
             foreignKeyName: "comentarios_moderado_por_fkey"
             columns: ["moderado_por"]
             isOneToOne: false
             referencedRelation: "empleados"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comentarios_moderado_por_fkey"
+            columns: ["moderado_por"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comentarios_moderado_por_fkey"
+            columns: ["moderado_por"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["empleado_id"]
           },
           {
             foreignKeyName: "comentarios_publicacion_id_fkey"
@@ -261,11 +485,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "conexiones_recibe_id_fkey"
+            columns: ["recibe_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conexiones_recibe_id_fkey"
+            columns: ["recibe_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["empleado_id"]
+          },
+          {
             foreignKeyName: "conexiones_solicita_id_fkey"
             columns: ["solicita_id"]
             isOneToOne: false
             referencedRelation: "empleados"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conexiones_solicita_id_fkey"
+            columns: ["solicita_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conexiones_solicita_id_fkey"
+            columns: ["solicita_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["empleado_id"]
           },
         ]
       }
@@ -306,6 +558,20 @@ export type Database = {
             referencedRelation: "empleados"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "conversacion_participantes_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversacion_participantes_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["empleado_id"]
+          },
         ]
       }
       conversaciones: {
@@ -337,6 +603,39 @@ export type Database = {
           },
         ]
       }
+      cursos: {
+        Row: {
+          abierto: boolean
+          asistente_libre_activo: boolean
+          clave: string
+          created_at: string
+          descripcion: string | null
+          id: string
+          nombre: string
+          updated_at: string
+        }
+        Insert: {
+          abierto?: boolean
+          asistente_libre_activo?: boolean
+          clave: string
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          nombre: string
+          updated_at?: string
+        }
+        Update: {
+          abierto?: boolean
+          asistente_libre_activo?: boolean
+          clave?: string
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          nombre?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       empleados: {
         Row: {
           activo: boolean
@@ -347,6 +646,7 @@ export type Database = {
           created_at: string
           email: string | null
           es_moderador: boolean
+          familia_oficio: string
           fecha_ingreso: string | null
           foto_url: string | null
           id: string
@@ -368,6 +668,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           es_moderador?: boolean
+          familia_oficio?: string
           fecha_ingreso?: string | null
           foto_url?: string | null
           id?: string
@@ -389,6 +690,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           es_moderador?: boolean
+          familia_oficio?: string
           fecha_ingreso?: string | null
           foto_url?: string | null
           id?: string
@@ -536,6 +838,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "grupo_miembros_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grupo_miembros_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["empleado_id"]
+          },
+          {
             foreignKeyName: "grupo_miembros_grupo_id_fkey"
             columns: ["grupo_id"]
             isOneToOne: false
@@ -589,6 +905,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "empleados"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grupos_creador_id_fkey"
+            columns: ["creador_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grupos_creador_id_fkey"
+            columns: ["creador_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["empleado_id"]
           },
         ]
       }
@@ -710,6 +1040,127 @@ export type Database = {
         }
         Relationships: []
       }
+      lecciones: {
+        Row: {
+          activa: boolean
+          clave: string
+          created_at: string
+          curso_id: string
+          forma: string
+          id: string
+          minutos: number
+          numero: number
+          resumen: string | null
+          titulo: string
+        }
+        Insert: {
+          activa?: boolean
+          clave: string
+          created_at?: string
+          curso_id: string
+          forma: string
+          id?: string
+          minutos?: number
+          numero: number
+          resumen?: string | null
+          titulo: string
+        }
+        Update: {
+          activa?: boolean
+          clave?: string
+          created_at?: string
+          curso_id?: string
+          forma?: string
+          id?: string
+          minutos?: number
+          numero?: number
+          resumen?: string | null
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lecciones_curso_id_fkey"
+            columns: ["curso_id"]
+            isOneToOne: false
+            referencedRelation: "cursos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matriculas: {
+        Row: {
+          completado_en: string | null
+          created_at: string
+          curso_id: string
+          empleado_id: string
+          empujones: number
+          estado: string
+          familia_oficio: string
+          id: string
+          iniciado_en: string | null
+          nombre_corto: string | null
+          ultimo_empujon: string | null
+          ultimo_toque: string | null
+        }
+        Insert: {
+          completado_en?: string | null
+          created_at?: string
+          curso_id: string
+          empleado_id: string
+          empujones?: number
+          estado?: string
+          familia_oficio?: string
+          id?: string
+          iniciado_en?: string | null
+          nombre_corto?: string | null
+          ultimo_empujon?: string | null
+          ultimo_toque?: string | null
+        }
+        Update: {
+          completado_en?: string | null
+          created_at?: string
+          curso_id?: string
+          empleado_id?: string
+          empujones?: number
+          estado?: string
+          familia_oficio?: string
+          id?: string
+          iniciado_en?: string | null
+          nombre_corto?: string | null
+          ultimo_empujon?: string | null
+          ultimo_toque?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matriculas_curso_id_fkey"
+            columns: ["curso_id"]
+            isOneToOne: false
+            referencedRelation: "cursos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matriculas_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "empleados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matriculas_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matriculas_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["empleado_id"]
+          },
+        ]
+      }
       mensajes: {
         Row: {
           autor_id: string
@@ -742,6 +1193,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "empleados"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mensajes_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mensajes_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["empleado_id"]
           },
           {
             foreignKeyName: "mensajes_conversacion_id_fkey"
@@ -875,6 +1340,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "publicacion_lecturas_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "publicacion_lecturas_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["empleado_id"]
+          },
+          {
             foreignKeyName: "publicacion_lecturas_publicacion_id_fkey"
             columns: ["publicacion_id"]
             isOneToOne: false
@@ -956,6 +1435,20 @@ export type Database = {
             referencedRelation: "empleados"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "publicaciones_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "publicaciones_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["empleado_id"]
+          },
         ]
       }
       reacciones: {
@@ -989,11 +1482,183 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reacciones_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reacciones_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["empleado_id"]
+          },
+          {
             foreignKeyName: "reacciones_publicacion_id_fkey"
             columns: ["publicacion_id"]
             isOneToOne: false
             referencedRelation: "publicaciones"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      recordatorios: {
+        Row: {
+          created_at: string
+          detalle: string | null
+          enviado_en: string | null
+          escalon: number
+          estado: string
+          id: string
+          matricula_id: string
+          mensaje: string
+          via: string
+        }
+        Insert: {
+          created_at?: string
+          detalle?: string | null
+          enviado_en?: string | null
+          escalon: number
+          estado?: string
+          id?: string
+          matricula_id: string
+          mensaje: string
+          via?: string
+        }
+        Update: {
+          created_at?: string
+          detalle?: string | null
+          enviado_en?: string | null
+          escalon?: number
+          estado?: string
+          id?: string
+          matricula_id?: string
+          mensaje?: string
+          via?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recordatorios_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "matriculas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recordatorios_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["matricula_id"]
+          },
+          {
+            foreignKeyName: "recordatorios_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["matricula_id"]
+          },
+        ]
+      }
+      respuestas: {
+        Row: {
+          area_id: string | null
+          clave_paso: string
+          created_at: string
+          devolucion: string | null
+          devolucion_audio: string | null
+          devolucion_en: string | null
+          entrada: string
+          es_pregunta_campo: boolean
+          familia_oficio: string
+          hallazgo_id: string | null
+          id: string
+          leccion_id: string
+          matricula_id: string
+          media_url: string | null
+          texto: string | null
+          transcripcion_cruda: string | null
+        }
+        Insert: {
+          area_id?: string | null
+          clave_paso: string
+          created_at?: string
+          devolucion?: string | null
+          devolucion_audio?: string | null
+          devolucion_en?: string | null
+          entrada?: string
+          es_pregunta_campo?: boolean
+          familia_oficio?: string
+          hallazgo_id?: string | null
+          id?: string
+          leccion_id: string
+          matricula_id: string
+          media_url?: string | null
+          texto?: string | null
+          transcripcion_cruda?: string | null
+        }
+        Update: {
+          area_id?: string | null
+          clave_paso?: string
+          created_at?: string
+          devolucion?: string | null
+          devolucion_audio?: string | null
+          devolucion_en?: string | null
+          entrada?: string
+          es_pregunta_campo?: boolean
+          familia_oficio?: string
+          hallazgo_id?: string | null
+          id?: string
+          leccion_id?: string
+          matricula_id?: string
+          media_url?: string | null
+          texto?: string | null
+          transcripcion_cruda?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "respuestas_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "respuestas_hallazgo_id_fkey"
+            columns: ["hallazgo_id"]
+            isOneToOne: false
+            referencedRelation: "hallazgos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "respuestas_leccion_id_fkey"
+            columns: ["leccion_id"]
+            isOneToOne: false
+            referencedRelation: "lecciones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "respuestas_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "matriculas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "respuestas_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["matricula_id"]
+          },
+          {
+            foreignKeyName: "respuestas_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["matricula_id"]
           },
         ]
       }
@@ -1085,19 +1750,203 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      accesos_estado: {
+        Row: {
+          canal: string | null
+          created_at: string | null
+          empleado_id: string | null
+          enviado_en: string | null
+          expira_en: string | null
+          id: string | null
+          mensaje: string | null
+          motivo: string | null
+          ultimo_uso: string | null
+          usado_en: string | null
+          usos: number | null
+          vigente: boolean | null
+        }
+        Insert: {
+          canal?: string | null
+          created_at?: string | null
+          empleado_id?: string | null
+          enviado_en?: string | null
+          expira_en?: string | null
+          id?: string | null
+          mensaje?: string | null
+          motivo?: string | null
+          ultimo_uso?: string | null
+          usado_en?: string | null
+          usos?: number | null
+          vigente?: never
+        }
+        Update: {
+          canal?: string | null
+          created_at?: string | null
+          empleado_id?: string | null
+          enviado_en?: string | null
+          expira_en?: string | null
+          id?: string | null
+          mensaje?: string | null
+          motivo?: string | null
+          ultimo_uso?: string | null
+          usado_en?: string | null
+          usos?: number | null
+          vigente?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accesos_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "empleados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accesos_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accesos_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["empleado_id"]
+          },
+        ]
+      }
+      adiestramiento_avance: {
+        Row: {
+          area_id: string | null
+          area_nombre: string | null
+          completados: number | null
+          curso_id: string | null
+          en_curso: number | null
+          familia_oficio: string | null
+          lecciones_promedio: number | null
+          matriculados: number | null
+          sin_empezar: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "empleados_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matriculas_curso_id_fkey"
+            columns: ["curso_id"]
+            isOneToOne: false
+            referencedRelation: "cursos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      padron_estado: {
+        Row: {
+          acceso_enviado: string | null
+          acceso_expira: string | null
+          acceso_usos: number | null
+          activo: boolean | null
+          area_id: string | null
+          area_nombre: string | null
+          cargo: string | null
+          cedula: string | null
+          email: string | null
+          estado_matricula: string | null
+          familia_oficio: string | null
+          id: string | null
+          lecciones_hechas: number | null
+          matricula_id: string | null
+          nivel: string | null
+          nombre_completo: string | null
+          sede: string | null
+          telefono: string | null
+          tiene_cuenta: boolean | null
+          tipo_nomina: string | null
+          ultimo_toque: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "empleados_area_id_fkey"
+            columns: ["area_id"]
+            isOneToOne: false
+            referencedRelation: "areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recordatorios_pendientes: {
+        Row: {
+          area_nombre: string | null
+          callado_desde: string | null
+          cargo: string | null
+          curso_id: string | null
+          dias: number | null
+          empleado_id: string | null
+          estado: string | null
+          familia_oficio: string | null
+          lecciones_hechas: number | null
+          matricula_id: string | null
+          nombre_completo: string | null
+          nombre_corto: string | null
+          telefono: string | null
+          ultimo_escalon: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matriculas_curso_id_fkey"
+            columns: ["curso_id"]
+            isOneToOne: false
+            referencedRelation: "cursos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      cabe_otro_participante: { Args: { conv: string }; Returns: boolean }
+      coordino_grupo: { Args: { grupo: string }; Returns: boolean }
+      emitir_mi_certificado: {
+        Args: { p_matricula: string }
+        Returns: {
+          area_nombre: string | null
+          cargo: string | null
+          cedula: string
+          codigo: string
+          created_at: string
+          emitido_en: string
+          entregado_en: string | null
+          id: string
+          matricula_id: string
+          nombre_completo: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "certificados"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       es_admin: { Args: never; Returns: boolean }
       es_editor: { Args: never; Returns: boolean }
+      matricula_mia: { Args: { matricula: string }; Returns: boolean }
+      matricular_pendientes: { Args: { curso_clave: string }; Returns: number }
       mensajes_sin_leer: { Args: never; Returns: number }
       mi_empleado: { Args: never; Returns: string }
+      mi_matricula: { Args: { curso: string }; Returns: string }
       mi_rol: { Args: never; Returns: string }
+      participo_en: { Args: { conv: string }; Returns: boolean }
       puede_publicar: { Args: never; Returns: boolean }
       renombrar_hablante: {
         Args: { p_entrevista: string; p_etiqueta: string; p_nombre: string }
         Returns: number
       }
+      soy_miembro: { Args: { grupo: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

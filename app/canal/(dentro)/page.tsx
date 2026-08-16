@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { IconoEnviar, IconoMas } from '@/components/iconos'
+import { TarjetaAdiestramiento } from '@/components/canal/tarjeta-adiestramiento'
 import {
   TarjetaPublicacion,
   type PublicacionFeed,
@@ -51,6 +52,8 @@ export default async function CanalPage() {
           Lo que está pasando en Iberia
         </h1>
       </header>
+
+      <TarjetaAdiestramiento empleadoId={empleado.id} />
 
       {puedePublicar && (
         <Link

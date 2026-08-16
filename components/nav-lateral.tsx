@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import {
   IconoArchivos,
   IconoEntrevistas,
+  IconoGrupo,
   IconoHallazgos,
   IconoInforme,
   IconoPanel,
@@ -24,6 +25,8 @@ const PRINCIPALES: Item[] = [
   { href: '/dashboard/entrevistas', etiqueta: 'Entrevistas', Icono: IconoEntrevistas },
   { href: '/dashboard/archivos', etiqueta: 'Archivos', Icono: IconoArchivos },
   { href: '/dashboard/hallazgos', etiqueta: 'Hallazgos', Icono: IconoHallazgos },
+  { href: '/dashboard/adiestramiento', etiqueta: 'Adiestramiento', Icono: IconoGrupo },
+  { href: '/dashboard/empleados', etiqueta: 'Empleados', Icono: IconoUsuarios },
   { href: '/dashboard/informe', etiqueta: 'Editor del informe', Icono: IconoInforme },
 ]
 
