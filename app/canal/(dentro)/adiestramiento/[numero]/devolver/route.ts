@@ -102,11 +102,19 @@ export async function POST(
   }
 
   // Ya está contestada. Se entrega tal cual: ni se regenera ni se cobra otra vez.
+  //
+  // ⚠️ Pero si el texto está y **el audio no**, se sintetiza solo el audio. Es lo
+  // que pasa cuando Azure falla en el intento original: el texto se guarda —eso
+  // es lo importante— y antes la devolución se quedaba escrita para siempre,
+  // porque este atajo devolvía «ya está» y nadie volvía a intentar la voz. En un
+  // curso donde **la clase es un audio**, quedarse en letra no es un detalle. No
+  // se le vuelve a preguntar al modelo: lo que Ajito dijo no cambia.
   if (respuesta.devolucion) {
-    return NextResponse.json({
-      texto: respuesta.devolucion,
-      audio: Boolean(respuesta.devolucion_audio),
-    })
+    if (respuesta.devolucion_audio) {
+      return NextResponse.json({ texto: respuesta.devolucion, audio: true })
+    }
+    const ruta = await ponerVoz(supabase, respuesta.id, empleado.id, numero, clavePaso, respuesta.devolucion)
+    return NextResponse.json({ texto: respuesta.devolucion, audio: Boolean(ruta) })
   }
 
   const forma = leccion.forma as FormaIA
@@ -193,30 +201,57 @@ export async function POST(
   // --- ponerlo a hablar ------------------------------------------------------
   //
   // El texto se guarda aunque el audio falle. Sin audio la devolución se lee, y
-  // leerla es peor que oírla — pero perderla es mucho peor que leerla.
-
-  let rutaAudio: string | null = null
-  const hablado = await hablar(dicho.texto)
-
-  if (hablado.ok) {
-    const ruta = rutaDevolucion(empleado.id, numero, clavePaso)
-    const { error } = await supabase.storage
-      .from(BUCKET_RESPUESTAS)
-      .upload(ruta, hablado.mp3, { contentType: 'audio/mpeg', upsert: false })
-    if (!error) rutaAudio = ruta
-    else console.error('[ajito] no se pudo guardar el audio:', error.message)
-  } else {
-    console.error('[ajito] síntesis fallida:', hablado.detalle ?? hablado.motivo)
-  }
+  // leerla es peor que oírla — pero perderla es mucho peor que leerla. Si falla,
+  // el próximo toque del botón la pone: ver el atajo de arriba.
 
   await supabase
     .from('respuestas')
-    .update({
-      devolucion: dicho.texto,
-      devolucion_audio: rutaAudio,
-      devolucion_en: new Date().toISOString(),
-    })
+    .update({ devolucion: dicho.texto, devolucion_en: new Date().toISOString() })
     .eq('id', respuesta.id)
 
+  const rutaAudio = await ponerVoz(
+    supabase,
+    respuesta.id,
+    empleado.id,
+    numero,
+    clavePaso,
+    dicho.texto
+  )
+
   return NextResponse.json({ texto: dicho.texto, audio: Boolean(rutaAudio) })
+}
+
+/**
+ * Sintetiza la devolución, la guarda en el bucket privado y la deja apuntada en
+ * la fila. Devuelve la ruta, o `null` si no se pudo — y en ese caso la fila
+ * conserva su texto: nunca se pierde lo que Ajito dijo por no poder decirlo.
+ *
+ * Sale de la función que genera el texto a propósito, para poder pedir solo la
+ * voz de una devolución que ya existe.
+ */
+async function ponerVoz(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  respuestaId: string,
+  empleadoId: string,
+  numero: number,
+  clavePaso: string,
+  texto: string
+): Promise<string | null> {
+  const hablado = await hablar(texto)
+  if (!hablado.ok) {
+    console.error('[ajito] síntesis fallida:', hablado.detalle ?? hablado.motivo)
+    return null
+  }
+
+  const ruta = rutaDevolucion(empleadoId, numero, clavePaso)
+  const { error } = await supabase.storage
+    .from(BUCKET_RESPUESTAS)
+    .upload(ruta, hablado.mp3, { contentType: 'audio/mpeg', upsert: false })
+  if (error) {
+    console.error('[ajito] no se pudo guardar el audio:', error.message)
+    return null
+  }
+
+  await supabase.from('respuestas').update({ devolucion_audio: ruta }).eq('id', respuestaId)
+  return ruta
 }

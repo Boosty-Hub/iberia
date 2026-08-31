@@ -127,7 +127,23 @@ export function DevolucionAjito({
           etiqueta="Ajito te contesta"
           segundos={null}
         />
-      ) : null}
+      ) : (
+        /* Hay texto pero no salió la voz — Azure falló en su momento. La clase de
+           Ajito es un audio, así que quedarse en letra no es un detalle: se
+           ofrece pedirla. La ruta sintetiza solo el audio y no le vuelve a
+           preguntar al modelo, así que lo que dijo no cambia. */
+        <button
+          type="button"
+          disabled={estado === 'pensando'}
+          onClick={() => {
+            pedida.current = true
+            void pedir()
+          }}
+          className="btn-canal btn-canal-suave w-full"
+        >
+          {estado === 'pensando' ? 'Preparando la nota de voz…' : 'Oírlo en la voz de Ajito'}
+        </button>
+      )}
 
       {/* El texto va siempre, con audio o sin él. Con audio es la letra de lo
           que se está oyendo —vale para quien tiene el teléfono en silencio o

@@ -11,15 +11,43 @@ import { cn } from '@/lib/utils'
  * mental de quien la va a oír — nadie en esa planta ha usado un reproductor de
  * podcast, pero todo el mundo manda audios todos los días.
  *
- * Tres cosas que no son adorno:
+ * ── Los cuatro estados, y por qué se ven distintos ──────────────────────────
+ *
+ * Quien oye esto está de pie en un comedor con ruido, mirando un teléfono a un
+ * brazo de distancia y con dos minutos libres. **El estado tiene que leerse de
+ * un vistazo, sin fijarse.** Así que cada uno cambia el color de la tarjeta
+ * completa, no solo un detalle:
+ *
+ *   sin oír    tarjeta blanca · botón rojo con ▶     «toca aquí»
+ *   cargando   tarjeta blanca · botón rojo girando   «ya va, está bajando»
+ *   sonando    tarjeta DORADA · botón dorado con ⏸   «esto es lo que suena»
+ *   ya oído    tarjeta blanca · botón gris con ✓     «esta ya la pasaste»
+ *
+ * El dorado es el destacado del canal —`oro-300`, el mismo de lo oficial— y es
+ * lo más brillante que hay en la paleta: en una lista de ocho audios, el que
+ * suena se encuentra sin buscarlo. **No se metió un verde para «ya oído».** La
+ * paleta del canal son tres familias a propósito, y una cuarta rompería el
+ * lenguaje visual del producto entero; lo que separa «ya oído» de «apagado» es
+ * el **✓**, que es forma y no tono — la misma regla que separa la acción del
+ * peligro en el resto del aplicativo.
+ *
+ * ── Lo demás que no es adorno ───────────────────────────────────────────────
  *
  *  · **Toda la fila se toca**, no solo el botón. Con guantes, un objetivo de
  *    56 px falla; uno de ancho completo, no.
- *  · **Se marca lo ya oído.** El curso se hace a ratos, de pie, en el comedor;
- *    hay que poder volver y ver por dónde iba uno.
  *  · **`preload="none"`.** Nueve lecciones abriéndose solas serían megabytes
- *    del plan de datos del trabajador gastados sin que él le diera a nada.
+ *    del plan de datos del trabajador gastados sin que él le diera a nada. El
+ *    precio de eso es que el primer toque **siempre** espera: de ahí que el
+ *    estado de carga no sea un lujo.
+ *  · **El estado sale de los eventos del `<audio>`, no de la promesa de
+ *    `play()`.** Esa promesa resuelve cuando el sonido arranca, así que entre el
+ *    toque y ella hay un hueco de segundos en una conexión de planta — y el
+ *    hueco era justamente lo que no se veía. `waiting` vuelve a poner el
+ *    cargando si el buffer se queda corto a mitad, que en el piso pasa.
  */
+
+type Estado = 'quieto' | 'cargando' | 'sonando' | 'oido' | 'error'
+
 export function AudioAjito({
   src,
   etiqueta,
@@ -31,11 +59,10 @@ export function AudioAjito({
   segundos: number | null
 }) {
   const ref = useRef<HTMLAudioElement>(null)
-  const [sonando, setSonando] = useState(false)
-  const [oido, setOido] = useState(false)
+  const [estado, setEstado] = useState<Estado>('quieto')
+  const [yaOido, setYaOido] = useState(false)
   const [posicion, setPosicion] = useState(0)
   const [duracion, setDuracion] = useState<number | null>(segundos)
-  const [error, setError] = useState(false)
 
   useEffect(() => {
     const audio = ref.current
@@ -45,31 +72,47 @@ export function AudioAjito({
     const alCargar = () => {
       if (Number.isFinite(audio.duration)) setDuracion(audio.duration)
     }
+    // `playing` es el que dice que **de verdad** está saliendo sonido. `play()`
+    // se dispara antes, con el archivo todavía bajando.
+    const alSonar = () => setEstado('sonando')
+    const alEsperar = () => setEstado((e) => (e === 'sonando' ? 'cargando' : e))
+    const alPausar = () => setEstado((e) => (e === 'error' ? e : yaOido ? 'oido' : 'quieto'))
     const alTerminar = () => {
-      setSonando(false)
-      setOido(true)
+      setYaOido(true)
+      setEstado('oido')
       setPosicion(0)
     }
+    const alFallar = () => setEstado('error')
 
     audio.addEventListener('timeupdate', alTiempo)
     audio.addEventListener('loadedmetadata', alCargar)
+    audio.addEventListener('playing', alSonar)
+    audio.addEventListener('waiting', alEsperar)
+    audio.addEventListener('pause', alPausar)
     audio.addEventListener('ended', alTerminar)
-    audio.addEventListener('error', () => setError(true))
+    audio.addEventListener('error', alFallar)
 
     return () => {
       audio.removeEventListener('timeupdate', alTiempo)
       audio.removeEventListener('loadedmetadata', alCargar)
+      audio.removeEventListener('playing', alSonar)
+      audio.removeEventListener('waiting', alEsperar)
+      audio.removeEventListener('pause', alPausar)
       audio.removeEventListener('ended', alTerminar)
+      audio.removeEventListener('error', alFallar)
     }
-  }, [])
+  }, [yaOido])
 
   async function alternar() {
     const audio = ref.current
-    if (!audio) return
+    if (!audio || estado === 'error') return
 
-    if (sonando) {
+    // Sonando o cargando, el toque para. Que cargando también pare importa: el
+    // primer toque tarda, y quien se arrepiente tiene que poder salirse sin
+    // esperar a que arranque un audio que ya no quiere oír.
+    if (estado === 'sonando' || estado === 'cargando') {
       audio.pause()
-      setSonando(false)
+      setEstado(yaOido ? 'oido' : 'quieto')
       return
     }
 
@@ -79,22 +122,38 @@ export function AudioAjito({
       if (otro !== audio) otro.pause()
     }
 
+    // El cargando se pone **antes** de pedir el audio, que es el punto: en el
+    // piso, entre el toque y el primer sonido pueden pasar segundos.
+    setEstado('cargando')
     try {
       await audio.play()
-      setSonando(true)
     } catch {
-      setError(true)
+      setEstado('error')
     }
   }
 
   const total = duracion ?? 0
   const avance = total ? Math.min(100, (posicion / total) * 100) : 0
+  const activo = estado === 'sonando' || estado === 'cargando'
+
+  const rotulo =
+    estado === 'error'
+      ? 'No se pudo cargar el audio'
+      : estado === 'cargando'
+        ? 'Cargando…'
+        : estado === 'oido'
+          ? 'Ya lo oíste'
+          : etiqueta
 
   return (
     <div
       className={cn(
-        'tarjeta-canal flex items-center gap-3 px-3 py-3 transition-colors',
-        sonando && 'ring-2 ring-acento-500/30'
+        'flex items-center gap-3 rounded-2xl border px-3 py-3 transition-colors',
+        estado === 'sonando'
+          ? 'border-oro-300 bg-oro-50 shadow-none'
+          : estado === 'cargando'
+            ? 'border-acento-200 bg-white'
+            : 'tarjeta-canal border-transparent'
       )}
     >
       <audio ref={ref} src={src} preload="none" />
@@ -102,25 +161,35 @@ export function AudioAjito({
       <button
         type="button"
         onClick={alternar}
-        disabled={error}
-        aria-label={sonando ? `Pausar ${etiqueta}` : `Escuchar ${etiqueta}`}
+        disabled={estado === 'error'}
+        aria-label={activo ? `Pausar ${etiqueta}` : `Escuchar ${etiqueta}`}
         className={cn(
           'grid h-14 w-14 shrink-0 place-items-center rounded-full transition-colors',
           'focus-visible:ring-2 focus-visible:ring-acento-500/40 focus-visible:outline-none',
-          error
+          estado === 'error'
             ? 'bg-marca-100 text-marca-400'
-            : oido && !sonando
-              ? 'bg-marca-100 text-marca-700 active:bg-marca-200'
-              : 'bg-acento-600 text-white active:bg-acento-700'
+            : estado === 'sonando'
+              ? 'bg-oro-300 text-marca-900 active:bg-oro-400'
+              : estado === 'oido'
+                ? 'bg-marca-100 text-marca-600 active:bg-marca-200'
+                : 'bg-acento-600 text-white active:bg-acento-700'
         )}
       >
-        {sonando ? <IconoPausa /> : <IconoPlay />}
+        {estado === 'cargando' ? (
+          <IconoCargando />
+        ) : estado === 'sonando' ? (
+          <IconoPausa />
+        ) : estado === 'oido' ? (
+          <IconoOido />
+        ) : (
+          <IconoPlay />
+        )}
       </button>
 
       <button
         type="button"
         onClick={alternar}
-        disabled={error}
+        disabled={estado === 'error'}
         className="min-w-0 flex-1 py-2 text-left"
       >
         <span className="flex items-center gap-2">
@@ -129,22 +198,60 @@ export function AudioAjito({
             alt=""
             width={80}
             height={80}
-            className="h-5 w-5 shrink-0 object-contain"
+            className={cn(
+              'h-5 w-5 shrink-0 object-contain transition-opacity',
+              estado === 'oido' && 'opacity-50'
+            )}
           />
-          <span className="truncate text-[14px] font-semibold text-marca-800">
-            {error ? 'No se pudo cargar el audio' : oido && !sonando ? 'Ya lo oíste' : etiqueta}
+          {/* `aria-live`: quien navega con lector de pantalla también tiene que
+              enterarse de que está cargando, no solo quien ve el color. */}
+          <span
+            aria-live="polite"
+            className={cn(
+              'truncate text-[14px] font-semibold',
+              estado === 'sonando'
+                ? 'text-marca-900'
+                : estado === 'oido'
+                  ? 'text-marca-500'
+                  : 'text-marca-800'
+            )}
+          >
+            {rotulo}
           </span>
         </span>
 
         <span className="mt-2 flex items-center gap-2">
-          <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-marca-100">
-            <span
-              className="block h-full rounded-full bg-acento-600 transition-[width] duration-150"
-              style={{ width: `${avance}%` }}
-            />
+          <span
+            className={cn(
+              'h-1.5 flex-1 overflow-hidden rounded-full',
+              estado === 'sonando' ? 'bg-oro-200' : 'bg-marca-100'
+            )}
+          >
+            {/* Cargando, la barra va **vacía**. La primera versión ponía un
+                trozo latiendo a un tercio del ancho y se leía como «va por el
+                33%», que es un número inventado. Lo que dice que hay que esperar
+                es el anillo girando y el rótulo; una barra que miente estorba. */}
+            {estado !== 'cargando' && (
+              <span
+                className={cn(
+                  'block h-full rounded-full transition-[width] duration-150',
+                  // Carbón sobre el dorado, no dorado sobre dorado: `oro-500`
+                  // encima de `oro-200` no se distinguía a un brazo de
+                  // distancia, y el avance es justo lo que hay que poder ver
+                  // sin fijarse. De paso casa con el ⏸, que también es carbón.
+                  estado === 'sonando' ? 'bg-marca-800' : 'bg-acento-600'
+                )}
+                style={{ width: `${avance}%` }}
+              />
+            )}
           </span>
-          <span className="shrink-0 text-[12px] tabular-nums text-marca-500">
-            {reloj(sonando || posicion > 0 ? total - posicion : total)}
+          <span
+            className={cn(
+              'shrink-0 text-[12px] tabular-nums',
+              estado === 'sonando' ? 'text-oro-800' : 'text-marca-500'
+            )}
+          >
+            {reloj(activo || posicion > 0 ? total - posicion : total)}
           </span>
         </span>
       </button>
@@ -170,6 +277,48 @@ function IconoPausa() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6" aria-hidden="true">
       <path d="M7 4h3.5v16H7zM13.5 4H17v16h-3.5z" />
+    </svg>
+  )
+}
+
+/** El ✓ de «esta ya la pasaste». Es lo que separa el gris de un botón apagado. */
+function IconoOido() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-6 w-6"
+      aria-hidden="true"
+    >
+      <path d="M4 12.5 9 17.5 20 6.5" />
+    </svg>
+  )
+}
+
+/** Anillo girando. `animate-spin` de Tailwind, sin dependencias. */
+function IconoCargando() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-6 w-6 animate-spin" aria-hidden="true">
+      <circle
+        cx="12"
+        cy="12"
+        r="9"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeOpacity="0.3"
+      />
+      <path
+        d="M21 12a9 9 0 0 0-9-9"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
     </svg>
   )
 }

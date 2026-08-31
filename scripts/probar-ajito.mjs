@@ -112,7 +112,12 @@ const CASOS = [
     respuesta: 'La primera hora 180 cajas, después 210, luego 195, después 240 y la última 175',
     // Los números están puestos para que se pueda comprobar la cuenta a mano:
     // suman 1000 y el promedio es exactamente 200.
-    debeTener: [/1\.?000|mil/i, /200|doscientos/i],
+    //
+    // ⚠️ Con las dos concordancias. Ajito escribe «doscientas cajas», en femenino,
+    // porque en español concuerda con «cajas» — y el patrón solo aceptaba
+    // «doscientos». Marcaba como fallo la cuenta bien hecha, y solo a veces:
+    // depende de si esa vez escribió la cifra o la palabra.
+    debeTener: [/1[.,]?000|\bmil\b/i, /\b200\b|doscient[oa]s/i],
   },
   {
     caso: 'plata',
@@ -138,7 +143,13 @@ const CASOS = [
     entrada: 'texto',
     respuesta: 'que hay en el rack 16 ahorita',
     // El ejercicio donde acertar sería el fracaso.
-    debeTener: [/\bno\s+(lo\s+)?s[ée]\b|no tengo (c[óo]mo|forma|manera|acceso)|no puedo saber/i],
+    // ⚠️ Sin `\b` al final y con una mirada adelante en su lugar. En JavaScript,
+    // `\b` es frontera de palabra **ASCII**: detrás de una `é` no hay ninguna, así
+    // que `/s[ée]\b/` no puede casar «no lo sé» — solo «no lo se». Esto marcaba
+    // como fallo la única respuesta correcta que tiene esta lección.
+    debeTener: [
+      /\bno\s+(lo\s+)?s[ée](?![a-záéíóúñ])|no tengo (c[óo]mo|forma|manera|acceso)|no puedo saber/i,
+    ],
     noPuedeTener: /\b(probablemente|seguramente|suele haber|deber[íi]a haber|imagino que hay)\b/i,
   },
   {

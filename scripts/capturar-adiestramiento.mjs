@@ -142,6 +142,80 @@ async function abrir(pagina, ruta, { asentar = 2500 } = {}) {
   return respuesta
 }
 
+/** Los tres colores del botón del reproductor, tal como los pinta el CSS. */
+const COLOR = {
+  rojo: 'rgb(189, 42, 35)', // acento-600 · sin oír y cargando
+  oro: 'rgb(255, 208, 54)', // oro-300    · sonando
+  gris: 'rgb(239, 237, 237)', // marca-100  · ya oído
+}
+
+/**
+ * Que el reproductor cambie de color al tocarlo, y otra vez al terminar.
+ *
+ * Es lo único que le dice a la persona qué está pasando: entre el toque y el
+ * primer sonido pasan segundos en una conexión de planta, y en una lista de ocho
+ * audios hay que poder ver de un vistazo cuál ya se oyó. Se lee el color
+ * calculado y no la clase: una clase puede estar puesta y pisada por otra.
+ */
+async function colorDelReproductor(pagina, problemas) {
+  const estado = () =>
+    pagina.evaluate(() => {
+      const audio = document.querySelector('audio')
+      const boton = audio?.parentElement?.querySelector('button')
+      return {
+        color: boton ? getComputedStyle(boton).backgroundColor : null,
+        girando: !!boton?.querySelector('svg.animate-spin'),
+        rotulo: audio?.parentElement?.querySelector('span[aria-live]')?.textContent?.trim() ?? '',
+      }
+    })
+
+  const quieto = await estado()
+  if (quieto.color !== COLOR.rojo) {
+    problemas.push(`[audio] sin oír debería ser rojo y es ${quieto.color}`)
+  }
+
+  await pagina.locator('button[aria-label^="Escuchar"]').first().click()
+
+  // Cargando: el anillo girando o ya el dorado, según lo rápido que baje.
+  await pagina.waitForTimeout(150)
+  const arrancando = await estado()
+
+  await pagina
+    .waitForFunction(
+      () => {
+        const a = document.querySelector('audio')
+        return a && !a.paused && a.currentTime > 0
+      },
+      { timeout: 20000 }
+    )
+    .catch(() => problemas.push('[audio] no llegó a sonar'))
+  await pagina.waitForTimeout(400)
+
+  const sonando = await estado()
+  if (sonando.color !== COLOR.oro) {
+    problemas.push(`[audio] sonando debería ser dorado y es ${sonando.color}`)
+  }
+
+  // Al final, gris con ✓. Se adelanta el tiempo para que `ended` salga solo.
+  await pagina.evaluate(() => {
+    const a = document.querySelector('audio')
+    if (a && Number.isFinite(a.duration)) a.currentTime = Math.max(0, a.duration - 0.3)
+  })
+  await pagina.waitForTimeout(2000)
+
+  const oido = await estado()
+  if (oido.color !== COLOR.gris) {
+    problemas.push(`[audio] ya oído debería ser gris y es ${oido.color}`)
+  }
+  if (!/ya lo o[íi]ste/i.test(oido.rotulo)) {
+    problemas.push(`[audio] al terminar no dice «Ya lo oíste», dice «${oido.rotulo}»`)
+  }
+
+  console.log(
+    `  ✓ reproductor · rojo → ${arrancando.girando ? 'girando' : 'dorado'} → dorado → gris con ✓`
+  )
+}
+
 const PAGINAS = [
   { nombre: '01-canal-inicio', ruta: '/canal', movil: true },
   { nombre: '02-curso', ruta: '/canal/adiestramiento', movil: true },
@@ -266,6 +340,14 @@ try {
 
     await pagina.screenshot({ path: join(SALIDA, '07-turno-1.png'), fullPage: true })
     console.log('  ✓ 07-turno-1')
+
+    // --- los estados del reproductor -----------------------------------------
+    //
+    // Quien oye esto está de pie, con ruido y con dos minutos libres: el estado
+    // del audio tiene que leerse por el color, sin fijarse. Se comprueba el
+    // color de verdad —`getComputedStyle`—, porque una captura no dice si el
+    // dorado salió del estado o de una clase que quedó pegada.
+    await colorDelReproductor(pagina, problemas)
 
     // Se avanza turno a turno: si toca contestar, se contesta; si toca botón,
     // se toca. Como en la vida.
