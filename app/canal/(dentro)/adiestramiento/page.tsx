@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
+import { ReiniciarCurso } from '@/components/canal/reiniciar-curso'
 import { IconoCheck, IconoReloj } from '@/components/iconos'
 import {
   CURSO,
@@ -9,6 +10,7 @@ import {
   minutosTexto,
   type FormaIA,
 } from '@/lib/adiestramiento'
+import { esEditor, obtenerSesion } from '@/lib/auth'
 import { requerirEmpleado } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
@@ -17,6 +19,8 @@ export const metadata: Metadata = { title: 'Conoce a Ajito' }
 
 export default async function AdiestramientoPage() {
   const empleado = await requerirEmpleado()
+  const sesion = await obtenerSesion()
+  const puedeReiniciar = esEditor(sesion?.perfil)
   const supabase = await createClient()
 
   const { data: curso } = await supabase
@@ -124,6 +128,10 @@ export default async function AdiestramientoPage() {
               Ver mi certificado
             </Link>
           )}
+
+          {/* Solo para el equipo de Boosty: es herramienta de trabajo, no una
+              opción del alumno. Ver `reiniciarMiCurso`. */}
+          {puedeReiniciar && <ReiniciarCurso />}
         </div>
       </section>
 

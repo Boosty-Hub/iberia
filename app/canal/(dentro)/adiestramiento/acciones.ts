@@ -4,8 +4,10 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import guion from '@/contenido/adiestramiento/guion.json'
 import { CURSO } from '@/lib/adiestramiento'
+import { esEditor, obtenerSesion } from '@/lib/auth'
 import { requerirEmpleado } from '@/lib/canal'
 import { turnoDelEjercicio, type LeccionGuion } from '@/lib/guion'
+import { BUCKET_RESPUESTAS } from '@/lib/storage'
 import { createClient } from '@/lib/supabase/server'
 
 const LECCIONES = guion.lecciones as LeccionGuion[]
@@ -257,4 +259,104 @@ export async function terminarLeccion(datos: FormData) {
         ? '/canal/adiestramiento/certificado'
         : '/canal/adiestramiento'
   )
+}
+
+/**
+ * Reinicia el curso completo de quien lo pide.
+ *
+ * ⚠️ **Solo para editores de Boosty, y a propósito.** Es una herramienta de
+ * trabajo: para volver a recorrer una lección hay que borrar el avance, y sin
+ * esto había que ir a la base a mano. Delante de las doscientas personas de
+ * planta un botón que borra el avance es un accidente esperando — quien lleva
+ * tres lecciones hechas no tiene ninguna razón para tocarlo, y si lo toca no hay
+ * cómo devolvérselo.
+ *
+ * Borra de verdad, no marca: avances, respuestas con sus fotos y notas de voz,
+ * los audios de las devoluciones y el certificado si lo hubo. Y devuelve la
+ * matrícula a «matriculada», como si nunca hubiera entrado.
+ *
+ * Los archivos del bucket se van con las filas. Dejarlos sería peor que un
+ * descuido: son fotos de una persona y notas de voz suyas, sin nada que las
+ * apunte y por lo tanto sin nada que las vuelva a borrar.
+ */
+export async function reiniciarMiCurso() {
+  const empleado = await requerirEmpleado()
+  const sesion = await obtenerSesion()
+  if (!esEditor(sesion?.perfil)) {
+    return { error: 'Esto solo lo puede hacer el equipo de Boosty.' }
+  }
+
+  const supabase = await createClient()
+
+  const { data: curso } = await supabase
+    .from('cursos')
+    .select('id')
+    .eq('clave', CURSO)
+    .maybeSingle()
+  if (!curso) return { error: 'El curso no existe.' }
+
+  const { data: matricula } = await supabase
+    .from('matriculas')
+    .select('id')
+    .eq('curso_id', curso.id)
+    .eq('empleado_id', empleado.id)
+    .maybeSingle()
+  if (!matricula) return { error: 'No tienes matrícula en el curso.' }
+
+  // --- los archivos -----------------------------------------------------------
+  //
+  // Se barre **la carpeta del empleado**, no solo lo que apuntan las filas. Los
+  // intentos que fallaron a mitad de camino dejan objetos sin fila que los
+  // nombre, y esos ya nadie los volvería a borrar: son fotos de una persona y
+  // notas de voz suyas. La primera versión de esto borró 2 archivos y dejó 7.
+  const raiz = `respuestas/${empleado.id}`
+  const carpetas = await supabase.storage.from(BUCKET_RESPUESTAS).list(raiz)
+  const rutas: string[] = []
+  for (const carpeta of carpetas.data ?? []) {
+    const dentro = await supabase.storage.from(BUCKET_RESPUESTAS).list(`${raiz}/${carpeta.name}`)
+    for (const objeto of dentro.data ?? []) rutas.push(`${raiz}/${carpeta.name}/${objeto.name}`)
+  }
+
+  if (rutas.length) {
+    const { error } = await supabase.storage.from(BUCKET_RESPUESTAS).remove(rutas)
+    if (error) return { error: `No se pudieron borrar los archivos: ${error.message}` }
+  }
+
+  // --- las filas --------------------------------------------------------------
+  //
+  // ⚠️ Con los errores mirados uno por uno. Sin política de DELETE, Postgres no
+  // se queja: filtra las filas y `delete()` devuelve cero afectadas. Así, la
+  // primera versión de esto decía «curso reiniciado» con los avances intactos.
+  // Las políticas están en `20260831180000_reiniciar_curso.sql`.
+  for (const tabla of ['respuestas', 'avances', 'certificados'] as const) {
+    const { error } = await supabase.from(tabla).delete().eq('matricula_id', matricula.id)
+    if (error) return { error: `No se pudo limpiar ${tabla}: ${error.message}` }
+  }
+
+  const { error: errMatricula } = await supabase
+    .from('matriculas')
+    .update({
+      // 'pendiente' es el valor de arranque del `check` de la tabla. Poner uno
+      // inventado —'matriculada'— lo rechazaba con un 23514 que nadie leía.
+      estado: 'pendiente',
+      iniciado_en: null,
+      completado_en: null,
+      ultimo_toque: null,
+    })
+    .eq('id', matricula.id)
+  if (errMatricula) return { error: `No se pudo reiniciar la matrícula: ${errMatricula.message}` }
+
+  // Y se comprueba: la acción no dice «hecho» sin haberlo mirado.
+  const [{ count: avances }, { count: respuestas }] = await Promise.all([
+    supabase.from('avances').select('*', { count: 'exact', head: true }).eq('matricula_id', matricula.id),
+    supabase.from('respuestas').select('*', { count: 'exact', head: true }).eq('matricula_id', matricula.id),
+  ])
+  if (avances || respuestas) {
+    return { error: `Quedaron ${avances} avances y ${respuestas} respuestas sin borrar.` }
+  }
+
+  revalidatePath('/canal/adiestramiento')
+  return {
+    ok: `Curso reiniciado. Se borraron ${rutas.length} archivo${rutas.length === 1 ? '' : 's'} tuyo${rutas.length === 1 ? '' : 's'} del expediente.`,
+  }
 }
