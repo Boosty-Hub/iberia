@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { IconoBasura, IconoBuscar, IconoDescargar } from '@/components/iconos'
 import { SubirArchivo } from '@/components/subir-archivo'
+import { PreviaArchivo } from '@/components/previa-archivo'
 import { EncabezadoPagina, EstadoVacio, Insignia } from '@/components/ui'
 import { esEditor, requerirSesion } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
@@ -167,7 +168,15 @@ export default async function ArchivosPage({ searchParams }: PageProps<'/dashboa
                 </span>
 
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-marca-800">{a.nombre}</p>
+                  {/* El nombre abre la previsualización. Antes, saber cuál de los
+                      siete PDF era el que hacía falta obligaba a descargarlos:
+                      material bajo NDA, en la carpeta de descargas de quien fuera. */}
+                  <PreviaArchivo
+                    id={a.id}
+                    nombre={a.nombre}
+                    mime={a.mime_type}
+                    descripcion={a.descripcion}
+                  />
 
                   {a.descripcion && (
                     <p className="mt-0.5 line-clamp-2 text-sm text-marca-600">
