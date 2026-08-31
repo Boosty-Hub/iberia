@@ -1,13 +1,18 @@
 # Bitácora del proyecto
 
-Registro de lo ejecutado en cada sesión de trabajo, para saber en la siguiente dónde
-quedamos. **Se actualiza al cierre de cada sesión, añadiendo la entrada más reciente
-arriba.**
+Qué pasó en cada sesión y dónde quedamos. **La entrada más reciente arriba.**
 
-Contexto de fondo: `CONTEXTO_IBERIA.md` (cargado en el módulo de archivos del
-dashboard) y `AGENTS.md` para las convenciones técnicas. **Lo que falta está en
-`PENDIENTES.md`**, con el nombre de quién tiene cada cosa; y cómo poner esto en línea,
-en `DESPLIEGUE.md`.
+> **Esto se lee entero o no sirve.** Antes de escribir aquí hay que leerla completa y
+> comprobar que lo nuevo no repita ni contradiga lo que ya está. Y hay que mantenerla
+> corta: una bitácora larga no se lee, y una que no se lee no es memoria de nada.
+>
+> **Qué va aquí y qué no.** Aquí va lo que pasó, lo que se decidió y por qué, y lo que se
+> rompió. **Cómo funciona el sistema va en `AGENTS.md`**, no aquí — si algo se puede
+> explicar una vez y consultarse, no se repite en cada entrada.
+
+Contexto de fondo: `CONTEXTO_IBERIA.md` (en el módulo de archivos), `AGENTS.md` para las
+convenciones, **`PENDIENTES.md` para lo que falta** y `DESPLIEGUE.md` para poner esto en
+línea.
 
 ---
 
@@ -15,582 +20,668 @@ en `DESPLIEGUE.md`.
 
 | | |
 |---|---|
-| **Fase** | 1 · Entender (5 meses en firme, arrancó tras la firma del 4 de agosto de 2026) |
-| **Dashboard** | Operativo en local. Sin desplegar. |
-| **Sesiones cargadas** | 5 (2 del comité del 9 de julio, 3 de la visita a Cagua del 5 de agosto) |
-| **Entrevistas** | 9 programadas para la semana del 18 de agosto, en Cagua |
-| **Hallazgos** | 0 — pendiente de extraer del material ya cargado |
-| **Informe** | 21 secciones estructuradas, todas vacías |
-| **Canal de comunicación** | Primera versión funcionando en local: feed, directorio, mensajes, grupos, avisos, perfil y consola de publicación |
-| **Adiestramiento** | Guion de las 9 lecciones escrito y grabado (70 audios, 21m40s), 10 fichas de bolsillo y el certificado. Módulo en pie con RLS verificada. Ajito ya contesta: falta saldo en la cuenta de Anthropic para verlo hablar |
-| **Padrón** | Módulo de empleados con enrolamiento masivo y enlace personal por WhatsApp. 17 fichas de muestra a la espera del padrón real |
+| **Fase** | 1 · Entender · **día 25 de 153**. Contrato `CONT-2026-08-0002`, firmado el 6/7 de agosto de 2026 |
+| **Calendario** | Adelantado: **nada se entrega después del 6 de diciembre**, porque el aviso de no renovación vence antes que el entregable que sirve para decidir |
+| **Dashboard** | Operativo en local. **Sin desplegar** |
+| **Levantamiento** | 27 sesiones · **20.011 turnos**. **19 entrevistas de ~25 (76%)** · 10 de 14 macroprocesos |
+| **Hallazgos** | 236 en crudo → **28 redactados** en el informe · 38 de ENT-005 retenidos · 🔴 **la ronda 2 sin cosechar** |
+| **Informe** | **28 secciones** · 15 con contenido y los 28 hallazgos redactados adentro. Ninguna publicada |
+| **Horas** | **137 h en el mes 1 contra una bolsa de 107**, ya revisadas con Gabriel. Aparte: 111 h de la etapa anterior y 104 h del curso de planta, que se factura en Fase 2 |
+| **Comunicación** | **El comunicado salió.** Falta el plan con fecha, el vocero y la nota del boletín |
+| **Padrón** | **276 personas cargadas** con ficha, cargo, nivel y familia de oficio. ⚠️ Sin cédula, sin celular y sin correo |
+| **Canal** | Funciona en local. Anunciado el 12 de agosto; **la revisión con mercadeo se cayó y no tiene fecha** |
+| **Formación dirigente** | Uno a uno con Alberto el 17 de agosto y **Petit Comité dictado el 26**. Faltan dos formaciones, sus fechas y aclarar las licencias |
+| **Adiestramiento de planta** | Completo: guion, **70 audios (20 min 02 s)**, 10 fichas, certificado, padrón, recordatorios. **Ajito ya contesta** con la clave que tiene saldo. **Es de Fase 2** — avance para mostrar, no para abrir |
 | **Repositorio** | `Boosty-Hub/iberia` — privado |
 
-### Pendiente inmediato
+### Lo que aprieta
 
-**La lista completa vive en `PENDIENTES.md`**, ordenada por lo que bloquea y con el
-nombre de quién tiene cada cosa. Aquí solo lo que impide abrir el curso:
+**La lista completa está en `PENDIENTES.md`**, ordenada por los siete entregables de la
+cláusula 5. Aquí solo lo urgente:
 
-- **Saldo en la cuenta de Anthropic** (~$60) — Boosty. Sin esto Ajito no contesta.
-- **Cuenta de WhatsApp Business y su plantilla aprobada** — Martha Fuentes.
-- **Padrón real con teléfonos** — Gustavo Carballo. Sin teléfono no hay enlace.
-- **Lista de nombres y cargos** — cierra las familias de oficio.
-- **Aprobación de Milagro Salas**: la lista de confidencialidad de la lección 7 y la
-  retención de las fotos, que hay que decidir antes de grabar la lección 0.
-- **Regenerar la clave de Azure Speech**, que quedó visible en una captura.
-- **Probar la transcripción con audio real de Cagua**, con ruido y acento de planta.
+- 🔴 **Cosechar los hallazgos de la ronda 2.** Son 6.605 turnos del dinero, la gente, las
+  compras por dentro, el laboratorio, la seguridad y los servicios generales, y no hay ni
+  uno cargado. **El informe entero está construido sobre la cadena física**, que es lo único
+  que había cuando se redactó.
+- 🔴 **La grabación de ENT-005.** Milagro Salas fue grabada sin avisarle y pidió que se
+  borrara. Sus 38 hallazgos están retenidos y nada de esa entrevista puede citarse.
+- 🔴 **El corte del mes 1 es el 6 de septiembre**, en seis días: **redactar el reporte
+  mensual de consumo**, que la cláusula 8 obliga y del que no se ha entregado ninguno. Las 38
+  partidas ya están revisadas y el mes cierra en **137 h contra 107**, con la mezcla que
+  promete la propuesta. **`/dashboard/programa` ya está escrito para que lo lea Iberia**, así
+  que el reporte se apoya en él en vez de repetirlo.
+- **Agendar lo que falta del levantamiento**: Alberto (E1), Antonio Sorrentino (E2), Arianna
+  González y Martha E. Álvarez (O6), Martha Fuentes (TI, va de última) y **Yelitza Pérez**,
+  que se cayó de la ronda 2 y es la puerta que más veces nombra la ronda 1.
+- **Confirmar el comunicado** —día, vía y acuse— y sacar la nota del boletín. Y **aprobar el
+  comité de comunicaciones** propuesto el 27, que de paso cierra la cadencia de gobierno.
+- **Cerrar el acceso antes de la segunda formación**, no en la sala: en la primera se fueron
+  48 de los 240 minutos en que la gente lograra entrar.
+- **Aclarar el estado de las licencias de Claude Team** y fechar la segunda y la tercera.
+- **Refijar la revisión del canal con mercadeo** — Alberto la agenda. Bloquea el despliegue.
+- **Leer los 28 hallazgos redactados** del informe y validar los que los sostienen.
+- **Pedirle a Capital Humano cédula y celular por ficha.** El padrón llegó sin ellos.
 
 ---
 
-## 16 de agosto de 2026 · Sesión 5
+## 31 de agosto de 2026 · Sesión 9 — la ronda 2, la formación directiva y Ajito hablando
 
-**Que Ajito conteste.** Hasta esta sesión Ajito era un guion grabado: decía lo mismo a
-las doscientas personas. Ahora contesta lo que cada quien le manda, con su voz, y esa
-es la mitad del curso que no se puede grabar por adelantado. Sin esto el
-adiestramiento es un video largo; con esto, la persona **vive una vez** lo que las
-nueve lecciones le están explicando.
+Doce transcripciones nuevas: la ronda 2 completa, el Petit Comité del 26 y la reunión de
+comunicaciones con Fuguet. **La base pasa de 15 sesiones a 27 y de 10.481 turnos a 20.011**;
+el levantamiento, de 9 entrevistas a **19 de ~25**. Y la clave de Anthropic con saldo entró,
+así que Ajito contesta por primera vez.
 
-**Construido**
+### Lo que trajeron las transcripciones
 
-- **`lib/ajito.ts` — el personaje.** Las reglas de `00-reglas-del-guion.md` traducidas a
-  instrucción para el modelo: tuteo venezolano, frases cortas, sin género para sí mismo
-  ni para la persona, sin adular, sin inglés, sin el vocabulario que en una planta
-  anuncia despidos (automatización, optimizar, monitorear, sustituir). Y la rúbrica
-  hablada: qué hiciste, qué te faltó —una sola cosa, nunca «mal»— y cómo se ve mejor,
-  que Ajito **hace** en vez de explicar.
-- **Una instrucción propia por ejercicio**, que es donde está la pedagogía y no en la
-  regla general. En la lección 2 hay que devolver ordenado en pasos lo que la persona
-  contó revuelto; en la 3, describir una foto sin decir una palabra del cuerpo de nadie;
-  en la 6, sacar la cuenta del pasaje y **callarse la opinión sobre la plata**; y en la 7
-  decir «no sé», el único ejercicio del curso donde acertar sería el fracaso — porque la
-  lección enseña que la IA inventa cuando no sabe, y se enseña dejándose pillar.
-- **`lib/hablar.ts`** pone a hablar la devolución con la misma `es-VE-PaolaNeural` a +16%
-  de las nueve lecciones. Si la clase la dijera una voz y la devolución otra, habría dos
-  Ajitos y se notaría en la primera lección.
-- **La ruta `…/devolver`**, idempotente, y `…/devolucion/[clave]` para servir el mp3. El
-  audio va al bucket de la persona: una devolución habla de lo que ella contestó, así
-  que hereda la misma promesa que la respuesta —la oye quien la provocó y nadie más—.
-- **Migración `…_devolucion.sql`**: `devolucion_audio` y `devolucion_en`.
-- **`npm run probar:ajito`**: crea un trabajador de prueba por caso, le mete una
-  respuesta escrita como contestaría alguien de planta —sin tildes, con la frase
-  cortada—, pide la devolución por el mismo camino que la pediría el teléfono e
-  **imprime lo que contestó**. Ocho casos, elegidos por dónde duele: la cuenta del
-  pasaje, el «pillame» de la 7, la crítica al curso en la 8.
+**El comunicado oficial salió, y no lo trajimos nosotros.** Consta en `SES-006`, por boca de
+Carlos Quintana: «tomando en cuenta que ya salió el comunicado (…) queremos ahora que salga
+algo dentro del boletín». Era el pendiente más viejo de la lista. Falta el dato duro —qué
+día, por qué vía, a quién llegó— y por eso no se da por entregado. De la misma reunión salió
+un **comité de comunicaciones a tres patas** —Iberia, Fuguet y Boosty—, que es la vía más
+corta para cerrar la cadencia de gobierno de la cláusula 10; Alberto y Martha Fuentes no
+estaban en la llamada y falta que lo aprueben.
+
+⚠️ **Un archivo venía mal rotulado y por poco perdemos una entrevista entera.**
+`Entrevista-Beatriz-Parte-2` no es la parte 2 de Beatriz: **es la sesión de Compras** —José
+Acevedo y Josgleisy Ascanio, 83 minutos— que se daba por no hecha. Se cazó leyendo el primer
+minuto, donde la conductora dice «lo primero que necesito es que **ustedes** me digan sus
+nombres». Con ella la ronda 2 cierra en diez sesiones y no en nueve.
+
+**El padrón de Capital Humano resultó ser el árbitro de los nombres.** Fireflies transcribe
+por sonido: «Paola Mancillo», «Beatriz Nazaret», «Juan Pablo Yepes», «Glaciar Caño», «Pedro
+Ruiz Méndez». Cotejados contra las 276 fichas quedaron Paola Mansilla, Beatriz Vieira, Juan
+Pablo Yépez, Josgleisy Ascanio y Pedro Méndez, con su cargo real. De paso cazó dos errores
+viejos: **«Ana Karina Vázquez» era Vargas** y **«Vasco» es Vasco De Freitas, Director
+Gerente**, a quien Jesús describe en `ENT-013` como «el director general, el accionista
+mayoritario». Corregidos con `corregir-nombre.mjs`.
+
+**Quedan tres hablantes sin identificar, y son de la directiva: los speakers 5, 6 y 7 de
+`FOR-002`.** Entre ellos están Antonio Sorrentino y Gustavo Carballo, pero cuatro horas con
+siete voces no dan para cerrarlo desde el texto. Quien estuvo en la sala los reconoce de una;
+no se les inventa nombre.
+
+**Contra el mapa de macroprocesos: de 7 a 10 de 14**, y de ~20 a **33 de los 47 procesos N1**.
+Cerraron E3, S4 y S5; S3 entró completo; S1 quedó a una sesión. **Y las cuatro que faltan son
+exactamente Caracas**: Dirección, Planificación Comercial, Comercialización y Ventas, y
+Tecnología de la Información. La ronda 1 remitía siempre a las mismas cuatro puertas y la
+ronda 2 abrió tres.
+
+🔴 **Yelitza Pérez, de Crédito y Cobranza, no vino.** Es la puerta que más veces nombra la
+ronda 1 —la liberación que comprime el despacho— y sigue sin levantar.
+
+✅ **Las guías nuevas midieron bien.** Seis de las diez sesiones cayeron entre 62 y 86 minutos
+contra los 60 planificados y ninguna quedó a medias. Es la corrección de la ronda 1, donde la
+guía estimaba 90–150 y ninguna llegó a 90.
+
+### La formación de la directiva
+
+Cuatro horas, y cada participante salió con su cuenta trabajando sobre un archivo propio:
+listas de precio y venta, proyecciones, márgenes por SKU, el esquema variable de comisiones,
+ingresos en bolívares y dólares contra nómina diaria. **Eso es el arranque de los «artefactos
+por área» que promete la propuesta y que no existían.**
+
+⚠️ **Pero 48 de los 240 minutos se fueron en que la gente lograra entrar.** Alberto entró un
+día y al siguiente no; «algunos sí pudieron entrar con la VPN de Iberia» y a los demás hubo
+que instalarles un **Proton VPN en el momento**. Con seis personas se absorbe; con la cohorte
+de gerentes, no. **El acceso se cierra antes, en una máquina limpia, el día antes.**
+
+Y sobre las licencias, dos frases de la misma sala que no cuadran: «el pago de la cuenta y lo
+que tú manejas está a nombre de Iberia» y, en el minuto 1, «me falta pagar las otras». Hay
+licencia corporativa andando; **falta saber quién la contrató, cuántos asientos son y si la
+tarjeta de Dora ya pasó.**
+
+### Las horas, revisadas con Gabriel · 248 h → **137 h**
+
+Las estimaciones de desarrollo estaban infladas y las de Carlos y de dirección no reflejaban
+lo dedicado. Los números los fijó él: **procesos 70, desarrollo 36, dirección 27, senior 4**.
+En julio el desarrollo baja de 24 h a 6 — ahí todavía no se ejecutaba el aplicativo, sino
+cuatro maquetas para el comité.
+
+✅ **Y con eso la mezcla deja de estar invertida.** El único perfil por encima de su cuota es
+**consultores de procesos (+34)** —los dos rodajes— y **desarrollo cerró por debajo (−9)**. Es
+el reparto que la propuesta promete para la Fase 1, y eso cambia lo que dice el reporte
+mensual: ya no hay que explicar un desbalance, hay que señalarlo como cumplido.
+
+⚠️ **Salió una imputación nueva, `fase_0`.** El corte por mes calendario metía en la Fase 1 el
+deck de la sesión de lanzamiento (12 h, 1.º de agosto) y la negociación del contrato (6 h, día
+3) **aunque el contrato se firmó el 6**, y ya estaban cobradas en los USD 4.700. Era contarlas
+dos veces, la misma trampa que resolvió `fase_2` con el curso de planta. La etapa anterior son
+**111 h** y van en su propia tarjeta.
+
+### El módulo del programa, rehecho para que lo lea Iberia
+
+**Decisión de Gabriel: `/dashboard/programa` lo abre el cliente.** Estaba escrito para Boosty
+—tarifas, valor consumido, «⚠ 2,6× la cuota», casillas en rojo— y la RLS lo cerraba a
+editores. Un reporte mensual llega una vez al mes; la pregunta «¿en qué están?» aparece
+cualquier martes. **Las reglas de qué se muestra y qué no están en `AGENTS.md`.** Lo que
+enseñó hacerlo:
+
+- **El rótulo engañaba más que el dato.** `gestion` se llamaba «Dirección, gobierno y
+  reportería» y llevaba dentro las 40 h del dashboard y las 16 del importador: el cliente
+  leía **90 horas de pura administración**. Ahora es «Herramientas y dirección del programa»
+  con su nota. **No se movió un solo registro** — y se resistió la tentación de reatribuirlos,
+  porque la decisión de que el dashboard no cuenta contra ningún entregable ya estaba tomada.
+- **Tres secciones daban tres totales distintos del mismo trabajo.** Ahora las tres hablan de
+  las mismas horas de la fase y cuadran con la cifra de arriba.
+- **El cuadro por perfil volvió, porque es el que define el contrato.** Se había quitado con
+  las alarmas; sin él, «137 h» puede ser cualquier reparto. Cada casilla lleva debajo su «+34»
+  o su «−9» —aritmética, no alarma— y quien se pasa va en seminegrita: forma, no tono.
+- **Se verificó con los dos ojos.** Un script crea un lector de prueba, abre la página con su
+  sesión y comprueba lo que no debe verle: dinero, formulario de carga y la marca «en riesgo».
+  Sin eso, «esto no se lo ve el cliente» es una creencia, no una comprobación.
+- **La pantalla cazó que el Documento de Arquitectura marca cero horas** con 28 secciones
+  escritas. Sigue en cero: al revisar el registro, esas horas no van ahí. Es honesto, pero
+  **hay que decidir si el entregable principal se queda sin partida propia.**
+
+### Ajito contesta, y por primera vez se le leyó
+
+**La clave con saldo entró como `ANTHROPIC_API_KEY_SALDO`** y `probar:ajito` devolvió las
+ocho, todas dentro de las reglas. Era el 🔴 más viejo del adiestramiento: *«nadie ha leído
+todavía una devolución de Ajito»*.
+
+Contestar de verdad destapó **dos fallos que no se ven con el modelo apagado**: en el saludo
+de la lección 0, Ajito decía «Encantado» —se pone género, que es regla que no se rompe— y se
+quedaba en 23 palabras, diez segundos de audio cortado en seco.
+
+⚠️ **Y `capturar:adiestramiento` reventó, que era buena noticia.** Usaba `networkidle`, y una
+lección con devolución pendiente dispara un `fetch` que ahora tarda de diez a veinte segundos.
+**Con la clave sin saldo fallaba al instante y el capturador pasaba — o sea que pasaba
+*porque* el modelo estaba roto.**
+
+### Los audios sonaban cortados, y era el markdown
+
+⚠️ **En SSML un salto de línea es una pausa, y las citas del guion están ajustadas a 78
+columnas**: Azure metía silencio en mitad de cualquier frase partida, entre «Me» y «parece
+bien». Y `mstts:silence type="Sentenceboundary"` **se suma** al silencio que Azure ya pone,
+así que 180 ms caían sobre cada punto de unas frases que son cortas por diseño.
+
+**Medido sobre el WAV** —RMS en marcos de 10 ms— el Audio 1 de la lección 0 pasó de **16
+pausas, 11 de ellas de 400 ms o más**, a **12 y ninguna llega a 400**.
+
+**Y de paso salió que la velocidad estaba mal medida.** El `+16%` de agosto se cronometró
+sobre el texto: el audio real iba a **174 palabras por minuto**, no a las 192 elegidas a
+propósito. Sin las pausas falsas, `+16%` se va a 198 —las 199 que en su día se descartaron por
+«pódcast de oficina»— y **`+12%` da exactamente 192**. Regrabados los 70 por 31 centavos: el
+curso mide **20 min 02 s** contra 21 min 40 s, diciendo lo mismo.
+
+### Lo que enseñó romperse
+
+🔴 **`probar:adiestramiento` pasó de 16 comprobaciones a 9 y siguió diciendo «sin fallos».** El
+bloque de «lo que NO se puede» necesita una segunda matrícula y solo reutilizaba una que
+estuviera por ahí; el día que no hubo ninguna se saltó entero **en silencio**. Y las siete que
+se saltaron son justo las que prueban la promesa de la lección 0: que lo que alguien contesta
+no lo lee nadie más. Ahora la abre si falta y avisa si no puede. Van 17. *De paso, «el avance
+queda guardado y lo leo» exigía exactamente una fila en una matrícula que es de una cuenta
+real: cualquier vuelta por el curso la hacía fallar sin que nada estuviera mal.*
+
+⚠️ **`sembrar:programa` y `sembrar:horas` escribían los dos en `registros_horas`**, con
+descripciones distintas para el mismo trabajo: la jornada del 20 de agosto entraba dos veces,
+5,42 h en uno y 10,5 h en el otro. Y como `--limpiar` borra lo que no está en su archivo,
+**correr los dos en un orden duplicaba las horas y en el otro las desaparecía sin decir nada.**
+Es la familia de las 40 h fantasma de la sesión 6. Un solo registro: `sembrar-horas.mjs`.
+
+⚠️ **Los hitos tenían la misma trampa sin el aviso.** Al renombrar «Comunicado oficial
+publicado» quedó el viejo vivo, y el panel mostraba el mismo comunicado a la vez como hecho el
+27 de agosto y en riesgo el 6 de septiembre. Ahora `sembrar:programa` lista los huérfanos.
+
+**Dos comodidades que eran en realidad huecos de verificación.** `capturar` ya no pide
+contraseña —acuña la sesión con la clave de servicio—, porque una verificación obligatoria que
+depende de que alguien esté delante para teclear una clave es una verificación que se salta. Y
+en el menú, bajo Administración, hay un acceso directo a **El curso de Ajito**: es la única
+forma de oír un audio después de regrabarlo, y hasta hoy había que escribir la ruta a mano.
+
+**Dónde quedamos.** La ronda 2 y la formación directiva adentro, las horas revisadas y
+cuadradas contra la pantalla, el módulo del programa listo para que Iberia lo abra y Ajito
+contestando con voz corregida. Lo que sigue es **cosechar los hallazgos de la ronda 2**, que
+es lo que hoy le falta al informe, y **el reporte mensual antes del 6 de septiembre**.
+
+---
+
+## 24 de agosto de 2026 · Sesión 8 — la fila 5 de la ronda 2 estaba mal ubicada
+
+Gabriel cayó en algo que la sesión 7 no cazó: **Luis Daniel Agostini y Alexis Rojas son de
+Comercial y Mercadeo, y esas dos áreas despachan desde Caracas**, no desde Cagua. Meterlos
+en la fila 5 de la Pista A rompía la premisa del documento entero —diez entrevistas, todas
+en la planta—. Y el suplente que los cubría, **Jesús Acosta**, tampoco servía: es el mismo
+«Jesús, Gerente de Mantenimiento» de `ENT-004`, ya entrevistado en la ronda 1.
+
+**Reemplazo, mirando qué macroproceso queda sin ni siquiera una fecha diferida.** Del mapa
+v7, **S3 · Gestión de Capital Humano** era el único de los catorce que no tenía ronda ni
+estaba en la lista de «para más adelante» junto con E1, E2, O6 y TI. La fila 5 ahora la
+llevan **Luz Marina Sanz** (Gerente de Recursos Humanos) y **Liseth Yánez** (Jefa de
+Administración de Personal) — Liseth ya estaba anotada como «de Cagua» entre los suplentes,
+así que se promovió y ese puesto de suplente quedó vacante. Ajustados en el mismo paso: el
+horario de las 13:40–14:40, el responsable de elegir la fecha (ya no Luis Daniel Agostini)
+y la lista de suplentes en el documento y en `PENDIENTES.md`.
+
+⚠️ **Sigue sin confirmarse con Martha.** El padrón no trae sede — se decidió así a propósito,
+por lo mismo que no se le inventa cédula a nadie— así que la ubicación de Luz Marina Sanz y
+Liseth Yánez es inferencia por área, no dato duro. Va como pedido en el documento.
+
+---
+
+## 23 de agosto de 2026 · Sesión 7 — el documento de la ronda 2, revisado por Gabriel
+
+Cinco correcciones al PDF que se le manda a Martha, todas de criterio de trato con el
+cliente. Vale anotarlas porque son la línea, no el detalle de un documento:
+
+- **Los documentos se piden, no se exigen, y pueden llegar después.** La fila decía «se
+  pedirán documentos en la sesión»; ahora dice que puede que se pidan, para validar el
+  proceso que lleva cada quien, y que **lo que no esté a la mano se envía después**. Poner
+  al convocado a buscar papeles contrarreloj es la forma de que llegue a la defensiva.
+- **Fuera la fila de la grabación.** El consentimiento se pide en la sala, en voz alta, y
+  está en el guion desde ENT-005. Anunciarlo por escrito y por adelantado lo convierte en
+  un trámite antes de que la conversación empiece.
+- **Urgente no es regaño.** «Se pidió para el 14 y todavía no está», «puede dejar la sesión
+  sin piso», «la gente mira en vez de trabajar» — describían el fallo, no la salida. Las
+  dos alertas ahora dicen qué se gana resolviéndolas: la conexión andando hace la sesión
+  práctica, las licencias hacen que cada quien salga con su acceso propio. **La urgencia se
+  transmite con el plazo y con lo que está en juego, no con el reproche.**
+- **Nada de Capital Humano en este documento.** Cédula y celular por ficha se siguen
+  necesitando —está en `PENDIENTES.md`—, pero no se piden acá: mezclar un pedido de datos
+  del padrón con la convocatoria de la ronda 2 diluye las dos cosas.
+- **Dora asiste a la formación, Flaviano no**, así que la primera cohorte queda en seis.
+  Eso deja de ser pregunta y sale del documento: quién va a la sala no es materia de un PDF.
+- **La sección 04 se dejó en dos avisos y nada más.** Fuera «a cuatro días de la sesión»
+  —contar los días es apurar—, fuera el repaso de las condiciones del licenciamiento —ya
+  estaban en el documento del 11— y fuera el «cómo despejar las dos de una vez», que era
+  decirle a Martha cómo hacer su trabajo. **Se dice qué falta y por qué importa; el cómo lo
+  pone quien lo va a resolver.**
+
+**Y la fecha ya no se pregunta en abstracto: se propone.** Jueves 27 de agosto o martes 1.º
+de septiembre. Un «elijan el día» devuelve silencio; dos fechas concretas devuelven una.
+
+---
+
+## 22 de agosto de 2026 · Sesión 6
+
+**Volver a medir contra la propuesta.** El proyecto se estaba midiendo contra sí mismo:
+`PENDIENTES.md` entero estaba ordenado alrededor de «abrir el curso», y abrir el curso
+**es Fase 2**. Nadie llevaba la cuenta de los siete entregables que compromete la
+cláusula 5 para la Fase 1.
+
+**Cargado**
+
+- **Las 9 entrevistas del rodaje del 20 de agosto** en Cagua, dos pistas —cinco Gabriel,
+  cuatro Ruth—: Macedo, Martínez, Acosta, Cáceres, Salas, Castro, Armas, Valor y Peña.
+  4.407 turnos, 8 h 47 min. Calzaron una a una con las nueve filas ya programadas.
+- **`FOR-001`, la formación uno a uno con Alberto** del 17 de agosto: 1.590 turnos,
+  **3 h 05 min** de una hora y media pedida. Serie propia — no cuenta contra las ~25.
+- **Al expediente**: la propuesta, el contrato firmado y los tres correos de constancia.
+- **236 hallazgos propuestos**, de leer las nueve entrevistas completas. 56 riesgos, 54
+  cuellos de botella, 46 de trabajo manual, 27 datos disponibles, 23 oportunidades, 19
+  supuestos y 11 sistemas.
+
+**Construido** — `importar-transcripciones`, `cargar-hallazgos`, `subir-documentos`,
+`sembrar-programa` y **`/dashboard/programa`** con su migración: línea de tiempo y consumo
+de la bolsa de 107 horas.
+
+🔴 **Lo más grave del día.** Al cerrar ENT-005, **Milagro Salas supo que estaba grabada y
+pidió que se borrara** — «bórrala, sí, por favor». Ruth reconoció que fue la única persona
+a la que no se le avisó. Sus 38 hallazgos quedaron retenidos sin cargar, y en las ~16 que
+faltan el aviso de grabación va al inicio del guion.
+
+**Lo que salió de leer la propuesta y el contrato completos**
+
+- ⚠️ **Colisión de calendario.** El aviso de no renovación es de 30 días sobre un plazo que
+  vence el 6 de enero: **Iberia decide si sigue el 6 de diciembre**, y la propuesta pone el
+  Documento de Arquitectura un mes después. Todo el calendario se corrió al 6 de diciembre.
+- **Los informes de levantamiento por área** están pedidos por partida doble y no existía
+  ni el formato. Sale de los hallazgos validados: los siete tipos son sus secciones.
+- **El reporte mensual de horas es contractual** (cláusula 8) y no se estaba llevando.
+- **El contrato quedó firme.** Firma Gabriel Andrés Montiel Toro y es quien comparece —la
+  discrepancia con Luisa Elena desapareció—; el aviso de ajuste de fee quedó en 45 días
+  contra los 30 de la no renovación, así que ya no chocan; y las 107 horas y el
+  licenciamiento de USD 60 entraron los dos a la cláusula 8. Queda vigilar que no hay
+  derogatoria expresa del `CONT-2026-07-0005` anterior.
+
+**Corregido con Gabriel**
+
+- **El «chat organizacional» no es software.** Son las **licencias de Claude Team** a
+  nombre de Iberia más las **tres formaciones**: la directiva el 26 de agosto, después los
+  gerentes, después los líderes que ellos escojan. Es adopción, no desarrollo. *(Ojo con la
+  nota de la sesión 5 —«las licencias corporativas no sirven para esto»—: era cierta para
+  el curso de planta, que va por API, y no aplica a este entregable.)*
+- **El inventario de sistemas sale de las entrevistas** y ya está saliendo. Cierra con la
+  entrevista de Tecnología de la Información, que falta agendar.
+- **Las encuestas de pulso las hace Iberia**, no nosotros. Están nombradas como componente
+  de la v1 en la página 8 de la propuesta, así que conviene dejarlo por escrito en el acta
+  de la revisión con mercadeo.
+- **El curso de planta es Fase 2.** La cláusula 5 pone el despliegue ahí y la 8 hace el
+  licenciamiento de USD 60 facturable «a partir de su activación en la Fase 2». Abrirlo en
+  Fase 1 sería regalar unos $12.000 antes de que Iberia se comprometa con la fase que los
+  paga.
+- **Se puede citar y nombrar en el informe.**
+
+**Cómo se identificó a cada hablante.** Buscando el nombre dentro del texto, no adivinando
+por quién habla más. Luis Cáceres se presenta solo y ahí se cayó la corazonada que iba por
+otro hablante; en ENT-002 el entrevistador se delata leyendo la lista del rodaje; y **en
+ENT-006 los números van al revés** que en las otras tres de Ruth. Un importador que asuma
+«el primero es el entrevistador» le habría puesto las palabras de Andreína Castro en boca
+de Ruth. `ENT-004 · speaker 3` resultó ser **Jesús, Gerente de Mantenimiento** — y esa
+etiqueta viene contaminada: entre los minutos 5 y 6 se cuela Rafael Acosta, que llegó a la
+hora equivocada. **Quedan cuatro sin identificar.**
+
+**Corregido de mirar la pantalla** — la tabla de consumo arrancaba en julio, porque
+`Intl.DateTimeFormat` sin `timeZone` lee el primero del mes a medianoche UTC como el mes
+anterior visto desde Venezuela; la línea de tiempo abría por enero de 2027 y ahora va
+partida en «lo que viene» y «lo hecho»; y los encabezados de perfil decían «Consultor» dos
+veces por recortar a la primera palabra.
+
+### Cierre del día · las horas, el padrón y el informe
+
+**El registro de horas completo, y lo que dice.** 31 partidas, cada una con la base de su
+número: la preparación, los traslados Caracas↔Cagua, la redacción de los documentos, las
+horas de Carlos y de Josué, y el desarrollo del aplicativo. **El mes 1 va en 290 h contra
+una bolsa de 107**, más 103 h de Fase 0 que se registran aparte y no descuentan.
+
+De los cuatro perfiles, el que se disparó es desarrollo: **176 h contra una cuota de 45**,
+y 124 de ellas son el curso de planta, que es entregable de Fase 2. **Se invirtió la mezcla
+que promete la propuesta** —«en la Fase 1 pesan los consultores; en las fases 2 y 3, los
+desarrolladores»—. No es incumplimiento: la cláusula 8 promedia dentro de la fase y la 5
+pone el riesgo del lado de Boosty. Pero obliga a que los meses 2 a 5 pesen en consultoría,
+y a que el reporte lo diga en vez de esconderlo.
+
+*Son estimaciones por entregable, no un parte de trabajo. El valor no está en la cifra sino
+en que no falte ninguna partida: corregir un número escrito cuesta un minuto, acordarse de
+una partida que falta cuesta el mes.*
+
+**El padrón llegó y le falta lo que hace falta.** 276 personas —no ~280—, sin un vacío, con
+ficha única, cargo y departamento; sirve para clasificar familias de oficio. Pero **no trae
+cédula, ni celular, ni correo, ni sede**: sin celular no hay enlace personal. Hay que
+pedirle a Capital Humano un segundo archivo.
+
+**El informe arrancó.** 26 secciones —se añadieron «De quién depende cada proceso», «El
+estado del dato», «Dónde no va la IA», «La decisión» y el anexo de informes por área—, y
+seis ya tienen contenido. *(Quedaron en 28 al añadirse «En sus palabras» y el anexo de
+cifras, y hoy 15 tienen contenido.)* **Los tres anexos se regeneran solos de la base**; las secciones
+de prosa se escriben una vez y, en cuanto alguien las toca desde el editor, el script no
+las vuelve a pisar. Nada publicado: los hallazgos que las sostienen siguen propuestos.
+
+**Corregido de mirar la pantalla, segunda tanda** — el tope de 24 h por partida daba por
+hecho que cada fila era una jornada, y obligaba a partir cada entregable en trozos con
+fechas inventadas; ahora son 160, que sigue cazando el cero de más. El script de horas
+resumía por fecha exacta y la pantalla por mes, así que decían cifras distintas del mismo
+dato. Y la portada del informe rotulaba «15 entrevistas» cuando 15 son las sesiones y 9 las
+entrevistas: en el documento que lee el cliente, eso es inflar el avance.
+
+### Tercera vuelta · el padrón, la imputación de horas y dos fallos serios
+
+**El padrón real, cargado.** Las 276 personas están en `/dashboard/empleados` con ficha,
+cargo, departamento mapeado al organigrama, nivel y familia de oficio —94 de línea, 43 de
+supervisión, 30 de oficina, 20 de almacén—. `importar:padron` lee el `.xlsx` del bucket, no
+de la carpeta de descargas de nadie, y descomprime en un temporal que borra al salir. La
+migración añadió `ficha` —la clave de Capital Humano— y **volvió opcional la cédula**:
+inventarle una a 276 personas para satisfacer una restricción sería meter dato falso en la
+tabla de la que salen los certificados.
+
+**Lo que se cobra aparte no consume bolsa.** El booleano `adicional` no alcanzaba, así que
+ahora hay `imputacion`: `bolsa`, `fase_2` o `adicional`. Con el curso de planta fuera —104 h
+que van por el licenciamiento de USD 60— y la app en las 32 h que dijo Gabriel, el mes 1
+queda en **182 h contra 107**, y no en las 290 que se veían antes. *(⚠️ Cifra superada: el
+31 de agosto Gabriel revisó el registro partida por partida y el mes 1 cerró en **137 h**.
+Y se sumó una cuarta imputación, `fase_0`. Ver esa sesión.)*
+
+🔴 **`probar:supabase` matriculó a 201 personas.** La comprobación de que
+`matricular_pendientes` existe la llamaba con el curso real, así que **verificar escribía**:
+correrla justo después de cargar el padrón metió a 201 personas en un curso cerrado que es
+entregable de Fase 2. Deshecho —solo las de hoy y solo las que no tenían avance ni
+respuestas— y corregido: ahora pregunta por un curso inexistente a propósito, y la excepción
+«no existe el curso» prueba que la función está sin tocarle la matrícula a nadie. Una suite
+que corre contra producción no puede escribir.
+
+⚠️ **La idempotencia por descripción deja huérfanas.** Al mover el dashboard de `app` a
+`gestion` se le tocó el texto, y como la clave es (fecha, descripción), la fila vieja
+sobrevivió: 40 h fantasma que la pantalla sí sumaba y el script no. Se veía en que la página
+decía 222 h y el resumen 182. Ahora el script lista lo que está en la base y no en el
+archivo, y `--limpiar` lo borra.
+
+### Los hallazgos, redactados
+
+De las **236 observaciones en crudo quedaron 28 hallazgos numerados**, en prosa y agrupados
+por tema. El recorte es la mitad del trabajo: entró lo que dijeron desde áreas distintas
+—las 24 a 48 horas de la caja a la factura las cuentan Producción y Distribución por
+separado, el MRP en Excel lo describen tres áreas— o lo que es hecho duro con cifra, plazo o
+sistema. Lo de una sola mención espera a la ronda 2.
+
+El informe los recibió repartidos por `MAPA.md`, que no sigue el orden con que se
+redactaron: leerlos de corrido pide un orden y el entregable pide otro. Van 6 en «Del pedido
+al cobro», 5 en sistemas, 5 en el estado del dato, 3 en cuellos de botella, 3 en
+restricciones, 3 en «Dónde no va la IA», 2 en dependencias y 1 en madurez.
+
+Dos secciones nuevas: **«En sus palabras»**, con las 18 citas que mueven la aguja y en un
+solo sitio —no repartidas por todo el documento—, y el **anexo de cifras**, con las ~85
+que salieron dichas, cada una con su fuente y marcando cuáles son estimación de quien
+habló. Y el anexo de hallazgos dejó de ser un volcado de las 236: ahora es el índice de los
+28. Las crudas se quedan en el panel, que es su mesa de trabajo.
+
+**Corregido de mirar la pantalla** — el limpiador de portada cortaba hasta el siguiente
+`##`, y `CITAS.md` no tiene ninguno: se comió el archivo entero y dejó la sección vacía. En
+`NUMEROS.md` se llevó el párrafo de entrada. Al recortar por estructura hay que recortar lo
+mínimo.
+
+### Las guías, rehechas · y el documento para Martha
+
+Las tres guías de entrevista se rehicieron con `generar:guias`: **siete secciones con su
+minuto, que suman 60**, solo las preguntas —es guía de entrevistador, no manual— y cuatro
+secciones marcadas «No se salta» que son los cuatro huecos de la ronda 1. Adaptadas a
+Iberia: fuera lo multi-país, el e-commerce y la casa matriz de marca representada; dentro
+las maquilas —Iberia *es* la casa matriz de las suyas—, el cumplimiento sanitario venezolano
+y el turno único.
+
+**El generador avisa si una pregunta se puede contestar con sí o con no**, que es la regla
+del archivo: una abierta hace que la persona cuente el proceso, una cerrada solo confirma el
+que ya trae el entrevistador en la cabeza. Ese chequeo cazó cuatro —«¿se hace igual para
+todo?», «¿los sistemas se hablan?», «¿hay algo que JD debería hacer?», «¿el área tiene
+presupuesto?»— que ahora preguntan por el cómo y no por el sí.
+
+**La ronda 2 es un día entero en Cagua**, dos pistas de cinco: Jesús Planas con el dinero y
+la venta, Ruth con la planta por debajo —Beatriz, los coordinadores de Compras, Prevención
+de Pérdidas, Laboratorio y Servicios Generales—. En Caracas no hay ronda por ahora; lo que
+hay en Caracas es la formación del 26.
+
+**Y el documento se rehízo después de leer el del 11 de agosto.** La primera versión repetía
+lo que Iberia ya sabía: el contenido de la formación, los participantes, el costo de las
+licencias, la forma de pago. Todo eso ya estaba dicho. El documento nuevo dice solo lo que
+cambió o lo que sigue abierto —**la VPN y la tarjeta**— y de paso caza que en la
+convocatoria del 21 faltan dos de los siete de la lista original. *(Resuelto el 23: Dora
+asiste, Flaviano no. Y el tono de esas dos alertas se rehizo — ver sesión 7.)* *Antes de
+escribirle otra vez al cliente, hay que leer lo que ya se le mandó.*
+
+**Corregido de usarlo:** `generar-pdf.mjs` tomaba `--vista` como nombre del archivo de
+salida, así que la vista previa reventaba justo cuando se quería revisar el PDF antes de
+entregarlo. Las banderas ahora se apartan de los posicionales.
+
+**Dónde quedamos.** Levantamiento cargado, 28 hallazgos redactados dentro del informe,
+padrón real adentro, horas cuadradas, las guías listas y la ronda 2 en un PDF para mandar. Lo que sigue no es construir: es
+resolver lo de la grabación, sacar el comunicado, refijar la revisión del canal, cotizar las
+licencias, pedir los teléfonos y agendar las nueve.
+
+---
+
+## 16 de agosto de 2026 · Sesión 5 — que Ajito conteste
+
+Hasta aquí Ajito era un guion grabado: decía lo mismo a las doscientas personas. Ahora
+contesta lo que cada quien le manda, con su voz. Es la mitad del curso que no se puede
+grabar por adelantado.
+
+**Construido** — `lib/ajito.ts` (el personaje, con una instrucción propia por ejercicio),
+`lib/hablar.ts` (la devolución hablada con la misma voz), la ruta de devolución idempotente
+y `probar:ajito` con ocho casos. Más **las 10 fichas de bolsillo**, **el certificado**, **el
+empujón** y **el padrón con el enlace personal**.
 
 **Decidido**
 
-- **El modelo es `claude-opus-5` y va por la API.** La visión es el requisito duro —leer
-  la letra chiquita de la etiqueta de un frasco, con mala luz y en ángulo— y es donde el
-  escalón entre modelos se nota. Esfuerzo en `medium`, no en `low`: la devolución es
-  corta pero respeta quince reglas a la vez, y las que fallan son caras.
-- **Las licencias corporativas no sirven para esto**, y conviene decirlo antes de que
-  aparezca en una factura. Está anotado en `herramientas.md`.
-- **El curso completo sale por unos 90 dólares de servicios** para las 200 personas: ~$40
-  de voz, ~$52 de modelo. Las fotos son el renglón caro —hasta 4.800 tokens cada una—.
+- **El modelo es `claude-opus-5` por API, esfuerzo `medium`.** La visión es el requisito
+  duro —leer la letra chiquita de una etiqueta con mala luz y en ángulo—. Las licencias de
+  asiento no sirven para esto: una licencia es una persona delante de una ventana, esto es
+  un programa llamando doscientas veces al día.
+- **El curso completo sale por unos $90 de servicios** para las 200: ~$40 de voz, ~$52 de
+  modelo. Las fotos son el renglón caro, hasta 4.800 tokens cada una.
+- **El empujón funciona sin WhatsApp, y es decisión de diseño.** La cuenta está pedida y va
+  a tardar meses, que es justo cuando la gente hace el curso. Apagado, el panel prepara los
+  mensajes y alguien los copia; encendido salen solos y son los mismos.
+- **La escalera —2, 5, 8 y 13 días— vive en el guion**, con una regla propia: **no se
+  reclama**. Se manda el escalón más alto vencido y después del de 13 no se escribe más.
+- **El enlace es la credencial**, y se trató como una contraseña: se guarda el SHA-256,
+  caduca a 120 días, se reusa contando los usos, y `/entrar/[token]` no dice por qué falló.
 
-**Corregido, y salió de mirar la captura**
+🔴 **Lo que no se pudo verificar, y es lo importante: nadie ha leído todavía una devolución
+de Ajito.** *(✅ Resuelto el 31 de agosto: entró una clave con saldo y se leyeron las ocho de
+`probar:ajito`. Ver esa sesión.)* La cuenta de Anthropic no tiene crédito. El circuito entero está probado menos
+la llamada al modelo, y ni siquiera se puede comprobar que la petición esté bien armada,
+porque el cobro se verifica **antes** que el cuerpo: con tres cuerpos distintos, uno
+inválido a propósito, la API devolvió el mismo error de saldo.
 
-- **La lección 3 disparaba cuatro llamadas al modelo de golpe**, con sus cuatro fotos, al
-  abrirse con respuestas viejas sin contestar. En una conexión de planta se caen las
-  cuatro juntas. Ahora **solo pide una a la vez**, la primera a la que le falte, y se van
-  llenando de arriba abajo.
-- **Y una que fallara dejaba la cola atascada detrás suyo**, congelando el resto de la
-  lección. Ahora queda marcada con `devolucion_en` sin texto, sale de la cola, enseña su
-  botón de reintentar y las demás siguen.
+**Lo que enseñó romperse**
 
-**Verificado**
-
-`tipos` y `eslint` limpios. `capturar:adiestramiento` recorre el curso completo en
-iPhone 14 sin desbordes ni objetivos táctiles chicos, y las capturas se abrieron: la
-respuesta de la persona sale citada con su filete gris y debajo va lo de Ajito.
-
-**Lo que no se pudo verificar, y es lo importante:** Gabriel puso la clave a media
-sesión y la llamada siguió fallando. No era la clave: **la cuenta de Anthropic no tiene
-crédito** (`Your credit balance is too low`). Así que **nadie ha leído todavía una
-devolución de Ajito**. El circuito entero está probado menos la llamada al modelo — y ni
-siquiera se puede comprobar que la petición esté bien armada, porque el cobro se verifica
-**antes** que el cuerpo: con tres cuerpos distintos, uno de ellos inválido a propósito,
-la API devolvió el mismo error de saldo. En cuanto haya crédito, `npm run probar:ajito`
-lo dice en un minuto.
-
-De ese rato salió una mejora: **los fallos ahora se clasifican** —`sin-saldo`,
-`sin-permiso`, `ocupado`, `sin-configurar`, `fallo`— porque cada uno se arregla en un
-sitio distinto y la diferencia se paga en horas. Con «fallo» a secas se perdió una hora
-buscando en el código lo que estaba en la consola de facturación.
-
-Y con eso se corrigió algo peor: **un fallo por saldo o por red no debe marcar la
-respuesta como intentada**. Solo se marca cuando el problema es de esa respuesta. Si el
-problema es del servicio, le pasa igual a las doscientas, así que la cola se para sola y
-el día que se arregle se recuperan todas sin que nadie toque un botón. Con la versión
-anterior, todas las respuestas de estas pruebas habrían quedado fuera de la cola para
-siempre.
-
-### Las fichas de bolsillo
-
-Los bloques 🖼 del guion llevaban desde el principio sin dibujar nada. Ya están las
-**diez fichas** —una por lección y dos para la 8, según el interruptor—: verticales,
-1080×1920, para guardar en la galería del teléfono y volver a mirarlas en el bus dos
-semanas después.
-
-- **Salen del guion**, como los audios: el texto está en la cita debajo de cada bloque
-  `🖼 **Ficha de bolsillo**`. La de la lección 8 no estaba escrita —solo descrita en
-  prosa— y se escribió, porque el guion manda.
-- **Se dibujan con Playwright**, no con GDI+ como la marca. Esto es tipografía, Chromium
-  ya sabe componerla, y corre en cualquier sistema; los `.ps1` solo en Windows.
-- **El tamaño se mide.** La primera versión tenía los tamaños a mano y la ficha de la
-  lección 8 —siete líneas contra tres— salió con Ajito cortado por abajo, mientras las de
-  tres líneas dejaban medio metro de blanco. Ahora `medir()` baja la escala hasta que
-  cabe y avisa por debajo del 70%, donde el arreglo ya no es encoger sino escribir menos.
-
-**Dos fallos del lector que salieron de esto:** la descripción de un bloque 🖼 partida en
-dos líneas dejaba la cita fuera de alcance —así salió vacía la ficha de la 8, sin que
-nada se quejara—, y la ficha no heredaba el `-A`/`-B` de su audio, así que al apagar el
-interruptor se oía una despedida y se veía la otra.
-
-### El certificado
-
-Es lo contractual del adiestramiento y lo último que Ajito promete, en el audio 5 de la
-lección 8. Hasta hoy, terminar las nueve lecciones no entregaba nada: el botón «Ver mi
-certificado» de la portada del curso llevaba a la lección 8.
-
-- **Se emite solo al cerrar la novena**, y `terminarLeccion` redirige al certificado en
-  vez de al índice — llegar a una lista de lecciones tachadas después de ese audio sería
-  quedarle mal. Si la emisión falla, la lección igual queda terminada.
-- **Nadie se lo puede fabricar.** La política de la tabla —correctamente— solo deja
-  escribir a los editores de Boosty. La emisión pasa por `emitir_mi_certificado()`,
-  `security definer`, que comprueba que la matrícula sea de quien llama y que las nueve
-  lecciones estén completadas **contándolas**, sin fiarse del estado de la matrícula.
-- **Una sola hoja para dos públicos**: la que ve el trabajador en su teléfono es la misma
-  que sale en `/dashboard/adiestramiento/certificados`, de donde Boosty imprime los
-  doscientos para que el Gerente de Planta los entregue en mano. Si fueran dos maquetas,
-  el papel y la pantalla dirían cosas distintas del mismo curso.
-- **Los datos van congelados en la fila.** Si la persona cambia de cargo en noviembre, el
-  certificado sigue diciendo lo que era el día que lo hizo. Y el código va legible
-  —`IB-AJITO-2026-0001`— porque alguien de Capital Humano lo va a teclear copiándolo del
-  impreso.
-
-### El empujón
-
-Lo último que faltaba del adiestramiento. El curso es a su ritmo y los gerentes piden
-que avancen; entre esas dos cosas hay un hueco de doscientas personas que empiezan la
-lección 0 un martes y no vuelven.
-
-**Está armado para funcionar sin WhatsApp, y esa es la decisión de diseño.** La cuenta
-de WhatsApp Business está pedida a Martha Fuentes y va a tardar —alta del número,
-verificación del negocio con Meta, aprobación de cada plantilla—. Un empujón que solo
-empuja cuando la integración esté lista no empuja nada durante los meses que tarde, que
-es justo cuando la gente está haciendo el curso. Así que apagado el panel prepara los
-mensajes con el nombre de cada quien y alguien los copia y los manda desde su teléfono;
-encendido salen solos, y son exactamente los mismos.
-
-**La conexión se pega desde el panel**, como pediste. Va ahí y no en el `.env` porque la
-pone quien tenga la consola de Meta delante, y esa persona no despliega. El token es un
-secreto: RLS de solo administradores, y **el panel no lo enseña de vuelta ni
-enmascarado** — un token en pantalla es un token en una captura de pantalla. Hay botón de
-probar la conexión que le pregunta a Meta por el número sin escribirle a nadie.
-
-**La escalera está en el guion**, en `contenido/adiestramiento/recordatorios.md`: 2, 5, 8
-y 13 días, que es lo que hace MAIA y que ya habíamos decidido copiar. Con una regla
-propia que es la que separa un empujón de una molestia: **no se reclama**. Nadie tiene
-que explicar por qué no ha vuelto. Se manda el escalón más alto vencido y no todos, y
-después del de los 13 no se escribe más — si a los trece días no volvió, eso lo resuelve
-alguien hablándole en persona, no un cuarto mensaje.
-
-`npm run probar:recordatorios` son 38 comprobaciones: que la escalera se lea del guion,
-que no traiga vocabulario prohibido ni reclame, que con veinte días de silencio salga uno
-solo y no cuatro, que no se repita el ya mandado, y —la que más importa para no meter la
-pata con alguien— **que un teléfono mal copiado en el padrón no se mande a nadie**. Once
-formatos venezolanos probados; un fijo de Caracas o un número corto se descartan.
-
-Después monta tres trabajadores con 1, 6 y 22 días de silencio, le da al botón del panel
-y comprueba que a cada quien le tocó lo suyo. El de los 6 recibe: *«Wilmer, llevas 0 de
-nueve. La que sigue es Conoce a Ajito y son tres minutos. Aquí te espero.»*
-
-### El padrón, y el enlace personal por fin construido
-
-El hueco que quedó abierto hace un rato —`accesos` en el esquema y nada que lo usara— se
-cerró en la misma sesión, porque Gabriel pidió el módulo de empleados con enrolamiento
-masivo y envío de los enlaces.
-
-**`/dashboard/empleados`** es ahora la mesa de trabajo de las ~200 personas: quién está,
-quién tiene teléfono, quién está matriculado, a quién se le mandó su enlace y **quién ha
-entrado con él**. Con selección múltiple y tres acciones en lote —matricular, acuñar el
-enlace, mandarlo—, porque doscientas personas no se enrolan de una en una. La barra de
-acciones va pegada abajo: al marcar cuarenta filas la cabecera ya no se ve.
-
-**El enlace es la credencial**, y por eso se trató como una contraseña:
-
-- **El token no se guarda, se guarda su SHA-256.** Quien lea `accesos` —incluido quien
-  tenga la clave de servicio— puede comprobar un token que le presenten, no suplantar a
-  nadie.
-- **Caduca a los 120 días**, que cubre la Fase 1. Un enlace en un chat de WhatsApp es
-  reenviable.
-- **Se puede volver a usar hasta entonces y cada uso se cuenta.** El curso son semanas;
-  un enlace de un solo uso obligaría a mandar uno nuevo cada vez. Y «mandado, cero
-  entradas» es el dato que más dice del despliegue: significa que no llegó.
-- **Acuñar le crea la cuenta a quien no la tiene**, con un correo interno derivado de la
-  cédula que nadie va a usar nunca para entrar. Supabase necesita colgar la sesión de
-  algo; la puerta es el enlace.
-- `/entrar/[token]` **no dice por qué falló**. Caducado, inventado o de alguien que ya no
-  está devuelven todos lo mismo: distinguirlos convertiría la ruta en una forma de
-  averiguar qué tokens existen.
-
-`npm run probar:padron` son 25 comprobaciones, y las que importan son las cuatro maneras
-en que un enlace se vuelve un agujero: que el token esté guardado en claro, que uno
-inventado abra sesión, que uno caducado siga sirviendo, y que `accesos` se pueda leer
-desde una sesión normal. Las cuatro fallan como deben. Después comprueba el módulo:
-matricular en lote, acuñar —creando la cuenta— y entrar con el enlace directo al curso,
-sin clave, dos veces.
-
-**Un fallo que salió de volver a abrir la captura:** el padrón decía «sin acuñar» de un
-enlace que sí existía. `padron_estado` se creó con `security_invoker = on` —el ajuste
-correcto por defecto— pero dentro mira `accesos`, cuya política **niega el SELECT a todo
-el mundo**. La subconsulta volvía vacía en silencio. Un panel que dice que a alguien no
-se le mandó su enlace cuando sí, lleva a mandárselo dos veces. Corregido con el mismo
-patrón que ya usaba `accesos_estado`: la vista corre como su dueña y se cierra con un
-`where es_editor()` dentro.
-
-`npm run probar:certificado` monta dos trabajadores —uno que termina y uno que se queda a
-mitad— y prueba los tres caminos por los que se colaría un certificado falso: emitir a
-medio curso, emitir el de otra persona pasándole su id, y escribir en la tabla a mano.
-Los tres fallan. Diecisiete comprobaciones, con capturas de las tres vistas.
+- **Un fallo de saldo o de red no debe marcar la respuesta como intentada.** Si el problema
+  es del servicio le pasa igual a las doscientas: la cola se para sola y el día que se
+  arregle se recuperan todas. Con la versión anterior habrían quedado fuera para siempre.
+- Por eso los fallos ahora **se clasifican** —`sin-saldo`, `sin-permiso`, `ocupado`,
+  `sin-configurar`, `fallo`—: cada uno se arregla en un sitio distinto, y con «fallo» a
+  secas se perdió una hora buscando en el código lo que estaba en la consola de facturación.
+- La lección 3 disparaba **cuatro llamadas de golpe** con sus cuatro fotos; y una que
+  fallara atascaba la cola detrás suyo.
+- **El tamaño de las fichas se mide, no se calcula.** Con los tamaños a mano, la de la
+  lección 8 salió con Ajito cortado y las de tres líneas con medio metro de blanco.
+- **`padron_estado` con `security_invoker = on`** decía «sin acuñar» de enlaces que sí
+  existían: la vista mira `accesos`, cuya política niega el SELECT a todo el mundo, y la
+  subconsulta volvía vacía en silencio. Eso lleva a mandar el mismo enlace dos veces.
 
 ---
 
-## 16 de agosto de 2026 · Sesión 4
+## 16 de agosto de 2026 · Sesión 4 — arranca el adiestramiento
 
-Arranca el **adiestramiento en IA por el teléfono**: el curso de Ajito, para las ~200
-personas que **no** van a las tres formaciones presenciales. Es la tercera capa de
-formación que Boosty prometió en comité y que nunca se había detallado.
+El curso de Ajito, para las ~200 personas que **no** van a las tres formaciones
+presenciales. Es la tercera capa de formación que Boosty prometió en comité y que nunca se
+había detallado.
 
 **Investigado**
 
-- **El curso MAIA** (`Downloads/Telegram Desktop/WhatsApp Chat - MAIA (Conversed)`):
-  3.577 líneas de chat, 21 videos, 28 tarjetas, 12 PDF. Dos módulos de Alberto Benbunan
-  bajo la marca *rebundle*. Lo que se copia: la anatomía de la lección, la devolución con
-  rúbrica (✅ / 🔧 / ✨, nunca «mal»), la confirmación de la transcripción de voz, la
-  memoria larga —te devuelve tu propio prompt malo del onboarding— y el acoso amable a
-  los 2, 5, 8 y 13 días. Lo que **no** sirve para planta: texto denso, jerga en inglés
-  sin glosar, caso final de una fintech, y PDFs A4 a 9 pt que en un teléfono quedan a 3.
-- **Realidad del piso**, de las cinco transcripciones: la planta corre a **un solo
-  turno** (6:00–14:00); **no hay señal en el piso** —por eso usan radio—; hay wifi en el
-  **salón Toronjil**, con 8 computadoras de uso libre donde la gente ya va en su
-  almuerzo; **nadie de planta tiene correo corporativo** y la vía que ya funciona es una
-  línea de WhatsApp con todo el personal cargado.
+- **El curso MAIA** (3.577 líneas de chat, 21 videos, 28 tarjetas, 12 PDF). Se copia: la
+  anatomía de la lección, la devolución con rúbrica —nunca «mal»—, la confirmación de la
+  transcripción y el acoso amable a los 2, 5, 8 y 13 días. No sirve para planta: texto
+  denso, jerga en inglés sin glosar y PDFs A4 a 9 pt que en un teléfono quedan a 3.
+- **La realidad del piso**, de las cinco transcripciones: un solo turno (6:00–14:00), **no
+  hay señal en el piso** —por eso usan radio—, wifi en el salón Toronjil con 8 computadoras
+  de uso libre, **nadie de planta tiene correo corporativo**, y la vía que ya funciona es
+  una línea de WhatsApp con todo el personal cargado.
+
+**Construido** — el guion de las nueve lecciones (~14.000 palabras), la migración,
+`/canal/adiestramiento`, `/dashboard/adiestramiento`, `lib/voz.ts`, `lib/guion.ts`,
+`capturar:oficios` y **los 70 audios: 21 min 40 s por 31 centavos**, ninguno de más de 38 s.
+*(Regrabados el 31 de agosto y ahora son 20 min 02 s — ver esa sesión: los saltos de línea
+del markdown metían pausas falsas.)*
 
 **Decidido**
 
-- **Objetivo**: que sepan cómo opera la IA y de cuántas formas puede actuar. No se entra
-  en el miedo al puesto. Sencillo, con ejercicios divertidos —fotos—, ligado a la
-  cosecha de hallazgos, y cumple la capacitación y certificación del contrato.
-- **Audiencia**: todos los que no van a las tres formaciones — planta y administrativo.
-- **La única IA que tocan es el asistente del curso.** Sin licencias para planta.
-- **A su ritmo, sin arranque presencial.** Los gerentes empujan.
-- **`asistente_libre_activo` apagado de fábrica**, con interruptor en el panel. Tal vez
-  se encienda más adelante, no de entrada.
-- **La voz es sintética**, femenina y caribeña. Ajito no declara sexo y el audio grabado
-  tampoco le pone género al trabajador: «list@» no existe en voz.
-- **La voz quedó cerrada: `es-VE-PaolaNeural`, de Azure Speech.** Venezolana de fábrica,
-  no aproximada. Azure es el único proveedor grande que declara los 22 locales del
-  español país por país; Google solo tiene España y México, y ElevenLabs no tiene locale
-  venezolano. La letra chica: `es-VE` se quedó en la generación estándar —sin las
-  variantes HD que Microsoft solo le dio a España y México— así que se cambió prosodia
-  por acento, y se compensa con SSML. Para esta gente el acento pesa más. De paso Azure
-  hace también el habla a texto, así que la transcripción sale del mismo proveedor.
-  **Costo de la voz del curso completo, para las 200 personas: unos 40 dólares.**
-- **La velocidad quedó en `+16%`, y el número está medido.** Gabriel oyó las dos y
-  Paola le sonó lenta. Con `npm run probar:voz` se generaron siete muestras del
-  arranque de la lección 0 y se midió cada una: Paola de fábrica va a 166 palabras por
-  minuto y Sebastián a 200 — **Sebastián de fábrica y Paola a +20% duran exactamente lo
-  mismo**, o sea que corre un 20% más rápido y eso era lo que se oía. Se quedó en +16%
-  (192 ppm) y no en +20%: a 199 la voz queda de pódcast de oficina, y quien va a oír
-  esto está entendiendo por primera vez qué es la IA, en el comedor y con ruido.
-  La perilla vive en `lib/voz.ts`.
-- **El recurso de Azure ya existía**: `industriasiberiait-9652-resource`, `westus3`,
-  nivel S0, en la cuenta de Iberia. No hizo falta crear nada.
-- **No se fotografía el área productiva** ni se usa el teléfono en las líneas. Los
-  ejercicios de foto se mudaron a los espacios libres y a la cocina de su casa — la
-  etiqueta de un producto de Iberia, que además le devuelve orgullo: *«ese lote salió de
-  envasado, o sea que eso pasó por tus manos»*.
+- **Objetivo**: que sepan cómo opera la IA y de cuántas formas puede actuar. No se entra en
+  el miedo al puesto. A su ritmo, sin arranque presencial; los gerentes empujan.
+- **`es-VE-PaolaNeural` de Azure, y el objetivo son 192 palabras por minuto.** Azure es el único
+  proveedor grande con locale venezolano de fábrica. Paola va a 166 palabras por minuto y
+  Sebastián a 200 — Paola a +20% dura exactamente lo mismo que Sebastián, y eso era lo que
+  sonaba lento. **192 ppm** es el objetivo: a 199 queda de pódcast de oficina, y quien va a
+  oír esto está entendiendo por primera vez qué es la IA, en el comedor y con ruido.
+  **La voz quedó cerrada aquí; no queda prueba a ciegas pendiente.**
+  *(⚠️ El porcentaje que da esas 192 cambió a `+12%` el 31 de agosto. Aquí se escribió +16%
+  porque la medición se hizo cronometrando el texto y no el audio, que llevaba pausas de más
+  adentro. El objetivo no cambió; el número que lo consigue, sí.)*
+- **No se fotografía el área productiva** ni se usa el teléfono en las líneas.
 - **El ejercicio bifurca por familia de oficio, no por nivel.** Bajo `planta` conviven la
-  operadora de envasado, la cocinera de pruebas y el vigilante; mandarle a la cocinera un
-  ejercicio del codificador de frascos es decirle que la empresa no sabe qué hace.
+  operadora de envasado, la cocinera de pruebas y el vigilante.
+- **`asistente_libre_activo` apagado de fábrica.**
 
-**Recibido de la agencia** (`LOGOS IBERIA + IA.pptx`, vía Mercadeo)
+**De la agencia** (`LOGOS IBERIA + IA.pptx`, vía Mercadeo): la marca `IBER[IA] · Nuevo
+Sabor`, **Ajito** —cabeza de ajo, cuerpo de ají, ruedita en vez de piernas, que resuelve
+sola la lección de «no soy una persona»— y 18 avatares del personal, todos de oficina:
+**faltan los de planta**.
 
-- **La marca del programa**: `IBER[IA] · Nuevo Sabor`, con el *IA* recuadrado dentro del
-  propio nombre de la empresa.
-- **Ajito**: cabeza de ajo, cuerpo de ají con el logo, ojos verdes y **ruedita en vez de
-  piernas** —que resuelve sola la lección de «no soy una persona»—, más una animación de
-  bienvenida de 2,5 MB ya montada.
-- **18 avatares caricaturizados** del personal. Todos de oficina salvo uno: **faltan los
-  de planta** y hay que pedírselos a Martica.
+**Lo que enseñó romperse**
 
-**Construido**
-
-- **El guion completo** en `contenido/adiestramiento/`: las reglas, las nueve lecciones
-  palabra por palabra y el inventario de herramientas por verificar (~14.000 palabras).
-- **Migración `20260816120000_adiestramiento.sql`**, aplicada: `cursos`, `lecciones`,
-  `matriculas`, `avances`, `respuestas`, `certificados`, `empleados.familia_oficio`, la
-  vista `adiestramiento_avance` y `matricular_pendientes()` con el EXECUTE revocado a
-  `authenticated`.
-- **`/canal/adiestramiento`** — portada del curso, las nueve lecciones con su avance, la
-  lección con sus ejercicios ya bifurcados por oficio y la pregunta de campo. Más la
-  tarjeta de entrada arriba del feed.
-- **`/dashboard/adiestramiento`** — el interruptor del asistente libre, el de apertura,
-  matricular a los que faltan, y el tablero por oficio y por área.
-- **`scripts/generar-ajito.ps1`**, `sembrar-adiestramiento.mjs`,
-  `probar-adiestramiento.mjs` (16 comprobaciones) y `capturar-adiestramiento.mjs`.
-- **`lib/voz.ts`** — la voz de Ajito en un solo sitio: nombre, velocidad, tono y
-  pausas, más `aSSML()`, que toma el guion en crudo y arma el SSML. El guion nunca
-  lleva marcado a mano. Y `scripts/probar-voz.mjs`, que genera muestras para elegir
-  de oído en vez de discutir.
-- **`capturar:oficios`: el curso visto por los ocho oficios.** Crea un trabajador de
-  prueba por familia —Yorgelis de envasado, Nancy de la cocina de pruebas, Wilmer
-  montacarguista, Douglas vigilante…—, cada uno con su sesión, recorre la lección
-  completa y **compara la consigna que salió en pantalla contra el catálogo**. Verificado
-  en las lecciones 2, 6 y 7: la cocinera recibe «cómo preparas una de las pruebas», el
-  montacarguista «qué hay en el rack 16» y el vigilante «quién entró ayer por la mañana».
-  Nadie recibe algo que no hace. Todo se borra al salir.
-- **Se contesta hablando.** Grabador en el navegador, conversión a WAV 16 kHz en el
-  teléfono, transcripción con Azure en `es-VE` —el mismo recurso que la voz— y la
-  confirmación de MAIA: se muestra lo entendido, se puede corregir, y solo entonces se
-  guarda. **Probado de punta a punta**: la frase «los códigos de lote del frasco» volvió
-  exacta.
-- **Y con foto.** El botón abre la cámara directo, no el explorador de archivos. Ninguna
-  vía está cerrada: de voz se pasa a texto y al revés con un toque.
-- **Bucket aparte para lo que manda la gente**, con el dueño en la ruta y la política
-  comprobándolo. Los audios del curso los oye cualquiera con matrícula; una nota de voz
-  la oye quien la grabó.
-- **La lección se recorre turno a turno.** `lib/guion.ts` lee el markdown y
-  `generar:guion` deja `guion.json`, que es lo que recorre la página. Un turno va hasta
-  el próximo botón o ejercicio, y en cuál va cada quien vive en `avances.paso` — así
-  quien la deje por la mitad la retoma donde estaba. Los turnos anteriores quedan
-  arriba, como en un chat. **De rollo de 8.300 píxeles a conversación.**
-- **Chequeo de coherencia entre el guion y el catálogo.** Cada 🎯 lleva su clave
-  (`selfie`, `campo`, `pillame`) y `generar:guion` verifica que exista en
-  `lib/adiestramiento.ts`. 27 ejercicios enlazados, las nueve lecciones de acuerdo.
-- **Los audios se sirven desde un bucket privado**, por una ruta que exige sesión,
-  **matrícula en el curso** y firma un enlace de 60 segundos. Nada por URL pública.
-- **El reproductor se parece a una nota de voz de WhatsApp**, a propósito: es el modelo
-  mental de quien lo va a usar. Toda la fila se toca —con guantes 56 px falla—, se marca
-  lo ya oído, y `preload="none"` para que nueve audios no se bajen solos del plan de
-  datos del trabajador.
-- **Los 70 audios de Ajito, grabados.** `scripts/generar-audios.mjs` lee los bloques
-  `🔊 **Audio N**` de los nueve guiones y sintetiza cada uno. **21 minutos y 40
-  segundos de voz por 31 centavos.** Ninguno pasa de 38 segundos ni de 1 MB. Es
-  incremental por huella del texto: la segunda corrida no gastó un solo carácter.
-
-**Corregido**
-
-- Dato falso que yo mismo había metido en el repo: que Paola venía a 130 palabras por
-  minuto. Salía de una página de terceros. Medida sobre el texto real va a 166.
-- **«Nueve ratos» → «nueve clases».** En Venezuela «rato» no funciona como unidad
-  contable. El «rato» idiomático —«hace rato», «reírnos un rato»— se quedó, que ese sí
-  es venezolano puro. La descripción del curso ya estaba en la base, así que el cambio
-  fue en una migración aparte y no editando la que ya corrió.
-- La prueba de RLS **dejó dos usuarios de prueba en el auth de producción** y dos
-  fichas del padrón amarradas a ellos, porque el bloque de limpieza no se aplicó como
-  creí. Se detectó en el lint final, se borraron y el padrón quedó como estaba. La
-  limpieza ahora barre por prefijo de correo, así que recoge también lo que quede de
-  una corrida que se caiga a mitad.
-- La **historia de migraciones remota estaba vacía**: las seis anteriores se habían
-  aplicado a mano. Se repararon como aplicadas, así que de ahora en adelante
-  `npx supabase db push` funciona.
-- El clasificador de oficios mandaba a **«Preparador de Mezclas» a la cocina de pruebas**
-  cuando es de línea — justo el error que Gabriel advirtió. Corregido en las reglas.
-- La prueba de RLS se contradecía: hacía pasar por «ajena» una respuesta del propio
-  empleado que después suplantaba. Ahora monta una sesión de empleado corriente de
-  verdad y comprueba la promesa de la lección 0 contra la base real.
-- Dos cosas de la interfaz que solo se vieron mirando las capturas: los títulos de
-  lección se cortaban en el teléfono, y el aviso de las fotos se repetía en cada
-  ejercicio hasta volverse ruido.
-- **El error del `
-`**: los guiones quedaron con saltos de línea de Windows y ningún
-  `$` de las expresiones casaba, así que el lector devolvía vacío sin quejarse. Peor:
-  `generar-audios` tenía su propia copia del lector con el mismo fallo — una regrabación
-  habría encontrado cero audios y no habría dicho nada. Ahora hay un solo lector, que
-  normaliza el salto de línea.
-- **Dos redundancias que solo se vieron mirando las capturas por oficio.** El cierre
-  mostraba «Sigo ahora» y debajo «Terminar la lección», que son lo mismo — ahora el botón
-  del guion cierra la lección. Y la línea 💬 repetía la consigna del ejercicio
-  («Mándame una nota de voz» y debajo «Nancy, mándame una nota de voz contándome…»): en
-  el chat del guion hace falta porque el input va aparte, aquí sobraba.
-- En modo foto, «Prefiero contárselo escrito» rotulaba el botón de enviar y salía
-  deshabilitado: parecía roto. Ahora es un cambio de vía, como en el modo voz.
-- El chequeo de objetivos táctiles daba por chico el selector de archivo oculto de 1 px
-  —la técnica estándar—, cuando quien recibe el toque es la etiqueta que lo envuelve.
-- La prueba de RLS reventaba si la persona ya tenía matrícula. Ahora la reutiliza y solo
-  borra lo que ella misma creó.
-- Rótulos repetidos en los audios: el primero decía «Portada» —heredaba una sección que
-  solo tiene una imagen— y «Ahora un compañero» salía dos veces. El título sale ahora de
-  la sección del primer audio, y un turno que retoma una sección dice «Ajito sigue».
-
-**Novedad de verificación.** `probar:adiestramiento` y `capturar:adiestramiento` **no
-piden contraseña**: acuñan la sesión con un enlace mágico y la inyectan como cookie. La
-verificación visual y la de RLS dejan de depender de que alguien esté delante.
-
-**Dónde quedamos**
-
-El módulo camina en local con las 17 fichas de muestra. Falta lo que no depende de
-nosotros: la **lista completa de nombres y cargos** para cerrar las familias de oficio,
-los **avatares de planta**, las **fotos autorizadas** que pone Ajito en la lección 3, y
-**elegir la voz** con una prueba a ciegas. Y falta conectar el modelo, la transcripción,
-la voz y la generación de imágenes — hoy la lección se hace escrita y lo dice sin
-disimular.
+- **Los saltos de línea de Windows** dejaron el lector del guion devolviendo vacío sin
+  quejarse. Peor: `generar-audios` tenía su propia copia del lector con el mismo fallo, así
+  que una regrabación habría encontrado cero audios y no habría dicho nada. Ahora hay un
+  solo lector.
+- La prueba de RLS **dejó dos usuarios de prueba en el auth de producción**. La limpieza
+  ahora barre por prefijo, así que recoge también lo que quede de una corrida caída.
+- Un dato falso que estaba en el repo: que Paola venía a 130 ppm. Salía de una página de
+  terceros; medida sobre el texto real va a 166.
+- **«Nueve ratos» → «nueve clases»**: en Venezuela «rato» no funciona como unidad contable.
+- El clasificador mandaba al **Preparador de Mezclas a la cocina de pruebas**, cuando es de
+  línea.
+- La historia de migraciones remota estaba vacía —las seis anteriores se habían aplicado a
+  mano—. Reparada; desde entonces `npx supabase db push` funciona.
 
 ---
 
 ## 12 de agosto de 2026 · Sesión 3
 
-- **Regla de registro fijada**: todo lo que se hable, escriba o redacte en este
-  proyecto —correos, mensajes, textos de la app— va en **modismo venezolano**, con
-  **tuteo** (nunca voseo rioplatense ni otro) y **siempre en tono profesional**.
-  Queda en `AGENTS.md` bajo Convenciones.
-- Borrador de correo para Alberto: aviso de que el canal de comunicación interna
-  ya tiene el diseño terminado, propuesta de revisión conjunta con mercadeo antes
-  de conectarlo a base de datos real y sacarlo al aire. No se comunicó como
-  producto de IA (es el entregable de comunicación interna, capítulo de
-  «La Nueva Iberia»).
+- **Regla de registro fijada**: todo lo que se hable o escriba en este proyecto va en
+  **modismo venezolano**, con **tuteo** y siempre en tono profesional. Quedó en `AGENTS.md`.
+- Borrador de correo a Alberto avisando que el canal ya tiene el diseño terminado, con
+  propuesta de revisarlo con mercadeo antes de conectarlo a datos reales. **No se comunicó
+  como producto de IA**: es el entregable de comunicación interna.
 
 ---
 
-## 11 de agosto de 2026 · Sesión 2
+## 11 de agosto de 2026 · Sesión 2 — el canal de comunicación interna
 
-Primera versión del **canal de comunicación interna**, pensado desde el teléfono: es
-donde lo va a abrir la mayoría de las 280 personas, y donde el personal de planta lo va
-a abrir siempre.
+Pensado desde el teléfono: es donde lo va a abrir la mayoría de las 280 personas, y donde
+el personal de planta lo va a abrir siempre.
 
-**Construido**
+**Construido** — el esquema completo con RLS, las siete secciones (Inicio, Gente, Mensajes,
+Grupos, Avisos, Yo, Publicar), `probar:canal` con 21 comprobaciones contra la base real y
+`capturar:canal`, que mide desbordes y objetivos táctiles en un iPhone 14. Más 17 fichas de
+muestra, con perfiles de planta incluidos: es el caso difícil del diseño y había que verlo.
 
-- Esquema del canal con RLS completa: `empleados` (el padrón, con nivel y tipo de
-  nómina), `publicaciones`, `publicacion_lecturas`, `accesos`, `conexiones`, `grupos`,
-  `grupo_miembros`, `conversaciones`, `conversacion_participantes`, `mensajes`,
-  `comentarios` y `reacciones`.
-- Identidad propia del canal, tomada del demo que gustó: fondo claro, tarjetas
-  redondeadas, el rojo de Iberia y el amarillo como segundo acento. Tipografía DM Sans
-  autoalojada, sin llamadas a Google en producción.
-- Concha móvil: cabecera discreta, navegación fija al pie con cinco destinos y objetivo
-  táctil de 44 px en todo lo que se toca.
-- **Inicio** — feed segmentado por audiencia: cada quien ve lo suyo según nivel y área,
-  y el comunicado oficial se distingue por una banda dorada.
-- **Gente** — directorio de toda la organización, agrupado por nivel, con buscador.
-- **Mensajes** — conversaciones directas, con contador de no leídos.
-- **Grupos** — creación, incorporación a los abiertos y conversación por grupo.
-- **Avisos** — solicitudes de conexión y comunicados oficiales con marca de lectura.
-- **Yo** — ficha propia, conexiones y salida de sesión.
-- **Publicar** — consola de publicación con segmentación de audiencia y el sello de
-  oficial reservado a la dirección y a quien modera.
-- `scripts/probar-canal.mjs` (21 comprobaciones contra la base real, con sesión de
-  empleado y no con clave de servicio) y `scripts/capturar-canal.mjs` (recorre el canal
-  en un iPhone 14 y mide desbordes y objetivos táctiles).
-- 17 fichas de muestra sembradas, incluidos perfiles de planta: es el caso difícil del
-  diseño y había que poder verlo.
+**Decidido**
 
-**Decisiones**
-
-- **Conectar antes de conversar, pero solo entre pares.** Entre niveles vecinos se
-  solicita conexión y la otra persona acepta. Hacia arriba —a dos niveles o más— se
-  escribe directo, sin solicitud: nadie de planta queda expuesto a que la dirección le
-  rechace una solicitud dentro de su propia empresa.
-- **El enlace de WhatsApp es la credencial.** El personal de planta no tiene correo
-  corporativo. Se guarda el hash del token, nunca el token en claro.
-- **Un grupo es una conversación con nombre y propósito**, no un módulo aparte: reusa el
-  mismo hilo y la misma pantalla.
+- **Conectar antes de conversar, pero solo entre pares.** Hacia arriba —dos niveles o más—
+  se escribe directo: nadie de planta queda expuesto a que la dirección le rechace una
+  solicitud dentro de su propia empresa.
+- **Un grupo es una conversación con nombre y propósito**, no un módulo aparte.
 - **La lectura se registra.** Hasta ahora el comunicado salía por correo y cartelera sin
-  saber quién lo leía; ahora el alcance es un dato.
-- Un comentario oculto por moderación **sigue siendo visible para quien lo escribió**.
-  Requerimiento explícito de la Gerencia General: se prefiere saber que alguien está
-  molesto a suponer que todo va bien.
+  saber quién lo leía.
+- **Un comentario oculto por moderación sigue siendo visible para quien lo escribió.**
+  Requerimiento explícito de la Gerencia General: se prefiere saber que alguien está molesto
+  a suponer que todo va bien.
 
-**Corregido**
+**Lo que enseñó romperse**
 
-- **Recursión infinita en RLS.** Las políticas de `conversacion_participantes` y
-  `grupo_miembros` se preguntaban por sí mismas, y Postgres las cortaba con
-  «infinite recursion detected in policy». El síntoma era mudo: tocar «Escribir» en el
-  directorio no hacía nada. Resuelto sacando la pregunta a funciones
-  `security definer` (`participo_en`, `soy_miembro`, `coordino_grupo`,
-  `cabe_otro_participante`).
-- **`.select()` después de un `insert` bajo RLS.** Al crear una conversación todavía no
-  se participa en ella, así que el `RETURNING` volvía vacío y la acción moría en
-  silencio. Ahora el id se genera en el servidor antes de insertar.
-- Objetivos táctiles por debajo de 44 px (logo de la cabecera, enlaces de volver) y
-  nombres recortados en el directorio: «Alberto García-Ra…» no le sirve a nadie.
+- **Recursión infinita en RLS**: las políticas se preguntaban por sí mismas y Postgres las
+  cortaba. El síntoma era mudo — tocar «Escribir» no hacía nada. Se resolvió sacando la
+  pregunta a funciones `security definer`.
+- **`.select()` después de un `insert` bajo RLS**: al crear una conversación todavía no
+  participas en ella, así que el `RETURNING` volvía vacío y la acción moría en silencio.
 
-**Unificado**
-
-El estilo del canal se adoptó como el del producto entero, por indicación de Gabriel.
-DM Sans en todas partes, fondo claro, tarjetas `rounded-2xl` con una sola sombra. Las
-superficies oscuras desaparecieron: la barra lateral del panel, el login y el pie del
-informe ahora son claros, y el informe se lee como una hoja blanca sobre la mesa. El
-carbón queda para el texto y para la acción secundaria de peso.
-
-**Dónde quedamos**
-
-El canal funciona de extremo a extremo en local y está verificado por vista en teléfono.
-Falta el padrón real de Capital Humano y la cuenta de WhatsApp Business para el envío
-masivo; hasta entonces, lo que se publica se ve dentro del canal.
+**Unificado**: el estilo del canal se adoptó para el producto entero, por indicación de
+Gabriel. Las superficies oscuras desaparecieron del panel, el login y el informe.
 
 ---
 
-## 11 de agosto de 2026 · Sesión 1
+## 11 de agosto de 2026 · Sesión 1 — se levanta el dashboard
 
-Primera sesión de construcción. Se levantó el dashboard completo desde cero.
+**Construido** — Next.js 16 + React 19 + Tailwind 4 sobre Supabase, con RLS en todas las
+tablas y tres roles sin registro abierto. El **parser de Fireflies** (50 verificaciones), el
+importador de entrevistas, los módulos de archivos, hallazgos e informe, el rebranding
+completo a la identidad de Iberia y las suites de verificación.
 
-**Construido**
+**Cargado** — 5 sesiones con 4.484 turnos, 2 organigramas y `CONTEXTO_IBERIA.md`.
 
-- Proyecto Next.js 16 + React 19 + Tailwind 4 + TypeScript sobre Supabase.
-- Schema con RLS en todas las tablas: perfiles y roles, áreas, sesiones,
-  transcripciones, hallazgos, archivos y secciones del informe.
-- Autenticación con correo y contraseña, tres roles (admin, consultor, lector) y
-  provisión de usuarios sin registro abierto.
-- **Parser de Fireflies** (`lib/fireflies.ts`): interpreta el export en Markdown y en
-  JSON, con los cuatro formatos de marca de hablante. 50 verificaciones.
-- **Importador de entrevistas**: se sueltan los archivos y el sistema deduce
-  entrevistado, cargo, área, sede, fecha, duración y resumen. El archivo se lee en el
-  navegador; al servidor solo viaja la transcripción interpretada.
-- Módulos de archivos (bucket privado, descarga por enlace firmado), hallazgos e
-  informe con editor markdown.
-- Rebranding completo a la identidad de Iberia: rojo `#D4332C` sobre carbón cálido,
-  con los assets generados desde el máster del logo.
-- Suites de verificación: parser, deducción, RLS reales, render de páginas con sesión,
-  importación de extremo a extremo por navegador.
-- Generador de PDF para entregables (`scripts/generar-pdf.mjs`).
+**Decidido**
 
-**Cargado**
+- Las transcripciones vienen de Fireflies; **no se transcribe audio en la app**.
+- El informe es página aparte del admin pero **exige sesión**. Es un levantamiento que
+  conduce a la arquitectura, no un documento de arquitectura suelto: 21 secciones.
+- El organigrama real se cargó como jerarquía de áreas (39 nodos).
+- **Series separadas `SES-` y `ENT-`**, para medir el avance contra la meta de ~25
+  entrevistas. *(Después se sumó `FOR-` para las formaciones.)*
 
-- 5 sesiones con 4.484 turnos de transcripción.
-- 2 organigramas (documento II-21-14-008).
-- `CONTEXTO_IBERIA.md`.
+**Corregido** — tres apellidos que Fireflies transcribió por sonido: Flaviano **Tucci**,
+Gustavo **Carballo** y **Martha** Fuentes (536 turnos reatribuidos), más Luis Daniel
+**Agostini** (25). En SES-004, Fireflies había partido a Tucci en dos etiquetas: fusionadas,
+187 turnos más, con lo que el recorrido de planta completo queda citable.
 
-**Decisiones**
-
-- Las transcripciones vienen de Fireflies; no se transcribe audio en la app.
-- Acceso por correo y contraseña, sin registro abierto.
-- El informe es una página aparte del admin, pero exige sesión.
-- El informe es un **levantamiento que conduce a la arquitectura**, no un documento de
-  arquitectura suelto. 21 secciones.
-- Organigrama real cargado como jerarquía de áreas (39 nodos).
-- Las sesiones grupales y las entrevistas 1:1 conviven con series de código separadas
-  (`SES-` y `ENT-`), para medir el avance contra la meta de ~25 entrevistas.
-
-**Corregido**
-
-- Tres apellidos que Fireflies transcribió por sonido: Flaviano **Tucci** (no Fuchi),
-  Gustavo **Carballo** (no Carvallo), **Martha** Fuentes (no Marta). 536 turnos
-  reatribuidos.
-- Luis Daniel **Agostini** (no Agustín). 25 turnos.
-- SES-004: Fireflies partió a Flaviano Tucci en dos etiquetas. Fusionadas — 187 turnos
-  más, con lo que el recorrido de planta completo (línea de mayonesa, molino,
-  laboratorio, envasado) queda atribuible y citable.
-
-**Entregado**
-
-- `documentos/2026-08-primer-rodaje-y-formacion.pdf` — propuesta de agenda para la
-  semana del 18 de agosto: 9 entrevistas en Cagua en dos pistas y la formación
-  dirigente de 3 horas en Caracas.
-
-**Dónde quedamos**
-
-Esperando que Iberia elija el día del rodaje y confirme los nombres. El siguiente paso
-de construcción es la app de comunicación interna, cuando Gabriel lo indique.
+**Entregado** — `documentos/2026-08-primer-rodaje-y-formacion.pdf`, la propuesta de agenda
+del rodaje de entrevistas.
