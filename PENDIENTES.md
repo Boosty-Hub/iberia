@@ -399,6 +399,7 @@ el comité antes de continuar con las fases siguientes»*.
 | 🔴 **Cosechar la ronda 2 y volver a redactar.** Es el paso que desbloquea todo lo demás: sin los hallazgos de finanzas, capital humano, compras, laboratorio y seguridad, la mitad del documento no se puede escribir | **Boosty** |
 | **Seguir llenándolo.** Van 15 secciones con contenido, tres de ellas anexos que se regeneran solos de la base. Ninguna publicada: los hallazgos que las sostienen todavía están propuestos | **Boosty** |
 | **Fijar la fecha del comité de aprobación** — primera semana de diciembre, por lo del aviso de renovación | Gabriel con Alberto |
+| ⚠️ **Decidir si el entregable lleva partida de horas propia.** Hoy marca **cero** en `/dashboard/programa` con 28 secciones escritas: al revisar el registro con Gabriel, esas horas no fueron a `arquitectura`. Es honesto —no hay ninguna cargada ahí— pero el entregable principal aparece en blanco para el cliente, y en diciembre alguien va a preguntar cuántas horas costó el documento que sostiene la Fase 2 | Gabriel decide · **Boosty** carga |
 
 > ⚠️ **Lo que más va a costar defender.** De los 236 hallazgos, buena parte no se arregla
 > con IA: se arregla parametrizando JD Edwards, dando un permiso o capturando un dato que

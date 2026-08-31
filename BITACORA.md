@@ -170,8 +170,9 @@ enseñó hacerlo:
   sesión y comprueba lo que no debe verle: dinero, formulario de carga y la marca «en riesgo».
   Sin eso, «esto no se lo ve el cliente» es una creencia, no una comprobación.
 - **La pantalla cazó que el Documento de Arquitectura marca cero horas** con 28 secciones
-  escritas. Sigue en cero: al revisar el registro, esas horas no van ahí. Es honesto, pero
-  **hay que decidir si el entregable principal se queda sin partida propia.**
+  escritas. Sigue en cero: al revisar el registro, esas horas no van ahí. Es honesto, pero el
+  entregable principal aparece en blanco para el cliente. **Queda anotado en `PENDIENTES.md`**,
+  que es donde va lo que falta.
 
 ### Ajito: la clave, la voz y el reproductor
 
