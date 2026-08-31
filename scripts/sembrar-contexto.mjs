@@ -46,7 +46,7 @@ const PERSONAS = [
   // Equipo consultor
   { nombre: 'Gabriel Montiel Toro', cargo: 'CEO · Boosty Digital', area: 'boosty', org: 'boosty' },
   { nombre: 'Carlos Quintana', cargo: 'Consultor senior en dirigencia y gestión del cambio', area: 'boosty', org: 'boosty' },
-  { nombre: 'Josué Bonilla', cargo: 'Consultor en metodología y procesos (UCAB)', area: 'boosty', org: 'boosty' },
+  { nombre: 'Jesús Planas', cargo: 'Consultor en metodología y procesos (UCAB)', area: 'boosty', org: 'boosty' },
   { nombre: 'Jesús Plana', cargo: 'Consultor de procesos (Consultores UCAB)', area: 'boosty', org: 'boosty' },
 ]
 

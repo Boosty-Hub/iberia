@@ -189,11 +189,24 @@ console.log('\nLa función de emisión\n')
 }
 
 {
-  const { error } = await admin.rpc('matricular_pendientes', { curso_clave: 'ajito' })
+  // ⚠️ Se pregunta por un curso que no existe **a propósito**.
+  //
+  // Esta comprobación llamaba con `ajito` y eso no verifica: matricula. El 22 de
+  // agosto de 2026, correr las verificaciones justo después de cargar el padrón
+  // real metió a 201 personas en un curso que está cerrado y que es entregable
+  // de Fase 2. Una suite que corre contra producción no puede escribir.
+  //
+  // Con una clave inexistente la función entra, no encuentra el curso y levanta
+  // «No existe el curso» — que prueba que está y que se puede ejecutar, sin
+  // tocarle la matrícula a nadie.
+  const CLAVE_QUE_NO_EXISTE = '__no-existe__'
+  const { error } = await admin.rpc('matricular_pendientes', {
+    curso_clave: CLAVE_QUE_NO_EXISTE,
+  })
   comprobar(
-    'matricular_pendientes existe',
-    !/could not find|does not exist/i.test(error?.message ?? ''),
-    error?.message ?? ''
+    'matricular_pendientes existe (y no matricula a nadie al comprobarlo)',
+    /no existe el curso/i.test(error?.message ?? ''),
+    error?.message ?? 'no levantó la excepción esperada'
   )
 }
 

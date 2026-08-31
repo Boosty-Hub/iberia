@@ -96,6 +96,15 @@ export async function acunarEnlaces(datos: FormData) {
   for (const persona of gente ?? []) {
     if (!persona.activo) continue
 
+    // Sin cédula no se puede acuñar: el correo interno se deriva de ella, y no
+    // se le inventa una a nadie. El padrón de julio de 2026 llegó sin cédulas,
+    // así que hasta que Capital Humano mande el segundo archivo esta gente se
+    // salta en silencio en vez de crear cuentas con un identificador falso.
+    if (!persona.cedula) {
+      console.error(`[accesos] ${persona.nombre_completo} no tiene cédula: no se acuña`)
+      continue
+    }
+
     let perfil = persona.perfil_id
 
     if (!perfil) {

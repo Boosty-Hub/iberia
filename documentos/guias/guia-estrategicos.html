@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="es-VE">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guía de entrevista · Macroprocesos estratégicos · Industrias Iberia</title>
+<style>
+  :root { --acento:#D4332C; --tinta:#1A1F28; --gris:#5B6470; --linea:#e4e2df; --fondo:#f6f7f9; --papel:#fff; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0 auto; padding: 0 1.25rem 4rem; background: var(--fondo); color: var(--tinta);
+    font: 16px/1.6 "DM Sans", -apple-system, Segoe UI, system-ui, sans-serif; max-width: 44rem;
+  }
+  header.portada { padding: 2.5rem 0 1.25rem; }
+  .rotulo { font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--acento); font-weight:600; margin:0 0 .5rem; }
+  h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 .5rem; letter-spacing: -.01em; }
+  .para { color: var(--gris); margin: 0 0 1.25rem; }
+  .caja { background:var(--papel); border:1px solid var(--linea); border-radius:1rem; padding:1.1rem 1.25rem; margin:0 0 1rem; }
+  .caja p { margin: 0 0 .7rem; } .caja p:last-child { margin: 0; }
+  .duracion { display:inline-block; background:var(--tinta); color:#fff; border-radius:999px; padding:.3rem .85rem; font-size:.82rem; font-weight:600; margin-bottom:1rem; }
+  .bloque { background:var(--papel); border:1px solid var(--linea); border-radius:1rem; padding:1.1rem 1.25rem; margin:0 0 .8rem; }
+  .bloque.critico { border-color: var(--acento); border-width: 2px; }
+  .bloque header { display:flex; align-items:center; gap:.7rem; margin-bottom:.5rem; }
+  .num { flex:none; width:1.7rem; height:1.7rem; border-radius:50%; background:var(--tinta); color:#fff; display:grid; place-items:center; font-size:.85rem; font-weight:700; }
+  .critico .num { background: var(--acento); }
+  .bloque h2 { font-size: 1.1rem; margin: 0; flex: 1; }
+  .reloj { flex:none; font-size:.8rem; color:var(--gris); font-variant-numeric:tabular-nums; }
+  .sello { display:inline-block; background:#fdecec; color:var(--acento); font-size:.7rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:.16rem .55rem; border-radius:999px; margin:0 0 .5rem; }
+  .intro { color: var(--gris); font-size: .9rem; margin: 0 0 .7rem; }
+  .preguntas { list-style: none; margin: 0; padding: 0; }
+  .pregunta { border-top: 1px solid var(--linea); }
+  .pregunta:first-child { border-top: 0; }
+  .pregunta label { display:flex; gap:.7rem; align-items:flex-start; cursor:pointer; padding:.62rem 0; }
+  .pregunta input { margin-top:.34rem; width:1.05rem; height:1.05rem; flex:none; accent-color:var(--acento); }
+  .q { font-weight: 500; }
+  input:checked + .q { opacity: .4; text-decoration: line-through; }
+  .aviso { margin:.8rem 0 0; background:#fff8e6; border:1px solid #f2e2b6; border-radius:.6rem; padding:.6rem .8rem; font-size:.87rem; }
+  .anexo { margin-top: 2rem; }
+  .anexo > h2 { font-size: 1.25rem; margin-bottom: .3rem; }
+  .macro { background:var(--papel); border:1px solid var(--linea); border-radius:1rem; padding:.9rem 1.25rem; margin-bottom:.6rem; }
+  .macro h3 { font-size: .96rem; margin: 0 0 .4rem; }
+  .cuenta { font-weight: 400; color: var(--gris); font-size: .8rem; }
+  .macro ul { list-style: none; margin: 0; padding: 0; font-size: .91rem; }
+  .macro li { padding: .2rem 0; }
+  .macro input { accent-color: var(--acento); margin-right: .4rem; }
+  footer { color: var(--gris); font-size: .8rem; margin-top: 2rem; text-align: center; }
+  @media print {
+    body { background:#fff; max-width:none; font-size:10.5pt; padding:0; }
+    .bloque, .macro, .caja { break-inside: avoid; border-color: #ccc; }
+    .duracion { background: none; color: var(--tinta); border: 1px solid #ccc; }
+  }
+</style>
+</head>
+<body>
+
+<header class="portada">
+  <p class="rotulo">Industrias Iberia · Fase 1 · Levantamiento</p>
+  <h1>Macroprocesos estratégicos</h1>
+  <p class="para">Dirección General, Direcciones de área y las gerencias que deciden el rumbo, no la transacción.</p>
+  <p class="duracion">56 minutos · 8 secciones</p>
+</header>
+
+<div class="caja">
+  <p><strong>Cómo se usa.</strong> Las preguntas se leen en voz alta tal como están. Marca
+  cada una al cubrirla. Los minutos son un presupuesto: si algo se estira, lo que se recorta
+  es «el flujo», nunca las secciones marcadas <em>No se salta</em>.</p>
+  <p>Acá no se levanta el flujo transaccional: se levanta <strong>cómo se decide</strong>. Con qué información, en qué foro y qué pasa cuando la información no llega a tiempo.</p>
+</div>
+
+<div class="caja">
+<p><strong>Qué estamos construyendo, y qué no.</strong> El entregable de la Fase 1 es el
+<strong>Documento de Arquitectura de IA</strong>: dónde interviene la IA, dónde no, en qué
+orden y con qué conexiones al núcleo. <strong>No estamos entregando un manual de
+procesos.</strong></p>
+<p>Pero el mapa de macroprocesos y sus procesos N1 <em>es</em> la base sobre la que se
+dibuja esa arquitectura. Y sirve doble: si más adelante la Junta Directiva quiere los
+manuales de proceso, eso es otro proyecto —y llegaría con el levantamiento ya hecho.</p></div>
+
+
+    <section class="bloque critico">
+      <header>
+        <span class="num">1</span>
+        <h2>Apertura y consentimiento</h2>
+        <span class="reloj">0–3 min</span>
+      </header>
+      <p class="sello">No se salta</p>
+      
+      <ol class="preguntas">
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">Antes de empezar: esta conversación la vamos a grabar para no estar escribiendo y poder prestarte atención. El audio lo oímos nosotros y el equipo del proyecto, se usa solo para el levantamiento y no sale de ahí. ¿Estás de acuerdo?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">Cuéntame cómo te llamas y cuál es tu cargo exacto.</span></label>
+        </li></ol>
+      
+    </section>
+    <section class="bloque">
+      <header>
+        <span class="num">2</span>
+        <h2>Tu papel en las decisiones</h2>
+        <span class="reloj">3–9 min</span>
+      </header>
+      
+      
+      <ol class="preguntas">
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿Qué decisiones son tuyas y cuáles subes? ¿Dónde está la raya?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿En qué foros se decide esto, quién va y cada cuánto se reúnen de verdad?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿Dónde queda registro de lo que se decide?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">Cuando algo se traba y necesitas destrabarlo, ¿a quién buscas?</span></label>
+        </li></ol>
+      
+    </section>
+    <section class="bloque critico">
+      <header>
+        <span class="num">3</span>
+        <h2>Con qué números decides</h2>
+        <span class="reloj">9–17 min</span>
+      </header>
+      <p class="sello">No se salta</p>
+      
+      <ol class="preguntas">
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿Qué información miras para saber si esto va bien o va mal, y con qué frecuencia te llega?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿Quién te la prepara, y cuánto tarda en llegarte desde que ocurre el hecho?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿Qué pregunta te hacen —el dueño, la Junta, un cliente— que hoy te cuesta responder?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿Qué decisión has tomado este año con menos información de la que hubieras querido?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿Qué número no existe hoy y te cambiaría la forma de decidir?</span></label>
+        </li></ol>
+      
+    </section>
+    <section class="bloque">
+      <header>
+        <span class="num">4</span>
+        <h2>El proceso de decisión</h2>
+        <span class="reloj">17–33 min</span>
+      </header>
+      
+      <p class="intro">Con la lista de procesos N1 del anexo impresa y sobre la mesa.</p>
+      <ol class="preguntas">
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">Llévame por una decisión real y reciente: cómo se planteó, con qué se decidió, quién opinó, cuánto tardó y cómo se comunicó.</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿Cada cuánto se replantea?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿Qué se hace cuando la realidad se sale de lo planificado?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿Qué políticas escritas gobiernan esto, dónde viven y cuándo se actualizaron?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿Cómo baja esta decisión a la operación, y cómo sabes que llegó?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿Qué le pides a las otras direcciones para poder decidir, y qué tan a tiempo te llega?</span></label>
+        </li></ol>
+      
+    </section>
+    <section class="bloque">
+      <header>
+        <span class="num">5</span>
+        <h2>Sistemas y visibilidad</h2>
+        <span class="reloj">33–39 min</span>
+      </header>
+      
+      
+      <ol class="preguntas">
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿Qué miras tú directamente en un sistema, y qué te llega ya masticado?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿De qué tienes visibilidad en el momento, y qué ves con días de retraso?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">Si quisieras un dato ahorita mismo, ¿a quién se lo pides y cuánto tarda?</span></label>
+        </li></ol>
+      
+    </section>
+    <section class="bloque critico">
+      <header>
+        <span class="num">6</span>
+        <h2>Riesgos y continuidad</h2>
+        <span class="reloj">39–45 min</span>
+      </header>
+      <p class="sello">No se salta</p>
+      
+      <ol class="preguntas">
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">En febrero hubo un incidente informático. Cuéntame ese día desde tu área: cuánto duró, cómo siguieron trabajando, qué información no volvió y qué cambió después.</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">Si mañana se cae JD a las 8 de la mañana, ¿qué haces hasta las 5 de la tarde?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">Si mañana falta una persona de tu equipo por un mes, ¿cuál te complica más y por qué?</span></label>
+        </li></ol>
+      
+    </section>
+    <section class="bloque">
+      <header>
+        <span class="num">7</span>
+        <h2>Qué no tocar, qué cambiar</h2>
+        <span class="reloj">45–53 min</span>
+      </header>
+      
+      
+      <ol class="preguntas">
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">Si viene alguien a rediseñar todo esto, ¿qué le dices de entrada que NO se toca?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿Qué te duele hoy y cambiarías si no tuvieras límite de tiempo ni de plata?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">Si una herramienta pudiera hacerte UNA sola tarea de tu día, ¿cuál te aliviaría más?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿Qué te preocupa de meter IA en tu proceso? ¿Qué decisión de las que tomas hoy no delegarías nunca?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">De todo lo que hablamos, ¿por dónde empezarías tú si tuvieras que escoger una sola cosa para el año que viene?</span></label>
+        </li></ol>
+      
+    </section>
+    <section class="bloque critico">
+      <header>
+        <span class="num">8</span>
+        <h2>Cierre</h2>
+        <span class="reloj">53–56 min</span>
+      </header>
+      <p class="sello">No se salta</p>
+      
+      <ol class="preguntas">
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿Qué documento me puedes pasar que nos ahorre una reunión? Anótalo en voz alta: nombre, quién lo manda y cuándo.</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿Con quién más tenemos que hablar para entender bien esto? ¿Qué parte de tu proceso cuenta mejor otra persona?</span></label>
+        </li>
+        <li class="pregunta">
+          <label><input type="checkbox"><span class="q">¿Qué se nos quedó por fuera?</span></label>
+        </li></ol>
+      
+    </section>
+
+<section class="anexo">
+  <h2>Anexo · Los procesos de este nivel</h2>
+  <p class="intro">Imprime esta página y tenla sobre la mesa durante la sección del flujo.
+  Si dice que un proceso no existe o que se llama distinto, <strong>eso es hallazgo, no
+  error</strong>.</p>
+  
+      <div class="macro">
+        <h3>Dirección y Gobierno Corporativo <span class="cuenta">3 procesos</span></h3>
+        <ul><li><input type="checkbox"> Definición de Visión, Misión y Objetivos Corporativos</li><li><input type="checkbox"> Toma de Decisiones de Alto Nivel / Gobierno Corporativo</li><li><input type="checkbox"> Control y Supervisión General de la Organización</li></ul>
+      </div>
+      <div class="macro">
+        <h3>Planificación Comercial y Desarrollo de Negocio <span class="cuenta">3 procesos</span></h3>
+        <ul><li><input type="checkbox"> Planificación Estratégica de Ventas y Canales</li><li><input type="checkbox"> Desarrollo de Nuevos Negocios y Clientes Clave</li><li><input type="checkbox"> Definición de Estrategia Comercial y de Precios</li></ul>
+      </div>
+      <div class="macro">
+        <h3>Gestión de Calidad y Desarrollo de Productos <span class="cuenta">3 procesos</span></h3>
+        <ul><li><input type="checkbox"> Investigación y Desarrollo de Nuevos Productos</li><li><input type="checkbox"> Diseño y Reformulación de Productos</li><li><input type="checkbox"> Gestión del Sistema de Gestión de Calidad</li></ul>
+      </div>
+</section>
+
+<footer>
+  Boosty Digital para Industrias Iberia · Documento confidencial ·
+  Se genera con <code>npm run generar:guias</code>
+</footer>
+
+</body>
+</html>

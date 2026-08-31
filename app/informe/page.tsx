@@ -21,7 +21,14 @@ export default async function InformePage() {
       .from('informe_secciones')
       .select('id, slug, numero, titulo, subtitulo, parte, contenido_md, publicado, updated_at')
       .order('orden'),
-    supabase.from('entrevistas').select('id', { count: 'exact', head: true }),
+    // Solo las de tipo 'entrevista': las reuniones de comité, los recorridos y
+    // las formaciones son sesiones del levantamiento, pero no cuentan contra las
+    // ~25 entrevistas que compromete el programa. Rotularlas como entrevistas en
+    // el documento que lee el cliente sería inflar el avance.
+    supabase
+      .from('entrevistas')
+      .select('id', { count: 'exact', head: true })
+      .eq('tipo', 'entrevista'),
     supabase.from('hallazgos').select('id, estado'),
   ])
 

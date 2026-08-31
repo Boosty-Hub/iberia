@@ -13,13 +13,19 @@ import { mkdir } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
-const entrada = process.argv[2]
+// Las banderas se apartan de los argumentos posicionales: sin esto, un
+// `generar-pdf.mjs entrada.html --vista` tomaba «--vista» como nombre del
+// archivo de salida y la vista previa reventaba al no reconocer la extensión.
+const banderas = process.argv.slice(2).filter((a) => a.startsWith('--'))
+const posicionales = process.argv.slice(2).filter((a) => !a.startsWith('--'))
+
+const entrada = posicionales[0]
 if (!entrada) {
-  console.error('\n✖ Uso: node scripts/generar-pdf.mjs <archivo.html> [salida.pdf]\n')
+  console.error('\n✖ Uso: node scripts/generar-pdf.mjs <archivo.html> [salida.pdf] [--vista]\n')
   process.exit(1)
 }
 
-const salida = process.argv[3] ?? entrada.replace(/\.html?$/i, '.pdf')
+const salida = posicionales[1] ?? entrada.replace(/\.html?$/i, '.pdf')
 await mkdir(dirname(resolve(salida)), { recursive: true })
 
 const navegador = await chromium.launch()
@@ -50,7 +56,7 @@ await pagina.pdf({
 // Vista previa en PNG: Chromium en headless no abre PDF, así que la única forma
 // de revisar el resultado antes de entregarlo es capturar el HTML en medio de
 // impresión, que es exactamente lo que el PDF rasteriza.
-if (process.argv.includes('--vista')) {
+if (banderas.includes('--vista')) {
   await pagina.emulateMedia({ media: 'print' })
   await pagina.setViewportSize({ width: 794, height: 1123 }) // A4 a 96 ppp
   // Se replican los márgenes del PDF; sin esto el contenido aparece pegado al

@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Segunda jornada de entrevistas · Industrias Iberia</title>
+    <style>
+      :root {
+        --rojo: #d4332c;
+        --rojo-claro: #fdf3f2;
+        --rojo-borde: #f7c8c4;
+        --carbon: #1e1c1b;
+        --carbon-medio: #474342;
+        --gris: #6d6765;
+        --gris-claro: #b8b3b1;
+        --borde: #e4e1e0;
+        --fondo-suave: #f8f7f7;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        font-size: 10.5pt;
+        line-height: 1.55;
+        color: var(--carbon-medio);
+      }
+
+      h1, h2, h3 { color: var(--carbon); margin: 0; }
+
+      .portada { border-bottom: 3px solid var(--rojo); padding-bottom: 20px; margin-bottom: 28px; }
+      .portada img { height: 34px; width: auto; display: block; margin-bottom: 22px; }
+      .rotulo {
+        font-size: 8pt; font-weight: 700; letter-spacing: 0.16em;
+        text-transform: uppercase; color: var(--rojo); margin-bottom: 8px;
+      }
+      .portada h1 { font-size: 21pt; line-height: 1.2; letter-spacing: -0.01em; }
+      .portada .bajada { font-size: 11pt; color: var(--gris); margin-top: 10px; }
+
+      section { margin-bottom: 26px; }
+      section > h2 {
+        font-size: 13pt; margin-bottom: 4px;
+        padding-bottom: 6px; border-bottom: 1px solid var(--borde);
+      }
+      .num { color: var(--rojo); font-family: ui-monospace, monospace; font-size: 10pt; margin-right: 8px; }
+      section > .intro { color: var(--gris); margin: 10px 0 14px; }
+
+      h3 { font-size: 10.5pt; margin: 16px 0 6px; }
+
+      p { margin: 0 0 9px; }
+      ul { margin: 0 0 10px; padding-left: 18px; }
+      li { margin-bottom: 4px; }
+      strong { color: var(--carbon); font-weight: 600; }
+
+      table { width: 100%; border-collapse: collapse; font-size: 9.5pt; margin: 10px 0 14px; }
+      thead { background: var(--carbon); color: #fff; }
+      th { text-align: left; padding: 7px 9px; font-weight: 600; font-size: 9pt; }
+      td { padding: 7px 9px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+      tbody tr:nth-child(even) { background: var(--fondo-suave); }
+      .hora { font-family: ui-monospace, monospace; font-size: 8.5pt; white-space: nowrap; color: var(--carbon); }
+      .franja td { background: var(--fondo-suave); color: var(--gris); font-style: italic; }
+
+      .aviso {
+        border: 1px solid var(--rojo-borde); background: var(--rojo-claro);
+        border-left: 3px solid var(--rojo); padding: 12px 14px; margin: 12px 0 14px;
+        break-inside: avoid;
+      }
+      .aviso h3 { color: var(--rojo); margin-top: 0; }
+      .aviso p:last-child { margin-bottom: 0; }
+
+      .nota {
+        background: var(--fondo-suave); border-left: 3px solid var(--gris-claro);
+        padding: 10px 14px; margin: 12px 0; font-size: 9.5pt;
+      }
+      .nota p:last-child { margin-bottom: 0; }
+
+      .pista { display: inline-block; font-size: 8pt; font-weight: 700; padding: 1px 6px;
+               border-radius: 9px; white-space: nowrap; }
+      .pista-a { background: var(--rojo); color: #fff; }
+      .pista-b { background: var(--carbon); color: #fff; }
+
+      .salto { break-before: page; }
+      .juntos { break-inside: avoid; }
+
+      footer.cierre {
+        margin-top: 30px; padding-top: 14px; border-top: 1px solid var(--borde);
+        font-size: 8.5pt; color: var(--gris);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="portada">
+      <img src="../public/marca/iberia.png" alt="Industrias Iberia" />
+      <p class="rotulo">Programa de Adopción de IA · Fase 1 · Entender</p>
+      <h1>Segunda jornada de entrevistas</h1>
+      <p class="bajada">
+        Diez entrevistas de levantamiento en un día en la planta de Cagua, en dos pistas:
+        proponemos el jueves 27 de agosto o el martes 1.º de septiembre. Más lo que queda
+        por resolver para la formación directiva del miércoles 26.
+      </p>
+    </div>
+
+    <!-- ================================================================== -->
+    <section>
+      <h2><span class="num">01</span>La jornada en Cagua</h2>
+      <p class="intro">
+        Mismo formato que la jornada del 20 de agosto: dos pistas simultáneas, un día
+        completo. Las conducen <strong>Jesús Planas</strong> y <strong>Ruth
+        Velázquez</strong>. Cada entrevista dura una hora.
+      </p>
+
+      <div class="aviso">
+        <h3>La fecha que proponemos</h3>
+        <p>
+          <strong>Jueves 27 de agosto</strong> o <strong>martes 1.º de septiembre</strong>.
+          Cualquiera de las dos nos sirve; elegimos la que le cuadre mejor a la planta y
+          convocamos con ella.
+        </p>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 17%">Hora</th>
+            <th style="width: 41.5%"><span class="pista pista-a">Pista A</span> Jesús Planas</th>
+            <th><span class="pista pista-b">Pista B</span> Ruth Velázquez</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="franja"><td class="hora">06:00 – 07:30</td><td colspan="2">Traslado Caracas → Cagua</td></tr>
+          <tr class="franja"><td class="hora">07:30 – 08:00</td><td colspan="2">Encuadre con los líderes del proyecto</td></tr>
+          <tr>
+            <td class="hora">08:00 – 09:00</td>
+            <td>Dirección de Finanzas</td>
+            <td>Analista de Operaciones</td>
+          </tr>
+          <tr>
+            <td class="hora">09:10 – 10:10</td>
+            <td>Contabilidad y Costos</td>
+            <td>Coordinación de Compras</td>
+          </tr>
+          <tr class="franja"><td class="hora">10:10 – 10:30</td><td colspan="2">Pausa</td></tr>
+          <tr>
+            <td class="hora">10:30 – 11:30</td>
+            <td>Crédito y Cobranza</td>
+            <td>Prevención de Pérdidas y Seguridad y Salud</td>
+          </tr>
+          <tr>
+            <td class="hora">11:40 – 12:40</td>
+            <td>Tesorería, Cuentas por Pagar e Impuestos</td>
+            <td>Laboratorio y Sistema de Gestión de la Calidad</td>
+          </tr>
+          <tr class="franja"><td class="hora">12:40 – 13:40</td><td colspan="2">Almuerzo</td></tr>
+          <tr>
+            <td class="hora">13:40 – 14:40</td>
+            <td>Recursos Humanos y Administración de Personal</td>
+            <td>Servicios Generales</td>
+          </tr>
+          <tr class="franja"><td class="hora">14:45 – 15:15</td><td colspan="2">Cierre con los líderes del proyecto</td></tr>
+          <tr class="franja"><td class="hora">15:30</td><td colspan="2">Regreso a Caracas</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ================================================================== -->
+    <section>
+      <h2><span class="num">02</span>A quién convocamos</h2>
+
+      <h3><span class="pista pista-a">Pista A</span> con Jesús Planas</h3>
+      <table>
+        <thead>
+          <tr><th style="width: 38%">Persona</th><th style="width: 32%">Cargo</th><th>Qué levantamos</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Dora Luciche</strong></td>
+            <td>Directora de Finanzas</td>
+            <td>Presupuesto y control de gestión</td>
+          </tr>
+          <tr>
+            <td><strong>Ana Karina Vargas</strong><br />y <strong>María Criselia Briceño</strong></td>
+            <td>Gerente de Contabilidad · Jefa de Costos</td>
+            <td>Contabilidad general y costeo</td>
+          </tr>
+          <tr>
+            <td><strong>Yelitza Pérez</strong></td>
+            <td>Jefa de Crédito y Cobranza</td>
+            <td>Crédito, cobranza y liberación de pedidos</td>
+          </tr>
+          <tr>
+            <td><strong>Edgardo Quevedo</strong><br />y <strong>Jorge Rodríguez</strong></td>
+            <td>Gerente de Tesorería · Jefe de Impuestos y Cuentas por Pagar</td>
+            <td>Tesorería, flujo de caja, cuentas por pagar y tributos</td>
+          </tr>
+          <tr>
+            <td><strong>Luz Marina Sanz</strong><br />y <strong>Liseth Yánez</strong></td>
+            <td>Gerente de Recursos Humanos · Jefa de Administración de Personal</td>
+            <td>Selección, desarrollo organizacional, nómina y administración de personal</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3><span class="pista pista-b">Pista B</span> con Ruth Velázquez</h3>
+      <table>
+        <thead>
+          <tr><th style="width: 38%">Persona</th><th style="width: 32%">Cargo</th><th>Qué levantamos</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Beatriz Vieira</strong></td>
+            <td>Analista de Operaciones</td>
+            <td>El control de producción y la reportería diaria a la Dirección</td>
+          </tr>
+          <tr>
+            <td><strong>Josgleisy Ascanio</strong><br />y <strong>José Acevedo</strong></td>
+            <td>Coordinadora de Compras · Comprador</td>
+            <td>Requisiciones, órdenes de compra, importación y permisología</td>
+          </tr>
+          <tr>
+            <td><strong>Juan Pablo Yépez</strong><br />y <strong>Mary Carmen Torres</strong></td>
+            <td>Jefe de Prevención y Control de Pérdidas · Jefa de Seguridad y Salud en el Trabajo</td>
+            <td>Mermas, control de pérdidas, seguridad industrial y salud ocupacional</td>
+          </tr>
+          <tr>
+            <td><strong>Merquidia Coss</strong><br />y <strong>Paola Mansilla</strong></td>
+            <td>Coordinadora de Laboratorio · Coordinadora del Sistema de Gestión de la Calidad</td>
+            <td>Análisis, liberación de lotes y el sistema de gestión</td>
+          </tr>
+          <tr>
+            <td><strong>Pedro Méndez</strong></td>
+            <td>Coordinador de Servicios Generales</td>
+            <td>Infraestructura, servicios de planta y tratamiento de aguas</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="nota">
+        <p>
+          <strong>Por qué estos diez.</strong> La primera jornada recorrió entera la cadena
+          física —materia prima, producción, producto terminado y despacho—. Lo que quedó por
+          conversar es el dinero, la reportería y las áreas que sostienen la planta por
+          debajo. Y no es un hueco de método: buena parte de lo que salió el 20 de agosto
+          termina remitiendo justamente a esas puertas.
+        </p>
+      </div>
+
+      <h3>Si alguno no puede</h3>
+      <p>
+        Suplentes, todos en Cagua y en este orden: <strong>Félix Puig</strong> (Coordinación de
+        Distribución) y <strong>Armando Briceño</strong> o <strong>José Miguel Goyo</strong>
+        (Supervisión de Almacén y Distribución).
+      </p>
+    </section>
+
+    <!-- ================================================================== -->
+    <section class="juntos">
+      <h2><span class="num">03</span>Qué cambia respecto de la primera jornada</h2>
+      <p class="intro">Poco, y conviene que los convocados lo sepan de antemano.</p>
+
+      <table>
+        <thead>
+          <tr><th style="width: 30%">Qué</th><th>Detalle</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Una hora, no cincuenta minutos</strong></td>
+            <td>La guía de conversación se reorganizó y ahora cubre el proceso completo en
+              sesenta minutos exactos.</td>
+          </tr>
+          <tr>
+            <td><strong>Puede que se pidan documentos</strong></td>
+            <td>Un formato, una hoja de cálculo, un instructivo: lo que sirva para validar el
+              proceso que lleva cada quien. Documentan mejor que cualquier conversación. Lo
+              que no esté a la mano en la sesión <strong>se puede enviar después</strong>, sin
+              apuro. Conviene que cada convocado venga sabiendo que se le puede pedir.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ================================================================== -->
+    <section class="salto">
+      <h2><span class="num">04</span>Formación directiva del miércoles 26</h2>
+      <p class="intro">
+        El contenido, los participantes y las condiciones del licenciamiento están en el
+        documento del 11 de agosto y no cambian. Acá va solo <strong>lo que sigue
+        abierto</strong>.
+      </p>
+
+      <div class="aviso">
+        <h3>1 · La conexión · para resolver primero</h3>
+        <p>
+          La herramienta <strong>no se alcanza directamente desde Venezuela</strong>. Cada
+          computadora que entre a la sala el miércoles necesita su <strong>VPN configurada y
+          probada con antelación</strong>.
+        </p>
+        <p>
+          Es un punto nuevo respecto del documento del 11 de agosto, y de él depende que la
+          sesión sea práctica: con la conexión andando, cada quien trabaja sobre sus propios
+          casos desde su computadora.
+        </p>
+      </div>
+
+      <div class="aviso">
+        <h3>2 · La tarjeta para las licencias · para resolver primero</h3>
+        <p>
+          Es lo único que falta para contratarlas. Con las licencias activas, cada
+          participante <strong>sale de la sesión con su acceso propio</strong> y sigue
+          practicando; sin ellas, el miércoles se hace en modo demostración.
+        </p>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <section class="juntos">
+      <h2><span class="num">05</span>Lo que hace falta decidir</h2>
+
+      <table>
+        <thead>
+          <tr><th style="width: 52%">Acción</th><th style="width: 28%">Responsable</th><th>Cuándo</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>VPN configurada y probada en al menos una computadora</td>
+            <td>Martha Fuentes</td>
+            <td class="hora">Antes del 26</td>
+          </tr>
+          <tr>
+            <td>Tarjeta disponible para contratar las licencias</td>
+            <td>Dora Luciche</td>
+            <td class="hora">Antes del 26</td>
+          </tr>
+          <tr>
+            <td>Elegir el día de la jornada en Cagua: <strong>jueves 27 de agosto</strong> o
+              <strong>martes 1.º de septiembre</strong></td>
+            <td>Martha Fuentes</td>
+            <td class="hora">Esta semana</td>
+          </tr>
+          <tr>
+            <td>Confirmar la disponibilidad de los diez convocados en Cagua ese día</td>
+            <td>Martha Fuentes</td>
+            <td class="hora">Esta semana</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer class="cierre">
+      Programa de Adopción de IA · Industrias Iberia. Información confidencial, manejada bajo
+      acuerdo de confidencialidad.<br />
+      Boosty Digital · Anthropic Partner · Agosto de 2026
+    </footer>
+  </body>
+</html>
