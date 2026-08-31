@@ -33,7 +33,15 @@
     "probar:certificado": "node --env-file=.env.local scripts/probar-certificado.mjs",
     "probar:recordatorios": "node --env-file=.env.local --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=ExperimentalWarning scripts/probar-recordatorios.mjs",
     "probar:padron": "node --env-file=.env.local --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=ExperimentalWarning scripts/probar-padron.mjs",
-    "probar:supabase": "node --env-file=.env.local scripts/probar-supabase.mjs"
+    "probar:supabase": "node --env-file=.env.local scripts/probar-supabase.mjs",
+    "importar:transcripciones": "node --env-file=.env.local --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=ExperimentalWarning scripts/importar-transcripciones.mjs",
+    "subir:documentos": "node --env-file=.env.local scripts/subir-documentos.mjs",
+    "sembrar:programa": "node --env-file=.env.local scripts/sembrar-programa.mjs",
+    "cargar:hallazgos": "node --env-file=.env.local scripts/cargar-hallazgos.mjs",
+    "sembrar:horas": "node --env-file=.env.local scripts/sembrar-horas.mjs",
+    "informe:estructura": "node --env-file=.env.local scripts/estructura-informe.mjs",
+    "importar:padron": "node --env-file=.env.local scripts/importar-padron.mjs",
+    "generar:guias": "node scripts/generar-guias.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",

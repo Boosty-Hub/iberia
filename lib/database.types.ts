@@ -642,12 +642,13 @@ export type Database = {
           area_id: string | null
           busqueda: unknown
           cargo: string | null
-          cedula: string
+          cedula: string | null
           created_at: string
           email: string | null
           es_moderador: boolean
           familia_oficio: string
           fecha_ingreso: string | null
+          ficha: string | null
           foto_url: string | null
           id: string
           nivel: string
@@ -664,12 +665,13 @@ export type Database = {
           area_id?: string | null
           busqueda?: unknown
           cargo?: string | null
-          cedula: string
+          cedula?: string | null
           created_at?: string
           email?: string | null
           es_moderador?: boolean
           familia_oficio?: string
           fecha_ingreso?: string | null
+          ficha?: string | null
           foto_url?: string | null
           id?: string
           nivel?: string
@@ -686,12 +688,13 @@ export type Database = {
           area_id?: string | null
           busqueda?: unknown
           cargo?: string | null
-          cedula?: string
+          cedula?: string | null
           created_at?: string
           email?: string | null
           es_moderador?: boolean
           familia_oficio?: string
           fecha_ingreso?: string | null
+          ficha?: string | null
           foto_url?: string | null
           id?: string
           nivel?: string
@@ -994,6 +997,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      hitos: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          descripcion: string | null
+          entregable: string | null
+          estado: string
+          fecha: string
+          id: string
+          tipo: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          descripcion?: string | null
+          entregable?: string | null
+          estado?: string
+          fecha: string
+          id?: string
+          tipo?: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          descripcion?: string | null
+          entregable?: string | null
+          estado?: string
+          fecha?: string
+          id?: string
+          tipo?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       informe_secciones: {
         Row: {
@@ -1562,6 +1604,69 @@ export type Database = {
           },
         ]
       }
+      registros_horas: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          descripcion: string
+          entregable: string
+          entrevista_id: string | null
+          fecha: string
+          hito_id: string | null
+          horas: number
+          id: string
+          imputacion: string
+          perfil: string
+          persona: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          descripcion: string
+          entregable?: string
+          entrevista_id?: string | null
+          fecha: string
+          hito_id?: string | null
+          horas: number
+          id?: string
+          imputacion?: string
+          perfil: string
+          persona?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          descripcion?: string
+          entregable?: string
+          entrevista_id?: string | null
+          fecha?: string
+          hito_id?: string | null
+          horas?: number
+          id?: string
+          imputacion?: string
+          perfil?: string
+          persona?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registros_horas_entrevista_id_fkey"
+            columns: ["entrevista_id"]
+            isOneToOne: false
+            referencedRelation: "entrevistas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registros_horas_hito_id_fkey"
+            columns: ["hito_id"]
+            isOneToOne: false
+            referencedRelation: "hitos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       respuestas: {
         Row: {
           area_id: string | null
@@ -1845,6 +1950,29 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      consumo_mensual: {
+        Row: {
+          horas: number | null
+          imputacion: string | null
+          mes: string | null
+          perfil: string | null
+        }
+        Relationships: []
+      }
+      linea_de_tiempo: {
+        Row: {
+          descripcion: string | null
+          duracion_minutos: number | null
+          entregable: string | null
+          estado: string | null
+          fecha: string | null
+          id: string | null
+          origen: string | null
+          tipo: string | null
+          titulo: string | null
+        }
+        Relationships: []
       }
       padron_estado: {
         Row: {
