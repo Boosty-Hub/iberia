@@ -68,7 +68,7 @@ cláusula 5. Aquí solo lo urgente:
 
 Doce transcripciones nuevas: la ronda 2 completa, el Petit Comité del 26 y la reunión de
 comunicaciones con Fuguet. **La base pasa de 15 sesiones a 27 y de 10.481 turnos a 20.011**;
-el levantamiento, de 9 entrevistas a **19 de ~25**. Y la clave de Anthropic con saldo entró,
+el levantamiento, de 9 entrevistas a **19 de ~25**. Y entró la clave de Anthropic con saldo,
 así que Ajito contesta por primera vez.
 
 ### Lo que trajeron las transcripciones
@@ -173,67 +173,109 @@ enseñó hacerlo:
   escritas. Sigue en cero: al revisar el registro, esas horas no van ahí. Es honesto, pero
   **hay que decidir si el entregable principal se queda sin partida propia.**
 
-### Ajito contesta, y por primera vez se le leyó
+### Ajito: la clave, la voz y el reproductor
 
 **La clave con saldo entró como `ANTHROPIC_API_KEY_SALDO`** y `probar:ajito` devolvió las
 ocho, todas dentro de las reglas. Era el 🔴 más viejo del adiestramiento: *«nadie ha leído
-todavía una devolución de Ajito»*.
+todavía una devolución de Ajito»*. Contestar de verdad destapó **dos fallos de personaje que
+no se ven con el modelo apagado**: en el saludo de la lección 0 decía «Encantado» —se pone
+género, que es regla que no se rompe— y se quedaba en 23 palabras, diez segundos de audio
+cortado en seco.
 
-Contestar de verdad destapó **dos fallos que no se ven con el modelo apagado**: en el saludo
-de la lección 0, Ajito decía «Encantado» —se pone género, que es regla que no se rompe— y se
-quedaba en 23 palabras, diez segundos de audio cortado en seco.
+**Y sale hablada.** El circuito estaba completo desde la sesión 5 y funciona: medido, la
+pregunta «¿esto manejará las máquinas de producción?» devuelve **22 segundos de nota de voz**,
+y Ajito contesta lo que se le preguntó — «no tengo manos ni cables en la línea». ⚠️ Lo que
+faltaba era la recuperación: el atajo de idempotencia devolvía «ya está» al ver el texto, así
+que **una devolución que se quedó escrita se quedaba escrita para siempre**. Ahora el
+siguiente toque sintetiza solo la voz, en 2,9 s y sin volver a preguntarle al modelo.
 
-⚠️ **Y `capturar:adiestramiento` reventó, que era buena noticia.** Usaba `networkidle`, y una
-lección con devolución pendiente dispara un `fetch` que ahora tarda de diez a veinte segundos.
-**Con la clave sin saldo fallaba al instante y el capturador pasaba — o sea que pasaba
-*porque* el modelo estaba roto.**
+⚠️ **Los audios sonaban cortados, y era el markdown.** En SSML un salto de línea es una pausa,
+y las citas del guion están ajustadas a 78 columnas: Azure metía silencio en mitad de
+cualquier frase partida, entre «Me» y «parece bien». Y `mstts:silence type="Sentenceboundary"`
+**se suma** al silencio que Azure ya pone, así que 180 ms caían sobre cada punto de unas
+frases que son cortas por diseño. Medido sobre el WAV —RMS en marcos de 10 ms— el Audio 1 de
+la lección 0 pasó de **16 pausas, 11 de ellas de 400 ms o más**, a **12 y ninguna llega a
+400**.
 
-### Los audios sonaban cortados, y era el markdown
+**De paso salió que la velocidad estaba mal medida.** El `+16%` de agosto se cronometró sobre
+el texto: el audio real iba a **174 palabras por minuto**, no a las 192 elegidas a propósito.
+Sin las pausas falsas, `+16%` se va a 198 —las 199 que en su día se descartaron por «pódcast
+de oficina»— y **`+12%` da exactamente 192**. Regrabados los 70 por 31 centavos: el curso mide
+**20 min 02 s** contra 21 min 40 s, diciendo lo mismo.
 
-⚠️ **En SSML un salto de línea es una pausa, y las citas del guion están ajustadas a 78
-columnas**: Azure metía silencio en mitad de cualquier frase partida, entre «Me» y «parece
-bien». Y `mstts:silence type="Sentenceboundary"` **se suma** al silencio que Azure ya pone,
-así que 180 ms caían sobre cada punto de unas frases que son cortas por diseño.
+**Y el reproductor pasó de dos estados a cuatro**, porque el gris de «ya oído» se leía como
+botón apagado: rojo con ▶ sin oír, rojo con anillo girando mientras carga, **tarjeta dorada**
+con ⏸ sonando, y gris con **✓** y «Ya lo oíste» al terminar. Lo que importa es de dónde sale
+el estado: **de los eventos del `<audio>`, no de la promesa de `play()`**, que resuelve cuando
+el sonido ya arrancó — con `preload="none"` y una conexión de planta, entre el toque y ella
+pasan segundos, y ese hueco era el que no se veía. `waiting` devuelve al cargando si el buffer
+se queda corto a mitad, que en el piso pasa. *No se metió un verde para «ya oído»: la paleta
+del canal son tres familias a propósito, y lo que separa «ya oído» de «apagado» es el ✓ —
+forma, no tono, la misma regla del rojo.*
 
-**Medido sobre el WAV** —RMS en marcos de 10 ms— el Audio 1 de la lección 0 pasó de **16
-pausas, 11 de ellas de 400 ms o más**, a **12 y ninguna llega a 400**.
+### El expediente y el curso, con dos cosas que faltaban
 
-**Y de paso salió que la velocidad estaba mal medida.** El `+16%` de agosto se cronometró
-sobre el texto: el audio real iba a **174 palabras por minuto**, no a las 192 elegidas a
-propósito. Sin las pausas falsas, `+16%` se va a 198 —las 199 que en su día se descartaron por
-«pódcast de oficina»— y **`+12%` da exactamente 192**. Regrabados los 70 por 31 centavos: el
-curso mide **20 min 02 s** contra 21 min 40 s, diciendo lo mismo.
+**Previsualizador en el módulo de archivos.** El nombre del archivo abre un `<dialog>` con el
+PDF, el markdown maquetado o el aviso honesto de que un xlsx no lo abre el navegador. Antes,
+saber cuál de los siete PDF era el que hacía falta obligaba a descargarlos: material bajo NDA,
+en la carpeta de descargas de quien fuera. *Chromium headless no trae visor de PDF, así que
+esa parte se verificó con navegador real: cinco páginas, miniaturas y el contrato legible.*
+
+**Botón de reiniciar el curso, solo para editores**, para poder volver a recorrer una lección
+sin entrar a la base a mano. Borra avances, respuestas, los archivos de la carpeta del
+empleado en el bucket y el certificado.
+
+**Y en el menú, bajo Administración, un acceso directo a El curso de Ajito**: es la única
+forma de oír un audio después de regrabarlo, y hasta hoy había que escribir la ruta a mano.
 
 ### Lo que enseñó romperse
 
-🔴 **`probar:adiestramiento` pasó de 16 comprobaciones a 9 y siguió diciendo «sin fallos».** El
-bloque de «lo que NO se puede» necesita una segunda matrícula y solo reutilizaba una que
-estuviera por ahí; el día que no hubo ninguna se saltó entero **en silencio**. Y las siete que
-se saltaron son justo las que prueban la promesa de la lección 0: que lo que alguien contesta
-no lo lee nadie más. Ahora la abre si falta y avisa si no puede. Van 17. *De paso, «el avance
-queda guardado y lo leo» exigía exactamente una fila en una matrícula que es de una cuenta
-real: cualquier vuelta por el curso la hacía fallar sin que nada estuviera mal.*
+El día dejó seis fallos, y **cinco eran de la verificación, no del producto**. Vale anotarlos
+juntos porque son el mismo error de fondo: una comprobación que no comprueba es peor que no
+tenerla, porque además da tranquilidad.
 
-⚠️ **`sembrar:programa` y `sembrar:horas` escribían los dos en `registros_horas`**, con
-descripciones distintas para el mismo trabajo: la jornada del 20 de agosto entraba dos veces,
-5,42 h en uno y 10,5 h en el otro. Y como `--limpiar` borra lo que no está en su archivo,
-**correr los dos en un orden duplicaba las horas y en el otro las desaparecía sin decir nada.**
-Es la familia de las 40 h fantasma de la sesión 6. Un solo registro: `sembrar-horas.mjs`.
+- 🔴 **`probar:adiestramiento` pasó de 16 comprobaciones a 9 y siguió diciendo «sin fallos».**
+  El bloque de «lo que NO se puede» necesita una segunda matrícula y solo reutilizaba una que
+  estuviera por ahí; el día que no hubo ninguna se saltó entero **en silencio**. Y las siete
+  que se saltaron son justo las que prueban la promesa de la lección 0: que lo que alguien
+  contesta no lo lee nadie más. Van 17.
+- 🔴 **Sin política de DELETE, Postgres no se queja: filtra las filas y `delete()` devuelve
+  cero afectadas.** El botón de reiniciar decía «curso reiniciado» con los cuatro avances
+  intactos. `avances`, `respuestas` y `certificados` tenían SELECT, INSERT y UPDATE, y ninguna
+  DELETE — el curso se escribió para avanzar, nunca para retroceder. Ahora la tienen, solo
+  editores, y **la acción mira el error de cada borrado y vuelve a contar antes de decir que
+  sí**. *De paso: me inventé el estado `'matriculada'` —es `'pendiente'`— y borraba solo los
+  archivos que apuntan las filas, dejando 2 borrados y 7 huérfanos.*
+- ⚠️ **`capturar:adiestramiento` pasaba *porque* el modelo estaba roto.** Usaba `networkidle`,
+  y una lección con devolución pendiente dispara un `fetch` de diez a veinte segundos: con la
+  clave sin saldo fallaba al instante y la red se quedaba quieta.
+- ⚠️ **Dos patrones de `probar:ajito` reprobaban la respuesta correcta.** La lección 7 exigía
+  «no lo sé» con una frontera de palabra al final, y en JavaScript esa frontera es **ASCII**:
+  detrás de una `é` no hay ninguna, así que solo podía casar «no lo se», sin tilde. Y la 6
+  pedía «doscientos» cuando Ajito escribe «doscient**as** cajas», que es la concordancia
+  correcta. *Un chequeo que reprueba lo bueno enseña a ignorar los chequeos.*
+- ⚠️ **`sembrar:programa` y `sembrar:horas` escribían los dos en `registros_horas`**, con
+  descripciones distintas para el mismo trabajo: la jornada del 20 de agosto entraba dos
+  veces, 5,42 h en uno y 10,5 h en el otro. Y como `--limpiar` borra lo que no está en su
+  archivo, **correr los dos en un orden duplicaba las horas y en el otro las desaparecía sin
+  decir nada.** Es la familia de las 40 h fantasma de la sesión 6. Un solo registro.
+- ⚠️ **Los hitos tenían la misma trampa sin el aviso.** Al renombrar «Comunicado oficial
+  publicado» quedó el viejo vivo, y el panel mostraba el mismo comunicado a la vez como hecho
+  el 27 de agosto y en riesgo el 6 de septiembre.
 
-⚠️ **Los hitos tenían la misma trampa sin el aviso.** Al renombrar «Comunicado oficial
-publicado» quedó el viejo vivo, y el panel mostraba el mismo comunicado a la vez como hecho el
-27 de agosto y en riesgo el 6 de septiembre. Ahora `sembrar:programa` lista los huérfanos.
-
-**Dos comodidades que eran en realidad huecos de verificación.** `capturar` ya no pide
-contraseña —acuña la sesión con la clave de servicio—, porque una verificación obligatoria que
-depende de que alguien esté delante para teclear una clave es una verificación que se salta. Y
-en el menú, bajo Administración, hay un acceso directo a **El curso de Ajito**: es la única
-forma de oír un audio después de regrabarlo, y hasta hoy había que escribir la ruta a mano.
+**Y dos comodidades que eran huecos de verificación.** `capturar` ya no pide contraseña
+—acuña la sesión con la clave de servicio—, porque una verificación obligatoria que depende de
+que alguien esté delante para teclear una clave es una verificación que se salta. Y
+`capturar:adiestramiento` comprueba ahora los tres colores del reproductor con
+`getComputedStyle` y no por captura: una clase puede estar puesta y pisada por otra. Ese
+chequeo cazó, el mismo día, que el botón de reiniciar medía 40 px contra los 44 de objetivo
+táctil del canal.
 
 **Dónde quedamos.** La ronda 2 y la formación directiva adentro, las horas revisadas y
-cuadradas contra la pantalla, el módulo del programa listo para que Iberia lo abra y Ajito
-contestando con voz corregida. Lo que sigue es **cosechar los hallazgos de la ronda 2**, que
-es lo que hoy le falta al informe, y **el reporte mensual antes del 6 de septiembre**.
+cuadradas contra la pantalla, el módulo del programa listo para que Iberia lo abra, Ajito
+contestando con voz y el expediente con previa. Lo que sigue es **cosechar los hallazgos de la
+ronda 2**, que es lo que hoy le falta al informe, y **el reporte mensual antes del 6 de
+septiembre**.
 
 ---
 

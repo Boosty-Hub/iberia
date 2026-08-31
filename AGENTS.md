@@ -129,6 +129,28 @@ y una ruedita en vez de piernas.
   segundos y el texto que la acompaña es **una línea** que dice qué hacer. La voz es
   sintética por necesidad, no por ahorro: las devoluciones se generan en el momento y
   tienen que sonar igual que la clase.
+- **El reproductor tiene cuatro estados y cada uno cambia el color de la tarjeta entera**,
+  no un detalle. Quien oye esto está de pie en un comedor con ruido, mirando el teléfono a un
+  brazo de distancia: el estado se lee de un vistazo o no se lee.
+
+  | | Tarjeta | Botón | Rótulo |
+  |---|---|---|---|
+  | sin oír | blanca | rojo con ▶ | la etiqueta |
+  | cargando | blanca, borde rojo | rojo con anillo girando | «Cargando…» |
+  | sonando | **dorada** | dorado con ⏸ | la etiqueta |
+  | ya oído | blanca | gris con ✓ | «Ya lo oíste» |
+
+  El dorado es `oro-300`, el destacado del canal: en una lista de ocho audios, el que suena
+  se encuentra sin buscarlo. **No se metió un verde para «ya oído»** — la paleta del canal
+  son tres familias a propósito y una cuarta rompe el lenguaje visual del producto entero;
+  lo que separa «ya oído» de «apagado» es el **✓**, que es forma y no tono.
+- ⚠️ **El estado sale de los eventos del `<audio>`, no de la promesa de `play()`.** Esa
+  promesa resuelve cuando el sonido ya arrancó, así que entre el toque y ella hay un hueco de
+  segundos con `preload="none"` y una conexión de planta — y ese hueco era justamente lo que
+  no se veía. `playing` enciende el dorado, `waiting` vuelve al cargando si el buffer se queda
+  corto a mitad, `ended` pone el ✓. Y cargando **no se pinta avance en la barra**: un trozo a
+  un tercio del ancho se lee como «va por el 33%», que es un número inventado.
+  `capturar:adiestramiento` comprueba los tres colores con `getComputedStyle`, no por captura.
 - **La voz vive en `lib/voz.ts`** — `es-VE-PaolaNeural` de Azure, venezolana de fábrica,
   a `+12%` porque de fábrica va lenta. Ahí está la perilla y ahí se cambia para todo el
   curso a la vez. El guion se escribe en crudo: `aSSML()` arma los párrafos y aplica
@@ -198,6 +220,15 @@ y una ruedita en vez de piernas.
   ```
   pwsh scripts/generar-ajito.ps1     # assets/marca/ajito.png → public/marca/ajito.png
   ```
+
+**Reiniciar el curso es solo de editores.** El botón vive en el índice de
+`/canal/adiestramiento` y lo dibuja `esEditor(perfil)`: es herramienta de trabajo —para
+volver a recorrer una lección hay que borrar el avance— y delante de las doscientas
+personas de planta un botón que borra el avance es un accidente esperando. Borra de verdad:
+avances, respuestas, los archivos de la carpeta del empleado en el bucket, y el certificado.
+⚠️ **Sin política de DELETE, Postgres no se queja: filtra las filas y `delete()` devuelve
+cero afectadas.** La primera versión decía «curso reiniciado» con los avances intactos, así
+que la acción **mira el error de cada borrado y vuelve a contar antes de decir que sí**.
 
 ```
 npm run sembrar:adiestramiento  -- --abrir   # clasifica oficios, matricula y abre
@@ -368,7 +399,15 @@ la vacía.
 
 La devolución **se pide aparte de guardar la respuesta**, y ese orden importa: lo que la
 persona dijo es lo que no se puede perder, así que se guarda primero y siempre. Si el
-modelo se cae, la respuesta está a salvo y sale un botón de reintentar. Solo se pide una
+modelo se cae, la respuesta está a salvo y sale un botón de reintentar.
+
+**Y sale hablada, no escrita.** `lib/hablar.ts` la sintetiza con la misma voz de la clase
+—si la clase la dijera una voz y la devolución otra, habría dos Ajitos— y la guarda en el
+bucket privado bajo `respuestas/{empleado_id}/`, que es donde la política de dueño-en-la-ruta
+ya la cubre. El texto va debajo del reproductor con audio o sin él: vale para quien tiene el
+teléfono en silencio o está en el comedor con ruido. ⚠️ **Si el audio falla, el siguiente
+toque lo sintetiza sin volver a preguntarle al modelo**: antes el atajo de idempotencia
+devolvía «ya está» y la devolución se quedaba escrita para siempre. Solo se pide una
 a la vez —la primera de la lección a la que le falte—: abrir una lección con cuatro
 respuestas viejas no puede disparar cuatro llamadas con sus cuatro fotos. Una que falla
 queda marcada con `devolucion_en` sin texto y **sale de la cola**, para no congelar
@@ -410,8 +449,18 @@ Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).
   `npm run crear:usuario`.
 - **Bucket privado**: se descarga por `app/dashboard/archivos/[id]/descargar/route.ts`,
   que exige sesión y firma una URL de 60 s.
-- El binario de un archivo **no pasa por el servidor de Next**: el navegador sube
-  directo a Storage y luego una server action registra la metadata.
+- **Y se previsualiza por `[id]/ver`**, que es otra ruta por una diferencia de una palabra:
+  `descargar` firma con `{ download: nombre }`, lo que pone `Content-Disposition: attachment`
+  y hace que el navegador guarde el archivo en vez de mostrarlo — dentro de un `iframe` eso
+  no previsualiza, dispara una descarga. `ver` sirve los bytes **desde el mismo origen**, y es
+  la única vez que el binario pasa por el servidor de Next: así el visor lee un `.md` con
+  `fetch` sin pelear con CORS y mete un PDF en un `iframe` sin que la redirección se lo lleve
+  a otro dominio. Son nueve archivos que mira el equipo consultor, no doscientos teléfonos.
+- **Al subir**, el binario **no pasa por el servidor de Next**: el navegador escribe directo
+  en Storage y luego una server action registra la metadata. *(Al previsualizar sí pasa, y es
+  la excepción — ver la viñeta de arriba. La diferencia está en el tamaño y en quién: una
+  subida puede ser un PDF de 20 MB desde cualquier conexión; una previa son nueve archivos
+  que abre el equipo consultor.)*
 
 ## Trampas conocidas
 
