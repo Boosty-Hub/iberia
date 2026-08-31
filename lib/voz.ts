@@ -24,26 +24,40 @@ export type VozAjito = {
   velocidad: number
   /** Ajuste de tono. Azure admite de 0,5× a 1,5×. En 0 se queda como viene. */
   tono: number
-  /** Silencio extra entre frases, en milisegundos. */
+  /**
+   * Silencio al final de cada frase, en milisegundos. **Es el valor exacto que se
+   * oye, no un extra**: va como `Sentenceboundary-exact`. En 0 no se le dice nada
+   * a Azure, y entonces pone lo suyo — que en `es-VE` son unos 900 ms y suena a
+   * frases sueltas. Medido: 180 ms deja 12 pausas en el Audio 1 de la lección 0 y
+   * ninguna llega a 400 ms.
+   */
   pausaFrase: number
 }
 
 /**
- * Medido sobre el arranque de la lección 0 (88 palabras), el 16 de agosto:
+ * **192 palabras por minuto** es el objetivo, y está elegido: a 199 la voz queda
+ * al nivel de un pódcast de oficina, y quien va a oír esto es alguien
+ * entendiendo por primera vez qué es la IA, en el comedor y con ruido. 192 es
+ * ágil sin ir de carrera.
  *
- *   Paola tal cual ......... 31,8 s → 166 ppm
- *   Paola +16% ............. 27,5 s → 192 ppm   ← elegida
- *   Paola +20% ............. 26,5 s → 199 ppm
- *   Sebastián tal cual ..... 26,4 s → 200 ppm
+ * ⚠️ **El porcentaje que da esas 192 cambió el 31 de agosto, de +16% a +12%, y no
+ * porque cambiara el objetivo.** La medición de agosto se hizo cronometrando el
+ * texto, no el audio, y el audio real llevaba adentro dos cosas que lo frenaban:
+ * los saltos de columna del guion, que Azure tomaba como pausa, y 180 ms
+ * *sumados* a cada punto. Medido sobre el audio de verdad —RMS en marcos de
+ * 10 ms sobre el WAV, no cronómetro— el mismo +16% daba **174 ppm**. Arregladas
+ * las dos cosas en `aSSML()`, la escala quedó así, sobre las 86 palabras del
+ * Audio 1 de la lección 0:
  *
- * O sea que **Sebastián corre un 20% más rápido que Paola de fábrica** — eso es
- * lo que se oye al ponerlos uno detrás del otro, y por eso Paola parecía lenta.
+ *   +16% ... 26,0 s → 198 ppm   · 12 pausas, ninguna de 400 ms o más
+ *   +12% ... 26,9 s → 192 ppm   ← elegida, es el objetivo de siempre
+ *   +8% .... 27,8 s → 185 ppm   · aparece una pausa de 400 ms
  *
- * Se quedó en +16% y no en +20% a propósito. A 199 la voz queda al nivel de un
- * pódcast de oficina, y quien va a oír esto es alguien entendiendo por primera
- * vez qué es la IA, en el comedor y con ruido. 192 es ágil sin ir de carrera.
+ * Y de referencia: Paola tal cual son 166 ppm y Sebastián tal cual, 200 — o sea
+ * que **Sebastián corre un 20% más rápido que Paola de fábrica**, que es lo que
+ * se oye al ponerlos uno detrás del otro y por lo que Paola parecía lenta.
  *
- * Y ojo con lo que el porcentaje NO arregla: `rate` cambia la velocidad, no la
+ * Ojo con lo que el porcentaje NO arregla: `rate` cambia la velocidad, no la
  * cadencia. `es-VE` se quedó en la generación estándar, sin las variantes HD
  * que Microsoft solo le dio a España y México, y esa prosodia más plana no se
  * corrige acelerando. Si algún día molesta el ritmo y no el tempo, la salida es
@@ -52,7 +66,7 @@ export type VozAjito = {
 export const PAOLA: VozAjito = {
   nombre: 'es-VE-PaolaNeural',
   etiqueta: 'Paola · venezolana',
-  velocidad: 16,
+  velocidad: 12,
   tono: 0,
   pausaFrase: 180,
 }
@@ -70,17 +84,37 @@ export const SEBASTIAN: VozAjito = {
 export const VOZ = PAOLA
 
 /**
+ * Junta las líneas de un párrafo en una sola.
+ *
+ * ⚠️ **Esto era la causa de que los audios sonaran cortados.** El guion está
+ * escrito en markdown con las citas ajustadas a 78 columnas, así que una frase
+ * cualquiera viene partida a la mitad:
+ *
+ *     Fíjate bien cómo me hicieron: la cabeza es un ajo y el cuerpo es un ají. Me
+ *     parece bien, porque de eso vive esta casa.
+ *
+ * `lib/guion.ts` conserva esos saltos —hace bien, son el texto tal cual— y Azure
+ * los toma como frontera de prosodia: metía una pausa entre «Me» y «parece
+ * bien». Un salto de línea de ajuste de columna no es una pausa; la pausa la
+ * marca el renglón en blanco, que abre `<p>`.
+ */
+function unaSolaLinea(parrafo: string): string {
+  return parrafo.replace(/\s*\n\s*/g, ' ').replace(/\s{2,}/g, ' ').trim()
+}
+
+/**
  * Envuelve un texto del guion en SSML.
  *
  * El texto entra en crudo, tal como está escrito en
- * `contenido/adiestramiento/`: los saltos de línea del guion marcan las pausas
- * de respiración y aquí se convierten en párrafos, que es como Azure las
- * entiende. No hay que escribir SSML a mano en el guion.
+ * `contenido/adiestramiento/`: **el renglón en blanco** marca la pausa de
+ * respiración y aquí se convierte en párrafo, que es como Azure la entiende. Los
+ * saltos sueltos de dentro de un párrafo son ajuste de columna del markdown y se
+ * deshacen. No hay que escribir SSML a mano en el guion.
  */
 export function aSSML(texto: string, voz: VozAjito = VOZ): string {
   const parrafos = texto
     .split(/\n\s*\n/)
-    .map((p) => p.trim())
+    .map(unaSolaLinea)
     .filter(Boolean)
     .map((p) => `<p>${escapar(p)}</p>`)
     .join('\n      ')
@@ -92,10 +126,17 @@ export function aSSML(texto: string, voz: VozAjito = VOZ): string {
   const abre = prosodia.length ? `<prosody ${prosodia.join(' ')}>` : ''
   const cierra = prosodia.length ? '</prosody>' : ''
 
+  // `Sentenceboundary-exact` fija el silencio; `Sentenceboundary` a secas se
+  // **suma** al que Azure ya pone. Con las frases cortas que Ajito habla por
+  // diseño, esos 180 ms sumados a cada punto convertían el audio en una lista de
+  // frases sueltas. Con `-exact` la cifra es la que se oye.
+  const silencio = voz.pausaFrase
+    ? `<mstts:silence type="Sentenceboundary-exact" value="${voz.pausaFrase}ms"/>\n    `
+    : ''
+
   return `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" xml:lang="es-VE">
   <voice name="${voz.nombre}">
-    <mstts:silence type="Sentenceboundary" value="${voz.pausaFrase}ms"/>
-    ${abre}
+    ${silencio}${abre}
       ${parrafos}
     ${cierra}
   </voice>

@@ -118,6 +118,30 @@ if (empleado) {
 
 // --- Recorrido ----------------------------------------------------------------
 
+/**
+ * Abre una ruta y espera a que se asiente, sin usar `networkidle`.
+ *
+ * ⚠️ **`networkidle` dejó de servir el día que Ajito empezó a contestar.** Una
+ * lección con una respuesta pendiente de devolución dispara un `fetch` a
+ * `…/devolver` al cargar, y esa llamada tarda de diez a veinte segundos: la red
+ * nunca se queda quieta y `goto` reventaba por timeout. Con la clave sin saldo
+ * fallaba al instante y no se notaba — o sea que el capturador pasaba *porque*
+ * el modelo estaba roto.
+ *
+ * Se espera al DOM y después un rato fijo, que es lo que hace falta para que la
+ * página pinte. Si la devolución llega dentro de ese rato, sale en la captura; si
+ * no, sale su estado de espera, que también es lo que vería la persona.
+ */
+async function abrir(pagina, ruta, { asentar = 2500 } = {}) {
+  const respuesta = await pagina.goto(BASE + ruta, {
+    waitUntil: 'domcontentloaded',
+    timeout: 45000,
+  })
+  await pagina.waitForLoadState('load', { timeout: 20000 }).catch(() => {})
+  await pagina.waitForTimeout(asentar)
+  return respuesta
+}
+
 const PAGINAS = [
   { nombre: '01-canal-inicio', ruta: '/canal', movil: true },
   { nombre: '02-curso', ruta: '/canal/adiestramiento', movil: true },
@@ -161,7 +185,8 @@ try {
       if (msg.type() === 'error') problemas.push(`[consola] ${nombre}: ${msg.text()}`)
     })
 
-    const respuesta = await pagina.goto(BASE + ruta, { waitUntil: 'networkidle' })
+
+    const respuesta = await abrir(pagina, ruta)
     if (!respuesta?.ok()) problemas.push(`[http ${respuesta?.status()}] ${nombre} · ${ruta}`)
 
     const destino = new URL(pagina.url()).pathname
@@ -226,7 +251,7 @@ try {
       if (msg.type() === 'error') problemas.push(`[consola] flujo: ${msg.text()}`)
     })
 
-    await pagina.goto(BASE + '/canal/adiestramiento/3', { waitUntil: 'networkidle' })
+    await abrir(pagina, '/canal/adiestramiento/3')
 
     const empezar = pagina.getByRole('button', { name: /empezar la lecci/i })
     if (await empezar.count()) {

@@ -229,7 +229,8 @@ Súmale los ~$40 de la voz y el curso completo sale por **unos 90 dólares de
 servicios**. Es un renglón chico al lado de las horas de la gente, y conviene
 tenerlo dicho antes de que alguien lo pregunte.
 
-⚠️ **Falta la clave.** `ANTHROPIC_API_KEY` está vacía en `.env.local`. Sin ella
+✅ **La clave está y tiene saldo**, en `ANTHROPIC_API_KEY_SALDO`. Quién la resuelve es
+`lib/clave-anthropic.ts`. *(Lo de abajo queda como registro de cuando faltaba.)* Sin ella
 todo el circuito funciona menos el modelo: la respuesta se guarda, y donde iría
 la devolución sale «No pude contestarte ahorita» con su botón. El día que entre
 la clave, `npm run probar:ajito` dice en un minuto si Ajito habla como Ajito.

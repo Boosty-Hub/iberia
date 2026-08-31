@@ -5,11 +5,13 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
   IconoArchivos,
+  IconoChat,
   IconoEntrevistas,
   IconoGrupo,
   IconoHallazgos,
   IconoInforme,
   IconoPanel,
+  IconoReloj,
   IconoUsuarios,
   IconoVerInforme,
 } from '@/components/iconos'
@@ -28,6 +30,7 @@ const PRINCIPALES: Item[] = [
   { href: '/dashboard/adiestramiento', etiqueta: 'Adiestramiento', Icono: IconoGrupo },
   { href: '/dashboard/empleados', etiqueta: 'Empleados', Icono: IconoUsuarios },
   { href: '/dashboard/informe', etiqueta: 'Editor del informe', Icono: IconoInforme },
+  { href: '/dashboard/programa', etiqueta: 'El programa', Icono: IconoReloj },
 ]
 
 /**
@@ -82,6 +85,24 @@ export function NavLateral({ esAdmin }: { esAdmin: boolean }) {
           >
             <IconoUsuarios className="h-[18px] w-[18px] shrink-0" />
             Usuarios
+          </Link>
+
+          {/* El curso visto por dentro. El panel de `/dashboard/adiestramiento`
+              dice cómo va la gente; esto es la clase de Ajito tal como la abre
+              un operador en su teléfono, y hasta ahora no se llegaba a ella
+              desde el menú: había que escribir la ruta a mano. Es la única
+              forma de oír un audio después de regrabarlo. */}
+          <Link
+            href="/canal/adiestramiento"
+            className={cn(
+              'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors',
+              activo('/canal/adiestramiento')
+                ? 'bg-marca-100 font-semibold text-marca-900'
+                : INACTIVO
+            )}
+          >
+            <IconoChat className="h-[18px] w-[18px] shrink-0" />
+            El curso de Ajito
           </Link>
         </>
       )}

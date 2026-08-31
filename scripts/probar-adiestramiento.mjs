@@ -103,6 +103,7 @@ const { data: otro } = await admin
 let miMatricula = null
 let matriculaEsMia = false
 let matriculaAjena = null
+let matriculaAjenaEsDeLaPrueba = false
 let respuestaAjena = null
 let usuarioPrueba = null
 let perfilOriginal = null
@@ -135,6 +136,13 @@ try {
     matriculaEsMia = true
   }
 
+  // ⚠️ **La matrícula ajena se abre si no existe.** Antes solo se reutilizaba una
+  // que estuviera por ahí, y el día que no hubo ninguna —el curso está cerrado y
+  // nadie tiene matrícula de verdad— el bloque entero de «lo que NO se puede» se
+  // saltó **en silencio**: la suite pasó de 16 comprobaciones a 9 y siguió
+  // diciendo «sin fallos». Justo las siete que se saltaron son las que prueban la
+  // promesa de la lección 0: que lo que alguien contesta no lo lee nadie más.
+  // Una suite que no puede correr una comprobación no la ha pasado.
   if (otro) {
     const { data: ya } = await admin
       .from('matriculas')
@@ -142,8 +150,29 @@ try {
       .eq('curso_id', curso.id)
       .eq('empleado_id', otro.id)
       .maybeSingle()
-    matriculaAjena = ya?.id ?? null
+
+    if (ya) {
+      matriculaAjena = ya.id
+    } else {
+      const { data: abierta, error } = await admin
+        .from('matriculas')
+        .insert({ curso_id: curso.id, empleado_id: otro.id, familia_oficio: 'linea' })
+        .select('id')
+        .single()
+      if (error) {
+        comprobar('se pudo abrir la matrícula ajena de la prueba', false, error.message)
+      } else {
+        matriculaAjena = abierta.id
+        matriculaAjenaEsDeLaPrueba = true
+      }
+    }
   }
+
+  comprobar(
+    'hay una segunda matrícula con la que probar lo ajeno',
+    !!matriculaAjena,
+    'sin ella no se puede comprobar que nadie lee lo que otro contesta'
+  )
 
   // --- Catálogo ---------------------------------------------------------------
   const { data: cursoVisto } = await cliente.from('cursos').select('*').eq('clave', 'ajito').maybeSingle()
@@ -166,11 +195,20 @@ try {
     )
   comprobar('puedo abrir una lección', !errAvance, errAvance?.message)
 
+  // ⚠️ Se pregunta por **esta** lección, no por «cuántas filas hay».
+  // `miMatricula` es la de una cuenta real, así que cualquier vuelta por el curso
+  // —una captura, una prueba a mano— le deja avances dentro, y la comprobación
+  // fallaba por eso: encontraba dos filas y ninguna estaba mal.
   const { data: avanceLeido } = await cliente
     .from('avances')
     .select('id, estado')
     .eq('matricula_id', miMatricula)
-  comprobar('el avance queda guardado y lo leo', avanceLeido?.length === 1, JSON.stringify(avanceLeido))
+    .eq('leccion_id', leccion.id)
+  comprobar(
+    'el avance de la lección queda guardado y lo leo',
+    avanceLeido?.length === 1 && !!avanceLeido[0].estado,
+    JSON.stringify(avanceLeido)
+  )
 
   // --- Responder ---------------------------------------------------------------
   const { error: errResp } = await cliente.from('respuestas').insert({
@@ -308,6 +346,13 @@ try {
  */
 async function limpiar() {
   if (respuestaAjena) await admin.from('respuestas').delete().eq('id', respuestaAjena)
+  // La matricula ajena solo se borra si la abrio esta corrida. Si ya estaba, es
+  // de alguien y no se toca.
+  if (matriculaAjena && matriculaAjenaEsDeLaPrueba) {
+    await admin.from('avances').delete().eq('matricula_id', matriculaAjena)
+    await admin.from('respuestas').delete().eq('matricula_id', matriculaAjena)
+    await admin.from('matriculas').delete().eq('id', matriculaAjena)
+  }
   // Las respuestas de la prueba se van siempre; la matrícula, solo si la abrió
   // esta corrida.
   if (miMatricula) await admin.from('respuestas').delete().eq('matricula_id', miMatricula).eq('clave_paso', 'prueba')

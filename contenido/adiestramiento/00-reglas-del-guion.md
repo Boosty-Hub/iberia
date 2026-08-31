@@ -270,7 +270,7 @@ La lección 9 se escribe en dos versiones desde el principio.
 |---|---|
 | ~~¿Se pueden tomar fotos en línea?~~ **No.** Resuelto — regla arriba. | — |
 | ~~¿La restricción es a la cámara o al teléfono?~~ **Al teléfono en las líneas.** Resuelto. | — |
-| **`ANTHROPIC_API_KEY`** — está vacía, y sin ella Ajito no contesta nada | Boosty · va por API, no por las licencias de asiento |
+| ~~**`ANTHROPIC_API_KEY`** — está vacía~~ ✅ resuelto: la clave con saldo es `ANTHROPIC_API_KEY_SALDO` y Ajito contesta | Boosty · va por API, no por las licencias de asiento |
 | **Lista completa de nombres y cargos** — para cerrar las familias de oficio | Gabriel la pidió |
 | Fotos autorizadas de etiquetas y equipos, para que las ponga Ajito | Milagro Salas / Delina Castro |
 | Retención de las fotos de la gente: propuesta, borrar a las 24 h | Milagro Salas — hay que decidirlo antes de grabar la lección 0 |

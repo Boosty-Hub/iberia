@@ -1,6 +1,7 @@
 import 'server-only'
 import Anthropic from '@anthropic-ai/sdk'
 import { FAMILIAS_OFICIO, type FamiliaOficio } from '@/lib/adiestramiento'
+import { claveAnthropic } from '@/lib/clave-anthropic'
 
 /**
  * Ajito contestando.
@@ -79,7 +80,10 @@ comedor o en el bus, con ruido alrededor.
 # Reglas que no se rompen
 
 **No tienes sexo y no lo declaras.** Nunca usas un adjetivo con género referido a ti:
-no dices «estoy listo» ni «estoy lista», dices «ya está» o «aquí estoy».
+no dices «estoy listo» ni «estoy lista», dices «ya está» o «aquí estoy». Donde más se
+te escapa es al saludar: **nunca «encantado» ni «encantada»**, ni «contento», ni
+«preparado», ni «seguro». Se saluda sin adjetivo: «Un gusto», «Qué bueno saberlo»,
+«Vamos con eso».
 
 **Tampoco le pones género a la persona.** No sabes si quien te escribe es hombre o
 mujer, y el nombre no te lo dice. No escribes «vas adelantado», «cuando estés listo»,
@@ -127,9 +131,15 @@ tal como lo escribas.`
 /** Lo que Ajito tiene que hacer en este ejercicio, y solo en este. */
 const INSTRUCCION: Record<string, string> = {
   // --- Lección 0 · bienvenida -------------------------------------------------
+  // El saludo es más corto que el resto de las devoluciones, pero no tanto como
+  // «dos o tres frases» hacía salir: a 23 palabras el audio dura diez segundos y
+  // se corta en seco. Y es donde más se le escapa el género —«encantado»—, así
+  // que aquí se le dice otra vez.
   apodo:
-    'Te acaba de decir cómo quiere que le digas. Salúdalo con ese nombre y dile que ' +
-    'así le vas a decir de aquí en adelante. Muy corto, dos o tres frases.',
+    'Te acaba de decir cómo quiere que le digas. Salúdalo con ese nombre, dile que así ' +
+    'le vas a decir de aquí en adelante, y ciérrale con que si después quiere que le ' +
+    'digas de otra forma, te lo dice y ya. Entre 30 y 45 palabras, y sin ningún ' +
+    'adjetivo sobre ti: ni «encantado» ni «encantada».',
   'primer-toque':
     'Es lo primero que te manda en la vida. Contéstale lo que te preguntó, de verdad y ' +
     'corto. Si no te preguntó nada, respóndele a lo que dijo. Y le haces notar que no ' +
@@ -274,7 +284,7 @@ export type Contexto = {
  * el sitio equivocado.
  */
 export type MotivoFallo =
-  /** Falta `ANTHROPIC_API_KEY`. */
+  /** No hay ninguna clave de Anthropic configurada — ver `lib/clave-anthropic.ts`. */
   | 'sin-configurar'
   /** La clave sirve, pero la cuenta no tiene crédito. Consola → Plans & Billing. */
   | 'sin-saldo'
@@ -290,9 +300,13 @@ export type Devolucion =
   | { ok: false; motivo: MotivoFallo; detalle?: string }
 
 export async function devolver(contexto: Contexto): Promise<Devolucion> {
-  if (!process.env.ANTHROPIC_API_KEY) return { ok: false, motivo: 'sin-configurar' }
+  // La clave se pasa explícita, no se deja al SDK. Sin esto tomaría
+  // `ANTHROPIC_API_KEY` del entorno —que es la que se quedó sin crédito— y el
+  // fallo llegaría como «sin-saldo» aunque en `.env.local` haya una que sirve.
+  const { clave } = claveAnthropic()
+  if (!clave) return { ok: false, motivo: 'sin-configurar' }
 
-  const cliente = new Anthropic()
+  const cliente = new Anthropic({ apiKey: clave })
 
   const instruccion = contexto.esCampo
     ? INSTRUCCION_CAMPO

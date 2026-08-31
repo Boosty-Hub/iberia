@@ -22,7 +22,10 @@
  *
  * Las reglas cazan la regresión; leer las devoluciones es la verificación.
  *
- * Necesita el servidor de desarrollo levantado y ANTHROPIC_API_KEY.
+ * Necesita el servidor de desarrollo levantado y una clave de Anthropic con
+ * saldo. Cual se usa lo decide `lib/clave-anthropic.ts`; aqui se dice en voz
+ * alta, porque el fallo mas caro de este script fue un «sin saldo» que era de
+ * la clave equivocada.
  */
 
 import { createClient } from '@supabase/supabase-js'
@@ -42,10 +45,16 @@ if (!URL_SUPA || !CLAVE_PUB || !SECRETO) {
   console.error('\n✖ Faltan las variables de Supabase en .env.local\n')
   process.exit(1)
 }
-if (!process.env.ANTHROPIC_API_KEY) {
-  console.error('\n✖ Falta ANTHROPIC_API_KEY en .env.local\n')
+/** El mismo orden que `lib/clave-anthropic.ts`. Manda la que tiene saldo. */
+const CLAVE_ANTHROPIC = ['ANTHROPIC_API_KEY_SALDO', 'ANTHROPIC_API_KEY'].find((n) =>
+  process.env[n]?.trim()
+)
+if (!CLAVE_ANTHROPIC) {
+  console.error('\n✖ No hay clave de Anthropic en .env.local.')
+  console.error('   Se busca ANTHROPIC_API_KEY_SALDO y, si no está, ANTHROPIC_API_KEY.\n')
   process.exit(1)
 }
+console.log(`\nClave de Anthropic: ${CLAVE_ANTHROPIC}`)
 
 const admin = createClient(URL_SUPA, SECRETO, { auth: { persistSession: false } })
 
