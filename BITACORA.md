@@ -121,10 +121,20 @@ misma tarde y lo rehízo entero**, y esto es lo que quedó — no lo de 32, que 
 - **«La decisión» se eliminó** a petición de Jesús. ⚠️ Con ella se fue el único sitio donde
   vivía lo que el comité aprueba al aprobar el documento; si hace falta, hay que buscarle
   casa.
-- **Las generadoras quedaron desconectadas, no borradas.** `GENERADAS` está vacío a
-  propósito; el código del mapa, las fichas y los anexos sigue en el script y
-  `contenido/informe/inventario-procesos.json` también. Volver a llenarlas del dato es
-  devolver la entrada al mapa.
+- **Las generadoras quedaron desconectadas, no borradas**, y se reconectan de una en una
+  a medida que se revisa cada sección. Al cierre del día iban **dos: «Cobertura del
+  levantamiento» y «El mapa de procesos»**. El resto sigue fuera de `GENERADAS`, con su
+  código en el script y `contenido/informe/inventario-procesos.json` en su sitio.
+  ⚠️ **«Las cifras del levantamiento» no es generada** —salía de `NUMEROS.md`, que ya no
+  existe en el taller, igual que `HALLAZGOS.md` y `MAPA.md`—; se recupera del respaldo.
+- Al reconectar, tres cosas que el dato desmintió: la cobertura por área se contaba solo
+  por `entrevistas.area_id` y daba 10 áreas «no escuchadas», cuando **varias sí están por
+  boca de quien asistió** —Laboratorio entre ellas—; ahora suma los participantes y son 5.
+  El mapa decía «treinta y seis sesiones» a mano cuando son 42. Y mezclaba los 11 procesos
+  que no se ejecutan con los 3 sin evidencia.
+- ⚠️ **Los enlaces del mapa a las fichas son ahora entre páginas.** Con una sección por
+  ruta, un `#ancla` a secas se queda en el mapa y no lleva a ninguna parte: el destino
+  tiene que ser `/informe/fichas-procesos#…`.
 
 ### El informe dejó de ser una sola página
 

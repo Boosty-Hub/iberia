@@ -97,7 +97,15 @@ function fecha(iso) {
   })
 }
 
-async function anexoSesiones() {
+/**
+ * Sección 02 · Cobertura del levantamiento.
+ *
+ * Era el anexo de sesiones. Como sección tiene que responder algo más que «qué
+ * se escuchó»: **qué quedó fuera**. Por eso cierra con las áreas de Iberia que
+ * no tienen ni una sesión — eso sale del dato, y es lo que un comité pregunta
+ * primero.
+ */
+async function coberturaDelLevantamiento() {
   const { data } = await admin
     .from('entrevistas')
     .select(
@@ -127,17 +135,55 @@ async function anexoSesiones() {
     } | ${gente || '—'} |`
   })
 
-  return `Todo lo levantado hasta la fecha, con su código, su fecha y quién estuvo. Las
-sesiones marcadas \`SES-\` son reuniones de comité y recorridos de planta; las \`ENT-\`
-son las entrevistas estructuradas que cuentan contra las ~25 que compromete el programa;
-las \`FOR-\` son formaciones y no cuentan contra esa meta.
 
-**${entrevistas.length} de ~25 entrevistas** · ${sesiones.length} sesiones en total ·
+  // Lo que no se escuchó importa tanto como lo que sí. Se excluye al equipo
+  // consultor, que no es un área de Iberia.
+  const { data: areas } = await admin.from('areas').select('id, nombre').order('nombre')
+  const { data: conArea } = await admin.from('entrevistas').select('area_id')
+  // Un área está cubierta si tiene sesión propia **o si alguien suyo estuvo en
+  // alguna**: la Jefatura de Laboratorio no tiene entrevista, pero su jefa
+  // condujo el recorrido de planta. Contar solo por `entrevistas.area_id` la
+  // daba por no escuchada, que es falso.
+  const { data: asistentes } = await admin
+    .from('sesion_participantes')
+    .select('personas(area_id)')
+  const conSesion = new Set((conArea ?? []).map((e) => e.area_id).filter(Boolean))
+  for (const a of asistentes ?? []) {
+    if (a.personas?.area_id) conSesion.add(a.personas.area_id)
+  }
+
+  const deIberia = (areas ?? []).filter((a) => !/Boosty|consultor/i.test(a.nombre))
+  const sinSesion = deIberia.filter((a) => !conSesion.has(a.id))
+  const cubiertas = deIberia.length - sinSesion.length
+
+  const hueco = sinSesion.length
+    ? [
+        '',
+        '## Lo que quedó fuera',
+        '',
+        `**${cubiertas} de las ${deIberia.length} áreas** de la estructura estuvieron en alguna sesión, con entrevista propia o a través de alguien de su equipo. Las ${sinSesion.length} que no:`,
+        '',
+        ...sinSesion.map((a) => `- ${a.nombre}`),
+        '',
+        'No todas pesan igual: varias son jefaturas dentro de una dirección que sí se entrevistó, y lo suyo se recogió por boca de quien las dirige. Pero ninguna afirmación de este documento se apoya en una fuente propia de estas áreas.',
+      ].join('\n')
+    : ''
+
+
+  return `Este capítulo dice **qué se escuchó y qué no**, porque todo lo que viene después se
+apoya en eso. Las sesiones marcadas \`SES-\` son reuniones de comité y recorridos de planta;
+las \`ENT-\` son las entrevistas estructuradas que cuentan contra las ~25 que compromete el
+programa; las \`FOR-\` son formaciones y no cuentan contra esa meta.
+
+**${entrevistas.length} entrevistas** —el programa comprometía ~25— · ${sesiones.length} sesiones en total ·
 ${Math.round(minutos / 60)} horas de grabación · **${(turnos ?? 0).toLocaleString('es-VE')} turnos** transcritos.
+
+## El registro completo
 
 | Código | Fecha | Quién | Área | Sede | Duración | Participantes |
 |---|---|---|---|---|---|---|
 ${filas.join('\n')}
+${hueco}
 
 > Las transcripciones completas están en el módulo de entrevistas del panel. Cada
 > afirmación de este informe que provenga de una sesión lleva su cita textual y el
@@ -503,6 +549,13 @@ function tituloDeFicha(macro) {
   return `${macro.nivel} ${macro.numero} · ${macro.nombre}`
 }
 
+/**
+ * ⚠️ El enlace del mapa a una ficha es **entre páginas**: desde que cada sección
+ * del informe es su propia ruta, un `#ancla` a secas se queda en el mapa y no
+ * lleva a ninguna parte. El destino es la página de las fichas más el ancla.
+ */
+const RUTA_FICHAS = '/informe/fichas-procesos'
+
 function anclaDe(macro) {
   // Un slugger nuevo por llamada: el que se reutiliza numera los repetidos
   // (`-1`, `-2`) y el enlace dejaría de casar con el encabezado.
@@ -559,22 +612,33 @@ function conteoPorNivel(macros) {
 async function mapaDeProcesos() {
   if (!INVENTARIO) return null
   const macros = INVENTARIO.macroprocesos
+  const { count: sesiones } = await admin
+    .from('entrevistas')
+    .select('*', { count: 'exact', head: true })
   const totalN1 = macros.reduce((t, m) => t + m.procesos.length, 0)
   const nuevos = macros.filter((m) => m.nuevo)
-  const fuera = macros.reduce((t, m) => t + m.no_se_hace.length, 0)
+  const noEjecutan = macros.reduce(
+    (t, m) => t + m.no_se_hace.filter((x) => x.estado === 'NO SE EJECUTA').length,
+    0
+  )
+  const sinEvidencia = macros.reduce(
+    (t, m) => t + m.no_se_hace.filter((x) => x.estado === 'SIN EVIDENCIA').length,
+    0
+  )
 
   const l = []
   l.push(
     'Este mapa es el índice del documento. No describe lo que la empresa debería hacer: ' +
-      'recoge lo que hace hoy, validado contra las treinta y seis sesiones del levantamiento. ' +
+      `recoge lo que hace hoy, validado contra las ${sesiones ?? 0} sesiones del levantamiento. ` +
       `Son **${macros.length} macroprocesos** y **${totalN1} procesos** de primer nivel.`
   )
   l.push('')
   l.push(
     `El inventario de partida tenía 14 macroprocesos y 47 procesos. Al contrastarlo con lo que ` +
-      `dijeron las personas que los ejecutan, **${nuevos.length} macroprocesos aparecieron enteros** y ` +
-      `${fuera} procesos documentados resultaron no ejecutarse. Esos ${fuera} no cuentan aquí: cada uno ` +
-      'está al pie de la ficha de su macroproceso, bajo «Lo que NO se hace».'
+      `dijeron las personas que los ejecutan, **${nuevos.length} macroprocesos aparecieron enteros**, ` +
+      `**${noEjecutan} procesos documentados resultaron no ejecutarse** y de otros ${sinEvidencia} no quedó ` +
+      `evidencia alguna. Esos ${noEjecutan + sinEvidencia} no cuentan aquí: cada uno está al pie de la ficha ` +
+      'de su macroproceso, bajo «Lo que NO se hace».'
   )
   l.push('')
   l.push('| Nivel | Macroprocesos | Procesos | De ellos, nuevos |')
@@ -597,7 +661,7 @@ async function mapaDeProcesos() {
     }
     const marca = m.nuevo ? ' · **nuevo**' : ''
     l.push(
-      `**${m.numero}. [${m.nombre}](#${anclaDe(m)})** — ${m.procesos.length} procesos${marca}`
+      `**${m.numero}. [${m.nombre}](${RUTA_FICHAS}#${anclaDe(m)})** — ${m.procesos.length} procesos${marca}`
     )
     l.push('')
   }
@@ -739,7 +803,12 @@ async function anexoProcesos() {
 // siguen ahí arriba, y `contenido/informe/inventario-procesos.json` también—,
 // así que volver a llenarlas del dato es devolver la entrada a este mapa, no
 // reescribir nada. Mientras esté vacío, ninguna sección se autogenera.
-const GENERADAS = {}
+const GENERADAS = {
+  // Reconectadas paso a paso, a medida que se revisa cada una. El resto sigue
+  // desconectado: sus generadoras están escritas arriba y esperan su turno.
+  cobertura: coberturaDelLevantamiento,
+  'mapa-procesos': mapaDeProcesos,
+}
 
 /**
  * Las secciones de prosa. Las que reciben hallazgos los pegan debajo de su
