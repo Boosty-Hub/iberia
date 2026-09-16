@@ -69,3 +69,10 @@ desktop.ini
 # aplicación es en el bucket privado, no en el repositorio.
 /contenido/adiestramiento/audio/
 /contenido/adiestramiento/fichas/
+
+# Insumos del levantamiento (confidencial): las notas de entrevista con sus citas
+# textuales, los organigramas, los inventarios de procesos y los respaldos del
+# informe. Misma razón que `/contenido/*` — es material de Iberia bajo NDA, y en
+# `notas-entrevistas/` está además ENT-005, que se grabó sin consentimiento y no
+# puede citarse en ninguna parte.
+/Insumos/

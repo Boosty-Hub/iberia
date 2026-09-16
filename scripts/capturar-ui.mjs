@@ -63,6 +63,9 @@ const PAGINAS = [
   { nombre: '09-informe-seccion', ruta: '/dashboard/informe/resumen-ejecutivo' },
   { nombre: '10-usuarios', ruta: '/dashboard/usuarios' },
   { nombre: '11-informe', ruta: '/informe' },
+  // Cada sección del informe es su propia página; esta es una cualquiera, para
+  // que el recorrido no se quede solo en la portada.
+  { nombre: '11b-informe-seccion', ruta: '/informe/mapa-procesos' },
   { nombre: '12-programa', ruta: '/dashboard/programa' },
   { nombre: '13-empleados', ruta: '/dashboard/empleados' },
 ]

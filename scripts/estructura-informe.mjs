@@ -3,17 +3,21 @@
  * pueden llenar solas.
  *
  *   npm run informe:estructura
- *   npm run informe:estructura -- --revisar
+ *   npm run informe:estructura -- --revisar   # dice qué haría, sin escribir
+ *   npm run informe:estructura -- --rehacer   # reescribe la prosa desde el taller
+ *   npm run informe:estructura -- --podar     # borra las huérfanas que estén vacías
  *
  * Hace tres cosas y en este orden importa:
  *
- *   npm run informe:estructura -- --rehacer   # reescribe la prosa desde el taller
- *
- *  1. **La estructura.** Crea o actualiza las 28 secciones con su número, parte y
- *     subtítulo. Idempotente por `slug`.
- *  2. **Las secciones de datos** —los tres anexos que salen de la base— se
- *     **regeneran siempre**: son el reflejo del dato, no prosa. Si alguien las
- *     edita a mano, la próxima corrida las pisa, y así debe ser.
+ *  1. **La estructura.** Crea o actualiza las 32 secciones con su número, parte y
+ *     subtítulo. Idempotente por `slug`. Las que quedan fuera del armazón no se
+ *     borran solas: `--podar` se lleva las vacías y **nunca** las que tienen texto.
+ *  2. **Las secciones de datos** se **regeneran siempre**: son el reflejo del
+ *     dato, no prosa. Si alguien las edita a mano, la próxima corrida las pisa, y
+ *     así debe ser. Son los anexos que salen de la base y, desde el armazón del
+ *     16 de septiembre, el **mapa de procesos**, las **veinte fichas** y su anexo,
+ *     que salen del inventario V2. ⚠️ Una generadora sin fuente **no escribe**:
+ *     devolver `null` guardaba la sección vacía y borraba lo que ya estaba.
  *  3. **Las secciones de prosa** salen de `contenido/informe/`, que es el taller
  *     donde se redactan, y se escriben **solo si están vacías**. En cuanto alguien
  *     las toca desde `/dashboard/informe`, el editor manda. Con `--rehacer` se
@@ -26,6 +30,7 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { readFileSync } from 'node:fs'
+import GithubSlugger from 'github-slugger'
 import { resolve } from 'node:path'
 
 const admin = createClient(
@@ -38,56 +43,42 @@ const revisar = process.argv.includes('--revisar')
 // Fuerza a reescribir las secciones de prosa desde el taller, pisando lo que
 // haya en el editor. Solo cuando se quiere justamente eso.
 const rehacer = process.argv.includes('--rehacer')
+// Borra las secciones que quedaron fuera del armazón nuevo **y están vacías**.
+// Las huérfanas con texto no se borran ni con esto.
+const podar = process.argv.includes('--podar')
 
 // =============================================================================
 // 1) LA ESTRUCTURA
 // =============================================================================
 
 const SECCIONES = [
-  // --- Portada ---------------------------------------------------------------
-  ['portada', 'resumen-ejecutivo', 'Resumen ejecutivo', 'Qué encontramos y qué proponemos, en dos páginas'],
-  ['portada', 'como-leer', 'Cómo leer este informe', 'El recorrido: del levantamiento a la arquitectura'],
+  // --- Apertura --------------------------------------------------------------
+  ['portada', 'resumen-ejecutivo', 'Resumen ejecutivo', 'El encargo, qué encontramos y qué proponemos'],
 
   // --- Levantamiento ---------------------------------------------------------
-  ['levantamiento', 'punto-de-partida', 'El punto de partida', 'La decisión del comité gerencial y el encargo'],
-  ['levantamiento', 'metodo', 'Cómo se hizo el levantamiento', 'Sesiones, entrevistas, recorridos y fuentes consultadas'],
-  ['levantamiento', 'la-empresa', 'Industrias Iberia hoy', 'El negocio, el portafolio y la planta de Cagua'],
-  ['levantamiento', 'mapa-organizacion', 'Mapa de la organización', 'Direcciones, gerencias y quién decide qué'],
-  // NUEVA · el hallazgo más repetido del levantamiento no es tecnológico
-  ['levantamiento', 'dependencias', 'De quién depende cada proceso', 'Los procesos que hoy viven en una sola cabeza'],
-  ['levantamiento', 'procesos-clave', 'Del pedido al cobro', 'Los procesos que sostienen la operación'],
-  ['levantamiento', 'sistemas-datos', 'Sistemas, datos y conectividad', 'Qué vive en el ERP, qué vive fuera y dónde nace cada dato'],
-  // NUEVA · qué dato existe de verdad, y desde cuándo
-  ['levantamiento', 'estado-del-dato', 'El estado del dato', 'Qué hay, qué es confiable y desde cuándo'],
-  ['levantamiento', 'cuellos-botella', 'Cuellos de botella y trabajo manual', 'Dónde se pierde tiempo, trazabilidad y margen'],
-  ['levantamiento', 'madurez', 'Madurez digital y disposición al cambio', 'El punto de partida de las personas, no solo el de la tecnología'],
-  ['levantamiento', 'restricciones', 'Restricciones y condiciones de borde', 'Lo que el contexto país, el ERP y la seguridad imponen'],
-  // NUEVA · una sola sección de citas, y solo lo que mueve la aguja
-  ['levantamiento', 'en-sus-palabras', 'En sus palabras', 'Lo que nos dijeron, y por qué importa'],
+  // El orden es el del argumento, y va por pares: una sección afirma y la
+  // siguiente la respalda. Cobertura dice cuánto se escuchó y las cifras qué se
+  // midió; «Sistemas y estado del dato» argumenta y el inventario lo enseña.
+  ['levantamiento', 'cobertura', 'Cobertura del levantamiento', 'Qué se cubrió, con quién y con qué profundidad'],
+  ['levantamiento', 'cifras', 'Las cifras del levantamiento', 'Solo lo que alguien dijo explícitamente, con su fuente'],
+  ['levantamiento', 'mapa-procesos', 'El mapa de procesos', 'El índice vivo: veinte macroprocesos y los procesos que se ejecutan hoy'],
+  // Absorbe el informe de levantamiento por área: la ficha corta por proceso y
+  // lleva dentro «Quién lo contó». Dos cortes del mismo material se
+  // desincronizan en cuanto alguien edita uno.
+  ['levantamiento', 'fichas-procesos', 'Las fichas de proceso', 'Una por macroproceso: qué hace, quién lo ejecuta, quién lo contó y qué le falta'],
+  ['levantamiento', 'sistemas-datos', 'Sistemas y estado del dato', 'Qué vive en el ERP, qué vive fuera y qué dato es confiable'],
+  ['levantamiento', 'inventario-sistemas', 'Inventario de sistemas', 'Sistema por sistema, con su dueño, su estado y su rastro'],
+  ['levantamiento', 'riesgo-continuidad', 'Riesgo y continuidad', 'El incidente de febrero visto desde treinta y cuatro entrevistas'],
+  // La bisagra: todo lo anterior los construye, todo lo posterior actúa sobre ellos.
+  ['levantamiento', 'hallazgos', 'Los hallazgos', 'Lo que encontramos, cada uno con su cita'],
 
   // --- Arquitectura ----------------------------------------------------------
-  ['arquitectura', 'principios', 'Principios de arquitectura', 'El núcleo protegido, las dos vías y la aprobación humana'],
-  ['arquitectura', 'arquitectura-ia', 'Arquitectura de IA propuesta', 'El plano completo: capas, flujos de datos y conexiones al núcleo'],
-  ['arquitectura', 'modulos', 'Módulos priorizados', 'Qué se construye, en qué orden y por qué ese orden'],
-  // NUEVA · la propuesta promete decir «dónde interviene la IA y dónde no»
+  // Primero qué se puede hacer y qué no, después con qué reglas, y solo entonces
+  // el plano. Al revés, el plano parece la respuesta antes de la pregunta.
+  ['arquitectura', 'oportunidades', 'Las oportunidades, priorizadas', 'Impacto, costo, dependencias y disponibilidad del dato'],
   ['arquitectura', 'donde-no-va-la-ia', 'Dónde no va la IA', 'Lo que se resuelve sin un modelo, y por qué decirlo importa'],
-  ['arquitectura', 'gobierno-datos', 'Gobierno de datos y seguridad', 'Accesos, licenciamiento, trazabilidad y protección del núcleo'],
-  ['arquitectura', 'hoja-de-ruta', 'Hoja de ruta fases 2 a 4', 'Secuencia, dependencias y puntos de control'],
-  ['arquitectura', 'inversion-retorno', 'Inversión y retorno estimado', 'Costo por módulo y beneficio esperado'],
-  ['arquitectura', 'supuestos-riesgos', 'Supuestos y riesgos', 'Qué debe validar la dirección antes de dimensionar la Fase 2'],
-  // NUEVA · la cláusula 7 hace de este documento la condición para la Fase 2
-  ['arquitectura', 'la-decision', 'La decisión', 'Qué aprueba el comité al aprobar este documento'],
-
-  // --- Anexos ----------------------------------------------------------------
-  ['anexos', 'anexo-sesiones', 'Anexo · Sesiones y entrevistas', 'Registro de todo lo levantado, con fecha y participantes'],
-  // NUEVA · entregable contractual de la cláusula 5 que no tenía dónde vivir
-  ['anexos', 'anexo-levantamientos', 'Anexo · Informes de levantamiento por área', 'Un informe por área, con lo que dijo cada quien'],
-  // Ya no es un volcado de las 236 observaciones crudas: eso vive en el panel.
-  // Acá va el índice de los hallazgos redactados, para poder navegarlos.
-  ['anexos', 'anexo-hallazgos', 'Anexo · Índice de hallazgos', 'Los veintiocho, con su sección y su impacto'],
-  // NUEVA · las cifras que sostienen el informe, con su fuente
-  ['anexos', 'anexo-cifras', 'Anexo · Las cifras del levantamiento', 'Solo lo que alguien dijo explícitamente'],
-  ['anexos', 'anexo-inventario', 'Anexo · Inventario de sistemas y archivos', 'Fuentes documentales del levantamiento'],
+  ['arquitectura', 'arquitectura-ia', 'La arquitectura propuesta', 'El plano completo: capas, flujos de datos y conexiones al núcleo'],
+  ['arquitectura', 'hoja-de-ruta', 'Hoja de ruta', 'Fases siguientes: secuencia, dependencias y puntos de control'],
 ]
 
 // =============================================================================
@@ -295,6 +286,11 @@ function indiceDeHallazgos() {
     .sort()
     .map(([c, titulo]) => `| **${c}** | ${titulo} | ${seccionDe.get(c) ?? '—'} |`)
 
+  // Sin `HALLAZGOS.md` en el taller la tabla sale vacía, y un anexo con la
+  // introducción y cero filas no es un anexo: es el anterior, borrado. Sin
+  // hallazgos que indexar no se escribe nada y se conserva lo que hubiera.
+  if (!filas.length) return null
+
   return `Los veintiocho hallazgos redactados de la primera ronda, con la sección del informe
 donde vive cada uno. Se numeran de corrido para poder citarlos en las reuniones y en el
 plan de las fases siguientes: «lo de H-04» tiene que querer decir lo mismo para todo el
@@ -470,11 +466,280 @@ En todas ellas, **el primer entregable no es un modelo: es el registro.**`
 
 // =============================================================================
 
-const GENERADAS = {
-  'anexo-sesiones': anexoSesiones,
-  'anexo-hallazgos': async () => indiceDeHallazgos(),
-  'anexo-inventario': anexoInventario,
+// =============================================================================
+// EL MAPA DE PROCESOS Y LAS VEINTE FICHAS
+// =============================================================================
+//
+// Salen del inventario V2 —`contenido/informe/inventario-procesos.json`—, que es
+// el volcado del Excel que valida el mapa contra las 36 sesiones. Son reflejo del
+// dato: se regeneran en cada corrida y no se editan desde el editor.
+//
+// **Solo entran los procesos vigentes.** Los que están en el papel y no se
+// ejecutan, y los que nadie nombró, quedan fuera del mapa y del conteo; viven al
+// pie de la ficha de su macroproceso, bajo «Lo que NO se hace». Se decidió así
+// porque una ausencia suelta en un anexo no es un hallazgo: pegada al proceso al
+// que le falta, sí.
+
+const INVENTARIO = (() => {
+  const crudo = leerTaller('inventario-procesos.json')
+  if (!crudo) return null
+  try {
+    return JSON.parse(crudo)
+  } catch (e) {
+    console.error(`✖ inventario-procesos.json no se pudo leer: ${e.message}`)
+    return null
+  }
+})()
+
+/**
+ * El título de la ficha de un macroproceso, y el ancla a la que apunta el mapa.
+ *
+ * ⚠️ El ancla **no se escribe**: la pone `rehype-slug` a partir del texto del
+ * encabezado, y acá se calcula con el mismo `github-slugger` para que coincidan.
+ * Un `<a id="…">` en el markdown no sirve — `react-markdown` descarta el HTML
+ * crudo y el enlace queda muerto sin que nada avise.
+ */
+function tituloDeFicha(macro) {
+  return `${macro.nivel} ${macro.numero} · ${macro.nombre}`
 }
+
+function anclaDe(macro) {
+  // Un slugger nuevo por llamada: el que se reutiliza numera los repetidos
+  // (`-1`, `-2`) y el enlace dejaría de casar con el encabezado.
+  return new GithubSlugger().slug(tituloDeFicha(macro))
+}
+
+/**
+ * El dueño del macroproceso: quien lleva más procesos, no la lista de todos.
+ *
+ * Capital Humano tiene nueve áreas distintas repartidas en once procesos, así que
+ * enumerarlas todas no dice quién manda ahí — dice que nadie manda, que es otra
+ * cosa y se escribe en la prosa. El reparto fino ya está en la tabla de abajo.
+ *
+ * Se descartan las anotaciones que el inventario trae en el campo de área
+ * («Lo ejecuta TI (debería ser Nómina)»): son el hallazgo de un proceso suelto,
+ * no el dueño del macroproceso.
+ */
+function duenosDe(macro) {
+  const cuenta = new Map()
+  for (const p of macro.procesos) {
+    const a = (p.area ?? '').trim()
+    if (!a || a === '—') continue
+    if (/deber[íi]a|custodiad|lo ejecuta/i.test(a)) continue
+    cuenta.set(a, (cuenta.get(a) ?? 0) + 1)
+  }
+  const orden = [...cuenta.entries()].sort((x, y) => y[1] - x[1])
+  if (!orden.length) return '`sin dueño identificado en el levantamiento`'
+
+  const principales = orden.filter(([, n]) => n > 1).slice(0, 3)
+  const lista = (principales.length ? principales : orden.slice(0, 2)).map(
+    ([a, n]) => (n > 1 ? `**${a}** (${n})` : `**${a}**`)
+  )
+  const resto = orden.length - lista.length
+  return resto > 0
+    ? `${lista.join(' · ')} · y ${resto} área${resto > 1 ? 's' : ''} más, en la tabla`
+    : lista.join(' · ')
+}
+
+/** El recuento por nivel, que es lo primero que se mira del mapa. */
+function conteoPorNivel(macros) {
+  const filas = []
+  for (const nivel of ['Estratégico', 'Operativo', 'Soporte']) {
+    const sub = macros.filter((m) => m.nivel === nivel)
+    filas.push({
+      nivel,
+      macros: sub.length,
+      procesos: sub.reduce((t, m) => t + m.procesos.length, 0),
+      nuevos: sub.filter((m) => m.nuevo).length,
+    })
+  }
+  return filas
+}
+
+async function mapaDeProcesos() {
+  if (!INVENTARIO) return null
+  const macros = INVENTARIO.macroprocesos
+  const totalN1 = macros.reduce((t, m) => t + m.procesos.length, 0)
+  const nuevos = macros.filter((m) => m.nuevo)
+  const fuera = macros.reduce((t, m) => t + m.no_se_hace.length, 0)
+
+  const l = []
+  l.push(
+    'Este mapa es el índice del documento. No describe lo que la empresa debería hacer: ' +
+      'recoge lo que hace hoy, validado contra las treinta y seis sesiones del levantamiento. ' +
+      `Son **${macros.length} macroprocesos** y **${totalN1} procesos** de primer nivel.`
+  )
+  l.push('')
+  l.push(
+    `El inventario de partida tenía 14 macroprocesos y 47 procesos. Al contrastarlo con lo que ` +
+      `dijeron las personas que los ejecutan, **${nuevos.length} macroprocesos aparecieron enteros** y ` +
+      `${fuera} procesos documentados resultaron no ejecutarse. Esos ${fuera} no cuentan aquí: cada uno ` +
+      'está al pie de la ficha de su macroproceso, bajo «Lo que NO se hace».'
+  )
+  l.push('')
+  l.push('| Nivel | Macroprocesos | Procesos | De ellos, nuevos |')
+  l.push('| --- | ---: | ---: | ---: |')
+  for (const f of conteoPorNivel(macros)) {
+    l.push(`| ${f.nivel} | ${f.macros} | ${f.procesos} | ${f.nuevos} |`)
+  }
+  l.push(
+    `| **Total** | **${macros.length}** | **${totalN1}** | **${nuevos.length}** |`
+  )
+  l.push('')
+
+  let nivelActual = ''
+  for (const m of macros) {
+    if (m.nivel !== nivelActual) {
+      nivelActual = m.nivel
+      l.push('')
+      l.push(`### ${nivelActual}`)
+      l.push('')
+    }
+    const marca = m.nuevo ? ' · **nuevo**' : ''
+    l.push(
+      `**${m.numero}. [${m.nombre}](#${anclaDe(m)})** — ${m.procesos.length} procesos${marca}`
+    )
+    l.push('')
+  }
+
+  if (nuevos.length) {
+    l.push('')
+    l.push('### Los macroprocesos que el inventario no recogía')
+    l.push('')
+    l.push(
+      'Ninguno de estos seis es una propuesta: los seis se ejecutan hoy y ninguno tenía sitio en el ' +
+        'mapa anterior. Que un macroproceso completo no estuviera en el papel es, por sí solo, un hallazgo.'
+    )
+    l.push('')
+    for (const m of nuevos) {
+      l.push(`- **${m.nombre}** *(${m.nivel})* — ${m.procesos.length} procesos`)
+    }
+    l.push('')
+  }
+
+  return l.join('\n')
+}
+
+async function fichasDeProceso() {
+  if (!INVENTARIO) return null
+  const macros = INVENTARIO.macroprocesos
+
+  const l = []
+  l.push(
+    'Una ficha por macroproceso, con el mismo formato en las veinte. Es el formato el que hace el ' +
+      'trabajo: cuando todas las fichas responden a las mismas preguntas, lo que falta en una se ve ' +
+      'sin tener que buscarlo.'
+  )
+  l.push('')
+  l.push(
+    'La regla de escritura es que **cada línea sostenga un hallazgo**. Si una línea solo describe, sobra: ' +
+      'este documento no es un manual de procesos y las guías de entrevista dicen explícitamente que no ' +
+      'lo estamos produciendo.'
+  )
+  l.push('')
+
+  let nivelActual = ''
+  for (const m of macros) {
+    if (m.nivel !== nivelActual) {
+      nivelActual = m.nivel
+      l.push('')
+      l.push(`## ${nivelActual}`)
+      l.push('')
+    }
+
+    l.push('')
+    l.push(`### ${tituloDeFicha(m)}`)
+    if (m.nuevo) {
+      l.push('')
+      l.push('> **Macroproceso nuevo.** No figuraba en el inventario de partida.')
+    }
+    l.push('')
+    l.push('**Qué hace hoy** — `pendiente de redactar · tres líneas, y cada una con su hallazgo`')
+    l.push('')
+    l.push(`**Quién lo ejecuta** — ${duenosDe(m)}`)
+    l.push('')
+    l.push('**Sistemas** — `pendiente · qué vive en JD, qué en Excel y qué en ningún sitio`')
+    l.push('')
+    l.push('**Dato disponible** — `pendiente · sí / parcial / no, y desde cuándo`')
+    l.push('')
+    l.push(`**Procesos (${m.procesos.length})**`)
+    l.push('')
+    l.push('| Proceso | Área que lo ejecuta |')
+    l.push('| --- | --- |')
+    for (const p of m.procesos) {
+      const area = p.dueno_corregido ? `${p.area} ⟵ *dueño corregido*` : p.area || '—'
+      l.push(`| ${p.nombre} | ${area} |`)
+    }
+    l.push('')
+    l.push('**Hallazgos** — `pendiente · los que sostiene este macroproceso, con su cita textual`')
+
+    if (m.no_se_hace.length) {
+      l.push('')
+      l.push('**Lo que NO se hace**')
+      l.push('')
+      for (const p of m.no_se_hace) {
+        const marca = p.estado === 'SIN EVIDENCIA' ? 'sin evidencia' : 'no se ejecuta'
+        const fuente = p.fuente && p.fuente !== '—' ? ` *(${p.fuente})*` : ''
+        l.push(`- **${p.nombre}** · ${marca} — ${p.observacion}${fuente}`)
+      }
+    }
+    l.push('')
+    l.push('---')
+  }
+
+  return l.join('\n')
+}
+
+async function anexoProcesos() {
+  if (!INVENTARIO) return null
+  const macros = INVENTARIO.macroprocesos
+  const totalN1 = macros.reduce((t, m) => t + m.procesos.length, 0)
+
+  const l = []
+  l.push(
+    `El inventario completo detrás del mapa y de las fichas: **${totalN1} procesos vigentes** en ` +
+      `**${macros.length} macroprocesos**, con el área que ejecuta cada uno y la sesión donde se levantó.`
+  )
+  l.push('')
+  l.push(
+    'La columna de área es la **real**, la que dijo quien lo hace, que no siempre coincide con la que ' +
+      'asignaba el organigrama. Donde difiere va marcada.'
+  )
+  l.push('')
+  l.push(
+    `Fuente: \`${INVENTARIO.fuente}\`. Los procesos documentados que no se ejecutan están en la hoja ` +
+      '«No vigentes» de ese archivo y al pie de cada ficha, no aquí.'
+  )
+  l.push('')
+
+  for (const m of macros) {
+    l.push('')
+    l.push(`### ${m.nivel} ${m.numero} · ${m.nombre}${m.nuevo ? ' *(nuevo)*' : ''}`)
+    l.push('')
+    l.push('| # | Proceso | Área que lo ejecuta | Fuente |')
+    l.push('| ---: | --- | --- | --- |')
+    for (const [i, p] of m.procesos.entries()) {
+      const area = p.dueno_corregido ? `${p.area} ⟵ corregido` : p.area || '—'
+      l.push(`| ${i + 1} | ${p.nombre} | ${area} | ${p.fuente || '—'} |`)
+    }
+    l.push('')
+  }
+
+  return l.join('\n')
+}
+
+// =============================================================================
+
+// ⚠️ **Desconectadas a propósito el 16 de septiembre de 2026.** El armazón se
+// dejó en blanco por decisión del cliente: las trece secciones se escriben desde
+// cero contra el levantamiento, sin relleno que revisar.
+//
+// Las generadoras **no se borraron** —`mapaDeProcesos`, `fichasDeProceso`,
+// `anexoProcesos`, `anexoSesiones`, `indiceDeHallazgos` y `anexoInventario`
+// siguen ahí arriba, y `contenido/informe/inventario-procesos.json` también—,
+// así que volver a llenarlas del dato es devolver la entrada a este mapa, no
+// reescribir nada. Mientras esté vacío, ninguna sección se autogenera.
+const GENERADAS = {}
 
 /**
  * Las secciones de prosa. Las que reciben hallazgos los pegan debajo de su
@@ -537,6 +802,7 @@ let reordenadas = 0
 let generadas = 0
 let escritas = 0
 let respetadas = 0
+const sinFuente = []
 
 for (const [i, [parte, slug, titulo, subtitulo]] of SECCIONES.entries()) {
   const numero = String(i + 1).padStart(2, '0')
@@ -546,8 +812,18 @@ for (const [i, [parte, slug, titulo, subtitulo]] of SECCIONES.entries()) {
   let contenido
   if (GENERADAS[slug]) {
     // Los anexos se regeneran siempre: son el reflejo de la base.
-    contenido = await GENERADAS[slug]()
-    generadas++
+    //
+    // ⚠️ Salvo que la generadora no tenga con qué. Devolvía `null` cuando le
+    // faltaba su archivo del taller, y `null` no es `undefined`: la sección se
+    // guardaba vacía y se perdía lo que ya estaba escrito. Sin fuente no se
+    // escribe nada y se deja lo que haya.
+    const generado = await GENERADAS[slug]()
+    if (generado && generado.trim()) {
+      contenido = generado
+      generadas++
+    } else {
+      sinFuente.push(slug)
+    }
   } else if (BORRADORES[slug]) {
     if (previa?.contenido_md?.trim() && !rehacer) {
       // Alguien ya escribió aquí. El editor manda.
@@ -597,10 +873,39 @@ console.log(
       `${generadas} anexos regenerados · ${escritas} borradores escritos · ${respetadas} respetadas por tener contenido\n`
 )
 
-if (huerfanas.length) {
-  console.log('⚠️  Fuera de la estructura, no se borraron por si tienen contenido:')
-  for (const h of huerfanas) console.log(`     · ${h.slug}`)
+if (sinFuente.length) {
+  console.log('Sin fuente para regenerarse — se dejó intacto lo que tenían:')
+  for (const s of sinFuente) console.log(`     · ${s}`)
   console.log('')
+}
+
+if (huerfanas.length) {
+  // Una huérfana vacía es un resto del armazón anterior y estorba en el editor.
+  // Una huérfana con texto es trabajo de alguien: esa no se toca ni con --podar.
+  const vacias = huerfanas.filter((h) => !(h.contenido_md ?? '').trim())
+  const conTexto = huerfanas.filter((h) => (h.contenido_md ?? '').trim())
+
+  if (podar && vacias.length && !revisar) {
+    await admin
+      .from('informe_secciones')
+      .delete()
+      .in('id', vacias.map((v) => v.id))
+    console.log(`Podadas ${vacias.length} secciones huérfanas y vacías:`)
+    for (const v of vacias) console.log(`     · ${v.slug}`)
+    console.log('')
+  } else if (vacias.length) {
+    console.log('Fuera de la estructura y vacías — se van con --podar:')
+    for (const v of vacias) console.log(`     · ${v.slug}`)
+    console.log('')
+  }
+
+  if (conTexto.length) {
+    console.log('⚠️  Fuera de la estructura pero CON contenido, no se borran nunca:')
+    for (const h of conTexto) {
+      console.log(`     · ${h.slug} · ${h.contenido_md.trim().length} caracteres`)
+    }
+    console.log('')
+  }
 }
 
 console.log('Todo entra sin publicar. Se publica a mano desde /dashboard/informe.\n')

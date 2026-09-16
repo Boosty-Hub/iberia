@@ -376,11 +376,12 @@ todo de Fase 2 y no bloquea nada de la Fase 1:
 
 ## 7 · Documento de Arquitectura de IA · **vence 6 de diciembre**
 
-**28 secciones, 15 con contenido y ninguna publicada.** Ya están escritos el método, «De
-quién depende cada proceso» y «El estado del dato», los 28 hallazgos redactados van
-repartidos adentro, y los tres anexos —sesiones, hallazgos e inventario— **se regeneran
-solos de la base** cada vez que corre `informe:estructura`. Nada se publica hasta que los
-hallazgos estén validados.
+**13 secciones, todas en blanco y ninguna publicada.** El 16 de septiembre Jesús mandó
+vaciar el documento entero —los 155.232 caracteres eran relleno anterior al procesamiento de
+las entrevistas— y rehacer el armazón: tres partes, sin anexos, con el índice a la izquierda.
+Está respaldado en `Insumos/Respaldo_Informe_2026-09-16_antes-de-vaciar` y la restauración
+está probada. **Ninguna sección se autogenera**: las generadoras quedaron desconectadas a
+propósito.
 
 🔴 **Y lo que hoy le falta al documento no es estructura: es la mitad administrativa de la
 empresa.** Los 28 hallazgos redactados salen todos de la cadena física, porque son los
@@ -395,9 +396,11 @@ el comité antes de continuar con las fases siguientes»*.
 
 | Qué falta | De quién |
 |---|---|
-| ~~Cerrar la estructura~~ **Hecha: 28 secciones.** Se añadieron «De quién depende cada proceso», «El estado del dato», «Dónde no va la IA», «La decisión», «En sus palabras», el anexo de cifras y el de informes de levantamiento por área | ✅ |
+| ~~Cerrar la estructura~~ **Rehecha el 16 de septiembre: 13 secciones en blanco.** Sin anexos; lo que era anexo se volvió sección, pegado al argumento que sostiene. El informe por área lo absorbe «Las fichas de proceso» | ✅ |
+| **Escribir las trece.** Empezando por las cinco que salen del dato y hoy están desconectadas —mapa de procesos, fichas, cifras, inventario de sistemas y hallazgos—: reconectarlas es devolver su entrada a `GENERADAS` en `estructura-informe.mjs` | **Boosty** |
+| ⚠️ **Decidir dónde vive «qué aprueba el comité».** La sección «La decisión» se eliminó a petición de Jesús, y con ella el único sitio donde eso estaba escrito | Gabriel decide |
 | 🔴 **Cosechar la ronda 2 y volver a redactar.** Es el paso que desbloquea todo lo demás: sin los hallazgos de finanzas, capital humano, compras, laboratorio y seguridad, la mitad del documento no se puede escribir | **Boosty** |
-| **Seguir llenándolo.** Van 15 secciones con contenido, tres de ellas anexos que se regeneran solos de la base. Ninguna publicada: los hallazgos que las sostienen todavía están propuestos | **Boosty** |
+| **Nada publicado, y así se queda** hasta que los hallazgos que lo sostienen estén validados. Un lector de Iberia hoy no ve el informe; un editor ve el armazón con su marca «Por escribir» | **Boosty** |
 | **Fijar la fecha del comité de aprobación** — primera semana de diciembre, por lo del aviso de renovación | Gabriel con Alberto |
 | ⚠️ **Decidir si el entregable lleva partida de horas propia.** Hoy marca **cero** en `/dashboard/programa` con 28 secciones escritas: al revisar el registro con Gabriel, esas horas no fueron a `arquitectura`. Es honesto —no hay ninguna cargada ahí— pero el entregable principal aparece en blanco para el cliente, y en diciembre alguien va a preguntar cuántas horas costó el documento que sostiene la Fase 2 | Gabriel decide · **Boosty** carga |
 
@@ -406,6 +409,16 @@ el comité antes de continuar con las fases siguientes»*.
 > hoy nadie captura. Si el documento vende todo eso como inteligencia artificial, el
 > primero que lo lea con cuidado nos lo tumba. Por eso la sección de «dónde no va la IA»
 > no es un gesto de honestidad: es lo que sostiene el resto del documento.
+
+---
+
+## El dashboard — lo que hay que arreglar
+
+- ⚠️ **`/dashboard/hallazgos` da un error de hidratación** («some attributes of the server
+  rendered HTML didn't match»). Lo caza `npm run capturar` y es la única página que lo da.
+  No rompe nada visible, pero es la página desde la que se validan los hallazgos, que es el
+  paso que desbloquea el informe. Detectado el 16 de septiembre; **no lo causó el armazón**
+  —esa página no renderiza markdown— y no se persiguió para no mezclarlo con el informe.
 
 ---
 

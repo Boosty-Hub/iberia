@@ -23,9 +23,9 @@ línea.
 | **Fase** | 1 · Entender · **día 25 de 153**. Contrato `CONT-2026-08-0002`, firmado el 6/7 de agosto de 2026 |
 | **Calendario** | Adelantado: **nada se entrega después del 6 de diciembre**, porque el aviso de no renovación vence antes que el entregable que sirve para decidir |
 | **Dashboard** | Operativo en local. **Sin desplegar** |
-| **Levantamiento** | 27 sesiones · **20.011 turnos**. **19 entrevistas de ~25 (76%)** · 10 de 14 macroprocesos |
+| **Levantamiento** | **42 sesiones · 27.951 turnos**. **34 entrevistas de ~25 (136%)** · los 20 macroprocesos cubiertos |
 | **Hallazgos** | 236 en crudo → **28 redactados** en el informe · 38 de ENT-005 retenidos · 🔴 **la ronda 2 sin cosechar** |
-| **Informe** | **28 secciones** · 15 con contenido y los 28 hallazgos redactados adentro. Ninguna publicada |
+| **Informe** | **13 secciones, todas en blanco.** Armazón rehecho el 16 de septiembre por decisión del cliente. Ninguna publicada |
 | **Horas** | **137 h en el mes 1 contra una bolsa de 107**, ya revisadas con Gabriel. Aparte: 111 h de la etapa anterior y 104 h del curso de planta, que se factura en Fase 2 |
 | **Comunicación** | **El comunicado salió.** Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | **276 personas cargadas** con ficha, cargo, nivel y familia de oficio. ⚠️ Sin cédula, sin celular y sin correo |
@@ -61,6 +61,115 @@ cláusula 5. Aquí solo lo urgente:
 - **Refijar la revisión del canal con mercadeo** — Alberto la agenda. Bloquea el despliegue.
 - **Leer los 28 hallazgos redactados** del informe y validar los que los sostienen.
 - **Pedirle a Capital Humano cédula y celular por ficha.** El padrón llegó sin ellos.
+
+---
+
+## 16 de septiembre de 2026 · Sesión 10 — el inventario contra las entrevistas, y el armazón nuevo
+
+Se cerró la extracción de las 36 notas de entrevista y con ellas se validó el mapa de
+procesos contra lo que dijeron las personas que los ejecutan. El resultado obligó a rehacer
+el armazón del informe.
+
+### El mapa de partida no describía la empresa
+
+De los **47 procesos N1 del inventario original, 30 se confirmaron**, 6 resultaron no
+ejecutarse y 11 tenían mal el dueño. Y faltaban **cinco macroprocesos enteros** —más uno
+recomendado— que sí se ejecutan y no estaban en el papel. El inventario pasó de 14/47 a
+**20 macroprocesos y 142 procesos vigentes**.
+
+Los ocho que más se repitieron en las entrevistas: **S&OP y la explosión de materiales**
+(siete voces independientes), la **maquila en las dos direcciones**, la **facturación que
+ejecuta Distribución** y la **cobranza de calle que hace Comercial** — ninguno de los cuatro
+existía en el mapa. Y dos hallazgos que el mapa no podía mostrar: la empresa **no está
+certificada en ISO** pese a que se afirma internamente, y los indicadores que destruyó el
+ataque de febrero **nunca se reconstruyeron**.
+
+Todo está en `Insumos/Validacion_Inventario_vs_Entrevistas.md` y en el Excel **V2**
+(`Inventario_Macroprocesos_Procesos_V2.xlsx`), que colorea cada proceso por estado. **El V1
+no se tocó**: son dos archivos.
+
+### Decisiones de esta sesión
+
+- **El informe web es el Documento de Arquitectura de IA completo**, no solo el entregable
+  de entendimiento: en la Fase 2 otro consultor lo usa como insumo íntegro. Por eso el
+  armazón incluye arquitectura, hoja de ruta y la decisión.
+- **Los procesos que no se ejecutan salen del mapa y del conteo**, pero no del informe: van
+  al pie de la ficha de su macroproceso, bajo «Lo que NO se hace», con su cita. Una ausencia
+  suelta en un anexo no es un hallazgo; pegada al proceso que le falta, sí.
+- **Una ficha por macroproceso (20), no por proceso N1 (142).** A media página, 142 fichas
+  son 71 páginas y el entregable se convierte en el manual de procesos que las guías dicen
+  explícitamente no estar produciendo.
+- **La prosa vieja se queda por ahora.** Está respaldada y se decide sección por sección.
+
+### El armazón · **13 secciones en blanco**
+
+Se montó primero uno de 32 secciones que conservaba la prosa anterior. **Jesús lo revisó esa
+misma tarde y lo rehízo entero**, y esto es lo que quedó — no lo de 32, que ya no existe:
+
+- **Todo el contenido se borró.** Los 155.232 caracteres eran «relleno básico» escrito antes
+  de procesar las entrevistas. Respaldado en `Insumos/Respaldo_Informe_2026-09-16_antes-de-vaciar`.
+- **Trece secciones**, en tres partes. **Sin anexos**: lo que era anexo se volvió sección y
+  entró pegado al argumento que sostiene. El orden va **por pares —una sección afirma y la
+  siguiente la respalda**: *Cobertura* / *Las cifras*, *Sistemas y estado del dato* /
+  *Inventario de sistemas*.
+- **«Los hallazgos» cierra el levantamiento**: es la bisagra, todo lo anterior los construye y
+  todo lo posterior actúa sobre ellos.
+- **El informe por área desapareció como sección** y lo absorbe *Las fichas de proceso*, que
+  gana una línea «Quién lo contó». Cortar el mismo material por proceso y por área obliga a
+  contarlo dos veces y las dos versiones se desincronizan. La columna vertebral del documento
+  es el mapa de procesos, no el organigrama.
+- **«La decisión» se eliminó** a petición de Jesús. ⚠️ Con ella se fue el único sitio donde
+  vivía lo que el comité aprueba al aprobar el documento; si hace falta, hay que buscarle
+  casa.
+- **Las generadoras quedaron desconectadas, no borradas.** `GENERADAS` está vacío a
+  propósito; el código del mapa, las fichas y los anexos sigue en el script y
+  `contenido/informe/inventario-procesos.json` también. Volver a llenarlas del dato es
+  devolver la entrada al mapa.
+
+### El informe dejó de ser una sola página
+
+**Cada sección es ahora su propia página**: `/informe/[slug]`. `/informe` quedó como portada
+—título, cifras, nota de confidencialidad y el índice completo— y el índice es la navegación.
+
+- **El índice vive en el layout, no en la página.** Así no se vuelve a montar al cambiar de
+  sección, el scroll de la columna se conserva y el destino activo se marca solo. Va a la
+  izquierda con el lenguaje de la barra del panel: columna blanca de 256 px, borde a la
+  derecha, y el activo en rojo tenue —no en bloque sólido, que en una barra blanca pesa como
+  un botón de acción y compite con los de la página.
+- **La portada repite el índice a propósito.** En pantalla ancha duplica la barra; en teléfono,
+  donde la barra no está, es la única forma de navegar.
+- **Cada sección lleva «anterior / siguiente».** Un documento se lee de corrido, y obligar a
+  volver al índice entre sección y sección lo rompe.
+- **Un slug que no existe da 404**, y para un lector de Iberia una sección sin escribir
+  tampoco existe: no llega a ella ni escribiendo la URL.
+
+⚠️ **`/informe` solo pintaba secciones con texto, así que el armazón vacío no se veía.**
+Ahora **un editor ve las trece** con su marca «Por escribir» y el contador dice *0 / 13*; el
+lector de Iberia sigue viendo solo lo escrito y publicado, que es lo correcto.
+
+⚠️ **`npx prettier` sin más reformateó `app/informe/page.tsx` con comillas dobles y punto y
+coma.** El repositorio no tiene `.prettierrc`, así que prettier aplica sus valores por
+defecto, que son lo contrario del estilo del proyecto. **No correrlo a pelo** — se deshizo
+reescribiendo el archivo.
+
+### Dos formas de perder contenido, tapadas
+
+⚠️ **Una generadora que devuelve `null` borraba la sección.** `null` no es `undefined`, así
+que `contenido_md` se guardaba vacío: sin su archivo del taller, el anexo se regeneraba a
+nada y se llevaba por delante lo que ya estaba escrito. Ahora, sin fuente no se escribe y el
+script dice qué secciones dejó intactas.
+
+⚠️ **Y `indiceDeHallazgos()` devolvía la introducción con la tabla vacía**, que no dispara la
+guarda anterior porque no está vacío. Sin hallazgos que indexar devuelve `null`.
+
+`--podar` borra las secciones que quedan fuera del armazón **y están vacías**. Las huérfanas
+con texto no se borran nunca, ni con la bandera.
+
+### Dónde quedamos
+
+Trece secciones, cero caracteres, ninguna publicada. Lo siguiente es **escribir**, y el
+primer paso no es redactar: es **cosechar los hallazgos de la ronda 2**. Ahora se nota más
+que nunca, porque ya no queda prosa vieja tapando el hueco.
 
 ---
 

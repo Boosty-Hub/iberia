@@ -165,8 +165,11 @@ body {
 .prosa h2 {
   @apply mt-8 text-xl font-bold text-marca-900;
 }
+/* La escalera saltaba de `xl` a `base`, así que un h3 se veía igual que el
+   `**negrita**` de un párrafo: en las veinte fichas de proceso el título de la
+   ficha no se distinguía de sus propias etiquetas. */
 .prosa h3 {
-  @apply mt-6 text-base font-semibold text-marca-900;
+  @apply mt-8 text-lg font-bold text-marca-900;
 }
 .prosa p {
   @apply text-marca-700;

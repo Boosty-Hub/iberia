@@ -41,7 +41,8 @@
     "sembrar:horas": "node --env-file=.env.local scripts/sembrar-horas.mjs",
     "informe:estructura": "node --env-file=.env.local scripts/estructura-informe.mjs",
     "importar:padron": "node --env-file=.env.local scripts/importar-padron.mjs",
-    "generar:guias": "node scripts/generar-guias.mjs"
+    "generar:guias": "node scripts/generar-guias.mjs",
+    "respaldar:informe": "node --env-file=.env.local scripts/respaldar-informe.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",
@@ -49,10 +50,12 @@
     "@supabase/supabase-js": "^2.112.3",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
+    "github-slugger": "^2.0.0",
     "next": "16.3.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-markdown": "^10.1.0",
+    "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.6.0"
   },
