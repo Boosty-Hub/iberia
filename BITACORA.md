@@ -25,7 +25,7 @@ línea.
 | **Dashboard** | Operativo en local. **Sin desplegar** |
 | **Levantamiento** | **42 sesiones · 27.951 turnos**. **34 entrevistas de ~25 (136%)** · los 20 macroprocesos cubiertos |
 | **Hallazgos** | **394, todos con cita textual verificada** · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
-| **Informe** | **13 secciones · 7 escritas** · 140.418 caracteres. Ninguna publicada |
+| **Informe** | **13 secciones · 10 escritas** · 215.124 caracteres. Faltan la 12, la 13 y el resumen ejecutivo. Ninguna publicada |
 | **Horas** | **137 h en el mes 1 contra una bolsa de 107**, ya revisadas con Gabriel. Aparte: 111 h de la etapa anterior y 104 h del curso de planta, que se factura en Fase 2 |
 | **Comunicación** | **El comunicado salió.** Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | **276 personas cargadas** con ficha, cargo, nivel y familia de oficio. ⚠️ Sin cédula, sin celular y sin correo |
@@ -61,6 +61,193 @@ cláusula 5. Aquí solo lo urgente:
 - **Refijar la revisión del canal con mercadeo** — Alberto la agenda. Bloquea el despliegue.
 - **Leer los 42 hallazgos redactados** del informe y validar los que los sostienen.
 - **Pedirle a Capital Humano cédula y celular por ficha.** El padrón llegó sin ellos.
+
+---
+
+## 17 de septiembre de 2026 · Sesión 16 — la 11, y los cuatro filtros
+
+Se escribió **«11 · Dónde no va la IA»**, el par de la 10. Nueve bloques, 21 citas, siete
+enlaces al capítulo 9 comprobados. 17.724 caracteres. El informe va en **215.124 caracteres ·
+10 de 13**.
+
+### El argumento: cuatro filtros antes de que algo sea IA
+
+El capítulo **no es el negativo de la 10**. Tiene tesis propia: de todo lo que el levantamiento
+pidió, una parte se resuelve **configurando** lo que ya está pagado, otra **conectando** dos
+sistemas, otra **decidiendo y escribiendo** una regla, y otra **comprando un equipo o pagando
+una licencia**. Lo que queda después de esos cuatro filtros es el programa de IA — y es más
+pequeño de lo que parecía, y por eso realizable.
+
+El filtro más incómodo es el cuarto, y por eso se dejó escrito con nombre: **los dos
+supervisores de Distribución no tienen computadora**, el gestor documental se dio de baja por
+impago, las cuentas de tesorería se cancelaron por desuso, SharePoint no fluye por permisos y
+el antivirus no se aprobó antes de febrero. Cinco problemas serios y ninguno necesita un
+modelo: necesita una orden de compra.
+
+### Los límites los puso la empresa, no nosotros
+
+La mejor parte del capítulo no la escribimos: la dijeron los entrevistados, casi siempre sin
+que se les preguntara así.
+
+- **Bandera, no acción** — Contabilidad, dos veces en la misma sesión.
+- **Alguien pregunta; la IA no sale sola a buscar** — el límite arquitectónico más importante
+  del documento, y lo puso la Gerencia de TI.
+- **Lo que no se cuantifica no se decide por número** — Servicios Generales, sobre evaluar
+  proveedores.
+- **Tres perímetros de confidencialidad nombrados**: las investigaciones de PCP, los datos del
+  servicio médico y las cámaras, que la propia TI se autolimita pese a tener la potestad.
+- **Lo que exige la norma no se negocia** — COVENIN y la normativa de alimentos.
+- **IA con perfiles y alcance por rol**, porque una IA conversacional abierta sobre la
+  plataforma publica el mapa que un atacante necesita.
+
+### Por qué decirlo importa, con dato
+
+Se cerró con las tres razones, y dos son cifras del propio levantamiento: la autoevaluación de
+uso de IA del equipo gerencial de planta fue **3, 3, 5, 4, 5 y algún 7 u 8** —con esa
+dispersión, desplegar en todo a la vez no produce adopción—, y el temor ya se nombró en la
+sesión de arranque: *que van a cortar al 30% de los trabajadores*. La tercera es de negocio:
+**vender como IA lo que es configuración destruye la credibilidad del programa** el día de la
+demostración.
+
+### Lo que se mejoró del código
+
+⚠️ **El 6 y el 11 se escriben igual, y eran dos funciones idénticas.** Se extrajo
+`capituloConCitas()`. Antes, arreglar la guarda de citas en una dejaba la otra sin arreglar —
+que es exactamente lo que había pasado con la guarda de cita repetida.
+
+Y `donde-no-va-la-ia` salió de `BORRADORES`: ya no es prosa suelta.
+
+**Dónde quedamos.** Tres secciones: **12 · La arquitectura propuesta**, que es el plano y ya
+tiene sus insumos —las 33 oportunidades clasificadas, los límites de este capítulo y el
+inventario de sistemas—; **13 · Hoja de ruta**; y **01 · Resumen ejecutivo**, de última.
+
+---
+
+## 17 de septiembre de 2026 · Sesión 15 — la 10, y la regla que ordena el programa
+
+Se escribió **«10 · Las oportunidades, priorizadas»**, primera sección del bloque de
+arquitectura: **33 oportunidades clasificadas de 33 que hay en la base**, 26.191 caracteres.
+El informe va en **197.400 caracteres · 9 de 13**.
+
+### La regla que produce el orden
+
+**El dato manda sobre el impacto.** Una oportunidad de impacto alto cuyo dato no existe no va
+primero: va después de construirlo, y construirlo es un proyecto con su propio plazo. Ordenar
+por impacto e ignorar esto es exactamente cómo un programa de IA acumula pilotos que no llegan
+a producción.
+
+De ahí salen tres grupos:
+
+```
+Grupo 1 · dato disponible, se puede empezar ya      12
+Grupo 2 · el dato existe sucio, paso previo corto    8
+Grupo 3 · hay que construir el dato primero          9
+No son oportunidades: son condiciones                4
+```
+
+**Y la consecuencia incómoda va escrita en el capítulo**: casi todo lo que más entusiasmo
+genera está en el grupo 3 — la foto del anaquel, el mantenimiento por condición, el ruteo
+inteligente. Buenas ideas sin dato detrás todavía. Decirlo ahí protege al programa de
+prometer la foto del anaquel para el primer trimestre.
+
+### Decisiones
+
+- **Cuatro entradas clasificadas como oportunidad no lo son, y se separaron.** Las reglas de
+  negocio del S&OP, la tesis de devolver tiempo de análisis, el desarrollo con IA sin gobierno
+  y la adopción propia del gerente de distribuidores son **condiciones**, no piezas que se
+  puedan escoger. Mezclarlas haría creer que son opcionales.
+- **Se añadió el eje del consenso**, separado del orden por dato: cuántas voces independientes
+  piden lo mismo. Siete el S&OP, cinco la foto del anaquel, cuatro el ruteo, tres devolver
+  tiempo de análisis.
+- **La dependencia más repetida no es técnica.** Aparece en nueve de las treinta y tres y
+  siempre con la misma forma: *alguien tiene que decidir algo y escribirlo*. La política de
+  inventario, las reglas de secuenciación, el formato único de sell-out, qué se hace cuando
+  salta una alerta.
+- **Se dice en el capítulo qué parte no es IA** —el asistente de la sábana de compras es en
+  buena medida parametrizar el ERP—, porque decirlo ahí y no al pasar la factura es lo que
+  separa un programa de un catálogo.
+
+### La guarda nueva: cobertura en las dos direcciones
+
+⚠️ El taller referencia cada oportunidad por el **título exacto de su hallazgo**, y el
+generador comprueba **las dos direcciones**: que todo título del taller exista en la base, y
+que **toda oportunidad de la base esté clasificada en algún grupo**. Imprime
+`33 clasificadas de 33 · cobertura completa`.
+
+Sin eso, reordenar los grupos deja caer una en silencio, que es el modo de fallar de una lista
+que se edita a mano. El impacto y el área tampoco se escriben en el taller: se heredan del
+hallazgo. El taller solo pone lo que es juicio de priorización — costo, dato y dependencias.
+
+### Verificación
+
+37 filas en cinco tablas, renderizado a 1440 y 390 px, sin desborde, cero errores de consola,
+`tsc` limpio. La tabla de seis columnas mide 814 px y se lee entera.
+
+**Dónde quedamos.** Quedan cuatro: **11 · Dónde no va la IA**, que es el par de esta y ya tiene
+su material señalado desde los capítulos 6 y 10; **12 · La arquitectura propuesta**; **13 ·
+Hoja de ruta**; y **01 · Resumen ejecutivo**, de última porque resume a las demás.
+
+---
+
+## 17 de septiembre de 2026 · Sesión 14 — la 03, y el bloque de levantamiento cerrado
+
+Se escribió **«03 · Las cifras del levantamiento»**: **188 cifras de 31 sesiones**, en once
+grupos temáticos más las discrepancias. 30.791 caracteres. Con esto **el bloque de
+levantamiento queda completo**: las ocho secciones de la parte 1, 171.209 caracteres.
+
+### El respaldo viejo no servía, y por qué
+
+`310-anexo-cifras.md` tenía 97 cifras **de ocho sesiones** —el texto decía literalmente «las
+ocho sesiones»— cuando hoy son 35 utilizables. Cubría menos de una cuarta parte y toda la
+ronda 2 quedaba fuera. Se conservó **su estructura temática**, que seguía siendo la correcta,
+y se rehízo la extracción sobre el resto. Los grupos nuevos son **el tamaño del negocio**, **el
+dinero**, **la gente** y **los sistemas**, que son justo lo que la ronda 1 no alcanzó.
+
+### Dos defectos del anexo viejo que ahora no pueden repetirse
+
+🔴 **La atribución estaba escrita a mano y estaba mal.** Tres filas firmadas «Jesús · ENT-004»
+—que es el consultor que condujo la sesión, no el entrevistado— y nueve firmadas con el área
+en vez de la persona, cuando el informe cita por nombre. Las dieciséis son Luis Cáceres.
+
+**Ahora la fila solo lleva el código** y el generador resuelve el nombre contra `entrevistas`.
+El padrón manda y no se puede desviar.
+
+⚠️ **Y cada cifra lleva marca.** Una cifra medida y una estimación de quien habló se parecen
+mucho en una tabla y no son lo mismo. El reparto que salió:
+
+```
+159 dato · 15 estimación · 11 ejemplo · 3 sin confirmar
+```
+
+Importa porque varias de estas cifras terminan en la hoja de ruta, y comprometerse con un
+ahorro calculado sobre una estimación es la forma más rápida de incumplir. El grupo de
+capacidad de planta es el que más lo necesita: **los 280.000 cajas/mes los propios
+entrevistados no los dan por firmes.**
+
+### «Las cifras que no coinciden»
+
+Sección nueva al cierre, con los **seis casos donde dos voces dieron números distintos para lo
+mismo**. No se resolvieron a favor de ninguna: van las dos con su fuente, que es lo que
+permite ir a cerrarlas con el área.
+
+El más útil es el impacto de febrero —**4 días** según Contabilidad contra **casi 10 meses**
+según Capital Humano—, que no es contradicción sino la distinción entre levantar y recuperar.
+Y el más accionable, el umbral de variación de consumo: **3%** que el sistema devuelve contra
+**5%** que exige explicación formal. Hay que cerrarlo antes de automatizar nada encima.
+
+Esa sección es, además, la manifestación contable de **H-35**: no hay una sola fuente de
+verdad. Dos áreas consultan el mismo maestro de clientes el mismo mes y dan 2.370 y 2.372.
+
+### Verificación
+
+188 filas en once tablas, renderizado a 1440 y a 390 px, **sin desborde en ninguno**, cero
+errores de consola, `tsc` limpio. Comprobado además que no aparece ENT-005 y que ninguna fila
+conserva la atribución vieja.
+
+**Dónde quedamos.** Quedan cinco secciones y todas son de arquitectura o de cierre: **10 ·
+Oportunidades**, **11 · Dónde no va la IA**, **12 · La arquitectura propuesta**, **13 · Hoja de
+ruta** y **01 · Resumen ejecutivo**, que va de última porque resume a las demás. La natural es
+la **10**, que ya tiene con qué priorizar: los 42 hallazgos redactados y estas 188 cifras.
 
 ---
 

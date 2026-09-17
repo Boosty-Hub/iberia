@@ -1335,15 +1335,22 @@ async function riesgoYContinuidad() {
 // se apoya la operación cuando el ERP no llega, que no es una lista de sistemas
 // y no existe en ninguna otra parte del documento.
 
-async function sistemasYDato() {
-  const crudo = leerTaller('sistemas-datos.json')
+/**
+ * Un capítulo de prosa con citas: entrada, bloques con sus citas leídas de la
+ * base, el puente al capítulo 9 y el cierre.
+ *
+ * Lo comparten el 6 y el 11, que se escriben igual. Cuando eran dos funciones
+ * idénticas, arreglar la guarda de citas en una dejaba la otra sin arreglar.
+ */
+async function capituloConCitas(archivo, etiqueta, entradaDeHallazgos) {
+  const crudo = leerTaller(archivo)
   if (!crudo) return null
   const taller = JSON.parse(crudo)
 
   const { porClave } = await hallazgosPorClave()
   const l = []
   const huerfanas = []
-  const ctx = { porClave, huerfanas, yaCitadas: new Set(), etiqueta: 'sistemas-datos' }
+  const ctx = { porClave, huerfanas, yaCitadas: new Set(), etiqueta }
 
   l.push(taller.entrada)
 
@@ -1364,12 +1371,12 @@ async function sistemasYDato() {
   })()
 
   if (destacados && taller.hallazgos?.length) {
-    const enlaces = enlacesAHallazgos(destacados, taller.hallazgos, 'sistemas-datos')
+    const enlaces = enlacesAHallazgos(destacados, taller.hallazgos, etiqueta)
     if (enlaces.length) {
       l.push('')
       l.push('## Los hallazgos de este capítulo')
       l.push('')
-      l.push('Los que el capítulo 9 desarrolla sobre sistemas y calidad del dato, cada uno con su cita completa:')
+      l.push(entradaDeHallazgos)
       l.push('')
       l.push(...enlaces)
     }
@@ -1383,12 +1390,40 @@ async function sistemasYDato() {
   }
 
   if (huerfanas.length) {
-    console.warn(`  ⚠️ sistemas-datos: ${huerfanas.length} cita(s) sin casar en la base:`)
+    console.warn(`  ⚠️ ${etiqueta}: ${huerfanas.length} cita(s) sin casar en la base:`)
     for (const h of huerfanas) console.warn(`     ${h}`)
+  } else {
+    console.log(`  · ${etiqueta}: ${taller.bloques.length} bloques, todas las citas casaron`)
   }
 
   return l.join('\n')
 }
+
+const sistemasYDato = () =>
+  capituloConCitas(
+    'sistemas-datos.json',
+    'sistemas-datos',
+    'Los que el capítulo 9 desarrolla sobre sistemas y calidad del dato, cada uno con su cita completa:'
+  )
+
+// =============================================================================
+// 11) DÓNDE NO VA LA IA
+// =============================================================================
+//
+// El par de la 10: aquella dice qué se puede hacer y esta qué no —y, sobre todo,
+// qué se resuelve sin un modelo.
+//
+// ⚠️ **No es el negativo de la 10.** Tiene argumento propio: los cuatro filtros
+// —configurar, conectar, decidir y comprar— y los límites que pusieron las
+// personas entrevistadas, que son el mejor insumo de gobierno del levantamiento.
+// Repetir aquí la lista de oportunidades desincroniza los dos capítulos.
+
+const dondeNoVaLaIA = () =>
+  capituloConCitas(
+    'donde-no-va-la-ia.json',
+    'donde-no-va-la-ia',
+    'Los del capítulo 9 que sostienen este límite, cada uno con su cita completa:'
+  )
 
 // =============================================================================
 // 7) INVENTARIO DE SISTEMAS
@@ -1525,15 +1560,283 @@ async function inventarioDeSistemas() {
   return l.join('\n')
 }
 
+// =============================================================================
+// 3) LAS CIFRAS DEL LEVANTAMIENTO
+// =============================================================================
+//
+// El respaldo de la 02: aquella dice cuánto se escuchó y esta qué se midió.
+//
+// ⚠️ **La atribución se resuelve contra `entrevistas`, no se escribe en el
+// taller.** El anexo del armazón viejo la tenía a mano y se veía: tres filas
+// firmadas «Jesús · ENT-004» —que es el consultor que condujo la sesión, no el
+// entrevistado— y nueve firmadas con el área en vez de la persona, cuando el
+// informe cita por nombre. Aquí la fila solo lleva el código y el nombre sale
+// del padrón.
+//
+// ⚠️ Y cada fila lleva **marca**: una cifra medida y una estimación de quien
+// habló se parecen mucho en una tabla y no son lo mismo. Varias de estas cifras
+// terminan en la hoja de ruta, y comprometerse con un ahorro calculado sobre
+// una estimación es la forma más rápida de incumplir.
+
+/** Las marcas que puede llevar una cifra, y cómo se rotulan. */
+const MARCA_CIFRA = {
+  estimación: 'estimación',
+  ejemplo: 'ejemplo',
+  'sin confirmar': 'sin confirmar',
+}
+
+/** Nombre de quien habló en una sesión, del padrón. Las grupales no tienen. */
+function firmaDeSesion(codigo, porCodigo) {
+  const e = porCodigo.get(codigo)
+  if (!e?.entrevistado_nombre) return `\`${codigo}\``
+  return `${e.entrevistado_nombre} · \`${codigo}\``
+}
+
+async function cifrasDelLevantamiento() {
+  const crudo = leerTaller('cifras-levantamiento.json')
+  if (!crudo) return null
+  const taller = JSON.parse(crudo)
+
+  const { data: sesiones } = await admin
+    .from('entrevistas')
+    .select('codigo, entrevistado_nombre')
+    .order('codigo')
+  const porCodigo = new Map((sesiones ?? []).map((e) => [e.codigo, e]))
+
+  const l = []
+  const desconocidas = []
+  const marcasMalas = []
+  let total = 0
+  const porMarca = new Map()
+  const usadas = new Set()
+
+  /** La columna de fuente, con todas las voces de una misma cifra. */
+  const fuentes = (codigos) => {
+    const buenos = []
+    for (const c of codigos ?? []) {
+      if (SIN_CONSENTIMIENTO.has(c)) {
+        console.warn(`  ⛔ cifras: ${c} no puede citarse (sin consentimiento). Omitida.`)
+        continue
+      }
+      if (!porCodigo.has(c)) desconocidas.push(c)
+      usadas.add(c)
+      buenos.push(firmaDeSesion(c, porCodigo))
+    }
+    return buenos.join('; ') || '—'
+  }
+
+  // La entrada se arma al final, cuando ya se contaron las cifras y las voces:
+  // el total es justo el número que no puede escribirse a mano.
+  const posicionEntrada = l.length
+  l.push('')
+
+  for (const grupo of taller.grupos) {
+    l.push('')
+    l.push(`## ${grupo.titulo}`)
+    l.push('')
+    l.push(grupo.entrada)
+    l.push('')
+    l.push('| Cifra | Qué mide | De dónde sale |')
+    l.push('|---|---|---|')
+    for (const [cifra, que, codigos, marca] of grupo.filas) {
+      total++
+      if (marca && !MARCA_CIFRA[marca]) marcasMalas.push(`${grupo.titulo} → «${cifra}»: marca «${marca}»`)
+      porMarca.set(marca ?? 'dato', (porMarca.get(marca ?? 'dato') ?? 0) + 1)
+      const cola = marca ? ` *· ${MARCA_CIFRA[marca] ?? marca}*` : ''
+      l.push(`| **${cifra}** | ${que}${cola} | ${fuentes(codigos)} |`)
+    }
+  }
+
+  if (taller.discrepancias) {
+    l.push('')
+    l.push(`## ${taller.discrepancias.titulo}`)
+    l.push('')
+    l.push(taller.discrepancias.entrada)
+    l.push('')
+    for (const [asunto, cifras, codigos, nota] of taller.discrepancias.filas) {
+      l.push('')
+      l.push(`**${asunto}** — ${cifras}`)
+      l.push('')
+      l.push(`> ${nota}`)
+      l.push(`> — ${fuentes(codigos)}`)
+    }
+  }
+
+  if (taller.cierre) {
+    l.push('')
+    l.push('---')
+    l.push('')
+    l.push(taller.cierre)
+  }
+
+  if (desconocidas.length) {
+    console.warn(`  ⚠️ cifras: ${[...new Set(desconocidas)].join(', ')} no están en la tabla de sesiones`)
+  }
+  if (marcasMalas.length) {
+    console.warn(`  ⚠️ cifras: ${marcasMalas.length} marca(s) que no existen:`)
+    for (const m of marcasMalas) console.warn(`     ${m}`)
+  }
+  l[posicionEntrada] = taller.entrada
+    .replace('{TOTAL}', String(total))
+    .replace('{SESIONES}', String(usadas.size))
+
+  const reparto = [...porMarca.entries()].map(([k, n]) => `${n} ${k}`).join(' · ')
+  console.log(`  · cifras: ${total} cifras de ${usadas.size} sesiones — ${reparto}`)
+
+  return l.join('\n')
+}
+
+// =============================================================================
+// 10) LAS OPORTUNIDADES, PRIORIZADAS
+// =============================================================================
+//
+// Lo que el levantamiento propone hacer, ordenado. El orden vale más que la
+// lista, y la regla que lo produce es la del dato: una oportunidad de impacto
+// alto cuyo dato no existe **no va primero**.
+//
+// ⚠️ **La guarda de este capítulo es la cobertura.** El taller referencia cada
+// oportunidad por el título exacto de su hallazgo, y el generador comprueba las
+// dos direcciones: que todo título del taller exista en la base, y que **toda
+// oportunidad de la base esté clasificada en algún grupo**. Sin eso, reordenar
+// los grupos deja caer una en silencio, que es el modo de fallar de una lista
+// que se edita a mano.
+//
+// El impacto y el área **no se escriben en el taller**: se heredan del hallazgo.
+// El taller pone lo que es juicio de priorización —costo, disponibilidad del
+// dato y dependencias— y nada más.
+
+/** Cómo se rotula la disponibilidad del dato, que es la dimensión que manda. */
+const DATO_OPORTUNIDAD = {
+  disponible: '✅ Disponible',
+  'hay que limpiarlo': '⚠️ Hay que limpiarlo',
+  'no existe': '🔴 No existe',
+  '—': '—',
+}
+
+async function lasOportunidades() {
+  const crudo = leerTaller('oportunidades.json')
+  if (!crudo) return null
+  const taller = JSON.parse(crudo)
+
+  const { data: todas } = await admin
+    .from('hallazgos')
+    .select('titulo, descripcion, impacto, areas(nombre), entrevistas(codigo, entrevistado_nombre)')
+    .eq('tipo', 'oportunidad_ia')
+    .order('titulo')
+
+  const porTitulo = new Map()
+  for (const h of todas ?? []) {
+    if (SIN_CONSENTIMIENTO.has(h.entrevistas?.codigo)) continue
+    porTitulo.set(h.titulo, h)
+  }
+
+  const l = []
+  const sinCasar = []
+  const colocadas = new Set()
+  let total = 0
+
+  const posicionEntrada = l.length
+  l.push('')
+
+  // --- Los criterios, que es lo que hace defendible el orden -----------------
+  const c = taller.criterios
+  l.push('')
+  l.push(`## ${c.titulo}`)
+  l.push('')
+  l.push(c.entrada)
+  l.push('')
+  l.push('| Dimensión | Qué mide | Escala |')
+  l.push('|---|---|---|')
+  for (const [dim, que, escala] of c.filas) l.push(`| **${dim}** | ${que} | ${escala} |`)
+  l.push('')
+  l.push(c.regla)
+
+  // --- El eje del consenso ---------------------------------------------------
+  if (taller.consenso) {
+    l.push('')
+    l.push(`## ${taller.consenso.titulo}`)
+    l.push('')
+    l.push(taller.consenso.entrada)
+    l.push('')
+    for (const [cuantas, que] of taller.consenso.filas) l.push(`- **${cuantas}** · ${que}`)
+  }
+
+  // --- Los grupos ------------------------------------------------------------
+  for (const grupo of taller.grupos) {
+    l.push('')
+    l.push(`## ${grupo.titulo}`)
+    l.push('')
+    l.push(grupo.entrada)
+    l.push('')
+    l.push('| Oportunidad | Área | Impacto | Costo | Dato | Depende de |')
+    l.push('|---|---|---|---|---|---|')
+    for (const o of grupo.oportunidades) {
+      total++
+      const h = porTitulo.get(o.h)
+      if (!h) {
+        sinCasar.push(`${grupo.titulo} → «${o.h}»`)
+        continue
+      }
+      colocadas.add(o.h)
+      const area = h.areas?.nombre ?? '—'
+      const impacto = h.impacto ? h.impacto[0].toUpperCase() + h.impacto.slice(1) : '—'
+      const dato = DATO_OPORTUNIDAD[o.dato] ?? o.dato
+      l.push(
+        `| **${o.h}** | ${area} | ${impacto} | ${o.costo} | ${dato} | ${o.depende} |`
+      )
+    }
+    // La sesión de cada una va debajo: metida en la tabla, la columna de
+    // «depende de» deja de caber y es la que hay que leer entera.
+    l.push('')
+    for (const o of grupo.oportunidades) {
+      const h = porTitulo.get(o.h)
+      if (!h) continue
+      const quien = [h.entrevistas?.entrevistado_nombre, h.entrevistas?.codigo ? `\`${h.entrevistas.codigo}\`` : null]
+        .filter(Boolean)
+        .join(' · ')
+      l.push(`- **${o.h}** — ${h.descripcion ?? ''} ${quien ? `*(${quien})*` : ''}`)
+    }
+  }
+
+  if (taller.cierre) {
+    l.push('')
+    l.push('---')
+    l.push('')
+    l.push(taller.cierre)
+  }
+
+  l[posicionEntrada] = taller.entrada.replace('{TOTAL}', String(total))
+
+  // --- Las dos direcciones de la guarda -------------------------------------
+  const huerfanas = [...porTitulo.keys()].filter((t) => !colocadas.has(t))
+  if (sinCasar.length) {
+    console.warn(`  ⚠️ oportunidades: ${sinCasar.length} título(s) del taller que no existen en la base:`)
+    for (const s of sinCasar) console.warn(`     ${s}`)
+  }
+  if (huerfanas.length) {
+    console.warn(`  ⚠️ oportunidades: ${huerfanas.length} oportunidad(es) de la base SIN clasificar:`)
+    for (const h of huerfanas) console.warn(`     ${h}`)
+  }
+  console.log(
+    `  · oportunidades: ${total} clasificadas de ${porTitulo.size} en la base` +
+      (sinCasar.length || huerfanas.length ? ' · ⚠️ revisar' : ' · cobertura completa')
+  )
+
+  return l.join('\n')
+}
+
 const GENERADAS = {
   // Reconectadas paso a paso, a medida que se revisa cada una. El resto sigue
   // desconectado: sus generadoras están escritas arriba y esperan su turno.
   cobertura: coberturaDelLevantamiento,
+  cifras: cifrasDelLevantamiento,
+  oportunidades: lasOportunidades,
   'inventario-sistemas': inventarioDeSistemas,
   'mapa-procesos': mapaDeProcesos,
   hallazgos: losHallazgos,
   'fichas-procesos': fichasDeProceso,
   'sistemas-datos': sistemasYDato,
+  'donde-no-va-la-ia': dondeNoVaLaIA,
   'riesgo-continuidad': riesgoYContinuidad,
 }
 
@@ -1575,7 +1878,7 @@ const BORRADORES = {
   'cuellos-botella': conHallazgos(null),
   madurez: conHallazgos(null),
   restricciones: conHallazgos(null),
-  'donde-no-va-la-ia': conHallazgos(null),
+  // `donde-no-va-la-ia` salió de aquí: ahora se genera del taller.
   'en-sus-palabras': async () => {
     const md = leerTaller('CITAS.md')
     return md ? sinPortada(md) : null
