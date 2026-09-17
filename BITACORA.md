@@ -25,7 +25,7 @@ línea.
 | **Dashboard** | Operativo en local. **Sin desplegar** |
 | **Levantamiento** | **42 sesiones · 27.951 turnos**. **34 entrevistas de ~25 (136%)** · los 20 macroprocesos cubiertos |
 | **Hallazgos** | **394, todos con cita textual verificada** · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
-| **Informe** | **13 secciones · 3 escritas** (cobertura, mapa de procesos y los hallazgos). Ninguna publicada |
+| **Informe** | **13 secciones · 4 escritas** · 90.706 caracteres. Ninguna publicada |
 | **Horas** | **137 h en el mes 1 contra una bolsa de 107**, ya revisadas con Gabriel. Aparte: 111 h de la etapa anterior y 104 h del curso de planta, que se factura en Fase 2 |
 | **Comunicación** | **El comunicado salió.** Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | **276 personas cargadas** con ficha, cargo, nivel y familia de oficio. ⚠️ Sin cédula, sin celular y sin correo |
@@ -231,6 +231,36 @@ encountered 2 child process exceptions» sin más traza, y el servidor servía e
 cacheado. **Era el servidor de desarrollo degradado** tras el aviso de memoria del sistema:
 con `rm -rf .next` y reinicio limpio, renderiza. Ante un 500 sin traza útil en esta app,
 reiniciar antes de sospechar del contenido.
+
+### La sección 05 · las veinte fichas
+
+Cada ficha trae ahora **quién lo contó** —las sesiones que documentaron más de uno de sus
+procesos, con el nombre de quien habló— y **sus hallazgos**, enlazados al capítulo 9. Son
+**60 enlaces** entre las dos secciones, y con ellos los **20 del mapa** ya caen en su ficha:
+el documento se recorre entero sin volver al índice.
+
+⚠️ **La atribución de hallazgos a fichas no se puede inferir.** Se intentó cruzando las
+sesiones del macroproceso con las del hallazgo, y un macroproceso que cita una sesión por un
+proceso tangencial hereda todo lo suyo: a Capital Humano le caía un hallazgo sobre la
+recepción del laboratorio, y S&OP se llevaba 27 de los 42. Estrechar el cruce a las sesiones
+«principales» dejaba a Compras sin ninguno, teniendo nueve voces. **Va explícita**, en el
+campo `macros` de `hallazgos-destacados.json`: es criterio editorial, como la selección.
+
+⚠️ **Y el ancla de un hallazgo se calcula sobre el encabezado completo**, `H-01 · Título`,
+no sobre el título solo: el separador deja su hueco y el id real lleva doble guion
+(`h-01--la-explosion…`). Construirlo a mano dejó los sesenta enlaces apuntando a la nada, y
+sin error visible en ningún sitio.
+
+### ⚠️ La máquina se está quedando sin memoria
+
+Los 500 de `/informe/hallazgos` y `/informe/fichas-procesos` **no eran del contenido**: los
+procesos de render de Next se caen con «Jest worker encountered 2 child process exceptions»
+y el servidor repite el error cacheado. Medido durante la sesión: **0,9 GB libres de 7,8**.
+El sistema mató además dos tareas de fondo por lo mismo.
+
+Receta: `rm -rf .next` y reiniciar `npm run dev`. Tras el reinicio las tres secciones
+grandes renderizan sin problema. **Ante un 500 sin traza útil en esta app, reiniciar antes
+de sospechar del contenido.**
 
 ### Dónde quedamos
 

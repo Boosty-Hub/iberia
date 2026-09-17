@@ -556,6 +556,75 @@ function tituloDeFicha(macro) {
  */
 const RUTA_FICHAS = '/informe/fichas-procesos'
 
+/**
+ * El ancla del encabezado de un hallazgo en la página del capítulo 9.
+ *
+ * ⚠️ Se calcula sobre **el texto completo del encabezado**, `H-01 · Título`, no
+ * sobre el título solo: el separador deja su hueco y el id real lleva doble
+ * guion (`h-01--la-explosion…`). Construirlo a mano dejaba los sesenta enlaces
+ * de las fichas apuntando a la nada, y sin error visible.
+ */
+function anclaDeHallazgo(clave, titulo) {
+  return new GithubSlugger().slug(`H-${clave} · ${titulo}`)
+}
+
+/**
+ * Quién contó este macroproceso: las sesiones que documentaron **más de uno** de
+ * sus procesos, y si ninguna llega a dos, las que haya. Listarlas todas producía
+ * párrafos de diez nombres —Capital Humano citaba a diez personas— que no dicen
+ * quién es la fuente de verdad del proceso.
+ */
+function quienesContaron(macro, porSesion) {
+  const cuenta = new Map()
+  for (const pr of [...macro.procesos, ...macro.no_se_hace]) {
+    for (const c of (pr.fuente ?? '').split(/[,;]/).map((x) => x.trim())) {
+      if (/^(ENT|SES|FOR)-\d+$/.test(c)) cuenta.set(c, (cuenta.get(c) ?? 0) + 1)
+    }
+  }
+  if (!cuenta.size) return '`sin fuente registrada`'
+
+  const orden = [...cuenta.entries()].sort((a, b) => b[1] - a[1])
+  const principales = orden.filter(([, n]) => n > 1)
+  const elegidas = (principales.length ? principales : orden).slice(0, 4)
+
+  const gente = elegidas.map(([c, n]) => {
+    const e = porSesion.get(c)
+    const veces = n > 1 ? ` (${n})` : ''
+    if (!e?.entrevistado_nombre) return `\`${c}\`${veces}`
+    return `${e.entrevistado_nombre} \u00b7 \`${c}\`${veces}`
+  })
+  const resto = cuenta.size - elegidas.length
+  // «sesiones» pierde la tilde en plural: no vale con pegarle «es» a «sesión».
+  const cola = resto > 0 ? ` · y ${resto} ${resto > 1 ? 'sesiones' : 'sesión'} más` : ''
+  return gente.join(' · ') + cola
+}
+
+/**
+ * Los hallazgos redactados que referencia cada ficha.
+ *
+ * ⚠️ La asignación es **editorial y explícita**, en el campo `macros` de
+ * `hallazgos-destacados.json`. Se intentó deducirla cruzando las sesiones del
+ * macroproceso con las del hallazgo y no funciona: un macroproceso que cita una
+ * sesión por un proceso tangencial hereda todo lo suyo — a Capital Humano le
+ * caía un hallazgo sobre la recepción del laboratorio. Estrechar el cruce a las
+ * sesiones principales dejaba a Compras sin ninguno, teniendo nueve voces.
+ */
+function destacadosDe(macro, destacados) {
+  if (!destacados) return []
+  const mio = `${macro.nivel} ${macro.numero}`
+  let n = 0
+  const suyos = []
+  for (const b of destacados.bloques) {
+    for (const h of b.hallazgos) {
+      n++
+      if ((h.macros ?? []).includes(mio)) {
+        suyos.push({ clave: String(n).padStart(2, '0'), titulo: h.titulo })
+      }
+    }
+  }
+  return suyos
+}
+
 function anclaDe(macro) {
   // Un slugger nuevo por llamada: el que se reutiliza numera los repetidos
   // (`-1`, `-2`) y el enlace dejaría de casar con el encabezado.
@@ -688,6 +757,15 @@ async function fichasDeProceso() {
   if (!INVENTARIO) return null
   const macros = INVENTARIO.macroprocesos
 
+  const crudoDest = leerTaller('hallazgos-destacados.json')
+  const destacados = crudoDest ? JSON.parse(crudoDest) : null
+
+  // Quién habló en cada sesión, para la línea «Quién lo contó».
+  const { data: sesiones } = await admin
+    .from('entrevistas')
+    .select('codigo, entrevistado_nombre, entrevistado_cargo')
+  const porSesion = new Map((sesiones ?? []).map((e) => [e.codigo, e]))
+
   const l = []
   l.push(
     'Una ficha por macroproceso, con el mismo formato en las veinte. Es el formato el que hace el ' +
@@ -722,6 +800,8 @@ async function fichasDeProceso() {
     l.push('')
     l.push(`**Quién lo ejecuta** — ${duenosDe(m)}`)
     l.push('')
+    l.push(`**Quién lo contó** — ${quienesContaron(m, porSesion)}`)
+    l.push('')
     l.push('**Sistemas** — `pendiente · qué vive en JD, qué en Excel y qué en ningún sitio`')
     l.push('')
     l.push('**Dato disponible** — `pendiente · sí / parcial / no, y desde cuándo`')
@@ -735,7 +815,23 @@ async function fichasDeProceso() {
       l.push(`| ${p.nombre} | ${area} |`)
     }
     l.push('')
-    l.push('**Hallazgos** — `pendiente · los que sostiene este macroproceso, con su cita textual`')
+    const suyos = destacadosDe(m, destacados)
+    if (suyos.length) {
+      l.push('')
+      l.push('**Hallazgos**')
+      l.push('')
+      for (const h of suyos) {
+        l.push(
+          `- [**H-${h.clave}** · ${h.titulo}](/informe/hallazgos#${anclaDeHallazgo(h.clave, h.titulo)})`
+        )
+      }
+    } else {
+      l.push('')
+      l.push(
+        '**Hallazgos** — los de este macroproceso son transversales y se desarrollan en ' +
+          '[Los hallazgos](/informe/hallazgos).'
+      )
+    }
 
     if (m.no_se_hace.length) {
       l.push('')
@@ -954,6 +1050,7 @@ const GENERADAS = {
   cobertura: coberturaDelLevantamiento,
   'mapa-procesos': mapaDeProcesos,
   hallazgos: losHallazgos,
+  'fichas-procesos': fichasDeProceso,
 }
 
 /**
