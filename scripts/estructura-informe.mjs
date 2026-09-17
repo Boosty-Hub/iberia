@@ -1426,6 +1426,114 @@ const dondeNoVaLaIA = () =>
   )
 
 // =============================================================================
+// 12) LA ARQUITECTURA PROPUESTA
+// =============================================================================
+//
+// El plano, y llega después de «qué se puede» y «qué no», que es el orden que
+// manda el armazón.
+//
+// ⚠️ **Las reglas van antes que el dibujo.** En el armazón viejo «Principios» y
+// «Gobierno del dato» eran secciones aparte; aquí se absorben, porque una
+// arquitectura sin sus reglas se lee como un catálogo de cajas y la fase 2 la
+// ejecuta eligiendo herramientas sin saber qué no puede romper.
+//
+// ⚠️ El diagrama de capas va en **bloque de código monoespaciado**: el
+// renderizador no tiene mermaid, y `.prosa pre` ya trae `overflow-x-auto`, así
+// que un dibujo ancho se desplaza dentro de su caja en vez de romper la página.
+
+const laArquitectura = () =>
+  capituloConCitas(
+    'arquitectura-ia.json',
+    'arquitectura-ia',
+    'Los del capítulo 9 de los que se derivan estas reglas y estas capas:'
+  )
+
+// =============================================================================
+// 13) HOJA DE RUTA
+// =============================================================================
+//
+// Secuencia, dependencias y puntos de control. **No fechas de Fase 2**: esas
+// dependen de una decisión que todavía no se ha tomado, y comprometerlas antes
+// sería inventarlas.
+//
+// ⚠️ **Las fechas del contrato no se escriben en el taller**: se leen de
+// `lib/programa.ts`, que es donde viven. Si el calendario se corre —ya se corrió
+// una vez, para que el comité apruebe con el documento en la mano—, el capítulo
+// se corrige solo en vez de contradecir al panel del programa.
+//
+// ⚠️ Y el conteo de hallazgos validados sale de la base en cada corrida. Es el
+// punto de control más urgente del capítulo y cambia todos los días; escrito a
+// mano, envejece en una tarde y deja el cierre diciendo una cifra falsa.
+
+/**
+ * Una constante de fecha de `lib/programa.ts`, leída del archivo.
+ *
+ * Es un `.ts` y esto es un `.mjs`, así que se extrae con expresión regular en
+ * vez de importarlo. Feo, pero mantiene **una sola fuente** para el calendario
+ * contractual: el panel del programa y el informe no pueden decir fechas
+ * distintas del mismo contrato.
+ */
+function fechaDelPrograma(nombre) {
+  try {
+    const src = readFileSync('lib/programa.ts', 'utf8')
+    // ⚠️ `\\d` doble: en un template literal, `\d` pierde la barra invertida y
+    // el patrón pasa a buscar la letra «d». Fallaba en silencio devolviendo null.
+    const m = src.match(new RegExp(`export const ${nombre} = '(\\d{4}-\\d{2}-\\d{2})'`))
+    return m?.[1] ?? null
+  } catch {
+    return null
+  }
+}
+
+const MESES = [
+  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+]
+
+/** «2026-12-06» → «6 de diciembre de 2026». */
+function enPalabras(iso) {
+  if (!iso) return null
+  const [a, m, d] = iso.split('-').map(Number)
+  return `${d} de ${MESES[m - 1]} de ${a}`
+}
+
+async function laHojaDeRuta() {
+  const aviso = enPalabras(fechaDelPrograma('AVISO_RENOVACION'))
+  const cierre = enPalabras(fechaDelPrograma('CIERRE_FASE'))
+  if (!aviso || !cierre) {
+    console.error('  ✖ hoja-de-ruta: no se pudieron leer las fechas de lib/programa.ts; no se escribe.')
+    return null
+  }
+
+  const { data: todos } = await admin.from('hallazgos').select('estado')
+  const total = (todos ?? []).length
+  const validados = (todos ?? []).filter((h) => h.estado === 'validado').length
+
+  const md = await capituloConCitas(
+    'hoja-de-ruta.json',
+    'hoja-de-ruta',
+    'Los del capítulo 9 que esta hoja de ruta tiene que atender primero:'
+  )
+  if (!md) return null
+
+  console.log(
+    `  · hoja-de-ruta: decide el ${aviso} · ${validados} de ${total} hallazgos validados` +
+      (validados < total / 2 ? ' · ⚠️ el documento descansa sobre material sin confirmar' : '')
+  )
+
+  // Las palabras en letra para que el texto no diga «2 hallazgos» en medio de
+  // un párrafo escrito en prosa.
+  const enLetraCorta = { 0: 'ninguno', 1: 'uno', 2: 'dos', 3: 'tres', 4: 'cuatro', 5: 'cinco' }
+  const vTexto = enLetraCorta[validados] ?? String(validados)
+
+  return md
+    .replaceAll('{AVISO}', aviso)
+    .replaceAll('{CIERRE}', cierre)
+    .replaceAll('{TOTAL}', String(total))
+    .replaceAll('{VALIDADOS}', vTexto)
+}
+
+// =============================================================================
 // 7) INVENTARIO DE SISTEMAS
 // =============================================================================
 //
@@ -1837,6 +1945,8 @@ const GENERADAS = {
   'fichas-procesos': fichasDeProceso,
   'sistemas-datos': sistemasYDato,
   'donde-no-va-la-ia': dondeNoVaLaIA,
+  'arquitectura-ia': laArquitectura,
+  'hoja-de-ruta': laHojaDeRuta,
   'riesgo-continuidad': riesgoYContinuidad,
 }
 

@@ -25,7 +25,7 @@ línea.
 | **Dashboard** | Operativo en local. **Sin desplegar** |
 | **Levantamiento** | **42 sesiones · 27.951 turnos**. **34 entrevistas de ~25 (136%)** · los 20 macroprocesos cubiertos |
 | **Hallazgos** | **394, todos con cita textual verificada** · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
-| **Informe** | **13 secciones · 10 escritas** · 215.124 caracteres. Faltan la 12, la 13 y el resumen ejecutivo. Ninguna publicada |
+| **Informe** | **13 secciones · 12 escritas** · 242.494 caracteres. **Solo falta el resumen ejecutivo.** Ninguna publicada |
 | **Horas** | **137 h en el mes 1 contra una bolsa de 107**, ya revisadas con Gabriel. Aparte: 111 h de la etapa anterior y 104 h del curso de planta, que se factura en Fase 2 |
 | **Comunicación** | **El comunicado salió.** Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | **276 personas cargadas** con ficha, cargo, nivel y familia de oficio. ⚠️ Sin cédula, sin celular y sin correo |
@@ -61,6 +61,146 @@ cláusula 5. Aquí solo lo urgente:
 - **Refijar la revisión del canal con mercadeo** — Alberto la agenda. Bloquea el despliegue.
 - **Leer los 42 hallazgos redactados** del informe y validar los que los sostienen.
 - **Pedirle a Capital Humano cédula y celular por ficha.** El padrón llegó sin ellos.
+
+---
+
+## 17 de septiembre de 2026 · Sesión 18 — la 13, y el documento queda a una sección
+
+Se escribió **«13 · Hoja de ruta»**: cinco bloques, siete citas, cuatro olas y su tabla de
+puntos de control. 10.332 caracteres. El informe va en **242.494 caracteres · 12 de 13** —
+solo falta el resumen ejecutivo.
+
+### Lo que el capítulo promete, y lo que no
+
+El subtítulo dice *secuencia, dependencias y puntos de control*, y eso es exactamente lo que
+da. **No promete fechas de Fase 2**, y se dice por qué en la primera línea: dependen de una
+decisión que se toma el 6 de diciembre. Comprometerlas antes sería inventarlas.
+
+Lo único con fecha es lo que falta de la fase actual, porque esa sí está firmada.
+
+### «La decisión» encontró casa
+
+⚠️ Cuando se eliminó esa sección del armazón, quedó anotado que con ella se iba **el único
+sitio donde vivía qué aprueba el comité al aprobar el documento**. Va ahora en el punto de
+control del 6 de diciembre, que es su lugar natural: un punto de control sin criterio de
+aprobación no es un punto de control.
+
+Son **cinco cosas y no más**: las nueve reglas, las seis capas y la conexión al núcleo, el
+orden de los tres grupos, lo que queda fuera, y que la capa de captura se presupueste aparte.
+Y se dice también lo que **no** se aprueba: ni herramientas, ni proveedores, ni inversión.
+
+### El dato que abre y cierra el capítulo
+
+**De los 394 hallazgos, 2 están validados.** Es el punto de control más urgente y el que no
+puede hacer Boosty solo. El capítulo lo pone al principio como primer pendiente y lo repite en
+el cierre, porque mientras siga así la hoja de ruta es una propuesta bien fundamentada sobre
+material que Iberia todavía no ha confirmado.
+
+### Decisiones de secuencia, con su porqué escrito
+
+- **La ola 1 no lleva las doce oportunidades del grupo 1, sino tres o cuatro.** El objetivo de
+  la primera ola no es cubrir, es demostrar — y la demostración es lo que financia el resto.
+- **El gobierno va en la ola 1**, no después, porque la adopción ya empezó sin él y cada mes
+  que pasa hay más material de Iberia en cuentas personales.
+- **La captura va antes que los modelos.** La foto del anaquel no espera por presupuesto ni por
+  tecnología: espera por dato que nadie está recogiendo.
+- **Los puntos de control se responden con evidencia, no con avance porcentual.** El de la ola 1
+  es el que más importa: *¿alguien que no sea de Boosty lo está usando solo?* Hay precedente de
+  lo contrario en la propia casa — licencias de tableros compradas y sin usar, y un sistema de
+  tesorería cancelado porque nadie lo abrió.
+
+### Dos cosas que ya no se escriben a mano
+
+⚠️ **Las fechas del contrato se leen de `lib/programa.ts`.** Es un `.ts` y el script es `.mjs`,
+así que se extraen con expresión regular en vez de importarlo: feo, pero mantiene **una sola
+fuente** para el calendario. El panel del programa y el informe no pueden decir fechas
+distintas del mismo contrato.
+
+⚠️ **Y el conteo de hallazgos validados sale de la base en cada corrida**, porque cambia todos
+los días. Escrito a mano, el cierre del documento diría una cifra falsa en una tarde.
+
+Trampa que costó una corrida: en un template literal, **`\d` pierde la barra invertida** y el
+patrón pasa a buscar la letra «d». Fallaba en silencio devolviendo `null`, y la guarda —no
+escribir si no hay fechas— fue lo que lo delató.
+
+**Dónde quedamos.** Falta **01 · Resumen ejecutivo**, que va de última porque resume a las
+demás y ahora sí tiene a qué referirse.
+
+**Verificación de la 12 y la 13, hecha.** Las dos en 200 a 1440 y a 390 px, sin desborde, las
+once anclas al capítulo 9 resuelven y cero errores de consola.
+
+⚠️ **Y el 500 volvió a aparecer, con el mismo diagnóstico de siempre.** El servidor que quedó
+vivo tras el corte por memoria —PID de las 9:38— servía `arquitectura-ia` con *«Jest worker
+encountered 2 child process exceptions»*. **No era el contenido.** La receta de la bitácora
+funcionó otra vez: matar el proceso, borrar `.next` y relevantar. Arrancó en 710 ms contra los
+6,6 s del arranque bajo presión.
+
+Detalle nuevo que conviene anotar: **cortar la tarea de fondo no mata el servidor**. Queda el
+proceso `node` escuchando en el 3000 con los workers muertos, y `npm run dev` se niega a
+arrancar diciendo que ya hay uno. Hay que matarlo por PID.
+
+---
+
+## 17 de septiembre de 2026 · Sesión 17 — la 12, el plano
+
+Se escribió **«12 · La arquitectura propuesta»**: seis bloques, 15 citas, el diagrama de capas
+y ocho enlaces al capítulo 9. 17.038 caracteres. El informe va en **232.162 caracteres · 11 de
+13**.
+
+### Las reglas van antes que el dibujo
+
+En el armazón viejo «Principios» y «Gobierno del dato» eran secciones aparte. Aquí se
+absorben, y el capítulo abre con **nueve reglas** antes de enseñar una sola caja. El motivo:
+una arquitectura sin sus reglas se lee como un catálogo, y la fase 2 la ejecutaría eligiendo
+herramientas sin saber qué no puede romper.
+
+⚠️ **Ninguna de las nueve es doctrina importada.** Cada una se deriva de algo que el
+levantamiento encontró, y lleva su origen al lado: *bandera, no acción* lo puso Contabilidad;
+*alguien pregunta, nada sale solo a buscar* lo puso la Gerencia de TI y es la que más
+condiciona el diseño; *ningún respaldo en una sola máquina* es la lección literal de febrero.
+
+### Las seis capas, y la que falta
+
+```
+6 interacción · 5 asistentes · 4 dato gobernado · 3 integración
+1 núcleo (JD/DB2/Power)    2 captura
+gobierno y seguridad — transversal
+```
+
+**La capa 2, la de captura, es la que hoy prácticamente no existe**, y es la que condiciona el
+calendario: sin ella el grupo 3 del capítulo 10 no arranca nunca. La capa 4 es la que resuelve
+que tres áreas produzcan el mismo dato distinto, y no es un almacén de datos: es un acuerdo
+escrito con un dueño por fuente.
+
+### La conexión al núcleo, en una línea
+
+**De lectura, libre; de escritura, por la puerta del ERP.** Ninguna capa escribe por su
+cuenta: entra como lo hace EXA, presentándose al ERP como si lo hubiera transcrito una persona
+para que dispare sus validaciones nativas. Consecuencia que se dejó explícita: **las reglas de
+negocio no se reimplementan en la capa de IA**, porque duplicarlas garantiza que dentro de un
+año digan cosas distintas.
+
+### Lo que el plano declara que NO resuelve
+
+Se escribió aparte y a propósito. **No hay nube**, así que **el riesgo físico sigue en pie** —
+todos los servidores en el mismo edificio, con el historial que documenta el capítulo 8— y el
+plano no debe fingir que lo resuelve. Tampoco fija productos ni proveedores: eso es decisión de
+fase 2.
+
+### El diagrama, y una corrección mía
+
+Va en bloque de código monoespaciado porque el renderizador no tiene mermaid. ⚠️ **Al revisarlo
+di por roto lo que estaba bien**: las cajas parecían no cerrar. Medido, las 35 líneas son de 62
+caracteres exactos y todos los glifos —incluidos los de dibujo— miden 7,8 px en Geist Mono. Lo
+que se ve es el **interlineado**, que deja hueco entre los `│` de filas contiguas. Es cosmético
+y legible; no se tocó `.prosa pre` por eso.
+
+**Dónde quedamos.** Dos secciones: **13 · Hoja de ruta**, que ya tiene todo lo que necesita —los
+tres grupos de oportunidades, las dependencias y la capa de captura como condicionante del
+calendario—, y **01 · Resumen ejecutivo**, de última.
+
+⚠️ **El servidor de desarrollo lo detuvo el sistema por memoria baja** al final de la sesión.
+No es fallo del comando. Antes de seguir, liberar memoria y volver a levantarlo.
 
 ---
 
