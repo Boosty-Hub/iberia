@@ -568,7 +568,39 @@ const INVENTARIO = (() => {
  * crudo y el enlace queda muerto sin que nada avise.
  */
 function tituloDeFicha(macro) {
-  return `${macro.nivel} ${macro.numero} · ${macro.nombre}`
+  return `${numeroDeFicha(macro)} · ${macro.nombre}`
+}
+
+/**
+ * Los tres niveles, en el orden en que aparecen en el inventario.
+ *
+ * Se deriva del propio inventario y no se escribe a mano: si mañana se añade un
+ * nivel o se reordenan, la numeración lo sigue en vez de mentir.
+ */
+const NIVELES = (() => {
+  const vistos = []
+  for (const m of INVENTARIO?.macroprocesos ?? []) {
+    if (!vistos.includes(m.nivel)) vistos.push(m.nivel)
+  }
+  return vistos
+})()
+
+/** «1», «2», «3» — el número del nivel dentro del documento. */
+function numeroDeNivel(nivel) {
+  const i = NIVELES.indexOf(nivel)
+  return i === -1 ? '?' : String(i + 1)
+}
+
+/**
+ * «1.1», «2.5» — el número jerárquico de un macroproceso.
+ *
+ * ⚠️ **Esto cambia el ancla de la ficha**, porque el ancla la calcula
+ * `github-slugger` sobre el texto del encabezado. No rompe nada porque el enlace
+ * del mapa sale de esta misma función: los dos lados cambian juntos. Cualquier
+ * enlace escrito a mano a una ficha sí se rompería, y por eso no hay ninguno.
+ */
+function numeroDeFicha(macro) {
+  return `${numeroDeNivel(macro.nivel)}.${macro.numero}`
 }
 
 /**
@@ -841,7 +873,7 @@ async function fichasDeProceso() {
     if (m.nivel !== nivelActual) {
       nivelActual = m.nivel
       l.push('')
-      l.push(`## ${nivelActual}`)
+      l.push(`## ${numeroDeNivel(nivelActual)} · ${nivelActual}`)
       l.push('')
     }
 

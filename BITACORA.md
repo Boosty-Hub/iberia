@@ -120,9 +120,28 @@ la bandera `u`**, y conviene recordarlo: en este proyecto todo el vocabulario ll
 `\w` va a fallar siempre en el primero que los tenga.
 
 El subíndice se numera ahora en jerarquía —`1. Estratégico`, `1.1. Dirección…`, `2. Operativo`,
-`2.1. Planificación Integrada…`—, decidido así con Jesús. **La numeración es del índice, no del
-contenido**: el documento no numera los niveles, pero en una columna estrecha es lo que deja
-ver la jerarquía de un vistazo.
+`2.1. Planificación Integrada…`—, decidido así con Jesús.
+
+### Y la numeración pasó al contenido
+
+Primero se numeró solo el índice. A petición de Jesús **la numeración va ahora en los propios
+encabezados** del documento: los niveles son `## 1 · Estratégico` y las fichas
+`### 2.1 · Planificación Integrada…`.
+
+⚠️ **Eso cambia el ancla de cada ficha**, porque el ancla la calcula `github-slugger` sobre el
+texto del encabezado. **No rompió nada porque el enlace del mapa sale de la misma función que
+el título** —`tituloDeFicha()`— y los dos lados cambiaron juntos. Un enlace escrito a mano sí
+se habría roto; por eso no hay ninguno.
+
+Comprobado tras el cambio: **los 20 enlaces del mapa y los 60 de las fichas a hallazgos
+resuelven**, con anclas nuevas del tipo `22--gestión-de-compras-y-abastecimiento`.
+
+Y **el índice dejó de calcular su propia numeración**: la lee del título. Antes la contaba por
+posición, y eran dos numeraciones que podían separarse — si el inventario reordenaba un
+macroproceso, el índice habría dicho «2.5» y la ficha de destino otra cosa.
+
+⚠️ El orden de los niveles **se deriva del inventario**, no está escrito: si mañana se añade
+uno o se reordenan, la numeración lo sigue en vez de mentir.
 
 ---
 
