@@ -25,7 +25,7 @@ línea.
 | **Dashboard** | Operativo en local. **Sin desplegar** |
 | **Levantamiento** | **42 sesiones · 27.951 turnos**. **34 entrevistas de ~25 (136%)** · los 20 macroprocesos cubiertos |
 | **Hallazgos** | **394, todos con cita textual verificada** · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
-| **Informe** | ✅ **13 de 13 escritas** · 252.077 caracteres. **Ninguna publicada** — los hallazgos que lo sostienen siguen propuestos |
+| **Informe** | ✅ **13 de 13 secciones y 20 de 20 fichas** · 268.000 caracteres aprox. Ninguna publicada — los hallazgos siguen propuestos |
 | **Horas** | **137 h en el mes 1 contra una bolsa de 107**, ya revisadas con Gabriel. Aparte: 111 h de la etapa anterior y 104 h del curso de planta, que se factura en Fase 2 |
 | **Comunicación** | **El comunicado salió.** Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | **276 personas cargadas** con ficha, cargo, nivel y familia de oficio. ⚠️ Sin cédula, sin celular y sin correo |
@@ -61,6 +61,108 @@ cláusula 5. Aquí solo lo urgente:
 - **Refijar la revisión del canal con mercadeo** — Alberto la agenda. Bloquea el despliegue.
 - **Leer los 42 hallazgos redactados** del informe y validar los que los sostienen.
 - **Pedirle a Capital Humano cédula y celular por ficha.** El padrón llegó sin ellos.
+
+---
+
+## 17 de septiembre de 2026 · Sesión 21 — las veinte fichas, y «Quién lo contó» baja al pie
+
+Se redactaron **las quince fichas que faltaban**. La 05 pasa de 5 a **20 de 20**, y el
+generador ya no imprime advertencia. La sección creció de 33.268 a **49.940 caracteres
+renderizados**, que es casi la mitad de lo que aporta al documento.
+
+### «Quién lo contó» se movió, no se quitó
+
+Jesús planteó quitarla de todas las fichas, para que se centren en el contenido y no en quién
+lo dijo. **El diagnóstico era correcto y la solución no.**
+
+La línea iba **entre «Quién lo ejecuta» y «Sistemas»** — o sea, interrumpiendo el contenido con
+la procedencia. Pero quitarla costaba tres cosas: la ficha **absorbió el informe por área
+justamente con esa línea** (regla 4 del armazón); es el atajo de quien tenga que validar los
+392 hallazgos que siguen propuestos; y la Fase 2 la necesita para saber a qué sesión volver
+por cada macroproceso.
+
+**Se bajó al pie de la ficha, en cursiva y sin negrita.** El contenido manda y la trazabilidad
+queda disponible sin competir. Acordado así con Jesús.
+
+### Lo que las fichas dejaron ver al escribirlas
+
+Escribirlas una por una hizo visibles cosas que el mapa por sí solo no muestra:
+
+- **La proporción de procesos que no se ejecutan es desigual y dice mucho.** Capital Humano
+  tiene tres de once —sin plan de formación, sin evaluación de desempeño—, que es la más alta
+  del inventario.
+- **Hay procesos ejecutados por el área equivocada, y son varios**: la facturación la hace
+  Distribución; la liquidación de guías la opera Tesorería dentro de Distribución; el bono de
+  productividad lo ejecuta TI; la metrología figura en Mantenimiento y la hace Calidad.
+- **El «Dato disponible» no es uniforme y esa es la conclusión.** Almacén de materia prima es
+  de los mejores del levantamiento; Producción es **no confiable justo donde más se usa**;
+  Mantenimiento y Capital Humano sencillamente no existen.
+
+### Verificación
+
+Las trece secciones recorridas otra vez: **todas en 200, ninguna desborda, cero pendientes
+visibles, cero errores de página**. 253.192 caracteres renderizados. Comprobado también que el
+nombre de la sesión retenida sigue sin aparecer en las fichas.
+
+**Dónde quedamos.** El documento está escrito de verdad ahora. Lo que falta no es redacción:
+son los **392 hallazgos por validar**, que es lo que la hoja de ruta pone como primer punto de
+control.
+
+---
+
+## 17 de septiembre de 2026 · Sesión 20 — la fuga de ENT-005, y las fichas no estaban hechas
+
+Sesión que empezó revisando un hueco que señaló Jesús y terminó encontrando algo más serio.
+
+### 🔴 ENT-005 estaba citada en el documento
+
+`ENT-005` no puede cosecharse ni citarse. **Aparecía igual en dos secciones**, con nombre y
+apellido:
+
+- **05 · Fichas** — en «Quién lo contó» de dos macroprocesos, y acreditando una observación
+  en «Lo que NO se hace».
+- **02 · Cobertura** — una fila de la tabla con su nombre, cargo y duración, más su nombre
+  como participante en dos comités.
+
+⚠️ **La causa: `SIN_CONSENTIMIENTO` se creó al escribir el capítulo 8 y las generadoras
+anteriores no la tenían.** `quienesContaron()` y la cobertura son del armazón de septiembre y
+leen el inventario y la base directamente, donde ENT-005 sigue figurando como fuente de varios
+procesos. **No citarla incluye no acreditarla**, y eso no estaba implementado.
+
+Arreglado en los tres sitios. **Decidido con Jesús**:
+
+- La fila de cobertura **se queda y se anonimiza**: `Sesión retenida · sin consentimiento de
+  grabación`, sin nombre, cargo, área ni duración. Quitarla habría dejado un hueco en el
+  conteo de 42 que citan otros tres capítulos.
+- **Su nombre se filtra también de los comités** SES-001 y SES-002, aunque esas sesiones no
+  estén vetadas. Criterio máximo: no aparece en ninguna parte del documento.
+
+Comprobado: **cero apariciones de su nombre en las trece secciones**. Queda el código
+`ENT-005` en la fila retenida, que es lo que sostiene el conteo.
+
+⚠️ **Queda un resto por decidir**: la observación del proceso «Gestión de Quejas y Reclamos»
+en el inventario dice «lo primero que automatizaría la Gerente de Calidad». Se le quitó la
+acreditación, pero el texto la identifica por cargo y el contenido sale de su sesión. Vive en
+`inventario-procesos.json`, que produce otro proceso.
+
+### Las fichas estaban a medias, y yo las di por hechas
+
+De los cinco campos de cada ficha, **solo se llenaron los dos que salen del dato**. Los tres
+que son redacción quedaron como plantilla visible: **60 campos en 20 fichas**.
+
+Mi reporte de aquella sesión —«las veinte fichas, con sus fuentes y sus hallazgos»— era exacto
+sobre lo hecho y **nunca dijo lo que faltaba**, y sobre esa base llamé «completo» al documento.
+
+Escritas **las cinco primeras** (Estratégico 1-3, Operativo 1-2). La prosa vive en
+`contenido/informe/fichas-prosa.json`, con clave `«Nivel N»`.
+
+⚠️ **El relleno es parcial a propósito y la plantilla se queda a la vista.** Veinte por tres
+escritos de una sentada dan prosa de relleno; en blanco, los campos se vuelven invisibles. Y
+**el generador ahora cuenta**: imprime `5 de 20 fichas redactadas · faltan 45 campos` en cada
+corrida. Eso es lo que faltó la primera vez.
+
+**Dónde quedamos.** Quince fichas, 45 campos. Y el documento **no está completo** — corregido
+en el estado de arriba.
 
 ---
 

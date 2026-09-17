@@ -126,11 +126,29 @@ async function coberturaDelLevantamiento() {
     .from('transcripcion_segmentos')
     .select('*', { count: 'exact', head: true })
 
+  // ⚠️ **La sesión sin consentimiento cuenta pero no se acredita.** Sigue en la
+  // tabla —ocurrió, y quitarla dejaría un hueco en un conteo que otros capítulos
+  // citan— pero sin nombre, sin cargo, sin área y sin duración. Y su nombre se
+  // filtra también de los participantes de **las demás** sesiones: el criterio
+  // acordado es que no aparezca en ninguna parte del documento.
+  const vetados = new Set(
+    sesiones
+      .filter((s) => SIN_CONSENTIMIENTO.has(s.codigo))
+      .map((s) => s.entrevistado_nombre)
+      .filter(Boolean)
+  )
+  if (vetados.size) {
+    console.log(`  · cobertura: ${vetados.size} sesión(es) retenida(s), contadas y sin acreditar`)
+  }
+
   const filas = sesiones.map((s) => {
+    if (SIN_CONSENTIMIENTO.has(s.codigo)) {
+      return `| \`${s.codigo}\` | ${fecha(s.fecha_entrevista)} | **Sesión retenida** · sin consentimiento de grabación | — | ${SEDES[s.sede] ?? '—'} | — | — |`
+    }
     const nombre = s.titulo || s.entrevistado_nombre || s.codigo
     const gente = (s.participantes ?? [])
       .map((p) => p.personas?.nombre_completo)
-      .filter(Boolean)
+      .filter((n) => n && !vetados.has(n))
       .join(', ')
     return `| \`${s.codigo}\` | ${fecha(s.fecha_entrevista)} | ${nombre}${
       s.entrevistado_cargo ? ` · ${s.entrevistado_cargo}` : ''
@@ -586,6 +604,11 @@ function quienesContaron(macro, porSesion) {
   const cuenta = new Map()
   for (const pr of [...macro.procesos, ...macro.no_se_hace]) {
     for (const c of (pr.fuente ?? '').split(/[,;]/).map((x) => x.trim())) {
+      // ⚠️ La guarda de consentimiento también aquí. Esta función es anterior a
+      // `SIN_CONSENTIMIENTO` y no la tenía: el inventario trae ENT-005 como
+      // fuente de varios procesos, así que la ficha la nombraba —con nombre y
+      // apellido— en un capítulo del informe. No citarla incluye no acreditarla.
+      if (SIN_CONSENTIMIENTO.has(c)) continue
       if (/^(ENT|SES|FOR)-\d+$/.test(c)) cuenta.set(c, (cuenta.get(c) ?? 0) + 1)
     }
   }
@@ -761,9 +784,34 @@ async function mapaDeProcesos() {
   return l.join('\n')
 }
 
+/**
+ * Los tres campos de la ficha que son redacción, no dato.
+ *
+ * ⚠️ **El relleno es parcial a propósito y la plantilla se queda a la vista.**
+ * Son veinte macroprocesos por tres campos: escribirlos de una sentada produce
+ * prosa de relleno, y dejarlos en blanco los vuelve invisibles. Con la plantilla
+ * puesta, la ficha sin redactar se distingue de un vistazo y el generador dice
+ * cuántas van — que es lo que faltó la primera vez: las fichas se dieron por
+ * hechas con sesenta campos sin escribir.
+ */
+const PLANTILLA = {
+  que_hace: '`pendiente de redactar · tres líneas, y cada una con su hallazgo`',
+  sistemas: '`pendiente · qué vive en JD, qué en Excel y qué en ningún sitio`',
+  dato: '`pendiente · sí / parcial / no, y desde cuándo`',
+}
+
+const PROSA_FICHAS = (() => {
+  try {
+    return JSON.parse(leerTaller('fichas-prosa.json')).fichas ?? {}
+  } catch {
+    return {}
+  }
+})()
+
 async function fichasDeProceso() {
   if (!INVENTARIO) return null
   const macros = INVENTARIO.macroprocesos
+  let redactadas = 0
 
   const crudoDest = leerTaller('hallazgos-destacados.json')
   const destacados = crudoDest ? JSON.parse(crudoDest) : null
@@ -804,15 +852,15 @@ async function fichasDeProceso() {
       l.push('> **Macroproceso nuevo.** No figuraba en el inventario de partida.')
     }
     l.push('')
-    l.push('**Qué hace hoy** — `pendiente de redactar · tres líneas, y cada una con su hallazgo`')
+    const prosa = PROSA_FICHAS[`${m.nivel} ${m.numero}`] ?? {}
+    if (prosa.que_hace) redactadas++
+    l.push(`**Qué hace hoy** — ${prosa.que_hace ?? PLANTILLA.que_hace}`)
     l.push('')
     l.push(`**Quién lo ejecuta** — ${duenosDe(m)}`)
     l.push('')
-    l.push(`**Quién lo contó** — ${quienesContaron(m, porSesion)}`)
+    l.push(`**Sistemas** — ${prosa.sistemas ?? PLANTILLA.sistemas}`)
     l.push('')
-    l.push('**Sistemas** — `pendiente · qué vive en JD, qué en Excel y qué en ningún sitio`')
-    l.push('')
-    l.push('**Dato disponible** — `pendiente · sí / parcial / no, y desde cuándo`')
+    l.push(`**Dato disponible** — ${prosa.dato ?? PLANTILLA.dato}`)
     l.push('')
     l.push(`**Procesos (${m.procesos.length})**`)
     l.push('')
@@ -847,13 +895,30 @@ async function fichasDeProceso() {
       l.push('')
       for (const p of m.no_se_hace) {
         const marca = p.estado === 'SIN EVIDENCIA' ? 'sin evidencia' : 'no se ejecuta'
-        const fuente = p.fuente && p.fuente !== '—' ? ` *(${p.fuente})*` : ''
+        // Misma guarda: la observación se conserva, la acreditación no.
+        const cods = (p.fuente ?? '')
+          .split(/[,;]/)
+          .map((x) => x.trim())
+          .filter((c) => c && c !== '—' && !SIN_CONSENTIMIENTO.has(c))
+        const fuente = cods.length ? ` *(${cods.join(', ')})*` : ''
         l.push(`- **${p.nombre}** · ${marca} — ${p.observacion}${fuente}`)
       }
     }
+    // ⚠️ **«Quién lo contó» va al pie, no en medio.** Estaba entre «Quién lo
+    // ejecuta» y «Sistemas», o sea interrumpiendo el contenido con la
+    // procedencia. No se quita —la ficha absorbió el informe por área
+    // justamente con esta línea, y es el atajo de quien tenga que validar los
+    // hallazgos— pero deja de competir con lo que el lector vino a buscar.
+    l.push('')
+    l.push(`*Quién lo contó* — ${quienesContaron(m, porSesion)}`)
     l.push('')
     l.push('---')
   }
+
+  console.log(
+    `  · fichas-procesos: ${redactadas} de ${macros.length} fichas redactadas` +
+      (redactadas < macros.length ? ` · ⚠️ faltan ${(macros.length - redactadas) * 3} campos` : '')
+  )
 
   return l.join('\n')
 }
