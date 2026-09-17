@@ -64,6 +64,52 @@ cláusula 5. Aquí solo lo urgente:
 
 ---
 
+## 17 de septiembre de 2026 · Sesión 22 — la 05 se pliega
+
+«Las fichas de proceso» eran **49.940 caracteres en una sola página**, ilegibles de corrido.
+Ahora se pliega por nivel. **La página pasa de todo ese scroll a 930 px** al cargar.
+
+- **Tres bloques cerrados de entrada** —Estratégico 3, Operativo 9, Soporte 8—, cada uno con
+  su cuenta de fichas en el resumen.
+- **Chevron en el índice lateral** sobre la 05, que despliega los tres niveles y los veinte
+  macroprocesos como enlaces directos a su ancla.
+
+### La decisión: acordeón, no tres páginas
+
+Se evaluó partir la sección en `/estrategico`, `/operativo` y `/soporte`. **Se descartó**:
+rompía los 20 enlaces del mapa de procesos y los 60 de las fichas a hallazgos, ya verificados,
+y obligaba a rehacer el generador de anclas. El acordeón resuelve la lectura sin tocar nada de
+lo verificado, y es reversible.
+
+### ⚠️ El riesgo de plegar no es visual, son las anclas
+
+A las fichas apuntan **veinte enlaces desde el mapa de procesos, que es otra página**, y caen
+dentro de bloques que pueden estar cerrados. `MarkdownPlegable` **abre el bloque que contiene
+el id del hash** antes de dejar que el navegador salte, al cargar y en cada `hashchange`, y
+rehace el scroll — el primer intento cae sobre un elemento sin altura.
+
+Comprobado: **los 20 enlaces del mapa resuelven y el ancla directa abre su bloque.**
+
+### Decisiones de implementación
+
+- **El subíndice se saca del contenido, no del inventario.** Podría leerse el JSON, pero
+  entonces índice y página dirían cosas distintas en cuanto una se regenerara sin la otra. Se
+  parsean los encabezados, y el ancla la calcula el mismo `github-slugger` que usa `rehype-slug`.
+- **El chevron es un botón aparte, fuera del enlace.** Anidado dentro, desplegar obligaría a
+  navegar — lo contrario de lo que sirve.
+- **`PLEGABLES` es una lista en la página, no un atributo de la sección**: plegar es una
+  decisión de lectura, no una propiedad del contenido.
+- ⚠️ **No hay regla de impresión, y no es un olvido**: un `<details>` cerrado oculta su
+  contenido por el navegador y ocultar el `summary` no lo revela. Si algún día se imprime desde
+  esta página, hay que abrir los bloques con JavaScript antes de `print()`. Queda anotado en el
+  CSS.
+
+Trampa repetida por tercera vez: **`
+` escrito desde un script pierde la barra y se
+convierte en salto de línea real**. Lo cazó `tsc`.
+
+---
+
 ## 17 de septiembre de 2026 · Sesión 21 — las veinte fichas, y «Quién lo contó» baja al pie
 
 Se redactaron **las quince fichas que faltaban**. La 05 pasa de 5 a **20 de 20**, y el

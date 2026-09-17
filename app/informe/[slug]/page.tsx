@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Markdown } from '@/components/markdown'
+import { MarkdownPlegable } from '@/components/markdown-plegable'
 import { Insignia } from '@/components/ui'
 import { esEditor, requerirSesion } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
@@ -14,6 +15,15 @@ import { PARTES_INFORME, type ParteInforme } from '@/lib/types'
  * para pasar a la siguiente: un documento se lee de corrido, y obligar a volver
  * al índice entre sección y sección lo rompe.
  */
+
+/**
+ * Las secciones que se pliegan por sus encabezados de nivel 2.
+ *
+ * Es una lista y no una propiedad de la sección a propósito: plegar es una
+ * decisión de lectura de esta página, no un atributo del contenido. Si mañana
+ * otra sección crece hasta ahí, se añade su slug y ya.
+ */
+const PLEGABLES = new Set(['fichas-procesos'])
 
 /** Las secciones que el usuario puede ver, ya filtradas por RLS. */
 async function leerSecciones() {
@@ -91,7 +101,14 @@ export default async function SeccionInformePage({ params }: PageProps<'/informe
 
       <div className="py-8">
         {escrita ? (
-          <Markdown contenido={seccion.contenido_md!} />
+          // «Las fichas de proceso» son veinte macroprocesos y cincuenta mil
+          // caracteres: de corrido no se leen. Se pliegan por nivel. El resto de
+          // secciones va entera, que es como se lee un documento.
+          PLEGABLES.has(seccion.slug) ? (
+            <MarkdownPlegable contenido={seccion.contenido_md!} />
+          ) : (
+            <Markdown contenido={seccion.contenido_md!} />
+          )
         ) : (
           // Solo la ve un editor: `visibles` no le entrega secciones vacías al
           // lector de Iberia.

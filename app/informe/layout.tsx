@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { cerrarSesion } from '@/app/login/actions'
 import { IconoPanel, IconoSalir } from '@/components/iconos'
-import { IndiceInforme, type EntradaIndice } from '@/components/indice-informe'
+import GithubSlugger from 'github-slugger'
+import { IndiceInforme, type EntradaIndice, type NivelIndice } from '@/components/indice-informe'
 import { Marca } from '@/components/marca'
 import { esEditor, requerirSesion } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
@@ -16,6 +17,43 @@ import { createClient } from '@/lib/supabase/server'
  * montar al cambiar de sección, la posición del scroll de la columna se
  * conserva y el destino activo se marca solo.
  */
+/**
+ * El subíndice de una sección plegable: sus niveles y las fichas de cada uno.
+ *
+ * ⚠️ **Se saca del propio contenido, no del inventario.** Podría leerse
+ * `inventario-procesos.json`, pero entonces el índice y la página podrían decir
+ * cosas distintas en cuanto una se regenerara sin la otra. Parseando los
+ * encabezados se navega exactamente lo que está escrito, y el ancla es la misma
+ * que calcula `rehype-slug` porque la genera el mismo `github-slugger`.
+ */
+function subindice(slug: string, md: string | null): NivelIndice[] | undefined {
+  if (slug !== 'fichas-procesos' || !md) return undefined
+
+  const niveles: NivelIndice[] = []
+  let enCodigo = false
+
+  for (const linea of md.split('\n')) {
+    if (linea.trimStart().startsWith('```')) enCodigo = !enCodigo
+    if (enCodigo) continue
+
+    const h2 = /^## (?!#)(.+)$/.exec(linea)
+    if (h2) {
+      niveles.push({ titulo: h2[1].trim(), fichas: [] })
+      continue
+    }
+    const h3 = /^### (.+)$/.exec(linea)
+    if (h3 && niveles.length) {
+      const texto = h3[1].trim()
+      niveles[niveles.length - 1].fichas.push({
+        titulo: texto,
+        ancla: new GithubSlugger().slug(texto),
+      })
+    }
+  }
+
+  return niveles.filter((n) => n.fichas.length)
+}
+
 export default async function InformeLayout({ children }: LayoutProps<'/informe'>) {
   const { perfil } = await requerirSesion()
   const puedeEditar = esEditor(perfil)
@@ -40,6 +78,7 @@ export default async function InformeLayout({ children }: LayoutProps<'/informe'
     titulo: s.titulo,
     parte: s.parte,
     escrita: Boolean(s.contenido_md?.trim()),
+    sub: subindice(s.slug, s.contenido_md),
   }))
 
   return (

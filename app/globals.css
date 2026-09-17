@@ -225,6 +225,59 @@ body {
   @apply overflow-x-auto;
 }
 
+/* -----------------------------------------------------------------------------
+   Sección plegable del informe · «Las fichas de proceso»
+   Veinte macroprocesos en una página se leen mal de corrido. Se pliega por
+   nivel, y el bloque cerrado tiene que leerse como un control, no como un
+   título: de ahí la superficie, el borde y el chevron que gira.
+   -------------------------------------------------------------------------- */
+.plegable {
+  @apply mt-4 overflow-hidden rounded-2xl border border-[var(--borde)];
+}
+.plegable > summary {
+  @apply flex cursor-pointer list-none items-center gap-3 bg-marca-50 px-5 py-4
+         text-base font-semibold text-marca-800 transition-colors;
+}
+.plegable > summary:hover {
+  @apply bg-marca-100;
+}
+/* El marcador propio de Safari y Chrome se quita por las dos vías que existen. */
+.plegable > summary::-webkit-details-marker {
+  display: none;
+}
+.plegable > summary::marker {
+  content: '';
+}
+/* El chevron, dibujado con borde para no depender de ningún icono. */
+.plegable > summary::before {
+  content: '';
+  @apply h-2 w-2 shrink-0 rotate-45 border-r-2 border-b-2 border-acento-500
+         transition-transform duration-150;
+  margin-left: 0.15rem;
+}
+.plegable[open] > summary::before {
+  @apply -rotate-45;
+  margin-top: 0.3rem;
+}
+.plegable-titulo {
+  @apply flex-1;
+}
+.plegable-cuenta {
+  @apply rounded-full bg-white px-2.5 py-0.5 font-mono text-xs font-normal text-marca-500;
+}
+.plegable-cuerpo {
+  @apply px-5 pb-2;
+}
+/* El encabezado del nivel ya está en el resumen: dentro sobra. */
+.plegable-cuerpo .prosa > h2:first-child {
+  @apply sr-only;
+}
+/* ⚠️ No hay regla de impresión, y no es un olvido: un `<details>` cerrado
+   oculta su contenido por el navegador, y ocultar el `summary` no lo revela.
+   Forzarlo desde CSS no es fiable entre motores. Si algún día el informe se
+   imprime desde esta página, hay que abrir los bloques con JavaScript antes de
+   llamar a `print()`. Hoy el PDF sale de `documentos/`, que es otra ruta. */
+
 /* =============================================================================
    CANAL · el aplicativo de comunicación interna
    Pensado para el teléfono primero. De aquí salió el lenguaje visual del resto
