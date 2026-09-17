@@ -108,6 +108,22 @@ Trampa repetida por tercera vez: **`
 ` escrito desde un script pierde la barra y se
 convierte en salto de línea real**. Lo cazó `tsc`.
 
+### 🔴 Y un bug de etiquetado que solo se veía mirando
+
+Lo cazó Jesús: en el subíndice, **Estratégico conservaba el prefijo «Estratégico 1 · » y
+Operativo y Soporte no**.
+
+⚠️ **La causa: `\w` es ASCII.** El patrón que quitaba el prefijo dejaba de casar en la «é» de
+«Estratégico», mientras «Operativo» y «Soporte» —sin acentos— sí se limpiaban. El resultado
+era un índice donde un nivel se numeraba distinto de los otros dos. **Arreglado con `\p{L}` y
+la bandera `u`**, y conviene recordarlo: en este proyecto todo el vocabulario lleva acentos, y
+`\w` va a fallar siempre en el primero que los tenga.
+
+El subíndice se numera ahora en jerarquía —`1. Estratégico`, `1.1. Dirección…`, `2. Operativo`,
+`2.1. Planificación Integrada…`—, decidido así con Jesús. **La numeración es del índice, no del
+contenido**: el documento no numera los niveles, pero en una columna estrecha es lo que deja
+ver la jerarquía de un vistazo.
+
 ---
 
 ## 17 de septiembre de 2026 · Sesión 21 — las veinte fichas, y «Quién lo contó» baja al pie

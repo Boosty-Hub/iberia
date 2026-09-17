@@ -63,25 +63,43 @@ function Chevron({
  * la página **abre sola el bloque plegado que contiene ese id** — si no, el
  * enlace llevaría a la página y a ningún sitio dentro de ella.
  */
+/**
+ * Quita el prefijo «Nivel N · » del título de una ficha, para dejar solo el
+ * nombre del macroproceso.
+ *
+ * ⚠️ **`\p{L}` y no `\w`.** `\w` es ASCII: con «Estratégico 1 · …» dejaba de
+ * casar en la «é» y el prefijo se quedaba puesto, mientras «Operativo» y
+ * «Soporte» —sin acentos— sí se limpiaban. El resultado era un índice donde
+ * un nivel se numeraba y los otros dos no.
+ */
+function soloNombre(titulo: string) {
+  return titulo.replace(/^\p{L}+\s+\d+\s*·\s*/u, '')
+}
+
 function SubIndice({ slug, niveles }: { slug: string; niveles: NivelIndice[] }) {
   return (
-    <ul className="mt-0.5 mb-1 ml-6 space-y-2 border-l border-[var(--borde)] pl-3">
-      {niveles.map((n) => (
+    <ul className="mt-1 mb-1 ml-6 space-y-2 border-l border-[var(--borde)] pl-3">
+      {niveles.map((n, iNivel) => (
         <li key={n.titulo}>
-          <p className="px-1 text-[11px] font-semibold tracking-wide text-marca-400 uppercase">
-            {n.titulo}
+          {/* La numeración es del índice, no del contenido: el documento no
+              numera los niveles, pero en una columna estrecha «1.» y «2.1.»
+              son lo que deja ver la jerarquía de un vistazo. */}
+          <p className="flex gap-1.5 px-1 text-[11px] font-semibold tracking-wide text-marca-500 uppercase">
+            <span className="font-mono text-marca-400">{iNivel + 1}.</span>
+            {soloNombre(n.titulo)}
           </p>
           <ul className="mt-0.5 space-y-px">
-            {n.fichas.map((f) => (
+            {n.fichas.map((f, iFicha) => (
               <li key={f.ancla}>
                 <Link
                   href={`/informe/${slug}#${f.ancla}`}
-                  className="block truncate rounded px-1 py-0.5 text-xs text-marca-500 transition-colors hover:bg-[var(--fondo)] hover:text-acento-700"
+                  className="flex gap-1.5 rounded px-1 py-0.5 text-xs text-marca-500 transition-colors hover:bg-[var(--fondo)] hover:text-acento-700"
                   title={f.titulo}
                 >
-                  {/* Solo el nombre: el nivel ya lo dice el rótulo de arriba y
-                      repetirlo llena la columna sin informar. */}
-                  {f.titulo.replace(/^\w+\s+\d+\s*·\s*/, '')}
+                  <span className="shrink-0 font-mono text-marca-400">
+                    {iNivel + 1}.{iFicha + 1}.
+                  </span>
+                  <span className="truncate">{soloNombre(f.titulo)}</span>
                 </Link>
               </li>
             ))}
