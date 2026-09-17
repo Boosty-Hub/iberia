@@ -19,6 +19,28 @@ import { Markdown } from '@/components/markdown'
  * llevaría a la página correcta y a ningún sitio dentro de ella — que es
  * exactamente la clase de fallo que no da error.
  */
+/**
+ * Abre el bloque plegado que contiene un id y salta hasta él.
+ *
+ * Se exporta porque **el índice lateral también la necesita**: sus enlaces
+ * apuntan a anclas de esta misma página, y ahí el navegador no hace nada por su
+ * cuenta (ver abajo).
+ */
+export function revelarAncla(id: string) {
+  if (!id) return
+  // `getElementById` encuentra el destino aunque el bloque esté cerrado: el
+  // contenido está en el DOM, solo oculto.
+  const destino = document.getElementById(id)
+  if (!destino) return
+
+  const bloque = destino.closest('details')
+  if (bloque && !bloque.open) bloque.open = true
+
+  // El salto se rehace tras abrir: el intento del navegador, si lo hubo, cayó
+  // sobre un elemento que todavía no tenía altura.
+  requestAnimationFrame(() => destino.scrollIntoView({ block: 'start' }))
+}
+
 export function MarkdownPlegable({
   contenido,
   className,
@@ -29,27 +51,10 @@ export function MarkdownPlegable({
   const caja = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const nodo = caja.current
-    if (!nodo) return
-
-    /** Abre el `<details>` que contenga el id del hash y salta hasta él. */
-    const abrirPorHash = () => {
-      const id = decodeURIComponent(window.location.hash.slice(1))
-      if (!id) return
-      // `getElementById` funciona aunque el bloque esté cerrado: el contenido
-      // está en el DOM, solo oculto.
-      const destino = document.getElementById(id)
-      if (!destino) return
-      const bloque = destino.closest('details')
-      if (bloque && !bloque.open) bloque.open = true
-      // Tras abrirlo hay que rehacer el salto: el navegador ya lo intentó sobre
-      // un elemento que no tenía altura.
-      requestAnimationFrame(() => destino.scrollIntoView({ block: 'start' }))
-    }
-
-    abrirPorHash()
-    window.addEventListener('hashchange', abrirPorHash)
-    return () => window.removeEventListener('hashchange', abrirPorHash)
+    const porHash = () => revelarAncla(decodeURIComponent(window.location.hash.slice(1)))
+    porHash()
+    window.addEventListener('hashchange', porHash)
+    return () => window.removeEventListener('hashchange', porHash)
   }, [])
 
   const bloques = partirPorNivel2(contenido)

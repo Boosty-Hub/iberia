@@ -143,6 +143,30 @@ macroproceso, el índice habría dicho «2.5» y la ficha de destino otra cosa.
 ⚠️ El orden de los niveles **se deriva del inventario**, no está escrito: si mañana se añade
 uno o se reordenan, la numeración lo sigue en vez de mentir.
 
+### 🔴 Y el submenú no llevaba a ninguna parte desde la propia página
+
+Lo reportó Jesús: estando **ya en** `/informe/fichas-procesos`, pulsar cualquier entrada del
+submenú no hacía nada. Desde otra sección sí funcionaba.
+
+⚠️ **La causa: `history.pushState` no dispara `hashchange`.** Next navega la misma ruta con
+`pushState`, así que la URL cambiaba —se veía el `#` nuevo— pero el listener de
+`MarkdownPlegable` nunca corría, el bloque seguía cerrado y el navegador no podía saltar a un
+destino sin altura. **Un enlace que parece roto y no da ningún error.** Medido antes de tocar
+nada: 0 eventos `hashchange` en el clic.
+
+Arreglado extrayendo `revelarAncla(id)` de `MarkdownPlegable` y llamándola desde el índice
+cuando ya se está en esa página: se hace el `pushState` a mano y se revela el ancla. El
+manejador **respeta Cmd/Ctrl/Shift y el botón central**, para no romper «abrir en pestaña
+nueva».
+
+Comprobado: los veinte enlaces del submenú abren su bloque y saltan, **desde la propia página y
+desde otra sección**.
+
+⚠️ Nota de método: la primera pasada de la prueba dio por roto el caso «desde otra sección».
+No lo estaba — **la página de fichas tarda en montar y el `waitForTimeout` de 1.200 ms se
+quedaba corto**. Se cambió por `waitForURL`. Conviene recordarlo: en esta sección, las esperas
+fijas mienten.
+
 ---
 
 ## 17 de septiembre de 2026 · Sesión 21 — las veinte fichas, y «Quién lo contó» baja al pie

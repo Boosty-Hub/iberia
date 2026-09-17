@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import { revelarAncla } from '@/components/markdown-plegable'
 import { PARTES_INFORME, PARTES_INFORME_ORDEN, type ParteInforme } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
@@ -19,14 +20,6 @@ export type EntradaIndice = {
   sub?: NivelIndice[]
 }
 
-/**
- * El índice del informe, que es también su navegación: cada sección es una
- * página propia y esta lista es cómo se llega a ella.
- *
- * El destino activo se marca como en la barra del panel —rojo tenue y texto
- * rojo, no un bloque sólido—: en una columna blanca una pastilla llena pesa
- * como un botón de acción y compite con los de la página.
- */
 /** El chevron que despliega el subíndice. Gira, no cambia de icono. */
 function Chevron({
   abierto,
@@ -56,14 +49,6 @@ function Chevron({
 }
 
 /**
- * Los niveles de una sección plegable y sus fichas.
- *
- * ⚠️ Cada ficha enlaza a `/informe/<slug>#<ancla>`. El ancla la calcula el
- * layout con el mismo `github-slugger` que usa `rehype-slug` al renderizar, y
- * la página **abre sola el bloque plegado que contiene ese id** — si no, el
- * enlace llevaría a la página y a ningún sitio dentro de ella.
- */
-/**
  * Parte el título de un encabezado numerado en su número y su nombre.
  *
  * ⚠️ **El número lo trae el contenido, el índice ya no lo calcula.** Antes lo
@@ -77,7 +62,34 @@ function partirNumero(titulo: string): [numero: string, nombre: string] {
   return m ? [m[1], m[2]] : ['', titulo]
 }
 
+/**
+ * Los niveles de una sección plegable y sus fichas.
+ *
+ * Cada ficha enlaza a `/informe/<slug>#<ancla>`, y el ancla la calcula el layout
+ * con el mismo `github-slugger` que usa `rehype-slug` al renderizar.
+ */
 function SubIndice({ slug, niveles }: { slug: string; niveles: NivelIndice[] }) {
+  const ruta = usePathname()
+  const enLaPagina = ruta === `/informe/${slug}`
+
+  /**
+   * ⚠️ **Estando ya en la página, el enlace no hace nada por su cuenta.**
+   *
+   * Next navega la misma ruta con `history.pushState`, y `pushState` **no
+   * dispara `hashchange`**: la URL cambia, el listener de `MarkdownPlegable`
+   * nunca corre, el bloque sigue cerrado y el navegador no puede saltar a un
+   * destino sin altura. El resultado es un enlace que parece roto y no da error.
+   *
+   * Desde otra sección no hace falta: la navegación monta la página y el efecto
+   * lee el hash al arrancar.
+   */
+  const alPulsar = (ev: React.MouseEvent, ancla: string) => {
+    if (!enLaPagina || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button !== 0) return
+    ev.preventDefault()
+    window.history.pushState(null, '', `#${ancla}`)
+    revelarAncla(ancla)
+  }
+
   return (
     <ul className="mt-1 mb-1 ml-6 space-y-2 border-l border-[var(--borde)] pl-3">
       {niveles.map((n) => {
@@ -95,6 +107,7 @@ function SubIndice({ slug, niveles }: { slug: string; niveles: NivelIndice[] }) 
                   <li key={f.ancla}>
                     <Link
                       href={`/informe/${slug}#${f.ancla}`}
+                      onClick={(ev) => alPulsar(ev, f.ancla)}
                       className="flex gap-1.5 rounded px-1 py-0.5 text-xs text-marca-500 transition-colors hover:bg-[var(--fondo)] hover:text-acento-700"
                       title={f.titulo}
                     >
@@ -112,6 +125,14 @@ function SubIndice({ slug, niveles }: { slug: string; niveles: NivelIndice[] }) 
   )
 }
 
+/**
+ * El índice del informe, que es también su navegación: cada sección es una
+ * página propia y esta lista es cómo se llega a ella.
+ *
+ * El destino activo se marca como en la barra del panel —rojo tenue y texto
+ * rojo, no un bloque sólido—: en una columna blanca una pastilla llena pesa
+ * como un botón de acción y compite con los de la página.
+ */
 export function IndiceInforme({ secciones }: { secciones: EntradaIndice[] }) {
   const ruta = usePathname()
   // Solo se recuerda qué está desplegado, no se persiste: el índice no se
