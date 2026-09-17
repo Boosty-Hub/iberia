@@ -73,6 +73,14 @@ const SECCIONES = [
   // texto fijo que nadie recuerda corregir cuando el conteo cambia. La cifra
   // auditada vive en la primera línea del capítulo, que la calcula el generador.
   ['levantamiento', 'riesgo-continuidad', 'Riesgo y continuidad', 'El incidente de febrero visto desde las áreas que lo vivieron'],
+  // Dónde se traba el trabajo y su inventario. Entran en pareja, como manda la
+  // regla: el primero afirma los patrones y el segundo los enseña uno por uno.
+  // ⚠️ Existieron en el armazón de 32 como «Cuellos de botella y trabajo
+  // manual» y se cortaron el 16 de septiembre. Vuelven porque entre «esto está
+  // mal» y «hagamos esto» faltaba cuantificar el dolor, que es lo que un comité
+  // pregunta antes de aprobar un presupuesto.
+  ['levantamiento', 'trabas', 'Dónde se traba el trabajo', 'Los patrones que se repiten, con su costo en tiempo y margen'],
+  ['levantamiento', 'inventario-trabas', 'Inventario de trabas', 'Traba por traba, con su área, su tipo y la sesión donde se dijo'],
   // La bisagra: todo lo anterior los construye, todo lo posterior actúa sobre ellos.
   ['levantamiento', 'hallazgos', 'Los hallazgos', 'Lo que encontramos, cada uno con su cita'],
 
@@ -84,6 +92,36 @@ const SECCIONES = [
   ['arquitectura', 'arquitectura-ia', 'La arquitectura propuesta', 'El plano completo: capas, flujos de datos y conexiones al núcleo'],
   ['arquitectura', 'hoja-de-ruta', 'Hoja de ruta', 'Fases siguientes: secuencia, dependencias y puntos de control'],
 ]
+
+/**
+ * Las referencias de un capítulo a otro, resueltas en la corrida.
+ *
+ * ⚠️ **Los números de capítulo no se escriben en el taller.** Llegó a haber
+ * treinta y nueve «capítulo 9», «capítulo 11»… repartidos en diez archivos, y
+ * bastaba insertar una sección para que todos apuntaran a otra cosa **sin que
+ * nada avisara**. Ahora se escribe `{cap:hallazgos}` y aquí se convierte en
+ * «capítulo 11», con el número que tenga hoy. Si el slug no existe, se avisa en
+ * vez de publicar una referencia muerta.
+ */
+const NUMERO_DE_SLUG = new Map(
+  SECCIONES.map(([, slug], i) => [slug, String(i + 1)])
+)
+
+function resolverCapitulos(md, etiqueta) {
+  const malas = []
+  const salida = md.replace(/\{cap:([a-z0-9-]+)\}/g, (_, slug) => {
+    const n = NUMERO_DE_SLUG.get(slug)
+    if (!n) {
+      malas.push(slug)
+      return 'ese capítulo'
+    }
+    return `capítulo ${n}`
+  })
+  if (malas.length) {
+    console.warn(`  ⚠️ ${etiqueta}: referencia a un capítulo que no existe: ${[...new Set(malas)].join(', ')}`)
+  }
+  return salida
+}
 
 // =============================================================================
 // 2) LAS SECCIONES QUE SE GENERAN DE LA BASE
@@ -2104,6 +2142,111 @@ async function elResumenEjecutivo() {
   return salida
 }
 
+// =============================================================================
+// 9 y 10) DÓNDE SE TRABA EL TRABAJO · INVENTARIO DE TRABAS
+// =============================================================================
+//
+// El par: el 9 afirma los patrones transversales y el 10 los enseña uno por uno.
+//
+// ⚠️ **En el 9 no va ninguna tabla área por área**, y en el 10 no va prosa. Son
+// dos cortes del mismo material y mezclarlos es garantizar que se
+// desincronicen: ya pasó con el informe por área y las fichas.
+//
+// ⚠️ Existieron en el armazón de 32 como «Cuellos de botella y trabajo manual»
+// y se cortaron el 16 de septiembre. Vuelven porque entre «esto está mal» y
+// «hagamos esto» faltaba cuantificar el dolor.
+
+/** Los dos tipos de hallazgo que son una traba. */
+const TIPOS_TRABA = ['cuello_botella', 'trabajo_manual']
+
+const ROTULO_TRABA = {
+  cuello_botella: 'Cuello de botella',
+  trabajo_manual: 'Trabajo manual',
+}
+
+/** Las trabas de la base, sin las sesiones que no pueden usarse. */
+async function leerTrabas() {
+  const { data } = await admin
+    .from('hallazgos')
+    .select('tipo, titulo, descripcion, impacto, areas(nombre), entrevistas(codigo, entrevistado_nombre)')
+    .in('tipo', TIPOS_TRABA)
+    .order('titulo')
+  return (data ?? []).filter((h) => !SIN_CONSENTIMIENTO.has(h.entrevistas?.codigo))
+}
+
+async function dondeSeTraba() {
+  const trabas = await leerTrabas()
+  const areas = new Set(trabas.map((h) => h.areas?.nombre).filter(Boolean))
+
+  const md = await capituloConCitas(
+    'trabas.json',
+    'trabas',
+    `Los del ${NUMERO_DE_SLUG.has('hallazgos') ? `capítulo ${NUMERO_DE_SLUG.get('hallazgos')}` : 'capítulo de hallazgos'} que desarrollan estos patrones:`
+  )
+  if (!md) return null
+
+  console.log(`  · trabas: ${trabas.length} trabas en ${areas.size} áreas`)
+  return md.replaceAll('{TOTAL}', String(trabas.length)).replaceAll('{AREAS}', String(areas.size))
+}
+
+/**
+ * El inventario, agrupado por área.
+ *
+ * ⚠️ **Por área y no por tipo.** Agrupado por cuello de botella contra trabajo
+ * manual se lee como una taxonomía y no dice a quién llamar; por área, cada
+ * gerente encuentra lo suyo de una vez y ve cuánto carga comparado con el resto.
+ * El tipo va en su columna.
+ */
+async function inventarioDeTrabas() {
+  const trabas = await leerTrabas()
+  if (!trabas.length) return null
+
+  const porArea = new Map()
+  for (const h of trabas) {
+    const a = h.areas?.nombre ?? 'Sin área asignada'
+    if (!porArea.has(a)) porArea.set(a, [])
+    porArea.get(a).push(h)
+  }
+
+  const orden = [...porArea.entries()].sort((a, b) => b[1].length - a[1].length)
+  const altas = trabas.filter((h) => h.impacto === 'alto').length
+
+  const l = []
+  l.push(
+    `El respaldo del capítulo anterior: **las ${trabas.length} trabas que recogió el levantamiento**, ` +
+      `una por una. ${altas} son de impacto alto, y están repartidas en ${porArea.size} áreas.`
+  )
+  l.push('')
+  l.push(
+    'Va **ordenado por área y de mayor a menor carga**, no por tipo: agrupado por cuello de ' +
+      'botella contra trabajo manual se lee como una taxonomía y no dice a quién llamar. Así, ' +
+      'cada gerencia encuentra lo suyo de una vez y ve cuánto carga comparada con el resto.'
+  )
+  l.push('')
+  l.push(
+    '> Todas entran como **propuestas**, igual que el resto de hallazgos: son candidatas con su ' +
+      'cita hasta que alguien que estuvo en esa sesión las confirma o las descarta.'
+  )
+
+  for (const [area, suyas] of orden) {
+    l.push('')
+    l.push(`## ${area} · ${suyas.length}`)
+    l.push('')
+    l.push('| Traba | Tipo | Impacto | Sesión |')
+    l.push('|---|---|---|---|')
+    for (const h of suyas.sort((a, b) => a.titulo.localeCompare(b.titulo, 'es'))) {
+      const quien = [h.entrevistas?.entrevistado_nombre, h.entrevistas?.codigo]
+        .filter(Boolean)
+        .join(' · ')
+      const imp = h.impacto ? h.impacto[0].toUpperCase() + h.impacto.slice(1) : '—'
+      l.push(`| **${h.titulo}** | ${ROTULO_TRABA[h.tipo] ?? h.tipo} | ${imp} | ${quien || '—'} |`)
+    }
+  }
+
+  console.log(`  · inventario-trabas: ${trabas.length} trabas · ${porArea.size} áreas · ${altas} de impacto alto`)
+  return l.join('\n')
+}
+
 const GENERADAS = {
   'resumen-ejecutivo': elResumenEjecutivo,
   // Reconectadas paso a paso, a medida que se revisa cada una. El resto sigue
@@ -2120,6 +2263,8 @@ const GENERADAS = {
   'arquitectura-ia': laArquitectura,
   'hoja-de-ruta': laHojaDeRuta,
   'riesgo-continuidad': riesgoYContinuidad,
+  trabas: dondeSeTraba,
+  'inventario-trabas': inventarioDeTrabas,
 }
 
 /**
@@ -2219,7 +2364,10 @@ for (const [i, [parte, slug, titulo, subtitulo]] of SECCIONES.entries()) {
   }
 
   const fila = { parte, slug, numero, titulo, subtitulo, orden }
-  if (contenido !== undefined) fila.contenido_md = contenido
+  // Un solo sitio por donde pasa todo el contenido: aquí se resuelven las
+  // referencias `{cap:slug}` de un capítulo a otro, vengan de una generadora o
+  // del taller. Ponerlo en cada generadora sería olvidarlo en la siguiente.
+  if (contenido !== undefined) fila.contenido_md = resolverCapitulos(contenido, slug)
 
   if (revisar) {
     const marca = previa ? (contenido !== undefined ? '~' : '=') : '+'

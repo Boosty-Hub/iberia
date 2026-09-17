@@ -25,7 +25,7 @@ línea.
 | **Dashboard** | Operativo en local. **Sin desplegar** |
 | **Levantamiento** | **42 sesiones · 27.951 turnos**. **34 entrevistas de ~25 (136%)** · los 20 macroprocesos cubiertos |
 | **Hallazgos** | **394, todos con cita textual verificada** · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
-| **Informe** | ✅ **13 de 13 secciones y 20 de 20 fichas** · 268.000 caracteres aprox. Ninguna publicada — los hallazgos siguen propuestos |
+| **Informe** | **15 secciones** y 20 de 20 fichas. Ninguna publicada — los hallazgos siguen propuestos |
 | **Horas** | **137 h en el mes 1 contra una bolsa de 107**, ya revisadas con Gabriel. Aparte: 111 h de la etapa anterior y 104 h del curso de planta, que se factura en Fase 2 |
 | **Comunicación** | **El comunicado salió.** Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | **276 personas cargadas** con ficha, cargo, nivel y familia de oficio. ⚠️ Sin cédula, sin celular y sin correo |
@@ -61,6 +61,59 @@ cláusula 5. Aquí solo lo urgente:
 - **Refijar la revisión del canal con mercadeo** — Alberto la agenda. Bloquea el despliegue.
 - **Leer los 42 hallazgos redactados** del informe y validar los que los sostienen.
 - **Pedirle a Capital Humano cédula y celular por ficha.** El padrón llegó sin ellos.
+
+---
+
+## 17 de septiembre de 2026 · Sesión 23 — vuelven los cuellos de botella, como par
+
+Jesús pidió una sección de «puntos de dolor». **Ya existía**: en el armazón de 32 era «14 ·
+Cuellos de botella y trabajo manual» y se cortó el 16 de septiembre con otras diecinueve. Se
+le dieron cuatro opciones y eligió recuperarla **con su par**, que es lo que manda la regla 1.
+
+```
+09 · Dónde se traba el trabajo    los siete patrones, con su costo
+10 · Inventario de trabas         las 149, por área
+```
+
+El nombre salió de las propias guías de entrevista —*«cuando algo se traba, ¿a quién
+buscas?»*—, y se descartó «mapa del dolor» por metafórico: ningún otro título del documento lo
+es.
+
+**El documento pasa a 15 secciones.**
+
+### ⚠️ Lo que casi se rompe al renumerar
+
+Insertar dos secciones corre la numeración de la 09 a la 15. Y había **39 referencias
+«capítulo N» escritas a mano en diez talleres**. Todas habrían apuntado a otra sección **sin
+que nada avisara**.
+
+Se sustituyeron por `{cap:slug}`, que el generador resuelve en la corrida contra `SECCIONES`
+—y avisa si el slug no existe—. Se aplica en **un solo sitio**, justo antes de escribir en la
+base: ponerlo en cada generadora sería olvidarlo en la siguiente.
+
+Dos cosas que el reemplazo masivo rompió y hubo que devolver:
+
+- **Las `nota` de los talleres** son documentación interna, no se renderizan: ahí el token
+  nunca se resolvería. Vuelven a texto plano.
+- **El diagrama de capas del {cap:arquitectura-ia}** tiene ancho fijo de 62 caracteres, y el
+  token cambia el largo de la línea al resolverse. Se quitó la referencia de dentro de la caja.
+  ⚠️ **En un dibujo monoespaciado no puede haber nada que se sustituya en tiempo de
+  generación.**
+
+### El contenido
+
+**Siete patrones transversales**, cada uno en áreas que no hablan entre sí: la doble
+transcripción, la espera por una firma, el sistema que tiene el dato y no lo da como hace
+falta, el registro que llega tarde para servir, corregir cuesta más que equivocarse, el papel
+que sube a la oficina, y **la traba de uno es la parada de otro** — que es el que justifica
+que el capítulo exista, porque no se ve desde ningún área.
+
+El cierre dice lo que más importa: **de los siete, cinco no necesitan un modelo**. Eso no los
+hace menos importantes, los hace más baratos.
+
+⚠️ **El inventario va por área, no por tipo.** Agrupado en «cuello de botella» contra «trabajo
+manual» se lee como taxonomía y no dice a quién llamar; por área cada gerencia encuentra lo
+suyo y ve cuánto carga comparada con el resto.
 
 ---
 
