@@ -25,14 +25,14 @@ línea.
 | **Dashboard** | Operativo en local. **Sin desplegar** |
 | **Levantamiento** | **42 sesiones · 27.951 turnos**. **34 entrevistas de ~25 (136%)** · los 20 macroprocesos cubiertos |
 | **Hallazgos** | **394, todos con cita textual verificada** · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
-| **Informe** | **13 secciones · 4 escritas** · 90.706 caracteres. Ninguna publicada |
+| **Informe** | **13 secciones · 7 escritas** · 140.418 caracteres. Ninguna publicada |
 | **Horas** | **137 h en el mes 1 contra una bolsa de 107**, ya revisadas con Gabriel. Aparte: 111 h de la etapa anterior y 104 h del curso de planta, que se factura en Fase 2 |
 | **Comunicación** | **El comunicado salió.** Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | **276 personas cargadas** con ficha, cargo, nivel y familia de oficio. ⚠️ Sin cédula, sin celular y sin correo |
 | **Canal** | Funciona en local. Anunciado el 12 de agosto; **la revisión con mercadeo se cayó y no tiene fecha** |
 | **Formación dirigente** | Uno a uno con Alberto el 17 de agosto y **Petit Comité dictado el 26**. Faltan dos formaciones, sus fechas y aclarar las licencias |
 | **Adiestramiento de planta** | Completo: guion, **70 audios (20 min 02 s)**, 10 fichas, certificado, padrón, recordatorios. **Ajito ya contesta** con la clave que tiene saldo. **Es de Fase 2** — avance para mostrar, no para abrir |
-| **Repositorio** | `Boosty-Hub/iberia` — privado |
+| **Repositorio** | `Boosty-Hub/iberia` — 🔴 **público**. Cinco commits subidos el 17/9 con la bitácora dentro. Hace falta un administrador de la organización para cerrarlo |
 
 ### Lo que aprieta
 
@@ -59,8 +59,194 @@ cláusula 5. Aquí solo lo urgente:
   48 de los 240 minutos en que la gente lograra entrar.
 - **Aclarar el estado de las licencias de Claude Team** y fechar la segunda y la tercera.
 - **Refijar la revisión del canal con mercadeo** — Alberto la agenda. Bloquea el despliegue.
-- **Leer los 28 hallazgos redactados** del informe y validar los que los sostienen.
+- **Leer los 42 hallazgos redactados** del informe y validar los que los sostienen.
 - **Pedirle a Capital Humano cédula y celular por ficha.** El padrón llegó sin ellos.
+
+---
+
+## 17 de septiembre de 2026 · Sesión 13 — la 07, y una generadora que había que descartar
+
+Se escribió **«07 · Inventario de sistemas»**, que cierra el par con la 06. **27 sistemas en
+ocho capas más los proveedores**, 13.695 caracteres. El informe va en **140.418 caracteres ·
+7 de 13**, y con esto **el bloque de levantamiento queda completo salvo «Las cifras»**.
+
+### La generadora vieja no servía, y conviene que quede dicho por qué
+
+`anexoInventario` construía el inventario listando los hallazgos de `tipo = 'sistema'`. Eso
+no es un inventario de sistemas: **son hallazgos *sobre* sistemas**. La columna «Sistema»
+habría dicho «El MRP no corre en el ERP» y «Almacén de repuestos con inventario mínimo de dos
+unidades». Además no traía **dueño ni estado**, que es justo lo que promete el subtítulo, y le
+colgaba una tabla con los documentos del expediente, que no son sistemas.
+
+Se dejó escrita por si el anexo vuelve. El capítulo sale ahora de
+`contenido/informe/inventario-sistemas.json`, que es criterio editorial: qué cuenta como
+sistema, en qué capa va y en qué estado está.
+
+### El rastro se cuenta, no se teclea
+
+Cada sistema lleva sus **alias** y el generador busca en cuáles de las 35 notas aparece. Un
+inventario con las sesiones escritas a mano envejece a la primera cosecha, y esa cifra es lo
+que un lector usa para calibrar cuánto pesa cada sistema. Hasta cuatro sesiones se enumeran;
+a partir de ahí va el número, porque **JD Edwards aparece en 29** y enumerarlas llena la celda
+sin informar.
+
+⚠️ Los alias son expresiones regulares **con frontera de palabra**: `JD`, `EXA`, `ATC` y `SPI`
+aparecen dentro de otras palabras. Y los nombres largos llevan sus variantes de escritura —
+«Star Quality», «StarQuality», «Star Point».
+
+### Lo que el inventario deja ver
+
+- **Cinco sistemas perdidos contra uno integrado de verdad.** Star Quality, el sistema de
+  laboratorio, el gestor documental, SAGE/XRT y el instalador del sistema de clínica, contra
+  EXA, que es el único conectado por API. Tres se los llevó el ataque y dos se cayeron por
+  decisiones administrativas — impago y cancelación por desuso—, y el efecto operativo es el
+  mismo.
+- **El perímetro es casi todo propio.** Salvo Microsoft 365 y las plataformas de terceros,
+  todo corre dentro del edificio: control, y riesgo concentrado en el mismo sitio.
+- **La IA ya está adentro en ocho sesiones**, sin licencia ni gobierno.
+- Se añadió una tabla de **proveedores**, porque en varios casos la capacidad de cambiar un
+  sistema no está dentro de la empresa: Infocen no deja tocar los programas sin perder la
+  garantía, y el implantador original dejó la instalación a medias.
+
+### Verificación
+
+Renderizado a 1440 y a 390 px. **Sin desborde en ninguno de los dos**: la tabla mide 487 px en
+el teléfono y se desplaza dentro de `.tabla-scroll`, que es como está diseñado. Cero errores
+de consola, `tsc` limpio. Las notas largas de cada sistema van **debajo** de la tabla y no en
+una celda: tres líneas de prosa en una celda rompen el ancho en teléfono.
+
+**Dónde quedamos.** Quedan seis secciones, todas fuera del levantamiento salvo **03 · Las
+cifras del levantamiento**, que es la que falta para cerrar el bloque. ⚠️ No es generada: salía
+de `NUMEROS.md`, que ya no está en el taller, y **hay que recuperarlo del respaldo del 16 de
+septiembre** o rehacerlo del dato.
+
+---
+
+## 17 de septiembre de 2026 · Sesión 12 — la 06, y el argumento que da vuelta al diagnóstico
+
+Se escribió **«06 · Sistemas y estado del dato»**, sexta sección: 22.314 caracteres, nueve
+apartados, 33 citas y doce enlaces al capítulo 9, comprobados contra el ancla real. El
+informe va en **126.723 caracteres · 6 de 13**.
+
+### La tesis del capítulo
+
+**El problema de Iberia no es que le falte sistema: es que el que tiene se configuró
+incompleto y la empresa aprendió a trabajar alrededor.** JD Edwards ya tiene las fórmulas
+con mano de obra y tiempos de máquina, la traza completa de cada orden, las rutas con cajas
+y kilos, la hora a la que recibe cada cliente y el gasto por centro de costo. Nada de eso se
+usa. Y el cálculo que dispara todas las compras de la empresa —la explosión de materiales—
+vive en un Excel, teniendo el ERP módulo de MRP.
+
+La brecha que describe el capítulo **no es entre lo que hay y lo que haría falta, sino entre
+lo que ya está pagado y lo que se explota**. Eso cambia el orden de la fase siguiente: buena
+parte de lo que se pidió en las entrevistas no necesita un modelo, necesita terminar de
+configurar el ERP.
+
+El resto del argumento, en orden: dónde vive el dato que el ERP no tiene (Excel, papel,
+WhatsApp, correo, Access); que los sistemas no se hablan —siete años sin interfaz contable
+con la nómina— salvo EXA, que sí y demuestra que se puede; que el ERP monomoneda se paga en
+horas de Excel; **qué dato es confiable y qué dato no**, graduado en cuatro niveles; y que no
+hay una sola fuente de verdad, porque tres áreas producen el dato de ventas y no coincide.
+
+### Decisiones
+
+- **El capítulo no lleva tabla de sistemas.** Ese es el 7, que sale de la base. Van en
+  pareja —el 6 afirma, el 7 enseña la evidencia— y dos tablas del mismo material se
+  desincronizan. El cuadro que sí lleva es otro: los **soportes** (Excel, papel, WhatsApp,
+  correo) sobre los que se apoya la operación cuando el ERP no llega. Queda anotado en el
+  código para que no se reintroduzca.
+- **Se gradúa la confiabilidad del dato en cuatro niveles** en vez de afirmar que «el dato es
+  malo». Hay dato confiable hoy (inventario de materia prima), recuperable con un paso previo
+  (causas de parada en texto libre), **no confiable** (las paradas anotadas de memoria, y las
+  horas de arranque mal clasificadas que inflan la eficiencia al doble) e inexistente (merma,
+  mantenimiento). Sin esa gradación no se puede decidir qué se construye primero.
+- **Se registra que la adopción ya empezó sin gobierno**: hay desarrollo con IA en producción
+  hecho a título individual, y uso de IA en cuentas personales. Ninguno malintencionado, todo
+  sobre material bajo NDA. El programa llega a ordenarlo, no a iniciarlo.
+
+### Lo que se mejoró del código
+
+- **El pegado de citas es ahora común** (`pegarCitas`), y con él viajan las dos guardas que
+  ningún capítulo puede saltarse: la de consentimiento y la de cita repetida. Antes vivían
+  dentro del generador del capítulo 8.
+- ⚠️ **Un capítulo que referencia hallazgos sueltos los nombra por título, nunca por número.**
+  El número es la posición en el capítulo 9: en cuanto se inserte un hallazgo antes, un
+  `H-37` escrito a mano apunta a otro. `enlacesAHallazgos()` resuelve el número en cada
+  corrida y avisa si el título no existe.
+- `sistemas-datos` salió de `BORRADORES`: ya no es prosa suelta, se genera del taller.
+
+**Dónde quedamos.** Quedan siete secciones. La natural es **07 · Inventario de sistemas**,
+que cierra el par y ya tiene generadora escrita (`anexoInventario`): es reconectarla y
+revisar lo que saca.
+
+---
+
+## 17 de septiembre de 2026 · Sesión 11 — la 08, y dos cifras que no se sostenían
+
+Se escribió **«08 · Riesgo y continuidad»**, quinta sección del informe: el incidente de
+febrero visto desde las áreas, no desde TI. Quedó en 13.749 caracteres, con 17 citas y los
+seis enlaces al capítulo 9 comprobados uno a uno contra el ancla real. El informe va en
+**104.409 caracteres · 5 de 13**.
+
+El capítulo se apoya en una distinción que puso el coordinador de infraestructura y que
+ordena todo lo demás: **una cosa es levantar y otra recuperar**. El argumento central es que
+el ataque no se llevó archivos, se llevó capacidades — el indicador de merma que se perdió y
+nunca volvió es el caso limpio—, y que **el único respaldo que funcionó en toda la empresa
+fue el papel**, en Calidad y en Crédito y Cobranza.
+
+### Dos cifras que estaban mal, y de dónde salían
+
+- 🔴 **El subtítulo decía «treinta y cuatro entrevistas» y son diecisiete.** Era un número
+  puesto a ojo al montar el armazón. Contado sobre las notas: diecisiete sesiones hablan del
+  ataque, catorce con hallazgo documentado. Un número inflado en la primera línea de un
+  capítulo sobre pérdida de datos es justo lo que un lector usa para dejar de creerte.
+- 🔴 **`ENT-005` entraba en el conteo, y no puede usarse.** La entrevistada fue grabada sin
+  saberlo y pidió que se borrara. No citarla no basta: contarla para afirmar «el ataque
+  aparece en N sesiones» es usar su material por la puerta de atrás. Se descuenta del
+  numerador y del denominador — de ahí 17 sobre 35 y no 18 sobre 36.
+
+**El conteo ya no se escribe a mano**: lo calcula `sesionesDelAtaque()` sobre las notas y lo
+imprime en cada corrida. Si se resuelve el consentimiento de ENT-005, se saca de
+`SIN_CONSENTIMIENTO` y la cifra se corrige sola.
+
+### Lo que se rompió y se arregló en el camino
+
+- **La misma cita salía dos veces**, en dos bloques distintos de la misma página: la de
+  Martha Fuentes sobre el proveedor de respaldo sostiene a la vez el relato del ataque y el
+  del respaldo, y al escribir el taller eso no se ve. Ahora el generador omite la repetida y
+  avisa.
+- **Falso positivo en el conteo**: `SES-004` habla de un «ataque de plagas» —gorgojos en las
+  especias— y entraba como si hablara del ciberataque. Es el único del corpus y va excluido
+  por nombre.
+- **La guarda de consentimiento vive en el generador**, no solo en la cosecha: el taller se
+  escribe a mano y nadie se acuerda de la lista al pegar una cita.
+
+### Decisiones
+
+- **El capítulo registra también lo que se hizo bien.** Los servidores nuevos, el TrueNAS
+  con inmutabilidad, la cinta que sale del edificio, el Kaspersky y la auditoría en curso van
+  con el mismo detalle que las pérdidas. Un capítulo de riesgos que solo enumera fallos se lee
+  como un reproche y se descarta.
+- **Cierra apuntando a la arquitectura**: ningún componente nuevo puede sumar un punto único
+  de falla ni apoyarse en un respaldo que viva en una sola máquina.
+
+### Ojo con esto
+
+- 🔴 **El repositorio sigue público** y ya tiene dentro la bitácora con las citas del
+  levantamiento y el detalle del ataque. Hace falta un administrador de la organización:
+  `gh repo edit Boosty-Hub/iberia --visibility private --accept-visibility-change-consequences`.
+- 🔴 **`RowerConsultoria` tiene permiso de escritura** sobre el repositorio y sigue sin
+  saberse de quién es. Cuenta personal creada el 17 de julio, sin organización.
+- **Dependabot reporta 6 vulnerabilidades** (4 críticas, 2 altas) en las dependencias. No se
+  tocaron: actualizar en mitad de la escritura del informe puede romper el render.
+- ⚠️ **`AGENTS.md` dice «28 secciones» y habla de «La decisión» y de los cuatro anexos.** Es
+  del armazón viejo; el vigente son 13 secciones sin anexos. Hay que corregirlo.
+- ⚠️ **«las 36 sesiones» no es lo mismo que «las 42 del levantamiento»**: 36 son las notas
+  extraídas. El capítulo dice «sesiones con nota» para no confundirlas.
+
+**Dónde quedamos.** Siguen sin escribir ocho secciones. La natural es **06 · Sistemas y
+estado del dato**, que hace par con **07 · Inventario de sistemas** y tiene material de
+sobra en ENT-020 y ENT-021.
 
 ---
 

@@ -9,7 +9,7 @@
  *
  * Hace tres cosas y en este orden importa:
  *
- *  1. **La estructura.** Crea o actualiza las 32 secciones con su número, parte y
+ *  1. **La estructura.** Crea o actualiza las 13 secciones con su número, parte y
  *     subtítulo. Idempotente por `slug`. Las que quedan fuera del armazón no se
  *     borran solas: `--podar` se lleva las vacías y **nunca** las que tienen texto.
  *  2. **Las secciones de datos** se **regeneran siempre**: son el reflejo del
@@ -29,7 +29,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import GithubSlugger from 'github-slugger'
 import { resolve } from 'node:path'
 
@@ -68,7 +68,11 @@ const SECCIONES = [
   ['levantamiento', 'fichas-procesos', 'Las fichas de proceso', 'Una por macroproceso: qué hace, quién lo ejecuta, quién lo contó y qué le falta'],
   ['levantamiento', 'sistemas-datos', 'Sistemas y estado del dato', 'Qué vive en el ERP, qué vive fuera y qué dato es confiable'],
   ['levantamiento', 'inventario-sistemas', 'Inventario de sistemas', 'Sistema por sistema, con su dueño, su estado y su rastro'],
-  ['levantamiento', 'riesgo-continuidad', 'Riesgo y continuidad', 'El incidente de febrero visto desde treinta y cuatro entrevistas'],
+  // ⚠️ El subtítulo **no lleva el número de sesiones**, y es a propósito: lo
+  // llevaba —decía «treinta y cuatro», cuando son diecisiete— y un subtítulo es
+  // texto fijo que nadie recuerda corregir cuando el conteo cambia. La cifra
+  // auditada vive en la primera línea del capítulo, que la calcula el generador.
+  ['levantamiento', 'riesgo-continuidad', 'Riesgo y continuidad', 'El incidente de febrero visto desde las áreas que lo vivieron'],
   // La bisagra: todo lo anterior los construye, todo lo posterior actúa sobre ellos.
   ['levantamiento', 'hallazgos', 'Los hallazgos', 'Lo que encontramos, cada uno con su cita'],
 
@@ -555,6 +559,10 @@ function tituloDeFicha(macro) {
  * lleva a ninguna parte. El destino es la página de las fichas más el ancla.
  */
 const RUTA_FICHAS = '/informe/fichas-procesos'
+const RUTA_HALLAZGOS = '/informe/hallazgos'
+
+/** Las notas del levantamiento, que es de donde sale el conteo de sesiones. */
+const NOTAS = 'Insumos/notas-entrevistas'
 
 /**
  * El ancla del encabezado de un hallazgo en la página del capítulo 9.
@@ -822,14 +830,14 @@ async function fichasDeProceso() {
       l.push('')
       for (const h of suyos) {
         l.push(
-          `- [**H-${h.clave}** · ${h.titulo}](/informe/hallazgos#${anclaDeHallazgo(h.clave, h.titulo)})`
+          `- [**H-${h.clave}** · ${h.titulo}](${RUTA_HALLAZGOS}#${anclaDeHallazgo(h.clave, h.titulo)})`
         )
       }
     } else {
       l.push('')
       l.push(
         '**Hallazgos** — los de este macroproceso son transversales y se desarrollan en ' +
-          '[Los hallazgos](/informe/hallazgos).'
+          `[Los hallazgos](${RUTA_HALLAZGOS}).`
       )
     }
 
@@ -1044,13 +1052,489 @@ async function losHallazgos() {
 // siguen ahí arriba, y `contenido/informe/inventario-procesos.json` también—,
 // así que volver a llenarlas del dato es devolver la entrada a este mapa, no
 // reescribir nada. Mientras esté vacío, ninguna sección se autogenera.
+// =============================================================================
+// 8) RIESGO Y CONTINUIDAD
+// =============================================================================
+//
+// El incidente de febrero visto desde las áreas, no desde TI. La prosa vive en
+// `riesgo-continuidad.json` y las citas **no se copian ahí**: se leen de la
+// tabla `hallazgos` por la pareja (entrevista, título), igual que el capítulo 9.
+//
+// ⚠️ El número de sesiones que hablan del ataque **no se escribe a mano**. Se
+// contó primero a ojo y el subtítulo del armazón llegó a decir «treinta y
+// cuatro» cuando son dieciocho; un número inflado en la primera línea de un
+// capítulo sobre pérdida de datos es exactamente lo que un lector usa para
+// dejar de creerte. Lo cuenta `sesionesDelAtaque()` sobre las notas.
+
+/** Términos del ciberataque, y el falso positivo que hay que excluir. */
+const RE_ATAQUE = /ataque|hackeo|hacke|ciberataque|secuestr|ransom|encript|cifrad|incidente de febrero|desde febrero|en febrero/i
+// ⚠️ SES-004 habla de un «ataque de plagas» (gorgojos en las especias) y entraba
+// en el conteo. Es el único falso positivo del corpus, y basta con mirar si la
+// coincidencia es esa.
+const RE_PLAGA = /ataque de plaga/i
+
+/** Menciona el ciberataque de verdad, y no los gorgojos. */
+function hablaDelAtaque(texto) {
+  if (!texto) return false
+  const limpio = texto.replace(RE_PLAGA, '')
+  return RE_ATAQUE.test(limpio)
+}
+
+/**
+ * Sesiones que no pueden usarse, **ni siquiera para contar**.
+ *
+ * ⚠️ `ENT-005` se grabó sin que la entrevistada lo supiera y pidió que se
+ * borrara: no se cosecha y no se cita. Y tampoco entra en un conteo publicado —
+ * decir «el ataque aparece en dieciocho sesiones» apoyándose en una de ellas es
+ * usar el material por la puerta de atrás. Se descuenta del numerador y del
+ * denominador, y por eso la cifra del capítulo es diecisiete sobre treinta y
+ * cinco. Si se resuelve el consentimiento, se saca de esta lista y el número se
+ * corrige solo.
+ */
+const SIN_CONSENTIMIENTO = new Set(['ENT-005'])
+
+/**
+ * Cuántas sesiones del levantamiento hablan del ataque, y cuántas dejaron un
+ * hallazgo. Une las notas del taller con los hallazgos de la base: hay áreas que
+ * lo cuentan sin usar la palabra —Compras dice «desde febrero»— y al revés.
+ */
+function sesionesDelAtaque(hallazgos) {
+  const conNota = new Set()
+  let total = 0
+  try {
+    for (const f of readdirSync(NOTAS)) {
+      if (!f.endsWith('.md')) continue
+      const codigo = f.replace(/\.md$/, '')
+      if (SIN_CONSENTIMIENTO.has(codigo)) continue
+      total++
+      const t = readFileSync(resolve(NOTAS, f), 'utf8')
+      if (hablaDelAtaque(t)) conNota.add(codigo)
+    }
+  } catch {
+    // Sin las notas a mano el capítulo se escribe igual: el conteo es del
+    // levantamiento, no del render, y vale más publicar sin cifra que con una
+    // inventada.
+    return null
+  }
+
+  const conHallazgo = new Set()
+  for (const h of hallazgos ?? []) {
+    const cod = h.entrevistas?.codigo
+    if (!cod || SIN_CONSENTIMIENTO.has(cod)) continue
+    if (hablaDelAtaque([h.titulo, h.descripcion, h.cita_textual].filter(Boolean).join(' '))) {
+      conHallazgo.add(cod)
+    }
+  }
+
+  const todas = new Set([...conNota, ...conHallazgo])
+  return { sesiones: todas.size, total, conHallazgo: conHallazgo.size }
+}
+
+/** Los números en palabras, que es como se escriben en el cuerpo del informe. */
+const EN_LETRA = {
+  14: 'catorce', 15: 'quince', 16: 'dieciséis', 17: 'diecisiete', 18: 'dieciocho',
+  19: 'diecinueve', 20: 'veinte', 34: 'treinta y cuatro', 35: 'treinta y cinco',
+  36: 'treinta y seis', 37: 'treinta y siete',
+}
+const enLetra = (n) => EN_LETRA[n] ?? String(n)
+
+/**
+ * Pega las citas de un bloque de taller, leídas de la base por la pareja
+ * (entrevista, título). Es común a los capítulos que se escriben así, y con
+ * ella viajan las dos guardas que ninguno puede saltarse:
+ *
+ *  - **Consentimiento.** Va aquí y no solo en la cosecha, porque el taller se
+ *    escribe a mano y nadie se acuerda de la lista al pegar una cita.
+ *  - **Cita repetida.** La misma cita en dos bloques se lee como un error de
+ *    copiado y es invisible al escribir: pasó con la cita de TI sobre el
+ *    proveedor de respaldo, que sostiene a la vez el relato del ataque y el del
+ *    respaldo. Se queda en el primer bloque que la use.
+ *
+ * `ctx.yaCitadas` es por capítulo, no global: repetir una cita en dos capítulos
+ * distintos es legítimo — el lector de uno no ha leído el otro.
+ */
+function pegarCitas(l, bloque, ctx) {
+  for (const [cod, tit] of bloque.fuentes ?? []) {
+    if (SIN_CONSENTIMIENTO.has(cod)) {
+      console.warn(`  ⛔ ${ctx.etiqueta}: ${cod} no puede citarse (sin consentimiento). Omitida en «${bloque.titulo}».`)
+      continue
+    }
+    const f = ctx.porClave.get(`${cod}|${tit}`)
+    if (!f) {
+      ctx.huerfanas.push(`${bloque.titulo} → ${cod} · ${tit}`)
+      continue
+    }
+    if (!f.cita_textual?.trim()) continue
+    if (ctx.yaCitadas.has(`${cod}|${tit}`)) {
+      console.warn(`  ⚠️ ${ctx.etiqueta}: cita repetida, omitida en «${bloque.titulo}» → ${cod} · ${tit}`)
+      continue
+    }
+    ctx.yaCitadas.add(`${cod}|${tit}`)
+    const firma = [f.entrevistas?.entrevistado_nombre, f.areas?.nombre].filter(Boolean).join(' · ')
+    l.push('')
+    l.push(`> «${f.cita_textual.trim()}»`)
+    l.push(`> — ${firma || 'Sin identificar'} · \`${cod}\``)
+  }
+}
+
+/** Los hallazgos de la base, indexados por la pareja (entrevista, título). */
+async function hallazgosPorClave() {
+  const { data } = await admin
+    .from('hallazgos')
+    .select('titulo, descripcion, cita_textual, areas(nombre), entrevistas(codigo, entrevistado_nombre)')
+    .order('titulo')
+  const porClave = new Map()
+  for (const h of data ?? []) porClave.set(`${h.entrevistas?.codigo}|${h.titulo}`, h)
+  return { todos: data ?? [], porClave }
+}
+
+/**
+ * Los hallazgos redactados de un bloque del capítulo 9, con su número y su
+ * ancla. Se lee del mismo archivo que numera el capítulo, así que si mañana se
+ * agrega un hallazgo antes, los enlaces se corrigen solos.
+ */
+function bloqueDeHallazgos(destacados, titulo) {
+  let n = 0
+  for (const b of destacados.bloques) {
+    const suyos = []
+    for (const h of b.hallazgos) {
+      n++
+      suyos.push({ clave: String(n).padStart(2, '0'), titulo: h.titulo })
+    }
+    if (b.titulo === titulo) return suyos
+  }
+  return []
+}
+
+/**
+ * Todos los hallazgos redactados, indexados por su título.
+ *
+ * ⚠️ Un capítulo que referencia hallazgos sueltos de varios bloques **los nombra
+ * por título, nunca por número**. El número es la posición en el capítulo 9: en
+ * cuanto alguien inserte un hallazgo antes, un `H-37` escrito a mano apunta a
+ * otro. Aquí el título es la clave y el número se resuelve en cada corrida.
+ */
+function hallazgosPorTitulo(destacados) {
+  const m = new Map()
+  let n = 0
+  for (const b of destacados.bloques) {
+    for (const h of b.hallazgos) {
+      n++
+      m.set(h.titulo, { clave: String(n).padStart(2, '0'), titulo: h.titulo })
+    }
+  }
+  return m
+}
+
+/** La lista de enlaces al capítulo 9 que cierra un capítulo, resuelta por título. */
+function enlacesAHallazgos(destacados, titulos, etiqueta) {
+  const indice = hallazgosPorTitulo(destacados)
+  const l = []
+  for (const t of titulos ?? []) {
+    const h = indice.get(t)
+    if (!h) {
+      console.warn(`  ⚠️ ${etiqueta}: no existe un hallazgo redactado titulado «${t}»`)
+      continue
+    }
+    l.push(`- [**H-${h.clave}** · ${h.titulo}](${RUTA_HALLAZGOS}#${anclaDeHallazgo(h.clave, h.titulo)})`)
+  }
+  return l
+}
+
+async function riesgoYContinuidad() {
+  const crudo = leerTaller('riesgo-continuidad.json')
+  if (!crudo) return null
+  const taller = JSON.parse(crudo)
+
+  const { todos, porClave } = await hallazgosPorClave()
+  const cuenta = sesionesDelAtaque(todos)
+  const l = []
+  const huerfanas = []
+  const ctx = { porClave, huerfanas, yaCitadas: new Set(), etiqueta: 'riesgo-continuidad' }
+
+  // Si no se pudo contar, la entrada va sin cifras antes que con cifras falsas.
+  const entrada = cuenta
+    ? taller.entrada
+        .replace('{SESIONES}', enLetra(cuenta.sesiones))
+        .replace('{TOTAL}', enLetra(cuenta.total))
+        .replace('{CONHALLAZGO}', enLetra(cuenta.conHallazgo))
+    : taller.entrada.replace(
+        /El ataque aparece en[^.]+\. /,
+        'El ataque aparece en buena parte de las sesiones del levantamiento. '
+      )
+  l.push(entrada)
+
+  for (const bloque of taller.bloques) {
+    l.push('')
+    l.push(`## ${bloque.titulo}`)
+    l.push('')
+    l.push(bloque.texto)
+    pegarCitas(l, bloque, ctx)
+  }
+
+  // El puente al capítulo 9: los seis hallazgos del bloque del ataque, con el
+  // ancla calculada por el mismo slugger que pone el id del encabezado.
+  const destacados = (() => {
+    try {
+      return JSON.parse(leerTaller('hallazgos-destacados.json'))
+    } catch {
+      return null
+    }
+  })()
+
+  if (destacados) {
+    const suyos = bloqueDeHallazgos(destacados, 'Lo que el ataque se llevó, y no volvió')
+    if (suyos.length) {
+      l.push('')
+      l.push('## Los hallazgos de este capítulo')
+      l.push('')
+      l.push(
+        `Los ${enLetra(suyos.length)} hallazgos que el capítulo 9 desarrolla sobre el incidente, ` +
+          'cada uno con su cita completa:'
+      )
+      l.push('')
+      for (const h of suyos) {
+        l.push(
+          `- [**H-${h.clave}** · ${h.titulo}](${RUTA_HALLAZGOS}#${anclaDeHallazgo(h.clave, h.titulo)})`
+        )
+      }
+    }
+  }
+
+  if (taller.cierre) {
+    l.push('')
+    l.push('---')
+    l.push('')
+    l.push(taller.cierre)
+  }
+
+  if (huerfanas.length) {
+    console.warn(`  ⚠️ riesgo-continuidad: ${huerfanas.length} cita(s) sin casar en la base:`)
+    for (const h of huerfanas) console.warn(`     ${h}`)
+  }
+  if (cuenta) {
+    console.log(
+      `  · riesgo-continuidad: ${cuenta.sesiones}/${cuenta.total} sesiones hablan del ataque, ${cuenta.conHallazgo} con hallazgo`
+    )
+  }
+
+  return l.join('\n')
+}
+
+// =============================================================================
+// 6) SISTEMAS Y ESTADO DEL DATO
+// =============================================================================
+//
+// El argumento: qué vive en el ERP, qué vive fuera y qué dato es confiable.
+//
+// ⚠️ **Este capítulo no lleva el inventario de sistemas.** Ese es el 7, que sale
+// de la base con `anexoInventario`. Van en pareja —el 6 afirma y el 7 enseña la
+// evidencia— y si el 6 monta su propia tabla de sistemas, las dos se
+// desincronizan en cuanto alguien cosecha un hallazgo nuevo. El cuadro que sí
+// lleva es otro: los **soportes** —Excel, papel, WhatsApp, correo— sobre los que
+// se apoya la operación cuando el ERP no llega, que no es una lista de sistemas
+// y no existe en ninguna otra parte del documento.
+
+async function sistemasYDato() {
+  const crudo = leerTaller('sistemas-datos.json')
+  if (!crudo) return null
+  const taller = JSON.parse(crudo)
+
+  const { porClave } = await hallazgosPorClave()
+  const l = []
+  const huerfanas = []
+  const ctx = { porClave, huerfanas, yaCitadas: new Set(), etiqueta: 'sistemas-datos' }
+
+  l.push(taller.entrada)
+
+  for (const bloque of taller.bloques) {
+    l.push('')
+    l.push(`## ${bloque.titulo}`)
+    l.push('')
+    l.push(bloque.texto)
+    pegarCitas(l, bloque, ctx)
+  }
+
+  const destacados = (() => {
+    try {
+      return JSON.parse(leerTaller('hallazgos-destacados.json'))
+    } catch {
+      return null
+    }
+  })()
+
+  if (destacados && taller.hallazgos?.length) {
+    const enlaces = enlacesAHallazgos(destacados, taller.hallazgos, 'sistemas-datos')
+    if (enlaces.length) {
+      l.push('')
+      l.push('## Los hallazgos de este capítulo')
+      l.push('')
+      l.push('Los que el capítulo 9 desarrolla sobre sistemas y calidad del dato, cada uno con su cita completa:')
+      l.push('')
+      l.push(...enlaces)
+    }
+  }
+
+  if (taller.cierre) {
+    l.push('')
+    l.push('---')
+    l.push('')
+    l.push(taller.cierre)
+  }
+
+  if (huerfanas.length) {
+    console.warn(`  ⚠️ sistemas-datos: ${huerfanas.length} cita(s) sin casar en la base:`)
+    for (const h of huerfanas) console.warn(`     ${h}`)
+  }
+
+  return l.join('\n')
+}
+
+// =============================================================================
+// 7) INVENTARIO DE SISTEMAS
+// =============================================================================
+//
+// El respaldo del capítulo 6: sistema por sistema, con su dueño, su estado y su
+// rastro.
+//
+// ⚠️ **No usa `anexoInventario`**, que era la generadora del armazón viejo. Esa
+// lista los hallazgos de `tipo = 'sistema'`, que son hallazgos **sobre**
+// sistemas y no sistemas: la columna «Sistema» decía «El MRP no corre en el
+// ERP» y «Almacén de repuestos con inventario mínimo de dos unidades». Tampoco
+// traía dueño ni estado, que es lo que promete el subtítulo, y le colgaba una
+// tabla de los documentos del expediente, que no son sistemas. Se queda escrita
+// por si el anexo vuelve; este capítulo sale de `inventario-sistemas.json`.
+//
+// ⚠️ **El rastro no se escribe a mano.** Un inventario con las sesiones
+// tecleadas envejece a la primera cosecha, y la cifra es justo lo que un lector
+// usa para calibrar cuánto pesa cada sistema. Lo cuenta `rastroDeSistema()`
+// buscando los alias en las notas del levantamiento.
+
+/**
+ * En qué sesiones se nombró un sistema.
+ *
+ * Los alias son expresiones regulares porque los nombres cortos necesitan
+ * frontera de palabra —`JD`, `EXA`, `ATC`, `SPI` aparecen dentro de otras
+ * palabras— y los largos tienen variantes de escritura: «Star Quality»,
+ * «StarQuality», «Star Point».
+ */
+function rastroDeSistema(alias, notas) {
+  const re = new RegExp((alias ?? []).join('|'), 'i')
+  const codigos = []
+  for (const [codigo, texto] of notas) {
+    if (re.test(texto)) codigos.push(codigo)
+  }
+  return codigos.sort()
+}
+
+/** Las notas del levantamiento en memoria, sin las que no pueden usarse. */
+function leerNotas() {
+  const notas = []
+  try {
+    for (const f of readdirSync(NOTAS)) {
+      if (!f.endsWith('.md')) continue
+      const codigo = f.replace(/\.md$/, '')
+      if (SIN_CONSENTIMIENTO.has(codigo)) continue
+      notas.push([codigo, readFileSync(resolve(NOTAS, f), 'utf8')])
+    }
+  } catch {
+    return null
+  }
+  return notas
+}
+
+/**
+ * El rastro, escrito para leerse. Hasta cuatro sesiones se enumeran; a partir
+ * de ahí el número dice más que la lista — `JD Edwards` aparece en treinta y
+ * enumerarlas llena la celda sin informar.
+ */
+function rastroEnTexto(codigos) {
+  if (!codigos.length) return '`sin rastro en notas`'
+  if (codigos.length <= 4) return codigos.map((c) => `\`${c}\``).join(' ')
+  return `**${codigos.length}** sesiones`
+}
+
+async function inventarioDeSistemas() {
+  const crudo = leerTaller('inventario-sistemas.json')
+  if (!crudo) return null
+  const taller = JSON.parse(crudo)
+
+  const notas = leerNotas()
+  if (!notas) {
+    console.error('  ✖ inventario-sistemas: no se pudieron leer las notas; no se escribe.')
+    return null
+  }
+
+  const l = []
+  l.push(taller.entrada)
+
+  let total = 0
+  let sinRastro = 0
+
+  for (const capa of taller.capas) {
+    l.push('')
+    l.push(`## ${capa.titulo}`)
+    l.push('')
+    l.push(capa.entrada)
+    l.push('')
+    l.push('| Sistema | Qué hace | Dueño | Estado | Nombrado en |')
+    l.push('|---|---|---|---|---|')
+    for (const s of capa.sistemas) {
+      total++
+      const codigos = rastroDeSistema(s.alias, notas)
+      if (!codigos.length) sinRastro++
+      l.push(
+        `| **${s.nombre}** | ${s.que} | ${s.dueno} | ${s.estado} | ${rastroEnTexto(codigos)} |`
+      )
+    }
+    // Las notas van debajo de la tabla y no dentro: una celda con tres líneas
+    // de prosa rompe el ancho de la tabla en pantalla de teléfono, y esto se
+    // lee también desde el teléfono.
+    const conNota = capa.sistemas.filter((s) => s.nota)
+    if (conNota.length) {
+      l.push('')
+      for (const s of conNota) l.push(`- **${s.nombre}** — ${s.nota}`)
+    }
+  }
+
+  if (taller.proveedores) {
+    l.push('')
+    l.push(`## ${taller.proveedores.titulo}`)
+    l.push('')
+    l.push(taller.proveedores.entrada)
+    l.push('')
+    l.push('| Proveedor | Qué sostiene | Estado de la relación |')
+    l.push('|---|---|---|')
+    for (const [quien, que, estado] of taller.proveedores.filas) {
+      l.push(`| **${quien}** | ${que} | ${estado} |`)
+    }
+  }
+
+  if (taller.cierre) {
+    l.push('')
+    l.push('---')
+    l.push('')
+    l.push(taller.cierre)
+  }
+
+  console.log(
+    `  · inventario-sistemas: ${total} sistemas en ${taller.capas.length} capas` +
+      (sinRastro ? ` · ⚠️ ${sinRastro} sin rastro en las notas` : '')
+  )
+
+  return l.join('\n')
+}
+
 const GENERADAS = {
   // Reconectadas paso a paso, a medida que se revisa cada una. El resto sigue
   // desconectado: sus generadoras están escritas arriba y esperan su turno.
   cobertura: coberturaDelLevantamiento,
+  'inventario-sistemas': inventarioDeSistemas,
   'mapa-procesos': mapaDeProcesos,
   hallazgos: losHallazgos,
   'fichas-procesos': fichasDeProceso,
+  'sistemas-datos': sistemasYDato,
+  'riesgo-continuidad': riesgoYContinuidad,
 }
 
 /**
@@ -1087,7 +1571,7 @@ const BORRADORES = {
   dependencias: conHallazgos(BORRADOR_DEPENDENCIAS),
   'estado-del-dato': conHallazgos(BORRADOR_ESTADO_DATO),
   'procesos-clave': conHallazgos(null),
-  'sistemas-datos': conHallazgos(null),
+  // `sistemas-datos` salió de aquí: ahora se genera del taller (ver `sistemasYDato`).
   'cuellos-botella': conHallazgos(null),
   madurez: conHallazgos(null),
   restricciones: conHallazgos(null),
