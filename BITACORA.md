@@ -24,7 +24,7 @@ línea.
 | **Calendario** | Adelantado: **nada se entrega después del 6 de diciembre**, porque el aviso de no renovación vence antes que el entregable que sirve para decidir |
 | **Dashboard** | Operativo en local. **Sin desplegar** |
 | **Levantamiento** | **42 sesiones · 27.951 turnos**. **34 entrevistas de ~25 (136%)** · los 20 macroprocesos cubiertos |
-| **Hallazgos** | 236 en crudo → **28 redactados** en el informe · 38 de ENT-005 retenidos · 🔴 **la ronda 2 sin cosechar** |
+| **Hallazgos** | **394, todos con cita textual verificada** · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
 | **Informe** | **13 secciones, todas en blanco.** Armazón rehecho el 16 de septiembre por decisión del cliente. Ninguna publicada |
 | **Horas** | **137 h en el mes 1 contra una bolsa de 107**, ya revisadas con Gabriel. Aparte: 111 h de la etapa anterior y 104 h del curso de planta, que se factura en Fase 2 |
 | **Comunicación** | **El comunicado salió.** Falta el plan con fecha, el vocero y la nota del boletín |
@@ -174,6 +174,41 @@ guarda anterior porque no está vacío. Sin hallazgos que indexar devuelve `null
 
 `--podar` borra las secciones que quedan fuera del armazón **y están vacías**. Las huérfanas
 con texto no se borran nunca, ni con la bandera.
+
+### La cosecha de hallazgos · de 8 a 37 sesiones
+
+Se cosecharon las 29 sesiones que faltaban. **De 236 hallazgos a 394**, todos con cita
+textual, y de 8 sesiones cosechadas a **37 de 42**.
+
+| Bloque | Sesiones | Hallazgos |
+|---|---:|---:|
+| Comercial | 10 | 54 |
+| Finanzas | 4 | 23 |
+| Cadena de valor | 4 | 26 |
+| Gente, seguridad y calidad | 3 | 23 |
+| Tecnología | 3 | 16 |
+| Recorridos y comités | 5 | 16 |
+
+⚠️ **Las citas de las notas no servían tal cual.** Al contrastarlas contra la transcripción,
+varias estaban levemente reformuladas —`ENT-031` dice literalmente «ISO, no estamos
+certificados», no «Nosotros no estamos certificados ISO»—. Todas las cargadas son **el turno
+exacto**, extraído de `transcripcion_segmentos`. Convención: `…` marca elisión y los
+corchetes corrigen errores evidentes de Fireflies (`[EXA]`, `[DAX]`), nada más.
+
+**Criterio: selectivo, no exhaustivo.** Al ritmo de las primeras ocho sesiones —61 hallazgos
+por cada 1.000 turnos— habrían salido ~1.500 candidatos, que no es un catálogo sino un
+vertedero. Se descartó todo lo que describe sin sostener una decisión.
+
+**Cinco sesiones quedan sin cosechar, y las cinco por una razón:**
+- `ENT-005` — grabada sin consentimiento; no puede cosecharse ni citarse.
+- `ENT-029` — programada, todavía sin hacer (0 turnos).
+- `FOR-001`, `FOR-002`, `SES-006` — **4.515 turnos que no contienen hallazgos de proceso**:
+  son el consultor enseñando a usar la herramienta y la reunión con la agencia. Comprobado
+  con un barrido por señales, no por lectura completa.
+
+⚠️ **`SES-002` tiene siete hablantes sin identificar** y de ahí salen tres hallazgos de
+gobierno. La cita es literal, pero **no se pueden atribuir por nombre** hasta que alguien que
+estuvo en la sala los reconozca. Lo mismo aplica a `SES-005` en parte.
 
 ### Dónde quedamos
 
