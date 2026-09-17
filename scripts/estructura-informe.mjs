@@ -2175,18 +2175,102 @@ async function leerTrabas() {
 }
 
 async function dondeSeTraba() {
+  const crudo = leerTaller('trabas.json')
+  if (!crudo) return null
+  const taller = JSON.parse(crudo)
+
   const trabas = await leerTrabas()
-  const areas = new Set(trabas.map((h) => h.areas?.nombre).filter(Boolean))
+  const areasTotal = new Set(trabas.map((h) => h.areas?.nombre).filter(Boolean))
+  const { porClave } = await hallazgosPorClave()
 
-  const md = await capituloConCitas(
-    'trabas.json',
-    'trabas',
-    `Los del ${NUMERO_DE_SLUG.has('hallazgos') ? `capítulo ${NUMERO_DE_SLUG.get('hallazgos')}` : 'capítulo de hallazgos'} que desarrollan estos patrones:`
+  const l = []
+  const huerfanas = []
+  const ctx = { porClave, huerfanas, yaCitadas: new Set(), etiqueta: 'trabas' }
+
+  l.push(
+    taller.entrada
+      .replaceAll('{TOTAL}', String(trabas.length))
+      .replaceAll('{AREAS}', String(areasTotal.size))
   )
-  if (!md) return null
 
-  console.log(`  · trabas: ${trabas.length} trabas en ${areas.size} áreas`)
-  return md.replaceAll('{TOTAL}', String(trabas.length)).replaceAll('{AREAS}', String(areas.size))
+  // --- El cuadro de mando --------------------------------------------------
+  //
+  // ⚠️ **No se escribe en el taller: se cuenta.** Los casos y las áreas de cada
+  // patrón salen de su propia lista, y la columna del modelo de su bandera. Un
+  // resumen tecleado a mano es un segundo sitio donde vive el mismo dato, y al
+  // primer patrón que gane un caso deja de coincidir con la tabla de abajo.
+  const sinModelo = taller.patrones.filter((p) => !p.modelo).length
+  const r = taller.resumen
+  l.push('')
+  l.push(`## ${r.titulo}`)
+  l.push('')
+  l.push(r.entrada)
+  l.push('')
+  l.push('| # | Patrón | Casos | Áreas | Se cierra con | ¿Modelo? |')
+  l.push('|---|---|---|---|---|---|')
+  taller.patrones.forEach((p, i) => {
+    const areas = new Set((p.casos ?? []).map((c) => c[0]))
+    l.push(
+      `| **${i + 1}** | ${p.titulo} | ${(p.casos ?? []).length} | ${areas.size} | ${p.resuelve} | ` +
+        `${p.modelo ? 'Sí' : '**No**'} |`
+    )
+  })
+  l.push('')
+  l.push(r.cierre.replaceAll('{SINMODELO}', enLetra(sinModelo)))
+
+  // --- Cada patrón, con su tabla de casos ----------------------------------
+  taller.patrones.forEach((p, i) => {
+    l.push('')
+    l.push(`## ${i + 1} · ${p.titulo}`)
+    l.push('')
+    l.push(p.texto)
+    if (p.casos?.length) {
+      l.push('')
+      l.push('| Dónde | Qué se traba | Lo que cuesta |')
+      l.push('|---|---|---|')
+      for (const [donde, que, cuesta] of p.casos) l.push(`| **${donde}** | ${que} | ${cuesta} |`)
+    }
+    pegarCitas(l, p, ctx)
+  })
+
+  // --- El puente al capítulo de hallazgos ------------------------------------
+  const destacados = (() => {
+    try {
+      return JSON.parse(leerTaller('hallazgos-destacados.json'))
+    } catch {
+      return null
+    }
+  })()
+  if (destacados && taller.hallazgos?.length) {
+    const enlaces = enlacesAHallazgos(destacados, taller.hallazgos, 'trabas')
+    if (enlaces.length) {
+      l.push('')
+      l.push('## Los hallazgos de este capítulo')
+      l.push('')
+      l.push('Los que desarrollan estos patrones, cada uno con su cita completa:')
+      l.push('')
+      l.push(...enlaces)
+    }
+  }
+
+  if (taller.cierre) {
+    l.push('')
+    l.push('---')
+    l.push('')
+    l.push(taller.cierre)
+  }
+
+  if (huerfanas.length) {
+    console.warn(`  ⚠️ trabas: ${huerfanas.length} cita(s) sin casar:`)
+    for (const h of huerfanas) console.warn(`     ${h}`)
+  }
+  const casos = taller.patrones.reduce((t, p) => t + (p.casos?.length ?? 0), 0)
+  console.log(
+    `  · trabas: ${taller.patrones.length} patrones · ${casos} casos · ${sinModelo} se cierran sin modelo · ` +
+      `${trabas.length} trabas en ${areasTotal.size} áreas`
+  )
+
+  return l.join('\n')
 }
 
 /**

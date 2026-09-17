@@ -115,6 +115,27 @@ hace menos importantes, los hace más baratos.
 manual» se lee como taxonomía y no dice a quién llamar; por área cada gerencia encuentra lo
 suyo y ve cuánto carga comparada con el resto.
 
+### La 09 pasa a formato de tablas
+
+A petición de Jesús, el capítulo deja de ser prosa corrida. Ahora abre con un **cuadro de
+mando de los siete patrones** —casos, áreas, con qué se cierra y si necesita un modelo— y cada
+patrón lleva debajo su tabla de casos concretos: `Dónde · Qué se traba · Lo que cuesta`.
+
+```
+7 patrones · 28 casos · 6 se cierran sin modelo
+8 tablas · 35 filas · 19 citas
+```
+
+⚠️ **El cuadro de mando no se escribe: se cuenta.** Los casos y las áreas de cada patrón salen
+de su propia lista y la columna del modelo de su bandera. Un resumen tecleado sería un segundo
+sitio donde vive el mismo dato, y al primer patrón que gane un caso dejaría de coincidir con la
+tabla de abajo.
+
+**Decisión: tablas, no barras de bloques.** Se descartó cualquier gráfico monoespaciado —barras
+de `▓`, sparklines— por dos motivos: ya hubo dos sustos de alineación en este documento, y el
+entregable acaba en PDF, donde un gráfico hecho con caracteres envejece mal. La columna
+«¿Modelo?» con el **No** en negrita hace el argumento sin necesidad de dibujo.
+
 ---
 
 ## 17 de septiembre de 2026 · Sesión 22 — la 05 se pliega
