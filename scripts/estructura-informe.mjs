@@ -1933,7 +1933,82 @@ async function lasOportunidades() {
   return l.join('\n')
 }
 
+// =============================================================================
+// 1) RESUMEN EJECUTIVO
+// =============================================================================
+//
+// Se escribe el último porque resume a los demás, y va primero en el documento.
+//
+// ⚠️ **Ninguna cifra se escribe a mano.** Todas se calculan en la corrida, desde
+// la base y desde el inventario, que es de donde las sacan los capítulos que
+// resume. Un resumen ejecutivo con una cifra que ya no coincide con su capítulo
+// es la forma más rápida de que el lector deje de creer el documento entero — y
+// es justo la sección donde más tienta escribirlas, porque son pocas.
+
+async function elResumenEjecutivo() {
+  const aviso = enPalabras(fechaDelPrograma('AVISO_RENOVACION'))
+  if (!aviso) {
+    console.error('  ✖ resumen-ejecutivo: no se pudo leer la fecha de lib/programa.ts; no se escribe.')
+    return null
+  }
+
+  const { data: sesiones } = await admin.from('entrevistas').select('codigo')
+  const { data: hallazgos } = await admin.from('hallazgos').select('estado, tipo')
+
+  const inv = (() => {
+    try {
+      return JSON.parse(leerTaller('inventario-procesos.json'))
+    } catch {
+      return null
+    }
+  })()
+  if (!inv) {
+    console.error('  ✖ resumen-ejecutivo: sin inventario de procesos; no se escribe.')
+    return null
+  }
+
+  const macros = inv.macroprocesos ?? []
+  const procesos = macros.reduce((t, m) => t + (m.procesos?.length ?? 0), 0)
+
+  const cifras = {
+    SESIONES: (sesiones ?? []).length,
+    ENTREVISTAS: (sesiones ?? []).filter((s) => s.codigo?.startsWith('ENT')).length,
+    HALLAZGOS: (hallazgos ?? []).length,
+    VALIDADOS: (hallazgos ?? []).filter((h) => h.estado === 'validado').length,
+    OPORTUNIDADES: (hallazgos ?? []).filter((h) => h.tipo === 'oportunidad_ia').length,
+    MACROS: macros.length,
+    PROCESOS: procesos,
+  }
+
+  const md = await capituloConCitas(
+    'resumen-ejecutivo.json',
+    'resumen-ejecutivo',
+    'Los del capítulo 9 que más pesan en este resumen:'
+  )
+  if (!md) return null
+
+  // «dos validados» y no «2 validados»: va en medio de un párrafo de prosa.
+  const EN_LETRA_CORTA = { 0: 'ninguno', 1: 'uno', 2: 'dos', 3: 'tres', 4: 'cuatro', 5: 'cinco' }
+
+  let salida = md.replaceAll('{AVISO}', aviso)
+  for (const [clave, valor] of Object.entries(cifras)) {
+    const texto = clave === 'VALIDADOS' ? (EN_LETRA_CORTA[valor] ?? String(valor)) : String(valor)
+    salida = salida.replaceAll(`{${clave}}`, texto)
+  }
+
+  const quedan = salida.match(/\{[A-Z]+\}/g)
+  if (quedan) console.warn(`  ⚠️ resumen-ejecutivo: marcadores sin sustituir: ${[...new Set(quedan)].join(' ')}`)
+
+  console.log(
+    `  · resumen-ejecutivo: ${cifras.SESIONES} sesiones · ${cifras.HALLAZGOS} hallazgos (${cifras.VALIDADOS} validados) · ` +
+      `${cifras.OPORTUNIDADES} oportunidades · ${cifras.MACROS}/${cifras.PROCESOS} procesos`
+  )
+
+  return salida
+}
+
 const GENERADAS = {
+  'resumen-ejecutivo': elResumenEjecutivo,
   // Reconectadas paso a paso, a medida que se revisa cada una. El resto sigue
   // desconectado: sus generadoras están escritas arriba y esperan su turno.
   cobertura: coberturaDelLevantamiento,

@@ -25,7 +25,7 @@ línea.
 | **Dashboard** | Operativo en local. **Sin desplegar** |
 | **Levantamiento** | **42 sesiones · 27.951 turnos**. **34 entrevistas de ~25 (136%)** · los 20 macroprocesos cubiertos |
 | **Hallazgos** | **394, todos con cita textual verificada** · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
-| **Informe** | **13 secciones · 12 escritas** · 242.494 caracteres. **Solo falta el resumen ejecutivo.** Ninguna publicada |
+| **Informe** | ✅ **13 de 13 escritas** · 252.077 caracteres. **Ninguna publicada** — los hallazgos que lo sostienen siguen propuestos |
 | **Horas** | **137 h en el mes 1 contra una bolsa de 107**, ya revisadas con Gabriel. Aparte: 111 h de la etapa anterior y 104 h del curso de planta, que se factura en Fase 2 |
 | **Comunicación** | **El comunicado salió.** Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | **276 personas cargadas** con ficha, cargo, nivel y familia de oficio. ⚠️ Sin cédula, sin celular y sin correo |
@@ -61,6 +61,58 @@ cláusula 5. Aquí solo lo urgente:
 - **Refijar la revisión del canal con mercadeo** — Alberto la agenda. Bloquea el despliegue.
 - **Leer los 42 hallazgos redactados** del informe y validar los que los sostienen.
 - **Pedirle a Capital Humano cédula y celular por ficha.** El padrón llegó sin ellos.
+
+---
+
+## 17 de septiembre de 2026 · Sesión 19 — el resumen ejecutivo: el documento está escrito
+
+Se escribió **«01 · Resumen ejecutivo»**, que va primero y se escribió el último porque resume
+a los demás. **El Documento de Arquitectura de IA está completo: 13 de 13 secciones, 252.077
+caracteres.**
+
+### Verificación de las trece, de una vez
+
+Las trece secciones recorridas con sesión real: **todas en 200, ninguna desborda, cero errores
+de página**. 231.173 caracteres renderizados.
+
+```
+01 resumen-ejecutivo    9.464     08 riesgo-continuidad  13.128
+02 cobertura            8.349     09 hallazgos           40.472
+03 cifras              27.791     10 oportunidades       25.096
+04 mapa-procesos        2.607     11 donde-no-va-la-ia   16.907
+05 fichas-procesos     27.855     12 arquitectura-ia     16.143
+06 sistemas-datos      20.914     13 hoja-de-ruta         9.763
+07 inventario-sistemas 12.684
+```
+
+### La regla que gobierna este capítulo
+
+⚠️ **Ninguna cifra del resumen se escribe a mano.** Las siete —sesiones, entrevistas,
+hallazgos, validados, oportunidades, macroprocesos y procesos— se calculan en la corrida desde
+la base y desde el inventario, que es de donde las sacan los capítulos que resume. **Es la
+sección donde más tienta escribirlas, porque son pocas**, y es donde más caro sale: un resumen
+ejecutivo que no coincide con su propio capítulo es la forma más rápida de que el lector deje
+de creer el documento entero.
+
+### Cómo quedó
+
+Está escrito para leerse **solo**. Quien no pase de esta sección sale con el encargo, el
+diagnóstico en seis puntos, lo que ya funciona en la casa, la propuesta, lo que decide el
+comité y lo que aprieta antes.
+
+Dos decisiones de redacción que conviene conservar:
+
+- **Lleva una sección de lo que ya funciona**, y no es cortesía. Un diagnóstico que solo
+  enumera fallas se descarta: la API de EXA, el control de plagas, lo que construyó su propia gente y el
+  inventario de materia prima son la prueba de que lo que se propone es realizable **porque ya
+  está ocurriendo aquí**.
+- **Cierra con la validación, no con la propuesta.** De los 394 hallazgos hay 2 validados, y el
+  resumen lo dice en su propia sección de urgencias. Terminar con el plano habría sido más
+  vistoso y menos honesto.
+
+**Dónde quedamos.** El documento está escrito y **ninguna sección está publicada**: un lector
+de Iberia todavía no ve nada, y no debe verlo mientras los hallazgos sigan en `propuesto`. Lo
+que toca ahora no es escribir más, es **validar**.
 
 ---
 
