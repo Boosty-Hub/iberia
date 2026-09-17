@@ -794,6 +794,151 @@ async function anexoProcesos() {
 
 // =============================================================================
 
+
+// =============================================================================
+// SECCIÓN 09 · LOS HALLAZGOS
+// =============================================================================
+//
+// Dos piezas y una regla. La prosa —los cuarenta y dos redactados— vive en
+// `contenido/informe/hallazgos-destacados.json`, porque es criterio editorial y
+// no sale del dato. **Las citas no se copian ahí**: se leen de la tabla
+// `hallazgos` por la pareja (entrevista, título), de modo que la cita del
+// informe y la que Iberia valida en el panel sean siempre la misma. Si alguien
+// renombra un hallazgo en la base, la referencia deja de casar y el script lo
+// dice en vez de publicar un hueco.
+//
+// Debajo va el índice de los 394 agrupado por área: el mapa completo para quien
+// quiera ir al detalle. El cuerpo del capítulo son los cuarenta y dos.
+
+/** Los rótulos del panel, para no inventar otros en el informe. */
+const TIPO_HALLAZGO = {
+  cuello_botella: 'Cuello de botella',
+  trabajo_manual: 'Trabajo manual',
+  dato_disponible: 'Dato disponible',
+  oportunidad_ia: 'Oportunidad de IA',
+  riesgo: 'Riesgo',
+  sistema: 'Sistema',
+  supuesto: 'Supuesto',
+}
+
+async function losHallazgos() {
+  const crudo = leerTaller('hallazgos-destacados.json')
+  if (!crudo) return null
+  const destacados = JSON.parse(crudo)
+
+  const { data: todos } = await admin
+    .from('hallazgos')
+    .select(
+      'tipo, titulo, cita_textual, estado, impacto, areas(nombre), entrevistas(codigo, entrevistado_nombre)'
+    )
+    .order('titulo')
+
+  const porClave = new Map()
+  for (const h of todos ?? []) porClave.set(`${h.entrevistas?.codigo}|${h.titulo}`, h)
+
+  const total = (todos ?? []).length
+  const redactados = destacados.bloques.reduce((t, b) => t + b.hallazgos.length, 0)
+  const l = []
+  const huerfanas = []
+
+  l.push(
+    `El levantamiento produjo **${total} hallazgos**, cada uno con la cita textual de quien lo dijo ` +
+      `y la sesión donde se dijo. Este capítulo no los lista todos: escoge los **${redactados}** que ` +
+      'sostienen el argumento del documento. El resto está en el índice del final y, con su ficha ' +
+      'completa, en el panel del levantamiento.'
+  )
+  l.push('')
+  l.push(
+    'El criterio de selección fue el mismo para todos: **impacto alto, y al menos dos voces ' +
+      'independientes o una consecuencia medible detrás**. Lo que dijo una sola persona una sola vez ' +
+      'quedó fuera, por cierto que sea.'
+  )
+  l.push('')
+  l.push(
+    '> Todos entran como **propuestos**. Un hallazgo propuesto no es un hallazgo: es un candidato ' +
+      'con su cita, hasta que alguien que estuvo en esa entrevista lo valida o lo descarta.'
+  )
+
+  let n = 0
+  for (const bloque of destacados.bloques) {
+    l.push('')
+    l.push(`## ${bloque.titulo}`)
+    l.push('')
+    l.push(bloque.entrada)
+
+    for (const h of bloque.hallazgos) {
+      n++
+      const clave = String(n).padStart(2, '0')
+      l.push('')
+      l.push(`### H-${clave} · ${h.titulo}`)
+      l.push('')
+      l.push(h.texto)
+
+      for (const [cod, tit] of h.fuentes) {
+        const f = porClave.get(`${cod}|${tit}`)
+        if (!f) {
+          huerfanas.push(`H-${clave} → ${cod} · ${tit}`)
+          continue
+        }
+        if (!f.cita_textual?.trim()) continue
+        const firma = [f.entrevistas?.entrevistado_nombre, f.areas?.nombre].filter(Boolean).join(' · ')
+        l.push('')
+        l.push(`> «${f.cita_textual.trim()}»`)
+        l.push(`> — ${firma || 'Sin identificar'} · \`${cod}\``)
+      }
+    }
+  }
+
+  // --- El mapa de los que no se desarrollan --------------------------------
+  //
+  // ⚠️ Aquí había una tabla con los 394, y era un error por dos motivos. El
+  // editorial: un índice de cientos de filas no lo lee nadie, y el trabajo de
+  // este informe fue justamente escoger — el detalle vive en el panel del
+  // levantamiento, con su ficha completa. Y el técnico: 421 filas de tabla
+  // tumbaban el proceso de render de Next con un 500, sin más pista que un
+  // «Jest worker» en el log.
+  const porArea = new Map()
+  for (const h of todos ?? []) {
+    const a = h.areas?.nombre ?? 'Sin área asignada'
+    if (!porArea.has(a)) porArea.set(a, [])
+    porArea.get(a).push(h)
+  }
+
+  const marcados = new Set()
+  for (const b of destacados.bloques) {
+    for (const h of b.hallazgos) for (const [c, t] of h.fuentes) marcados.add(`${c}|${t}`)
+  }
+
+  const TIPOS = ['cuello_botella', 'trabajo_manual', 'riesgo', 'dato_disponible', 'oportunidad_ia', 'sistema', 'supuesto']
+
+  l.push('')
+  l.push('## Dónde está el resto')
+  l.push('')
+  l.push(
+    `Los otros ${total - marcados.size} hallazgos no son descarte: son el detalle que sostiene lo ` +
+      'anterior y el material de las fichas de proceso. Cada uno está en el panel del levantamiento ' +
+      'con su cita, su sesión y su área, filtrable por tipo y por estado. Este es su reparto:'
+  )
+  l.push('')
+  l.push('| Área | Total | Desarrollados | Cuello | Manual | Riesgo | Dato | IA | Sist. | Sup. |')
+  l.push('| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |')
+
+  for (const [area, lista] of [...porArea.entries()].sort((a, b) => b[1].length - a[1].length)) {
+    const dest = lista.filter((h) => marcados.has(`${h.entrevistas?.codigo}|${h.titulo}`)).length
+    const cuenta = TIPOS.map((t) => lista.filter((h) => h.tipo === t).length || '')
+    l.push(`| ${area} | ${lista.length} | ${dest || ''} | ${cuenta.join(' | ')} |`)
+  }
+  l.push(`| **Total** | **${total}** | **${marcados.size}** | ${TIPOS.map((t) => `**${(todos ?? []).filter((h) => h.tipo === t).length}**`).join(' | ')} |`)
+
+  if (huerfanas.length) {
+    console.error('\n⚠️  Referencias de hallazgos-destacados.json que no casan con la base:')
+    for (const h of huerfanas) console.error(`     · ${h}`)
+    console.error('')
+  }
+
+  return l.join('\n')
+}
+
 // ⚠️ **Desconectadas a propósito el 16 de septiembre de 2026.** El armazón se
 // dejó en blanco por decisión del cliente: las trece secciones se escriben desde
 // cero contra el levantamiento, sin relleno que revisar.
@@ -808,6 +953,7 @@ const GENERADAS = {
   // desconectado: sus generadoras están escritas arriba y esperan su turno.
   cobertura: coberturaDelLevantamiento,
   'mapa-procesos': mapaDeProcesos,
+  hallazgos: losHallazgos,
 }
 
 /**

@@ -25,7 +25,7 @@ línea.
 | **Dashboard** | Operativo en local. **Sin desplegar** |
 | **Levantamiento** | **42 sesiones · 27.951 turnos**. **34 entrevistas de ~25 (136%)** · los 20 macroprocesos cubiertos |
 | **Hallazgos** | **394, todos con cita textual verificada** · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
-| **Informe** | **13 secciones, todas en blanco.** Armazón rehecho el 16 de septiembre por decisión del cliente. Ninguna publicada |
+| **Informe** | **13 secciones · 3 escritas** (cobertura, mapa de procesos y los hallazgos). Ninguna publicada |
 | **Horas** | **137 h en el mes 1 contra una bolsa de 107**, ya revisadas con Gabriel. Aparte: 111 h de la etapa anterior y 104 h del curso de planta, que se factura en Fase 2 |
 | **Comunicación** | **El comunicado salió.** Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | **276 personas cargadas** con ficha, cargo, nivel y familia de oficio. ⚠️ Sin cédula, sin celular y sin correo |
@@ -209,6 +209,28 @@ vertedero. Se descartó todo lo que describe sin sostener una decisión.
 ⚠️ **`SES-002` tiene siete hablantes sin identificar** y de ahí salen tres hallazgos de
 gobierno. La cita es literal, pero **no se pueden atribuir por nombre** hasta que alguien que
 estuvo en la sala los reconozca. Lo mismo aplica a `SES-005` en parte.
+
+### La sección 09 · los hallazgos
+
+**42 hallazgos redactados de los 394**, en siete bloques temáticos, con **101 citas**. El
+criterio: impacto alto, y al menos dos voces independientes o una consecuencia medible.
+
+La prosa vive en `contenido/informe/hallazgos-destacados.json` porque es criterio editorial
+y no sale del dato. **Las citas no se copian ahí**: el generador las lee de la tabla
+`hallazgos` por la pareja (entrevista, título), de modo que la cita del informe y la que
+Iberia valida en el panel sean siempre la misma. Si alguien renombra un hallazgo, la
+referencia deja de casar y el script lo dice en vez de publicar un hueco.
+
+⚠️ **La primera versión metía los 394 en tablas y estaba mal por dos motivos.** El
+editorial —un índice de cientos de filas no lo lee nadie, y el detalle vive en el panel— y
+el práctico: 421 filas de tabla en una sola sección. Se sustituyó por un cuadro de reparto
+por área, 27 filas.
+
+⚠️ **Y hubo un 500 que no era del contenido.** `/informe/hallazgos` devolvía «Jest worker
+encountered 2 child process exceptions» sin más traza, y el servidor servía el error
+cacheado. **Era el servidor de desarrollo degradado** tras el aviso de memoria del sistema:
+con `rm -rf .next` y reinicio limpio, renderiza. Ante un 500 sin traza útil en esta app,
+reiniciar antes de sospechar del contenido.
 
 ### Dónde quedamos
 
