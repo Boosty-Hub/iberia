@@ -147,6 +147,18 @@ export function MapaInteractivo({ macros }: { macros: MacroDelMapa[] }) {
   // que hace falta es quitarla de en medio sin buscarle sitio.
   const [leyendaAbierta, setLeyendaAbierta] = useState(true)
 
+  /**
+   * Pantalla completa.
+   *
+   * ⚠️ **No usa la API de `requestFullscreen`.** El mapa vive dentro de un
+   * documento con barra lateral, y el modo nativo del navegador saca el
+   * elemento de la página: se pierden los estilos heredados en algunos motores,
+   * el botón de salir es el del navegador y no el nuestro, y en iOS no existe
+   * para elementos que no sean vídeo. Un panel fijo sobre la página da lo mismo
+   * —todo el ancho y todo el alto— y se comporta igual en los cuatro motores.
+   */
+  const [ampliado, setAmpliado] = useState(false)
+
   const clave = (m: MacroDelMapa) => `${m.nivel}-${m.numero}`
   const activo = puestos.find((p) => clave(p.macro) === elegido) ?? null
   const numeroDe = (nivel: string) => FAMILIAS.findIndex((f) => f.nivel === nivel) + 1
@@ -182,6 +194,25 @@ export function MapaInteractivo({ macros }: { macros: MacroDelMapa[] }) {
   useEffect(() => {
     asomar()
   }, [asomar])
+
+  // Al entrar o salir de la vista ampliada el marco cambia de tamaño, y el
+  // lienzo hay que recolocarlo: si no, el dibujo se queda donde estaba y aparece
+  // fuera de la vista. Se espera un fotograma para medir el marco ya crecido.
+  useEffect(() => {
+    const id = requestAnimationFrame(() => ajustar())
+    return () => cancelAnimationFrame(id)
+  }, [ampliado, ajustar])
+
+  // Escapar cierra, que es lo que espera cualquiera en una vista a pantalla
+  // completa. Solo se escucha mientras está abierta.
+  useEffect(() => {
+    if (!ampliado) return
+    const alPulsar = (ev: KeyboardEvent) => {
+      if (ev.key === 'Escape') setAmpliado(false)
+    }
+    window.addEventListener('keydown', alPulsar)
+    return () => window.removeEventListener('keydown', alPulsar)
+  }, [ampliado])
 
   /** Lleva el lienzo hasta una caja y la deja en el centro del marco. */
   const centrar = useCallback((p: Puesto) => {
@@ -261,7 +292,7 @@ export function MapaInteractivo({ macros }: { macros: MacroDelMapa[] }) {
   const atenuado = (nivel: string) => filtro !== 'todo' && filtro !== nivel
 
   return (
-    <div className="mapa-marco">
+    <div className={`mapa-marco${ampliado ? ' ampliado' : ''}`}>
       <div
         ref={marco}
         className="mapa-lienzo"
@@ -491,6 +522,14 @@ export function MapaInteractivo({ macros }: { macros: MacroDelMapa[] }) {
           </button>
           <button type="button" onClick={ajustar} aria-label="Ver todo el mapa" title="Ver todo">
             ⤢
+          </button>
+          <button
+            type="button"
+            onClick={() => setAmpliado((x) => !x)}
+            aria-label={ampliado ? 'Salir de pantalla completa' : 'Ver a pantalla completa'}
+            title={ampliado ? 'Salir · Esc' : 'Pantalla completa'}
+          >
+            {ampliado ? '✕' : '⛶'}
           </button>
         </div>
 

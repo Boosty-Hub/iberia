@@ -926,6 +926,7 @@ async function fichasDeProceso() {
   if (!INVENTARIO) return null
   const macros = INVENTARIO.macroprocesos
   let redactadas = 0
+  const retenidos = []
 
   const crudoDest = leerTaller('hallazgos-destacados.json')
   const destacados = crudoDest ? JSON.parse(crudoDest) : null
@@ -1007,11 +1008,23 @@ async function fichasDeProceso() {
       l.push('')
       for (const p of m.no_se_hace) {
         const marca = p.estado === 'SIN EVIDENCIA' ? 'sin evidencia' : 'no se ejecuta'
-        // Misma guarda: la observación se conserva, la acreditación no.
-        const cods = (p.fuente ?? '')
+        const todas = (p.fuente ?? '')
           .split(/[,;]/)
           .map((x) => x.trim())
-          .filter((c) => c && c !== '—' && !SIN_CONSENTIMIENTO.has(c))
+          .filter((c) => c && c !== '—')
+        const cods = todas.filter((c) => !SIN_CONSENTIMIENTO.has(c))
+
+        // ⚠️ **Si la única fuente es una sesión retenida, la observación no se
+        // publica.** La guarda de consentimiento cubría la acreditación —no
+        // decir de quién sale— y dejaba pasar el contenido, que es lo que de
+        // verdad importa: «no citarla» incluye no publicar lo que dijo. Se coló
+        // una observación que además nombraba su cargo. Si hay otra sesión que
+        // documenta lo mismo, se queda: ahí el hallazgo no depende de ella.
+        if (todas.length && !cods.length) {
+          retenidos.push(`${m.nombre} · ${p.nombre}`)
+          continue
+        }
+
         const fuente = SIN_CODIGOS || !cods.length ? '' : ` *(${cods.join(', ')})*`
         l.push(`- **${p.nombre}** · ${marca} — ${p.observacion}${fuente}`)
       }
@@ -1023,6 +1036,13 @@ async function fichasDeProceso() {
     // de trazabilidad (`npm run expediente`), que no se entrega al cliente.
     l.push('')
     l.push('---')
+  }
+
+  if (retenidos.length) {
+    console.log(
+      `  ⛔ fichas: ${retenidos.length} observación(es) no publicada(s), su única fuente es una sesión retenida:`
+    )
+    for (const r of retenidos) console.log(`     ${r}`)
   }
 
   console.log(
