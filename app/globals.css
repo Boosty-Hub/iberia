@@ -237,6 +237,18 @@ body {
    nivel, y el bloque cerrado tiene que leerse como un control, no como un
    título: de ahí la superficie, el borde y el chevron que gira.
    -------------------------------------------------------------------------- */
+/* Los mandos de abrir y cerrar todo. Discretos: son una comodidad, no la acción
+   principal de la página — lo que el lector viene a hacer es elegir qué ficha
+   leer, no desplegarlas las veinte. */
+.plegable-mandos {
+  @apply mt-6 flex justify-end gap-2;
+}
+.plegable-mandos button {
+  @apply cursor-pointer rounded-lg border border-[var(--borde)] bg-white px-3 py-1.5 text-xs
+         font-medium text-marca-600 transition-colors hover:border-acento-300
+         hover:text-acento-700;
+}
+
 .plegable {
   @apply mt-4 overflow-hidden rounded-2xl border border-[var(--borde)];
 }
@@ -383,11 +395,19 @@ body {
 .mapa-lienzo {
   @apply relative h-[34rem] flex-1 touch-none overflow-hidden rounded-2xl border
          border-[var(--borde)] select-none lg:h-[44rem];
-  background-color: var(--color-marca-50);
-  /* La retícula dice «esto es un plano y se mueve», y al arrastrar se ve que se
-     mueve. Sin ella, el lienzo parece una imagen quieta. */
-  background-image: radial-gradient(var(--color-marca-200) 1px, transparent 1px);
-  background-size: 22px 22px;
+  /* ⚠️ **El lienzo tiene que separarse de la tarjeta que lo contiene.** Estaba
+     en `marca-50`, que sobre el blanco de la página y con las cajas también
+     blancas dejaba los tres planos —página, lienzo y nodo— casi al mismo tono.
+     Ahora lleva un carbón más marcado con una insinuación cálida del rojo de
+     marca en diagonal: suficiente para que las cajas floten, lejos de competir
+     con ellas. */
+  background-color: var(--color-marca-100);
+  background-image:
+    radial-gradient(var(--color-marca-300) 1px, transparent 1px),
+    linear-gradient(135deg, var(--color-acento-50) 0%, transparent 55%);
+  background-size:
+    22px 22px,
+    100% 100%;
   cursor: grab;
 }
 .mapa-lienzo:active {

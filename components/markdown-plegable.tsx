@@ -82,6 +82,21 @@ export function MarkdownPlegable({
     <div ref={caja}>
       {bloques[0].cuerpo.trim() && <Markdown contenido={bloques[0].cuerpo} className={className} />}
 
+      {/* Abrir y cerrar todo.
+          ⚠️ **Actúa sobre el DOM y no sobre un estado de React**, igual que
+          `revelarAncla`: el `open` de un `<details>` lo maneja el navegador
+          cuando el usuario pulsa el resumen, así que llevarlo también en estado
+          daría dos versiones de la verdad —y la de React se impondría al primer
+          re-render, cerrando lo que alguien acababa de abrir a mano. */}
+      <div className="plegable-mandos">
+        <button type="button" onClick={() => abrirTodo(caja.current, true)}>
+          Expandir todo
+        </button>
+        <button type="button" onClick={() => abrirTodo(caja.current, false)}>
+          Colapsar todo
+        </button>
+      </div>
+
       {/* **Dos niveles de plegado, y los dos cerrados de entrada.** El nivel
           agrupa —Estratégico, Operativo, Soporte— y dentro cada ficha tiene el
           suyo: abrir «Operativo» daba nueve fichas de golpe, que es otra vez la
@@ -219,4 +234,15 @@ function normalizar(t: string) {
     .toLowerCase()
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+/**
+ * Abre o cierra **todos** los bloques de la sección, los de nivel y los de cada
+ * ficha. Veinte fichas en tres niveles son veintitrés chevrones: buscarlos uno a
+ * uno para imprimir, o para leer de corrido, es justo lo que el plegado hace
+ * incómodo.
+ */
+function abrirTodo(raiz: HTMLElement | null, abierto: boolean) {
+  if (!raiz) return
+  for (const d of Array.from(raiz.querySelectorAll('details'))) d.open = abierto
 }

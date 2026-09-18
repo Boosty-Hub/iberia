@@ -64,6 +64,30 @@ cláusula 5. Aquí solo lo urgente:
 
 ---
 
+## 18 de septiembre de 2026 · Sesión 33 — dos comodidades
+
+**Expandir y colapsar todo en las fichas.** Veinte fichas en tres niveles son veintitrés
+chevrones, y buscarlos uno a uno para leer de corrido o para imprimir era justo lo incómodo
+del plegado.
+
+⚠️ **Actúan sobre el DOM, no sobre estado de React.** El `open` de un `<details>` lo maneja el
+navegador cuando alguien pulsa el resumen; llevarlo también en estado daría dos versiones de la
+verdad, y la de React se impondría al primer re-render cerrando lo que el lector acababa de
+abrir a mano. Misma razón por la que `revelarAncla` tampoco usa estado.
+
+**El lienzo del mapa se separa de su tarjeta.** Estaba en `marca-50` y, con la página clara y
+las cajas blancas, los tres planos —página, lienzo y nodo— quedaban casi al mismo tono. Ahora
+es `marca-100` con una insinuación del rojo de marca en diagonal:
+
+```
+página   #f6f7f9
+tarjeta   #ffffff
+lienzo    #efeded  ← el que cambió
+nodo      #ffffff
+```
+
+---
+
 ## 18 de septiembre de 2026 · Sesión 32 — doce encargos de pulido, y el informe deja de sonar a transcripción
 
 Un lote largo de Jesús sobre cada sección. El hilo común: **nada puede sonar a que el
