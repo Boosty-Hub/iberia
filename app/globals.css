@@ -382,6 +382,34 @@ body {
   opacity: 0.15;
 }
 
+/* El riel de una banda y las bajadas que acometen a él. Van **punteados y
+   tenues** a propósito: la troncal de la cadena es una secuencia real y estas
+   son una relación de banda, así que no pueden pesar igual ni parecer lo
+   mismo. */
+.mapa-riel {
+  stroke-width: 1.5;
+  stroke-dasharray: 2 6;
+  stroke-linecap: round;
+  opacity: 0.55;
+  transition: opacity 200ms;
+}
+.mapa-baja {
+  stroke-width: 1.5;
+  stroke-dasharray: 4 5;
+  opacity: 0.75;
+  transition: opacity 200ms;
+}
+.a-estrategico {
+  stroke: var(--color-acento-400);
+}
+.a-soporte {
+  stroke: var(--color-marca-400);
+}
+.mapa-riel.apagado,
+.mapa-baja.apagado {
+  opacity: 0.12;
+}
+
 .mapa-zona {
   @apply absolute font-mono text-[0.68rem] tracking-[0.18em] text-marca-400 uppercase;
   transition: opacity 200ms;
@@ -507,6 +535,10 @@ body {
 .ficha-linea {
   @apply h-0.5 w-6 shrink-0 rounded;
   background-color: var(--color-oro-600);
+}
+.ficha-punteada {
+  @apply h-0 w-6 shrink-0;
+  border-top: 1.5px dashed var(--color-marca-400);
 }
 .leyenda-nota {
   @apply mt-2.5 border-t border-dashed border-[var(--borde)] pt-2 text-[0.68rem] leading-snug

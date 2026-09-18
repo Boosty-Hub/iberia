@@ -119,9 +119,17 @@ Tres cosas que se vieron en pantalla y no en el código:
 y la página de fichas busca la fila por texto y la resalta en ámbar. Si no la encuentra no
 avisa — el lector se queda en la ficha, que es a donde iba igual.
 
-⚠️ **Las flechas son la secuencia de la cadena y nada más.** Los cruces entre áreas viven en
-la prosa del capítulo 9 y no como dato, así que dibujar una línea entre dos cajas cualesquiera
-sería inventar una relación que nadie validó. La leyenda lo dice en voz alta.
+**Las flechas, en dos registros.** Jesús hizo notar que las cajas de estratégico y soporte
+estaban sueltas. **Entre sí siguen sin flecha**, y es a propósito: no son una secuencia, y una
+flecha de 1.1 a 1.2 afirmaría un orden que no existe. Lo que faltaba dibujar era lo que el
+rótulo ya decía en palabras —que orientan la cadena y que la sostienen—, y ahora cada caja
+baja o sube punteada hasta un **riel** que abarca la banda.
+
+⚠️ **El riel existe para no emparejar.** Una línea de un estratégico a un eslabón concreto
+sería inventar una relación que nadie validó; la línea al riel dice «a la cadena entera», que
+es lo único que el levantamiento sostiene. Por eso el punteado pesa menos que la troncal: una
+es secuencia real y la otra relación de banda. Los cruces documentados entre áreas siguen en la
+prosa del capítulo 9, y la leyenda enlaza allá.
 
 ### Decisión aplazada
 

@@ -117,6 +117,15 @@ function repartir(macros: MacroDelMapa[]) {
   return { puestos, ancho, alto: FILA.Soporte + ALTO + MARGEN, cadena }
 }
 
+/**
+ * Los dos rieles donde acometen las bandas de arriba y de abajo.
+ *
+ * Van a **44 px de la cadena**, ni pegados —se leerían como parte de la caja—
+ * ni a media altura, que es donde dejarían de apuntar a nada.
+ */
+const RIEL_ARRIBA = FILA.Operativo - 44
+const RIEL_ABAJO = FILA.Operativo + ALTO + 44
+
 /** La curva de la troncal entre dos eslabones: sale y entra en horizontal. */
 function curva(x1: number, y1: number, x2: number, y2: number) {
   const d = Math.max(28, (x2 - x1) / 2)
@@ -284,7 +293,73 @@ export function MapaInteractivo({ macros }: { macros: MacroDelMapa[] }) {
               >
                 <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--color-oro-600)" />
               </marker>
+              <marker
+                id="punta-estrategico"
+                viewBox="0 0 10 10"
+                refX="8"
+                refY="5"
+                markerWidth="5"
+                markerHeight="5"
+                orient="auto-start-reverse"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--color-acento-400)" />
+              </marker>
+              <marker
+                id="punta-soporte"
+                viewBox="0 0 10 10"
+                refX="8"
+                refY="5"
+                markerWidth="5"
+                markerHeight="5"
+                orient="auto-start-reverse"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--color-marca-400)" />
+              </marker>
             </defs>
+            {/* ⚠️ **Las bandas de arriba y de abajo acometen a la CADENA, no a una
+                caja.** Emparejar un estratégico con un eslabón concreto sería
+                inventar una relación que nadie validó; lo que sí está dicho
+                —y es lo que el dibujo tenía sin dibujar— es que los
+                estratégicos orientan la cadena entera y los de soporte la
+                sostienen. De ahí el riel: la línea baja hasta él, y es el riel
+                el que abarca la banda.
+
+                Y **entre sí no llevan flecha**, a propósito: los estratégicos
+                no son una secuencia. Una flecha de 1.1 a 1.2 afirmaría un orden
+                que no existe. */}
+            {(['Estratégico', 'Soporte'] as const).map((nivel) => {
+              const arriba = nivel === 'Estratégico'
+              const y = arriba ? RIEL_ARRIBA : RIEL_ABAJO
+              const suyos = puestos.filter((p) => p.macro.nivel === nivel)
+              if (!suyos.length) return null
+              const clase = arriba ? 'a-estrategico' : 'a-soporte'
+              const punta = arriba ? 'url(#punta-estrategico)' : 'url(#punta-soporte)'
+              const apagado = atenuado(nivel) ? ' apagado' : ''
+
+              return (
+                <g key={`riel-${nivel}`}>
+                  <line
+                    className={`mapa-riel ${clase}${apagado}`}
+                    x1={MARGEN}
+                    y1={y}
+                    x2={ancho - MARGEN}
+                    y2={y}
+                  />
+                  {suyos.map((p) => (
+                    <line
+                      key={`${clave(p.macro)}-baja`}
+                      className={`mapa-baja ${clase}${apagado}`}
+                      x1={p.x + ANCHO / 2}
+                      y1={arriba ? p.y + ALTO : p.y}
+                      x2={p.x + ANCHO / 2}
+                      y2={y}
+                      markerEnd={punta}
+                    />
+                  ))}
+                </g>
+              )
+            })}
+
             {cadena.slice(0, -1).map((m, i) => {
               const a = puestos.find((p) => p.macro === m)
               const b = puestos.find((p) => p.macro === cadena[i + 1])
@@ -386,6 +461,10 @@ export function MapaInteractivo({ macros }: { macros: MacroDelMapa[] }) {
               Secuencia de la cadena de valor
             </li>
             <li>
+              <i className="ficha-punteada" />
+              Orientan la cadena · la sostienen
+            </li>
+            <li>
               <span className="marca-nuevo">nuevo</span>
               Macroproceso que el inventario no recogía
             </li>
@@ -395,9 +474,10 @@ export function MapaInteractivo({ macros }: { macros: MacroDelMapa[] }) {
             </li>
           </ul>
           <p className="leyenda-nota">
-            Las flechas son la secuencia de la cadena. Los cruces entre áreas están en{' '}
-            <Link href="/informe/trabas">Dónde se traba el trabajo</Link>, y no se dibujan acá
-            porque no hay dato que los sostenga uno a uno.
+            La línea llena es la secuencia de la cadena. El punteado va de cada banda a la
+            cadena entera, no a una caja: emparejar un estratégico con un eslabón sería inventar
+            una relación. Los cruces documentados entre áreas están en{' '}
+            <Link href="/informe/trabas">Dónde se traba el trabajo</Link>.
           </p>
         </aside>
 
