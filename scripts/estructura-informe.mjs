@@ -181,7 +181,7 @@ async function coberturaDelLevantamiento() {
 
   const filas = sesiones.map((s) => {
     if (SIN_CONSENTIMIENTO.has(s.codigo)) {
-      return `| \`${s.codigo}\` | ${fecha(s.fecha_entrevista)} | **Sesión retenida** · sin consentimiento de grabación | — | ${SEDES[s.sede] ?? '—'} | — | — |`
+      return `| \`${s.codigo}\` | ${fecha(s.fecha_entrevista)} | **Sesión retenida** · a solicitud de la entrevistada | — | ${SEDES[s.sede] ?? '—'} | — | — |`
     }
     const nombre = s.titulo || s.entrevistado_nombre || s.codigo
     const gente = (s.participantes ?? [])
@@ -236,7 +236,7 @@ las \`ENT-\` son las entrevistas estructuradas que cuentan contra las ~25 que co
 programa; las \`FOR-\` son formaciones y no cuentan contra esa meta.
 
 **${entrevistas.length} entrevistas** —el programa comprometía ~25— · ${sesiones.length} sesiones en total ·
-${Math.round(minutos / 60)} horas de grabación · **${(turnos ?? 0).toLocaleString('es-VE')} turnos** transcritos.
+${Math.round(minutos / 60)} horas de entrevista · **${(turnos ?? 0).toLocaleString('es-VE')} turnos** de diálogo registrados.
 
 ## El registro completo
 
@@ -245,9 +245,9 @@ ${Math.round(minutos / 60)} horas de grabación · **${(turnos ?? 0).toLocaleStr
 ${filas.join('\n')}
 ${hueco}
 
-> Las transcripciones completas están en el módulo de entrevistas del panel. Cada
-> afirmación de este informe que provenga de una sesión lleva su cita textual y el
-> código de la sesión donde se dijo.`
+> El detalle completo de cada sesión está en el módulo de entrevistas del panel.
+> Cada afirmación de este informe que provenga de una sesión lleva el código de la
+> sesión donde se dijo.`
 }
 
 async function anexoInventario() {
@@ -670,6 +670,83 @@ function acreditar(codigo, area) {
   return [area, codigo ? `\`${codigo}\`` : null].filter(Boolean).join(' · ')
 }
 
+/**
+ * Los nombres de pila de la gente entrevistada, con el rol que le corresponde.
+ *
+ * **Se construye de la base, no se escribe aquí.** Este archivo sí va a git y el
+ * repositorio es público: una lista de nombres de Iberia en el generador es la
+ * misma fuga que la política de atribución viene a cerrar, y encima permanente.
+ */
+let ROLES_POR_NOMBRE = new Map()
+
+async function cargarRoles() {
+  const { data } = await admin
+    .from('entrevistas')
+    .select('entrevistado_nombre, entrevistado_cargo')
+  const mapa = new Map()
+  for (const e of data ?? []) {
+    const pila = (e.entrevistado_nombre ?? '').trim().split(/\s+/)[0]
+    if (!pila || pila.length < 3 || !e.entrevistado_cargo) continue
+    mapa.set(pila, rolDeCargo(e.entrevistado_cargo))
+  }
+  // Los más largos primero: sin esto, un nombre contenido en otro parte el otro.
+  ROLES_POR_NOMBRE = new Map([...mapa].sort((a, b) => b[0].length - a[0].length))
+  return ROLES_POR_NOMBRE
+}
+
+/** «Gerente de Compras» → «la gerencia de Compras». El área se conserva; la persona no. */
+function rolDeCargo(cargo) {
+  const m = /^(Gerente|Jefe|Jefa|Director|Directora|Coordinador|Coordinadora|Supervisor|Supervisora|Analista|Asistente)\s+de\s+(.+)$/i.exec(
+    cargo.trim()
+  )
+  if (!m) return `el área de ${cargo.trim()}`
+  const cabeza = m[1].toLowerCase()
+  const femenino = {
+    gerente: 'la gerencia',
+    jefe: 'la jefatura',
+    jefa: 'la jefatura',
+    director: 'la dirección',
+    directora: 'la dirección',
+    coordinador: 'la coordinación',
+    coordinadora: 'la coordinación',
+    supervisor: 'la supervisión',
+    supervisora: 'la supervisión',
+  }[cabeza]
+  return `${femenino ?? `el área`} de ${m[2]}`
+}
+
+/**
+ * Quita los nombres de pila de la prosa que viene de la base y los cambia por el
+ * rol: «Fulano describe el módulo» → «la jefatura de Almacén de Materia Prima
+ * describe el módulo».
+ *
+ * ⚠️ **Hace falta porque la política de atribución no alcanza a `descripcion`.**
+ * `acreditar()` gobierna la línea de fuente —código de sesión y nada más—, pero
+ * las descripciones de los hallazgos se escribieron en la cosecha nombrando a
+ * quien lo dijo, y esas se renderizan tal cual. Trece nombres seguían saliendo en
+ * el capítulo de oportunidades con la política ya aplicada.
+ *
+ * **No toca la base**: la sustitución ocurre al generar, así que volver atrás es
+ * quitar esta llamada. El original sigue en `hallazgos.descripcion`.
+ */
+function despersonalizar(texto) {
+  if (!texto) return texto
+  let t = texto
+  for (const [pila, rol] of ROLES_POR_NOMBRE) {
+    if (!t.includes(pila)) continue
+    // Con límite de palabra unicode: un nombre corto no puede partir otro que lo
+    // contenga, y `\b` de JS no sirve con acentos.
+    const re = new RegExp(`(^|[^\p{L}])${pila}(?![\p{L}])`, 'gu')
+    t = t.replace(re, (_, antes) => {
+      // A principio de frase el rol va con mayúscula, que arranca en el artículo.
+      const inicio = antes === '' || /[.!?:¿¡]\s$/.test(antes) || antes === '\n'
+      const r = inicio ? rol[0].toUpperCase() + rol.slice(1) : rol
+      return `${antes}${r}`
+    })
+  }
+  return t
+}
+
 /** Las notas del levantamiento, que es de donde sale el conteo de sesiones. */
 const NOTAS = 'Insumos/notas-entrevistas'
 
@@ -847,12 +924,12 @@ async function mapaDeProcesos() {
     if (m.nivel !== nivelActual) {
       nivelActual = m.nivel
       l.push('')
-      l.push(`### ${nivelActual}`)
+      l.push(`### ${numeroDeNivel(nivelActual)}. ${nivelActual}`)
       l.push('')
     }
     const marca = m.nuevo ? ' · **nuevo**' : ''
     l.push(
-      `**${m.numero}. [${m.nombre}](${RUTA_FICHAS}#${anclaDe(m)})** — ${m.procesos.length} procesos${marca}`
+      `**${numeroDeFicha(m)}. [${m.nombre}](${RUTA_FICHAS}#${anclaDe(m)})** — ${m.procesos.length} procesos${marca}`
     )
     l.push('')
   }
@@ -867,7 +944,7 @@ async function mapaDeProcesos() {
     )
     l.push('')
     for (const m of nuevos) {
-      l.push(`- **${m.nombre}** *(${m.nivel})* — ${m.procesos.length} procesos`)
+      l.push(`- **${numeroDeFicha(m)}. ${m.nombre}** *(${m.nivel})* — ${m.procesos.length} procesos`)
     }
     l.push('')
   }
@@ -1134,6 +1211,7 @@ async function losHallazgos() {
       l.push('')
       l.push(h.texto)
 
+      const fuentesDelHallazgo = []
       for (const [cod, tit] of h.fuentes) {
         const f = porClave.get(`${cod}|${tit}`)
         if (!f) {
@@ -1141,10 +1219,22 @@ async function losHallazgos() {
           continue
         }
         if (!f.cita_textual?.trim()) continue
-        const firma = acreditar(f.entrevistas?.codigo, f.areas?.nombre)
+        fuentesDelHallazgo.push([cod, f.areas?.nombre])
+      }
+      // El capítulo de hallazgos tiene su propio camino de citas, y también
+      // respeta la regla: prosa formal más la acreditación al pie.
+      if (fuentesDelHallazgo.length) {
         l.push('')
-        l.push(`> «${f.cita_textual.trim()}»`)
-        l.push(`> — ${firma || `\`${cod}\``}`)
+        if (SIN_CITA_TEXTUAL.has('hallazgos')) {
+          const cods = [...new Set(fuentesDelHallazgo.map(([c]) => c))]
+          l.push(`*Fuentes · ${cods.map((c) => `\`${c}\``).join(' · ')}*`)
+        } else {
+          for (const [cod, area] of fuentesDelHallazgo) {
+            const f = porClave.get(`${cod}|${h.fuentes.find(([c]) => c === cod)?.[1]}`)
+            l.push(`> «${f?.cita_textual?.trim() ?? ''}»`)
+            l.push(`> — ${acreditar(cod, area)}`)
+          }
+        }
       }
     }
   }
@@ -1326,6 +1416,12 @@ const enLetra = (n) => EN_LETRA[n] ?? String(n)
  */
 const SIN_CITA_TEXTUAL = new Set([
   'resumen-ejecutivo',
+  'cobertura',
+  'cifras',
+  'sistemas-datos',
+  'riesgo-continuidad',
+  'trabas',
+  'hallazgos',
   'oportunidades',
   'donde-no-va-la-ia',
   'arquitectura-ia',
@@ -1645,11 +1741,21 @@ async function capituloConCitas(archivo, etiqueta, entradaDeHallazgos) {
     l.push(`## ${bloque.titulo}`)
     l.push('')
     l.push(bloque.texto)
-    // Los casos del filtro, en lista: son etiquetas cortas y en tabla de una
-    // columna se leerían peor que como viñetas.
+    // Los casos del filtro. **Un caso puede ser una etiqueta o una fila.** Con
+    // etiquetas sueltas salen en viñetas —en tabla de una columna se leerían
+    // peor—; en cuanto el taller le pone detalle al lado, el mismo bloque sale
+    // en tabla. Así una categoría gana columnas sin tocar el generador, y el
+    // conteo del cuadro de mando sigue siendo el mismo `casos.length`.
     if (bloque.casos?.length) {
       l.push('')
-      for (const c of bloque.casos) l.push(`- ${c}`)
+      if (bloque.casos.every((c) => Array.isArray(c))) {
+        const cab = bloque.cabeceras ?? ['Caso', 'Qué hace falta']
+        l.push(`| ${cab.join(' | ')} |`)
+        l.push(`|${cab.map(() => '---').join('|')}|`)
+        for (const c of bloque.casos) l.push(`| **${c[0]}** | ${c.slice(1).join(' | ')} |`)
+      } else {
+        for (const c of bloque.casos) l.push(`- ${c}`)
+      }
     }
     pegarCitas(l, bloque, ctx)
   }
@@ -2637,6 +2743,8 @@ const BORRADORES = {
 
 // -----------------------------------------------------------------------------
 
+await cargarRoles()
+
 const { data: existentes } = await admin
   .from('informe_secciones')
   .select('id, slug, contenido_md')
@@ -2686,7 +2794,13 @@ for (const [i, [parte, slug, titulo, subtitulo]] of SECCIONES.entries()) {
   // Un solo sitio por donde pasa todo el contenido: aquí se resuelven las
   // referencias `{cap:slug}` de un capítulo a otro, vengan de una generadora o
   // del taller. Ponerlo en cada generadora sería olvidarlo en la siguiente.
-  if (contenido !== undefined) fila.contenido_md = resolverCapitulos(contenido, slug)
+  if (contenido !== undefined) {
+    // Y aquí mismo caen los nombres de pila. Va en el paso final y no en cada
+    // generadora por lo mismo: la próxima generadora se olvidaría de llamarlo.
+    // **Cobertura es la excepción** — ahí el nombre *es* el contenido.
+    const resuelto = resolverCapitulos(contenido, slug)
+    fila.contenido_md = slug === 'cobertura' ? resuelto : despersonalizar(resuelto)
+  }
 
   if (revisar) {
     const marca = previa ? (contenido !== undefined ? '~' : '=') : '+'

@@ -71,7 +71,7 @@ export function MarkdownPlegable({
           quepa en una pantalla y se elija qué leer. Un ancla externa abre su
           bloque sola, y de eso se encarga el efecto de arriba. */}
       {bloques.slice(1).map((b) => (
-        <details key={b.titulo} className="plegable">
+        <details key={b.titulo} className={`plegable ${claseDeNivel(b.titulo)}`.trim()}>
           <summary>
             <span className="plegable-titulo">{b.titulo}</span>
             <span className="plegable-cuenta">
@@ -116,4 +116,26 @@ function partirPorNivel2(md: string) {
   }
 
   return bloques
+}
+
+/**
+ * La clase de tinte que le toca a un bloque, deducida de su título.
+ *
+ * Los títulos vienen numerados del generador —«1 · Estratégico»— y esa
+ * numeración sale del propio inventario, así que **no se puede tintar por
+ * posición**: si mañana se reordenan los niveles, el color seguiría al sitio y
+ * no a la categoría. Se deduce del nombre, sin acentos ni mayúsculas.
+ *
+ * Una categoría que no esté en la lista se queda con el gris de `.plegable`, que
+ * es un bloque perfectamente legible — no un fallo visible.
+ */
+function claseDeNivel(titulo: string) {
+  const limpio = titulo
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+  if (limpio.includes('estrategico')) return 'plegable-estrategico'
+  if (limpio.includes('operativo')) return 'plegable-operativo'
+  if (limpio.includes('soporte')) return 'plegable-soporte'
+  return ''
 }

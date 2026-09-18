@@ -64,6 +64,55 @@ cláusula 5. Aquí solo lo urgente:
 
 ---
 
+## 18 de septiembre de 2026 · Sesión 28 — seis encargos, y un nombre que se escapaba
+
+Jesús pidió seis cosas de una vez sobre el informe. Todas están hechas. Dos merecen quedar
+escritas porque cambian cómo funciona el generador.
+
+### 🔴 La política de atribución no llegaba a `hallazgos.descripcion`
+
+Con las citas ya convertidas en prosa y la acreditación reducida al código de sesión,
+**quedaban trece nombres de pila dentro del capítulo 12**. No venían de la lógica de
+atribución: venían del texto de la cosecha, que se escribió nombrando a quien lo dijo, y ese
+texto se renderiza tal cual.
+
+`despersonalizar()` los cambia por el rol —«Fulano describe el módulo» → «la jefatura de
+Almacén de Materia Prima describe el módulo»—. Tres decisiones dentro:
+
+- **El mapa nombre → rol se construye de la base, no se escribe en el script.**
+  `estructura-informe.mjs` sí va a git y el repositorio es público: una lista de nombres de
+  Iberia ahí sería la misma fuga que la política viene a cerrar, y encima permanente.
+- **Se aplica al markdown final, en el mismo sitio donde se resuelven los `{cap:}`**, no en
+  cada generadora. Puesto en cada una, la próxima se olvida.
+- **No toca la base.** El original sigue en `hallazgos.descripcion`, así que revertir es
+  quitar la llamada.
+
+Cobertura es la excepción, como ya lo era: ahí el nombre *es* el contenido del capítulo.
+
+Verificado: **0 nombres de pila fuera de cobertura** en las quince secciones.
+
+### Un caso puede ser una etiqueta o una fila
+
+El capítulo 13 tenía sus casos en viñetas sueltas. Ahora `capituloConCitas` mira los `casos`:
+si son cadenas salen en viñetas, y si el taller les pone detalle al lado **salen en tabla**.
+Una categoría gana columnas editando el taller, sin tocar el generador, y el conteo del cuadro
+de mando sigue siendo el mismo `casos.length`.
+
+### Lo demás
+
+| Encargo | Qué se hizo |
+|---|---|
+| Sin «grabadas» en la 02 | «44 horas de entrevista · 27.951 turnos de diálogo registrados». Comprobado en todo el informe: la única coincidencia que queda es un «que quede grabado en el momento» que habla de registrar en el sistema |
+| Numerar el mapa de procesos | `1. Estratégico` y `1.1. Dirección y Gobierno Corporativo`, con las mismas funciones que ya numeraban las fichas |
+| Color por categoría en las fichas | Rojo de marca para estratégico, oro para operativo, carbón para soporte — tonos 50/100. **El tinte se deduce del nombre del nivel, no de su posición**: numerado por el inventario, tintar por orden haría que el color siguiera al sitio y no a la categoría |
+| Tablas en la 06 | De 1 tabla a **8**. La que más pesa es «qué dato es confiable»: cuatro grados, y la fila «no confiable» dice por qué ningún modelo puede entrenarse ahí |
+| Tablas en la 13 | De 1 a **8**, contando las cinco de casos y las dos escritas —los seis límites que pusieron los entrevistados, y las tres razones por las que decirlo importa |
+
+Verificación visual hecha: los tres tintes medidos con `getComputedStyle`, ninguna tabla
+desborda su caja, y 0 errores de consola.
+
+---
+
 ## 18 de septiembre de 2026 · Sesión 27 — el respaldo no servía para revertir
 
 Antes de decidir si el informe pasa a prosa formal sin citas, se revisó si esa versión sería

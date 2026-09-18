@@ -268,6 +268,62 @@ body {
 .plegable-cuerpo {
   @apply px-5 pb-2;
 }
+
+/* -----------------------------------------------------------------------------
+   Un tinte por categoría, dentro de la paleta de Iberia
+   El rojo de marca para lo estratégico, el oro de lo oficial para lo operativo
+   y el carbón neutro para soporte. Van en los tonos 50/100 —lavados a
+   propósito—: el bloque tiene que distinguirse de un vistazo sin competir con
+   el texto y las tablas que lleva dentro. Nada de `slate-*`.
+   El chevron se queda rojo en los tres: es el control, no la categoría.
+   -------------------------------------------------------------------------- */
+.plegable-estrategico {
+  @apply border-acento-200/70;
+}
+.plegable-estrategico > summary {
+  @apply bg-acento-50 text-acento-900;
+}
+.plegable-estrategico > summary:hover {
+  @apply bg-acento-100;
+}
+.plegable-estrategico .plegable-cuerpo {
+  @apply bg-acento-50/40;
+}
+
+.plegable-operativo {
+  @apply border-oro-200/70;
+}
+.plegable-operativo > summary {
+  @apply bg-oro-50 text-oro-900;
+}
+.plegable-operativo > summary:hover {
+  @apply bg-oro-100;
+}
+.plegable-operativo .plegable-cuerpo {
+  @apply bg-oro-50/50;
+}
+
+.plegable-soporte {
+  @apply border-marca-200;
+}
+.plegable-soporte > summary {
+  @apply bg-marca-100 text-marca-800;
+}
+.plegable-soporte > summary:hover {
+  @apply bg-marca-200;
+}
+.plegable-soporte .plegable-cuerpo {
+  @apply bg-marca-50/60;
+}
+
+/* La píldora del conteo es blanca sobre el tinte: sobre el fondo de color, el
+   blanco es lo único que la separa del resumen en las tres categorías. */
+.plegable-estrategico .plegable-cuenta,
+.plegable-operativo .plegable-cuenta,
+.plegable-soporte .plegable-cuenta {
+  @apply bg-white/80;
+}
+
 /* El encabezado del nivel ya está en el resumen: dentro sobra. */
 .plegable-cuerpo .prosa > h2:first-child {
   @apply sr-only;
