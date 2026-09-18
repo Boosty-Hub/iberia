@@ -10,15 +10,21 @@
  *   informe.json          las filas tal cual están en la base — es lo que restaura
  *   informe-completo.md   las 28 secciones seguidas, para leerlo de corrido
  *   secciones/NN-slug.md  una por sección, con su cabecera
+ *   taller/*.json         la prosa de la que salen — **lo único que permite revertir**
  *
  * Restaurar escribe de vuelta `contenido_md` sección por sección, casando por
  * `slug`. No crea secciones que ya no existan: avisa cuáles no pudo devolver.
+ *
+ * ⚠️ **Restaurar no basta para revertir.** Las secciones se regeneran siempre, así
+ * que la próxima corrida del generador pisa lo restaurado. Volver de verdad a una
+ * versión anterior son tres pasos: copiar `taller/` de vuelta a
+ * `contenido/informe/`, `git checkout` del generador, y regenerar.
  *
  * Material de Iberia bajo NDA: la carpeta de salida no va a ningún repositorio.
  */
 
 import { createClient } from '@supabase/supabase-js'
-import { mkdir, writeFile, readFile } from 'node:fs/promises'
+import { mkdir, writeFile, readFile, cp, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 
 const args = {}
@@ -149,9 +155,33 @@ for (const s of secciones) {
 
 await writeFile(join(SALIDA, 'informe-completo.md'), partes.join('\n'), 'utf8')
 
+// --- El taller ---------------------------------------------------------------
+//
+// ⚠️ **Sin esto el respaldo no sirve para revertir, solo para leer.** Las quince
+// secciones están en `GENERADAS`, o sea que **se regeneran siempre**: devolver
+// `contenido_md` a la base recupera el texto hasta la próxima corrida, que lo
+// vuelve a pisar con lo que digan los talleres.
+//
+// Y los talleres **no están en git** —llevan material bajo NDA y `contenido/*`
+// está ignorado—, así que esta copia es su único historial. Sin ella, deshacer
+// una reescritura de prosa significa volver a escribirla a mano.
+//
+// El generador sí está versionado, de modo que la reversión completa es:
+// restaurar esta carpeta, `git checkout` del script y volver a generar.
+const TALLER = join('contenido', 'informe')
+let archivosTaller = 0
+try {
+  archivosTaller = (await readdir(TALLER)).filter((f) => f.endsWith('.json')).length
+  await cp(TALLER, join(SALIDA, 'taller'), { recursive: true })
+} catch (e) {
+  console.warn(
+    `\n  ⚠️ No se pudo copiar el taller (${e.message}). El respaldo sirve para leer, no para revertir.`
+  )
+}
+
 console.log(`\nRespaldo en ${SALIDA}`)
 console.log(`  ${secciones.length} secciones · ${conTexto.length} con texto · ${caracteres.toLocaleString('es-VE')} caracteres`)
-console.log('  informe.json · informe-completo.md · secciones/')
+console.log(`  informe.json · informe-completo.md · secciones/ · taller/ (${archivosTaller} json)`)
 console.log('\nSecciones con texto:')
 for (const s of conTexto) {
   console.log(`  ${String(s.numero ?? '').padStart(2)} · ${String(s.contenido_md.length).padStart(6)}c · ${s.titulo}`)

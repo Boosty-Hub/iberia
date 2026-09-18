@@ -64,6 +64,41 @@ cláusula 5. Aquí solo lo urgente:
 
 ---
 
+## 18 de septiembre de 2026 · Sesión 27 — el respaldo no servía para revertir
+
+Antes de decidir si el informe pasa a prosa formal sin citas, se revisó si esa versión sería
+recuperable. **No lo era**, y el motivo no era obvio.
+
+⚠️ **Las quince secciones están en `GENERADAS`, o sea que se regeneran siempre.** Restaurar un
+respaldo devuelve `contenido_md` a la base y lo recupera **hasta la próxima corrida**, que lo
+pisa con lo que digan los talleres. El respaldo servía para leer, no para volver atrás.
+
+Y la capa que hacía falta —`contenido/informe/*.json`, donde vive la prosa y los pares
+`(sesión, hallazgo)`— **no está en git**: `contenido/*` está ignorado, y con razón, porque
+lleva material bajo NDA. Así que no tenía ningún historial.
+
+### Lo que se hizo
+
+`respaldar-informe.mjs` **copia ahora también el taller**. No fue una copia suelta: va en el
+script, así que todos los respaldos futuros lo incluyen sin que nadie se acuerde.
+
+```
+Insumos/Respaldo_Informe_2026-09-18_con-citas/    1,3 MB
+  informe.json          las 15 filas de la base
+  informe-completo.md   las 15 seguidas
+  secciones/            una por sección
+  taller/               13 json · 102 pares (sesión, hallazgo)  ← lo nuevo
+```
+
+**La reversión completa son tres pasos**, y queda escrito en la cabecera del script: copiar
+`taller/` de vuelta, `git checkout` del generador —que sí está versionado— y regenerar.
+
+⚠️ **El respaldo del 17 no se puede completar retroactivamente.** Los talleres han cambiado
+mucho desde entonces —las trabas, los cuadros de mando, las tablas de la 08— y no hay forma de
+reconstruir su estado de aquel día. Ese respaldo sigue sirviendo para leer, no para revertir.
+
+---
+
 ## 17 de septiembre de 2026 · Sesión 26 — la 08 pasa de prosa a tablas
 
 Jesús pidió menos texto puro en **«Riesgo y continuidad»**. El capítulo pasa de nueve bloques
