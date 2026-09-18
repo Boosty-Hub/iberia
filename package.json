@@ -41,6 +41,7 @@
     "sembrar:horas": "node --env-file=.env.local scripts/sembrar-horas.mjs",
     "informe:estructura": "node --env-file=.env.local scripts/estructura-informe.mjs",
     "sembrar:procesos": "node --env-file=.env.local scripts/sembrar-procesos.mjs",
+    "expediente": "node --env-file=.env.local scripts/expediente-trazabilidad.mjs",
     "importar:padron": "node --env-file=.env.local scripts/importar-padron.mjs",
     "generar:guias": "node scripts/generar-guias.mjs",
     "respaldar:informe": "node --env-file=.env.local scripts/respaldar-informe.mjs"

@@ -538,7 +538,8 @@ npm run sembrar:horas                       # el registro de horas, partida por 
 npm run sembrar:horas -- --limpiar          # y borra las que ya no están en el archivo
 npm run importar:padron                     # las 276 personas de Capital Humano
 npm run importar:padron -- --sedes          # el reparto crudo por centro de costo
-npm run informe:estructura                  # las 28 secciones y los anexos que se generan solos
+npm run informe:estructura                  # las 14 secciones y los anexos que se generan solos
+npm run expediente                          # el dossier de trazabilidad, a Insumos/ · SOLO consultores
 npm run sembrar:procesos                    # el inventario del taller a la base, para el mapa
 npm run sembrar:procesos -- --revisar       # dice qué sembraría, sin escribir
 npm run generar:guias                       # las 3 guías de entrevista adaptadas a Iberia
@@ -655,7 +656,10 @@ cambia `scripts/generar-guias.mjs` y se regeneran, igual que la marca y las fich
 
 ## El informe (`/dashboard/informe` y `/informe`)
 
-Son **28 secciones** en cuatro partes, y `npm run informe:estructura` es quien las mantiene.
+Son **14 secciones** en cuatro partes, y `npm run informe:estructura` es quien las mantiene.
+La apertura **absorbió «Cobertura del levantamiento»**: sin nombres y sin códigos, aquel
+capítulo se quedaba en su cuadro de indicadores, y ese cuadro es lo que un resumen ejecutivo
+necesita arriba.
 
 - **Los tres anexos se regeneran siempre** de la base: sesiones, catálogo de hallazgos e
   inventario de sistemas. Son el reflejo del dato, no prosa; si alguien los edita a mano, la
@@ -664,8 +668,20 @@ Son **28 secciones** en cuatro partes, y `npm run informe:estructura` es quien l
   desde el editor, el editor manda y el script no las vuelve a tocar.
 - **Todo entra sin publicar.** Un lector de Iberia solo ve lo publicado, y no se publica
   nada mientras los hallazgos que lo sostienen sigan en `propuesto`.
-- **Se cita por nombre**, no por cargo. Es decisión de Gabriel: el informe nombra a quien lo
-  dijo.
+- 🔴 **El informe va sin citas, sin códigos de sesión y sin nombres.** Decisión del cliente
+  del 18 de septiembre de 2026, hablada con Gabriel. *(Sustituye a la norma anterior —«se cita
+  por nombre, el informe nombra a quien lo dijo»—, que estuvo vigente hasta ese día.)* El
+  documento se sostiene en la autoría del equipo consultor, no en un aparato de referencias.
+  - El interruptor es **`SIN_CODIGOS` en `estructura-informe.mjs`**, y es un interruptor de
+    verdad: los pares (sesión, hallazgo) siguen intactos en el taller y en la base, así que
+    ponerlo en `false` y regenerar devuelve el informe con referencias. **Nada se borra en el
+    origen.**
+  - **La trazabilidad no se pierde, cambia de sitio.** `npm run expediente` deja en `Insumos/`
+    —fuera de git— el dossier con cada hallazgo, su sesión, quién lo dijo, su cargo y la cita
+    literal. ⚠️ **Ese archivo pasa a ser el único puente entre el informe y su evidencia**, así
+    que va dentro del respaldo y **no se comparte con el cliente**.
+  - ⚠️ «Sin cita textual no hay hallazgo» **sigue en pie**: la cita se exige al cosechar y se
+    guarda en `hallazgos.cita_textual`. Lo que cambió es que no se imprime.
 - **El mapa interactivo (`/informe/mapa-interactivo`) es otra forma de mirar las secciones
   4 y 5**, no una sección: no está en `SECCIONES`, no sale en el índice y se entra por el
   botón rojo que vive dentro del mapa de procesos. Tres cosas que conviene no redescubrir:

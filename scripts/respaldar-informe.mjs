@@ -25,6 +25,7 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { mkdir, writeFile, readFile, cp, readdir } from 'node:fs/promises'
+import { execFileSync } from 'node:child_process'
 import { join } from 'node:path'
 
 const args = {}
@@ -179,9 +180,29 @@ try {
   )
 }
 
+// --- El expediente de trazabilidad ------------------------------------------
+//
+// ⚠️ **Desde que el informe va sin citas, sin códigos y sin nombres, el
+// expediente es el único puente entre lo que el documento afirma y la sesión
+// donde se dijo.** El informe se puede regenerar del taller; el expediente sale
+// de `hallazgos` y `entrevistas`, que esta copia no guardaba. Va dentro, y por
+// eso va en el script: un respaldo que hay que acordarse de completar a mano no
+// es un respaldo.
+let expediente = 'no'
+try {
+  execFileSync(
+    process.execPath,
+    ['--env-file=.env.local', 'scripts/expediente-trazabilidad.mjs', '--salida', join(SALIDA, 'expediente')],
+    { stdio: 'pipe' }
+  )
+  expediente = 'sí'
+} catch (e) {
+  console.warn('  ⚠️ No se pudo generar el expediente: ' + e.message.slice(0, 120))
+}
+
 console.log(`\nRespaldo en ${SALIDA}`)
 console.log(`  ${secciones.length} secciones · ${conTexto.length} con texto · ${caracteres.toLocaleString('es-VE')} caracteres`)
-console.log(`  informe.json · informe-completo.md · secciones/ · taller/ (${archivosTaller} json)`)
+console.log(`  informe.json · informe-completo.md · secciones/ · taller/ (${archivosTaller} json) · expediente/ (${expediente})`)
 console.log('\nSecciones con texto:')
 for (const s of conTexto) {
   console.log(`  ${String(s.numero ?? '').padStart(2)} · ${String(s.contenido_md.length).padStart(6)}c · ${s.titulo}`)

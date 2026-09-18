@@ -53,13 +53,16 @@ const podar = process.argv.includes('--podar')
 
 const SECCIONES = [
   // --- Apertura --------------------------------------------------------------
-  ['portada', 'resumen-ejecutivo', 'Resumen ejecutivo', 'El encargo, qué encontramos y qué proponemos'],
+  // ⚠️ **Absorbe «Cobertura del levantamiento»**, que era la sección 2. Sin los
+  // nombres y sin los códigos, aquel capítulo se quedaba en su cuadro de
+  // indicadores — y ese cuadro es justo lo que un resumen ejecutivo necesita
+  // arriba: cuánto se escuchó, antes de lo que se concluye.
+  ['portada', 'resumen-ejecutivo', 'Resumen ejecutivo', 'El encargo, lo que se cubrió y lo que encontramos'],
 
   // --- Levantamiento ---------------------------------------------------------
   // El orden es el del argumento, y va por pares: una sección afirma y la
   // siguiente la respalda. Cobertura dice cuánto se escuchó y las cifras qué se
   // midió; «Sistemas y estado del dato» argumenta y el inventario lo enseña.
-  ['levantamiento', 'cobertura', 'Cobertura del levantamiento', 'Qué se cubrió, con quién y con qué profundidad'],
   ['levantamiento', 'cifras', 'Las cifras del levantamiento', 'Solo lo que alguien dijo explícitamente, con su fuente'],
   ['levantamiento', 'mapa-procesos', 'El mapa de procesos', 'El índice vivo: veinte macroprocesos y los procesos que se ejecutan hoy'],
   // Absorbe el informe de levantamiento por área: la ficha corta por proceso y
@@ -137,117 +140,6 @@ function fecha(iso) {
     year: 'numeric',
     timeZone: 'UTC',
   })
-}
-
-/**
- * Sección 02 · Cobertura del levantamiento.
- *
- * Era el anexo de sesiones. Como sección tiene que responder algo más que «qué
- * se escuchó»: **qué quedó fuera**. Por eso cierra con las áreas de Iberia que
- * no tienen ni una sesión — eso sale del dato, y es lo que un comité pregunta
- * primero.
- */
-async function coberturaDelLevantamiento() {
-  const { data } = await admin
-    .from('entrevistas')
-    .select(
-      'codigo, tipo, titulo, entrevistado_nombre, entrevistado_cargo, sede, fecha_entrevista, duracion_minutos, entrevistador, areas(nombre), participantes:sesion_participantes(personas(nombre_completo), rol)'
-    )
-    .order('fecha_entrevista', { ascending: true })
-    .order('codigo', { ascending: true })
-
-  const sesiones = data ?? []
-  const entrevistas = sesiones.filter((s) => s.tipo === 'entrevista')
-  const minutos = sesiones.reduce((t, s) => t + (s.duracion_minutos ?? 0), 0)
-
-  const { count: turnos } = await admin
-    .from('transcripcion_segmentos')
-    .select('*', { count: 'exact', head: true })
-
-  // ⚠️ **La sesión sin consentimiento cuenta pero no se acredita.** Sigue en la
-  // tabla —ocurrió, y quitarla dejaría un hueco en un conteo que otros capítulos
-  // citan— pero sin nombre, sin cargo, sin área y sin duración. Y su nombre se
-  // filtra también de los participantes de **las demás** sesiones: el criterio
-  // acordado es que no aparezca en ninguna parte del documento.
-  const vetados = new Set(
-    sesiones
-      .filter((s) => SIN_CONSENTIMIENTO.has(s.codigo))
-      .map((s) => s.entrevistado_nombre)
-      .filter(Boolean)
-  )
-  if (vetados.size) {
-    console.log(`  · cobertura: ${vetados.size} sesión(es) retenida(s), contadas y sin acreditar`)
-  }
-
-  const filas = sesiones.map((s) => {
-    if (SIN_CONSENTIMIENTO.has(s.codigo)) {
-      return `| \`${s.codigo}\` | ${fecha(s.fecha_entrevista)} | **Sesión retenida** · a solicitud de la entrevistada | — | ${SEDES[s.sede] ?? '—'} | — | — |`
-    }
-    const nombre = s.titulo || s.entrevistado_nombre || s.codigo
-    const gente = (s.participantes ?? [])
-      .map((p) => p.personas?.nombre_completo)
-      .filter((n) => n && !vetados.has(n))
-      .join(', ')
-    return `| \`${s.codigo}\` | ${fecha(s.fecha_entrevista)} | ${nombre}${
-      s.entrevistado_cargo ? ` · ${s.entrevistado_cargo}` : ''
-    } | ${s.areas?.nombre ?? '—'} | ${SEDES[s.sede] ?? '—'} | ${
-      s.duracion_minutos ? `${s.duracion_minutos} min` : '—'
-    } | ${gente || '—'} |`
-  })
-
-
-  // Lo que no se escuchó importa tanto como lo que sí. Se excluye al equipo
-  // consultor, que no es un área de Iberia.
-  const { data: areas } = await admin.from('areas').select('id, nombre').order('nombre')
-  const { data: conArea } = await admin.from('entrevistas').select('area_id')
-  // Un área está cubierta si tiene sesión propia **o si alguien suyo estuvo en
-  // alguna**: la Jefatura de Laboratorio no tiene entrevista, pero su jefa
-  // condujo el recorrido de planta. Contar solo por `entrevistas.area_id` la
-  // daba por no escuchada, que es falso.
-  const { data: asistentes } = await admin
-    .from('sesion_participantes')
-    .select('personas(area_id)')
-  const conSesion = new Set((conArea ?? []).map((e) => e.area_id).filter(Boolean))
-  for (const a of asistentes ?? []) {
-    if (a.personas?.area_id) conSesion.add(a.personas.area_id)
-  }
-
-  const deIberia = (areas ?? []).filter((a) => !/Boosty|consultor/i.test(a.nombre))
-  const sinSesion = deIberia.filter((a) => !conSesion.has(a.id))
-  const cubiertas = deIberia.length - sinSesion.length
-
-  const hueco = sinSesion.length
-    ? [
-        '',
-        '## Lo que quedó fuera',
-        '',
-        `**${cubiertas} de las ${deIberia.length} áreas** de la estructura estuvieron en alguna sesión, con entrevista propia o a través de alguien de su equipo. Las ${sinSesion.length} que no:`,
-        '',
-        ...sinSesion.map((a) => `- ${a.nombre}`),
-        '',
-        'No todas pesan igual: varias son jefaturas dentro de una dirección que sí se entrevistó, y lo suyo se recogió por boca de quien las dirige. Pero ninguna afirmación de este documento se apoya en una fuente propia de estas áreas.',
-      ].join('\n')
-    : ''
-
-
-  return `Este capítulo dice **qué se escuchó y qué no**, porque todo lo que viene después se
-apoya en eso. Las sesiones marcadas \`SES-\` son reuniones de comité y recorridos de planta;
-las \`ENT-\` son las entrevistas estructuradas que cuentan contra las ~25 que compromete el
-programa; las \`FOR-\` son formaciones y no cuentan contra esa meta.
-
-**${entrevistas.length} entrevistas** —el programa comprometía ~25— · ${sesiones.length} sesiones en total ·
-${Math.round(minutos / 60)} horas de entrevista · **${(turnos ?? 0).toLocaleString('es-VE')} turnos** de diálogo registrados.
-
-## El registro completo
-
-| Código | Fecha | Quién | Área | Sede | Duración | Participantes |
-|---|---|---|---|---|---|---|
-${filas.join('\n')}
-${hueco}
-
-> El detalle completo de cada sesión está en el módulo de entrevistas del panel.
-> Cada afirmación de este informe que provenga de una sesión lleva el código de la
-> sesión donde se dijo.`
 }
 
 async function anexoInventario() {
@@ -667,6 +559,7 @@ const RUTA_HALLAZGOS = '/informe/hallazgos'
  * Queda dicho para que se revise con él.
  */
 function acreditar(codigo, area) {
+  if (SIN_CODIGOS) return area ?? ''
   return [area, codigo ? `\`${codigo}\`` : null].filter(Boolean).join(' · ')
 }
 
@@ -786,7 +679,16 @@ function quienesContaron(macro, porSesion) {
       if (/^(ENT|SES|FOR)-\d+$/.test(c)) cuenta.set(c, (cuenta.get(c) ?? 0) + 1)
     }
   }
-  if (!cuenta.size) return '`sin fuente registrada`'
+  if (!cuenta.size) return SIN_CODIGOS ? '—' : '`sin fuente registrada`'
+
+  // Sin códigos, la línea deja de acreditar y pasa a **medir**: en cuántas
+  // sesiones apareció este macroproceso. Es lo único que sigue siendo cierto y
+  // útil cuando no se dice quién — un macroproceso que salió en seis
+  // conversaciones distintas está mejor sostenido que uno que salió en una.
+  if (SIN_CODIGOS) {
+    const n = cuenta.size
+    return `**${n}** ${n === 1 ? 'sesión del levantamiento' : 'sesiones del levantamiento'}`
+  }
 
   const orden = [...cuenta.entries()].sort((a, b) => b[1] - a[1])
   const principales = orden.filter(([, n]) => n > 1)
@@ -1074,7 +976,7 @@ async function fichasDeProceso() {
           .split(/[,;]/)
           .map((x) => x.trim())
           .filter((c) => c && c !== '—' && !SIN_CONSENTIMIENTO.has(c))
-        const fuente = cods.length ? ` *(${cods.join(', ')})*` : ''
+        const fuente = SIN_CODIGOS || !cods.length ? '' : ` *(${cods.join(', ')})*`
         l.push(`- **${p.nombre}** · ${marca} — ${p.observacion}${fuente}`)
       }
     }
@@ -1233,7 +1135,7 @@ async function losHallazgos() {
         l.push('')
         if (SIN_CITA_TEXTUAL.has('hallazgos')) {
           const cods = [...new Set(fuentesDelHallazgo.map(([c]) => c))]
-          l.push(`*Fuentes · ${cods.map((c) => `\`${c}\``).join(' · ')}*`)
+          if (!SIN_CODIGOS) l.push(`*Fuentes · ${cods.map((c) => `\`${c}\``).join(' · ')}*`)
         } else {
           for (const [cod, area] of fuentesDelHallazgo) {
             const f = porClave.get(`${cod}|${h.fuentes.find(([c]) => c === cod)?.[1]}`)
@@ -1343,6 +1245,25 @@ function hablaDelAtaque(texto) {
  * cinco. Si se resuelve el consentimiento, se saca de esta lista y el número se
  * corrige solo.
  */
+/**
+ * **El informe no lleva códigos de sesión.**
+ *
+ * Decisión del cliente del 18 de septiembre de 2026, hablada con Gabriel: el
+ * documento se sostiene en la autoría del equipo consultor y no en un aparato
+ * de referencias. Eso deja fuera las citas textuales —ya convertidas a prosa—,
+ * los códigos `ENT-`, `SES-` y `FOR-`, y la tabla de sesiones con nombres.
+ *
+ * ⚠️ **No se pierde la trazabilidad, cambia de sitio.** `npm run expediente`
+ * deja en `Insumos/` el dossier con cada afirmación, su sesión, quién lo dijo y
+ * la cita literal — fuera de git, que es material bajo NDA. Ese archivo pasa a
+ * ser el único puente entre el informe y su evidencia.
+ *
+ * ⚠️ **Es un interruptor, no una reescritura.** Los pares (sesión, hallazgo)
+ * siguen en el taller y en la base: ponerlo en `false` y regenerar devuelve el
+ * informe con referencias. Nada de esto se borra en el origen.
+ */
+const SIN_CODIGOS = true
+
 const SIN_CONSENTIMIENTO = new Set(['ENT-005'])
 
 /**
@@ -1444,7 +1365,7 @@ function pegarCitas(l, bloque, ctx) {
     }
     if (cods.length) {
       l.push('')
-      l.push(`*Fuentes · ${cods.map((c) => `\`${c}\``).join(' · ')}*`)
+      if (!SIN_CODIGOS) l.push(`*Fuentes · ${cods.map((c) => `\`${c}\``).join(' · ')}*`)
     }
     return
   }
@@ -1600,8 +1521,8 @@ async function riesgoYContinuidad() {
     l.push('')
     l.push(pd.entrada)
     l.push('')
-    l.push('| Área | Qué perdió | ¿Volvió? | Sesión |')
-    l.push('|---|---|---|---|')
+    l.push(SIN_CODIGOS ? '| Área | Qué perdió | ¿Volvió? |' : '| Área | Qué perdió | ¿Volvió? | Sesión |')
+    l.push(SIN_CODIGOS ? '|---|---|---|' : '|---|---|---|---|')
     for (const [titulo, que, volvio] of pd.filas) {
       const h = porTitulo.get(titulo)
       if (!h) {
@@ -1611,7 +1532,8 @@ async function riesgoYContinuidad() {
       const cod = h.entrevistas?.codigo
       if (SIN_CONSENTIMIENTO.has(cod)) continue
       cuentaEstado[volvio] = (cuentaEstado[volvio] ?? 0) + 1
-      l.push(`| **${h.areas?.nombre ?? '—'}** | ${que} | ${ESTADO[volvio] ?? volvio} | \`${cod ?? '—'}\` |`)
+      const fila = `| **${h.areas?.nombre ?? '—'}** | ${que} | ${ESTADO[volvio] ?? volvio} |`
+      l.push(SIN_CODIGOS ? fila : `${fila} \`${cod ?? '—'}\` |`)
     }
     if (sinCasar.length) {
       console.warn(`  ⚠️ riesgo-continuidad: ${sinCasar.length} pérdida(s) sin casar en la base:`)
@@ -1996,6 +1918,13 @@ function leerNotas() {
  * enumerarlas llena la celda sin informar.
  */
 function rastroEnTexto(codigos) {
+  // Sin códigos la columna sigue sirviendo: lo que informa es **en cuántas
+  // sesiones apareció el sistema**, que es la medida de cuán extendido está.
+  // Cuál sesión exactamente es lo que se fue al expediente.
+  if (SIN_CODIGOS) {
+    if (!codigos.length) return '—'
+    return `${codigos.length} ${codigos.length === 1 ? 'sesión' : 'sesiones'}`
+  }
   if (!codigos.length) return '`sin rastro en notas`'
   if (codigos.length <= 4) return codigos.map((c) => `\`${c}\``).join(' ')
   return `**${codigos.length}** sesiones`
@@ -2099,7 +2028,7 @@ const MARCA_CIFRA = {
 
 /** La acreditación de una cifra: el código de sesión, sin nombre. */
 function firmaDeSesion(codigo) {
-  return `\`${codigo}\``
+  return SIN_CODIGOS ? '' : `\`${codigo}\``
 }
 
 async function cifrasDelLevantamiento() {
@@ -2341,7 +2270,7 @@ async function lasOportunidades() {
     for (const o of grupo.oportunidades) {
       const h = porTitulo.get(o.h)
       if (!h) continue
-      const quien = h.entrevistas?.codigo ? `\`${h.entrevistas.codigo}\`` : ''
+      const quien = SIN_CODIGOS || !h.entrevistas?.codigo ? '' : `\`${h.entrevistas.codigo}\``
       l.push(`- **${o.h}** — ${h.descripcion ?? ''} ${quien ? `*(${quien})*` : ''}`)
     }
   }
@@ -2384,6 +2313,99 @@ async function lasOportunidades() {
 // resume. Un resumen ejecutivo con una cifra que ya no coincide con su capítulo
 // es la forma más rápida de que el lector deje de creer el documento entero — y
 // es justo la sección donde más tienta escribirlas, porque son pocas.
+
+/**
+ * El cuadro de cobertura que abre el informe.
+ *
+ * Es lo que quedó de la vieja sección 2 cuando se le quitaron los nombres y los
+ * códigos: **cuánto se escuchó, sin decir a quién**. Y es lo que un resumen
+ * ejecutivo quiere arriba — un comité pregunta primero sobre cuánta base
+ * descansa lo que va a leer.
+ *
+ * ⚠️ **Ni una cifra se escribe.** Salen de la base y del inventario, que es la
+ * razón de que este cuadro esté aquí y no en el taller: un número tecleado
+ * seguiría diciendo lo mismo el día que entre una sesión más.
+ *
+ * ⚠️ **La sesión retenida cuenta y no se cosecha.** Se grabó sin que la persona
+ * lo supiera y pidió que se borrara. Sacarla del total falsearía la cobertura;
+ * nombrarla o cosecharla sería usar lo que pidió que no se usara. Cuenta, y la
+ * nota al pie lo dice sin identificarla.
+ */
+async function cuadroDeCobertura() {
+  const { data: sesiones } = await admin
+    .from('entrevistas')
+    .select('codigo, sede, entrevistado_nombre, areas(nombre), participantes:sesion_participantes(personas(nombre_completo))')
+
+  const ses = sesiones ?? []
+  if (!ses.length) return ''
+
+  const de = (p) => ses.filter((x) => x.codigo?.startsWith(p)).length
+  const gente = new Set()
+  for (const x of ses) {
+    if (x.entrevistado_nombre) gente.add(x.entrevistado_nombre.trim())
+    for (const p of x.participantes ?? []) {
+      if (p.personas?.nombre_completo) gente.add(p.personas.nombre_completo.trim())
+    }
+  }
+
+  const porSede = new Map()
+  for (const x of ses) porSede.set(x.sede, (porSede.get(x.sede) ?? 0) + 1)
+  const sedes = [...porSede.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([sede, n]) => `**${n}** en ${SEDES[sede] ?? 'sin sede'}`)
+    .join(' · ')
+
+  const areas = new Set(ses.map((x) => x.areas?.nombre).filter(Boolean))
+
+  const inv = (() => {
+    try {
+      return JSON.parse(leerTaller('inventario-procesos.json'))
+    } catch {
+      return null
+    }
+  })()
+  const macros = inv?.macroprocesos ?? []
+  const procesos = macros.reduce((t, m) => t + (m.procesos?.length ?? 0), 0)
+
+  const { count: hallazgos } = await admin
+    .from('hallazgos')
+    .select('*', { count: 'exact', head: true })
+
+  const retenidas = ses.filter((x) => SIN_CONSENTIMIENTO.has(x.codigo)).length
+
+  const l = []
+  l.push('## Lo que se cubrió')
+  l.push('')
+  l.push(
+    'El levantamiento se hizo en sitio, área por área, con quien ejecuta el proceso y no con ' +
+      'quien lo describe desde afuera. Esto es su alcance:'
+  )
+  l.push('')
+  l.push('| | |')
+  l.push('|---|---|')
+  l.push(
+    `| **Sesiones de levantamiento** | **${ses.length}** — ${de('ENT')} entrevistas de proceso, ` +
+      `${de('SES')} reuniones y recorridos, ${de('FOR')} formaciones |`
+  )
+  l.push(`| **Personas escuchadas** | **${gente.size}** |`)
+  l.push(`| **Dónde** | ${sedes} |`)
+  l.push(`| **Áreas con sesión propia** | **${areas.size}** |`)
+  l.push(`| **Procesos mapeados** | **${macros.length}** macroprocesos · **${procesos}** procesos de primer nivel |`)
+  l.push(`| **Hallazgos documentados** | **${hallazgos ?? 0}** |`)
+  l.push('')
+  if (retenidas) {
+    l.push(
+      `*${retenidas === 1 ? 'Una sesión' : `${retenidas} sesiones`} cuenta en el total y no se ` +
+        'cosechó, a solicitud de la persona entrevistada.*'
+    )
+  }
+
+  console.log(
+    `  · cobertura: ${ses.length} sesiones · ${gente.size} personas · ${areas.size} áreas` +
+      (retenidas ? ` · ${retenidas} retenida(s)` : '')
+  )
+  return l.join('\n')
+}
 
 async function elResumenEjecutivo() {
   const aviso = enPalabras(fechaDelPrograma('AVISO_RENOVACION'))
@@ -2430,7 +2452,7 @@ async function elResumenEjecutivo() {
   // «dos validados» y no «2 validados»: va en medio de un párrafo de prosa.
   const EN_LETRA_CORTA = { 0: 'ninguno', 1: 'uno', 2: 'dos', 3: 'tres', 4: 'cuatro', 5: 'cinco' }
 
-  let salida = md.replaceAll('{AVISO}', aviso)
+  let salida = md.replaceAll('{COBERTURA}', await cuadroDeCobertura()).replaceAll('{AVISO}', aviso)
   for (const [clave, valor] of Object.entries(cifras)) {
     const texto = clave === 'VALIDADOS' ? (EN_LETRA_CORTA[valor] ?? String(valor)) : String(valor)
     salida = salida.replaceAll(`{${clave}}`, texto)
@@ -2665,12 +2687,15 @@ async function inventarioDeTrabas() {
     l.push('')
     l.push(`## ${area} · ${suyas.length}`)
     l.push('')
-    l.push('| Traba | Tipo | Impacto | Sesión |')
-    l.push('|---|---|---|---|')
+    // ⚠️ La columna de sesión **se quita entera**, no se deja vacía: una
+    // columna con guiones en las 149 filas es ruido con encabezado.
+    l.push(SIN_CODIGOS ? '| Traba | Tipo | Impacto |' : '| Traba | Tipo | Impacto | Sesión |')
+    l.push(SIN_CODIGOS ? '|---|---|---|' : '|---|---|---|---|')
     for (const h of suyas.sort((a, b) => a.titulo.localeCompare(b.titulo, 'es'))) {
       const quien = h.entrevistas?.codigo ?? ''
       const imp = h.impacto ? h.impacto[0].toUpperCase() + h.impacto.slice(1) : '—'
-      l.push(`| **${h.titulo}** | ${ROTULO_TRABA[h.tipo] ?? h.tipo} | ${imp} | ${quien || '—'} |`)
+      const fila = `| **${h.titulo}** | ${ROTULO_TRABA[h.tipo] ?? h.tipo} | ${imp} |`
+      l.push(SIN_CODIGOS ? fila : `${fila} ${quien || '—'} |`)
     }
   }
 
@@ -2682,7 +2707,6 @@ const GENERADAS = {
   'resumen-ejecutivo': elResumenEjecutivo,
   // Reconectadas paso a paso, a medida que se revisa cada una. El resto sigue
   // desconectado: sus generadoras están escritas arriba y esperan su turno.
-  cobertura: coberturaDelLevantamiento,
   cifras: cifrasDelLevantamiento,
   oportunidades: lasOportunidades,
   'inventario-sistemas': inventarioDeSistemas,

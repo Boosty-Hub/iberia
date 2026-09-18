@@ -25,7 +25,7 @@ línea.
 | **Dashboard** | Operativo en local. **Sin desplegar** |
 | **Levantamiento** | **42 sesiones · 27.951 turnos**. **34 entrevistas de ~25 (136%)** · los 20 macroprocesos cubiertos |
 | **Hallazgos** | **394, todos con cita textual verificada** · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
-| **Informe** | **15 secciones** y 20 de 20 fichas. Ninguna publicada — los hallazgos siguen propuestos |
+| **Informe** | **14 secciones** y 20 de 20 fichas, **sin citas, sin códigos y sin nombres** (18/9, con Gabriel). Ninguna publicada |
 | **Horas** | **137 h en el mes 1 contra una bolsa de 107**, ya revisadas con Gabriel. Aparte: 111 h de la etapa anterior y 104 h del curso de planta, que se factura en Fase 2 |
 | **Comunicación** | **El comunicado salió.** Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | **276 personas cargadas** con ficha, cargo, nivel y familia de oficio. ⚠️ Sin cédula, sin celular y sin correo |
@@ -61,6 +61,71 @@ cláusula 5. Aquí solo lo urgente:
 - **Refijar la revisión del canal con mercadeo** — Alberto la agenda. Bloquea el despliegue.
 - **Leer los 42 hallazgos redactados** del informe y validar los que los sostienen.
 - **Pedirle a Capital Humano cédula y celular por ficha.** El padrón llegó sin ellos.
+
+---
+
+## 18 de septiembre de 2026 · Sesión 30 — el informe pierde el aparato de referencias
+
+Decisión del cliente, hablada con Gabriel: **el informe va sin citas textuales, sin códigos de
+sesión y sin nombres.** Se sostiene en la autoría del equipo consultor. Ejecutada entera.
+
+| Antes | Después |
+|---|---|
+| 742 códigos de sesión en 14 secciones | **0** |
+| 49 nombres y cargos en la sección 2 | **0** |
+| 8 fragmentos entrecomillados en la prosa | **0** |
+| La duración de cada sesión en minutos | **0** |
+| 15 secciones | **14** |
+
+### `SIN_CODIGOS` es un interruptor, no una demolición
+
+Todo lo que se quitó **sigue en el taller y en la base**. Ponerlo en `false` y regenerar
+devuelve el informe con referencias. Lo que lo hizo barato ya estaba comprobado: de 571 códigos
+del taller, 569 viven en casillas propias y **ninguno dentro de una oración**, así que esto era
+renderizado y no reescritura.
+
+Dos columnas de tabla **se quitan enteras** en vez de dejarse vacías —la de «Sesión» en el
+inventario de trabas y en riesgo—: una columna con 149 guiones es ruido con encabezado. Y dos
+sitios cambiaron de oficio en vez de callarse: «Quién lo contó» en las fichas y el rastro de un
+sistema ahora **cuentan sesiones** en vez de nombrarlas. Un macroproceso que salió en seis
+conversaciones está mejor sostenido que uno que salió en una, y eso sigue siendo cierto sin
+decir cuáles.
+
+### La sección 2 desapareció, y era lo que tenía que pasar
+
+Sin nombres y sin códigos, «Cobertura del levantamiento» se quedaba en su cuadro de
+indicadores. Ese cuadro es justo lo que un resumen ejecutivo quiere arriba, así que se fundió
+en la apertura: **entrada breve → cuánto se cubrió → qué encontramos**.
+
+```
+42 sesiones · 34 entrevistas, 6 reuniones y recorridos, 2 formaciones
+50 personas · 26 en Planta Cagua · 15 en Caracas · 1 remota
+28 áreas · 20 macroprocesos · 142 procesos · 394 hallazgos
+```
+
+⚠️ **Ni una de esas cifras se escribe**: salen de la base y del inventario. Y la sesión retenida
+sigue contando en el total con su nota al pie, sin identificarla — sacarla falsearía la
+cobertura, nombrarla sería usar lo que pidió que no se usara.
+
+### El expediente, que es donde vive ahora la defensa
+
+`npm run expediente` deja en `Insumos/` —fuera de git— los 394 hallazgos con su área, su
+sesión, quién lo dijo, su cargo y **la cita literal**. 41 sesiones citables de 42.
+
+⚠️ **Pasa a ser el único puente entre el informe y su evidencia**, así que `respaldar:informe`
+lo genera dentro del respaldo: el informe se puede reconstruir del taller, pero el expediente
+sale de `hallazgos` y `entrevistas`, que esa copia no guardaba. **No se comparte con el
+cliente.**
+
+⚠️ **`ENT-005` tampoco entra ahí.** No citarla incluye no guardarla.
+
+### Lo que queda dicho y sin resolver
+
+- De 394 hallazgos hay **2 validados**. El código era lo que permitía que un gerente
+  reconociera su conversación y corrigiera; ahora la validación depende de que el consultor
+  lleve el expediente a la mesa.
+- 🔴 **El repositorio sigue público** y la bitácora, que va dentro, lleva nombres de sesiones
+  viejas. Es lo que peor casa con esta decisión.
 
 ---
 
