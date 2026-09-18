@@ -206,6 +206,12 @@ body {
 .prosa thead {
   @apply border-b border-marca-200 bg-marca-50 text-marca-800;
 }
+/* Una tabla de dos columnas sin títulos es un cuadro de ficha, no una tabla de
+   datos —y markdown obliga a escribir la fila de cabecera igual. Pintada vacía
+   se ve como una banda gris suelta encima del cuadro, que parece un fallo. */
+.prosa thead:not(:has(th:not(:empty))) {
+  display: none;
+}
 .prosa th {
   @apply px-3 py-2 text-left font-semibold;
 }

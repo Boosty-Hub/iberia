@@ -25,7 +25,7 @@ línea.
 | **Dashboard** | Operativo en local. **Sin desplegar** |
 | **Levantamiento** | **42 sesiones · 27.951 turnos**. **34 entrevistas de ~25 (136%)** · los 20 macroprocesos cubiertos |
 | **Hallazgos** | **394, todos con cita textual verificada** · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
-| **Informe** | **14 secciones** y 20 de 20 fichas, **sin citas, sin códigos y sin nombres** (18/9, con Gabriel). Ninguna publicada |
+| **Informe** | **12 secciones** y 20 de 20 fichas, **sin citas, sin códigos y sin nombres** (18/9, con Gabriel). Ninguna publicada |
 | **Horas** | **137 h en el mes 1 contra una bolsa de 107**, ya revisadas con Gabriel. Aparte: 111 h de la etapa anterior y 104 h del curso de planta, que se factura en Fase 2 |
 | **Comunicación** | **El comunicado salió.** Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | **276 personas cargadas** con ficha, cargo, nivel y familia de oficio. ⚠️ Sin cédula, sin celular y sin correo |
@@ -61,6 +61,66 @@ cláusula 5. Aquí solo lo urgente:
 - **Refijar la revisión del canal con mercadeo** — Alberto la agenda. Bloquea el despliegue.
 - **Leer los 42 hallazgos redactados** del informe y validar los que los sostienen.
 - **Pedirle a Capital Humano cédula y celular por ficha.** El padrón llegó sin ellos.
+
+---
+
+## 18 de septiembre de 2026 · Sesión 31 — el armazón se comprime de 15 a 12
+
+Cinco encargos de Jesús sobre la estructura. Tres directos, dos que pidió opinar antes.
+
+| | Antes | Después |
+|---|---|---|
+| Secciones | 15 | **12** |
+| «Resumen ejecutivo» | 9.700 car. de síntesis | **«Inicio»**: portada de 6.100 |
+| «Las cifras del levantamiento» | capítulo de 25.400 | **disuelto** en 11 destinos |
+| «Inventario de trabas» | capítulo de 19.700, 26 tablas | **fundido**, condensado a un cuadro |
+| «Los hallazgos» | 23.000 car., 1 tabla | 30.800 car., **9 tablas**, 0 alusiones |
+| «Quién lo contó» en las fichas | 20 líneas | **0** |
+
+### Por qué «Inicio» no es un resumen ejecutivo
+
+Un documento que se resume a sí mismo en la primera página invita a no leer el resto, y esa
+síntesis envejece cada vez que cambia un capítulo **sin que nadie se acuerde de corregirla**.
+Ahora es una portada: de qué va el encargo, cuánto se cubrió, cuál es el mapa. Las conclusiones
+se leen donde se argumentan. La prosa del resumen sigue en el taller por si vuelve.
+
+### La disolución de las cifras, y lo que costó
+
+Jesús eligió disolver en vez de reformular, sabiendo el reparo: hay cifras que no cuelgan de
+ningún macroproceso. Se resolvió repartiendo los once grupos a mano —**el destino se escribe en
+el taller, no se deduce del texto**, porque adivinarlo pondría cifras en la ficha equivocada— y
+dándole sitio a los que no encajaban:
+
+```
+9 grupos (149 cifras)  → la ficha del macroproceso que miden
+El tamaño del negocio  → Inicio
+El incidente de febrero → Riesgo y continuidad
+Las 6 discrepancias    → Sistemas y estado del dato
+```
+
+⚠️ **Las discrepancias no podían ir a una ficha** y ese fue el punto fino: cada una compara
+**dos áreas** dando números distintos de lo mismo, así que metida en la ficha de un macroproceso
+la comparación desaparece — y la comparación *es* el hallazgo. Van al capítulo que argumenta que
+no hay una sola fuente de verdad, que es su tesis contada en números.
+
+### Lo que cazó el guardián de referencias
+
+Quitar tres secciones renumera todo lo de abajo. Los `{cap:slug}` lo absorbieron solos, pero el
+generador **avisó tres veces** de referencias a capítulos que ya no existían —`{cap:cifras}` en
+hoja de ruta, en riesgo y en el resumen—. Sin ese aviso habrían quedado enlaces a la nada, y sin
+error visible.
+
+### Y tres trampas de siempre
+
+- ⚠️ **El heredoc colapsa `\\\\` en `\\`.** Tres veces esta sesión: `replace(/\\n/g…)` quedó con un
+  salto de línea real dentro del regex, y una plantilla con `${dis.join('\\n')}` se partió en
+  tres líneas. Cuando hay barras, se escribe el archivo con la herramienta de escritura, no con
+  un heredoc.
+- **Una cabecera de tabla vacía se pintaba como una banda gris suelta.** Markdown obliga a
+  escribir la fila aunque el cuadro no tenga títulos; ahora se oculta por CSS.
+- Los **subtítulos de sección viven en `SECCIONES`, no en `contenido_md`**, así que la auditoría
+  de alusiones no los miraba: «Lo que encontramos, cada uno con su cita» sobrevivió a todo el
+  barrido anterior. Cuatro corregidos.
 
 ---
 

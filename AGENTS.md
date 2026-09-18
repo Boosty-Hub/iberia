@@ -656,10 +656,25 @@ cambia `scripts/generar-guias.mjs` y se regeneran, igual que la marca y las fich
 
 ## El informe (`/dashboard/informe` y `/informe`)
 
-Son **14 secciones** en cuatro partes, y `npm run informe:estructura` es quien las mantiene.
-La apertura **absorbió «Cobertura del levantamiento»**: sin nombres y sin códigos, aquel
-capítulo se quedaba en su cuadro de indicadores, y ese cuadro es lo que un resumen ejecutivo
-necesita arriba.
+Son **12 secciones** en cuatro partes, y `npm run informe:estructura` es quien las mantiene.
+El armazón se comprimió de 15 a 12 el 18 de septiembre de 2026, y cada fusión tiene su razón:
+
+- **«Inicio»** sustituye al resumen ejecutivo y absorbe «Cobertura del levantamiento». No es un
+  resumen: es una portada —de qué va el encargo, cuánto se cubrió y cuál es el mapa—. Un
+  documento que se resume a sí mismo en la primera página invita a no leer el resto, y la
+  síntesis envejece cada vez que cambia un capítulo sin que nadie se acuerde.
+- **«Las cifras del levantamiento» se disolvió.** Sus once grupos se reparten: nueve a la ficha
+  del macroproceso que miden, el tamaño del negocio a «Inicio» y el incidente de febrero a
+  «Riesgo y continuidad». **Las seis discrepancias van a «Sistemas y estado del dato»**, no a
+  una ficha: comparan dos áreas dando números distintos, y la comparación *es* el hallazgo.
+  ⚠️ El destino de cada grupo se **escribe** en el taller (`macro`, `sueltos`), no se deduce
+  del texto: adivinarlo pondría cifras en la ficha equivocada.
+- **«Inventario de trabas» se fundió en «Dónde se traba el trabajo»**, condensado: quedan el
+  cuadro de carga por área y el reparto por tipo, y se fueron las 25 tablas con las 149 trabas
+  una por una. El detalle ya vive en la ficha del proceso, que es donde se busca.
+- ⚠️ **Quitar una sección renumera todas las de abajo.** Por eso las referencias van como
+  `{cap:slug}` y el generador **avisa y falla** si una apunta a un capítulo que ya no existe —
+  lo cazó tres veces ese mismo día.
 
 - **Los tres anexos se regeneran siempre** de la base: sesiones, catálogo de hallazgos e
   inventario de sistemas. Son el reflejo del dato, no prosa; si alguien los edita a mano, la

@@ -53,29 +53,29 @@ const podar = process.argv.includes('--podar')
 
 const SECCIONES = [
   // --- Apertura --------------------------------------------------------------
-  // ⚠️ **Absorbe «Cobertura del levantamiento»**, que era la sección 2. Sin los
-  // nombres y sin los códigos, aquel capítulo se quedaba en su cuadro de
-  // indicadores — y ese cuadro es justo lo que un resumen ejecutivo necesita
-  // arriba: cuánto se escuchó, antes de lo que se concluye.
-  ['portada', 'resumen-ejecutivo', 'Resumen ejecutivo', 'El encargo, lo que se cubrió y lo que encontramos'],
+  // ⚠️ **No es un resumen ejecutivo, y es a propósito.** Lo fue hasta el 18 de
+  // septiembre de 2026: nueve mil caracteres de síntesis que repetían, más
+  // corto, lo que los capítulos dicen entero. Ahora es una portada — de qué va
+  // el encargo, cuánto se cubrió y cuál es el mapa— y las conclusiones se leen
+  // donde se argumentan. La prosa del resumen sigue en el taller por si vuelve.
+  ['portada', 'inicio', 'Inicio', 'El encargo, lo que se cubrió y el mapa de la operación'],
 
   // --- Levantamiento ---------------------------------------------------------
   // El orden es el del argumento, y va por pares: una sección afirma y la
   // siguiente la respalda. Cobertura dice cuánto se escuchó y las cifras qué se
   // midió; «Sistemas y estado del dato» argumenta y el inventario lo enseña.
-  ['levantamiento', 'cifras', 'Las cifras del levantamiento', 'Solo lo que alguien dijo explícitamente, con su fuente'],
   ['levantamiento', 'mapa-procesos', 'El mapa de procesos', 'El índice vivo: veinte macroprocesos y los procesos que se ejecutan hoy'],
   // Absorbe el informe de levantamiento por área: la ficha corta por proceso y
   // lleva dentro «Quién lo contó». Dos cortes del mismo material se
   // desincronizan en cuanto alguien edita uno.
-  ['levantamiento', 'fichas-procesos', 'Las fichas de proceso', 'Una por macroproceso: qué hace, quién lo ejecuta, quién lo contó y qué le falta'],
+  ['levantamiento', 'fichas-procesos', 'Las fichas de proceso', 'Una por macroproceso: qué hace, quién lo ejecuta, con qué sistemas y qué le falta'],
   ['levantamiento', 'sistemas-datos', 'Sistemas y estado del dato', 'Qué vive en el ERP, qué vive fuera y qué dato es confiable'],
-  ['levantamiento', 'inventario-sistemas', 'Inventario de sistemas', 'Sistema por sistema, con su dueño, su estado y su rastro'],
+  ['levantamiento', 'inventario-sistemas', 'Inventario de sistemas', 'Sistema por sistema, con su dueño, su estado y cuánto se apoya la operación en él'],
   // ⚠️ El subtítulo **no lleva el número de sesiones**, y es a propósito: lo
   // llevaba —decía «treinta y cuatro», cuando son diecisiete— y un subtítulo es
   // texto fijo que nadie recuerda corregir cuando el conteo cambia. La cifra
   // auditada vive en la primera línea del capítulo, que la calcula el generador.
-  ['levantamiento', 'riesgo-continuidad', 'Riesgo y continuidad', 'El incidente de febrero visto desde las áreas que lo vivieron'],
+  ['levantamiento', 'riesgo-continuidad', 'Riesgo y continuidad', 'El incidente de febrero: qué se perdió, qué volvió y qué sigue abierto'],
   // Dónde se traba el trabajo y su inventario. Entran en pareja, como manda la
   // regla: el primero afirma los patrones y el segundo los enseña uno por uno.
   // ⚠️ Existieron en el armazón de 32 como «Cuellos de botella y trabajo
@@ -83,9 +83,8 @@ const SECCIONES = [
   // mal» y «hagamos esto» faltaba cuantificar el dolor, que es lo que un comité
   // pregunta antes de aprobar un presupuesto.
   ['levantamiento', 'trabas', 'Dónde se traba el trabajo', 'Los patrones que se repiten, con su costo en tiempo y margen'],
-  ['levantamiento', 'inventario-trabas', 'Inventario de trabas', 'Traba por traba, con su área, su tipo y la sesión donde se dijo'],
   // La bisagra: todo lo anterior los construye, todo lo posterior actúa sobre ellos.
-  ['levantamiento', 'hallazgos', 'Los hallazgos', 'Lo que encontramos, cada uno con su cita'],
+  ['levantamiento', 'hallazgos', 'Los hallazgos', 'Los siete patrones del diagnóstico, y los cuarenta y dos hallazgos que los sostienen'],
 
   // --- Arquitectura ----------------------------------------------------------
   // Primero qué se puede hacer y qué no, después con qué reglas, y solo entonces
@@ -538,6 +537,94 @@ function numeroDeFicha(macro) {
  * del informe es su propia ruta, un `#ancla` a secas se queda en el mapa y no
  * lleva a ninguna parte. El destino es la página de las fichas más el ancla.
  */
+/**
+ * Las cifras de la operación, repartidas.
+ *
+ * ⚠️ **Eran un capítulo y dejaron de serlo** el 18 de septiembre de 2026: un
+ * capítulo titulado «las cifras del levantamiento» se lee como un volcado de lo
+ * que alguien dijo en una grabación, que es justo el registro del que el informe
+ * se está apartando. Las mismas 188 cifras dicen más dentro de la ficha del
+ * proceso que miden.
+ *
+ * Dos grupos no cuelgan de ningún macroproceso —el tamaño del negocio y el
+ * incidente de febrero— y van donde diga `sueltos`. Y las discrepancias van
+ * aparte: **comparan dos áreas, así que no caben en una ficha.**
+ *
+ * El destino de cada grupo se escribe en el taller, no se deduce del texto:
+ * adivinarlo pondría cifras en la ficha equivocada, que es peor que no ponerlas.
+ */
+const CIFRAS = (() => {
+  const crudo = leerTaller('cifras-levantamiento.json')
+  if (!crudo) return null
+  try {
+    return JSON.parse(crudo)
+  } catch (e) {
+    console.warn(`  ⚠️ cifras-levantamiento.json ilegible: ${e.message}`)
+    return null
+  }
+})()
+
+/** Las filas de cifras que le tocan a un destino, ya en tabla. */
+function tablaDeCifras(grupos, titulo) {
+  if (!grupos?.length) return []
+  const l = []
+  l.push('')
+  l.push(`**${titulo}**`)
+  for (const g of grupos) {
+    l.push('')
+    if (grupos.length > 1) l.push(`*${g.titulo}*`)
+    l.push('')
+    l.push('| Cifra | Qué mide |')
+    l.push('|---|---|')
+    for (const f of g.filas) {
+      // El cuarto elemento marca lo que no es dato duro. Se conserva: una
+      // estimación presentada como medición es la forma más barata de que un
+      // informe deje de ser creíble.
+      const marca = f[3] ? ` *· ${f[3]}*` : ''
+      l.push(`| **${f[0]}** | ${f[1]}${marca} |`)
+    }
+  }
+  return l
+}
+
+/** Los grupos de cifras asignados a un macroproceso. */
+function cifrasDeMacro(macro) {
+  if (!CIFRAS) return []
+  const clave = `${macro.nivel} ${macro.numero}`
+  return CIFRAS.grupos.filter((g) => g.macro === clave)
+}
+
+/**
+ * Las seis cifras que no coinciden.
+ *
+ * ⚠️ **Van a «Sistemas y estado del dato» y no a una ficha**, porque cada una
+ * compara **dos áreas** dando números distintos de lo mismo. Metida en la ficha
+ * de un macroproceso, la comparación desaparece — y la comparación *es* el
+ * hallazgo: es la manifestación medible de que no hay una sola fuente de verdad.
+ */
+function tablaDeDiscrepancias(slug) {
+  const dis = CIFRAS?.discrepancias
+  if (!dis || dis.destino !== slug) return []
+  const l = []
+  l.push('')
+  l.push(`## ${dis.titulo}`)
+  l.push('')
+  l.push(dis.entrada)
+  l.push('')
+  l.push('| El dato | Las dos versiones | Por qué pasa |')
+  l.push('|---|---|---|')
+  for (const [asunto, cifras, , nota] of dis.filas) {
+    l.push(`| **${asunto}** | ${cifras} | ${(nota ?? '').replace(/\s+/g, ' ').trim()} |`)
+  }
+  return l
+}
+
+/** Los grupos que van a una sección que no es una ficha. */
+function cifrasSueltas(slug) {
+  if (!CIFRAS) return []
+  return CIFRAS.grupos.filter((g) => CIFRAS.sueltos?.[g.titulo] === slug)
+}
+
 const RUTA_FICHAS = '/informe/fichas-procesos'
 const RUTA_HALLAZGOS = '/informe/hallazgos'
 
@@ -659,51 +746,6 @@ const NOTAS = 'Insumos/notas-entrevistas'
  */
 function anclaDeHallazgo(clave, titulo) {
   return new GithubSlugger().slug(`H-${clave} · ${titulo}`)
-}
-
-/**
- * Quién contó este macroproceso: las sesiones que documentaron **más de uno** de
- * sus procesos, y si ninguna llega a dos, las que haya. Listarlas todas producía
- * párrafos de diez nombres —Capital Humano citaba a diez personas— que no dicen
- * quién es la fuente de verdad del proceso.
- */
-function quienesContaron(macro, porSesion) {
-  const cuenta = new Map()
-  for (const pr of [...macro.procesos, ...macro.no_se_hace]) {
-    for (const c of (pr.fuente ?? '').split(/[,;]/).map((x) => x.trim())) {
-      // ⚠️ La guarda de consentimiento también aquí. Esta función es anterior a
-      // `SIN_CONSENTIMIENTO` y no la tenía: el inventario trae ENT-005 como
-      // fuente de varios procesos, así que la ficha la nombraba —con nombre y
-      // apellido— en un capítulo del informe. No citarla incluye no acreditarla.
-      if (SIN_CONSENTIMIENTO.has(c)) continue
-      if (/^(ENT|SES|FOR)-\d+$/.test(c)) cuenta.set(c, (cuenta.get(c) ?? 0) + 1)
-    }
-  }
-  if (!cuenta.size) return SIN_CODIGOS ? '—' : '`sin fuente registrada`'
-
-  // Sin códigos, la línea deja de acreditar y pasa a **medir**: en cuántas
-  // sesiones apareció este macroproceso. Es lo único que sigue siendo cierto y
-  // útil cuando no se dice quién — un macroproceso que salió en seis
-  // conversaciones distintas está mejor sostenido que uno que salió en una.
-  if (SIN_CODIGOS) {
-    const n = cuenta.size
-    return `**${n}** ${n === 1 ? 'sesión del levantamiento' : 'sesiones del levantamiento'}`
-  }
-
-  const orden = [...cuenta.entries()].sort((a, b) => b[1] - a[1])
-  const principales = orden.filter(([, n]) => n > 1)
-  const elegidas = (principales.length ? principales : orden).slice(0, 4)
-
-  const gente = elegidas.map(([c, n]) => {
-    const e = porSesion.get(c)
-    const veces = n > 1 ? ` (${n})` : ''
-    // Solo el código: la acreditación por nombre vive en la cobertura.
-    return `\`${c}\`${veces}`
-  })
-  const resto = cuenta.size - elegidas.length
-  // «sesiones» pierde la tilde en plural: no vale con pegarle «es» a «sesión».
-  const cola = resto > 0 ? ` · y ${resto} ${resto > 1 ? 'sesiones' : 'sesión'} más` : ''
-  return gente.join(' · ') + cola
 }
 
 /**
@@ -892,12 +934,6 @@ async function fichasDeProceso() {
   const crudoDest = leerTaller('hallazgos-destacados.json')
   const destacados = crudoDest ? JSON.parse(crudoDest) : null
 
-  // Quién habló en cada sesión, para la línea «Quién lo contó».
-  const { data: sesiones } = await admin
-    .from('entrevistas')
-    .select('codigo, entrevistado_nombre, entrevistado_cargo')
-  const porSesion = new Map((sesiones ?? []).map((e) => [e.codigo, e]))
-
   const l = []
   l.push(
     'Una ficha por macroproceso, con el mismo formato en las veinte. Es el formato el que hace el ' +
@@ -947,6 +983,11 @@ async function fichasDeProceso() {
       l.push(`| ${p.nombre} | ${area} |`)
     }
     l.push('')
+    // Las cifras de este macroproceso, si el taller le asignó alguna. Van
+    // después de los procesos y antes de los hallazgos: primero qué hace, luego
+    // cuánto, y al final qué le pasa.
+    l.push(...tablaDeCifras(cifrasDeMacro(m), 'Las cifras de este proceso'))
+
     const suyos = destacadosDe(m, destacados)
     if (suyos.length) {
       l.push('')
@@ -980,13 +1021,11 @@ async function fichasDeProceso() {
         l.push(`- **${p.nombre}** · ${marca} — ${p.observacion}${fuente}`)
       }
     }
-    // ⚠️ **«Quién lo contó» va al pie, no en medio.** Estaba entre «Quién lo
-    // ejecuta» y «Sistemas», o sea interrumpiendo el contenido con la
-    // procedencia. No se quita —la ficha absorbió el informe por área
-    // justamente con esta línea, y es el atajo de quien tenga que validar los
-    // hallazgos— pero deja de competir con lo que el lector vino a buscar.
-    l.push('')
-    l.push(`*Quién lo contó* — ${quienesContaron(m, porSesion)}`)
+    // ⚠️ **La línea «Quién lo contó» ya no existe.** Estuvo al pie de las
+    // veinte fichas y era el atajo de quien tuviera que validar un hallazgo,
+    // pero decir de dónde sale un proceso es exactamente lo que el informe
+    // dejó de hacer el 18 de septiembre. Ese atajo vive ahora en el expediente
+    // de trazabilidad (`npm run expediente`), que no se entrega al cliente.
     l.push('')
     l.push('---')
   }
@@ -1087,29 +1126,82 @@ async function losHallazgos() {
   const huerfanas = []
 
   l.push(
-    `El levantamiento produjo **${total} hallazgos**, cada uno con la cita textual de quien lo dijo ` +
-      `y la sesión donde se dijo. Este capítulo no los lista todos: escoge los **${redactados}** que ` +
-      'sostienen el argumento del documento. El resto está en el índice del final y, con su ficha ' +
-      'completa, en el panel del levantamiento.'
+    `El diagnóstico documentó **${total} hallazgos**. Este capítulo no los lista todos: desarrolla ` +
+      `los **${redactados}** que sostienen el argumento del documento, agrupados en ` +
+      `**${destacados.bloques.length} patrones**. El detalle completo vive en el panel del programa.`
   )
   l.push('')
   l.push(
-    'El criterio de selección fue el mismo para todos: **impacto alto, y al menos dos voces ' +
-      'independientes o una consecuencia medible detrás**. Lo que dijo una sola persona una sola vez ' +
-      'quedó fuera, por cierto que sea.'
-  )
-  l.push('')
-  l.push(
-    '> Todos entran como **propuestos**. Un hallazgo propuesto no es un hallazgo: es un candidato ' +
-      'con su cita, hasta que alguien que estuvo en esa entrevista lo valida o lo descarta.'
+    'El criterio para desarrollar uno fue el mismo en todos: **impacto alto, y detrás una ' +
+      'consecuencia medible o la coincidencia de áreas que no trabajan juntas**. Lo que aparece una ' +
+      'sola vez y en un solo sitio no está acá, por cierto que sea.'
   )
 
+  // --- El cuadro de mando ----------------------------------------------------
+  //
+  // ⚠️ **Las columnas se cuentan, no se escriben.** Cuántos hallazgos tiene un
+  // patrón, cuántas áreas cruza y cuántos son de impacto alto sale de la propia
+  // lista y de la base. Tecleadas serían un segundo sitio donde vive el mismo
+  // dato, y al mover un hallazgo de patrón dejarían de coincidir con las tablas
+  // de abajo.
+  const datosDe = (bloque) => {
+    const suyos = bloque.hallazgos.map((h) => {
+      for (const [cod, tit] of h.fuentes) {
+        const f = porClave.get(`${cod}|${tit}`)
+        if (f) return f
+      }
+      return null
+    })
+    const areas = new Set(suyos.filter(Boolean).map((f) => f.areas?.nombre).filter(Boolean))
+    const altos = suyos.filter((f) => f?.impacto === 'alto').length
+    return { suyos, areas, altos }
+  }
+
+  l.push('')
+  l.push('## Los siete patrones, de un vistazo')
+  l.push('')
+  l.push(
+    'Cada uno agrupa hallazgos que aparecieron en áreas que no trabajan juntas. Esa coincidencia ' +
+      'es lo que los convierte en un problema del sistema y no de un área.'
+  )
+  l.push('')
+  l.push('| Patrón | Hallazgos | Áreas que cruza | De impacto alto |')
+  l.push('|---|---:|---:|---:|')
+  for (const bloque of destacados.bloques) {
+    const d = datosDe(bloque)
+    l.push(
+      `| **${bloque.titulo}** | ${bloque.hallazgos.length} | ${d.areas.size} | ${d.altos || '—'} |`
+    )
+  }
+
   let n = 0
+  let contador = 0
   for (const bloque of destacados.bloques) {
     l.push('')
     l.push(`## ${bloque.titulo}`)
     l.push('')
     l.push(bloque.entrada)
+
+    // El índice del patrón, para leerlo de un vistazo antes de entrar en cada
+    // hallazgo. Es la misma lista que sigue, con su área y su impacto — que son
+    // dato de la base y no estaban a la vista en ningún sitio.
+    l.push('')
+    l.push('| # | Hallazgo | Área | Impacto |')
+    l.push('|---|---|---|---|')
+    for (const h of bloque.hallazgos) {
+      contador++
+      const clave = String(contador).padStart(2, '0')
+      let f = null
+      for (const [cod, tit] of h.fuentes) {
+        f = porClave.get(`${cod}|${tit}`)
+        if (f) break
+      }
+      const imp = f?.impacto ? f.impacto[0].toUpperCase() + f.impacto.slice(1) : '—'
+      l.push(
+        `| **H-${clave}** | [${h.titulo}](#${anclaDeHallazgo(clave, h.titulo)}) | ` +
+          `${f?.areas?.nombre ?? '—'} | ${imp} |`
+      )
+    }
 
     for (const h of bloque.hallazgos) {
       n++
@@ -1174,8 +1266,8 @@ async function losHallazgos() {
   l.push('')
   l.push(
     `Los otros ${total - marcados.size} hallazgos no son descarte: son el detalle que sostiene lo ` +
-      'anterior y el material de las fichas de proceso. Cada uno está en el panel del levantamiento ' +
-      'con su cita, su sesión y su área, filtrable por tipo y por estado. Este es su reparto:'
+      'anterior y el material de las fichas de proceso. Cada uno está documentado en el panel del ' +
+      'programa, filtrable por área, por tipo y por estado. Este es su reparto:'
   )
   l.push('')
   l.push('| Área | Total | Desarrollados | Cuello | Manual | Riesgo | Dato | IA | Sist. | Sup. |')
@@ -1592,6 +1684,10 @@ async function riesgoYContinuidad() {
     l.push(taller.cierre)
   }
 
+  // Las cifras del incidente. No cuelgan de un macroproceso —el ataque no es un
+  // proceso— y este es el capítulo que lo cuenta.
+  l.push(...tablaDeCifras(cifrasSueltas('riesgo-continuidad'), 'El incidente, en cifras'))
+
   if (huerfanas.length) {
     console.warn(`  ⚠️ riesgo-continuidad: ${huerfanas.length} cita(s) sin casar en la base:`)
     for (const h of huerfanas) console.warn(`     ${h}`)
@@ -1725,12 +1821,19 @@ async function capituloConCitas(archivo, etiqueta, entradaDeHallazgos) {
   return l.join('\n')
 }
 
-const sistemasYDato = () =>
-  capituloConCitas(
+const sistemasYDato = async () => {
+  const md = await capituloConCitas(
     'sistemas-datos.json',
     'sistemas-datos',
     'Los que el capítulo 9 desarrolla sobre sistemas y calidad del dato, cada uno con su cita completa:'
   )
+  if (!md) return null
+  // Las cifras que no coinciden cierran este capítulo, y no por comodidad: el
+  // capítulo argumenta que **no hay una sola fuente de verdad**, y estas seis son
+  // esa tesis contada en números.
+  const dis = tablaDeDiscrepancias('sistemas-datos')
+  return dis.length ? `${md}\n${dis.join('\n')}` : md
+}
 
 // =============================================================================
 // 11) DÓNDE NO VA LA IA
@@ -2020,111 +2123,6 @@ async function inventarioDeSistemas() {
 // una estimación es la forma más rápida de incumplir.
 
 /** Las marcas que puede llevar una cifra, y cómo se rotulan. */
-const MARCA_CIFRA = {
-  estimación: 'estimación',
-  ejemplo: 'ejemplo',
-  'sin confirmar': 'sin confirmar',
-}
-
-/** La acreditación de una cifra: el código de sesión, sin nombre. */
-function firmaDeSesion(codigo) {
-  return SIN_CODIGOS ? '' : `\`${codigo}\``
-}
-
-async function cifrasDelLevantamiento() {
-  const crudo = leerTaller('cifras-levantamiento.json')
-  if (!crudo) return null
-  const taller = JSON.parse(crudo)
-
-  const { data: sesiones } = await admin
-    .from('entrevistas')
-    .select('codigo, entrevistado_nombre')
-    .order('codigo')
-  const porCodigo = new Map((sesiones ?? []).map((e) => [e.codigo, e]))
-
-  const l = []
-  const desconocidas = []
-  const marcasMalas = []
-  let total = 0
-  const porMarca = new Map()
-  const usadas = new Set()
-
-  /** La columna de fuente, con todas las voces de una misma cifra. */
-  const fuentes = (codigos) => {
-    const buenos = []
-    for (const c of codigos ?? []) {
-      if (SIN_CONSENTIMIENTO.has(c)) {
-        console.warn(`  ⛔ cifras: ${c} no puede citarse (sin consentimiento). Omitida.`)
-        continue
-      }
-      if (!porCodigo.has(c)) desconocidas.push(c)
-      usadas.add(c)
-      buenos.push(firmaDeSesion(c))
-    }
-    return buenos.join('; ') || '—'
-  }
-
-  // La entrada se arma al final, cuando ya se contaron las cifras y las voces:
-  // el total es justo el número que no puede escribirse a mano.
-  const posicionEntrada = l.length
-  l.push('')
-
-  for (const grupo of taller.grupos) {
-    l.push('')
-    l.push(`## ${grupo.titulo}`)
-    l.push('')
-    l.push(grupo.entrada)
-    l.push('')
-    l.push('| Cifra | Qué mide | De dónde sale |')
-    l.push('|---|---|---|')
-    for (const [cifra, que, codigos, marca] of grupo.filas) {
-      total++
-      if (marca && !MARCA_CIFRA[marca]) marcasMalas.push(`${grupo.titulo} → «${cifra}»: marca «${marca}»`)
-      porMarca.set(marca ?? 'dato', (porMarca.get(marca ?? 'dato') ?? 0) + 1)
-      const cola = marca ? ` *· ${MARCA_CIFRA[marca] ?? marca}*` : ''
-      l.push(`| **${cifra}** | ${que}${cola} | ${fuentes(codigos)} |`)
-    }
-  }
-
-  if (taller.discrepancias) {
-    l.push('')
-    l.push(`## ${taller.discrepancias.titulo}`)
-    l.push('')
-    l.push(taller.discrepancias.entrada)
-    l.push('')
-    for (const [asunto, cifras, codigos, nota] of taller.discrepancias.filas) {
-      l.push('')
-      l.push(`**${asunto}** — ${cifras}`)
-      l.push('')
-      l.push(`> ${nota}`)
-      l.push(`> — ${fuentes(codigos)}`)
-    }
-  }
-
-  if (taller.cierre) {
-    l.push('')
-    l.push('---')
-    l.push('')
-    l.push(taller.cierre)
-  }
-
-  if (desconocidas.length) {
-    console.warn(`  ⚠️ cifras: ${[...new Set(desconocidas)].join(', ')} no están en la tabla de sesiones`)
-  }
-  if (marcasMalas.length) {
-    console.warn(`  ⚠️ cifras: ${marcasMalas.length} marca(s) que no existen:`)
-    for (const m of marcasMalas) console.warn(`     ${m}`)
-  }
-  l[posicionEntrada] = taller.entrada
-    .replace('{TOTAL}', String(total))
-    .replace('{SESIONES}', String(usadas.size))
-
-  const reparto = [...porMarca.entries()].map(([k, n]) => `${n} ${k}`).join(' · ')
-  console.log(`  · cifras: ${total} cifras de ${usadas.size} sesiones — ${reparto}`)
-
-  return l.join('\n')
-}
-
 // =============================================================================
 // 10) LAS OPORTUNIDADES, PRIORIZADAS
 // =============================================================================
@@ -2407,66 +2405,109 @@ async function cuadroDeCobertura() {
   return l.join('\n')
 }
 
-async function elResumenEjecutivo() {
+/**
+ * La portada del informe: de qué va, cuánto se cubrió y cuál es el mapa.
+ *
+ * ⚠️ **Es corta a propósito.** La sección que ocupaba este sitio era un resumen
+ * ejecutivo de nueve mil caracteres que adelantaba, más breve, lo que los trece
+ * capítulos siguientes argumentan con su evidencia. Un documento que se resume
+ * a sí mismo en la primera página invita a no leer el resto, y la síntesis
+ * envejece cada vez que cambia un capítulo — sin que nadie se acuerde.
+ *
+ * ⚠️ **Ni una cifra se escribe.** El cuadro de cobertura y el del mapa salen de
+ * la base y del inventario. Tecleados serían un segundo sitio donde vive el
+ * mismo dato, y dejarían de coincidir con los capítulos en la primera revisión.
+ */
+async function laPortada() {
   const aviso = enPalabras(fechaDelPrograma('AVISO_RENOVACION'))
   if (!aviso) {
-    console.error('  ✖ resumen-ejecutivo: no se pudo leer la fecha de lib/programa.ts; no se escribe.')
+    console.error('  ✖ inicio: no se pudo leer la fecha de lib/programa.ts; no se escribe.')
+    return null
+  }
+  if (!INVENTARIO) {
+    console.error('  ✖ inicio: sin inventario de procesos; no se escribe.')
     return null
   }
 
-  const { data: sesiones } = await admin.from('entrevistas').select('codigo')
-  const { data: hallazgos } = await admin.from('hallazgos').select('estado, tipo')
+  const macros = INVENTARIO.macroprocesos
+  const l = []
 
-  const inv = (() => {
-    try {
-      return JSON.parse(leerTaller('inventario-procesos.json'))
-    } catch {
-      return null
+  l.push(
+    'Iberia contrató a Boosty Digital para responder una pregunta: **dónde puede la ' +
+      'inteligencia artificial mejorar su operación, y dónde no.** Este documento es la ' +
+      `respuesta, y es el instrumento con el que el comité decide el **${aviso}** si el ` +
+      'programa continúa.'
+  )
+  l.push('')
+  l.push(
+    'No propone tecnología antes de entender el trabajo. Lo que sigue es el trabajo tal como ' +
+      'se hace hoy —proceso por proceso, sistema por sistema— y solo después qué parte de eso ' +
+      'la inteligencia artificial puede mejorar. **Buena parte no la necesita**, y decirlo es ' +
+      'la mitad del valor de este informe.'
+  )
+  l.push('')
+  l.push(await cuadroDeCobertura())
+
+  // --- El mapa, resumido -----------------------------------------------------
+  //
+  // Resumido de verdad: los conteos por nivel y los veinte nombres. El mapa
+  // entero es el {cap:mapa-procesos} y las fichas son otro capítulo; repetirlos
+  // acá sería tener tres sitios donde vive lo mismo.
+  l.push('')
+  l.push('## El mapa de la operación')
+  l.push('')
+  l.push(
+    `La empresa ejecuta **${macros.length} macroprocesos** en tres niveles. Este es el índice ` +
+      'de todo lo que sigue: cada uno tiene su ficha, y de cada ficha cuelgan sus procesos, ' +
+      'sus sistemas y lo que le falta.'
+  )
+  l.push('')
+  l.push('| Nivel | Qué hace | Macroprocesos | Procesos |')
+  l.push('| --- | --- | ---: | ---: |')
+  const QUE_HACE = {
+    Estratégico: 'Orientan el rumbo',
+    Operativo: 'Producen y entregan',
+    Soporte: 'Sostienen a los otros dos',
+  }
+  for (const f of conteoPorNivel(macros)) {
+    l.push(`| **${f.nivel}** | ${QUE_HACE[f.nivel] ?? '—'} | ${f.macros} | ${f.procesos} |`)
+  }
+  const totalN1 = macros.reduce((t, m) => t + m.procesos.length, 0)
+  l.push(`| **Total** | | **${macros.length}** | **${totalN1}** |`)
+
+  l.push('')
+  for (const nivel of NIVELES) {
+    const suyos = macros.filter((m) => m.nivel === nivel)
+    if (!suyos.length) continue
+    l.push('')
+    l.push(`**${numeroDeNivel(nivel)} · ${nivel}** — ${QUE_HACE[nivel] ?? ''}`)
+    l.push('')
+    for (const m of suyos) {
+      const marca = m.nuevo ? ' · **nuevo**' : ''
+      l.push(
+        `- **${numeroDeFicha(m)}. [${m.nombre}](${RUTA_FICHAS}#${anclaDe(m)})** — ` +
+          `${m.procesos.length} procesos${marca}`
+      )
     }
-  })()
-  if (!inv) {
-    console.error('  ✖ resumen-ejecutivo: sin inventario de procesos; no se escribe.')
-    return null
   }
 
-  const macros = inv.macroprocesos ?? []
-  const procesos = macros.reduce((t, m) => t + (m.procesos?.length ?? 0), 0)
-
-  const cifras = {
-    SESIONES: (sesiones ?? []).length,
-    ENTREVISTAS: (sesiones ?? []).filter((s) => s.codigo?.startsWith('ENT')).length,
-    HALLAZGOS: (hallazgos ?? []).length,
-    VALIDADOS: (hallazgos ?? []).filter((h) => h.estado === 'validado').length,
-    OPORTUNIDADES: (hallazgos ?? []).filter((h) => h.tipo === 'oportunidad_ia').length,
-    MACROS: macros.length,
-    PROCESOS: procesos,
-  }
-
-  const md = await capituloConCitas(
-    'resumen-ejecutivo.json',
-    'resumen-ejecutivo',
-    'Los del capítulo 9 que más pesan en este resumen:'
+  const nuevos = macros.filter((m) => m.nuevo).length
+  l.push('')
+  l.push(
+    `Los marcados como **nuevos** son los ${enLetra(nuevos)} macroprocesos que el inventario de ` +
+      'partida no recogía y que se ejecutan hoy. Que un macroproceso completo no estuviera en ' +
+      'el papel es, por sí solo, un hallazgo.'
   )
-  if (!md) return null
+  // El tamaño del negocio abre bien una portada: es la escala sobre la que hay
+  // que leer todo lo demás. Las otras diez familias de cifras viven dentro de la
+  // ficha del proceso que miden.
+  l.push(...tablaDeCifras(cifrasSueltas('inicio'), 'El tamaño del negocio'))
 
-  // «dos validados» y no «2 validados»: va en medio de un párrafo de prosa.
-  const EN_LETRA_CORTA = { 0: 'ninguno', 1: 'uno', 2: 'dos', 3: 'tres', 4: 'cuatro', 5: 'cinco' }
+  l.push('')
+  l.push(`El mapa completo, navegable, está en el {cap:mapa-procesos}.`)
 
-  let salida = md.replaceAll('{COBERTURA}', await cuadroDeCobertura()).replaceAll('{AVISO}', aviso)
-  for (const [clave, valor] of Object.entries(cifras)) {
-    const texto = clave === 'VALIDADOS' ? (EN_LETRA_CORTA[valor] ?? String(valor)) : String(valor)
-    salida = salida.replaceAll(`{${clave}}`, texto)
-  }
-
-  const quedan = salida.match(/\{[A-Z]+\}/g)
-  if (quedan) console.warn(`  ⚠️ resumen-ejecutivo: marcadores sin sustituir: ${[...new Set(quedan)].join(' ')}`)
-
-  console.log(
-    `  · resumen-ejecutivo: ${cifras.SESIONES} sesiones · ${cifras.HALLAZGOS} hallazgos (${cifras.VALIDADOS} validados) · ` +
-      `${cifras.OPORTUNIDADES} oportunidades · ${cifras.MACROS}/${cifras.PROCESOS} procesos`
-  )
-
-  return salida
+  console.log(`  · inicio: ${macros.length} macroprocesos · ${totalN1} procesos · decide el ${aviso}`)
+  return l.join('\n')
 }
 
 // =============================================================================
@@ -2597,6 +2638,13 @@ async function dondeSeTraba() {
       `${trabas.length} trabas en ${areasTotal.size} áreas`
   )
 
+
+  // El cuadro de fricción era el capítulo siguiente —«Inventario de trabas»— y
+  // se absorbió aquí el 18 de septiembre de 2026. El par «una afirma, la otra
+  // respalda» funcionaba mientras el respaldo fueran las 149 trabas; condensado
+  // a un cuadro por área, un capítulo entero para una tabla no se sostiene.
+  const friccion = await cuadroDeFriccion()
+  if (friccion) l.push(friccion)
   return l.join('\n')
 }
 
@@ -2608,7 +2656,7 @@ async function dondeSeTraba() {
  * gerente encuentra lo suyo de una vez y ve cuánto carga comparado con el resto.
  * El tipo va en su columna.
  */
-async function inventarioDeTrabas() {
+async function cuadroDeFriccion() {
   const trabas = await leerTrabas()
   if (!trabas.length) return null
 
@@ -2623,20 +2671,15 @@ async function inventarioDeTrabas() {
   const altas = trabas.filter((h) => h.impacto === 'alto').length
 
   const l = []
-  l.push(
-    `El respaldo del capítulo anterior: **las ${trabas.length} trabas que recogió el levantamiento**, ` +
-      `una por una. ${altas} son de impacto alto, y están repartidas en ${porArea.size} áreas.`
-  )
+  l.push('')
+  l.push('---')
   l.push('')
   l.push(
-    'Va **ordenado por área y de mayor a menor carga**, no por tipo: agrupado por cuello de ' +
-      'botella contra trabajo manual se lee como una taxonomía y no dice a quién llamar. Así, ' +
-      'cada gerencia encuentra lo suyo de una vez y ve cuánto carga comparada con el resto.'
-  )
-  l.push('')
-  l.push(
-    '> Todas entran como **propuestas**, igual que el resto de hallazgos: son candidatas con su ' +
-      'cita hasta que alguien que estuvo en esa sesión las confirma o las descarta.'
+    `Los siete patrones salen de **${trabas.length} trabas documentadas** —cuellos de botella y ` +
+      `trabajo manual— repartidas en ${porArea.size} áreas, de las cuales ${altas} son de ` +
+      'impacto alto. Listarlas una por una no sería un diagnóstico, sería un desahogo: **cada ' +
+      `traba está en la ficha del proceso al que pertenece**. Lo que sí cambia una decisión es ` +
+      'dónde se acumulan.'
   )
 
   // --- El cuadro de carga por área -------------------------------------------
@@ -2683,31 +2726,26 @@ async function inventarioDeTrabas() {
       'termine primero.'
   )
 
-  for (const [area, suyas] of orden) {
-    l.push('')
-    l.push(`## ${area} · ${suyas.length}`)
-    l.push('')
-    // ⚠️ La columna de sesión **se quita entera**, no se deja vacía: una
-    // columna con guiones en las 149 filas es ruido con encabezado.
-    l.push(SIN_CODIGOS ? '| Traba | Tipo | Impacto |' : '| Traba | Tipo | Impacto | Sesión |')
-    l.push(SIN_CODIGOS ? '|---|---|---|' : '|---|---|---|---|')
-    for (const h of suyas.sort((a, b) => a.titulo.localeCompare(b.titulo, 'es'))) {
-      const quien = h.entrevistas?.codigo ?? ''
-      const imp = h.impacto ? h.impacto[0].toUpperCase() + h.impacto.slice(1) : '—'
-      const fila = `| **${h.titulo}** | ${ROTULO_TRABA[h.tipo] ?? h.tipo} | ${imp} |`
-      l.push(SIN_CODIGOS ? fila : `${fila} ${quien || '—'} |`)
-    }
-  }
+  // ⚠️ **Aquí había veinticinco tablas con las 149 trabas, una por una**, y era
+  // un capítulo aparte. Se quitaron el 18 de septiembre de 2026 al fundir los
+  // dos capítulos: veinticinco tablas seguidas sirven de referencia —cada
+  // gerente busca la suya— pero nadie las lee, y el detalle ya vive en la ficha
+  // del proceso, que es donde se busca. Lo que no estaba en ningún sitio es el
+  // conjunto, y eso es lo que se queda.
+  l.push('')
+  l.push(
+    `Las ${trabas.length} trabas, una por una y con su proceso, están en el {cap:fichas-procesos} ` +
+      'y en el panel del programa, filtrables por área y por tipo.'
+  )
 
-  console.log(`  · inventario-trabas: ${trabas.length} trabas · ${porArea.size} áreas · ${altas} de impacto alto`)
+  console.log(`  · fricción: ${trabas.length} trabas · ${porArea.size} áreas · ${altas} de impacto alto`)
   return l.join('\n')
 }
 
 const GENERADAS = {
-  'resumen-ejecutivo': elResumenEjecutivo,
+  inicio: laPortada,
   // Reconectadas paso a paso, a medida que se revisa cada una. El resto sigue
   // desconectado: sus generadoras están escritas arriba y esperan su turno.
-  cifras: cifrasDelLevantamiento,
   oportunidades: lasOportunidades,
   'inventario-sistemas': inventarioDeSistemas,
   'mapa-procesos': mapaDeProcesos,
@@ -2719,7 +2757,6 @@ const GENERADAS = {
   'hoja-de-ruta': laHojaDeRuta,
   'riesgo-continuidad': riesgoYContinuidad,
   trabas: dondeSeTraba,
-  'inventario-trabas': inventarioDeTrabas,
 }
 
 /**
