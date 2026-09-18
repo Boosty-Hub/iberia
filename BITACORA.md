@@ -64,6 +64,54 @@ cláusula 5. Aquí solo lo urgente:
 
 ---
 
+## 17 de septiembre de 2026 · Sesión 25 — cuadro de mando en la 12, y una cifra que me inventé
+
+La **12 · Oportunidades** abre ahora con el mismo cuadro de mando que la 09: los cuatro grupos
+con sus oportunidades, cuántas son de impacto alto, qué disponibilidad de dato tienen y cuándo
+arrancan.
+
+```
+Grupo 1 · Se puede empezar ya          12   7 altas   ✅ Disponible
+Grupo 2 · Exigen un paso previo         8   6 altas   ⚠️ Hay que limpiarlo
+Grupo 3 · Construir el dato primero     9   6 altas   🔴 No existe
+No son oportunidades: son condiciones   4   3 altas   —
+```
+
+⚠️ **Va primero, antes de los criterios.** Se colocó en tercer lugar por error y se subió: un
+cuadro de mando que va tercero no es de un vistazo.
+
+Las cuatro columnas de conteo **se calculan** —de la lista y de la base—; solo «Arranca» es
+criterio editorial y vive en el taller. Y la disponibilidad del dato se **deduce** del grupo,
+que por diseño es uniforme: si algún día deja de serlo, la celda dice *mezclado* en vez de
+mentir.
+
+### 🔴 Una cifra que me inventé al proponerlo
+
+Al enseñarle el borrador a Jesús afirmé que **«la mitad de lo de alto impacto está en el grupo
+3»**. Es falso, y el cierre que había escrito se apoyaba en esa cifra. Al generarlo con datos
+reales:
+
+```
+22 de impacto alto en total
+ 6 en el grupo 3  →  27%, no la mitad
+ 7 pueden empezar ya  →  32%
+```
+
+Reescrito con lo que el dato sí dice, que además es un argumento mejor: **de las 22 de impacto
+alto, solo siete pueden empezar ya**; las otras quince esperan por limpiar un dato,
+construirlo o una decisión que nadie ha tomado. Dos de cada tres cosas que más pesan **no
+arrancan el lunes**.
+
+⚠️ Lección: **el cuadro se calculó y la afirmación del cierre no.** La cifra inventada
+sobrevivió hasta que el generador produjo la real. Cualquier afirmación cuantitativa de un
+cierre debería salir del mismo sitio que la tabla que la sostiene — por eso ahora `{ALTAS}`,
+`{ALTAS1}` y `{ALTASRESTO}` se sustituyen en la corrida.
+
+Se completó de paso `EN_LETRA` con los números del 1 al 13, que faltaban: el cierre decía «6
+de las oportunidades» en medio de un párrafo de prosa.
+
+---
+
 ## 17 de septiembre de 2026 · Sesión 24 — el informe se acredita por código, no por nombre
 
 Decisión de Jesús, con respaldo previo. **El documento nombraba a 34 personas en 712

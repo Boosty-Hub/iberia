@@ -1288,6 +1288,8 @@ function sesionesDelAtaque(hallazgos) {
 
 /** Los números en palabras, que es como se escriben en el cuerpo del informe. */
 const EN_LETRA = {
+  1: 'una', 2: 'dos', 3: 'tres', 4: 'cuatro', 5: 'cinco', 6: 'seis', 7: 'siete',
+  8: 'ocho', 9: 'nueve', 10: 'diez', 11: 'once', 12: 'doce', 13: 'trece',
   14: 'catorce', 15: 'quince', 16: 'dieciséis', 17: 'diecisiete', 18: 'dieciocho',
   19: 'diecinueve', 20: 'veinte', 34: 'treinta y cuatro', 35: 'treinta y cinco',
   36: 'treinta y seis', 37: 'treinta y siete',
@@ -2034,6 +2036,46 @@ async function lasOportunidades() {
 
   const posicionEntrada = l.length
   l.push('')
+
+  // --- El cuadro de mando ----------------------------------------------------
+  //
+  // ⚠️ **Las columnas de conteo no se escriben: se cuentan.** Oportunidades por
+  // grupo, cuántas son de impacto alto y qué disponibilidad de dato tienen salen
+  // de la propia lista y de la base. Tecleadas serían un segundo sitio donde
+  // vive el mismo dato, y al reclasificar una oportunidad dejarían de coincidir
+  // con las tablas de abajo. Solo «Arranca» es criterio editorial.
+  if (taller.cuadro) {
+    const q = taller.cuadro
+    l.push('')
+    l.push(`## ${q.titulo}`)
+    l.push('')
+    l.push(q.entrada)
+    l.push('')
+    l.push('| Grupo | Oportunidades | Impacto alto | Dato | Arranca |')
+    l.push('|---|---|---|---|---|')
+    let altasTotal = 0
+    let altasG1 = 0
+    for (const grupo of taller.grupos) {
+      const suyas = grupo.oportunidades ?? []
+      const altas = suyas.filter((o) => porTitulo.get(o.h)?.impacto === 'alto').length
+      altasTotal += altas
+      if (/grupo 1/i.test(grupo.titulo)) altasG1 = altas
+      // El dato es uniforme dentro de cada grupo por diseño — el grupo *es* su
+      // disponibilidad de dato. Si algún día deja de serlo, se ve aquí.
+      const datos = [...new Set(suyas.map((o) => o.dato))]
+      const dato = datos.length === 1 ? (DATO_OPORTUNIDAD[datos[0]] ?? datos[0]) : '*mezclado*'
+      l.push(
+        `| **${grupo.titulo}** | ${suyas.length} | ${altas || '—'} | ${dato} | ${grupo.arranca ?? '—'} |`
+      )
+    }
+    l.push('')
+    l.push(
+      q.cierre
+        .replaceAll('{ALTAS}', enLetra(altasTotal))
+        .replaceAll('{ALTAS1}', enLetra(altasG1))
+        .replaceAll('{ALTASRESTO}', enLetra(altasTotal - altasG1))
+    )
+  }
 
   // --- Los criterios, que es lo que hace defendible el orden -----------------
   const c = taller.criterios
