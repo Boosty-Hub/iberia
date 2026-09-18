@@ -2565,14 +2565,9 @@ async function laPortada() {
   // los lista enteros en el capítulo siguiente, y las fichas otra vez después.
   // Tres sitios con la misma lista es una lista que se desincroniza.
 
-  const nuevos = macros.filter((m) => m.nuevo).length
-  const enLetraMay = (n) => `${enLetra(n)[0].toUpperCase()}${enLetra(n).slice(1)}`
-  l.push('')
-  l.push(
-    `${enLetraMay(nuevos)} de esos macroprocesos **no figuraban en el inventario de partida** y ` +
-      'se ejecutan hoy. Que un macroproceso completo no estuviera en el papel es, por sí solo, ' +
-      'un hallazgo.'
-  )
+  // ⚠️ **Los macroprocesos nuevos ya no se anuncian aquí.** La frase estaba
+  // dos veces: esta y la del propio mapa, que es donde las cajas llevan su
+  // distintivo y la nota tiene a qué referirse.
   l.push('')
   l.push(`El mapa completo, navegable, está en el {cap:mapa-procesos}.`)
 
