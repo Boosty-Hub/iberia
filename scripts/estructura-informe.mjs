@@ -316,10 +316,6 @@ async function borradorMetodo() {
   const { count: turnos } = await admin
     .from('transcripcion_segmentos')
     .select('*', { count: 'exact', head: true })
-  const { count: hallazgos } = await admin
-    .from('hallazgos')
-    .select('*', { count: 'exact', head: true })
-
   return `Este informe no se escribió desde la experiencia de quien lo firma. Se escribió
 desde lo que dijo la gente que hace el trabajo, y cada afirmación lleva la cita que la
 sostiene.
@@ -884,18 +880,18 @@ async function mapaDeProcesos() {
     l.push('')
   }
 
+  // ⚠️ **Los nuevos ya no van en una lista aparte.** Tenían su propio bloque al
+  // final, y eso los sacaba del mapa justo cuando lo que dicen es que *forman
+  // parte del mapa*: se ejecutan hoy, en su nivel, junto a los demás. Quedan
+  // donde les toca, marcados con su distintivo, y la nota de abajo explica qué
+  // significa el distintivo.
   if (nuevos.length) {
     l.push('')
-    l.push('### Los macroprocesos que el inventario no recogía')
-    l.push('')
     l.push(
-      'Ninguno de estos seis es una propuesta: los seis se ejecutan hoy y ninguno tenía sitio en el ' +
-        'mapa anterior. Que un macroproceso completo no estuviera en el papel es, por sí solo, un hallazgo.'
+      `Los **${enLetra(nuevos.length)}** marcados como nuevos no figuraban en el inventario de ` +
+        'partida y se ejecutan hoy. No son una propuesta: que un macroproceso completo no ' +
+        'estuviera en el papel es, por sí solo, un hallazgo.'
     )
-    l.push('')
-    for (const m of nuevos) {
-      l.push(`- **${numeroDeFicha(m)}. ${m.nombre}** *(${m.nivel})* — ${m.procesos.length} procesos`)
-    }
     l.push('')
   }
 
@@ -943,8 +939,7 @@ async function fichasDeProceso() {
   l.push('')
   l.push(
     'La regla de escritura es que **cada línea sostenga un hallazgo**. Si una línea solo describe, sobra: ' +
-      'este documento no es un manual de procesos y las guías de entrevista dicen explícitamente que no ' +
-      'lo estamos produciendo.'
+      'este documento no es un manual de procesos, y no pretende serlo.'
   )
   l.push('')
 
@@ -1126,9 +1121,9 @@ async function losHallazgos() {
   const huerfanas = []
 
   l.push(
-    `El diagnóstico documentó **${total} hallazgos**. Este capítulo no los lista todos: desarrolla ` +
-      `los **${redactados}** que sostienen el argumento del documento, agrupados en ` +
-      `**${destacados.bloques.length} patrones**. El detalle completo vive en el panel del programa.`
+    `De todo lo que el diagnóstico documentó, este capítulo desarrolla los **${redactados} ` +
+      `hallazgos** que sostienen el argumento del documento, agrupados en ` +
+      `**${destacados.bloques.length} patrones**.`
   )
   l.push('')
   l.push(
@@ -1261,24 +1256,11 @@ async function losHallazgos() {
 
   const TIPOS = ['cuello_botella', 'trabajo_manual', 'riesgo', 'dato_disponible', 'oportunidad_ia', 'sistema', 'supuesto']
 
-  l.push('')
-  l.push('## Dónde está el resto')
-  l.push('')
-  l.push(
-    `Los otros ${total - marcados.size} hallazgos no son descarte: son el detalle que sostiene lo ` +
-      'anterior y el material de las fichas de proceso. Cada uno está documentado en el panel del ' +
-      'programa, filtrable por área, por tipo y por estado. Este es su reparto:'
-  )
-  l.push('')
-  l.push('| Área | Total | Desarrollados | Cuello | Manual | Riesgo | Dato | IA | Sist. | Sup. |')
-  l.push('| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |')
-
-  for (const [area, lista] of [...porArea.entries()].sort((a, b) => b[1].length - a[1].length)) {
-    const dest = lista.filter((h) => marcados.has(`${h.entrevistas?.codigo}|${h.titulo}`)).length
-    const cuenta = TIPOS.map((t) => lista.filter((h) => h.tipo === t).length || '')
-    l.push(`| ${area} | ${lista.length} | ${dest || ''} | ${cuenta.join(' | ')} |`)
-  }
-  l.push(`| **Total** | **${total}** | **${marcados.size}** | ${TIPOS.map((t) => `**${(todos ?? []).filter((h) => h.tipo === t).length}**`).join(' | ')} |`)
+  // ⚠️ **Aquí iba «Dónde está el resto»**, una matriz de áreas por tipo con los
+  // hallazgos que el capítulo no desarrolla. Se quitó el 18 de septiembre de
+  // 2026: anunciar cuántos hallazgos quedan sin desarrollar invita a pedirlos,
+  // y el trabajo de este informe fue justamente escoger. El reparto completo
+  // sigue en el panel del programa, filtrable por área, tipo y estado.
 
   if (huerfanas.length) {
     console.error('\n⚠️  Referencias de hallazgos-destacados.json que no casan con la base:')
@@ -1354,6 +1336,18 @@ function hablaDelAtaque(texto) {
  * siguen en el taller y en la base: ponerlo en `false` y regenerar devuelve el
  * informe con referencias. Nada de esto se borra en el origen.
  */
+/**
+ * **Fuera el bloque «Los hallazgos de este capítulo».**
+ *
+ * Estaba al pie de seis capítulos y repetía, en forma de lista de enlaces, lo
+ * que el capítulo acababa de argumentar. Con el informe ya sin códigos de
+ * sesión, esa lista dejó de ser una acreditación y quedó en un índice de sí
+ * mismo. Decisión del cliente del 18 de septiembre de 2026.
+ *
+ * El cálculo se conserva: apagarlo es esto, y encenderlo, `false`.
+ */
+const SIN_ENLACES_A_HALLAZGOS = true
+
 const SIN_CODIGOS = true
 
 const SIN_CONSENTIMIENTO = new Set(['ENT-005'])
@@ -1666,7 +1660,7 @@ async function riesgoYContinuidad() {
     }
   })()
   if (destacados && taller.hallazgos?.length) {
-    const enlaces = enlacesAHallazgos(destacados, taller.hallazgos, 'riesgo-continuidad')
+    const enlaces = SIN_ENLACES_A_HALLAZGOS ? [] : enlacesAHallazgos(destacados, taller.hallazgos, 'riesgo-continuidad')
     if (enlaces.length) {
       l.push('')
       l.push('## Los hallazgos de este capítulo')
@@ -1793,7 +1787,7 @@ async function capituloConCitas(archivo, etiqueta, entradaDeHallazgos) {
   })()
 
   if (destacados && taller.hallazgos?.length) {
-    const enlaces = enlacesAHallazgos(destacados, taller.hallazgos, etiqueta)
+    const enlaces = SIN_ENLACES_A_HALLAZGOS ? [] : enlacesAHallazgos(destacados, taller.hallazgos, etiqueta)
     if (enlaces.length) {
       l.push('')
       l.push('## Los hallazgos de este capítulo')
@@ -1919,6 +1913,21 @@ const MESES = [
   'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
 ]
 
+/**
+ * «2026-12-06» → «diciembre de 2026».
+ *
+ * ⚠️ **Sin el día, a propósito.** El informe decía «el comité decide el 6 de
+ * diciembre de 2026», que es la fecha en que vence el aviso de no renovación —
+ * un dato del contrato, no una convocatoria. Puesto así se leía como una
+ * citación, y además se rompe solo si el calendario se corre. El mes basta para
+ * lo que la frase tiene que decir.
+ */
+function enMes(iso) {
+  if (!iso) return null
+  const [a, m] = iso.split('-').map(Number)
+  return `${MESES[m - 1]} de ${a}`
+}
+
 /** «2026-12-06» → «6 de diciembre de 2026». */
 function enPalabras(iso) {
   if (!iso) return null
@@ -1927,7 +1936,7 @@ function enPalabras(iso) {
 }
 
 async function laHojaDeRuta() {
-  const aviso = enPalabras(fechaDelPrograma('AVISO_RENOVACION'))
+  const aviso = enMes(fechaDelPrograma('AVISO_RENOVACION'))
   const cierre = enPalabras(fechaDelPrograma('CIERRE_FASE'))
   if (!aviso || !cierre) {
     console.error('  ✖ hoja-de-ruta: no se pudieron leer las fechas de lib/programa.ts; no se escribe.')
@@ -2365,9 +2374,19 @@ async function cuadroDeCobertura() {
   const macros = inv?.macroprocesos ?? []
   const procesos = macros.reduce((t, m) => t + (m.procesos?.length ?? 0), 0)
 
-  const { count: hallazgos } = await admin
-    .from('hallazgos')
-    .select('*', { count: 'exact', head: true })
+  // ⚠️ **Se enseñan los que el informe desarrolla, no los que hay en la base.**
+  // «394 hallazgos documentados» en una portada invita a preguntar por los 394,
+  // y el trabajo de este informe fue justamente escoger. El número sale del
+  // taller de destacados, así que sigue sin escribirse.
+  const destacados = (() => {
+    try {
+      return JSON.parse(leerTaller('hallazgos-destacados.json'))
+    } catch {
+      return null
+    }
+  })()
+  const desarrollados = (destacados?.bloques ?? []).reduce((t, b) => t + b.hallazgos.length, 0)
+  const patrones = (destacados?.bloques ?? []).length
 
   const retenidas = ses.filter((x) => SIN_CONSENTIMIENTO.has(x.codigo)).length
 
@@ -2389,18 +2408,20 @@ async function cuadroDeCobertura() {
   l.push(`| **Dónde** | ${sedes} |`)
   l.push(`| **Áreas con sesión propia** | **${areas.size}** |`)
   l.push(`| **Procesos mapeados** | **${macros.length}** macroprocesos · **${procesos}** procesos de primer nivel |`)
-  l.push(`| **Hallazgos documentados** | **${hallazgos ?? 0}** |`)
-  l.push('')
-  if (retenidas) {
-    l.push(
-      `*${retenidas === 1 ? 'Una sesión' : `${retenidas} sesiones`} cuenta en el total y no se ` +
-        'cosechó, a solicitud de la persona entrevistada.*'
-    )
-  }
+  l.push(
+    `| **Hallazgos desarrollados** | **${desarrollados}**, agrupados en ${patrones} patrones |`
+  )
+  // ⚠️ **La nota de la sesión retenida ya no se escribe.** Decía que una sesión
+  // contaba en el total y no se había cosechado a solicitud de la persona
+  // entrevistada: era honesto y era, a la vez, contarle al cliente algo de una
+  // persona identificable por descarte. La guarda sigue viva en el generador
+  // —`SIN_CONSENTIMIENTO`—, que es donde tiene efecto; lo que se quita es
+  // anunciarla.
 
   console.log(
-    `  · cobertura: ${ses.length} sesiones · ${gente.size} personas · ${areas.size} áreas` +
-      (retenidas ? ` · ${retenidas} retenida(s)` : '')
+    `  · cobertura: ${ses.length} sesiones · ${gente.size} personas · ${areas.size} áreas · ` +
+      `${desarrollados} hallazgos en ${patrones} patrones` +
+      (retenidas ? ` · ${retenidas} retenida(s), contada(s) y sin anunciar` : '')
   )
   return l.join('\n')
 }
@@ -2419,7 +2440,7 @@ async function cuadroDeCobertura() {
  * mismo dato, y dejarían de coincidir con los capítulos en la primera revisión.
  */
 async function laPortada() {
-  const aviso = enPalabras(fechaDelPrograma('AVISO_RENOVACION'))
+  const aviso = enMes(fechaDelPrograma('AVISO_RENOVACION'))
   if (!aviso) {
     console.error('  ✖ inicio: no se pudo leer la fecha de lib/programa.ts; no se escribe.')
     return null
@@ -2435,7 +2456,7 @@ async function laPortada() {
   l.push(
     'Iberia contrató a Boosty Digital para responder una pregunta: **dónde puede la ' +
       'inteligencia artificial mejorar su operación, y dónde no.** Este documento es la ' +
-      `respuesta, y es el instrumento con el que el comité decide el **${aviso}** si el ` +
+      `respuesta, y es el instrumento con el que el comité decide **hacia final de año** si el ` +
       'programa continúa.'
   )
   l.push('')
@@ -2475,34 +2496,18 @@ async function laPortada() {
   const totalN1 = macros.reduce((t, m) => t + m.procesos.length, 0)
   l.push(`| **Total** | | **${macros.length}** | **${totalN1}** |`)
 
-  l.push('')
-  for (const nivel of NIVELES) {
-    const suyos = macros.filter((m) => m.nivel === nivel)
-    if (!suyos.length) continue
-    l.push('')
-    l.push(`**${numeroDeNivel(nivel)} · ${nivel}** — ${QUE_HACE[nivel] ?? ''}`)
-    l.push('')
-    for (const m of suyos) {
-      const marca = m.nuevo ? ' · **nuevo**' : ''
-      l.push(
-        `- **${numeroDeFicha(m)}. [${m.nombre}](${RUTA_FICHAS}#${anclaDe(m)})** — ` +
-          `${m.procesos.length} procesos${marca}`
-      )
-    }
-  }
+  // ⚠️ **Aquí iban los veinte, uno por uno.** Se quitaron: el mapa de procesos
+  // los lista enteros en el capítulo siguiente, y las fichas otra vez después.
+  // Tres sitios con la misma lista es una lista que se desincroniza.
 
   const nuevos = macros.filter((m) => m.nuevo).length
+  const enLetraMay = (n) => `${enLetra(n)[0].toUpperCase()}${enLetra(n).slice(1)}`
   l.push('')
   l.push(
-    `Los marcados como **nuevos** son los ${enLetra(nuevos)} macroprocesos que el inventario de ` +
-      'partida no recogía y que se ejecutan hoy. Que un macroproceso completo no estuviera en ' +
-      'el papel es, por sí solo, un hallazgo.'
+    `${enLetraMay(nuevos)} de esos macroprocesos **no figuraban en el inventario de partida** y ` +
+      'se ejecutan hoy. Que un macroproceso completo no estuviera en el papel es, por sí solo, ' +
+      'un hallazgo.'
   )
-  // El tamaño del negocio abre bien una portada: es la escala sobre la que hay
-  // que leer todo lo demás. Las otras diez familias de cifras viven dentro de la
-  // ficha del proceso que miden.
-  l.push(...tablaDeCifras(cifrasSueltas('inicio'), 'El tamaño del negocio'))
-
   l.push('')
   l.push(`El mapa completo, navegable, está en el {cap:mapa-procesos}.`)
 
@@ -2574,14 +2579,15 @@ async function dondeSeTraba() {
   l.push('')
   l.push(r.entrada)
   l.push('')
-  l.push('| # | Patrón | Casos | Áreas | Se cierra con | ¿Modelo? |')
-  l.push('|---|---|---|---|---|---|')
+  // ⚠️ **Sin las columnas de conteo.** Llevaba casos, áreas y un «sí/no» de
+  // modelo: los dos primeros invitaban a comparar patrones por tamaño —que es
+  // justo lo que este capítulo dice que no hay que hacer, porque lo que pesa no
+  // es cuántas veces ocurre sino que ocurra en áreas sin contacto— y el tercero
+  // ya lo dice la columna de al lado. Queda lo único accionable: qué lo cierra.
+  l.push('| # | Patrón | Se cierra con |')
+  l.push('|---|---|---|')
   taller.patrones.forEach((p, i) => {
-    const areas = new Set((p.casos ?? []).map((c) => c[0]))
-    l.push(
-      `| **${i + 1}** | ${p.titulo} | ${(p.casos ?? []).length} | ${areas.size} | ${p.resuelve} | ` +
-        `${p.modelo ? 'Sí' : '**No**'} |`
-    )
+    l.push(`| **${i + 1}** | ${p.titulo} | ${p.resuelve} |`)
   })
   l.push('')
   l.push(r.cierre.replaceAll('{SINMODELO}', enLetra(sinModelo)))
@@ -2610,7 +2616,7 @@ async function dondeSeTraba() {
     }
   })()
   if (destacados && taller.hallazgos?.length) {
-    const enlaces = enlacesAHallazgos(destacados, taller.hallazgos, 'trabas')
+    const enlaces = SIN_ENLACES_A_HALLAZGOS ? [] : enlacesAHallazgos(destacados, taller.hallazgos, 'trabas')
     if (enlaces.length) {
       l.push('')
       l.push('## Los hallazgos de este capítulo')
@@ -2690,41 +2696,11 @@ async function cuadroDeFriccion() {
   // más había que recorrer las veinticinco cabeceras contando.
   //
   // Todas las columnas se calculan. No hay nada escrito a mano.
-  l.push('')
-  l.push('## Dónde está concentrada la fricción')
-  l.push('')
-  l.push(
-    'Una fila por área, de mayor a menor carga. **La columna del impacto alto es la que ordena ' +
-      'el trabajo**; el reparto entre cuello de botella y trabajo manual dice de qué tipo es.'
-  )
-  l.push('')
-  l.push('| Área | Trabas | Impacto alto | Cuello de botella | Trabajo manual |')
-  l.push('|---|---|---|---|---|')
-  for (const [area, suyas] of orden) {
-    const alto = suyas.filter((h) => h.impacto === 'alto').length
-    const cuello = suyas.filter((h) => h.tipo === 'cuello_botella').length
-    const manual = suyas.filter((h) => h.tipo === 'trabajo_manual').length
-    l.push(`| **${area}** | ${suyas.length} | ${alto || '—'} | ${cuello || '—'} | ${manual || '—'} |`)
-  }
-  // ⚠️ Sin línea en blanco: una fila separada del cuerpo renderiza como **otra
-  // tabla** de una sola fila, con su propia cabecera vacía. Se vio en la
-  // primera corrida.
-  l.push(
-    `| **Total** | **${trabas.length}** | **${altas}** | ` +
-      `**${trabas.filter((h) => h.tipo === 'cuello_botella').length}** | ` +
-      `**${trabas.filter((h) => h.tipo === 'trabajo_manual').length}** |`
-  )
-
-  // La lectura de la tabla, con las cifras que acaba de producir.
-  const top = orden.slice(0, 3)
-  const enTop = top.reduce((t, [, x]) => t + x.length, 0)
-  l.push('')
-  l.push(
-    `**${enLetra(top.length)} áreas concentran ${enTop} de las ${trabas.length} trabas** — ` +
-      `${top.map(([a, x]) => `${a} (${x.length})`).join(', ')}. ` +
-      'No es casualidad: son las tres que más papel mueven y las que más dependen de que otro ' +
-      'termine primero.'
-  )
+  // ⚠️ **Aquí iba «Dónde está concentrada la fricción»**, un cuadro con una fila
+  // por área y sus conteos. Se quitó el 18 de septiembre de 2026: un ranking de
+  // áreas por número de trabas se lee como una tabla de culpables, y el
+  // capítulo argumenta justo lo contrario — que ninguna traba pertenece al área
+  // donde se ve. El reparto por área sigue disponible en el panel del programa.
 
   // ⚠️ **Aquí había veinticinco tablas con las 149 trabas, una por una**, y era
   // un capítulo aparte. Se quitaron el 18 de septiembre de 2026 al fundir los

@@ -33,13 +33,21 @@ export function revelarAncla(id: string) {
   const destino = document.getElementById(id)
   if (!destino) return
 
-  const bloque = destino.closest('details')
-  if (bloque && !bloque.open) bloque.open = true
+  // ⚠️ **Todos los padres, no el primero.** Desde que cada ficha tiene su propio
+  // `<details>` dentro del de su nivel, un ancla puede estar a dos niveles de
+  // profundidad: abrir solo el más cercano deja el bloque del nivel cerrado y el
+  // salto vuelve a caer sobre un elemento sin altura.
+  for (let n = destino.closest('details'); n; n = n.parentElement?.closest('details') ?? null) {
+    if (!n.open) n.open = true
+  }
 
   // El salto se rehace tras abrir: el intento del navegador, si lo hubo, cayó
   // sobre un elemento que todavía no tenía altura.
   requestAnimationFrame(() => destino.scrollIntoView({ block: 'start' }))
 }
+
+type Ficha = { titulo: string; cuerpo: string }
+type Nivel = { titulo: string; cuerpo: string; fichas: Ficha[] }
 
 export function MarkdownPlegable({
   contenido,
@@ -74,19 +82,35 @@ export function MarkdownPlegable({
     <div ref={caja}>
       {bloques[0].cuerpo.trim() && <Markdown contenido={bloques[0].cuerpo} className={className} />}
 
-      {/* Cerrados de entrada: la sección son veinte fichas y el objetivo es que
-          quepa en una pantalla y se elija qué leer. Un ancla externa abre su
-          bloque sola, y de eso se encarga el efecto de arriba. */}
+      {/* **Dos niveles de plegado, y los dos cerrados de entrada.** El nivel
+          agrupa —Estratégico, Operativo, Soporte— y dentro cada ficha tiene el
+          suyo: abrir «Operativo» daba nueve fichas de golpe, que es otra vez la
+          página de corrido que el plegado venía a evitar.
+
+          ⚠️ El ancla sigue funcionando porque `revelarAncla` abre **todos** los
+          `<details>` que contienen el destino, no solo el primero. */}
       {bloques.slice(1).map((b) => (
         <details key={b.titulo} className={`plegable ${claseDeNivel(b.titulo)}`.trim()}>
           <summary>
             <span className="plegable-titulo">{b.titulo}</span>
             <span className="plegable-cuenta">
-              {b.fichas} {b.fichas === 1 ? 'ficha' : 'fichas'}
+              {b.fichas.length} {b.fichas.length === 1 ? 'ficha' : 'fichas'}
             </span>
           </summary>
           <div className="plegable-cuerpo">
+            {/* El encabezado del nivel, para que el ancla del nivel exista. */}
             <Markdown contenido={`## ${b.titulo}\n\n${b.cuerpo}`} className={className} />
+
+            {b.fichas.map((f) => (
+              <details key={f.titulo} className="plegable plegable-ficha">
+                <summary>
+                  <span className="plegable-titulo">{f.titulo}</span>
+                </summary>
+                <div className="plegable-cuerpo">
+                  <Markdown contenido={`### ${f.titulo}\n\n${f.cuerpo}`} className={className} />
+                </div>
+              </details>
+            ))}
           </div>
         </details>
       ))}
@@ -102,10 +126,8 @@ export function MarkdownPlegable({
  * hay diagramas en bloques ``` y una línea suya que empiece por `##` partiría la
  * sección por la mitad.
  */
-function partirPorNivel2(md: string) {
-  const bloques: { titulo: string; cuerpo: string; fichas: number }[] = [
-    { titulo: '', cuerpo: '', fichas: 0 },
-  ]
+function partirPorNivel2(md: string): Nivel[] {
+  const bloques: Nivel[] = [{ titulo: '', cuerpo: '', fichas: [] }]
   let enCodigo = false
 
   for (const linea of md.split('\n')) {
@@ -113,13 +135,22 @@ function partirPorNivel2(md: string) {
 
     const h2 = !enCodigo && /^## (?!#)(.+)$/.exec(linea)
     if (h2) {
-      bloques.push({ titulo: h2[1].trim(), cuerpo: '', fichas: 0 })
+      bloques.push({ titulo: h2[1].trim(), cuerpo: '', fichas: [] })
       continue
     }
 
     const actual = bloques[bloques.length - 1]
-    if (!enCodigo && /^### /.test(linea)) actual.fichas++
-    actual.cuerpo += linea + '\n'
+    const h3 = !enCodigo && /^### (?!#)(.+)$/.exec(linea)
+    if (h3) {
+      // Una ficha nueva. Su cuerpo se va llenando con lo que venga hasta el
+      // próximo `###` o el próximo `##`.
+      actual.fichas.push({ titulo: h3[1].trim(), cuerpo: '' })
+      continue
+    }
+
+    const ficha = actual.fichas[actual.fichas.length - 1]
+    if (ficha) ficha.cuerpo += linea + '\n'
+    else actual.cuerpo += linea + '\n'
   }
 
   return bloques

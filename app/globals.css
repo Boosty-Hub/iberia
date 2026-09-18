@@ -275,6 +275,34 @@ body {
   @apply px-5 pb-2;
 }
 
+/* La ficha dentro de su nivel: el mismo control, un escalón más abajo. Más
+   estrecha y en blanco, para que se distinga del bloque que la contiene sin
+   inventar un color nuevo —la paleta ya tiene tres familias y una cuarta rompe
+   el lenguaje visual del producto. */
+.plegable-ficha {
+  @apply mt-2 rounded-lg border-[var(--borde)] bg-white shadow-none;
+}
+.plegable-ficha > summary {
+  @apply bg-white px-4 py-2.5 text-sm font-medium text-marca-700;
+}
+.plegable-ficha > summary:hover {
+  @apply bg-marca-50 text-acento-700;
+}
+.plegable-ficha > summary::before {
+  @apply h-1.5 w-1.5 border-marca-400;
+}
+.plegable-ficha[open] > summary {
+  @apply border-b border-[var(--borde)] text-marca-900;
+}
+.plegable-ficha .plegable-cuerpo {
+  @apply bg-white px-4;
+}
+/* El encabezado de la ficha ya está en su resumen: dentro sobra, igual que el
+   del nivel. */
+.plegable-ficha .prosa > h3:first-child {
+  @apply sr-only;
+}
+
 /* -----------------------------------------------------------------------------
    Un tinte por categoría, dentro de la paleta de Iberia
    El rojo de marca para lo estratégico, el oro de lo oficial para lo operativo

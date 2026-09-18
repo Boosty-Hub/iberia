@@ -64,6 +64,54 @@ cláusula 5. Aquí solo lo urgente:
 
 ---
 
+## 18 de septiembre de 2026 · Sesión 32 — doce encargos de pulido, y el informe deja de sonar a transcripción
+
+Un lote largo de Jesús sobre cada sección. El hilo común: **nada puede sonar a que el
+documento sale de grabaciones**, y menos texto seguido.
+
+| Lo que se quitó | Dónde estaba |
+|---|---|
+| «6 de diciembre de 2026» | Inicio y hoja de ruta → ahora «hacia final de año» y «diciembre» |
+| «Los hallazgos de este capítulo» | seis capítulos |
+| La nota de la sesión retenida | Inicio |
+| «394 hallazgos» | Inicio, hallazgos, dónde no va la IA, hoja de ruta |
+| «Dónde está el resto» y «Dónde está concentrada la fricción» | hallazgos y trabas |
+| Los conteos del cuadro de los siete | trabas |
+| «N voces» en el consenso | oportunidades |
+| «se cosechó de las entrevistas», «aparece en ocho sesiones» | inventario de sistemas |
+
+### Tres decisiones que conviene no perder
+
+**«Inicio» bajó de 4.700 a 1.900 caracteres** al quitarle la lista de los veinte macroprocesos.
+No se perdió nada: el mapa los lista enteros en el capítulo siguiente y las fichas otra vez
+después. **Tres sitios con la misma lista es una lista que se desincroniza.**
+
+⚠️ **El cuadro «Dónde está concentrada la fricción» se quitó por una razón editorial, no de
+espacio.** Un ranking de áreas por número de trabas se lee como una tabla de culpables, y el
+capítulo argumenta justo lo contrario — que ninguna traba pertenece al área donde se ve.
+
+⚠️ **Y las columnas de conteo del cuadro de los siete patrones** invítaban a comparar patrones
+por tamaño, que es lo que ese capítulo dice que no hay que hacer: lo que pesa no es cuántas
+veces ocurre sino que ocurra en áreas sin contacto. Queda lo único accionable: qué lo cierra.
+
+### El doble chevrón de las fichas
+
+Abrir «Operativo» daba nueve fichas de golpe —otra vez la página de corrido que el plegado
+venía a evitar—. Ahora cada ficha tiene el suyo dentro del de su nivel.
+
+⚠️ **Eso obligó a cambiar `revelarAncla`**: abría solo el `<details>` más cercano, y con dos
+niveles de profundidad el bloque del nivel se quedaba cerrado y el salto volvía a caer sobre un
+elemento sin altura. Ahora **recorre toda la cadena de padres**. Comprobado con el enlace que
+viene del mapa interactivo.
+
+### Y la arquitectura, de 0 a 3 tablas
+
+Las nueve reglas pasan a tabla con una columna nueva —**de dónde sale cada una**—, los cuatro
+flujos a «cómo debe correr / dónde se rompe hoy», y las tres ausencias a «por qué / qué deja en
+pie». El diagrama de capas se queda como bloque monoespaciado: es un dibujo, no texto.
+
+---
+
 ## 18 de septiembre de 2026 · Sesión 31 — el armazón se comprime de 15 a 12
 
 Cinco encargos de Jesús sobre la estructura. Tres directos, dos que pidió opinar antes.
