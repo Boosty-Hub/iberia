@@ -64,6 +64,26 @@ cláusula 5. Aquí solo lo urgente:
 
 ---
 
+## 18 de septiembre de 2026 · Sesión 35 — la portada dice ahora qué se encontró
+
+«Inicio» contaba cuánto se había cubierto y no insinuaba **qué se había encontrado**, que es lo
+primero que un comité quiere saber. De cuatro propuestas, Jesús eligió una: los siete patrones
+como titulares, enlazando cada uno a su desarrollo.
+
+⚠️ **Nombra, no argumenta**, y esa es la diferencia con el resumen ejecutivo que ocupaba este
+sitio hasta la sesión 31. Aquel adelantaba el argumento entero en nueve mil caracteres y
+envejecía cada vez que cambiaba un capítulo, sin que nadie se acordara de corregirlo. **Siete
+títulos no envejecen** — y salen del taller de destacados, así que tampoco se escriben.
+
+Los siete enlaces apuntan a los `##` del capítulo 8 y el ancla se calcula con el mismo
+`github-slugger` que usa `rehype-slug` al renderizar. Comprobado: 7 de 7 caen en un encabezado
+que existe.
+
+La portada pasa de 1.900 a 2.950 caracteres y queda con el arco completo: qué se pidió, cuánto
+se cubrió, qué se encontró, cuál es el mapa.
+
+---
+
 ## 18 de septiembre de 2026 · Sesión 34 — 🔴 la guarda de ENT-005 cubría la firma, no el contenido
 
 ### El hallazgo de la auditoría

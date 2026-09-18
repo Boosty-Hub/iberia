@@ -510,6 +510,12 @@ const NIVELES = (() => {
   return vistos
 })()
 
+/** «siete» → «Siete». Para abrir frase con un número en letra. */
+function enLetraMayuscula(n) {
+  const t = enLetra(n)
+  return `${t[0].toUpperCase()}${t.slice(1)}`
+}
+
 /** «1», «2», «3» — el número del nivel dentro del documento. */
 function numeroDeNivel(nivel) {
   const i = NIVELES.indexOf(nivel)
@@ -2488,6 +2494,45 @@ async function laPortada() {
   )
   l.push('')
   l.push(await cuadroDeCobertura())
+
+  // --- Los siete patrones, como titulares ------------------------------------
+  //
+  // ⚠️ **Nombra, no argumenta.** La portada decía cuánto se había cubierto y no
+  // insinuaba qué se había encontrado, que es lo primero que un comité quiere
+  // saber. Son los siete nombres y nada más: el resumen ejecutivo que ocupaba
+  // este sitio adelantaba el argumento entero, y esa síntesis envejecía cada vez
+  // que cambiaba un capítulo. Siete títulos no envejecen — y salen del taller de
+  // destacados, no se escriben.
+  const patronesDestacados = (() => {
+    try {
+      return JSON.parse(leerTaller('hallazgos-destacados.json'))?.bloques ?? []
+    } catch {
+      return []
+    }
+  })()
+
+  if (patronesDestacados.length) {
+    l.push('')
+    l.push('## Qué encontramos')
+    l.push('')
+    l.push(
+      `${enLetraMayuscula(patronesDestacados.length)} patrones, y lo que los hace importantes no ` +
+        'es cuántas veces ocurren sino que aparecen en **áreas que no trabajan juntas**. Eso los ' +
+        'convierte en problemas del sistema que comparten, no de un área — y por eso nadie los ' +
+        'arregla solo.'
+    )
+    l.push('')
+    patronesDestacados.forEach((p, i) => {
+      // El ancla es la del `##` del capítulo 8, calculada con el mismo
+      // `github-slugger` que usa `rehype-slug` al renderizar.
+      const ancla = new GithubSlugger().slug(p.titulo)
+      l.push(`${i + 1}. **[${p.titulo}](${RUTA_HALLAZGOS}#${ancla})**`)
+    })
+    l.push('')
+    l.push(
+      `Cada uno, con los hallazgos que lo sostienen, en el {cap:hallazgos}.`
+    )
+  }
 
   // --- El mapa, resumido -----------------------------------------------------
   //
