@@ -64,6 +64,67 @@ cláusula 5. Aquí solo lo urgente:
 
 ---
 
+## 17 de septiembre de 2026 · Sesión 24 — el informe se acredita por código, no por nombre
+
+Decisión de Jesús, con respaldo previo. **El documento nombraba a 34 personas en 712
+menciones**, varias asociadas a hallazgos incómodos. Ahora acredita por código de sesión.
+
+```
+antes:  712 menciones de nombre en 13 secciones
+ahora:   79, todas en la tabla de cobertura
+```
+
+### La excepción es deliberada
+
+**El capítulo 2 conserva nombre y cargo.** Ahí el nombre *es* la evidencia de a quién se
+escuchó, que es la función del capítulo.
+
+⚠️ Y de ahí se sigue algo que conviene no olvidar: **esto no anonimiza, formaliza.** Esa misma
+tabla resuelve cualquier código, así que quien necesite el nombre lo encuentra en el propio
+documento. Lo que cambia es que el texto deja de leerse como un señalamiento.
+
+⚠️ **Va en dirección contraria a la nota de `AGENTS.md`** —«se cita por nombre, decisión de
+Gabriel»—, que regulaba nombre frente a **cargo**, no frente a código. Se avisó a Jesús y
+decidió avanzar. **Queda pendiente revisarlo con Gabriel.**
+
+### Las citas del bloque de argumento pasan a prosa
+
+Los capítulos **1, 12, 13, 14 y 15** son argumento, no evidencia: su prosa ya afirma lo que la
+cita repetía —«el MRP no corre», «la nómina lleva siete años sin interfaz»— y la cita solo
+reforzaba, en registro coloquial. Ahí el bloque de cita se sustituye por **una línea de
+fuentes** al pie: `*Fuentes · ENT-003 · ENT-004*`.
+
+```
+levantamiento (2-11):  169 citas textuales, intactas
+argumento (1,12-15):    20 líneas de fuentes
+```
+
+⚠️ **Los capítulos del levantamiento las conservan, y no es negociable**: ahí la cita no
+ilustra, **prueba**. Borrarla dejaría al informe diciendo cosas que nadie dijo, que es
+literalmente lo que `AGENTS.md` advierte.
+
+### El respaldo
+
+```
+Insumos/Respaldo_Informe_2026-09-17_antes-de-anonimizar/   992 KB
+  informe.json          las 15 filas tal cual — es lo que restaura
+  informe-completo.md   las 15 seguidas
+  secciones/NN-slug.md  una por sección
+```
+
+Se usó el script del proyecto, no un formato inventado. Para devolverlo:
+`npm run respaldar:informe -- --restaurar "Insumos/Respaldo_Informe_2026-09-17_antes-de-anonimizar"`
+
+Y hay una segunda red: **las 394 citas y los 34 nombres siguen intactos en la base**. El
+informe los componía al vuelo, así que revertir es quitar una bandera del generador.
+
+### Verificación
+
+15 secciones en 200, **125 enlaces internos resuelven, 0 nombres fuera de la cobertura**. El
+documento baja de 233.933 a 217.928 caracteres renderizados.
+
+---
+
 ## 17 de septiembre de 2026 · Sesión 23 — vuelven los cuellos de botella, como par
 
 Jesús pidió una sección de «puntos de dolor». **Ya existía**: en el armazón de 32 era «14 ·

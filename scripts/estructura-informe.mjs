@@ -649,6 +649,27 @@ function numeroDeFicha(macro) {
 const RUTA_FICHAS = '/informe/fichas-procesos'
 const RUTA_HALLAZGOS = '/informe/hallazgos'
 
+/**
+ * ⚠️ **En el informe se acredita por código de sesión, no por nombre.**
+ *
+ * Decidido con Jesús el 17 de septiembre. El documento nombraba a 34 personas en
+ * 712 menciones, y varias de ellas quedaban asociadas a hallazgos incómodos —el
+ * indicador que se arma en casa el sábado, el control de crédito que cede ante
+ * una llamada—. Con el código, el texto deja de leerse como un señalamiento.
+ *
+ * ⚠️ **La excepción es la tabla de cobertura, y es deliberada**: ahí el nombre y
+ * el cargo *son* la evidencia de a quién se escuchó, que es la función del
+ * capítulo. Esa tabla es además la que permite resolver cualquier código, así
+ * que **esto no anonimiza: formaliza**. Quien necesite el nombre lo encuentra.
+ *
+ * ⚠️ Va en dirección contraria a la nota de `AGENTS.md` —«se cita por nombre,
+ * decisión de Gabriel»—, que regulaba nombre frente a cargo, no frente a código.
+ * Queda dicho para que se revise con él.
+ */
+function acreditar(codigo, area) {
+  return [area, codigo ? `\`${codigo}\`` : null].filter(Boolean).join(' · ')
+}
+
 /** Las notas del levantamiento, que es de donde sale el conteo de sesiones. */
 const NOTAS = 'Insumos/notas-entrevistas'
 
@@ -691,8 +712,8 @@ function quienesContaron(macro, porSesion) {
   const gente = elegidas.map(([c, n]) => {
     const e = porSesion.get(c)
     const veces = n > 1 ? ` (${n})` : ''
-    if (!e?.entrevistado_nombre) return `\`${c}\`${veces}`
-    return `${e.entrevistado_nombre} \u00b7 \`${c}\`${veces}`
+    // Solo el código: la acreditación por nombre vive en la cobertura.
+    return `\`${c}\`${veces}`
   })
   const resto = cuenta.size - elegidas.length
   // «sesiones» pierde la tilde en plural: no vale con pegarle «es» a «sesión».
@@ -1120,10 +1141,10 @@ async function losHallazgos() {
           continue
         }
         if (!f.cita_textual?.trim()) continue
-        const firma = [f.entrevistas?.entrevistado_nombre, f.areas?.nombre].filter(Boolean).join(' · ')
+        const firma = acreditar(f.entrevistas?.codigo, f.areas?.nombre)
         l.push('')
         l.push(`> «${f.cita_textual.trim()}»`)
-        l.push(`> — ${firma || 'Sin identificar'} · \`${cod}\``)
+        l.push(`> — ${firma || `\`${cod}\``}`)
       }
     }
   }
@@ -1288,7 +1309,42 @@ const enLetra = (n) => EN_LETRA[n] ?? String(n)
  * `ctx.yaCitadas` es por capítulo, no global: repetir una cita en dos capítulos
  * distintos es legítimo — el lector de uno no ha leído el otro.
  */
+/**
+ * Los capítulos que **no llevan cita textual**, sino una línea de fuentes.
+ *
+ * ⚠️ El bloque de arquitectura y el resumen son **argumento, no evidencia**: su
+ * prosa ya afirma lo que la cita repetía —«el MRP no corre», «la nómina lleva
+ * siete años sin interfaz»— y la cita solo reforzaba, en registro coloquial.
+ * Decidido con Jesús el 17 de septiembre: ahí la cita se sustituye por la
+ * acreditación, que **conserva la trazabilidad y sube el registro**.
+ *
+ * Los capítulos del levantamiento (2 al 11) **sí las conservan**: ahí la cita no
+ * ilustra, prueba. Es la diferencia entre sostener un argumento y sostener un
+ * hecho, y borrarla ahí dejaría al informe diciendo cosas que nadie dijo.
+ */
+const SIN_CITA_TEXTUAL = new Set([
+  'resumen-ejecutivo',
+  'oportunidades',
+  'donde-no-va-la-ia',
+  'arquitectura-ia',
+  'hoja-de-ruta',
+])
+
 function pegarCitas(l, bloque, ctx) {
+  // En los capítulos de argumento, una sola línea de fuentes al pie del bloque.
+  if (SIN_CITA_TEXTUAL.has(ctx.etiqueta)) {
+    const cods = []
+    for (const [cod] of bloque.fuentes ?? []) {
+      if (SIN_CONSENTIMIENTO.has(cod)) continue
+      if (!cods.includes(cod)) cods.push(cod)
+    }
+    if (cods.length) {
+      l.push('')
+      l.push(`*Fuentes · ${cods.map((c) => `\`${c}\``).join(' · ')}*`)
+    }
+    return
+  }
+
   for (const [cod, tit] of bloque.fuentes ?? []) {
     if (SIN_CONSENTIMIENTO.has(cod)) {
       console.warn(`  ⛔ ${ctx.etiqueta}: ${cod} no puede citarse (sin consentimiento). Omitida en «${bloque.titulo}».`)
@@ -1305,10 +1361,10 @@ function pegarCitas(l, bloque, ctx) {
       continue
     }
     ctx.yaCitadas.add(`${cod}|${tit}`)
-    const firma = [f.entrevistas?.entrevistado_nombre, f.areas?.nombre].filter(Boolean).join(' · ')
+    const firma = acreditar(f.entrevistas?.codigo, f.areas?.nombre)
     l.push('')
     l.push(`> «${f.cita_textual.trim()}»`)
-    l.push(`> — ${firma || 'Sin identificar'} · \`${cod}\``)
+    l.push(`> — ${firma || `\`${cod}\``}`)
   }
 }
 
@@ -1828,11 +1884,9 @@ const MARCA_CIFRA = {
   'sin confirmar': 'sin confirmar',
 }
 
-/** Nombre de quien habló en una sesión, del padrón. Las grupales no tienen. */
-function firmaDeSesion(codigo, porCodigo) {
-  const e = porCodigo.get(codigo)
-  if (!e?.entrevistado_nombre) return `\`${codigo}\``
-  return `${e.entrevistado_nombre} · \`${codigo}\``
+/** La acreditación de una cifra: el código de sesión, sin nombre. */
+function firmaDeSesion(codigo) {
+  return `\`${codigo}\``
 }
 
 async function cifrasDelLevantamiento() {
@@ -1863,7 +1917,7 @@ async function cifrasDelLevantamiento() {
       }
       if (!porCodigo.has(c)) desconocidas.push(c)
       usadas.add(c)
-      buenos.push(firmaDeSesion(c, porCodigo))
+      buenos.push(firmaDeSesion(c))
     }
     return buenos.join('; ') || '—'
   }
@@ -2034,9 +2088,7 @@ async function lasOportunidades() {
     for (const o of grupo.oportunidades) {
       const h = porTitulo.get(o.h)
       if (!h) continue
-      const quien = [h.entrevistas?.entrevistado_nombre, h.entrevistas?.codigo ? `\`${h.entrevistas.codigo}\`` : null]
-        .filter(Boolean)
-        .join(' · ')
+      const quien = h.entrevistas?.codigo ? `\`${h.entrevistas.codigo}\`` : ''
       l.push(`- **${o.h}** — ${h.descripcion ?? ''} ${quien ? `*(${quien})*` : ''}`)
     }
   }
@@ -2319,9 +2371,7 @@ async function inventarioDeTrabas() {
     l.push('| Traba | Tipo | Impacto | Sesión |')
     l.push('|---|---|---|---|')
     for (const h of suyas.sort((a, b) => a.titulo.localeCompare(b.titulo, 'es'))) {
-      const quien = [h.entrevistas?.entrevistado_nombre, h.entrevistas?.codigo]
-        .filter(Boolean)
-        .join(' · ')
+      const quien = h.entrevistas?.codigo ?? ''
       const imp = h.impacto ? h.impacto[0].toUpperCase() + h.impacto.slice(1) : '—'
       l.push(`| **${h.titulo}** | ${ROTULO_TRABA[h.tipo] ?? h.tipo} | ${imp} | ${quien || '—'} |`)
     }
