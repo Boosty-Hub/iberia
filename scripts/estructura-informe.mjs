@@ -1547,11 +1547,43 @@ async function capituloConCitas(archivo, etiqueta, entradaDeHallazgos) {
 
   l.push(taller.entrada)
 
+  // --- El cuadro de mando, si el taller lo trae ------------------------------
+  //
+  // ⚠️ **Opcional y calculado.** Lo lleva el 13 y no el 6, porque el 13 tiene
+  // seis filtros comparables entre sí y el 6 son nueve bloques de argumento que
+  // no forman una serie. Un cuadro de mando sobre cosas que no son comparables
+  // es decoración. Los casos se cuentan de la propia lista de cada bloque.
+  if (taller.cuadro) {
+    const q = taller.cuadro
+    const conFiltro = taller.bloques.filter((b) => b.filtro)
+    const casos = conFiltro.reduce((t, b) => t + (b.casos?.length ?? 0), 0)
+    l.push('')
+    l.push(`## ${q.titulo}`)
+    l.push('')
+    l.push(q.entrada)
+    l.push('')
+    l.push('| # | Se resuelve con | Casos | Quién lo hace | Naturaleza |')
+    l.push('|---|---|---|---|---|')
+    conFiltro.forEach((b, i) => {
+      l.push(
+        `| **${i + 1}** | ${b.filtro} | ${(b.casos ?? []).length} | ${b.dueno ?? '—'} | ${b.naturaleza ?? '—'} |`
+      )
+    })
+    l.push('')
+    l.push(q.cierre.replaceAll('{CASOS}', String(casos)))
+  }
+
   for (const bloque of taller.bloques) {
     l.push('')
     l.push(`## ${bloque.titulo}`)
     l.push('')
     l.push(bloque.texto)
+    // Los casos del filtro, en lista: son etiquetas cortas y en tabla de una
+    // columna se leerían peor que como viñetas.
+    if (bloque.casos?.length) {
+      l.push('')
+      for (const c of bloque.casos) l.push(`- ${c}`)
+    }
     pegarCitas(l, bloque, ctx)
   }
 

@@ -110,6 +110,28 @@ cierre debería salir del mismo sitio que la tabla que la sostiene — por eso a
 Se completó de paso `EN_LETRA` con los números del 1 al 13, que faltaban: el cierre decía «6
 de las oportunidades» en medio de un párrafo de prosa.
 
+### Y cuadro de mando en la 13
+
+Mismo tratamiento para **«Dónde no va la IA»**. Ahí el cuadro tiene una columna que no tienen
+los otros dos y es la que más pesa: **quién lo tiene que hacer**.
+
+```
+1  Configurar el ERP              5 casos   TI + proveedor de JD
+2  Conectar dos sistemas          4 casos   TI + proveedores
+3  Decidir y escribirlo           6 casos   Las áreas y la dirección
+4  Comprar o autorizar            5 casos   Compras y Finanzas
+5  Disciplina de proceso          1 caso    Cada área, con Excel
+6  Arreglar la captura primero    2 casos   Operaciones
+```
+
+**23 casos que salen del alcance de IA.** El cierre dice lo que el cuadro no puede: no
+desaparecen, cambian de dueño y de partida — y si no se les asigna dueño explícito quedan
+esperando a que los resuelva el programa de IA, que es lo único con presupuesto asignado.
+
+⚠️ **El cuadro es opcional en `capituloConCitas`, no incrustado.** Lo lleva el 13 y no el 6,
+porque el 13 tiene seis filtros comparables entre sí y el 6 son nueve bloques de argumento que
+no forman una serie. **Un cuadro de mando sobre cosas que no son comparables es decoración.**
+
 ---
 
 ## 17 de septiembre de 2026 · Sesión 24 — el informe se acredita por código, no por nombre
