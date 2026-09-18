@@ -64,6 +64,54 @@ cláusula 5. Aquí solo lo urgente:
 
 ---
 
+## 17 de septiembre de 2026 · Sesión 26 — la 08 pasa de prosa a tablas
+
+Jesús pidió menos texto puro en **«Riesgo y continuidad»**. El capítulo pasa de nueve bloques
+de prosa a **seis tablas y dos bloques**, y baja de 12.841 a 10.194 caracteres diciendo más.
+
+```
+Los dos ataques              comparados en paralelo, seis filas
+Qué resistió y qué cayó      siete componentes con su estado
+Qué perdió cada área         14 filas · generada de la base
+Levantar no es recuperar     las cuatro mediciones del mismo incidente
+Lo que se hizo después       ocho medidas con qué resuelve cada una
+Lo que sigue abierto         cinco frentes · con quién lo cierra
+```
+
+### La tabla que justifica el capítulo
+
+**«Qué perdió cada área, y si volvió»** es lo que el capítulo prometía y estaba en prosa. Ahora
+se genera: **el área y la sesión salen de la base** por el título del hallazgo, y el taller
+solo aporta el juicio editorial —qué se perdió, en corto, y si volvió—.
+
+```
+14 pérdidas · 6 no volvieron · 6 parciales · 2 recuperadas
+```
+
+⚠️ **Ese conteo se cuenta, no se escribe.** Es la tesis del capítulo: una cifra tecleada
+seguiría diciendo lo mismo el día que se añada una pérdida más, que es como un documento
+empieza a mentir sin que nadie lo toque.
+
+Y la cronología comparada deja ver algo que la prosa escondía: **la fila que más pesa es la
+última**, «qué se hizo después» — *nada estructural* en mayo de 2025 contra la respuesta
+completa de febrero de 2026.
+
+### 🔴 Un borrado accidental, y cómo se recuperó
+
+Al reescribir el generador delimité el reemplazo con «hasta `const GENERADAS`» en vez de
+«hasta el cierre de la función». **Se llevó por delante 939 líneas** — todas las generadoras
+declaradas entre medias. El script dejó de arrancar con `elResumenEjecutivo is not defined`.
+
+Recuperado con `git checkout` del archivo, que estaba commiteado, y rehecho **acotando por el
+cierre real de la función** —la primera línea que es exactamente `}`—.
+
+⚠️ La lección: **delimitar un reemplazo por «lo siguiente que reconozco» es frágil** cuando
+entre medias hay más código del que uno recuerda. Y el motivo de que costara dos minutos y no
+una tarde es que el archivo estaba commiteado: **commitear antes de una cirugía grande no es
+ceremonia.**
+
+---
+
 ## 17 de septiembre de 2026 · Sesión 25 — cuadro de mando en la 12, y una cifra que me inventé
 
 La **12 · Oportunidades** abre ahora con el mismo cuadro de mando que la 09: los cuatro grupos

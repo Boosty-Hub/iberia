@@ -1445,19 +1445,93 @@ async function riesgoYContinuidad() {
   const huerfanas = []
   const ctx = { porClave, huerfanas, yaCitadas: new Set(), etiqueta: 'riesgo-continuidad' }
 
-  // Si no se pudo contar, la entrada va sin cifras antes que con cifras falsas.
-  const entrada = cuenta
-    ? taller.entrada
-        .replace('{SESIONES}', enLetra(cuenta.sesiones))
-        .replace('{TOTAL}', enLetra(cuenta.total))
-        .replace('{CONHALLAZGO}', enLetra(cuenta.conHallazgo))
-    : taller.entrada.replace(
-        /El ataque aparece en[^.]+\. /,
-        'El ataque aparece en buena parte de las sesiones del levantamiento. '
-      )
-  l.push(entrada)
+  l.push(
+    cuenta
+      ? taller.entrada
+          .replace('{SESIONES}', enLetra(cuenta.sesiones))
+          .replace('{TOTAL}', enLetra(cuenta.total))
+          .replace('{CONHALLAZGO}', enLetra(cuenta.conHallazgo))
+      : taller.entrada.replace(
+          /El ataque aparece en[^.]+\. /,
+          'El ataque aparece en buena parte de las sesiones del levantamiento. '
+        )
+  )
 
-  for (const bloque of taller.bloques) {
+  /** Una tabla del taller, con su entrada y su cierre. */
+  const tabla = (bloque, cabecera) => {
+    if (!bloque) return
+    l.push('')
+    l.push(`## ${bloque.titulo}`)
+    l.push('')
+    l.push(bloque.entrada)
+    l.push('')
+    l.push(`| ${cabecera.join(' | ')} |`)
+    l.push(`|${cabecera.map(() => '---').join('|')}|`)
+    for (const fila of bloque.filas) l.push(`| ${fila.join(' | ')} |`)
+    if (bloque.cierre) {
+      l.push('')
+      l.push(bloque.cierre)
+    }
+  }
+
+  tabla(taller.cronologia, taller.cronologia?.columnas ?? ['', '', ''])
+  tabla(taller.resistio, ['Componente', 'Estado', 'Qué pasó'])
+
+  // --- El inventario de pérdidas -------------------------------------------
+  //
+  // ⚠️ **El área y la sesión salen de la base, no del taller.** Escritas a mano
+  // se separarían del hallazgo en cuanto alguien reasignara un área, y esta es
+  // justo la tabla que un gerente va a leer buscando su propia fila.
+  //
+  // ⚠️ Y el conteo de «no volvió» **se cuenta**: es la tesis del capítulo. Una
+  // cifra tecleada seguiría diciendo lo mismo el día que se añada una pérdida
+  // más, que es como un documento empieza a mentir sin que nadie lo toque.
+  if (taller.perdidas) {
+    const pd = taller.perdidas
+    const porTitulo = new Map([...porClave.values()].map((h) => [h.titulo, h]))
+    const sinCasar = []
+    const ESTADO = { No: '🔴 **No**', Parcial: '⚠️ Parcial', Sí: '✅ Sí' }
+    const cuentaEstado = { No: 0, Parcial: 0, Sí: 0 }
+
+    l.push('')
+    l.push(`## ${pd.titulo}`)
+    l.push('')
+    l.push(pd.entrada)
+    l.push('')
+    l.push('| Área | Qué perdió | ¿Volvió? | Sesión |')
+    l.push('|---|---|---|---|')
+    for (const [titulo, que, volvio] of pd.filas) {
+      const h = porTitulo.get(titulo)
+      if (!h) {
+        sinCasar.push(titulo)
+        continue
+      }
+      const cod = h.entrevistas?.codigo
+      if (SIN_CONSENTIMIENTO.has(cod)) continue
+      cuentaEstado[volvio] = (cuentaEstado[volvio] ?? 0) + 1
+      l.push(`| **${h.areas?.nombre ?? '—'}** | ${que} | ${ESTADO[volvio] ?? volvio} | \`${cod ?? '—'}\` |`)
+    }
+    if (sinCasar.length) {
+      console.warn(`  ⚠️ riesgo-continuidad: ${sinCasar.length} pérdida(s) sin casar en la base:`)
+      for (const t of sinCasar) console.warn(`     ${t}`)
+    }
+    const totalP = cuentaEstado.No + cuentaEstado.Parcial + cuentaEstado.Sí
+    if (pd.cierre) {
+      l.push('')
+      l.push(
+        pd.cierre
+          .replaceAll('{TOTAL_P}', enLetra(totalP))
+          .replaceAll('{NO_VOLVIO}', enLetra(cuentaEstado.No))
+          .replaceAll('{PARCIAL}', enLetra(cuentaEstado.Parcial))
+      )
+    }
+    console.log(
+      `  · riesgo-continuidad: ${totalP} pérdidas · ${cuentaEstado.No} no volvieron · ` +
+        `${cuentaEstado.Parcial} parciales · ${cuentaEstado.Sí} recuperadas`
+    )
+  }
+
+  for (const bloque of taller.bloques ?? []) {
     l.push('')
     l.push(`## ${bloque.titulo}`)
     l.push('')
@@ -1465,8 +1539,9 @@ async function riesgoYContinuidad() {
     pegarCitas(l, bloque, ctx)
   }
 
-  // El puente al capítulo 9: los seis hallazgos del bloque del ataque, con el
-  // ancla calculada por el mismo slugger que pone el id del encabezado.
+  tabla(taller.medidas, ['Medida', 'Qué es', 'Qué resuelve'])
+  tabla(taller.abiertos, ['Frente', 'Por qué sigue abierto', 'Quién lo cierra'])
+
   const destacados = (() => {
     try {
       return JSON.parse(leerTaller('hallazgos-destacados.json'))
@@ -1474,23 +1549,15 @@ async function riesgoYContinuidad() {
       return null
     }
   })()
-
-  if (destacados) {
-    const suyos = bloqueDeHallazgos(destacados, 'Lo que el ataque se llevó, y no volvió')
-    if (suyos.length) {
+  if (destacados && taller.hallazgos?.length) {
+    const enlaces = enlacesAHallazgos(destacados, taller.hallazgos, 'riesgo-continuidad')
+    if (enlaces.length) {
       l.push('')
       l.push('## Los hallazgos de este capítulo')
       l.push('')
-      l.push(
-        `Los ${enLetra(suyos.length)} hallazgos que el capítulo 9 desarrolla sobre el incidente, ` +
-          'cada uno con su cita completa:'
-      )
+      l.push('Los que el capítulo de hallazgos desarrolla sobre el incidente, con su cita completa:')
       l.push('')
-      for (const h of suyos) {
-        l.push(
-          `- [**H-${h.clave}** · ${h.titulo}](${RUTA_HALLAZGOS}#${anclaDeHallazgo(h.clave, h.titulo)})`
-        )
-      }
+      l.push(...enlaces)
     }
   }
 
