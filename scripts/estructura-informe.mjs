@@ -2505,6 +2505,50 @@ async function inventarioDeTrabas() {
       'cita hasta que alguien que estuvo en esa sesión las confirma o las descarta.'
   )
 
+  // --- El cuadro de carga por área -------------------------------------------
+  //
+  // ⚠️ Sin esto el capítulo son veinticinco tablas seguidas: sirve de referencia
+  // —cada gerente busca la suya— pero **no deja ver el conjunto**, que es la
+  // pregunta que un comité hace mirando este capítulo. Para saber quién carga
+  // más había que recorrer las veinticinco cabeceras contando.
+  //
+  // Todas las columnas se calculan. No hay nada escrito a mano.
+  l.push('')
+  l.push('## Dónde está concentrada la fricción')
+  l.push('')
+  l.push(
+    'Una fila por área, de mayor a menor carga. **La columna del impacto alto es la que ordena ' +
+      'el trabajo**; el reparto entre cuello de botella y trabajo manual dice de qué tipo es.'
+  )
+  l.push('')
+  l.push('| Área | Trabas | Impacto alto | Cuello de botella | Trabajo manual |')
+  l.push('|---|---|---|---|---|')
+  for (const [area, suyas] of orden) {
+    const alto = suyas.filter((h) => h.impacto === 'alto').length
+    const cuello = suyas.filter((h) => h.tipo === 'cuello_botella').length
+    const manual = suyas.filter((h) => h.tipo === 'trabajo_manual').length
+    l.push(`| **${area}** | ${suyas.length} | ${alto || '—'} | ${cuello || '—'} | ${manual || '—'} |`)
+  }
+  // ⚠️ Sin línea en blanco: una fila separada del cuerpo renderiza como **otra
+  // tabla** de una sola fila, con su propia cabecera vacía. Se vio en la
+  // primera corrida.
+  l.push(
+    `| **Total** | **${trabas.length}** | **${altas}** | ` +
+      `**${trabas.filter((h) => h.tipo === 'cuello_botella').length}** | ` +
+      `**${trabas.filter((h) => h.tipo === 'trabajo_manual').length}** |`
+  )
+
+  // La lectura de la tabla, con las cifras que acaba de producir.
+  const top = orden.slice(0, 3)
+  const enTop = top.reduce((t, [, x]) => t + x.length, 0)
+  l.push('')
+  l.push(
+    `**${enLetra(top.length)} áreas concentran ${enTop} de las ${trabas.length} trabas** — ` +
+      `${top.map(([a, x]) => `${a} (${x.length})`).join(', ')}. ` +
+      'No es casualidad: son las tres que más papel mueven y las que más dependen de que otro ' +
+      'termine primero.'
+  )
+
   for (const [area, suyas] of orden) {
     l.push('')
     l.push(`## ${area} · ${suyas.length}`)

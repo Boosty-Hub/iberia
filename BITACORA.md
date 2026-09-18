@@ -110,6 +110,31 @@ entre medias hay más código del que uno recuerda. Y el motivo de que costara d
 una tarde es que el archivo estaba commiteado: **commitear antes de una cirugía grande no es
 ceremonia.**
 
+### Y cuadro de carga en la 10
+
+La 10 ya era todo tablas —25, una por área— así que aquí no había prosa que convertir. Lo que
+faltaba era **ver el conjunto**: para saber quién carga más había que recorrer las veinticinco
+cabeceras contando.
+
+Se le añadió **«Dónde está concentrada la fricción»**: una fila por área con sus trabas, las de
+impacto alto y el reparto entre cuello de botella y trabajo manual, ordenada de mayor a menor y
+con fila de total.
+
+```
+Gerencia de Distribución   22   13 altas   13 cuello · 9 manual
+Gerencia de Compras        16   10 altas    8 cuello · 8 manual
+Gerencia de Planta         14    9 altas    9 cuello · 5 manual
+Total                     149   91 altas   83 cuello · 66 manual
+```
+
+**Tres áreas concentran 52 de las 149** — y la lectura que se añade debajo es que son las tres
+que más papel mueven y las que más dependen de que otro termine primero.
+
+⚠️ Detalle de render que costó una corrida: **la fila de total no puede llevar línea en blanco
+delante**. Separada del cuerpo, Markdown la trata como **otra tabla** de una sola fila con
+cabecera vacía. La comprobación ahora cuenta las filas de la primera tabla: 25 áreas + total =
+26.
+
 ---
 
 ## 17 de septiembre de 2026 · Sesión 25 — cuadro de mando en la 12, y una cifra que me inventé
