@@ -91,25 +91,37 @@ sección 2**, que es justo la que se va a fusionar:
 
 ### El mapa interactivo
 
-`/informe/mapa-interactivo`, con la figura canónica de un mapa de procesos: estratégicos
-arriba, la cadena operativa en el medio y **en flujo**, soporte abajo. Abrir una caja saca
-sus procesos y cada uno salta a su fila dentro de la ficha.
+`/informe/mapa-interactivo`. **Se rehizo en la misma sesión**: la primera versión eran tres
+bandas apiladas, y Jesús trajo un ejemplo en PPTX de cómo lo quería. Ahora es un **lienzo
+navegable** con el lenguaje de ese ejemplo y la paleta de Iberia: se arrastra, se acerca con
+Ctrl + rueda, y **al pulsar una caja el lienzo se centra en ella** y abre su panel de
+procesos. Leyenda arrastrable y plegable, pestañas de familia abajo, controles de zoom.
 
-**Lo que costó decidir fue dónde vive el dato.** El inventario estaba solo en el taller, y
-el mapa lo necesita al leer, no al generar. Leer el JSON del disco daba una página que
-funciona en local y sale vacía al desplegar; un módulo generado iría a un repositorio
-público; `public/` se sirve sin sesión. Así que dos tablas con RLS, sembradas desde el
-taller — **que sigue mandando**: cada siembra pisa.
+**Lo que costó decidir fue dónde vive el dato.** El inventario estaba solo en el taller, y el
+mapa lo necesita al leer, no al generar. Leer el JSON del disco daba una página que funciona
+en local y sale vacía al desplegar; un módulo generado iría a un repositorio público;
+`public/` se sirve sin sesión. Así que dos tablas con RLS, sembradas desde el taller —**que
+sigue mandando**: cada siembra pisa.
+
+Tres cosas que se vieron en pantalla y no en el código:
+
+- ⚠️ **El centrado iba en el `onClick` y se desviaba 169 px.** El panel se abre al lado y le
+  quita ancho al lienzo, así que el cálculo usaba el ancho de antes. Movido a un efecto, que
+  corre con la maqueta ya rehecha: 1 px.
+- ⚠️ **Abrir con todo el mapa a la vista era abrir un mapa ilegible** —veinte cajas a un
+  tercio de tamaño—. Arranca a escala de lectura por el principio de la cadena, y el botón
+  de ver todo da la vista de pájaro.
+- La leyenda flota abajo a la izquierda y tapaba el primer eslabón; el lienzo abre corrido a
+  la derecha, y además la leyenda se pliega.
 
 ⚠️ **No hay ancla por proceso y no la puede haber**: los procesos son filas de una tabla y
-`rehype-slug` solo trabaja sobre encabezados. El enlace lleva a la ficha **más
-`?proceso=`**, y la página de fichas busca la fila por texto y la resalta en ámbar. Si no
-la encuentra no avisa — el lector se queda en la ficha, que es a donde iba igual.
+`rehype-slug` solo trabaja sobre encabezados. El enlace lleva a la ficha **más `?proceso=`**,
+y la página de fichas busca la fila por texto y la resalta en ámbar. Si no la encuentra no
+avisa — el lector se queda en la ficha, que es a donde iba igual.
 
-Dos cosas que se vieron en pantalla y no en el código: la caja abierta de la cadena se
-descuadraba porque la flecha estaba dibujada *dentro* de la caja y la obligaba a ser una
-fila; y la cadena se cortaba en el borde sin decir que seguía. La flecha se fue a un
-envoltorio y el borde lleva desvanecido.
+⚠️ **Las flechas son la secuencia de la cadena y nada más.** Los cruces entre áreas viven en
+la prosa del capítulo 9 y no como dato, así que dibujar una línea entre dos cajas cualesquiera
+sería inventar una relación que nadie validó. La leyenda lo dice en voz alta.
 
 ### Decisión aplazada
 

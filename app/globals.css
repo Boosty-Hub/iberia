@@ -335,169 +335,268 @@ body {
    llamar a `print()`. Hoy el PDF sale de `documentos/`, que es otra ruta. */
 
 /* -----------------------------------------------------------------------------
-   MAPA INTERACTIVO DE PROCESOS
-   La figura canónica: estratégicos arriba, la cadena operativa en el medio y en
-   flujo, los de soporte abajo. Esa forma dice dónde está el valor y quién lo
-   sostiene, así que las tres bandas tienen que leerse **como bandas** y no como
-   tres listas seguidas — de ahí el fondo, el borde y el rótulo de cada una.
+   MAPA INTERACTIVO DE PROCESOS · el lienzo
+   La figura canónica: estratégicos arriba, la cadena de valor en el medio y en
+   flujo, soporte abajo. Veinte cajas no caben legibles en una pantalla, así que
+   el dibujo se arrastra, se acerca y se centra en lo que se pulsa.
    Los tintes son los de las fichas: un macroproceso es del mismo color en los
-   dos sitios o el lector no los relaciona.
+   dos sitios o el lector no los relaciona. Nada de `slate-*`.
    -------------------------------------------------------------------------- */
-.mapa {
-  @apply flex flex-col gap-4;
-}
-.mapa-banda {
-  @apply rounded-2xl border px-4 py-4 sm:px-5;
-}
-.mapa-banda-cabecera {
-  @apply mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-1;
-}
-.mapa-banda-numero {
-  @apply font-mono text-sm font-semibold text-acento-600;
-}
-.mapa-banda-titulo {
-  @apply text-lg font-bold tracking-tight text-marca-900;
-}
-.mapa-banda-rotulo {
-  @apply text-sm text-marca-500 italic;
-}
-.mapa-banda-cuenta {
-  @apply ml-auto rounded-full bg-white/80 px-2.5 py-0.5 font-mono text-xs text-marca-500;
+.mapa-marco {
+  @apply flex flex-col gap-4 lg:flex-row lg:items-start;
 }
 
-.banda-estrategico {
-  @apply border-acento-200/70 bg-acento-50;
+.mapa-lienzo {
+  @apply relative h-[34rem] flex-1 touch-none overflow-hidden rounded-2xl border
+         border-[var(--borde)] select-none lg:h-[44rem];
+  background-color: var(--color-marca-50);
+  /* La retícula dice «esto es un plano y se mueve», y al arrastrar se ve que se
+     mueve. Sin ella, el lienzo parece una imagen quieta. */
+  background-image: radial-gradient(var(--color-marca-200) 1px, transparent 1px);
+  background-size: 22px 22px;
+  cursor: grab;
 }
-.banda-operativo {
-  @apply border-oro-200/70 bg-oro-50;
-}
-/* La cadena no cabe en ninguna pantalla —nueve eslabones—, así que se desplaza.
-   Un corte seco en el borde derecho se lee como «aquí se acaba»: el desvanecido
-   es lo que dice que sigue. Se apaga al llegar al final con `animation-timeline`
-   donde el navegador lo soporte, y donde no, se queda —que es el caso benigno. */
-.banda-operativo {
-  @apply relative;
-}
-.banda-operativo::after {
-  content: '';
-  @apply pointer-events-none absolute top-0 right-0 bottom-0 hidden w-16 rounded-r-2xl lg:block;
-  background: linear-gradient(to right, transparent, var(--color-oro-50));
-}
-.banda-soporte {
-  @apply border-marca-200 bg-marca-100;
+.mapa-lienzo:active {
+  cursor: grabbing;
 }
 
-/* Las bandas sin secuencia van en rejilla. */
-.mapa-rejilla {
-  @apply grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3;
+/* El mundo: se mueve entero con un `transform`, así que nada de aquí adentro se
+   recalcula al arrastrar ni al acercar. */
+.mapa-mundo {
+  @apply absolute top-0 left-0 origin-top-left;
+}
+.mapa-mundo.suave {
+  transition: transform 420ms cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-/* La cadena operativa va en flujo y se desplaza si no cabe: el orden **es**
-   información —de la planificación a la venta— y apilarla en rejilla lo
-   borraría. En teléfono se apila igualmente, porque una fila de nueve cajas a
-   360 px no es un mapa, es un pasillo. */
-.mapa-cadena {
-  @apply grid grid-cols-1 gap-3 sm:grid-cols-2 lg:flex lg:items-start lg:gap-0 lg:overflow-x-auto lg:pb-2;
+.mapa-hilos {
+  @apply pointer-events-none absolute top-0 left-0;
 }
-.mapa-cadena > .mapa-eslabon {
-  @apply lg:flex lg:w-56 lg:shrink-0 lg:flex-row lg:items-start;
+.mapa-hilo {
+  fill: none;
+  stroke: var(--color-oro-600);
+  stroke-width: 2.5;
+  transition: opacity 200ms;
 }
-/* Abierta crece, pero **no a todo el ancho**: en una fila que se desplaza, una
-   caja a pantalla completa echa a las otras ocho fuera de la vista y el mapa
-   deja de ser un mapa. Crece lo justo para que la lista se lea. */
-.mapa-cadena > .mapa-eslabon.abierto {
-  @apply lg:w-[28rem];
-}
-.mapa-eslabon > .mapa-caja {
-  @apply w-full;
-}
-/* La flecha entre eslabón y eslabón, dibujada con borde. No la lleva el
-   primero, y desaparece cuando la caja está abierta: ahí el flujo deja de ser
-   lo que se está mirando. */
-.mapa-cadena > .mapa-eslabon + .mapa-eslabon::before {
-  content: '';
-  @apply hidden lg:block;
-  align-self: flex-start;
-  margin-top: 2.6rem;
-  width: 0.5rem;
-  height: 0.5rem;
-  margin: 0 0.55rem;
-  border-right: 2px solid var(--color-oro-400);
-  border-bottom: 2px solid var(--color-oro-400);
-  transform: rotate(-45deg);
-  flex: none;
+.mapa-hilo.apagado {
+  opacity: 0.15;
 }
 
-/* La caja de un macroproceso. */
-.mapa-caja {
-  @apply overflow-hidden rounded-xl border border-[var(--borde)] bg-white
-         shadow-[var(--sombra-tarjeta)] transition-shadow;
+.mapa-zona {
+  @apply absolute font-mono text-[0.68rem] tracking-[0.18em] text-marca-400 uppercase;
+  transition: opacity 200ms;
 }
-.mapa-caja:hover {
-  @apply border-acento-300;
-}
-.mapa-caja.abierta {
-  @apply border-acento-400;
-}
-.mapa-caja-cabeza {
-  @apply flex w-full cursor-pointer flex-col gap-1.5 px-4 py-3 text-left transition-colors;
-}
-.mapa-caja-cabeza:hover {
-  @apply bg-marca-50;
-}
-.mapa-caja-numero {
-  @apply font-mono text-xs font-semibold text-acento-600;
-}
-.mapa-caja-nombre {
-  @apply text-sm leading-snug font-semibold text-marca-800;
-}
-.mapa-caja-pie {
-  @apply mt-0.5 flex items-center gap-2;
-}
-.mapa-caja-cuenta {
-  @apply ml-auto rounded-full bg-marca-100 px-2 py-0.5 font-mono text-xs text-marca-500;
-}
-.mapa-nuevo {
-  @apply rounded-full bg-acento-500 px-2 py-0.5 text-[0.65rem] font-semibold tracking-wide
-         text-white uppercase;
+.mapa-zona.apagada {
+  opacity: 0.25;
 }
 
-/* Lo que se abre dentro de la caja. */
-.mapa-caja-cuerpo {
-  @apply border-t border-[var(--borde)] bg-marca-50/60 px-4 py-3;
+/* --- La caja de un macroproceso --------------------------------------------- */
+.nodo {
+  @apply absolute flex cursor-pointer items-start gap-2.5 rounded-xl border border-[var(--borde)]
+         bg-white px-3 py-2.5 text-left shadow-[var(--sombra-tarjeta)];
+  transition:
+    opacity 200ms,
+    box-shadow 160ms,
+    border-color 160ms,
+    transform 160ms;
 }
-.mapa-procesos {
-  @apply flex list-none flex-col gap-0.5;
+.nodo:hover {
+  @apply -translate-y-0.5;
+  box-shadow: 0 10px 22px -12px rgb(0 0 0 / 0.28);
 }
-.mapa-proceso {
-  @apply flex flex-wrap items-baseline gap-x-2 gap-y-0.5 rounded-lg px-2 py-1.5 transition-colors;
+.nodo.apagado {
+  opacity: 0.22;
 }
-.mapa-proceso:hover {
-  @apply bg-acento-50;
+.nodo.elegido {
+  box-shadow: 0 0 0 2px var(--color-acento-400);
 }
-.mapa-proceso-numero {
-  @apply font-mono text-xs text-marca-400;
+
+/* La baldosa del número hace de icono, y es lo que lleva el color de familia. */
+.nodo-icono {
+  @apply flex h-7 w-9 shrink-0 items-center justify-center rounded-md font-mono text-[0.7rem]
+         font-semibold text-white;
 }
-.mapa-proceso-nombre {
-  @apply text-sm text-marca-800;
+.nodo-cuerpo {
+  @apply flex min-w-0 flex-col gap-0.5;
 }
-.mapa-proceso:hover .mapa-proceso-nombre {
-  @apply text-acento-700 underline decoration-acento-300 underline-offset-2;
+.nodo-titulo {
+  @apply line-clamp-2 text-[0.8rem] leading-tight font-semibold;
 }
-.mapa-proceso-area {
-  @apply ml-auto text-xs text-marca-400;
+.nodo-cuenta {
+  @apply font-mono text-[0.68rem] text-marca-400;
 }
-.mapa-etiqueta {
-  @apply ml-1.5 rounded bg-oro-100 px-1.5 py-px text-[0.65rem] font-medium text-oro-800 not-italic;
+.nodo-marcas {
+  @apply mt-0.5 flex flex-wrap items-center gap-1;
 }
-.mapa-fuera {
-  @apply mt-2 border-t border-dashed border-[var(--borde)] pt-2 text-xs text-marca-400;
+
+.n-estrategico .nodo-icono,
+.nodo.n-estrategico .nodo-icono {
+  background-color: var(--color-acento-500);
 }
-.mapa-fuera a {
+.n-estrategico .nodo-titulo {
+  color: var(--color-acento-700);
+}
+.n-operativo .nodo-icono {
+  background-color: var(--color-oro-500);
+}
+.n-operativo .nodo-titulo {
+  color: var(--color-oro-800);
+}
+.n-soporte .nodo-icono {
+  background-color: var(--color-marca-600);
+}
+.n-soporte .nodo-titulo {
+  color: var(--color-marca-800);
+}
+
+.marca-nuevo {
+  @apply rounded bg-acento-500 px-1.5 py-px text-[0.6rem] font-semibold tracking-wide
+         text-white uppercase not-italic;
+}
+.marca-aviso {
+  @apply rounded bg-oro-100 px-1.5 py-px text-[0.62rem] font-medium text-oro-800 not-italic;
+}
+
+/* --- La leyenda, que se arrastra -------------------------------------------- */
+.leyenda {
+  @apply absolute z-20 w-60 rounded-xl border border-[var(--borde)] bg-white/95 px-3.5 py-3
+         shadow-[var(--sombra-tarjeta)] backdrop-blur-sm;
+}
+.leyenda-asa {
+  @apply -mx-3.5 -mt-3 mb-2.5 flex cursor-grab items-baseline gap-1.5 rounded-t-xl border-b
+         border-[var(--borde)] px-3.5 py-2 text-sm text-marca-800;
+}
+.leyenda-asa:active {
+  @apply cursor-grabbing;
+}
+.leyenda-asa span {
+  @apply text-xs font-normal text-marca-400;
+}
+.leyenda-plegar {
+  @apply ml-auto cursor-pointer rounded px-1.5 text-sm leading-none text-marca-400
+         hover:text-acento-600;
+}
+.leyenda.plegada {
+  @apply w-auto;
+}
+.leyenda.plegada .leyenda-asa {
+  @apply mb-0 rounded-xl border-b-0;
+}
+.leyenda.plegada ul,
+.leyenda.plegada .leyenda-nota {
+  @apply hidden;
+}
+.leyenda ul {
+  @apply flex list-none flex-col gap-1.5 text-xs text-marca-600;
+}
+.leyenda li {
+  @apply flex items-center gap-2;
+}
+.ficha-color {
+  @apply h-3 w-6 shrink-0 rounded;
+}
+.ficha-color.n-estrategico {
+  background-color: var(--color-acento-500);
+}
+.ficha-color.n-operativo {
+  background-color: var(--color-oro-500);
+}
+.ficha-color.n-soporte {
+  background-color: var(--color-marca-600);
+}
+.ficha-linea {
+  @apply h-0.5 w-6 shrink-0 rounded;
+  background-color: var(--color-oro-600);
+}
+.leyenda-nota {
+  @apply mt-2.5 border-t border-dashed border-[var(--borde)] pt-2 text-[0.68rem] leading-snug
+         text-marca-400;
+}
+.leyenda-nota a {
   @apply text-acento-600 hover:underline;
 }
-.mapa-ficha {
-  @apply mt-3 inline-block text-xs font-semibold text-acento-600 hover:underline;
+
+/* --- Acercar, alejar, ajustar ------------------------------------------------ */
+.mapa-controles {
+  @apply absolute right-4 bottom-16 z-20 flex flex-col overflow-hidden rounded-xl border
+         border-[var(--borde)] bg-white shadow-[var(--sombra-tarjeta)];
+}
+.mapa-controles button {
+  @apply flex h-9 w-9 cursor-pointer items-center justify-center text-base text-marca-600
+         transition-colors hover:bg-marca-50 hover:text-acento-600;
+}
+.mapa-controles button + button {
+  @apply border-t border-[var(--borde)];
+}
+
+/* --- Las pestañas de familia -------------------------------------------------- */
+.mapa-pestanas {
+  @apply absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 gap-1 rounded-full border
+         border-[var(--borde)] bg-white/95 p-1 shadow-[var(--sombra-tarjeta)] backdrop-blur-sm;
+}
+.mapa-pestanas button {
+  @apply cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-medium whitespace-nowrap
+         text-marca-600 transition-colors hover:bg-marca-50;
+}
+.mapa-pestanas button.activa {
+  @apply bg-acento-500 text-white hover:bg-acento-600;
+}
+
+.mapa-pista {
+  @apply pointer-events-none absolute top-3 right-4 z-10 rounded-full bg-white/80 px-2.5 py-1
+         text-[0.68rem] text-marca-400;
+}
+
+/* --- El panel de la caja elegida ---------------------------------------------- */
+.mapa-panel {
+  @apply flex max-h-[40rem] w-full flex-col overflow-hidden rounded-2xl border
+         border-[var(--borde)] bg-white shadow-[var(--sombra-tarjeta)] lg:w-80 lg:shrink-0;
+}
+.mapa-panel > header {
+  @apply flex items-start gap-2.5 border-b border-[var(--borde)] px-4 py-3;
+}
+.mapa-panel-titulo {
+  @apply min-w-0 flex-1;
+}
+.mapa-panel h3 {
+  @apply text-sm leading-snug font-semibold text-marca-900;
+}
+.mapa-panel header p {
+  @apply mt-0.5 text-xs text-marca-400;
+}
+.mapa-panel header button {
+  @apply -mt-1 cursor-pointer px-1 text-xl leading-none text-marca-300 hover:text-acento-600;
+}
+.mapa-panel-procesos {
+  @apply flex flex-1 list-none flex-col overflow-y-auto px-2 py-2;
+}
+.mapa-panel-procesos a {
+  @apply flex flex-col gap-0.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-acento-50;
+}
+.p-numero {
+  @apply font-mono text-[0.68rem] text-marca-400;
+}
+.p-nombre {
+  @apply text-[0.82rem] leading-snug text-marca-800;
+}
+/* Dentro de una frase el distintivo necesita aire: pegado al nombre se lee como
+   parte de la palabra —«(MRP)NUEVO»—. En la caja no hace falta, que ahí va en su
+   propia línea con `gap`. */
+.p-nombre .marca-nuevo,
+.p-nombre .marca-aviso {
+  @apply ml-1.5;
+}
+.mapa-panel-procesos a:hover .p-nombre {
+  @apply text-acento-700;
+}
+.p-area {
+  @apply text-[0.7rem] text-marca-400;
+}
+.mapa-panel > footer {
+  @apply border-t border-[var(--borde)] px-4 py-3;
+}
+.mapa-panel > footer a {
+  @apply text-xs font-semibold text-acento-600 hover:underline;
 }
 
 /* El botón que lleva al mapa desde la sección. Es la única puerta que tiene, y
