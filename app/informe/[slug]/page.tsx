@@ -99,6 +99,22 @@ export default async function SeccionInformePage({ params }: PageProps<'/informe
         {seccion.subtitulo && <p className="mt-2 text-marca-600">{seccion.subtitulo}</p>}
       </header>
 
+      {/* La puerta al mapa interactivo. Va aquí y no dentro del markdown
+          porque el renderizador descarta el HTML crudo: un botón escrito en el
+          taller llegaría como texto. Y va por slug, igual que `PLEGABLES`:
+          enseñar el mapa es una decisión de esta página, no un atributo del
+          contenido. */}
+      {seccion.slug === 'mapa-procesos' && escrita && (
+        <div className="mt-8 flex flex-wrap items-center gap-3">
+          <Link href="/informe/mapa-interactivo" className="btn-mapa">
+            <span aria-hidden>▦</span> Visitar el mapa interactivo
+          </Link>
+          <span className="text-xs text-marca-400">
+            Los veinte macroprocesos en un solo dibujo, y cada proceso lleva a su ficha.
+          </span>
+        </div>
+      )}
+
       <div className="py-8">
         {escrita ? (
           // «Las fichas de proceso» son veinte macroprocesos y cincuenta mil

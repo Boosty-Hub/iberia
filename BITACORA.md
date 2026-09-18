@@ -64,6 +64,65 @@ cláusula 5. Aquí solo lo urgente:
 
 ---
 
+## 18 de septiembre de 2026 · Sesión 29 — el mapa navegable, y una barra que faltaba
+
+### 🔴 `\p` dentro de una plantilla no es `\p`
+
+La auditoría de nombres cazó esto en una casilla de la sección 5: donde decía
+**«Analista de Operaciones»** había quedado escrito **«…lista de Operaciones»**, con un rol
+pegado delante. En un *template literal* de JavaScript, un escape que el
+lenguaje no reconoce **pierde la barra**, así que el `[^\p{L}]` de `despersonalizar()`
+llegaba al motor como `[^p{L}]` —una clase con las letras p, llave, L— y el límite de
+palabra no existía: «Ana» casaba dentro de «Analista». Va con doble barra.
+
+⚠️ Es la tercera vez que muerde la misma trampa, con `\d`, con `\b` y ahora con `\p`.
+Cuando un regex se arma en una plantilla, **la barra se escribe doble o no está**.
+
+### La auditoría, que era el encargo
+
+Grabaciones, minutos y nombres en las quince secciones. **Todo lo que queda está en la
+sección 2**, que es justo la que se va a fusionar:
+
+| | |
+|---|---|
+| Grabaciones | **0 reales.** Los 14 avisos son «transcripción» del pedido en la API de EXA y del parte de papel a Excel, y los audios de anomalía del transporte — flujos de negocio, no sesiones |
+| Minutos y horas | Las cifras de negocio se quedan, que son hallazgos. De entrevista solo hay dos cosas, las dos en la 2: la línea de «44 horas» y la columna *Duración* |
+| Nombres | **49, todos en la 2.** Fuera de ahí, cero: lo que saltaba era «Fuentes» del rótulo, «Edward» de JD Edwards y Campo, Parada, Mercado y Cruz, que son palabras corrientes |
+
+### El mapa interactivo
+
+`/informe/mapa-interactivo`, con la figura canónica de un mapa de procesos: estratégicos
+arriba, la cadena operativa en el medio y **en flujo**, soporte abajo. Abrir una caja saca
+sus procesos y cada uno salta a su fila dentro de la ficha.
+
+**Lo que costó decidir fue dónde vive el dato.** El inventario estaba solo en el taller, y
+el mapa lo necesita al leer, no al generar. Leer el JSON del disco daba una página que
+funciona en local y sale vacía al desplegar; un módulo generado iría a un repositorio
+público; `public/` se sirve sin sesión. Así que dos tablas con RLS, sembradas desde el
+taller — **que sigue mandando**: cada siembra pisa.
+
+⚠️ **No hay ancla por proceso y no la puede haber**: los procesos son filas de una tabla y
+`rehype-slug` solo trabaja sobre encabezados. El enlace lleva a la ficha **más
+`?proceso=`**, y la página de fichas busca la fila por texto y la resalta en ámbar. Si no
+la encuentra no avisa — el lector se queda en la ficha, que es a donde iba igual.
+
+Dos cosas que se vieron en pantalla y no en el código: la caja abierta de la cadena se
+descuadraba porque la flecha estaba dibujada *dentro* de la caja y la obligaba a ser una
+fila; y la cadena se cortaba en el borde sin decir que seguía. La flecha se fue a un
+envoltorio y el borde lleva desvanecido.
+
+### Decisión aplazada
+
+Jesús está pensando si el informe **quita los códigos de sesión y la tabla de cobertura**
+para quedar solo en prosa formal. Pidió que se le recuerde. Se comprobó que sería
+reversible: de 571 códigos, **569 están en casillas propias y ninguno dentro de una frase**,
+así que es renderizado y no reescritura. Se le dieron tres caminos —bandera al generar, dos
+columnas con botón, o filtrar al leer— y la recomendación de **esperar a que avance la
+validación**: con 2 hallazgos validados de 394, el código es lo que permite que un gerente
+reconozca su conversación y corrija.
+
+---
+
 ## 18 de septiembre de 2026 · Sesión 28 — seis encargos, y un nombre que se escapaba
 
 Jesús pidió seis cosas de una vez sobre el informe. Todas están hechas. Dos merecen quedar

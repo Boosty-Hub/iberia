@@ -736,7 +736,13 @@ function despersonalizar(texto) {
     if (!t.includes(pila)) continue
     // Con límite de palabra unicode: un nombre corto no puede partir otro que lo
     // contenga, y `\b` de JS no sirve con acentos.
-    const re = new RegExp(`(^|[^\p{L}])${pila}(?![\p{L}])`, 'gu')
+    // ⚠️ **`\p` dentro de una plantilla no es `\p`.** En un template literal un
+    // escape que JS no reconoce **pierde la barra**, así que `[^\p{L}]` llegaba al
+    // motor como `[^p{L}]` —una clase con las letras p, llave, L— y el límite de
+    // palabra dejaba de existir: «Analista de Operaciones» salía como «la gerencia
+    // de Contabilidadlista de Operaciones». Va con doble barra. Es la misma trampa
+    // que ya mordió con `\d` y con `\b`.
+    const re = new RegExp(`(^|[^\\p{L}])${pila}(?![\\p{L}])`, 'gu')
     t = t.replace(re, (_, antes) => {
       // A principio de frase el rol va con mayúscula, que arranca en el artículo.
       const inicio = antes === '' || /[.!?:¿¡]\s$/.test(antes) || antes === '\n'

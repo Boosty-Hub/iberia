@@ -54,6 +54,13 @@ export function MarkdownPlegable({
     const porHash = () => revelarAncla(decodeURIComponent(window.location.hash.slice(1)))
     porHash()
     window.addEventListener('hashchange', porHash)
+
+    // Quien llega desde el mapa interactivo viene por un proceso concreto, no
+    // por la ficha. El ancla lo deja en el encabezado del macroproceso; esto lo
+    // lleva hasta su fila.
+    const buscado = new URLSearchParams(window.location.search).get('proceso')
+    if (buscado) senalarProceso(buscado)
+
     return () => window.removeEventListener('hashchange', porHash)
   }, [])
 
@@ -138,4 +145,47 @@ function claseDeNivel(titulo: string) {
   if (limpio.includes('operativo')) return 'plegable-operativo'
   if (limpio.includes('soporte')) return 'plegable-soporte'
   return ''
+}
+
+/**
+ * Resalta la fila del proceso al que se llegó desde el mapa, y salta hasta ella.
+ *
+ * ⚠️ **Se busca por texto porque no hay otra cosa por la que buscar.** Los
+ * procesos viven como filas de una tabla del markdown, y las tablas no producen
+ * anclas —`rehype-slug` solo trabaja sobre encabezados—. Darles una exigiría
+ * HTML crudo, que el renderizador descarta.
+ *
+ * Por eso compara el nombre normalizado contra la primera casilla de cada fila.
+ * Si no lo encuentra **no hace nada y no avisa**: el lector se queda en la ficha
+ * del macroproceso, que es a donde el enlace lo llevó de todos modos.
+ */
+function senalarProceso(nombre: string) {
+  const objetivo = normalizar(nombre)
+  if (!objetivo) return
+
+  requestAnimationFrame(() => {
+    for (const fila of Array.from(document.querySelectorAll('table tbody tr'))) {
+      const celda = fila.querySelector('td')
+      if (!celda || normalizar(celda.textContent ?? '') !== objetivo) continue
+
+      const bloque = fila.closest('details')
+      if (bloque && !bloque.open) bloque.open = true
+
+      fila.classList.add('proceso-senalado')
+      requestAnimationFrame(() => fila.scrollIntoView({ block: 'center' }))
+      // Se apaga solo: un resaltado permanente se confunde con un estado del
+      // documento, y esto es «venías buscando esto».
+      window.setTimeout(() => fila.classList.remove('proceso-senalado'), 2600)
+      return
+    }
+  })
+}
+
+function normalizar(t: string) {
+  return t
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim()
 }

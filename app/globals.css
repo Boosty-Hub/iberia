@@ -334,6 +334,186 @@ body {
    imprime desde esta página, hay que abrir los bloques con JavaScript antes de
    llamar a `print()`. Hoy el PDF sale de `documentos/`, que es otra ruta. */
 
+/* -----------------------------------------------------------------------------
+   MAPA INTERACTIVO DE PROCESOS
+   La figura canónica: estratégicos arriba, la cadena operativa en el medio y en
+   flujo, los de soporte abajo. Esa forma dice dónde está el valor y quién lo
+   sostiene, así que las tres bandas tienen que leerse **como bandas** y no como
+   tres listas seguidas — de ahí el fondo, el borde y el rótulo de cada una.
+   Los tintes son los de las fichas: un macroproceso es del mismo color en los
+   dos sitios o el lector no los relaciona.
+   -------------------------------------------------------------------------- */
+.mapa {
+  @apply flex flex-col gap-4;
+}
+.mapa-banda {
+  @apply rounded-2xl border px-4 py-4 sm:px-5;
+}
+.mapa-banda-cabecera {
+  @apply mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-1;
+}
+.mapa-banda-numero {
+  @apply font-mono text-sm font-semibold text-acento-600;
+}
+.mapa-banda-titulo {
+  @apply text-lg font-bold tracking-tight text-marca-900;
+}
+.mapa-banda-rotulo {
+  @apply text-sm text-marca-500 italic;
+}
+.mapa-banda-cuenta {
+  @apply ml-auto rounded-full bg-white/80 px-2.5 py-0.5 font-mono text-xs text-marca-500;
+}
+
+.banda-estrategico {
+  @apply border-acento-200/70 bg-acento-50;
+}
+.banda-operativo {
+  @apply border-oro-200/70 bg-oro-50;
+}
+/* La cadena no cabe en ninguna pantalla —nueve eslabones—, así que se desplaza.
+   Un corte seco en el borde derecho se lee como «aquí se acaba»: el desvanecido
+   es lo que dice que sigue. Se apaga al llegar al final con `animation-timeline`
+   donde el navegador lo soporte, y donde no, se queda —que es el caso benigno. */
+.banda-operativo {
+  @apply relative;
+}
+.banda-operativo::after {
+  content: '';
+  @apply pointer-events-none absolute top-0 right-0 bottom-0 hidden w-16 rounded-r-2xl lg:block;
+  background: linear-gradient(to right, transparent, var(--color-oro-50));
+}
+.banda-soporte {
+  @apply border-marca-200 bg-marca-100;
+}
+
+/* Las bandas sin secuencia van en rejilla. */
+.mapa-rejilla {
+  @apply grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3;
+}
+
+/* La cadena operativa va en flujo y se desplaza si no cabe: el orden **es**
+   información —de la planificación a la venta— y apilarla en rejilla lo
+   borraría. En teléfono se apila igualmente, porque una fila de nueve cajas a
+   360 px no es un mapa, es un pasillo. */
+.mapa-cadena {
+  @apply grid grid-cols-1 gap-3 sm:grid-cols-2 lg:flex lg:items-start lg:gap-0 lg:overflow-x-auto lg:pb-2;
+}
+.mapa-cadena > .mapa-eslabon {
+  @apply lg:flex lg:w-56 lg:shrink-0 lg:flex-row lg:items-start;
+}
+/* Abierta crece, pero **no a todo el ancho**: en una fila que se desplaza, una
+   caja a pantalla completa echa a las otras ocho fuera de la vista y el mapa
+   deja de ser un mapa. Crece lo justo para que la lista se lea. */
+.mapa-cadena > .mapa-eslabon.abierto {
+  @apply lg:w-[28rem];
+}
+.mapa-eslabon > .mapa-caja {
+  @apply w-full;
+}
+/* La flecha entre eslabón y eslabón, dibujada con borde. No la lleva el
+   primero, y desaparece cuando la caja está abierta: ahí el flujo deja de ser
+   lo que se está mirando. */
+.mapa-cadena > .mapa-eslabon + .mapa-eslabon::before {
+  content: '';
+  @apply hidden lg:block;
+  align-self: flex-start;
+  margin-top: 2.6rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin: 0 0.55rem;
+  border-right: 2px solid var(--color-oro-400);
+  border-bottom: 2px solid var(--color-oro-400);
+  transform: rotate(-45deg);
+  flex: none;
+}
+
+/* La caja de un macroproceso. */
+.mapa-caja {
+  @apply overflow-hidden rounded-xl border border-[var(--borde)] bg-white
+         shadow-[var(--sombra-tarjeta)] transition-shadow;
+}
+.mapa-caja:hover {
+  @apply border-acento-300;
+}
+.mapa-caja.abierta {
+  @apply border-acento-400;
+}
+.mapa-caja-cabeza {
+  @apply flex w-full cursor-pointer flex-col gap-1.5 px-4 py-3 text-left transition-colors;
+}
+.mapa-caja-cabeza:hover {
+  @apply bg-marca-50;
+}
+.mapa-caja-numero {
+  @apply font-mono text-xs font-semibold text-acento-600;
+}
+.mapa-caja-nombre {
+  @apply text-sm leading-snug font-semibold text-marca-800;
+}
+.mapa-caja-pie {
+  @apply mt-0.5 flex items-center gap-2;
+}
+.mapa-caja-cuenta {
+  @apply ml-auto rounded-full bg-marca-100 px-2 py-0.5 font-mono text-xs text-marca-500;
+}
+.mapa-nuevo {
+  @apply rounded-full bg-acento-500 px-2 py-0.5 text-[0.65rem] font-semibold tracking-wide
+         text-white uppercase;
+}
+
+/* Lo que se abre dentro de la caja. */
+.mapa-caja-cuerpo {
+  @apply border-t border-[var(--borde)] bg-marca-50/60 px-4 py-3;
+}
+.mapa-procesos {
+  @apply flex list-none flex-col gap-0.5;
+}
+.mapa-proceso {
+  @apply flex flex-wrap items-baseline gap-x-2 gap-y-0.5 rounded-lg px-2 py-1.5 transition-colors;
+}
+.mapa-proceso:hover {
+  @apply bg-acento-50;
+}
+.mapa-proceso-numero {
+  @apply font-mono text-xs text-marca-400;
+}
+.mapa-proceso-nombre {
+  @apply text-sm text-marca-800;
+}
+.mapa-proceso:hover .mapa-proceso-nombre {
+  @apply text-acento-700 underline decoration-acento-300 underline-offset-2;
+}
+.mapa-proceso-area {
+  @apply ml-auto text-xs text-marca-400;
+}
+.mapa-etiqueta {
+  @apply ml-1.5 rounded bg-oro-100 px-1.5 py-px text-[0.65rem] font-medium text-oro-800 not-italic;
+}
+.mapa-fuera {
+  @apply mt-2 border-t border-dashed border-[var(--borde)] pt-2 text-xs text-marca-400;
+}
+.mapa-fuera a {
+  @apply text-acento-600 hover:underline;
+}
+.mapa-ficha {
+  @apply mt-3 inline-block text-xs font-semibold text-acento-600 hover:underline;
+}
+
+/* El botón que lleva al mapa desde la sección. Es la única puerta que tiene, y
+   por eso va en rojo sólido y no como un enlace más de la prosa. */
+.btn-mapa {
+  @apply inline-flex items-center gap-2 rounded-xl bg-acento-500 px-4 py-2.5 text-sm
+         font-semibold text-white transition-colors hover:bg-acento-600;
+}
+
+/* La fila del proceso al que se llegó desde el mapa. El resaltado es ámbar y no
+   rojo: en este producto el rojo se lee como error. Se apaga solo. */
+.prosa tr.proceso-senalado > td {
+  @apply bg-oro-100;
+  transition: background-color 1.2s ease-out;
+}
+
 /* =============================================================================
    CANAL · el aplicativo de comunicación interna
    Pensado para el teléfono primero. De aquí salió el lenguaje visual del resto

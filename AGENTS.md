@@ -539,6 +539,8 @@ npm run sembrar:horas -- --limpiar          # y borra las que ya no están en el
 npm run importar:padron                     # las 276 personas de Capital Humano
 npm run importar:padron -- --sedes          # el reparto crudo por centro de costo
 npm run informe:estructura                  # las 28 secciones y los anexos que se generan solos
+npm run sembrar:procesos                    # el inventario del taller a la base, para el mapa
+npm run sembrar:procesos -- --revisar       # dice qué sembraría, sin escribir
 npm run generar:guias                       # las 3 guías de entrevista adaptadas a Iberia
 ```
 
@@ -664,6 +666,21 @@ Son **28 secciones** en cuatro partes, y `npm run informe:estructura` es quien l
   nada mientras los hallazgos que lo sostienen sigan en `propuesto`.
 - **Se cita por nombre**, no por cargo. Es decisión de Gabriel: el informe nombra a quien lo
   dijo.
+- **El mapa interactivo (`/informe/mapa-interactivo`) es otra forma de mirar las secciones
+  4 y 5**, no una sección: no está en `SECCIONES`, no sale en el índice y se entra por el
+  botón rojo que vive dentro del mapa de procesos. Tres cosas que conviene no redescubrir:
+  - **El inventario está en la base** —`macroprocesos` y `procesos`, con RLS—, sembrado
+    desde el taller con `sembrar:procesos`. Tenía que estar: `contenido/*` está fuera de
+    git por el NDA, así que leer el JSON del disco daría una página que funciona en local
+    y sale vacía al desplegar; un módulo generado iría a un repositorio público; y
+    `public/` se sirve sin sesión. **El taller sigue mandando**: cada siembra pisa.
+  - **No hay ancla por proceso**, porque los procesos son filas de una tabla y
+    `rehype-slug` solo trabaja sobre encabezados. El enlace va a la ficha del macroproceso
+    **más `?proceso=`**, y la página de fichas busca la fila por texto y la resalta. Si no
+    la encuentra no avisa: el lector se queda en la ficha, que es a donde iba igual.
+  - **El ancla se calcula con el mismo `github-slugger` que el generador.** Construirla a
+    mano dejaría los veinte enlaces apuntando a la nada, y sin error visible.
+
 - Tres secciones existen por una razón que conviene no perder: **«Dónde no va la IA»**
   porque la propuesta promete decir «dónde interviene la IA y dónde no», y porque buena
   parte de los hallazgos se resuelve parametrizando el ERP y no con un modelo; **«La
