@@ -20,8 +20,9 @@
  *     devolver `null` guardaba la sección vacía y borraba lo que ya estaba.
  *  3. **Las secciones de prosa** salen de `contenido/informe/`, que es el taller
  *     donde se redactan, y se escriben **solo si están vacías**. En cuanto alguien
- *     las toca desde `/dashboard/informe`, el editor manda. Con `--rehacer` se
- *     fuerza a traerlas otra vez del taller, pisando lo que haya.
+ *     las corrige en la base, la base manda. Con `--rehacer` se fuerza a traerlas
+ *     otra vez del taller, pisando lo que haya. *(El editor del panel se eliminó el
+ *     25 de septiembre de 2026: el informe se escribe en las sesiones.)*
  *
  * Todo entra **sin publicar**. Un lector de Iberia no ve nada de esto hasta que
  * alguien lo publique a mano: los hallazgos que lo sostienen todavía están
@@ -60,7 +61,24 @@ const SECCIONES = [
   // donde se argumentan. La prosa del resumen sigue en el taller por si vuelve.
   ['portada', 'inicio', 'Inicio', 'El encargo, lo que se cubrió y el mapa de la operación'],
 
-  // --- Levantamiento ---------------------------------------------------------
+  // --- Lo que encontramos ----------------------------------------------------
+  // Reordenado el 25 de septiembre de 2026, con Gabriel: **primero lo que se
+  // encontró, después cómo funciona hoy y al final qué se propone.** Un comité
+  // lee la conclusión primero y la evidencia después. Los hallazgos abren el
+  // documento ubicados en el circuito del negocio, cada uno en el punto donde
+  // ocurre; «Los circuitos del negocio» dejó de ser sección y se fundió aquí (la
+  // vista del flujo) y en «Sistemas y estado del dato» (la de sistemas).
+  //
+  // ⚠️ **`hallazgos`, `sistemas-datos`, `inventario-sistemas`,
+  // `riesgo-continuidad` y `trabas` ya NO se generan**: se reescribieron
+  // ordenadas, en tarjetas y con nivel de criticidad, y se escriben en Supabase.
+  // Este script solo les pone título, número y orden. Por eso salieron de
+  // `GENERADAS`. ⚠️ Los hallazgos conservan su numeración —H-01 a H-42— y sus
+  // títulos: las fichas de proceso los enlazan por número, y ese número lo
+  // calcula `enlacesAHallazgos()` sobre el taller. **No renumerar el taller.**
+  ['hallazgos', 'hallazgos', 'Los hallazgos, en el circuito del negocio', 'Dónde se traba el negocio, punto por punto: los siete patrones y los cuarenta y dos hallazgos que los sostienen'],
+
+  // --- Cómo funciona hoy -----------------------------------------------------
   // El orden es el del argumento, y va por pares: una sección afirma y la
   // siguiente la respalda. Cobertura dice cuánto se escuchó y las cifras qué se
   // midió; «Sistemas y estado del dato» argumenta y el inventario lo enseña.
@@ -83,25 +101,23 @@ const SECCIONES = [
   // mal» y «hagamos esto» faltaba cuantificar el dolor, que es lo que un comité
   // pregunta antes de aprobar un presupuesto.
   ['levantamiento', 'trabas', 'Dónde se traba el trabajo', 'Los patrones que se repiten, con su costo en tiempo y margen'],
-  // La bisagra: todo lo anterior los construye, todo lo posterior actúa sobre ellos.
-  ['levantamiento', 'hallazgos', 'Los hallazgos', 'Los siete patrones del diagnóstico, y los cuarenta y dos hallazgos que los sostienen'],
 
-  // --- Arquitectura ----------------------------------------------------------
-  // Rehecha el 24 de septiembre de 2026, con Gabriel. Primero los circuitos
-  // —dónde espera el trabajo y por dónde viaja el dato—, después qué se puede
-  // hacer, y el plano al final: el sistema Iberia como espejo de JD y la ruta
-  // para construirlo.
+  // --- Qué proponemos --------------------------------------------------------
+  // Rehecha el 24 de septiembre de 2026, con Gabriel: qué se puede hacer, y el
+  // plano al final —el sistema Iberia como espejo de JD— con la ruta para
+  // construirlo.
   //
-  // ⚠️ **`circuitos`, `arquitectura-ia` y `hoja-de-ruta` NO se generan.** Su
-  // prosa se escribe en Supabase y el editor manda: este script solo les pone
-  // título, número y orden. Por eso no están en `GENERADAS`. Los dibujos de
-  // circuitos salen de sus propias tablas (`sembrar:circuitos`).
+  // ⚠️ **`oportunidades`, `arquitectura-ia` y `hoja-de-ruta` NO se generan.** Su
+  // prosa se escribe en Supabase, en las sesiones de trabajo: este script solo
+  // les pone título, número y orden. Las oportunidades salieron el 25/9, cuando
+  // se reordenaron por ola y por módulo del sistema Iberia, cada una con el punto
+  // del circuito y los hallazgos que destraba. Los dibujos de circuitos salen de
+  // sus propias tablas (`sembrar:circuitos`).
   //
   // «Dónde no va la IA» salió como sección: lo que prometía —decir dónde
   // interviene la IA y dónde no— ahora lo dice cada módulo del sistema Iberia,
   // capacidad por capacidad.
-  ['arquitectura', 'circuitos', 'Los circuitos del negocio', 'Dónde espera el trabajo y por dónde viaja el dato'],
-  ['arquitectura', 'oportunidades', 'Las oportunidades, priorizadas', 'Impacto, costo, dependencias y disponibilidad del dato'],
+  ['arquitectura', 'oportunidades', 'Las oportunidades, priorizadas', 'Por ola y por módulo del sistema Iberia: qué destraba cada una y si su dato ya existe'],
   ['arquitectura', 'arquitectura-ia', 'La arquitectura de IA: el sistema Iberia', 'El espejo de JD, sus módulos, dónde opera la IA y la tecnología que lo sostiene'],
   ['arquitectura', 'hoja-de-ruta', 'La ruta de construcción', 'Paso a paso y por olas: qué necesita cada paso y cómo se sabe que funcionó'],
 ]
@@ -203,8 +219,8 @@ ${filasArchivos.join('\n') || '| — | — | — |'}`
 // decide dónde vive cada hallazgo — el orden temático con que se redactaron es
 // bueno para leerlos de corrido, pero el entregable manda otra estructura.
 //
-// Las 236 observaciones en crudo **no** vienen acá: viven en `/dashboard/hallazgos`,
-// que es la mesa de trabajo. Al informe solo llega lo redactado.
+// Las observaciones en crudo **no** vienen acá: viven en la tabla `hallazgos`, que
+// es la mesa de trabajo. Al informe solo llega lo redactado.
 // =============================================================================
 
 const TALLER = 'contenido/informe'
@@ -2793,17 +2809,18 @@ const GENERADAS = {
   inicio: laPortada,
   // Reconectadas paso a paso, a medida que se revisa cada una. El resto sigue
   // desconectado: sus generadoras están escritas arriba y esperan su turno.
-  oportunidades: lasOportunidades,
-  'inventario-sistemas': inventarioDeSistemas,
+  // ⚠️ `mapa-procesos` ya no se pinta —la sección abre el mapa interactivo—,
+  // pero se sigue generando: sin texto, el lector no la ve y con ella se iría el mapa.
   'mapa-procesos': mapaDeProcesos,
-  hallazgos: losHallazgos,
   'fichas-procesos': fichasDeProceso,
-  'sistemas-datos': sistemasYDato,
-  // `arquitectura-ia` y `hoja-de-ruta` salieron el 24/9: se escriben en
-  // Supabase (ver la nota en SECCIONES). `donde-no-va-la-ia` ya no es sección.
-  // Sus generadoras quedan escritas arriba, desconectadas, como las demás.
-  'riesgo-continuidad': riesgoYContinuidad,
-  trabas: dondeSeTraba,
+  // `arquitectura-ia` y `hoja-de-ruta` salieron el 24/9, y el 25/9 salieron
+  // `hallazgos`, `sistemas-datos`, `inventario-sistemas`, `riesgo-continuidad`,
+  // `trabas` y `oportunidades`: se reescribieron en tarjetas con nivel —las
+  // oportunidades, por ola y por módulo del sistema Iberia— y se escriben en
+  // Supabase (ver la nota en SECCIONES). `donde-no-va-la-ia` y `circuitos` ya no
+  // son secciones. Sus generadoras quedan escritas arriba, desconectadas, como las
+  // demás: `losHallazgos`, `sistemasYDato`, `inventarioDeSistemas`,
+  // `riesgoYContinuidad`, `dondeSeTraba` y `lasOportunidades`.
 }
 
 /**
@@ -2984,4 +3001,4 @@ if (huerfanas.length) {
   }
 }
 
-console.log('Todo entra sin publicar. Se publica a mano desde /dashboard/informe.\n')
+console.log('Todo entra sin publicar. Se publica en sesión, sección por sección.\n')

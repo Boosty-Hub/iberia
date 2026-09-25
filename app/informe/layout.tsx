@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { cerrarSesion } from '@/app/login/actions'
-import { IconoEditar, IconoPanel, IconoSalir } from '@/components/iconos'
+import { IconoPanel, IconoSalir } from '@/components/iconos'
 import GithubSlugger from 'github-slugger'
 import { IndiceInforme, type EntradaIndice, type NivelIndice } from '@/components/indice-informe'
 import { MenuInforme } from '@/components/informe/menu-informe'
@@ -98,13 +98,6 @@ export default async function InformeLayout({ children }: LayoutProps<'/informe'
           {/* En teléfono, solo iconos de 40 px: con texto no cabían junto a la
               marca y la partían en dos renglones. */}
           <div className="ml-auto flex items-center gap-2">
-            {puedeEditar && puede(sesion, 'modulo:informe') && (
-              // En teléfono no: la sección ya trae su «Editar» junto a la miga de pan.
-              <Link href="/dashboard/informe" className="btn-neutro hidden h-10 px-3 text-xs sm:inline-flex" aria-label="Editar el informe">
-                <IconoEditar className="h-4 w-4" />
-                <span className="hidden sm:inline">Editar</span>
-              </Link>
-            )}
             {puede(sesion, 'modulo:panel') && (
               <Link href="/dashboard" className="btn-neutro h-10 min-w-10 px-2.5 text-xs sm:px-3" aria-label="Ir al panel">
                 <IconoPanel className="h-4 w-4" />
@@ -124,7 +117,7 @@ export default async function InformeLayout({ children }: LayoutProps<'/informe'
         {/* El índice, con el lenguaje de la barra del panel: columna blanca de
             256 px con borde a la derecha. Se pega debajo de la cabecera, que
             mide 60 px. En teléfono se va: allí el índice lo abre el botón de menú. */}
-        <aside className="hidden w-64 shrink-0 border-r border-[var(--borde)] bg-white lg:block">
+        <aside className="informe-indice hidden w-64 shrink-0 border-r border-[var(--borde)] bg-white lg:block">
           <div className="sticky top-[60px] max-h-[calc(100vh-60px)] overflow-y-auto">
             {visibles.length > 0 && <IndiceInforme secciones={visibles} />}
           </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { Markdown } from '@/components/markdown'
+import { normalizarNombre } from '@/lib/rehype-informe'
 
 /**
  * El markdown de una sección, plegado por sus encabezados de nivel 2.
@@ -41,9 +42,20 @@ export function revelarAncla(id: string) {
     if (!n.open) n.open = true
   }
 
+  // ⚠️ **Si el ancla es el título de una ficha o de un nivel, se salta a su barra,
+  // no al encabezado de adentro.** El `###` que lleva el id va dentro del cuerpo,
+  // debajo del resumen plegable: saltando a él, la barra con el nombre de la ficha
+  // quedaba escondida arriba y parecía que se había caído más abajo de donde
+  // empieza, y había que subir con la rueda. La barra lleva su `scroll-margin-top`
+  // para no quedar debajo de la cabecera fija.
+  const contenedor = destino.closest('details')
+  const esSuTitulo =
+    contenedor?.querySelector(':scope > .plegable-cuerpo > .prosa > :first-child') === destino
+  const objetivo = contenedor && esSuTitulo ? contenedor : destino
+
   // El salto se rehace tras abrir: el intento del navegador, si lo hubo, cayó
   // sobre un elemento que todavía no tenía altura.
-  requestAnimationFrame(() => destino.scrollIntoView({ block: 'start' }))
+  requestAnimationFrame(() => objetivo.scrollIntoView({ block: 'start' }))
 }
 
 type Ficha = { titulo: string; cuerpo: string }
@@ -52,10 +64,15 @@ type Nivel = { titulo: string; cuerpo: string; fichas: Ficha[] }
 export function MarkdownPlegable({
   contenido,
   className,
+  nuevos,
 }: {
   contenido: string
   className?: string
+  /** Procesos y macroprocesos nuevos, normalizados: llevan su marca. */
+  nuevos?: string[]
 }) {
+  const esNuevo = (titulo: string) =>
+    Boolean(nuevos?.includes(normalizarNombre(titulo.replace(/^[\d.]+\s*·\s*/, ''))))
   const caja = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -114,15 +131,18 @@ export function MarkdownPlegable({
           </summary>
           <div className="plegable-cuerpo">
             {/* El encabezado del nivel, para que el ancla del nivel exista. */}
-            <Markdown contenido={`## ${b.titulo}\n\n${b.cuerpo}`} className={className} />
+            <Markdown contenido={`## ${b.titulo}\n\n${b.cuerpo}`} className={className} nuevos={nuevos} />
 
             {b.fichas.map((f) => (
               <details key={f.titulo} className="plegable plegable-ficha">
                 <summary>
-                  <span className="plegable-titulo">{f.titulo}</span>
+                  <span className="plegable-titulo">
+                    {f.titulo}
+                    {esNuevo(f.titulo) && <span className="marca-nuevo ml-2 align-middle">Nuevo</span>}
+                  </span>
                 </summary>
                 <div className="plegable-cuerpo">
-                  <Markdown contenido={`### ${f.titulo}\n\n${f.cuerpo}`} className={className} />
+                  <Markdown contenido={`### ${f.titulo}\n\n${f.cuerpo}`} className={className} nuevos={nuevos} />
                 </div>
               </details>
             ))}

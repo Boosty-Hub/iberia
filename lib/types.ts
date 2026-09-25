@@ -197,17 +197,25 @@ export const CATEGORIAS_ARCHIVO: Record<CategoriaArchivo, string> = {
   otro: 'Otro',
 }
 
-export type ParteInforme = 'portada' | 'levantamiento' | 'arquitectura' | 'anexos'
+export type ParteInforme = 'portada' | 'hallazgos' | 'levantamiento' | 'arquitectura' | 'anexos'
 
+/**
+ * Las partes del informe, en el orden en que se leen. Reordenado el 25 de
+ * septiembre de 2026: primero lo que se encontró, después cómo funciona hoy la
+ * empresa —la evidencia— y al final qué se propone. Las claves siguen siendo las
+ * del `CHECK` de `informe_secciones.parte`; lo que cambió es cómo se rotulan.
+ */
 export const PARTES_INFORME: Record<ParteInforme, string> = {
   portada: 'Apertura',
-  levantamiento: 'Levantamiento',
-  arquitectura: 'Arquitectura de IA',
+  hallazgos: 'Lo que encontramos',
+  levantamiento: 'Cómo funciona hoy',
+  arquitectura: 'Qué proponemos',
   anexos: 'Anexos',
 }
 
 export const PARTES_INFORME_ORDEN: ParteInforme[] = [
   'portada',
+  'hallazgos',
   'levantamiento',
   'arquitectura',
   'anexos',

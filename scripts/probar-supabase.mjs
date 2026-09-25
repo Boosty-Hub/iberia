@@ -160,6 +160,7 @@ const RELACIONES = {
   informe_circuito_puntos: 'id, circuito, numero, titulo, fase, tipo, destapes, pos_x, pos_y',
   informe_modulos: 'id, numero, ola, nombre, titulo, cubre, lee, postea, destapa, pos_x',
   informe_circuito_textos: 'clave, contenido',
+  informe_hallazgos: 'codigo, titulo, patron, nivel, punto, sistema, orden',
   // Roles y permisos: el rol de cada quien y su matriz.
   roles: 'id, clave, nombre, nivel, sistema',
   rol_permisos: 'rol_id, recurso, ver, crear, editar, eliminar',
@@ -239,6 +240,7 @@ const NUEVAS = [
   'informe_circuito_puntos',
   'informe_modulos',
   'informe_circuito_textos',
+  'informe_hallazgos',
   'roles',
   'rol_permisos',
 ]

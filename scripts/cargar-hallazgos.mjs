@@ -8,8 +8,9 @@
  * Los hallazgos entran **siempre en estado `propuesto`**, que es lo que el
  * esquema ya prevé. Un hallazgo propuesto no es un hallazgo: es un candidato con
  * su cita al lado, para que alguien que estuvo en la entrevista lo valide o lo
- * descarte desde `/dashboard/hallazgos`. Nada de esto entra al informe sin pasar
- * por esa mano.
+ * descarte. Nada de esto entra al informe sin pasar por esa mano. *(Desde el 25
+ * de septiembre de 2026 el panel no tiene pantalla de hallazgos: se valida en
+ * sesión, sobre el expediente.)*
  *
  * El área no se pide en el archivo: se hereda de la entrevista, que ya la tiene
  * bien puesta. Un hallazgo de la entrevista de Compras es de Compras.
@@ -164,4 +165,4 @@ if (enEspera.length) {
   console.log('')
 }
 
-console.log('Todos entran como «propuesto». Se validan en /dashboard/hallazgos.\n')
+console.log('Todos entran como «propuesto». Se validan en sesión, sobre el expediente.\n')

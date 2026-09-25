@@ -1,8 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { IconoBuscar, IconoHallazgos } from '@/components/iconos'
+import { IconoBuscar } from '@/components/iconos'
 import type { Segmento } from '@/lib/types'
 import { formatTimestamp } from '@/lib/utils'
 
@@ -43,12 +42,8 @@ function Resaltado({ texto, termino }: { texto: string; termino: string }) {
 
 export function Transcripcion({
   segmentos,
-  entrevistaId,
-  puedeEditar,
 }: {
   segmentos: Pick<Segmento, 'id' | 'hablante' | 'texto' | 'inicio_segundos'>[]
-  entrevistaId: string
-  puedeEditar: boolean
 }) {
   const [termino, setTermino] = useState('')
 
@@ -129,29 +124,12 @@ export function Transcripcion({
                   </p>
                 )}
 
-                <div className="flex items-start justify-between gap-3">
-                  <p className="flex-1 text-sm leading-relaxed whitespace-pre-line text-marca-700">
-                    <Resaltado texto={s.texto} termino={termino} />
-                  </p>
-
-                  {puedeEditar && (
-                    <Link
-                      href={{
-                        pathname: '/dashboard/hallazgos/nuevo',
-                        query: {
-                          entrevista: entrevistaId,
-                          segmento: String(s.id),
-                          cita: s.texto.slice(0, 500),
-                        },
-                      }}
-                      title="Crear un hallazgo con esta cita"
-                      className="mt-0.5 shrink-0 rounded p-1.5 text-marca-300 transition-colors group-hover:text-acento-600 hover:bg-acento-50 focus-visible:text-acento-600"
-                    >
-                      <IconoHallazgos className="h-4 w-4" />
-                      <span className="sr-only">Crear hallazgo con esta cita</span>
-                    </Link>
-                  )}
-                </div>
+                {/* Marcar una cita como hallazgo salió con el módulo de hallazgos
+                    del panel, el 25 de septiembre: los hallazgos se cosechan con
+                    `cargar:hallazgos` y se leen en el informe. */}
+                <p className="text-sm leading-relaxed whitespace-pre-line text-marca-700">
+                  <Resaltado texto={s.texto} termino={termino} />
+                </p>
               </li>
             )
           })}

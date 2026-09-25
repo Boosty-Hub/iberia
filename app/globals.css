@@ -257,6 +257,99 @@ body {
 }
 
 /* -----------------------------------------------------------------------------
+   Informe · niveles, tarjetas y avisos
+   Lo que pinta `lib/rehype-informe.ts`. Tres niveles y tres colores, y nada más:
+   rojo es lo que frena o pone en riesgo, ámbar lo que cuesta, verde lo que
+   funciona y conviene no romper. El rojo es también la marca, así que el nivel
+   crítico se distingue por forma —pastilla con borde, barra lateral gruesa—,
+   no solo por tono.
+   -------------------------------------------------------------------------- */
+
+.prosa .nivel {
+  @apply mr-1 inline-flex -translate-y-px items-center rounded-full px-2 py-px align-middle text-[11px] font-semibold
+         tracking-wide uppercase ring-1 ring-inset;
+  line-height: 1.5;
+}
+.prosa .nivel-critico {
+  @apply bg-acento-50 text-acento-700 ring-acento-300;
+}
+.prosa .nivel-atencion {
+  @apply bg-amber-50 text-amber-800 ring-amber-300;
+}
+.prosa .nivel-funciona {
+  @apply bg-emerald-50 text-emerald-800 ring-emerald-300;
+}
+
+/* La tarjeta: una por `###`. La barra de la izquierda dice su nivel. */
+.prosa .tarjeta-md {
+  @apply mt-4 rounded-xl border border-[var(--borde)] bg-white px-5 py-4;
+  border-left-width: 4px;
+  @apply border-l-marca-200;
+}
+.prosa > .tarjeta-md + .tarjeta-md {
+  @apply mt-3;
+}
+.prosa .tarjeta-md[data-nivel='critico'] {
+  @apply border-l-acento-500;
+  @apply bg-acento-50/30;
+}
+.prosa .tarjeta-md[data-nivel='atencion'] {
+  @apply border-l-amber-400;
+}
+.prosa .tarjeta-md[data-nivel='funciona'] {
+  @apply border-l-emerald-500;
+}
+.prosa .tarjeta-md > h3 {
+  @apply mt-0 text-base leading-snug lg:text-[17px];
+}
+.prosa .tarjeta-md > * + * {
+  @apply mt-2;
+}
+.prosa .tarjeta-md > p:first-of-type {
+  @apply text-marca-700;
+}
+.prosa .tarjeta-md ul {
+  @apply space-y-1 text-[15px] lg:text-base;
+}
+.prosa .tarjeta-md .tabla-scroll {
+  @apply mt-3;
+}
+
+/* Los avisos: la idea que hay que llevarse, lo que no puede esperar, lo que
+   hay que vigilar. Sin cursiva: son lo más importante del bloque, no un aparte. */
+.prosa .aviso-md {
+  @apply rounded-xl border px-4 py-3 not-italic;
+  border-left-width: 4px;
+}
+.prosa .aviso-md > * + * {
+  @apply mt-1.5;
+}
+.prosa .aviso-md .aviso-rotulo {
+  @apply text-[11px] font-semibold tracking-[0.12em] uppercase;
+}
+.prosa .aviso-clave {
+  @apply border-marca-200 bg-marca-50 text-marca-800;
+  @apply border-l-marca-800;
+}
+.prosa .aviso-clave .aviso-rotulo {
+  @apply text-marca-500;
+}
+.prosa .aviso-critico {
+  @apply border-acento-200 bg-acento-50 text-marca-800;
+  @apply border-l-acento-600;
+}
+.prosa .aviso-critico .aviso-rotulo {
+  @apply text-acento-700;
+}
+.prosa .aviso-atencion {
+  @apply border-amber-200 bg-amber-50 text-marca-800;
+  @apply border-l-amber-400;
+}
+.prosa .aviso-atencion .aviso-rotulo {
+  @apply text-amber-800;
+}
+
+/* -----------------------------------------------------------------------------
    Sección plegable del informe · «Las fichas de proceso»
    Veinte macroprocesos en una página se leen mal de corrido. Se pliega por
    nivel, y el bloque cerrado tiene que leerse como un control, no como un
@@ -276,6 +369,9 @@ body {
 
 .plegable {
   @apply mt-4 overflow-hidden rounded-2xl border border-[var(--borde)];
+  /* El salto a una ficha cae en su barra, y la barra no puede quedar debajo de
+     la cabecera fija de 60 px. Ver `revelarAncla`. */
+  scroll-margin-top: 76px;
 }
 .plegable > summary {
   @apply flex cursor-pointer list-none items-center gap-3 bg-marca-50 px-5 py-4
@@ -308,8 +404,11 @@ body {
 .plegable-cuenta {
   @apply rounded-full bg-white px-2.5 py-0.5 font-mono text-xs font-normal text-marca-500;
 }
+/* Tres niveles anidados —hoja, nivel y ficha— con su relleno cada uno dejaban el
+   texto en 650 px de una pantalla de 1900. Menos relleno por nivel, y la hoja de
+   las fichas más ancha (ver `PLEGABLES` en la página). */
 .plegable-cuerpo {
-  @apply px-5 pb-2;
+  @apply px-3 pb-2 sm:px-4;
 }
 
 /* La ficha dentro de su nivel: el mismo control, un escalón más abajo. Más
@@ -332,7 +431,7 @@ body {
   @apply border-b border-[var(--borde)] text-marca-900;
 }
 .plegable-ficha .plegable-cuerpo {
-  @apply bg-white px-4;
+  @apply bg-white px-4 sm:px-5;
 }
 /* El encabezado de la ficha ya está en su resumen: dentro sobra, igual que el
    del nivel. */
@@ -427,15 +526,19 @@ body {
   @apply fixed inset-0 z-50 gap-0 bg-[var(--fondo)] p-3 lg:p-4;
 }
 .mapa-marco.ampliado .mapa-lienzo {
-  @apply h-full rounded-xl;
+  @apply h-full flex-1 rounded-xl;
 }
 .mapa-marco.ampliado .mapa-panel {
   @apply max-h-full lg:ml-4 lg:w-96;
 }
 
+/* ⚠️ **En columna, `flex-none`; en fila, `flex-1`.** Con `flex-1` en la columna del
+   teléfono, la base de 0% le ganaba al alto de 34rem y el lienzo —cuyo contenido va
+   en absoluto— medía cero: el mapa desaparecía por debajo de 1024 px. Lo cazó la
+   auditoría el 25 de septiembre, cuando el mapa pasó a ser la sección. */
 .mapa-lienzo {
-  @apply relative h-[34rem] flex-1 touch-none overflow-hidden rounded-2xl border
-         border-[var(--borde)] select-none lg:h-[44rem];
+  @apply relative h-[34rem] w-full flex-none touch-none overflow-hidden rounded-2xl border
+         border-[var(--borde)] select-none lg:h-[44rem] lg:w-auto lg:flex-1;
   /* ⚠️ **El lienzo tiene que separarse de la tarjeta que lo contiene.** Estaba
      en `marca-50`, que sobre el blanco de la página y con las cajas también
      blancas dejaba los tres planos —página, lienzo y nodo— casi al mismo tono.
@@ -726,13 +829,6 @@ body {
   @apply text-xs font-semibold text-acento-600 hover:underline;
 }
 
-/* El botón que lleva al mapa desde la sección. Es la única puerta que tiene, y
-   por eso va en rojo sólido y no como un enlace más de la prosa. */
-.btn-mapa {
-  @apply inline-flex items-center gap-2 rounded-xl bg-acento-500 px-4 py-2.5 text-sm
-         font-semibold text-white transition-colors hover:bg-acento-600;
-}
-
 /* La fila del proceso al que se llegó desde el mapa. El resaltado es ámbar y no
    rojo: en este producto el rojo se lee como error. Se apaga solo. */
 .prosa tr.proceso-senalado > td {
@@ -806,7 +902,11 @@ body {
    a la vez, y aquí se distingue igual: por forma. El trombo es un punto sólido;
    el dato que viaja a mano es una línea punteada.
    ============================================================================= */
-.circ {
+/* Los colores del circuito van también en `.circ-vars`: el panel de la ficha
+   se monta por portal en el `body`, fuera de `.circ`, y sin esto perdía el rojo
+   y el oro. */
+.circ,
+.circ-vars {
   --c-vena: var(--color-acento-200);
   --c-vena-2: var(--color-acento-400);
   --c-trombo: var(--color-acento-500);
@@ -818,6 +918,8 @@ body {
   --c-oro-halo: rgba(242, 183, 5, 0.22);
   --c-oro-suave: var(--color-oro-100);
   --c-oro-tinta: var(--color-oro-800);
+}
+.circ {
   display: grid;
   gap: 18px;
   margin-top: 28px;
@@ -865,7 +967,7 @@ body {
 .circ-punto .anillo { fill: none; stroke: transparent; stroke-width: 3; }
 .circ-punto.resaltado .anillo { stroke: var(--c-oro); }
 .circ-punto.sel .anillo { stroke: var(--c-tinta); stroke-width: 2.5; }
-.circ-punto:focus-visible { outline: none; }
+.circ-punto:focus, .circ-punto:focus-visible { outline: none; }
 .circ-punto:focus-visible .anillo { stroke: var(--c-trombo); }
 .circ .atenuado { opacity: 0.22; }
 
@@ -911,7 +1013,7 @@ body {
 .circ-modulo.base .n-mod { fill: #fff; }
 .circ-modulo .t-mod { fill: var(--c-tinta); font-size: 12.5px; font-weight: 500; text-anchor: middle; }
 .circ-modulo.sel .cara-sup { stroke: var(--c-tinta); stroke-dasharray: none; stroke-width: 3; }
-.circ-modulo:focus-visible { outline: none; }
+.circ-modulo:focus, .circ-modulo:focus-visible { outline: none; }
 .circ-modulo:focus-visible .cara-sup { stroke: var(--c-trombo); stroke-width: 3; }
 
 /* --- Barra de traspasos y funciones dormidas -------------------------------- */
@@ -926,8 +1028,8 @@ body {
 .circ-dormidas span { font-size: 12.5px; border: 1px dashed var(--c-tinta-3); border-radius: 999px; padding: 2px 10px; color: var(--c-tinta-2); }
 
 /* --- Lista y ficha ---------------------------------------------------------- */
-.circ-detalle { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 18px; align-items: start; }
-@media (max-width: 900px) { .circ-detalle { grid-template-columns: 1fr; } }
+.circ-detalle { display: grid; gap: 10px; }
+.circ-guia { margin: 0; font-size: 13px; color: var(--c-tinta-3); }
 .circ-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px; }
 .circ-item { font: inherit; text-align: left; color: inherit; cursor: pointer; display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; align-items: start;
   padding: 9px 11px; border-radius: 12px; border: 1px solid transparent; background: transparent; transition: opacity 0.2s ease; }
@@ -981,12 +1083,81 @@ body {
 .circ-ir .mini.mod { border-radius: 5px; background: var(--c-oro); color: #2b2100; }
 .circ-ir .mini.mod.base { background: var(--c-tinta); color: #fff; }
 .circ-nada { font-size: 13px; color: var(--c-tinta-3); }
+/* Los hallazgos en el circuito: el globo de cada punto, la lista de su ficha y
+   los transversales. Mismo semáforo que las tarjetas de la sección. */
+.circ-cuenta circle { fill: #fff; stroke: var(--c-tinta-2); stroke-width: 1.5; }
+.circ-cuenta text { font-size: 10.5px; font-weight: 700; fill: var(--c-tinta); text-anchor: middle; dominant-baseline: central; }
+.circ-cuenta.critico circle { fill: var(--c-trombo); stroke: #fff; }
+.circ-cuenta.critico text { fill: #fff; }
+.circ-punto.atenuado .circ-cuenta { opacity: 0.35; }
+.circ-hallazgos { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.circ-hallazgo { display: flex; align-items: flex-start; gap: 8px; border-radius: 10px; padding: 7px 9px; font-size: 13.5px; line-height: 1.4; color: var(--c-tinta); text-decoration: none; border: 1px solid var(--borde); background: #fff; min-height: 40px; }
+.circ-hallazgo:hover { border-color: var(--color-acento-300); }
+.circ-hallazgo b { font-family: var(--font-mono); font-weight: 600; font-size: 12px; color: var(--c-tinta-2); margin-right: 2px; }
+.circ-nivel { flex-shrink: 0; margin-top: 1px; border-radius: 999px; padding: 1px 8px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; box-shadow: inset 0 0 0 1px currentColor; }
+.circ-nivel.critico { color: var(--color-acento-700); background: var(--color-acento-50); }
+.circ-nivel.atencion { color: #92400e; background: #fffbeb; }
+.circ-nivel.funciona { color: #065f46; background: #ecfdf5; }
+.circ-transversales { border: 1px solid var(--borde); border-radius: 16px; background: #fff; padding: 16px 18px; }
+.circ-transversales .circ-hallazgos { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.circ-nota-transversal { margin: 2px 0 10px; font-size: 13px; color: var(--c-tinta-2); }
+.circ-chip.rojo[aria-pressed='true'] { background: var(--color-acento-50); border-color: var(--c-trombo); color: var(--color-acento-700); }
 .circ-relojes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
 .circ-reloj { border-left: 3px solid var(--c-trombo); padding: 4px 0 4px 12px; display: grid; gap: 2px; }
 .circ-reloj b { font-size: 21px; font-weight: 700; letter-spacing: -0.02em; color: var(--c-tinta); font-variant-numeric: tabular-nums; }
 .circ-reloj span { font-size: 13.5px; color: var(--c-tinta-2); }
 
+/* --- El panel de la ficha -----------------------------------------------------
+   Entra desde la derecha, debajo de la cabecera del informe (60 px), y no tapa
+   la página con un velo: el circuito sigue vivo al lado. Ver `Cajon` en
+   components/circuitos-informe.tsx. */
+:root { --cajon-ancho: 100vw; }
+@media (min-width: 1024px) { :root { --cajon-ancho: clamp(420px, 42vw, 780px); } }
+.circ-cajon {
+  position: fixed; top: 60px; right: 0; bottom: 0; z-index: 40;
+  width: var(--cajon-ancho); max-width: 100vw;
+  display: flex; flex-direction: column;
+  background: #fff; border-left: 1px solid var(--borde);
+  box-shadow: -18px 0 40px -24px rgba(35, 31, 30, 0.35);
+  transform: translateX(100%); visibility: hidden;
+  transition: transform 0.28s ease, visibility 0s linear 0.28s;
+}
+.circ-cajon.abierto { transform: none; visibility: visible; transition: transform 0.28s ease; }
+.circ-cajon-barra {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 12px 10px 22px; border-bottom: 1px solid var(--borde); background: var(--fondo);
+}
+.circ-cajon-rotulo { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-tinta-3); }
+.circ-cajon-botones { display: flex; gap: 6px; }
+.circ-cajon-boton {
+  width: 40px; height: 40px; display: grid; place-items: center; font: inherit; font-size: 16px;
+  border-radius: 12px; border: 1px solid var(--borde); background: #fff; color: var(--c-tinta); cursor: pointer;
+}
+.circ-cajon-boton:hover:not(:disabled) { border-color: var(--c-tinta-2); }
+.circ-cajon-boton:disabled { opacity: 0.35; cursor: default; }
+.circ-cajon-boton:focus-visible { outline: 2px solid var(--c-trombo); outline-offset: 2px; }
+.circ-cajon-cuerpo { flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+.circ-cajon .circ-ficha { border: 0; border-radius: 0; padding: 22px 22px 40px; gap: 18px; }
+@media (min-width: 1024px) { .circ-cajon .circ-ficha { padding: 26px 30px 48px; } }
+
+/* En pantalla ancha, el panel le hace sitio a la página en vez de taparla: el
+   índice del informe se retira a la izquierda, el contenido se corre y el
+   dibujo se encoge hasta caber entero. Sin esto, la mitad derecha del circuito
+   —y sus trombos— quedaba debajo del panel. */
+@media (min-width: 1024px) {
+  .informe-cascara main { transition: padding-right 0.28s ease; }
+  .informe-indice { transition: margin-left 0.28s ease; }
+  html.con-cajon .informe-cascara main { padding-right: var(--cajon-ancho); }
+  html.con-cajon .informe-indice { margin-left: -16rem; }
+  html.con-cajon .hoja-informe { padding-left: 1.5rem; padding-right: 1.5rem; }
+  html.con-cajon .circ-lienzo svg,
+  html.con-cajon .circ-lienzo svg.circ-escena { min-width: 0 !important; }
+  html.con-cajon .rejilla-seccion { display: block; }
+  html.con-cajon .indice-seccion-lateral { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .circ-cajon, .circ-cajon.abierto, .informe-cascara main, .informe-indice { transition: none; }
   .circ-punto, .circ-item, .circ-modulo { transition: none; }
   .circ-viga, .circ-haz { animation: none; }
 }
@@ -1209,6 +1380,69 @@ fieldset:disabled .nivel-opcion {
 }
 .matriz-barra.visible {
   @apply flex;
+}
+
+/* -----------------------------------------------------------------------------
+   Esqueletos de carga
+   Lo que se ve entre el clic y la página: la forma de lo que viene, en cuadros
+   grises con un brillo que los recorre. Sin esto, un clic en el menú no hacía
+   nada visible durante medio segundo o más —cada consulta cruza hasta Virginia—
+   y parecía que no había funcionado. Lo arman los `loading.tsx` de cada ruta con
+   `components/esqueletos.tsx`.
+   -------------------------------------------------------------------------- */
+
+.esqueleto {
+  @apply block rounded-lg bg-marca-100;
+  background-image: linear-gradient(
+    90deg,
+    rgb(255 255 255 / 0) 0%,
+    rgb(255 255 255 / 0.65) 50%,
+    rgb(255 255 255 / 0) 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: esqueleto-brillo 1.3s ease-in-out infinite;
+}
+@keyframes esqueleto-brillo {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+/* Quien pidió menos movimiento ve los cuadros quietos, que igual dicen «cargando». */
+@media (prefers-reduced-motion: reduce) {
+  .esqueleto {
+    animation: none;
+    background-image: none;
+  }
+}
+
+/* El aviso de arriba: la palabra, para quien no reconoce un esqueleto. */
+.esqueleto-aviso {
+  @apply inline-flex items-center gap-2 rounded-full border border-[var(--borde)] bg-white px-3 py-1 text-xs
+         font-medium text-marca-600;
+}
+.giro {
+  @apply inline-block h-3.5 w-3.5 rounded-full border-2 border-acento-200 border-t-acento-600;
+  animation: giro 0.7s linear infinite;
+}
+@keyframes giro {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* El indicador del enlace pulsado en la barra lateral: siempre ocupa su sitio y
+   solo cambia de opacidad, para que el menú no salte al aparecer. */
+.enlace-pendiente {
+  @apply ml-auto inline-block h-3.5 w-3.5 shrink-0 rounded-full border-2 border-acento-200 border-t-acento-600 opacity-0
+         transition-opacity duration-150;
+}
+.enlace-pendiente.activo {
+  @apply opacity-100;
+  animation: giro 0.7s linear infinite;
 }
 
 @media print {

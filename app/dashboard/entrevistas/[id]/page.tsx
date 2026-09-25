@@ -6,8 +6,6 @@ import {
   IconoAtras,
   IconoBasura,
   IconoEditar,
-  IconoHallazgos,
-  IconoMas,
   IconoReloj,
   IconoSede,
 } from '@/components/iconos'
@@ -19,16 +17,12 @@ import { createClient } from '@/lib/supabase/server'
 import { formatBytes, formatFecha, nombreSesion } from '@/lib/utils'
 import {
   ESTADOS_ENTREVISTA,
-  ESTADOS_HALLAZGO,
   ROLES_PARTICIPANTE,
   SEDES,
-  TIPOS_HALLAZGO,
   TIPOS_SESION,
   type EstadoEntrevista,
-  type EstadoHallazgo,
   type RolParticipante,
   type Sede,
-  type TipoHallazgo,
   type TipoSesion,
 } from '@/lib/types'
 import { eliminarEntrevista } from '../acciones'
@@ -52,12 +46,6 @@ const TONO_ESTADO: Record<EstadoEntrevista, 'neutro' | 'ambar' | 'marca' | 'verd
   realizada: 'ambar',
   transcrita: 'marca',
   analizada: 'verde',
-}
-
-const TONO_HALLAZGO: Record<EstadoHallazgo, 'neutro' | 'ambar' | 'verde'> = {
-  propuesto: 'ambar',
-  validado: 'verde',
-  descartado: 'neutro',
 }
 
 /**
@@ -115,8 +103,6 @@ export default async function EntrevistaPage({
   const [sesion, { id }] = await Promise.all([requerirPermiso('modulo:entrevistas'), params])
   const puedeEditar = puede(sesion, 'modulo:entrevistas', 'editar')
   const puedeEliminar = puede(sesion, 'modulo:entrevistas', 'eliminar')
-  // Marcar una cita como hallazgo es crear un hallazgo, no editar la sesión.
-  const puedeCrearHallazgo = puede(sesion, 'modulo:hallazgos', 'crear')
   const supabase = await createClient()
 
   const { data: entrevista } = await supabase
@@ -127,14 +113,9 @@ export default async function EntrevistaPage({
 
   if (!entrevista) notFound()
 
-  const [segmentos, { data: hallazgos }, { data: archivos }, { data: participantes }] =
+  const [segmentos, { data: archivos }, { data: participantes }] =
     await Promise.all([
     transcripcionCompleta(supabase, id),
-    supabase
-      .from('hallazgos')
-      .select('id, titulo, tipo, estado, impacto')
-      .eq('entrevista_id', id)
-      .order('created_at', { ascending: false }),
       supabase
         .from('archivos')
         .select('id, nombre, tamano_bytes, mime_type')
@@ -271,8 +252,6 @@ export default async function EntrevistaPage({
 
           <Transcripcion
             segmentos={segmentos}
-            entrevistaId={id}
-            puedeEditar={puedeCrearHallazgo}
           />
         </div>
 
@@ -393,56 +372,6 @@ export default async function EntrevistaPage({
             </section>
           )}
 
-          {/* Hallazgos */}
-          <section className="tarjeta">
-            <div className="flex items-center justify-between gap-3 border-b border-[var(--borde)] px-5 py-3.5">
-              <h2 className="text-sm font-semibold text-marca-800">
-                Hallazgos
-                <span className="ml-1.5 text-xs font-normal text-marca-500">
-                  {hallazgos?.length ?? 0}
-                </span>
-              </h2>
-              {puedeCrearHallazgo && (
-                <Link
-                  href={{
-                    pathname: '/dashboard/hallazgos/nuevo',
-                    query: { entrevista: id },
-                  }}
-                  className="text-xs font-medium text-acento-700 hover:underline"
-                >
-                  <IconoMas className="inline h-3.5 w-3.5" /> Añadir
-                </Link>
-              )}
-            </div>
-
-            {!hallazgos?.length ? (
-              <p className="px-5 py-6 text-center text-xs text-marca-500">
-                Sin hallazgos todavía. Marca una cita en la transcripción con el icono{' '}
-                <IconoHallazgos className="inline h-3.5 w-3.5" />.
-              </p>
-            ) : (
-              <ul className="divide-y divide-[var(--borde)]">
-                {hallazgos.map((h) => (
-                  <li key={h.id}>
-                    <Link
-                      href={`/dashboard/hallazgos/${h.id}`}
-                      className="block px-5 py-3 transition-colors hover:bg-marca-50/40"
-                    >
-                      <p className="text-sm font-medium text-marca-800">{h.titulo}</p>
-                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                        <Insignia tono="marca">
-                          {TIPOS_HALLAZGO[h.tipo as TipoHallazgo]}
-                        </Insignia>
-                        <Insignia tono={TONO_HALLAZGO[h.estado as EstadoHallazgo]}>
-                          {ESTADOS_HALLAZGO[h.estado as EstadoHallazgo]}
-                        </Insignia>
-                      </div>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
 
           {/* Archivos vinculados */}
           {!!archivos?.length && (

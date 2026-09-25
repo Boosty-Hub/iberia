@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 
 /**
  * Los circuitos del informe: el flujo, los sistemas y el espejo.
@@ -53,6 +54,21 @@ export type ModuloIberia = {
   pos_x: number
 }
 
+/** Un hallazgo del informe ubicado en el circuito (tabla `informe_hallazgos`). */
+export type HallazgoCircuito = {
+  codigo: string
+  titulo: string
+  patron: string
+  nivel: 'critico' | 'atencion' | 'funciona'
+  punto: string | null
+  sistema: string | null
+  orden: number
+  /** El id del `### H-NN · Título` de la sección, calculado en el servidor. */
+  ancla: string
+}
+
+const NIVEL_HALLAZGO: Record<string, string> = { critico: 'Crítico', atencion: 'Atención', funciona: 'Funciona' }
+
 type Tramo = [modo: 'mano' | 'sistema', rotulo: string | null]
 export type TextosCircuitos = {
   flujo?: { tesis: string; subtesis: string; retorno: string; codo_izq: string[]; codo_der: string[]; relojes: { cifra: string; texto: string }[] }
@@ -82,9 +98,11 @@ function Lienzo({ children }: { children: ReactNode }) {
     if (!m) return
     const medir = () => setDesliza(m.scrollWidth > m.clientWidth + 1)
     if (m.scrollWidth > m.clientWidth) m.scrollLeft = (m.scrollWidth - m.clientWidth) / 2
-    medir()
-    window.addEventListener('resize', medir)
-    return () => window.removeEventListener('resize', medir)
+    // Se mide el marco y no la ventana: al abrir el panel de la ficha el marco
+    // se encoge sin que la ventana cambie de tamaño.
+    const observador = new ResizeObserver(medir)
+    observador.observe(m)
+    return () => observador.disconnect()
   }, [])
   return (
     <>
@@ -92,6 +110,99 @@ function Lienzo({ children }: { children: ReactNode }) {
       {desliza && <p className="circ-desliza">Desliza de lado para ver el dibujo completo.</p>}
     </>
   )
+}
+
+const sinSuscripcion = () => () => {}
+
+/**
+ * La ficha de un punto o de un módulo, en un panel que entra desde la derecha.
+ *
+ * Antes iba debajo del dibujo, y para leerla había que bajar y perder el
+ * circuito de vista: el lector subía, tocaba otro trombo y volvía a bajar. Ahora
+ * se lee al lado del dibujo, que sigue vivo — **no es un modal**: no hay velo ni
+ * se bloquea la página, y tocar otro trombo cambia la ficha sin cerrarla.
+ *
+ * En pantalla ancha ocupa casi media pantalla y le hace sitio: el índice del
+ * informe se retira a la izquierda y el contenido se corre (`html.con-cajon` en
+ * `globals.css`), para que el dibujo quede entero y no tapado. En teléfono
+ * ocupa el ancho completo y se cierra con la ✕ o con Esc.
+ *
+ * Va por portal al `body`: un `position: fixed` dentro de la hoja quedaría
+ * atrapado por cualquier ancestro con `transform` o `filter`.
+ */
+function Cajon({
+  abierto,
+  onCerrar,
+  rotulo,
+  clave,
+  anterior,
+  siguiente,
+  children,
+}: {
+  abierto: boolean
+  onCerrar: () => void
+  rotulo: string
+  /** Cambia con la ficha: al cambiar, el panel vuelve arriba. */
+  clave: string
+  anterior?: { etiqueta: string; ir: () => void }
+  siguiente?: { etiqueta: string; ir: () => void }
+  children: ReactNode
+}) {
+  // En el servidor no hay `document`: el portal se monta ya en el navegador.
+  const enNavegador = useSyncExternalStore(sinSuscripcion, () => true, () => false)
+  const cuerpo = useRef<HTMLDivElement>(null)
+  const cerrar = useRef(onCerrar)
+  useEffect(() => {
+    cerrar.current = onCerrar
+  })
+
+  useEffect(() => {
+    if (!abierto) return
+    const raiz = document.documentElement
+    raiz.classList.add('con-cajon')
+    const alTeclear = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') cerrar.current()
+    }
+    document.addEventListener('keydown', alTeclear)
+    return () => {
+      raiz.classList.remove('con-cajon')
+      document.removeEventListener('keydown', alTeclear)
+    }
+  }, [abierto])
+
+  useEffect(() => {
+    cuerpo.current?.scrollTo({ top: 0 })
+  }, [clave])
+
+  if (!enNavegador) return null
+  return createPortal(
+    <aside className={`circ-vars circ-cajon${abierto ? ' abierto' : ''}`} aria-label={rotulo} aria-hidden={!abierto} inert={!abierto}>
+      <div className="circ-cajon-barra">
+        <span className="circ-cajon-rotulo">{rotulo}</span>
+        <div className="circ-cajon-botones">
+          <button type="button" className="circ-cajon-boton" onClick={anterior?.ir} disabled={!anterior} aria-label={anterior ? `Anterior: ${anterior.etiqueta}` : 'Anterior'} title={anterior?.etiqueta}>
+            <span aria-hidden="true">←</span>
+          </button>
+          <button type="button" className="circ-cajon-boton" onClick={siguiente?.ir} disabled={!siguiente} aria-label={siguiente ? `Siguiente: ${siguiente.etiqueta}` : 'Siguiente'} title={siguiente?.etiqueta}>
+            <span aria-hidden="true">→</span>
+          </button>
+          <button type="button" className="circ-cajon-boton cerrar" onClick={onCerrar} aria-label="Cerrar la ficha" title="Cerrar (Esc)">
+            <span aria-hidden="true">✕</span>
+          </button>
+        </div>
+      </div>
+      <div ref={cuerpo} className="circ-cajon-cuerpo" aria-live="polite">
+        {children}
+      </div>
+    </aside>,
+    document.body
+  )
+}
+
+/** El anterior y el siguiente dentro de lo que el filtro deja ver. */
+function vecinos<T extends { id: string }>(recorrido: T[], actual: T | undefined) {
+  const i = actual ? recorrido.findIndex((x) => x.id === actual.id) : -1
+  return { antes: i > 0 ? recorrido[i - 1] : undefined, despues: i === -1 ? recorrido[0] : recorrido[i + 1] }
 }
 
 // ============================== Vocabulario ==============================
@@ -149,7 +260,7 @@ function Anillo({ id, chevrones = true, lanesTop = 36, lanesBot = 506, children 
   )
 }
 
-function Marcador({ p, sel, atenuado, resaltado, onElegir, r = 14 }: { p: PuntoCircuito; sel: boolean; atenuado: boolean; resaltado: boolean; onElegir: () => void; r?: number }) {
+function Marcador({ p, sel, atenuado, resaltado, onElegir, r = 14, cuenta }: { p: PuntoCircuito; sel: boolean; atenuado: boolean; resaltado: boolean; onElegir: () => void; r?: number; cuenta?: { n: number; critico: boolean } }) {
   const cx = Number(p.pos_x), cy = Number(p.pos_y)
   return (
     <g
@@ -162,6 +273,13 @@ function Marcador({ p, sel, atenuado, resaltado, onElegir, r = 14 }: { p: PuntoC
       <circle className="anillo" cx={cx} cy={cy} r={r + 12} />
       <circle className="nucleo" cx={cx} cy={cy} r={r} />
       <text className="numero" x={cx} y={cy}>{p.numero}</text>
+      {/* Cuántos hallazgos caen en este punto: el globo va en rojo si alguno es crítico. */}
+      {cuenta && cuenta.n > 0 && (
+        <g className={`circ-cuenta${cuenta.critico ? ' critico' : ''}`} aria-hidden="true">
+          <circle cx={cx + r + 4} cy={cy - r - 4} r={9} />
+          <text x={cx + r + 4} y={cy - r - 4}>{cuenta.n}</text>
+        </g>
+      )}
     </g>
   )
 }
@@ -189,34 +307,107 @@ function Filtros({ opciones, valor, onCambio }: { opciones: [string, string, str
   )
 }
 
+/** «3 hallazgos · 1 crítico», para la lista de puntos. */
+function metaHallazgos(hs: HallazgoCircuito[]) {
+  if (!hs.length) return 'Sin hallazgos propios'
+  const criticos = hs.filter((h) => h.nivel === 'critico').length
+  return `${hs.length} ${hs.length === 1 ? 'hallazgo' : 'hallazgos'}${criticos ? ` · ${criticos} ${criticos === 1 ? 'crítico' : 'críticos'}` : ''}`
+}
+
+/**
+ * Cada hallazgo con su nivel, y enlace a su tarjeta en la misma sección. Desde
+ * el panel, el enlace lo cierra: quien baja a la tarjeta pasa a leer, y la
+ * tarjeta se lee a todo el ancho.
+ */
+function ListaHallazgos({ hallazgos, base = '', onIr }: { hallazgos: HallazgoCircuito[]; base?: string; onIr?: () => void }) {
+  return (
+    <ul className="circ-hallazgos">
+      {hallazgos.map((h) => (
+        <li key={h.codigo}>
+          <a href={`${base}#${h.ancla}`} className="circ-hallazgo" onClick={onIr}>
+            <span className={`circ-nivel ${h.nivel}`}>{NIVEL_HALLAZGO[h.nivel]}</span>
+            <span className="min-w-0"><b>{h.codigo}</b> {h.titulo}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 // ============================== Circuitos 1 y 2 ==============================
-export function CircuitosDelNegocio({ puntos, modulos, textos, inicial }: { puntos: PuntoCircuito[]; modulos: ModuloIberia[]; textos: TextosCircuitos; inicial?: string }) {
-  const inicialValido = puntos.find((p) => p.id === inicial)
-  const [vista, setVista] = useState<'flujo' | 'sistemas'>(inicialValido?.circuito ?? 'flujo')
+/**
+ * Los dos anillos del circuito. Con `vistaFija` pinta uno solo, sin pestañas:
+ * el flujo en «Los hallazgos» y los sistemas en «Sistemas y estado del dato».
+ * Con `hallazgos`, cada punto lleva cuántos hallazgos caen en él —en rojo si
+ * alguno es crítico—, su ficha los lista con enlace a su tarjeta, y debajo van
+ * los transversales, los que no caen en un solo punto.
+ */
+export function CircuitosDelNegocio({
+  puntos,
+  modulos,
+  textos,
+  inicial,
+  vistaFija,
+  hallazgos = [],
+  hallazgosEn = '',
+}: {
+  puntos: PuntoCircuito[]
+  modulos: ModuloIberia[]
+  textos: TextosCircuitos
+  inicial?: string
+  vistaFija?: 'flujo' | 'sistemas'
+  hallazgos?: HallazgoCircuito[]
+  /** Dónde viven las tarjetas de los hallazgos: vacío si es esta misma página. */
+  hallazgosEn?: string
+}) {
+  const inicialValido = puntos.find((p) => p.id === inicial && (!vistaFija || p.circuito === vistaFija))
+  const [vista, setVista] = useState<'flujo' | 'sistemas'>(vistaFija ?? inicialValido?.circuito ?? 'flujo')
+  const conHallazgos = hallazgos.length > 0
+  const hallazgosDe = (p: PuntoCircuito) =>
+    hallazgos.filter((h) => (p.circuito === 'flujo' ? h.punto : h.sistema) === p.id).sort((a, b) => a.orden - b.orden)
+  const cuentaDe = (p: PuntoCircuito) => {
+    const hs = hallazgosDe(p)
+    return { n: hs.length, critico: hs.some((h) => h.nivel === 'critico') }
+  }
+  const transversales =
+    conHallazgos && vista === 'flujo' ? hallazgos.filter((h) => !h.punto).sort((a, b) => a.orden - b.orden) : []
   const [sel, setSel] = useState<Record<string, string>>({
     flujo: inicialValido?.circuito === 'flujo' ? inicialValido.id : puntos.find((p) => p.circuito === 'flujo' && p.numero === 5)?.id ?? '',
     sistemas: inicialValido?.circuito === 'sistemas' ? inicialValido.id : puntos.find((p) => p.circuito === 'sistemas' && p.numero === 3)?.id ?? '',
   })
   const [filtro, setFiltro] = useState<Record<string, string>>({ flujo: 'todos', sistemas: 'todos' })
+  // El panel arranca cerrado, salvo que se llegue con `?punto=` desde otra sección.
+  const [abierto, setAbierto] = useState(Boolean(inicialValido))
 
   const lista = puntos.filter((p) => p.circuito === vista).sort((a, b) => a.numero - b.numero)
   const f = filtro[vista]
+  const porNivel = conHallazgos && vista === 'flujo'
   const coincide = (p: PuntoCircuito) => {
     if (f === 'todos') return true
+    if (porNivel) return hallazgosDe(p).some((h) => h.nivel === f)
     if (vista === 'flujo') return p.fase === f
     const grupos: Record<string, string[]> = { dos: ['duplicacion', 'doble_esfuerzo'], fuera: ['dato_fuera', 'punto_unico'], roto: ['puente_roto'], choque: ['choque'] }
     return (grupos[f] ?? []).includes(p.tipo ?? '')
   }
   const elegido = lista.find((p) => p.id === sel[vista]) ?? lista[0]
   const elegir = (id: string) => setSel((s) => ({ ...s, [vista]: id }))
+  const abrir = (id: string) => {
+    elegir(id)
+    setAbierto(true)
+  }
+  const visibleSel = (p: PuntoCircuito) => abierto && p.id === elegido?.id
+  const recorrido = lista.filter(coincide).length ? lista.filter(coincide) : lista
+  const { antes, despues } = vecinos(recorrido, elegido)
   const cambiarFiltro = (v: string) => {
     setFiltro((s) => ({ ...s, [vista]: v }))
     const actual = lista.find((p) => p.id === sel[vista])
-    const nuevoCoincide = (p: PuntoCircuito) => v === 'todos' || (vista === 'flujo' ? p.fase === v : ({ dos: ['duplicacion', 'doble_esfuerzo'], fuera: ['dato_fuera', 'punto_unico'], roto: ['puente_roto'], choque: ['choque'] }[v] ?? []).includes(p.tipo ?? ''))
+    const nuevoCoincide = (p: PuntoCircuito) => v === 'todos' || (porNivel ? hallazgosDe(p).some((h) => h.nivel === v) : vista === 'flujo' ? p.fase === v : ({ dos: ['duplicacion', 'doble_esfuerzo'], fuera: ['dato_fuera', 'punto_unico'], roto: ['puente_roto'], choque: ['choque'] }[v] ?? []).includes(p.tipo ?? ''))
     if (actual && !nuevoCoincide(actual)) { const primero = lista.find(nuevoCoincide); if (primero) elegir(primero.id) }
   }
   const cuenta = (pred: (p: PuntoCircuito) => boolean) => lista.filter(pred).length
-  const opciones: [string, string, string?][] = vista === 'flujo'
+  const opciones: [string, string, string?][] = porNivel
+    ? [['todos', `Los ${lista.length} puntos`], ['critico', `Con críticos · ${cuenta((p) => hallazgosDe(p).some((h) => h.nivel === 'critico'))}`, 'rojo'], ['atencion', `Con atención · ${cuenta((p) => hallazgosDe(p).some((h) => h.nivel === 'atencion'))}`]]
+    : vista === 'flujo'
     ? [['todos', `Los ${lista.length}`], ['2', `Fase 2 propuesta · ${cuenta((p) => p.fase === '2')}`, 'dorado'], ['3', `Fase 3 · planta · ${cuenta((p) => p.fase === '3')}`], ['sin', `Sin fase todavía · ${cuenta((p) => p.fase === 'sin')}`]]
     : [['todos', `Los ${lista.length}`], ['dos', `Se escribe más de una vez · ${cuenta((p) => ['duplicacion', 'doble_esfuerzo'].includes(p.tipo ?? ''))}`], ['fuera', `Fuera o en una persona · ${cuenta((p) => ['dato_fuera', 'punto_unico'].includes(p.tipo ?? ''))}`], ['roto', `Puente roto · ${cuenta((p) => p.tipo === 'puente_roto')}`], ['choque', `Chocan · ${cuenta((p) => p.tipo === 'choque')}`]]
 
@@ -227,10 +418,16 @@ export function CircuitosDelNegocio({ puntos, modulos, textos, inicial }: { punt
   return (
     <div className="circ" id="circuitos">
       <div className="circ-controles">
-        <div className="circ-pestanas" role="tablist" aria-label="Circuito">
-          <button type="button" role="tab" aria-selected={vista === 'flujo'} className="circ-pestana" onClick={() => setVista('flujo')}>El flujo</button>
-          <button type="button" role="tab" aria-selected={vista === 'sistemas'} className="circ-pestana" onClick={() => setVista('sistemas')}>Los sistemas</button>
-        </div>
+        {vistaFija ? (
+          <span className="circ-rotulo-vista">
+            {vistaFija === 'flujo' ? 'El circuito del negocio · dónde espera el trabajo' : 'El circuito del negocio · por dónde viaja el dato'}
+          </span>
+        ) : (
+          <div className="circ-pestanas" role="tablist" aria-label="Circuito">
+            <button type="button" role="tab" aria-selected={vista === 'flujo'} className="circ-pestana" onClick={() => setVista('flujo')}>El flujo</button>
+            <button type="button" role="tab" aria-selected={vista === 'sistemas'} className="circ-pestana" onClick={() => setVista('sistemas')}>Los sistemas</button>
+          </div>
+        )}
         <Filtros opciones={opciones} valor={f} onCambio={cambiarFiltro} />
       </div>
 
@@ -251,7 +448,7 @@ export function CircuitosDelNegocio({ puntos, modulos, textos, inicial }: { punt
                 </>
               )}
               {lista.map((p) => (
-                <Marcador key={p.id} p={p} sel={p.id === elegido?.id} atenuado={!coincide(p)} resaltado={f === '2' && p.fase === '2'} onElegir={() => elegir(p.id)} />
+                <Marcador key={p.id} p={p} sel={visibleSel(p)} atenuado={!coincide(p)} resaltado={f === '2' && p.fase === '2'} onElegir={() => abrir(p.id)} cuenta={conHallazgos ? cuentaDe(p) : undefined} />
               ))}
             </svg>
           ) : (
@@ -277,7 +474,7 @@ export function CircuitosDelNegocio({ puntos, modulos, textos, inicial }: { punt
               )}
               {lista.map((p) => (
                 <g key={p.id}>
-                  <Marcador p={p} r={p.centro ? 12 : 14} sel={p.id === elegido?.id} atenuado={!coincide(p)} resaltado={false} onElegir={() => elegir(p.id)} />
+                  <Marcador p={p} r={p.centro ? 12 : 14} sel={visibleSel(p)} atenuado={!coincide(p)} resaltado={false} onElegir={() => abrir(p.id)} cuenta={conHallazgos ? cuentaDe(p) : undefined} />
                   {p.centro && <text className="circ-t-nota circ-t-centro" x={Number(p.pos_x) + 22} y={Number(p.pos_y) + 4}>{p.centro}</text>}
                 </g>
               ))}
@@ -305,16 +502,27 @@ export function CircuitosDelNegocio({ puntos, modulos, textos, inicial }: { punt
       )}
 
       <div className="circ-detalle">
+        <p className="circ-guia">Elige un punto del dibujo o de la lista: su ficha se abre a un lado, sin perder el circuito de vista.</p>
         <div className="circ-lista" role="group" aria-label={vista === 'flujo' ? 'Los puntos donde el flujo espera' : 'Los trombos de sistema'}>
           {lista.map((p) => (
-            <button key={p.id} type="button" className={`circ-item${coincide(p) ? '' : ' atenuado'}`} aria-pressed={p.id === elegido?.id} onClick={() => elegir(p.id)}>
+            <button key={p.id} type="button" className={`circ-item${coincide(p) ? '' : ' atenuado'}`} aria-pressed={visibleSel(p)} onClick={() => abrir(p.id)}>
               <span className="circ-badge">{p.numero}</span>
-              <span><span className="tit">{p.titulo}</span><span className="meta">{vista === 'flujo' ? `${(p.donde ?? '').split(' · ')[0]} · ${FASE[p.fase ?? 'sin']?.[0] ?? ''}` : TIPO[p.tipo ?? ''] ?? ''}</span></span>
+              <span><span className="tit">{p.titulo}</span><span className="meta">{conHallazgos ? metaHallazgos(hallazgosDe(p)) : vista === 'flujo' ? `${(p.donde ?? '').split(' · ')[0]} · ${FASE[p.fase ?? 'sin']?.[0] ?? ''}` : TIPO[p.tipo ?? ''] ?? ''}</span></span>
             </button>
           ))}
         </div>
+      </div>
+
+      <Cajon
+        abierto={abierto && Boolean(elegido)}
+        onCerrar={() => setAbierto(false)}
+        rotulo={`${vista === 'flujo' ? 'Punto' : 'Trombo'} ${elegido?.numero ?? ''} de ${lista.length}`}
+        clave={elegido?.id ?? ''}
+        anterior={antes && { etiqueta: `${antes.numero} · ${antes.titulo}`, ir: () => elegir(antes.id) }}
+        siguiente={despues && { etiqueta: `${despues.numero} · ${despues.titulo}`, ir: () => elegir(despues.id) }}
+      >
         {elegido && (
-          <article className="circ-ficha" aria-live="polite">
+          <article className="circ-ficha">
             <div className="circ-ficha-cabeza">
               <div className="circ-ficha-num" aria-hidden="true">{elegido.numero}</div>
               <div>
@@ -329,6 +537,11 @@ export function CircuitosDelNegocio({ puntos, modulos, textos, inicial }: { punt
               </div>
             </div>
             <Bloque titulo={vista === 'flujo' ? 'Qué pasa' : 'Qué pasa con el dato'}><p>{elegido.que_pasa}</p></Bloque>
+            {conHallazgos && hallazgosDe(elegido).length > 0 && (
+              <Bloque titulo="Los hallazgos de este punto">
+                <ListaHallazgos hallazgos={hallazgosDe(elegido)} base={hallazgosEn} onIr={() => setAbierto(false)} />
+              </Bloque>
+            )}
             <Bloque titulo="Las cifras"><Cifras cifras={elegido.cifras} /></Bloque>
             {vista === 'flujo' && elegido.destapes.length > 0 && (
               <Bloque titulo="Cómo se destapa">
@@ -351,7 +564,15 @@ export function CircuitosDelNegocio({ puntos, modulos, textos, inicial }: { punt
             </Bloque>
           </article>
         )}
-      </div>
+      </Cajon>
+
+      {transversales.length > 0 && (
+        <section className="circ-transversales" aria-label="Hallazgos transversales">
+          <h3 className="circ-h3">Los que no caen en un solo punto · {transversales.length}</h3>
+          <p className="circ-nota-transversal">Recorren el circuito entero: el ataque, el gobierno, el conocimiento que vive en una persona.</p>
+          <ListaHallazgos hallazgos={transversales} base={hallazgosEn} />
+        </section>
+      )}
 
       {vista === 'flujo' && tf && (
         <div className="circ-relojes">
@@ -369,8 +590,16 @@ export function EspejoIberia({ modulos, puntos, textos, inicial }: { modulos: Mo
   const ordenados = [...modulos].sort((a, b) => a.numero - b.numero)
   const [sel, setSel] = useState(ordenados.find((m) => m.id === inicial)?.id ?? ordenados.find((m) => m.ola === '1')?.id ?? ordenados[0]?.id)
   const [filtro, setFiltro] = useState('todos')
+  const [abierto, setAbierto] = useState(Boolean(inicial && ordenados.some((m) => m.id === inicial)))
   const coincide = (m: ModuloIberia) => filtro === 'todos' || m.ola === filtro
   const elegido = ordenados.find((m) => m.id === sel) ?? ordenados[0]
+  const abrir = (id: string) => {
+    setSel(id)
+    setAbierto(true)
+  }
+  const visibleSel = (m: ModuloIberia) => abierto && m.id === elegido?.id
+  const recorrido = ordenados.filter(coincide).length ? ordenados.filter(coincide) : ordenados
+  const { antes, despues } = vecinos(recorrido, elegido)
   const te = textos.espejo
   const cambiarFiltro = (v: string) => {
     setFiltro(v)
@@ -427,17 +656,17 @@ export function EspejoIberia({ modulos, puntos, textos, inicial }: { modulos: Mo
             {ordenados.map((m, i) => {
               const xa = 320 + i * (460 / Math.max(1, ordenados.length - 1))
               const ya = 424 - 0.0538 * (xa - 290)
-              return <path key={m.id} className={`circ-haz${m.id === elegido?.id ? ' on' : ''}`} d={`M${xa},${ya} L${Number(m.pos_x)},${yModulo(Number(m.pos_x)) - 15}`} />
+              return <path key={m.id} className={`circ-haz${visibleSel(m) ? ' on' : ''}`} d={`M${xa},${ya} L${Number(m.pos_x)},${yModulo(Number(m.pos_x)) - 15}`} />
             })}
             {ordenados.map((m) => {
               const x = Number(m.pos_x), y = yModulo(x)
               return (
                 <g
                   key={m.id}
-                  className={`circ-modulo ${claseModulo(m)}${m.id === elegido?.id ? ' sel' : ''}${coincide(m) ? '' : ' atenuado'}`}
+                  className={`circ-modulo ${claseModulo(m)}${visibleSel(m) ? ' sel' : ''}${coincide(m) ? '' : ' atenuado'}`}
                   tabIndex={0} role="button" aria-label={`Módulo ${m.numero}, ${m.nombre.join(' ')}: ${m.titulo}`}
-                  onClick={() => setSel(m.id)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSel(m.id) } }}
+                  onClick={() => abrir(m.id)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrir(m.id) } }}
                 >
                   <polygon className="cara-izq" points={`${x - 46},${y} ${x},${y + 15} ${x},${y + 29} ${x - 46},${y + 14}`} />
                   <polygon className="cara-der" points={`${x},${y + 15} ${x + 46},${y} ${x + 46},${y + 14} ${x},${y + 29}`} />
@@ -458,16 +687,27 @@ export function EspejoIberia({ modulos, puntos, textos, inicial }: { modulos: Mo
       </figure>
 
       <div className="circ-detalle">
+        <p className="circ-guia">Elige un módulo del dibujo o de la lista: su ficha se abre a un lado.</p>
         <div className="circ-lista" role="group" aria-label="Los módulos del sistema Iberia">
           {ordenados.map((m) => (
-            <button key={m.id} type="button" className={`circ-item mod${coincide(m) ? '' : ' atenuado'}`} aria-pressed={m.id === elegido?.id} onClick={() => setSel(m.id)}>
+            <button key={m.id} type="button" className={`circ-item mod${coincide(m) ? '' : ' atenuado'}`} aria-pressed={visibleSel(m)} onClick={() => abrir(m.id)}>
               <span className={`circ-badge mod ${claseModulo(m)}`}>{m.numero}</span>
               <span><span className="tit">{m.titulo}</span><span className="meta">{m.nombre.join(' ')} · {OLA[m.ola]?.[0]}</span></span>
             </button>
           ))}
         </div>
+      </div>
+
+      <Cajon
+        abierto={abierto && Boolean(elegido)}
+        onCerrar={() => setAbierto(false)}
+        rotulo={`Módulo ${elegido?.numero ?? ''} de ${ordenados.length}`}
+        clave={elegido?.id ?? ''}
+        anterior={antes && { etiqueta: `${antes.numero} · ${antes.titulo}`, ir: () => setSel(antes.id) }}
+        siguiente={despues && { etiqueta: `${despues.numero} · ${despues.titulo}`, ir: () => setSel(despues.id) }}
+      >
         {elegido && (
-          <article className="circ-ficha" aria-live="polite">
+          <article className="circ-ficha">
             <div className="circ-ficha-cabeza">
               <div className={`circ-ficha-num mod ${claseModulo(elegido)}`} aria-hidden="true">{elegido.numero}</div>
               <div>
@@ -492,7 +732,7 @@ export function EspejoIberia({ modulos, puntos, textos, inicial }: { modulos: Mo
               <div className="circ-enlaces">
                 {elegido.destapa.length === 0 && <span className="circ-nada">Sus trombos quedan fuera del circuito principal</span>}
                 {elegido.destapa.filter((id) => porId[id]).map((id) => (
-                  <Link key={id} className="circ-ir" href={`/informe/circuitos?punto=${id}#circuitos`}>
+                  <Link key={id} className="circ-ir" href={`/informe/${id.startsWith('S') ? 'sistemas-datos' : 'hallazgos'}?punto=${id}#circuitos`}>
                     <span className="mini">{porId[id].numero}</span><span>{porId[id].circuito === 'flujo' ? 'Flujo' : 'Sistema'} · {porId[id].titulo}</span>
                   </Link>
                 ))}
@@ -500,7 +740,7 @@ export function EspejoIberia({ modulos, puntos, textos, inicial }: { modulos: Mo
             </Bloque>
           </article>
         )}
-      </div>
+      </Cajon>
     </div>
   )
 }

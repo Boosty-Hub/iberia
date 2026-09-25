@@ -57,15 +57,16 @@ const PAGINAS = [
   { nombre: '04-entrevistas-importar', ruta: '/dashboard/entrevistas/importar' },
   { nombre: '04b-entrevista-nueva', ruta: '/dashboard/entrevistas/nueva' },
   { nombre: '05-archivos', ruta: '/dashboard/archivos' },
-  { nombre: '06-hallazgos', ruta: '/dashboard/hallazgos' },
-  { nombre: '07-hallazgo-nuevo', ruta: '/dashboard/hallazgos/nuevo' },
-  { nombre: '08-informe-editor', ruta: '/dashboard/informe' },
-  { nombre: '09-informe-seccion', ruta: '/dashboard/informe/inicio' },
+  // Sin hallazgos ni editor del informe desde el 25 de septiembre: los hallazgos
+  // se leen en el informe y el informe se escribe en las sesiones.
   { nombre: '10-usuarios', ruta: '/dashboard/usuarios' },
+  { nombre: '10b-roles', ruta: '/dashboard/roles' },
   { nombre: '11-informe', ruta: '/informe' },
-  // Cada sección del informe es su propia página; esta es una cualquiera, para
-  // que el recorrido no se quede solo en la portada.
-  { nombre: '11b-informe-seccion', ruta: '/informe/mapa-procesos' },
+  // Las secciones con dibujo son las que más se rompen: el circuito, el mapa
+  // —que es la sección del mapa de procesos— y el espejo de la arquitectura.
+  { nombre: '11b-informe-hallazgos', ruta: '/informe/hallazgos' },
+  { nombre: '11c-informe-mapa', ruta: '/informe/mapa-interactivo' },
+  { nombre: '11d-informe-arquitectura', ruta: '/informe/arquitectura-ia' },
   { nombre: '12-programa', ruta: '/dashboard/programa' },
   { nombre: '13-empleados', ruta: '/dashboard/empleados' },
 ]

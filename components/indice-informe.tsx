@@ -3,7 +3,9 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import { IndicadorEnlace } from '@/components/indicador-enlace'
 import { revelarAncla } from '@/components/markdown-plegable'
+import { rutaDeSeccion } from '@/lib/informe-rutas'
 import { PARTES_INFORME, PARTES_INFORME_ORDEN, type ParteInforme } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
@@ -41,7 +43,7 @@ function Chevron({
       <span
         className={cn(
           'h-1.5 w-1.5 border-r-2 border-b-2 border-current transition-transform duration-150',
-          abierto ? '-rotate-45' : 'rotate-45'
+          abierto ? 'rotate-45' : '-rotate-45'
         )}
       />
     </button>
@@ -136,8 +138,12 @@ function SubIndice({ slug, niveles }: { slug: string; niveles: NivelIndice[] }) 
 export function IndiceInforme({ secciones }: { secciones: EntradaIndice[] }) {
   const ruta = usePathname()
   // Solo se recuerda qué está desplegado, no se persiste: el índice no se
-  // remonta al cambiar de sección porque vive en el layout.
-  const [abiertas, setAbiertas] = useState<Set<string>>(new Set())
+  // remonta al cambiar de sección porque vive en el layout. **Arranca desplegado**
+  // —decisión de Gabriel, 25 de septiembre—: las veinte fichas son la forma más
+  // corta de llegar a un macroproceso, y cerradas no se sabía que estaban ahí.
+  const [abiertas, setAbiertas] = useState<Set<string>>(
+    () => new Set(secciones.filter((s) => s.sub?.length).map((s) => s.slug))
+  )
 
   const alternar = (slug: string) =>
     setAbiertas((previas) => {
@@ -171,12 +177,12 @@ export function IndiceInforme({ secciones }: { secciones: EntradaIndice[] }) {
             </p>
             <ol className="space-y-0.5">
               {delParte.map((s) => {
-                const activa = ruta === `/informe/${s.slug}`
+                const activa = ruta === rutaDeSeccion(s.slug)
                 return (
                   <li key={s.slug}>
                     <div className="flex items-stretch">
                       <Link
-                        href={`/informe/${s.slug}`}
+                        href={rutaDeSeccion(s.slug)}
                         aria-current={activa ? 'page' : undefined}
                         className={cn(
                           'flex min-w-0 flex-1 gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors',
@@ -203,6 +209,7 @@ export function IndiceInforme({ secciones }: { secciones: EntradaIndice[] }) {
                         >
                           {s.titulo}
                         </span>
+                        <IndicadorEnlace className="mt-1" />
                       </Link>
 
                       {/* ⚠️ El chevron es un botón aparte, **fuera del enlace**.

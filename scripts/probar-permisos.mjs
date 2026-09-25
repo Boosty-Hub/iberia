@@ -105,11 +105,11 @@ try {
     { id: idLectura, clave: `${PREFIJO}-lectura`, nombre: 'Prueba · lectura', nivel: 'lector' },
     { id: idConsulta, clave: `${PREFIJO}-consulta`, nombre: 'Prueba · consultor', nivel: 'consultor' },
   ])
-  const t1 = await admin.from('rol_permisos').insert({ rol_id: idLectura, recurso: 'modulo:hallazgos', editar: true })
+  const t1 = await admin.from('rol_permisos').insert({ rol_id: idLectura, recurso: 'modulo:entrevistas', editar: true })
   comprobar('un rol de solo lectura no guarda «editar»', Boolean(t1.error))
   const t2 = await admin.from('rol_permisos').insert({ rol_id: idConsulta, recurso: 'modulo:roles', ver: true })
   comprobar('un consultor no gestiona roles', Boolean(t2.error))
-  const t3 = await admin.from('rol_permisos').insert({ rol_id: idConsulta, recurso: 'modulo:hallazgos', eliminar: true }).select('ver').single()
+  const t3 = await admin.from('rol_permisos').insert({ rol_id: idConsulta, recurso: 'modulo:entrevistas', eliminar: true }).select('ver').single()
   comprobar('marcar «eliminar» marca también «ver»', t3.data?.ver === true, t3.error?.message)
   const t4 = await admin.from('roles').update({ nivel: 'lector' }).eq('clave', 'consultor')
   comprobar('un rol de fábrica no cambia de nivel', Boolean(t4.error))
@@ -127,10 +127,18 @@ try {
     publicado: false,
   })
   if (eSec) throw new Error(`no se pudo crear la sección de prueba: ${eSec.message}`)
-  const { data: deFabrica } = await admin.from('rol_permisos').select('roles(clave)').eq('recurso', `informe:${slugPrueba}`)
+  const { data: deFabrica } = await admin
+    .from('rol_permisos')
+    .select('editar, eliminar, roles(clave)')
+    .eq('recurso', `informe:${slugPrueba}`)
   comprobar(
     'una sección nueva entra sola en los roles de fábrica',
     (deFabrica ?? []).length === 2,
+    JSON.stringify(deFabrica)
+  )
+  comprobar(
+    'y entra solo con «ver»: el informe no se edita desde el panel',
+    (deFabrica ?? []).every((p) => !p.editar && !p.eliminar),
     JSON.stringify(deFabrica)
   )
 
@@ -138,8 +146,10 @@ try {
   // ⚠️ En una inserción de varias filas, supabase-js pone NULL en la columna que
   // una fila no trae —no el valor por defecto—, así que van las cuatro siempre.
   const { error: ePerm } = await admin.from('rol_permisos').insert([
+    // La casilla de editar ya no sale en la matriz —el informe se escribe en las
+    // sesiones—, pero la política sigue en la base y se comprueba igual.
     { rol_id: idConsulta, recurso: `informe:${slugPrueba}`, ver: true, crear: false, editar: true, eliminar: false },
-    { rol_id: idConsulta, recurso: 'modulo:informe', ver: true, crear: false, editar: false, eliminar: false },
+    { rol_id: idConsulta, recurso: 'modulo:archivos', ver: true, crear: false, editar: false, eliminar: false },
   ])
   if (ePerm) throw new Error(`no se pudo armar la matriz de prueba: ${ePerm.message}`)
   const consultor = await cuenta('consultor', { rol: 'consultor', rol_clave: `${PREFIJO}-consulta` })
@@ -160,12 +170,12 @@ try {
   const c1 = await consultor.cliente
     .from('informe_secciones')
     .insert({ slug: `${PREFIJO}-nueva`, titulo: 'x', parte: 'arquitectura' })
-  comprobar('no crea secciones sin «crear» en el editor', Boolean(c1.error))
+  comprobar('no crea secciones: el panel ya no escribe el informe', Boolean(c1.error))
 
   // Lector de prueba sin nada marcado: ni el mapa ni las lecciones.
   const vacio = await cuenta('vacio', { rol: 'lector', rol_clave: `${PREFIJO}-lectura` })
   const { data: mapaVacio } = await vacio.cliente.from('macroprocesos').select('id').limit(1)
-  comprobar('sin la casilla del mapa, el mapa no se lee', (mapaVacio ?? []).length === 0)
+  comprobar('sin la casilla del mapa de procesos, el mapa no se lee', (mapaVacio ?? []).length === 0)
   const { data: leccVacio } = await vacio.cliente.from('lecciones').select('numero')
   comprobar('sin las casillas de las lecciones, no ve ninguna', (leccVacio ?? []).length === 0)
   const { data: mapaLector } = await lector.cliente.from('macroprocesos').select('id').limit(1)

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Insignia } from '@/components/ui'
+import { rutaDeSeccion } from '@/lib/informe-rutas'
 import { esEditor, puede, requerirSesion } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { PARTES_INFORME, PARTES_INFORME_ORDEN, type ParteInforme } from '@/lib/types'
@@ -59,11 +60,6 @@ export default async function InformePage() {
             Todavía no hay secciones publicadas. El levantamiento de procesos y el Documento de
             Arquitectura de IA se irán publicando a medida que avance el diagnóstico.
           </p>
-          {quienEscribe && puede(sesion, 'modulo:informe') && (
-            <Link href="/dashboard/informe" className="btn-acento mt-6">
-              Empezar a escribir
-            </Link>
-          )}
         </div>
       </div>
     )
@@ -124,7 +120,7 @@ export default async function InformePage() {
             usa exclusivamente para los fines del programa.
           </p>
           {primera && (
-            <Link href={`/informe/${primera.slug}`} className="btn-acento shrink-0">
+            <Link href={rutaDeSeccion(primera.slug)} className="btn-acento shrink-0">
               Empezar a leer
             </Link>
           )}
@@ -152,7 +148,7 @@ export default async function InformePage() {
                   const escrita = Boolean(s.contenido_md?.trim())
                   return (
                     <li key={s.id}>
-                      <Link href={`/informe/${s.slug}`} className="tarjeta-seccion group">
+                      <Link href={rutaDeSeccion(s.slug)} className="tarjeta-seccion group">
                         <span className="flex items-center gap-2">
                           <span className="font-mono text-xs text-acento-600">{s.numero ?? '—'}</span>
                           {!escrita && <span className="text-xs text-marca-400">Por escribir</span>}

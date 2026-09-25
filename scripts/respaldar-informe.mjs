@@ -189,7 +189,7 @@ try {
 let circuitos = 'no'
 try {
   const volcado = {}
-  for (const tabla of ['informe_circuito_puntos', 'informe_modulos', 'informe_circuito_textos']) {
+  for (const tabla of ['informe_circuito_puntos', 'informe_modulos', 'informe_circuito_textos', 'informe_hallazgos']) {
     const { data, error: e } = await admin.from(tabla).select('*')
     if (e) throw new Error(`${tabla}: ${e.message}`)
     volcado[tabla] = data

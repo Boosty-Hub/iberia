@@ -1,5 +1,6 @@
 import { cerrarSesion } from '@/app/login/actions'
-import { IconoSalir } from '@/components/iconos'
+import { IconoNuevaPestana, IconoSalir, IconoVerInforme } from '@/components/iconos'
+import Link from 'next/link'
 import { Marca } from '@/components/marca'
 import { MenuMovil } from '@/components/menu-movil'
 import { NavLateral, type ClaveNav } from '@/components/nav-lateral'
@@ -13,11 +14,9 @@ function destinosPermitidos(sesion: Sesion): ClaveNav[] {
     ['panel', puede(sesion, 'modulo:panel')],
     ['entrevistas', puede(sesion, 'modulo:entrevistas')],
     ['archivos', puede(sesion, 'modulo:archivos')],
-    ['hallazgos', puede(sesion, 'modulo:hallazgos')],
     ['adiestramiento', puede(sesion, 'modulo:adiestramiento')],
     // El padrón se abre con «editar»: sus vistas solo le responden al equipo.
     ['empleados', puede(sesion, 'modulo:empleados', 'editar')],
-    ['informe', puede(sesion, 'modulo:informe')],
     ['programa', puede(sesion, 'modulo:programa')],
     ['usuarios', puede(sesion, 'modulo:usuarios')],
     ['roles', puede(sesion, 'modulo:roles')],
@@ -70,6 +69,16 @@ export default async function DashboardLayout({ children }: LayoutProps<'/dashbo
           </div>
 
           <div className="ml-auto flex items-center gap-3">
+            {/* El informe, en la cabecera y no en la barra: es el destino de todo
+                el panel, y abajo del menú no se encontraba. Abre en otra pestaña,
+                porque es otra aplicación y volver al panel no puede costar el sitio. */}
+            {permitidos.includes('ver-informe') && (
+              <Link href="/informe" target="_blank" className="btn-neutro h-10 px-3 text-acento-700" aria-label="Ver el informe (abre en otra pestaña)">
+                <IconoVerInforme className="h-4 w-4" />
+                <span className="hidden md:inline">Ver el informe</span>
+                <IconoNuevaPestana className="hidden h-3.5 w-3.5 text-acento-400 md:inline" />
+              </Link>
+            )}
             <div className="hidden text-right sm:block">
               <p className="text-sm leading-tight font-medium text-marca-800">
                 {perfil.nombre_completo || email}

@@ -1109,6 +1109,54 @@ export type Database = {
         }
         Relationships: []
       }
+      informe_hallazgos: {
+        Row: {
+          codigo: string
+          nivel: string
+          orden: number
+          patron: string
+          punto: string | null
+          sistema: string | null
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          codigo: string
+          nivel: string
+          orden: number
+          patron: string
+          punto?: string | null
+          sistema?: string | null
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          codigo?: string
+          nivel?: string
+          orden?: number
+          patron?: string
+          punto?: string | null
+          sistema?: string | null
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "informe_hallazgos_punto_fkey"
+            columns: ["punto"]
+            isOneToOne: false
+            referencedRelation: "informe_circuito_puntos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "informe_hallazgos_sistema_fkey"
+            columns: ["sistema"]
+            isOneToOne: false
+            referencedRelation: "informe_circuito_puntos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       informe_modulos: {
         Row: {
           cifras: Json

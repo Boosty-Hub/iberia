@@ -3,45 +3,52 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { MapaInteractivo, type MacroDelMapa } from '@/components/mapa-interactivo'
+import { Insignia } from '@/components/ui'
 import { esEditor, puede, requerirSesion } from '@/lib/auth'
+import { rutaDeSeccion } from '@/lib/informe-rutas'
 import { createClient } from '@/lib/supabase/server'
+import { PARTES_INFORME, type ParteInforme } from '@/lib/types'
 
 /**
- * El mapa de procesos navegable.
+ * El mapa de procesos navegable — y, desde el 25 de septiembre, **la sección
+ * «El mapa de procesos»**: su página de texto decía lo mismo que las fichas y
+ * era un clic de más antes del dibujo. `/informe/mapa-procesos` redirige aquí y
+ * todo enlace a esa sección pasa por `rutaDeSeccion()`.
  *
- * Es una ruta hermana de `[slug]` y no una sección del informe: no tiene
- * contenido propio, es **otra forma de mirar** las secciones 4 y 5. Por eso no
- * está en `SECCIONES`, no aparece en el índice lateral y se entra por el botón
- * que vive dentro del mapa de procesos.
+ * Por eso esta página se viste de sección: la miga con su parte y su número,
+ * el título de la fila y las flechas de anterior y siguiente. Y se ve con la
+ * casilla «ver» de esa sección; el recurso aparte del mapa se fue.
  *
  * ⚠️ Un segmento estático gana al dinámico en Next, así que esta carpeta se
  * atiende antes que `[slug]` y nunca va a caer en el `notFound()` de allá.
  */
 
 export const metadata: Metadata = {
-  title: 'Mapa interactivo de procesos · Informe',
+  title: 'El mapa de procesos · Informe',
 }
 
 const NIVELES = ['Estratégico', 'Operativo', 'Soporte']
 
 export default async function MapaInteractivoPage() {
   const sesion = await requerirSesion()
+  const quienEscribe = esEditor(sesion.perfil)
   const supabase = await createClient()
 
-  // ⚠️ El mapa es el inventario entero de procesos. Hasta el 25 de septiembre lo
-  // abría cualquiera con sesión, aunque el informe no tuviera nada publicado:
-  // un lector de Iberia veía por aquí lo que la sección 2 todavía no le
-  // mostraba. Ahora exige su permiso y, para quien no escribe, que la sección
-  // del mapa de procesos esté publicada y a su alcance (la RLS decide eso).
-  if (!puede(sesion, 'informe:mapa-interactivo')) notFound()
-  if (!esEditor(sesion.perfil)) {
-    const { data: puerta } = await supabase
-      .from('informe_secciones')
-      .select('slug')
-      .eq('slug', 'mapa-procesos')
-      .maybeSingle()
-    if (!puerta) notFound()
-  }
+  // La lista de secciones que ve esta sesión, igual que en `[slug]`: la RLS
+  // filtra lo no publicado y `puede()` la casilla «ver» de cada rol.
+  const { data: filas } = await supabase
+    .from('informe_secciones')
+    .select('slug, numero, titulo, subtitulo, parte, contenido_md, publicado')
+    .order('orden')
+  const todas = (filas ?? []).filter((s) => puede(sesion, `informe:${s.slug}`))
+  const visibles = quienEscribe ? todas : todas.filter((s) => s.contenido_md?.trim())
+  const i = visibles.findIndex((s) => s.slug === 'mapa-procesos')
+  // ⚠️ El mapa es el inventario entero de procesos: quien no ve la sección no
+  // ve el mapa, aunque tenga sesión.
+  if (i === -1) notFound()
+  const seccion = visibles[i]
+  const anterior = i > 0 ? visibles[i - 1] : null
+  const siguiente = i < visibles.length - 1 ? visibles[i + 1] : null
 
   const { data } = await supabase
     .from('macroprocesos')
@@ -79,56 +86,70 @@ export default async function MapaInteractivoPage() {
   )
 
   return (
-    <article className="tarjeta mx-4 my-8 px-5 py-10 lg:mx-8 lg:my-10 lg:px-10 lg:py-12">
-      <header className="border-b border-[var(--borde)] pb-6">
-        <div className="flex flex-wrap items-center gap-2">
-          <Link href="/informe" className="text-xs text-marca-400 hover:text-acento-700">
-            Informe
-          </Link>
-          <span className="text-xs text-marca-300">/</span>
-          <Link
-            href="/informe/mapa-procesos"
-            className="text-xs text-marca-400 hover:text-acento-700"
-          >
-            El mapa de procesos
-          </Link>
-          <span className="text-xs text-marca-300">/</span>
-          <span className="text-xs text-marca-500">Mapa interactivo</span>
+    <div className="mx-auto w-full max-w-[1640px] sm:px-6 sm:py-8 lg:px-8 lg:py-10">
+      <article className="hoja-informe mx-auto w-full">
+        <header className="border-b border-[var(--borde)] pb-6">
+          <nav aria-label="Ruta" className="flex flex-wrap items-center gap-x-1 gap-y-2 text-xs">
+            <Link href="/informe" className="migas-enlace">
+              Informe
+            </Link>
+            <span className="text-marca-300" aria-hidden>
+              /
+            </span>
+            <span className="px-1 text-marca-500">{PARTES_INFORME[seccion.parte as ParteInforme]}</span>
+            {seccion.numero && <span className="font-mono text-acento-600">{seccion.numero}</span>}
+            {!seccion.publicado && (
+              <Insignia tono="ambar" className="ml-1">
+                Borrador
+              </Insignia>
+            )}
+          </nav>
+
+          <h1 className="mt-4 text-[1.75rem] leading-tight font-bold tracking-tight text-balance text-marca-900 sm:text-4xl">
+            {seccion.titulo}
+          </h1>
+          <p className="mt-3 text-base text-pretty text-marca-600 sm:text-lg">
+            Los {macros.length} macroprocesos y sus {totalProcesos} procesos. Abre una caja para ver
+            los suyos; cada uno lleva a su ficha en el informe.
+          </p>
+        </header>
+
+        <div className="py-8">
+          {macros.length ? (
+            <MapaInteractivo macros={macros} />
+          ) : (
+            <div className="rounded-xl border border-dashed border-[var(--borde)] px-6 py-12 text-center">
+              <p className="text-sm text-marca-400">El inventario todavía no está sembrado en la base.</p>
+              <p className="mt-2 font-mono text-xs text-marca-400">npm run sembrar:procesos</p>
+            </div>
+          )}
         </div>
 
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-marca-900">
-          Mapa interactivo de procesos
-        </h1>
-        <p className="mt-2 text-marca-600">
-          Los {macros.length} macroprocesos y sus {totalProcesos} procesos. Abre una caja para ver
-          los suyos; cada uno lleva a su ficha en el informe.
-        </p>
-      </header>
-
-      <div className="py-8">
-        {macros.length ? (
-          <MapaInteractivo macros={macros} />
-        ) : (
-          <div className="rounded-xl border border-dashed border-[var(--borde)] px-6 py-12 text-center">
-            <p className="text-sm text-marca-400">
-              El inventario todavía no está sembrado en la base.
-            </p>
-            <p className="mt-2 font-mono text-xs text-marca-400">npm run sembrar:procesos</p>
-          </div>
-        )}
-      </div>
-
-      <footer className="flex items-center justify-between border-t border-[var(--borde)] pt-6">
-        <Link href="/informe/mapa-procesos" className="text-sm text-marca-500 hover:text-acento-700">
-          ← El mapa de procesos
-        </Link>
-        <Link
-          href="/informe/fichas-procesos"
-          className="text-sm text-marca-500 hover:text-acento-700"
-        >
-          Las fichas de proceso →
-        </Link>
-      </footer>
-    </article>
+        <nav aria-label="Secciones contiguas" className="grid gap-3 border-t border-[var(--borde)] pt-6 sm:grid-cols-2">
+          {anterior ? (
+            <Link href={rutaDeSeccion(anterior.slug)} className="contigua">
+              <span className="text-xs text-marca-400">← Anterior</span>
+              <span className="contigua-titulo">
+                {anterior.numero && <span className="font-mono text-marca-400">{anterior.numero}</span>}
+                {anterior.titulo}
+              </span>
+            </Link>
+          ) : (
+            <span className="hidden sm:block" />
+          )}
+          {siguiente ? (
+            <Link href={rutaDeSeccion(siguiente.slug)} className="contigua sm:text-right">
+              <span className="text-xs text-marca-400">Siguiente →</span>
+              <span className="contigua-titulo sm:justify-end">
+                {siguiente.numero && <span className="font-mono text-marca-400">{siguiente.numero}</span>}
+                {siguiente.titulo}
+              </span>
+            </Link>
+          ) : (
+            <span className="hidden sm:block" />
+          )}
+        </nav>
+      </article>
+    </div>
   )
 }

@@ -51,7 +51,7 @@ export const GRUPOS: { clave: Grupo; titulo: string; descripcion: string }[] = [
     clave: 'informe',
     titulo: 'Secciones del informe',
     descripcion:
-      'Editar es escribir y publicar; eliminar, borrar la sección. Quien no puede ver una sección no la encuentra ni en el índice, y el lector solo ve lo publicado.',
+      'Se escriben en las sesiones de trabajo, no desde el panel: aquí solo se decide quién ve cada una. Quien no puede ver una sección no la encuentra ni en el índice, y el lector solo ve lo publicado.',
   },
   { clave: 'curso', titulo: 'Curso de Ajito', descripcion: 'Qué lecciones le aparecen a cada rol en el teléfono.' },
   {
@@ -90,24 +90,12 @@ export const MODULOS: Recurso[] = [
     acciones: ['ver', 'crear', 'eliminar'],
     detalle: { crear: 'Subir al expediente', eliminar: 'Borrar del expediente' },
   },
-  {
-    clave: 'modulo:hallazgos',
-    nombre: 'Hallazgos',
-    grupo: 'panel',
-    acciones: ['ver', 'crear', 'editar', 'eliminar'],
-    detalle: { editar: 'Incluye validar y descartar' },
-  },
-  {
-    clave: 'modulo:informe',
-    nombre: 'Editor del informe',
-    grupo: 'panel',
-    acciones: ['ver', 'crear'],
-    detalle: { ver: 'La lista de secciones en el panel', crear: 'Crear una sección nueva' },
-    subtitulo: 'Escribir cada sección se da abajo, sección por sección',
-  },
+  // Sin «Hallazgos» ni «Editor del informe» desde el 25 de septiembre: los
+  // hallazgos se leen en el informe, en su circuito, y el informe se escribe en
+  // las sesiones de trabajo. Ver la migración `informe_de_lectura`.
   {
     clave: 'modulo:programa',
-    nombre: 'El programa',
+    nombre: 'Consumos y línea de tiempo',
     grupo: 'panel',
     acciones: ['ver', 'crear', 'eliminar'],
     detalle: { crear: 'Cargar horas e hitos', eliminar: 'Borrar horas' },
@@ -160,15 +148,6 @@ export const MODULOS: Recurso[] = [
   },
 ]
 
-/** El mapa interactivo es una ruta del informe sin sección propia. */
-export const RECURSO_MAPA: Recurso = {
-  clave: 'informe:mapa-interactivo',
-  nombre: 'Mapa interactivo de procesos',
-  grupo: 'informe',
-  acciones: ['ver'],
-  subtitulo: 'Los veinte macroprocesos en un solo dibujo',
-}
-
 /** El inventario completo: los módulos, las secciones del informe y las lecciones. */
 export function construirInventario(
   secciones: { slug: string; numero: string | null; titulo: string }[],
@@ -181,9 +160,10 @@ export function construirInventario(
       nombre: s.titulo,
       subtitulo: s.numero ? `Sección ${s.numero}` : undefined,
       grupo: 'informe',
-      acciones: ['ver', 'editar', 'eliminar'],
+      // Solo «ver»: el mapa interactivo es la sección del mapa de procesos y se
+      // ve con su casilla.
+      acciones: ['ver'],
     })),
-    RECURSO_MAPA,
     ...lecciones.map<Recurso>((l) => ({
       clave: `leccion:${l.numero}`,
       nombre: l.titulo,

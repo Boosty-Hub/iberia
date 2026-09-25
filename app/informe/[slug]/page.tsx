@@ -1,20 +1,23 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
+import GithubSlugger from 'github-slugger'
 import {
   CircuitosDelNegocio,
   EspejoIberia,
+  type HallazgoCircuito,
   type ModuloIberia,
   type PuntoCircuito,
   type TextosCircuitos,
 } from '@/components/circuitos-informe'
-import { IconoEditar } from '@/components/iconos'
 import { IndiceSeccion } from '@/components/informe/indice-seccion'
 import { Markdown } from '@/components/markdown'
 import { MarkdownPlegable } from '@/components/markdown-plegable'
 import { Insignia } from '@/components/ui'
 import { esEditor, puede, requerirSesion } from '@/lib/auth'
 import { encabezadosDe, minutosDeLectura } from '@/lib/encabezados'
+import { RUTA_MAPA, rutaDeSeccion } from '@/lib/informe-rutas'
+import { normalizarNombre } from '@/lib/rehype-informe'
 import { createClient } from '@/lib/supabase/server'
 import { PARTES_INFORME, type ParteInforme } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -49,7 +52,32 @@ const PLEGABLES = new Set(['fichas-procesos'])
  * anillo mide 1080— y su índice lateral sale más tarde, cuando cabe al lado del
  * dibujo sin encogerlo.
  */
-const CON_CIRCUITOS = new Set(['circuitos', 'arquitectura-ia'])
+const CON_CIRCUITOS = new Set(['hallazgos', 'sistemas-datos', 'arquitectura-ia'])
+
+/**
+ * Las secciones que se leen en tarjetas: cada `###` es una, con el color de su
+ * nivel (crítico, atención, funciona). Son las que se reescribieron ordenadas el
+ * 25 de septiembre —«un sistema, y adentro todo puntualizado»—. Ver
+ * `lib/rehype-informe.ts`.
+ */
+const EN_TARJETAS = new Set(['hallazgos', 'sistemas-datos', 'inventario-sistemas', 'riesgo-continuidad', 'trabas', 'oportunidades'])
+
+/** Donde aparecen procesos y macroprocesos, y la marca «Nuevo» les sirve. */
+const CON_NUEVOS = new Set(['fichas-procesos'])
+
+/**
+ * Los nombres de los procesos y macroprocesos nuevos, de la base: son los que el
+ * levantamiento encontró y no estaban en el mapa de partida. La marca se pone al
+ * pintar, sin tocar el texto que escribe el generador.
+ */
+async function leerNuevos(): Promise<string[]> {
+  const supabase = await createClient()
+  const [{ data: macros }, { data: procesos }] = await Promise.all([
+    supabase.from('macroprocesos').select('nombre').eq('nuevo', true),
+    supabase.from('procesos').select('nombre').eq('estado', 'NUEVO'),
+  ])
+  return [...(macros ?? []), ...(procesos ?? [])].map((x) => normalizarNombre(x.nombre))
+}
 
 /**
  * El contenido de los circuitos sale de la base, no del código: el repositorio
@@ -57,15 +85,22 @@ const CON_CIRCUITOS = new Set(['circuitos', 'arquitectura-ia'])
  */
 async function leerCircuitos() {
   const supabase = await createClient()
-  const [{ data: puntos }, { data: modulos }, { data: textos }] = await Promise.all([
+  const [{ data: puntos }, { data: modulos }, { data: textos }, { data: hallazgos }] = await Promise.all([
     supabase.from('informe_circuito_puntos').select('*').order('numero'),
     supabase.from('informe_modulos').select('*').order('numero'),
     supabase.from('informe_circuito_textos').select('clave, contenido'),
+    supabase.from('informe_hallazgos').select('codigo, titulo, patron, nivel, punto, sistema, orden').order('orden'),
   ])
   return {
     puntos: (puntos ?? []) as unknown as PuntoCircuito[],
     modulos: (modulos ?? []) as unknown as ModuloIberia[],
     textos: Object.fromEntries((textos ?? []).map((t) => [t.clave, t.contenido])) as TextosCircuitos,
+    // El ancla de cada hallazgo es la que `rehype-slug` le pone a su
+    // `### H-NN · Título`: el mismo `github-slugger` sobre el mismo texto.
+    hallazgos: (hallazgos ?? []).map((h) => ({
+      ...h,
+      ancla: new GithubSlugger().slug(`${h.codigo} · ${h.titulo}`),
+    })) as HallazgoCircuito[],
   }
 }
 
@@ -102,19 +137,23 @@ const fecha = (iso: string) =>
 
 export default async function SeccionInformePage({ params, searchParams }: PageProps<'/informe/[slug]'>) {
   const [{ slug }, consulta] = await Promise.all([params, searchParams])
-  const { sesion, quienEscribe, visibles } = await leerSecciones()
+  const { visibles } = await leerSecciones()
 
   const i = visibles.findIndex((s) => s.slug === slug)
   if (i === -1) notFound()
+  // «El mapa de procesos» es el mapa interactivo. Ver `lib/informe-rutas.ts`.
+  if (slug === 'mapa-procesos') redirect(RUTA_MAPA)
 
   const seccion = visibles[i]
   const anterior = i > 0 ? visibles[i - 1] : null
   const siguiente = i < visibles.length - 1 ? visibles[i + 1] : null
   const escrita = Boolean(seccion.contenido_md?.trim())
-  const puedeEditarla = quienEscribe && puede(sesion, `informe:${seccion.slug}`, 'editar')
   const conCircuitos = CON_CIRCUITOS.has(seccion.slug)
   const plegable = PLEGABLES.has(seccion.slug)
-  const circuitos = conCircuitos ? await leerCircuitos() : null
+  const [circuitos, nuevos] = await Promise.all([
+    conCircuitos ? leerCircuitos() : null,
+    CON_NUEVOS.has(seccion.slug) ? leerNuevos() : undefined,
+  ])
   // Las fichas ya tienen su subíndice en la columna izquierda, por nivel y por
   // ficha: un segundo índice con los mismos niveles a la derecha sería ruido.
   const indice = plegable ? [] : encabezadosDe(seccion.contenido_md)
@@ -139,11 +178,25 @@ export default async function SeccionInformePage({ params, searchParams }: PageP
     <div
       className={cn(
         'mx-auto w-full sm:px-6 sm:py-8 lg:px-8 lg:py-10',
-        conCircuitos ? 'max-w-[1640px]' : conLateral ? 'max-w-[1200px]' : 'max-w-[960px]'
+        conCircuitos
+          ? 'max-w-[1640px]'
+          : plegable
+            ? 'max-w-[1160px]'
+            : conLateral
+              ? 'max-w-[1200px]'
+              : 'max-w-[960px]'
       )}
     >
-      <div className={rejilla}>
-        <article className={cn('hoja-informe', conCircuitos ? 'mx-auto w-full' : 'mx-auto w-full max-w-[840px]')}>
+      <div className={cn('rejilla-seccion', rejilla)}>
+        {/* Las fichas son material de consulta —tablas y rótulos, no prosa de
+            corrido— y van a 1080: a la medida de lectura, tres niveles de
+            plegado dejaban el texto en 650 px y medio monitor vacío. */}
+        <article
+          className={cn(
+            'hoja-informe mx-auto w-full',
+            conCircuitos ? '' : plegable ? 'max-w-[1080px] lg:px-10' : 'max-w-[840px]'
+          )}
+        >
           <header className="border-b border-[var(--borde)] pb-6">
             <nav aria-label="Ruta" className="flex flex-wrap items-center gap-x-1 gap-y-2 text-xs">
               <Link href="/informe" className="migas-enlace">
@@ -159,12 +212,6 @@ export default async function SeccionInformePage({ params, searchParams }: PageP
                 <Insignia tono="ambar" className="ml-1">
                   Borrador
                 </Insignia>
-              )}
-              {puedeEditarla && (
-                <Link href={`/dashboard/informe/${seccion.slug}`} className="btn-neutro ml-auto h-9 px-3 text-xs">
-                  <IconoEditar className="h-3.5 w-3.5" />
-                  Editar
-                </Link>
               )}
             </nav>
 
@@ -182,27 +229,29 @@ export default async function SeccionInformePage({ params, searchParams }: PageP
             )}
           </header>
 
-          {/* La puerta al mapa interactivo. Va aquí y no dentro del markdown
-              porque el renderizador descarta el HTML crudo. */}
-          {seccion.slug === 'mapa-procesos' && escrita && puede(sesion, 'informe:mapa-interactivo') && (
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link href="/informe/mapa-interactivo" className="btn-mapa">
-                <span aria-hidden>▦</span> Visitar el mapa interactivo
-              </Link>
-              <span className="text-xs text-marca-400">
-                Los veinte macroprocesos en un solo dibujo, y cada proceso lleva a su ficha.
-              </span>
-            </div>
-          )}
-
           {/* Los circuitos van arriba de la prosa: la sección se lee mirando el
               dibujo, y el texto explica lo que el lector ya tiene delante. */}
-          {circuitos && seccion.slug === 'circuitos' && (
+          {/* Los hallazgos abren con el flujo, cada uno en su punto; «Sistemas y
+              estado del dato», con el anillo de sistemas. Los dos, sin pestañas. */}
+          {circuitos && seccion.slug === 'hallazgos' && (
             <CircuitosDelNegocio
               puntos={circuitos.puntos}
               modulos={circuitos.modulos}
               textos={circuitos.textos}
               inicial={pedido('punto')}
+              vistaFija="flujo"
+              hallazgos={circuitos.hallazgos}
+            />
+          )}
+          {circuitos && seccion.slug === 'sistemas-datos' && (
+            <CircuitosDelNegocio
+              puntos={circuitos.puntos}
+              modulos={circuitos.modulos}
+              textos={circuitos.textos}
+              inicial={pedido('punto')}
+              vistaFija="sistemas"
+              hallazgos={circuitos.hallazgos}
+              hallazgosEn="/informe/hallazgos"
             />
           )}
           {circuitos && seccion.slug === 'arquitectura-ia' && (
@@ -224,27 +273,26 @@ export default async function SeccionInformePage({ params, searchParams }: PageP
           <div className={cn('py-8', conCircuitos && 'mx-auto max-w-[760px]')}>
             {escrita ? (
               plegable ? (
-                <MarkdownPlegable contenido={seccion.contenido_md!} />
+                <MarkdownPlegable contenido={seccion.contenido_md!} nuevos={nuevos} />
               ) : (
-                <Markdown contenido={seccion.contenido_md!} />
+                <Markdown
+                  contenido={seccion.contenido_md!}
+                  tarjetas={EN_TARJETAS.has(seccion.slug)}
+                  nuevos={nuevos}
+                />
               )
             ) : (
               // Solo la ve un editor: `visibles` no le entrega secciones vacías al
               // lector de Iberia.
               <div className="rounded-xl border border-dashed border-[var(--borde)] px-6 py-12 text-center">
                 <p className="text-sm text-marca-400">Esta sección está por escribir.</p>
-                {puedeEditarla && (
-                  <Link href={`/dashboard/informe/${seccion.slug}`} className="btn-acento mt-5">
-                    Escribirla
-                  </Link>
-                )}
               </div>
             )}
           </div>
 
           <nav aria-label="Secciones contiguas" className="grid gap-3 border-t border-[var(--borde)] pt-6 sm:grid-cols-2">
             {anterior ? (
-              <Link href={`/informe/${anterior.slug}`} className="contigua">
+              <Link href={rutaDeSeccion(anterior.slug)} className="contigua">
                 <span className="text-xs text-marca-400">← Anterior</span>
                 <span className="contigua-titulo">
                   {anterior.numero && <span className="font-mono text-marca-400">{anterior.numero}</span>}
@@ -255,7 +303,7 @@ export default async function SeccionInformePage({ params, searchParams }: PageP
               <span className="hidden sm:block" />
             )}
             {siguiente ? (
-              <Link href={`/informe/${siguiente.slug}`} className="contigua sm:text-right">
+              <Link href={rutaDeSeccion(siguiente.slug)} className="contigua sm:text-right">
                 <span className="text-xs text-marca-400">Siguiente →</span>
                 <span className="contigua-titulo sm:justify-end">
                   {siguiente.numero && <span className="font-mono text-marca-400">{siguiente.numero}</span>}
@@ -269,7 +317,7 @@ export default async function SeccionInformePage({ params, searchParams }: PageP
         </article>
 
         {conLateral && (
-          <aside className={cn('hidden', lateralVisible)}>
+          <aside className={cn('indice-seccion-lateral hidden', lateralVisible)}>
             <div className="sticky top-[92px] max-h-[calc(100vh-120px)] overflow-y-auto">
               <IndiceSeccion entradas={indice} variante="lateral" />
             </div>

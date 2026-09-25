@@ -31,9 +31,10 @@ export default async function PanelPage({ searchParams }: PageProps<'/dashboard'
   // módulo al que lleva. Un enlace a una pantalla prohibida es un aviso seguro.
   const verEntrevistas = puede(sesion, 'modulo:entrevistas')
   const crearEntrevistas = puede(sesion, 'modulo:entrevistas', 'crear')
-  const verHallazgos = puede(sesion, 'modulo:hallazgos')
+  // Los hallazgos ya no tienen módulo en el panel: se leen en el informe, en su
+  // circuito. La tarjeta lleva allá.
+  const verHallazgos = puede(sesion, 'informe:hallazgos')
   const verArchivos = puede(sesion, 'modulo:archivos')
-  const verEditorInforme = puede(sesion, 'modulo:informe')
 
   const [entrevistasRes, hallazgosRes, archivosRes, seccionesRes] = await Promise.all([
     supabase
@@ -41,7 +42,7 @@ export default async function PanelPage({ searchParams }: PageProps<'/dashboard'
       .select('id, codigo, tipo, titulo, entrevistado_nombre, entrevistado_cargo, estado, sede, fecha_entrevista, areas(nombre)')
       .order('fecha_entrevista', { ascending: false, nullsFirst: false })
       .order('codigo', { ascending: true }),
-    supabase.from('hallazgos').select('id, estado, tipo'),
+    supabase.from('informe_hallazgos').select('codigo, nivel'),
     supabase.from('archivos').select('id', { count: 'exact', head: true }),
     supabase.from('informe_secciones').select('id, publicado'),
   ])
@@ -66,7 +67,7 @@ export default async function PanelPage({ searchParams }: PageProps<'/dashboard'
   const transcritas = otrasSesiones.filter(
     (e) => e.estado === 'transcrita' || e.estado === 'analizada'
   ).length
-  const hallazgosValidados = hallazgos.filter((h) => h.estado === 'validado').length
+  const hallazgosCriticos = hallazgos.filter((h) => h.nivel === 'critico').length
   const seccionesPublicadas = secciones.filter((s) => s.publicado).length
 
   const aviso = Array.isArray(params.aviso) ? params.aviso[0] : params.aviso
@@ -118,9 +119,9 @@ export default async function PanelPage({ searchParams }: PageProps<'/dashboard'
         {verHallazgos && (
           <Metrica
             valor={hallazgos.length}
-            sufijo={hallazgosValidados > 0 ? `${hallazgosValidados} validados` : undefined}
-            etiqueta="Hallazgos"
-            href="/dashboard/hallazgos"
+            sufijo={hallazgosCriticos > 0 ? `${hallazgosCriticos} críticos` : undefined}
+            etiqueta="Hallazgos en el informe"
+            href="/informe/hallazgos"
           />
         )}
         {verArchivos && (
@@ -245,14 +246,7 @@ export default async function PanelPage({ searchParams }: PageProps<'/dashboard'
         <section className="tarjeta">
           <div className="flex items-baseline justify-between gap-4 border-b border-[var(--borde)] px-5 py-3.5">
             <h2 className="text-sm font-semibold text-marca-800">Informe</h2>
-            {verEditorInforme && (
-              <Link
-                href="/dashboard/informe"
-                className="text-xs font-medium text-acento-700 hover:underline"
-              >
-                Editar
-              </Link>
-            )}
+            {/* Sin «Editar»: el informe se escribe en las sesiones de trabajo. */}
           </div>
           <div className="px-5 py-4">
             <p className="flex items-baseline gap-1.5">

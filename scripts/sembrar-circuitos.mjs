@@ -41,6 +41,9 @@ try {
 const puntos = taller.puntos ?? []
 const modulos = taller.modulos ?? []
 const textos = taller.textos ?? {}
+// Cada hallazgo del informe ubicado en el circuito, con su nivel. Ver la sección
+// «Los hallazgos, en el circuito del negocio».
+const hallazgos = (taller.hallazgos ?? []).map((h, i) => ({ orden: i + 1, ...h }))
 
 // --- Coherencia del taller ---------------------------------------------------
 const problemas = []
@@ -63,6 +66,19 @@ for (const p of puntos)
   for (const d of p.destapes ?? [])
     if (!DESTAPES.includes(d.tipo)) problemas.push(`el punto ${p.id} tiene un destape de tipo «${d.tipo}», que no tiene rótulo`)
 
+// Los hallazgos: código único, nivel conocido, y un punto que exista y sea de
+// su circuito —el del flujo en `punto`, el de sistemas en `sistema`—.
+const codigos = new Set()
+for (const h of hallazgos) {
+  if (codigos.has(h.codigo)) problemas.push(`el hallazgo ${h.codigo} está repetido`)
+  codigos.add(h.codigo)
+  if (!['critico', 'atencion', 'funciona'].includes(h.nivel)) problemas.push(`el hallazgo ${h.codigo} tiene un nivel «${h.nivel}» que no existe`)
+  const p = puntos.find((x) => x.id === h.punto)
+  if (h.punto && (!p || p.circuito !== 'flujo')) problemas.push(`el hallazgo ${h.codigo} cae en «${h.punto}», que no es un punto del flujo`)
+  const s = puntos.find((x) => x.id === h.sistema)
+  if (h.sistema && (!s || s.circuito !== 'sistemas')) problemas.push(`el hallazgo ${h.codigo} se relaciona con «${h.sistema}», que no es un punto de sistemas`)
+}
+
 if (problemas.length) {
   console.error(`\n✖ El taller no es coherente:\n${problemas.map((p) => `   · ${p}`).join('\n')}\n`)
   process.exit(1)
@@ -73,6 +89,7 @@ const capacidades = modulos.reduce((t, m) => t + m.cubre.length, 0)
 console.log(`\n${ARCHIVO} · versión ${taller.version ?? '—'}`)
 console.log(`  ${puntos.filter((p) => p.circuito === 'flujo').length} puntos del flujo · ${puntos.filter((p) => p.circuito === 'sistemas').length} de sistemas`)
 console.log(`  ${modulos.length} módulos · ${capacidades} capacidades, ${ia} de ellas con IA`)
+console.log(`  ${hallazgos.length} hallazgos en el circuito · ${hallazgos.filter((h) => h.nivel === 'critico').length} críticos · ${hallazgos.filter((h) => !h.punto).length} transversales`)
 
 if (revisar) {
   console.log('\nRevisión: no se escribió nada.\n')
@@ -97,6 +114,7 @@ try {
   const sinPuntos = await volcar('informe_circuito_puntos', puntos, 'id')
   const sinModulos = await volcar('informe_modulos', modulos, 'id')
   await volcar('informe_circuito_textos', Object.entries(textos).map(([clave, contenido]) => ({ clave, contenido })), 'clave')
+  if (hallazgos.length) await volcar('informe_hallazgos', hallazgos, 'codigo')
   console.log('\n✔ Sembrado.')
   if (sinPuntos.length || sinModulos.length) {
     console.log(`  Borrado lo que ya no está en el taller: ${[...sinPuntos, ...sinModulos].join(', ')}`)

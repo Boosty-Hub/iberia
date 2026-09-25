@@ -1,6 +1,7 @@
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeSlug from 'rehype-slug'
+import { rehypeInforme } from '@/lib/rehype-informe'
 import { cn } from '@/lib/utils'
 
 /**
@@ -17,15 +18,23 @@ import { cn } from '@/lib/utils'
 export function Markdown({
   contenido,
   className,
+  tarjetas = false,
+  nuevos,
 }: {
   contenido: string
   className?: string
+  /** Cada `###` en una tarjeta. Ver `lib/rehype-informe.ts`. */
+  tarjetas?: boolean
+  /** Procesos y macroprocesos nuevos, normalizados, para su marca. */
+  nuevos?: string[]
 }) {
   return (
     <div className={cn('prosa', className)}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeSlug]}
+        // El orden importa: primero los ids, después las tarjetas, para que
+        // envolver un encabezado no le cambie el ancla.
+        rehypePlugins={[rehypeSlug, [rehypeInforme, { tarjetas, nuevos }]]}
         components={{
           table: ({ children }) => (
             <div className="tabla-scroll">
