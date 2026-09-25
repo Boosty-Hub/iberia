@@ -20,17 +20,17 @@ línea.
 
 | | |
 |---|---|
-| **Fase** | 1 · Entender · **día 25 de 153**. Contrato `CONT-2026-08-0002`, firmado el 6/7 de agosto de 2026 |
+| **Fase** | 1 · Entender · **día 50 de 153**. Contrato `CONT-2026-08-0002`, firmado el 6/7 de agosto de 2026 |
 | **Calendario** | Adelantado: **nada se entrega después del 6 de diciembre**, porque el aviso de no renovación vence antes que el entregable que sirve para decidir |
-| **Dashboard** | Operativo en local. **Sin desplegar**. Roles y permisos configurables desde el 25/9 |
-| **Levantamiento** | **42 sesiones · 27.951 turnos**. **34 entrevistas de ~25 (136%)** · los 20 macroprocesos cubiertos |
+| **Dashboard** | Operativo en local. **Sin desplegar**. Roles y permisos configurables desde el 25/9. **Sin módulo de hallazgos ni editor del informe** desde el 25/9: el informe se escribe en las sesiones |
+| **Levantamiento** | **42 sesiones grabadas · 27.951 turnos**. **33 entrevistas hechas de ~25** y una programada (ENT-029) · los 20 macroprocesos cubiertos |
 | **Hallazgos** | **394, todos con cita textual verificada** · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
-| **Informe** | **12 secciones** y 20 de 20 fichas, **sin citas, sin códigos y sin nombres** (18/9, con Gabriel). Ninguna publicada. **La parte de arquitectura se rehízo el 24/9**: los circuitos, el sistema Iberia y la ruta de construcción |
-| **Horas** | **137 h en el mes 1 contra una bolsa de 107**, ya revisadas con Gabriel. Aparte: 111 h de la etapa anterior y 104 h del curso de planta, que se factura en Fase 2 |
+| **Informe** | **11 secciones** y 20 de 20 fichas, **sin citas, sin códigos y sin nombres** (18/9, con Gabriel). Ninguna publicada. **Desde el 25/9 son 11, hallazgos primero**: lo que encontramos → cómo funciona hoy → qué proponemos, en tarjetas con nivel de criticidad. Ocho se escriben en Supabase; el generador solo lleva inicio, mapa y fichas |
+| **Horas** | **137 h en agosto**, revisadas con Gabriel, y **119 h en septiembre**, estimadas y por revisar: 256 h en la fase contra 107 al mes. Aparte: 111 h de la etapa anterior y 104 h del curso de planta, que se factura en Fase 2 |
 | **Comunicación** | **El comunicado salió.** Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | **276 personas cargadas** con ficha, cargo, nivel y familia de oficio. ⚠️ Sin cédula, sin celular y sin correo |
 | **Canal** | Funciona en local. Anunciado el 12 de agosto; **la revisión con mercadeo se cayó y no tiene fecha** |
-| **Formación dirigente** | Uno a uno con Alberto el 17 de agosto y **Petit Comité dictado el 26**. Faltan dos formaciones, sus fechas y aclarar las licencias |
+| **Formación dirigente** | Uno a uno con Alberto el 17 de agosto, **Petit Comité el 26** y **gerentes el 23 de septiembre en Cagua**. Falta la tercera —los líderes— y su fecha |
 | **Adiestramiento de planta** | Completo: guion, **70 audios (20 min 02 s)**, 10 fichas, certificado, padrón, recordatorios. **Ajito ya contesta** con la clave que tiene saldo — 🔴 **pero sin voz desde el 24/9**: la clave de Azure no autentica, y con ella cae la transcripción de las notas de voz. **Es de Fase 2** — avance para mostrar, no para abrir |
 | **Repositorio** | `Boosty-Hub/iberia` — 🔴 **público**. Cinco commits subidos el 17/9 con la bitácora dentro. Hace falta un administrador de la organización para cerrarlo |
 
@@ -57,10 +57,208 @@ cláusula 5. Aquí solo lo urgente:
   comité de comunicaciones** propuesto el 27, que de paso cierra la cadencia de gobierno.
 - **Cerrar el acceso antes de la segunda formación**, no en la sala: en la primera se fueron
   48 de los 240 minutos en que la gente lograra entrar.
-- **Aclarar el estado de las licencias de Claude Team** y fechar la segunda y la tercera.
+- **Aclarar el estado de las licencias de Claude Team** y fechar la tercera formación. *(La segunda, a los gerentes, se dio el 23 de septiembre.)*
 - **Refijar la revisión del canal con mercadeo** — Alberto la agenda. Bloquea el despliegue.
 - **Leer los 42 hallazgos redactados** del informe y validar los que los sostienen.
 - **Pedirle a Capital Humano cédula y celular por ficha.** El padrón llegó sin ellos.
+
+---
+
+## 25 de septiembre de 2026 · Sesión 41 — el panel se aligera, y la ficha del circuito se lee al lado
+
+Ocho encargos de Gabriel sobre el panel y el informe, y publicar todo en `main`.
+
+### Lo que decidió Gabriel
+
+- **Fuera del panel el módulo de hallazgos y el editor del informe.** Los hallazgos ya se leen en
+  el informe, cada uno en su punto del circuito, y **el informe se escribe en estas sesiones** y
+  queda listo en la base. Las rutas, sus acciones y sus componentes se borraron; la tabla
+  `hallazgos` se queda, que es la que guarda las citas y de la que sale el expediente.
+- **Una sección «Cursos» en la barra**: el adiestramiento, el padrón y el curso de Ajito juntos.
+- **«El programa» pasa a «Consumos y línea de tiempo»**, «Consumos» en la barra.
+- **«Ver el informe» sube a la cabecera**, en otra pestaña.
+- **«El mapa de procesos» abre directo el mapa interactivo**: la página previa decía lo mismo que
+  las fichas. La sección conserva su número y su sitio; su ruta de texto redirige al mapa, y el
+  mapa se viste de sección con su miga y sus flechas.
+- **La ficha de cada trombo, en un panel que entra desde la derecha**, para leerla sin perder el
+  circuito de vista. Aplica a los tres dibujos: flujo, sistemas y espejo.
+- **Las oportunidades, releídas y reordenadas** contra el circuito y la arquitectura.
+
+### Las oportunidades, en el orden en que se construye
+
+Antes iban en tres grupos por disponibilidad del dato, y no se sabía a qué parte del sistema
+Iberia iba cada una. Ahora van **por tramo de la ruta y por módulo** —paso 0 (2), ola 1 (4), ola 2
+(4), ola 3 (11)—, y cada tarjeta dice qué punto del circuito destraba, **con enlace a sus
+hallazgos** (27), dónde vive en el módulo, si es IA, y el dato como etiqueta: `[Arranca ya]`,
+`[Paso previo]`, `[Falta el dato]`. Un agente la reescribió sobre el texto que había y yo
+recomputé contra las tarjetas cada cifra del cuadro y del cierre antes de cargarla. **Salió del
+generador de Jesús**: se escribe en Supabase, como las otras seis.
+
+⚠️ **La reordenación destapó dos cosas que el orden por grupos escondía:**
+
+- **Ocho de las 29 no caben en ningún módulo del sistema Iberia**, y cuatro de ellas son IA que no
+  está entre las 17 capacidades de la arquitectura —la foto del anaquel, los audios del
+  transporte, la ubicación al recibir, la secuenciación de corridas—. No se metieron a la fuerza:
+  van aparte, con el módulo más cercano nombrado. Es decisión para Gabriel y Jesús si alguna
+  entra a un módulo.
+- **Finanzas y Personas no traen ninguna oportunidad de la lista.** Sus módulos salen del
+  circuito, no de lo que las áreas pidieron. Y la ola 3 guarda cinco de las doce que arrancan ya:
+  va al final por lo físico, no por el dato.
+
+### El panel de la ficha
+
+- **No es un modal**: tocar otro trombo cambia la ficha sin cerrarla, las flechas recorren lo que
+  deja ver el filtro, Esc cierra, y `?punto=` lo abre en ese punto.
+- ⚠️ **Tapando, la mitad derecha del circuito quedaba debajo del panel.** Ahora le hace sitio: el
+  índice del informe se retira, el contenido se corre y el dibujo se encoge hasta caber entero.
+  El espejo tenía su propio ancho mínimo de 1.000 px y seguía desbordando; lo cazó la medición,
+  no la captura.
+- **El aviso «desliza de lado» se quedaba puesto** al encogerse el dibujo, porque medía la
+  ventana y no el marco.
+- Un clic en un trombo le dejaba al navegador un recuadro de foco encima.
+
+### 🔴 El mapa no se veía en el teléfono
+
+La auditoría del informe cazó que **por debajo de 1024 px el lienzo del mapa medía cero de
+alto**: en la columna del teléfono, el `flex-1` le ganaba al alto fijo, y como todo lo de adentro
+va en absoluto no quedaba nada que lo estirara. El CSS es de la sesión 29; lo destapó el marco
+nuevo de la página, ahora que el mapa es la sección. Arreglado y medido en los cuatro anchos.
+
+### Los permisos, al día
+
+Migración `informe_de_lectura`: fuera las filas de los dos módulos borrados, **las secciones
+solo tienen «ver»** —una casilla de editar sin editor sería una mentira— y una sección nueva entra
+así. El recurso aparte del mapa se fue: el mapa se lee con la casilla de su sección, o con la de
+las fichas, que marcan «Nuevo» con esas tablas.
+
+⚠️ **Validar hallazgos se quedó sin pantalla.** Es lo que bloquea publicar, y ahora se hace en
+sesión, sobre el expediente. Anotado en `PENDIENTES.md`.
+
+### Verificación
+
+`probar:permisos` **35** (una nueva: la sección nueva entra solo con «ver») · `probar:supabase`
+65 · roles por la interfaz 33 · carga y fichas 10 · **el panel de la ficha 33**, nuevo
+(`mirar-cajon`: ningún trombo debajo del panel a 1440 y 1920, teléfono a ancho completo, el mapa
+como sección, la cabecera y la barra) · **auditoría del informe: 130 páginas en cinco anchos y dos perfiles, 750 enlaces del índice, 0 rotos, 0 errores de consola, 0 desbordes de página** · las oportunidades 10 (29 tarjetas, 12 verdes, 8 ámbar y 9 rojas, los 27 enlaces a hallazgos caen en su tarjeta) · `capturar` 14 páginas
+sin errores de consola · `tipos`, `lint` y `build` limpios.
+
+⚠️ **La auditoría de roles falló en un umbral, no en el producto**: contaba más de diez candados
+en la matriz de solo lectura, y con las secciones en «ver» son diez. Ahora comprueba la regla —
+ninguna casilla por encima del techo— en vez de un número.
+
+**Dónde quedamos.** Todo publicado en `main`. Jesús tiene que hacer pull antes de volver a correr
+el generador: salieron las oportunidades, el editor y el módulo de hallazgos.
+
+---
+
+## 25 de septiembre de 2026 · Sesión 40 — el informe arranca por lo que se encontró
+
+Seis encargos de Gabriel sobre el informe y la navegación.
+
+### Lo que decidió Gabriel
+
+- **El orden: hallazgos, después procesos, después la propuesta.** Se lo recomendé porque un
+  comité lee la conclusión primero y la evidencia después. Quedan 11 secciones: Inicio → Lo que
+  encontramos → Cómo funciona hoy → Qué proponemos. «Los circuitos del negocio» dejó de ser
+  sección y se fundió en los hallazgos (la vista del flujo) y en «Sistemas y estado del dato» (la
+  de sistemas).
+- **Los hallazgos no van sueltos**: van en el circuito, cada uno en el punto donde golpea, con su
+  nivel. 14 críticos, 24 de atención y 4 que funcionan; 16 son transversales.
+- **Cinco secciones salen del generador de Jesús** y se escriben en Supabase: hallazgos,
+  sistemas, inventario, riesgo y trabas. *(Ese mismo día salió también «Las oportunidades»: ver
+  sesión 41.)* Se reescribieron «ordenadas, puntualizadas y con color
+  en lo crítico»: un sistema por tarjeta, cada caso con su nivel.
+
+### Cómo se hizo
+
+Tres agentes reescribieron las cinco secciones en paralelo sobre el texto que había, con una
+guía común (`contenido/informe-v2/GUIA.md`): nada inventado, sin nombres ni códigos, largo igual
+o menor. Revisé cada entrega antes de cargarla. **Los 42 `### H-NN · Título` y los siete `##` de
+patrón quedaron idénticos**, porque las fichas enlazan a los hallazgos 64 veces y la portada a
+los patrones.
+
+⚠️ **Sus decisiones de nivel son de criterio y están en `PENDIENTES.md` para revisar**: JD en verde
+porque resistió, aunque su configuración a medias sea el problema central; los cinco sistemas
+perdidos en rojo; los 16 días de la compra en ámbar y la firma que falta en rojo.
+
+### Lo demás
+
+- **La carga ahora se ve.** Cada una de las 24 pantallas tiene su esqueleto, que aparece al
+  instante del clic, y el enlace pulsado lleva un giro. Antes el clic no hacía nada visible
+  durante medio segundo o más y parecía perdido.
+- **El subíndice de las fichas arranca desplegado**, y su chevrón apuntaba al revés.
+- **El salto a un macroproceso caía más abajo de donde empieza**: iba al `###` de adentro y la
+  barra con el nombre de la ficha quedaba escondida arriba. Ahora cae en la barra.
+- **Las fichas van a 1080 px** y con menos relleno por nivel: a 840, tres niveles anidados dejaban
+  el texto en 650 px de una pantalla de 1900.
+- **La marca «Nuevo»** en los 6 macroprocesos y los procesos nuevos, puesta al pintar con el dato
+  de la base.
+
+⚠️ **La matriz de «Lector Iberia» ya no tenía entrevistas, archivos ni hallazgos** cuando se
+corrió la verificación: se ajustó desde el panel después de la sesión 38. Dos comprobaciones de
+`auditar-roles` la daban por fija; ahora leen la matriz real.
+
+### Verificación
+
+`probar:supabase` 65 · `probar:permisos` 34 · carga, subíndice, salto y marcas 10 · roles 33 ·
+auditoría del informe en cuatro anchos: 52 páginas, 584 enlaces del índice y **0 rotos**, 0
+desbordes y 0 errores de consola · `tipos`, `lint` y `build` limpios. Respaldo antes de tocar la
+base en `Insumos/Respaldo_Informe_2026-09-25` y en `contenido/informe-v2/`.
+
+**Dónde quedamos.** El informe completo en borrador con su orden nuevo. Falta que Gabriel y Jesús
+lean las secciones reescritas y confirmen los niveles, y que Jesús haga pull antes de volver a
+correr el generador.
+
+---
+
+## 25 de septiembre de 2026 · Sesión 39 — septiembre entra al programa, y la formación de gerentes
+
+Encargo de Gabriel: cargar septiembre en el programa —con la formación de gerentes, que se dio
+el miércoles 23 en Cagua de 7:00 a 16:00, ida y vuelta incluida— y poner al día la línea de
+tiempo con todo lo que hay.
+
+### Lo que decidió Gabriel
+
+- **En septiembre el peso va en Jesús Planas**, que condujo el levantamiento y lo estructuró.
+- **Al entrenamiento fueron él, Ruth y Humberto**, de apoyo. Humberto no es uno de los cuatro
+  perfiles del contrato, y se carga **como consultor de procesos**.
+
+### 🔴 Correr el script habría metido 18 h de más
+
+Antes de cargar se comparó el archivo contra la base, y no coincidían: cuatro partidas de agosto
+estaban corregidas desde el panel —el 26 partido en sala y traslado, y tres con Jesús Planas en
+vez de Gabriel o «Boosty»— y el archivo tenía la versión vieja. Correrlo habría metido la vieja al
+lado de la corregida y deshecho los cambios de persona. Se pasaron al archivo, se comprobó que
+agosto siguiera en 137 h, y **el script ya no escribe si la base tiene partidas que él no conoce**.
+
+### Septiembre, cargado
+
+**119 h en 24 partidas**, estimadas con la base de cada una. Jesús Planas 51 · Ruth 24 · Gabriel
+19 · desarrollo 14 · Humberto 9 · Carlos 2. Por perfil: procesos 87 (+51 sobre su cuota),
+dirección 16, desarrollo 14 y senior 2. La fase va en **256 h** en dos meses.
+
+⚠️ **Salvo las 9 h del entrenamiento por persona, son estimaciones mías** —como en agosto, que
+Gabriel corrigió después—. Revisarlas está en `PENDIENTES.md`.
+
+### La línea de tiempo
+
+- **La formación de gerentes es `FOR-003`**, una sesión en `entrevistas` sin grabación, no un
+  hito: así la vista la une sola, como a las otras dos formaciones.
+- Tres hitos hechos: el levantamiento pasa la meta con **33 entrevistas** —no 34: ENT-029 sigue
+  programada—, el mapa de procesos validado contra las entrevistas, y el Documento de
+  Arquitectura completo en borrador. Y al día los previstos: dos de tres formaciones, el
+  inventario cerrado con Tecnología de la Información, y la app en riesgo porque la revisión con
+  Mercadeo no tiene fecha.
+- ⚠️ **La página daba por hecho lo que solo tenía fecha pasada.** Separaba «lo que viene» de
+  «lo hecho» por fecha, así que ENT-029 salía hecha con sus 60 minutos y el plan de comunicación
+  vencido también. Ahora separa por estado, lo vencido y sin hacer sale como «Pendiente», y la
+  vista le da «previsto» a una sesión programada.
+- El resumen de arriba seguía diciendo «el primer mes concentró el arranque». Ahora es una línea
+  por mes.
+
+**Verificado** con un lector de Iberia de prueba y como editor, a 1440 y 390 px: sin dinero, sin
+«en riesgo» y sin formulario para el lector; ENT-029 en «Lo que viene»; ningún desborde ni error
+de consola.
 
 ---
 
@@ -97,7 +295,8 @@ a la portada, y los enlaces de la cabecera medían 16 px de alto.
   fija; las tablas avisan con sombra cuando se deslizan.
 - ⚠️ **El mapa interactivo lo abría cualquiera con sesión** aunque el informe no tuviera nada
   publicado: el lector veía por ahí el inventario entero de procesos. Ahora exige su permiso y
-  que la sección del mapa esté publicada.
+  que la sección del mapa esté publicada. *(Desde la sesión 41 el mapa **es** esa sección y se ve
+  con su casilla; el permiso aparte se fue.)*
 - El panel ganó el mismo menú de teléfono: antes pintaba los ocho enlaces arriba del contenido.
 
 ### Roles y permisos
@@ -168,7 +367,7 @@ Primero se armó un artefacto privado con los tres circuitos —flujo, sistemas 
 ### El informe
 
 ```
-09 Los circuitos del negocio          nueva · los dos anillos, interactivos
+09 Los circuitos del negocio          nueva · los dos anillos, interactivos   (fundida el 25/9 en los hallazgos y en sistemas: ver sesión 40)
 10 Las oportunidades, priorizadas     igual, renumerada
 11 La arquitectura de IA: el sistema Iberia    reescrita · el espejo en 3D
 12 La ruta de construcción            reescrita · paso 0 y tres olas, sin fechas
@@ -225,7 +424,8 @@ Encargo de Gabriel: verificar todo lo construido, medir cuánto tarda en cargar 
 y que el informe abra en pestaña nueva desde el panel, «igual que el curso de Ajito».
 
 **El curso tampoco abría en pestaña nueva**, así que ahora lo hacen los dos: «Ver el informe»
-en el menú, en el panel y en el editor, y «El curso de Ajito». Llevan el icono de la flecha
+en el menú, en el panel y en el editor, y «El curso de Ajito». *(Desde la sesión 41 «Ver el
+informe» va en la cabecera del panel y el editor ya no existe.)* Llevan el icono de la flecha
 que sale de la caja. Comprobado con clic de verdad: se abre la pestaña y la de origen se
 queda en el panel.
 
@@ -2168,6 +2368,7 @@ empleado en el bucket y el certificado.
 
 **Y en el menú, bajo Administración, un acceso directo a El curso de Ajito**: es la única
 forma de oír un audio después de regrabarlo, y hasta hoy había que escribir la ruta a mano.
+*(Desde el 25 de septiembre va en el grupo «Cursos», con el adiestramiento y el padrón.)*
 
 ### Lo que enseñó romperse
 

@@ -567,13 +567,16 @@ npm run informe:estructura                  # las 12 secciones: genera las suyas
 npm run expediente                          # el dossier de trazabilidad, a Insumos/ · SOLO consultores
 npm run sembrar:procesos                    # el inventario del taller a la base, para el mapa
 npm run sembrar:procesos -- --revisar       # dice qué sembraría, sin escribir
-npm run sembrar:circuitos                   # los dibujos de las secciones 9 y 11, del taller
+npm run sembrar:circuitos                   # los circuitos, el espejo y los hallazgos en su punto, del taller
 npm run sembrar:circuitos -- --revisar      # dice qué sembraría, sin escribir
 npm run respaldar:informe                   # el informe, sus talleres y los circuitos a disco
 npm run generar:guias                       # las 3 guías de entrevista adaptadas a Iberia
 ```
 
 ## El programa (`/dashboard/programa`)
+
+En el panel se llama **«Consumos y línea de tiempo»** («Consumos» en la barra) desde el 25 de
+septiembre: «El programa» no decía qué había adentro.
 
 La cláusula 8 del contrato obliga a dos cosas que no vivían en ninguna parte: una bolsa de
 **107 horas al mes** administrada como promedio dentro de la fase, y un **reporte mensual
@@ -592,7 +595,16 @@ de consumo**. Este módulo es de donde sale ese reporte.
   procesos aunque la haga el director.
 - **Las sesiones no se copian a `hitos`.** La vista `linea_de_tiempo` las lee de
   `entrevistas`, que ya tienen su fecha. Dos listas de lo mismo dicen cosas distintas en dos
-  semanas.
+  semanas. **Una formación sin grabación también va ahí**, como sesión `FOR-` en estado
+  `realizada`: el entrenamiento de gerentes del 23 de septiembre es `FOR-003`.
+- **«Lo que viene» es lo que no se ha hecho, no lo que tiene fecha futura.** Separando por
+  fecha, una sesión programada que no ocurrió y un entregable vencido caían en «Lo hecho»
+  —ENT-029 salía hecha con sus 60 minutos—. Lo vencido y sin hacer sale como «Pendiente»,
+  en neutro. La vista da `previsto` a una sesión `programada`, y la página solo muestra la
+  duración de lo que ocurrió.
+- **El resumen de arriba es una línea por mes**, de `LO_QUE_TRAJO_EL_MES` en
+  `lib/programa.ts`. **Al cargar las horas de un mes, se añade su línea.** Era un párrafo
+  escrito en agosto que en septiembre seguía diciendo «el primer mes concentró el arranque».
 - ⚠️ **Este módulo lo lee Iberia.** *(Cambió el 31 de agosto, por decisión de Gabriel. Antes
   decía «las horas son de editores»: `hitos` y `registros_horas` estaban cerrados a Boosty y
   el consumo se entregaba redactado en el reporte mensual. Un reporte llega una vez al mes;
@@ -640,6 +652,14 @@ de consumo**. Este módulo es de donde sale ese reporte.
   hitos.** Cambiarle el texto **deja viva la fila vieja**: las horas se cuentan dos veces y
   el mismo hito sale dos veces con estados que se contradicen. Los dos scripts listan lo que
   está en la base y no en su archivo; `--limpiar` lo borra.
+- 🔴 **Lo que se corrige en el panel hay que pasarlo al archivo antes de volver a correr
+  `sembrar:horas`.** El 25 de septiembre la base tenía cuatro partidas de agosto corregidas
+  desde el panel —el 26 partido en sala y traslado, tres con otra persona— que el archivo no
+  conocía: correrlo habría metido 18 h de más y deshecho los cambios de persona. Ahora el
+  script **no escribe si la base tiene partidas que él no conoce**; lista cuáles y pide
+  pasarlas al archivo (o `--limpiar`, o `--forzar`).
+- **En las formaciones, la sala va a `formacion` y la preparación y el traslado, a
+  `gestion`.** Es como Gabriel partió el 26 de agosto, y así se cargó el 23 de septiembre.
 - **Lo anterior a la firma no descuenta bolsa.** Es Fase 0, ya cobrada por USD 4.700 aparte.
   `consumeBolsa()` corta **por mes calendario**, no por día, porque el fee se factura así y
   una fila mensual que mezclara horas que cuentan con horas que no, no se podría leer.
@@ -682,6 +702,20 @@ cambia `scripts/generar-guias.mjs` y se regeneran, igual que la marca y las fich
   macroprocesos y sus N1 es su base, y si la Junta pide después los manuales, eso es otro
   proyecto con el levantamiento ya hecho. Va dicho dentro de las guías.
 
+## El panel (`/dashboard`)
+
+La barra tiene tres grupos: **Levantamiento** (panel, entrevistas, archivos y «Consumos», que
+es `/dashboard/programa`), **Cursos** (adiestramiento, el padrón y el curso de Ajito, que abre
+en otra pestaña) y **Administración** (usuarios, roles). Cada destino sale solo si la sesión
+tiene su permiso (`destinosPermitidos()` en `app/dashboard/layout.tsx`).
+
+- **«Ver el informe» va en la cabecera, no en la barra**: es el destino de todo el panel, y
+  abajo del menú no se encontraba. Abre en otra pestaña, como el curso.
+- ⚠️ **El panel no tiene módulo de hallazgos ni editor del informe** desde el 25 de septiembre
+  de 2026 (decisión de Gabriel). Los hallazgos se leen en el informe, cada uno en su punto del
+  circuito; el informe **se escribe en las sesiones de trabajo** y se carga con los scripts.
+  Ver «El informe».
+
 ## Roles y permisos (`/dashboard/roles`)
 
 Los roles se crean desde el panel, cada uno con una **matriz de ver, crear, editar y
@@ -699,9 +733,9 @@ asignan a cada usuario en `/dashboard/usuarios`. Tablas `roles` y `rol_permisos`
 - **Un recurso es `modulo:<clave>`, `informe:<slug>` o `leccion:<numero>`.** Los módulos
   están en `MODULOS` de `lib/permisos.ts` —una pantalla nueva del panel se añade ahí el
   mismo día—; las secciones y las lecciones salen de la base, así que una nueva aparece
-  sola en la matriz. En los roles de fábrica entra con lo que su nivel veía ayer
-  (triggers `informe_secciones_permisos` y `lecciones_permisos`); en uno creado desde el
-  panel entra apagada.
+  sola en la matriz. En los roles de fábrica entra con «ver» (triggers
+  `informe_secciones_permisos` y `lecciones_permisos`); en uno creado desde el panel entra
+  apagada. **Las secciones del informe solo tienen «ver»**: el panel no las edita.
 - **Cada módulo declara solo las acciones que existen.** Una casilla que no hace nada es
   una mentira: sale como «no aplica». Empleados y Recordatorios **no tienen «ver» a
   secas**: leen vistas que solo le responden al equipo, así que se abren con «editar».
@@ -711,8 +745,9 @@ asignan a cada usuario en `/dashboard/usuarios`. Tablas `roles` y `rol_permisos`
   sirve igual en páginas y en acciones. `obtenerSesion()` trae el rol y la matriz de una
   vez (`mis_permisos()`) y va con `cache()`: layout y página la piden en la misma petición.
 - **Dónde cierra la base y dónde la app.** La casilla entra en la RLS del informe
-  (`informe_secciones`), del mapa (`macroprocesos`, `procesos`) y de las lecciones, que es
-  lo que se abre a gente que no es del equipo. En el resto de módulos la matriz la aplica
+  (`informe_secciones`), del mapa (`macroprocesos` y `procesos`, con la casilla del mapa de
+  procesos o la de las fichas, que marcan «Nuevo» con ellas) y de las lecciones, que es lo que
+  se abre a gente que no es del equipo. En el resto de módulos la matriz la aplica
   el servidor de la app, con el nivel como techo en la base.
 - **Cuatro roles de fábrica**, que reproducen el acceso de antes: Administrador, Consultor
   Boosty, Lector Iberia y **Personal de planta** —el canal y las nueve lecciones, nada
@@ -722,7 +757,13 @@ asignan a cada usuario en `/dashboard/usuarios`. Tablas `roles` y `rol_permisos`
   si no el canal, si no el informe, y si no `/sin-acceso`, que existe para que el panel
   no se redirija a sí mismo en bucle.
 
-## El informe (`/dashboard/informe` y `/informe`)
+## El informe (`/informe`)
+
+⚠️ **Se escribe en las sesiones de trabajo, no desde el panel.** El editor
+(`/dashboard/informe`) se eliminó el 25 de septiembre de 2026, por decisión de Gabriel: la
+prosa se redacta en el taller (`contenido/`), se revisa, y se carga en `informe_secciones` con
+la clave de servicio. Publicar también es de sesión. Por eso la matriz solo le da «ver» a cada
+sección, y la RLS de escritura queda de respaldo para el nivel administrador.
 
 **La cáscara de lectura** (25 de septiembre de 2026). La hoja se centra con una medida de
 lectura fija —840 px, texto a 16/17 px con 1,75 de interlineado— y a partir de 1400 px
@@ -738,8 +779,72 @@ mismo del panel). Antes la hoja iba pegada a la izquierda y a 1920 px dejaba 736
 - Las anclas se corren lo que mide la cabecera fija (`scroll-margin-top` en `.prosa`), y
   las tablas avisan con una sombra en el borde cuando se deslizan.
 
-Son **12 secciones** en cuatro partes, y `npm run informe:estructura` es quien las mantiene.
-El armazón se comprimió de 15 a 12 el 18 de septiembre de 2026, y cada fusión tiene su razón:
+### El orden: primero lo que se encontró
+
+**11 secciones en cuatro partes** (25 de septiembre de 2026, decisión de Gabriel):
+**Apertura** (01 Inicio) → **Lo que encontramos** (02 Los hallazgos, en el circuito del
+negocio) → **Cómo funciona hoy** (03 mapa, 04 fichas, 05 sistemas y estado del dato, 06
+inventario, 07 riesgo, 08 trabas) → **Qué proponemos** (09 oportunidades, 10 arquitectura,
+11 ruta). Un comité lee la conclusión primero y la evidencia después. «Los circuitos del
+negocio» dejó de ser sección: su vista del flujo abre los hallazgos y la de sistemas abre
+«Sistemas y estado del dato». La parte nueva es la clave `hallazgos` de
+`informe_secciones.parte`; las otras conservan su clave y cambiaron de rótulo.
+
+- **Los hallazgos van ubicados en el circuito**, no sueltos. La tabla `informe_hallazgos`
+  dice de cada uno su patrón, su **nivel** (`critico`, `atencion`, `funciona`), el punto del
+  flujo donde golpea (o ninguno, si es transversal) y el punto de sistemas relacionado. Se
+  siembra con `sembrar:circuitos` desde el arreglo `hallazgos` del taller
+  `contenido/circuitos/circuitos.json`. En el anillo cada punto lleva su cuenta —en rojo si
+  alguno es crítico— y su ficha los lista con enlace a su tarjeta.
+- ⚠️ **Los 42 hallazgos conservan su número y su título**: `### H-NN · Título`. Las fichas de
+  proceso los enlazan 64 veces por ancla, y la portada enlaza a los siete `##` de patrón.
+  Cambiar un título rompe el enlace sin error visible.
+- ⚠️ **Seis secciones más salieron del generador** —hallazgos, sistemas y estado del dato,
+  inventario, riesgo, trabas y oportunidades— y se escriben en Supabase, como la arquitectura y
+  la ruta. Se
+  reescribieron ordenadas y puntualizadas; la guía está en `contenido/informe-v2/GUIA.md`.
+
+### Tarjetas, niveles y avisos
+
+`lib/rehype-informe.ts` le enseña al markdown del informe cuatro cosas, con marcas que se
+leen bien en el texto crudo:
+
+- **`[Crítico]`, `[Atención]`, `[Funciona]`** al principio de un párrafo, una viñeta o una
+  celda → una pastilla roja, ámbar o verde. El rojo se reserva para lo que frena el circuito
+  o pone en riesgo la continuidad, el dinero o el cumplimiento: si todo va en rojo, nada lo es.
+  Las oportunidades usan tres más, con los mismos colores y otro significado —**qué tan listo
+  está el dato**—: `[Arranca ya]` en verde, `[Paso previo]` en ámbar, `[Falta el dato]` en rojo.
+- **`> [!CLAVE]`, `> [!CRITICO]`, `> [!ATENCION]`** → un aviso con su rótulo. Uno por `##`
+  como mucho.
+- **Tarjetas**, en las secciones de `EN_TARJETAS` (las seis de arriba): cada `###` y lo que sigue hasta el próximo
+  `###`, `##` o `---` va en una tarjeta con la barra del color de la etiqueta de su primera
+  línea. ⚠️ Lo que se escribe después de la última tarjeta de un `##` cae **dentro** de ella:
+  un cierre va tras un `---`.
+- **La marca «Nuevo»** en los procesos y macroprocesos nuevos de las fichas y del mapa, que se
+  pone al pintar con el dato de `macroprocesos.nuevo` y `procesos.estado` —el texto del
+  generador no se toca— y en todo `**nuevo**` suelto.
+
+⚠️ **Va después de `rehype-slug`**: los ids ya están puestos cuando se envuelve en tarjetas,
+así que las anclas no cambian.
+
+### La carga visible
+
+Cada ruta del panel y del informe tiene su `loading.tsx` con un esqueleto de su forma
+(`components/esqueletos.tsx`): Next lo pinta al instante del clic, porque el layout queda y
+solo cambia lo de adentro. Sin eso, un clic en el menú no hacía nada visible durante medio
+segundo o más y parecía perdido. Además, `IndicadorEnlace` —con `useLinkStatus`— pone un giro
+en el enlace pulsado mientras la ruta no se ha precargado. **Una pantalla nueva lleva su
+`loading.tsx`**, o su clic vuelve a parecer muerto.
+
+### Las fichas de proceso
+
+- **Van a 1080 px, no a la medida de lectura**: son material de consulta —tablas y rótulos— y
+  con tres niveles de plegado a 840 el texto quedaba en 650 px.
+- **El subíndice de la barra arranca desplegado**, y el salto a una ficha **cae en su barra
+  plegable**, no en el `###` de adentro, que la dejaba escondida arriba (`revelarAncla`).
+
+Antes del 25 de septiembre eran **12 secciones**. El armazón se comprimió de 15 a 12 el 18 de
+septiembre de 2026, y cada fusión tiene su razón:
 
 - **«Inicio»** sustituye al resumen ejecutivo y absorbe «Cobertura del levantamiento». No es un
   resumen: es una portada —de qué va el encargo, cuánto se cubrió y cuál es el mapa—. Un
@@ -759,8 +864,10 @@ El armazón se comprimió de 15 a 12 el 18 de septiembre de 2026, y cada fusión
   lo cazó tres veces ese mismo día.
 
 - **Lo que está en `GENERADAS` se regenera siempre** desde el taller y la base: si alguien lo
-  edita a mano, la próxima corrida lo pisa, y así debe ser. **Tres secciones no están ahí** —ver
-  la parte de arquitectura, abajo— y en esas el editor manda.
+  edita a mano, la próxima corrida lo pisa, y así debe ser. **Solo quedan ahí tres: inicio,
+  mapa y fichas.** Las otras ocho se escriben en Supabase, en las sesiones de trabajo, y el
+  script no las toca. *(Las oportunidades salieron el 25 de septiembre, reordenadas por ola y
+  por módulo del sistema Iberia, con cada `H-NN` enlazado a su tarjeta en los hallazgos.)*
 - **Todo entra sin publicar.** Un lector de Iberia solo ve lo publicado, y no se publica
   nada mientras los hallazgos que lo sostienen sigan en `propuesto`.
 - 🔴 **El informe va sin citas, sin códigos de sesión y sin nombres.** Decisión del cliente
@@ -777,9 +884,18 @@ El armazón se comprimió de 15 a 12 el 18 de septiembre de 2026, y cada fusión
     que va dentro del respaldo y **no se comparte con el cliente**.
   - ⚠️ «Sin cita textual no hay hallazgo» **sigue en pie**: la cita se exige al cosechar y se
     guarda en `hallazgos.cita_textual`. Lo que cambió es que no se imprime.
-- **El mapa interactivo (`/informe/mapa-interactivo`) es otra forma de mirar las secciones
-  4 y 5**, no una sección: no está en `SECCIONES`, no sale en el índice y se entra por el
-  botón rojo que vive dentro del mapa de procesos. Tres cosas que conviene no redescubrir:
+- **«El mapa de procesos» es el mapa interactivo** (`/informe/mapa-interactivo`). Hasta el
+  25 de septiembre era una página de texto con un botón al mapa, y el texto decía lo mismo que
+  las fichas. Ahora `/informe/mapa-procesos` redirige al mapa, y **todo enlace a una sección
+  pasa por `rutaDeSeccion()`** (`lib/informe-rutas.ts`): el índice, la portada y las flechas.
+  La página del mapa se viste de sección —miga con su parte y su número, anterior y
+  siguiente— y se ve con la casilla de `informe:mapa-procesos`; el recurso aparte
+  `informe:mapa-interactivo` se fue.
+  - ⚠️ **La fila `mapa-procesos` sigue en la base y el generador le sigue escribiendo
+    texto**, aunque ya no se pinte: sin contenido la sección no es visible para el lector, y
+    con ella se iría el mapa. Conserva además el número y el sitio en el índice.
+
+  Tres cosas del mapa que conviene no redescubrir:
   - **El inventario está en la base** —`macroprocesos` y `procesos`, con RLS—, sembrado
     desde el taller con `sembrar:procesos`. Tenía que estar: `contenido/*` está fuera de
     git por el NDA, así que leer el JSON del disco daría una página que funciona en local
@@ -791,17 +907,16 @@ El armazón se comprimió de 15 a 12 el 18 de septiembre de 2026, y cada fusión
     la encuentra no avisa: el lector se queda en la ficha, que es a donde iba igual.
   - **El ancla se calcula con el mismo `github-slugger` que el generador.** Construirla a
     mano dejaría los veinte enlaces apuntando a la nada, y sin error visible.
-  - ⚠️ **Es el inventario entero de procesos, y se abre con su permiso**
-    (`informe:mapa-interactivo`) y, para quien no escribe, solo si la sección del mapa de
-    procesos está publicada. Hasta el 25 de septiembre lo abría cualquiera con sesión, aunque
-    el informe no tuviera nada publicado.
+  - ⚠️ **Es el inventario entero de procesos**: se abre solo si la sección del mapa de
+    procesos está al alcance de quien lo pide —su casilla y, para quien no escribe,
+    publicada—. Hasta el 25 de septiembre lo abría cualquiera con sesión.
 
-### La parte de arquitectura: los circuitos y el sistema Iberia
+### La parte de arquitectura: el sistema Iberia
 
-Rehecha el 24 de septiembre de 2026, con Gabriel. **09 Los circuitos del negocio → 10 Las
-oportunidades → 11 La arquitectura de IA: el sistema Iberia → 12 La ruta de construcción.**
-Primero dónde espera el trabajo y por dónde viaja el dato; después el plano y el orden para
-construirlo.
+Rehecha el 24 de septiembre de 2026, con Gabriel, y desde el 25 es «Qué proponemos»: **09 Las
+oportunidades → 10 La arquitectura de IA: el sistema Iberia → 11 La ruta de construcción.**
+*(Hasta el 25 la abría «Los circuitos del negocio», que se fundió en los hallazgos y en
+«Sistemas y estado del dato».)*
 
 - **La arquitectura es una decisión, no un catálogo de capas.** JD se queda como **registro
   contable y fiscal**, y delante va el **sistema Iberia: un espejo de JD** que *obtiene* —una
@@ -817,25 +932,41 @@ construirlo.
 - **Qué aprueba el comité** vive en «La ruta de construcción»: la cláusula 7 hace de este
   documento la condición para pasar a Fase 2. La Fase 2 que se recomienda es **el paso 0 y la
   ola 1** (Compras, Comercial y Finanzas); la ruta va por olas y dependencias, sin fechas.
-- ⚠️ **`circuitos`, `arquitectura-ia` y `hoja-de-ruta` se escriben en Supabase, no en el
+- ⚠️ **`arquitectura-ia` y `hoja-de-ruta` se escriben en Supabase, no en el
   generador.** No están en `GENERADAS`: el script solo les pone título, número y orden. Su
-  prosa se redactó en `contenido/circuitos/secciones/*.md` y se cargó una vez; desde ahí manda
-  el editor. **Todo lo que el informe documenta tiene que existir en la base**, no solo en el
-  código ni en un archivo local.
-- **Los dibujos salen de tres tablas**, con RLS: `informe_circuito_puntos` (12 puntos del
-  flujo y 15 de sistemas), `informe_modulos` (los nueve módulos del espejo) e
-  `informe_circuito_textos`. Se siembran desde `contenido/circuitos/circuitos.json` con
+  prosa se redactó en `contenido/circuitos/secciones/*.md` y se cargó una vez; desde ahí se
+  corrige en la base. **Todo lo que el informe documenta tiene que existir en la base**, no
+  solo en el código ni en un archivo local.
+- **Los dibujos salen de cuatro tablas**, con RLS: `informe_circuito_puntos` (12 puntos del
+  flujo y 15 de sistemas), `informe_modulos` (los nueve módulos del espejo),
+  `informe_circuito_textos` e `informe_hallazgos` (cada hallazgo en su punto). Se siembran desde `contenido/circuitos/circuitos.json` con
   **`sembrar:circuitos`**, que comprueba la coherencia del taller antes de escribir y borra lo
   que ya no está en él: **el taller manda**, como en `sembrar:procesos`.
   `components/circuitos-informe.tsx` solo guarda geometría, porque el repositorio es público.
 - **Los dos dibujos se enlazan entre sí.** Un punto dice qué módulo lo atiende
   (`/informe/arquitectura-ia?modulo=M4#espejo`) y un módulo, qué puntos destapa
-  (`/informe/circuitos?punto=T2#circuitos`). La página los pinta por slug (`CON_CIRCUITOS`),
+  (`/informe/hallazgos?punto=T2#circuitos` para el flujo, `/informe/sistemas-datos?punto=S3#circuitos`
+  para los sistemas). La página los pinta por slug (`CON_CIRCUITOS`),
   por lo mismo que `PLEGABLES`, y **solo el dibujo va ancho**: a todo el ancho, la prosa salía
   a 150 caracteres por línea.
 - ⚠️ **Un tipo de destape nuevo necesita su rótulo en `DESTAPE`**, o sale como etiqueta vacía
   sin error. `sembrar:circuitos` falla si falta.
-- **`respaldar:informe` guarda también las tres tablas y el taller de los circuitos**, que no
+- **La ficha de un punto o de un módulo se abre en un panel a la derecha** (`Cajon`, 25 de
+  septiembre de 2026), no debajo del dibujo: debajo había que bajar a leerla y perder el
+  circuito de vista. Tres decisiones:
+  - **No es un modal.** No hay velo: tocar otro trombo cambia la ficha sin cerrarla, y las
+    flechas recorren los puntos que deja ver el filtro. Arranca cerrado, salvo que se llegue
+    con `?punto=` o `?modulo=`. Se cierra con la ✕ o con Esc.
+  - ⚠️ **En pantalla ancha le hace sitio a la página, no la tapa.** Tapando, la mitad derecha
+    del circuito —y sus trombos— quedaba debajo. Con el panel abierto, `html.con-cajon`
+    retira el índice del informe a la izquierda, corre el contenido y le quita al dibujo su
+    ancho mínimo, así que se encoge hasta caber entero. `mirar-cajon` mide que ningún trombo
+    quede debajo del panel a 1440 y a 1920.
+  - **Va por portal al `body`**, y por eso los colores del circuito están también en
+    `.circ-vars`: fuera de `.circ` el panel perdía el rojo y el oro.
+  - `Lienzo` mide su marco con `ResizeObserver`, no la ventana: al abrir el panel el marco
+    se encoge sin que la ventana cambie, y el aviso de «desliza de lado» se quedaba puesto.
+- **`respaldar:informe` guarda también las tablas y el taller de los circuitos**, que no
   está en git.
 
 ## Los hallazgos
@@ -854,6 +985,10 @@ el inventario y `riesgo` la sección de supuestos y riesgos.
 - **Recargar no pisa el estado.** Si alguien ya validó o descartó, eso manda.
 - ⚠️ **Una entrevista sin consentimiento de grabación no se cosecha.** Los archivos con
   `en-espera` en el nombre quedan fuera de la carga a propósito.
+- **El catálogo no tiene pantalla** desde el 25 de septiembre de 2026: lo que se lee son los 42
+  del informe, en su circuito (`informe_hallazgos`). La tabla `hallazgos` se queda —es la que
+  guarda la cita de cada uno y de la que sale el expediente—, y validar o descartar pasa a ser
+  trabajo de sesión, sobre el expediente.
 
 ## El levantamiento (`/dashboard/entrevistas`)
 

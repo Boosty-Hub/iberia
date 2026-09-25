@@ -11,17 +11,17 @@ del contrato **CONT-2026-08-0002**. Los dos documentos están en el módulo de a
 > la firma del **6 de agosto de 2026**. Lo que no aparezca aquí abajo no lo estamos
 > entregando — por bueno que sea.
 
-**Hoy es 31 de agosto: día 25 de 153.** Mes 1 se cierra en 6 días.
+**Hoy es 25 de septiembre: día 50 de 153.** El mes 2 se cierra en 5 días.
 
 | | Entregable | Vence | Cómo va |
 |---|---|---|---|
 | 1 | Plan de comunicación y comunicado oficial | **6 sep** | 🟡 **El comunicado salió**; falta el plan con fecha y el vocero |
 | 2 | App de comunicación interna (v1) **desplegada** | 30 sep | 🟡 Construida, sin revisar y sin desplegar |
-| 3 | Las tres formaciones y el chat de Claude andando | 31 oct | 🟡 **La primera dictada el 26 de agosto**; faltan dos y sus fechas |
-| 4 | Entrevistas y levantamiento (informes por área) | 7 nov | 🟡 **19 de ~25** · 28 hallazgos redactados · **0 informes por área** |
+| 3 | Las tres formaciones y el chat de Claude andando | 31 oct | 🟡 **Dos dictadas**: la directiva el 26 de agosto y los gerentes el 23 de septiembre. Falta la de los líderes y su fecha |
+| 4 | Entrevistas y levantamiento (informes por área) | 7 nov | 🟡 **33 de ~25** y una programada · 394 hallazgos, 42 desarrollados · **0 informes por área** |
 | 5 | Inventario de sistemas, datos, equipos y conectividad | 14 nov | 🟠 Sale de las entrevistas y ya está saliendo |
 | 6 | Programa de formación de planta **diseñado** | 30 nov | ✅ Hecho, y muy por encima |
-| 7 | **Documento de Arquitectura de IA** + plan fases 2–4 | **6 dic** | 🟠 28 secciones · 15 con contenido · **los hallazgos de la ronda 2 sin cosechar** |
+| 7 | **Documento de Arquitectura de IA** + plan fases 2–4 | **6 dic** | 🟠 **11 secciones, completo en borrador**, hallazgos primero · 🔴 solo 2 hallazgos validados |
 
 ---
 
@@ -112,7 +112,7 @@ Las tres, en orden:
 | | Para quién | Cuándo |
 |---|---|---|
 | 1 | **La directiva** — Sesión IA Petit Comité, sala de reuniones en Caracas | ✅ **dictada el miércoles 26 de agosto** · `FOR-002` |
-| 2 | **Los gerentes** | Sin fecha |
+| 2 | **Los gerentes** — en Cagua, con Ruth y Humberto de apoyo | ✅ **dictada el miércoles 23 de septiembre**, de 7:00 a 16:00 con el traslado · `FOR-003`, sin grabación cargada |
 | 3 | **Los líderes que decidan los gerentes** | Sin fecha, y sin padrón |
 
 Aparte, y fuera de agenda: la **formación uno a uno con Alberto García-Ramos** del lunes
@@ -309,7 +309,7 @@ distintos del mismo insumo, y el manual de macroprocesos no está en la propuest
 | **Imprimir la lista de procesos N1 antes de cada sesión.** Es lo que la guía pedía en su primera línea y no se hizo ninguna vez; va en el anexo de las guías nuevas | Quien prepare la sesión |
 | La evaluación completa de la ronda 1 está en `documentos/2026-08-evaluacion-entrevistas-ronda-1.md` | |
 | 🔴 **El informe de levantamiento por área.** El contrato lo pide por partida doble —cláusula 5 y tabla de la propuesta—. El formato ya está propuesto y sale de los hallazgos validados; falta acordarlo y sacar los primeros | **Boosty** |
-| **Leer los 28 hallazgos redactados** en el informe y validar en el panel los crudos que los sostienen. La redacción ya escogió: de 236 quedaron 28, y solo los que se sostienen sin las entrevistas que faltaban | Gabriel y Ruth |
+| **Leer los 42 hallazgos redactados** en el informe y validar los crudos que los sostienen. *(Desde el 25 de septiembre el panel ya no tiene pantalla de hallazgos: se valida en sesión, sobre el expediente, y se carga con script)* | Gabriel y Ruth |
 | ~~¿Las citas van con nombre o con cargo?~~ **Con nombre**, decidido | ✅ |
 | **Identificar 9 hablantes.** De la ronda 1: `ENT-001·speaker 3`, `ENT-002·speaker 2`, `ENT-008·speaker 1`, `ENT-009·speaker 3`, y los de SES-002 y SES-005. De la ronda 2: `ENT-010·speaker 3` y `ENT-016·speaker 3` —la misma persona en las dos, quien llevaba la agenda del día; dice «mi jefa Dora»—. Y **`FOR-002·speakers 5, 6 y 7`, que son de la directiva**: entre ellos están Antonio Sorrentino y Gustavo Carballo, pero la diarización de cuatro horas con siete voces no permite cerrarlo desde el texto | Gabriel reconoce las voces |
 | **El apellido de Jesús**, Gerente de Mantenimiento. En `ENT-004` solo se le nombra por el nombre de pila; en `ENT-015`, Compras lo llama «el gerente de mantenimiento, Jesús» y dice que **entró hace dos meses y bajó las hojas de emergencia un 40%** | Ruth |
@@ -399,14 +399,15 @@ el comité antes de continuar con las fases siguientes»*.
 | ~~Cerrar la estructura~~ **Rehecha el 16 de septiembre: 13 secciones en blanco.** Sin anexos; lo que era anexo se volvió sección, pegado al argumento que sostiene. El informe por área lo absorbe «Las fichas de proceso» | ✅ |
 | ~~Escribir las trece~~ **Escritas: son 12** desde que el armazón se comprimió el 18 de septiembre | ✅ |
 | ~~Decidir dónde vive «qué aprueba el comité»~~ **En «La ruta de construcción»**, bajo «Lo que se aprueba en diciembre»: cinco cosas y no más | ✅ |
-| 🔴 **Jesús: hacer `git pull` antes de volver a correr `informe:estructura`.** El generador cambió el 24: «Dónde no va la IA» ya no existe y entraron los circuitos. Y en sus talleres hay que corregir tres cosas, que se parcharon en la base pero **la próxima corrida las vuelve a pisar**: la referencia `{cap:donde-no-va-la-ia}` de **riesgo-continuidad** («se trata en el capítulo 11») y la de **trabas** («el capítulo 11 separa, módulo por módulo, lo que es IA de lo que no»); y el cierre de **oportunidades**, que dice que la sábana de compras «es parametrizar el ERP» y que la requisición «depende de que el MRP corra» — la decisión ahora es que la explosión corre en el espejo. Los `{cap:oportunidades}` se renumeran solos | **Jesús** · Gabriel le avisa |
-| **Leer y ajustar la prosa de las secciones 9, 11 y 12** antes de publicar. Es la recomendación de los consultores con productos concretos, y la firman Gabriel y Jesús | Gabriel y Jesús |
+| 🔴 **Jesús: hacer `git pull` antes de volver a correr `informe:estructura`.** El generador cambió dos veces. El 24 salió «Dónde no va la IA». **El 25 el informe se reordenó** —hallazgos primero, después cómo funciona hoy y al final la propuesta— y **cinco secciones dejaron de generarse**: hallazgos, sistemas y estado del dato, inventario, riesgo y trabas, que se reescribieron en tarjetas con nivel de criticidad y se escriben en Supabase. Sus talleres ya no las alimentan. **No renumerar los hallazgos de su taller**: las fichas los enlazan como H-01 a H-42 y así quedaron en la sección. En sus talleres quedan por corregir los `{cap:donde-no-va-la-ia}` de riesgo y trabas —ahora inofensivos, porque esas dos ya no se generan— y el cierre de oportunidades, que dice que la sábana de compras «es parametrizar el ERP». **Ese mismo día salió también «Las oportunidades»**, reordenada por ola y por módulo del sistema Iberia: su taller tampoco la alimenta ya. **Y el panel perdió el editor del informe y el módulo de hallazgos**: el informe se escribe en las sesiones | **Jesús** · Gabriel le avisa |
+| **Leer y ajustar la prosa de las secciones reescritas** antes de publicar: 02 hallazgos, 05 a 08 (sistemas, inventario, riesgo y trabas), 09 oportunidades, 10 arquitectura y 11 ruta. En las oportunidades, mirar sobre todo **dónde cayó cada una**: 21 en un módulo, 8 fuera del sistema Iberia con el módulo más cercano nombrado, y la etiqueta de dato de cada tarjeta. Las correcciones se hacen en sesión, no en el panel. Las seis del 25 las reescribieron agentes sobre el texto que había, sin inventar datos; los respaldos están en `contenido/informe-v2/` y en `Insumos/Respaldo_Informe_2026-09-25` | Gabriel y Jesús |
+| **Revisar los niveles de criticidad.** Hay 14 hallazgos en crítico, 24 en atención y 4 en funciona, y en las otras secciones cada tarjeta lleva el suyo. Decisiones de criterio para mirar: JD Edwards va en verde aunque su configuración a medias sea el problema central; los cinco sistemas perdidos, en rojo; H-08 —los 16 días— en ámbar y H-09 —la firma que falta— en rojo. Un nivel se cambia editando la etiqueta de la tarjeta; el del anillo, en el taller de circuitos | Gabriel y Jesús |
 | **Contrastar la arquitectura con la Gerencia de Tecnología antes del comité**: el usuario de solo lectura en DB2, qué operaciones expone el Orchestrator y con qué usuario de servicio, qué tablas necesitan tiempo real. Si Tecnología no la hace suya, el paso 0 no arranca | Gabriel con la Gerencia de TI |
 | 🔴 **Decidir dónde vive el espejo: en la planta o en la nube.** Es la única decisión técnica que la ruta pide antes de diciembre, porque sin ella el paso 0 no puede empezar el día que se apruebe | **Iberia** · la Gerencia de TI |
 | ~~Cosechar la ronda 2~~ **Hecho el 16 de septiembre: 394 hallazgos, 37 de 42 sesiones.** Quedan fuera ENT-005 (sin consentimiento), ENT-029 (sin hacer) y las dos formaciones más la reunión con la agencia, que no contienen hallazgos de proceso | ✅ |
-| 🔴 **Validar los hallazgos con Iberia. Es el paso que bloquea publicar.** De los 394, **solo 2 están validados**: nada se publica mientras los que sostienen una sección sigan en «propuesto», y validar lo hace quien estuvo en la entrevista, no nosotros. Si no arranca ya, es el cuello de botella de diciembre | **Iberia**, con Gabriel |
+| 🔴 **Validar los hallazgos con Iberia. Es el paso que bloquea publicar.** De los 394, **solo 2 están validados**: nada se publica mientras los que sostienen una sección sigan en «propuesto», y validar lo hace quien estuvo en la entrevista, no nosotros. Si no arranca ya, es el cuello de botella de diciembre. ⚠️ **Desde el 25 de septiembre no hay pantalla para marcarlo**: se lleva el expediente a la mesa y el resultado se carga en sesión | **Iberia**, con Gabriel |
 | ⚠️ **Identificar a los hablantes de `SES-002`** (siete sin nombre) y parte de `SES-005`. De ahí salen hallazgos de gobierno cuya cita es literal pero que no se pueden atribuir por nombre. Quien estuvo en la sala los reconoce de una | Gabriel o Martha |
-| **Nada publicado, y así se queda** hasta que los hallazgos que lo sostienen estén validados. Un lector de Iberia hoy no ve el informe; un editor ve el armazón con su marca «Por escribir» | **Boosty** |
+| **Nada publicado, y así se queda** hasta que los hallazgos que lo sostienen estén validados. Un lector de Iberia hoy no ve el informe; un editor ve el armazón con su marca «Por escribir». **Publicar se hace en sesión**, sección por sección: el panel ya no tiene el botón | **Boosty** |
 | **Fijar la fecha del comité de aprobación** — primera semana de diciembre, por lo del aviso de renovación | Gabriel con Alberto |
 | ⚠️ **Decidir si el entregable lleva partida de horas propia.** Hoy marca **cero** en `/dashboard/programa` con 28 secciones escritas: al revisar el registro con Gabriel, esas horas no fueron a `arquitectura`. Es honesto —no hay ninguna cargada ahí— pero el entregable principal aparece en blanco para el cliente, y en diciembre alguien va a preguntar cuántas horas costó el documento que sostiene la Fase 2 | Gabriel decide · **Boosty** carga |
 
@@ -424,11 +425,9 @@ el comité antes de continuar con las fases siguientes»*.
 
 - ~~`/dashboard/hallazgos` da un error de hidratación~~ ✅ **Ya no aparece** (24 de
   septiembre): `capturar` sale limpio en producción y en desarrollo.
-- ⚠️ **Paginar el listado de hallazgos.** Con 394 la página pesa **2 MB de HTML** —la más
-  pesada del panel, aunque todavía carga en 0,8 s— y va a crecer con cada cosecha. Y a los
-  **1.000 se corta sin avisar**, por el tope de Supabase: el listado, los contadores del
-  panel y los del informe dirían 1.000 cuando fueran más. Hoy no se llega; conviene
-  resolverlo antes de que la cosecha lo acerque.
+- ~~Paginar el listado de hallazgos~~ **Ya no hace falta**: la pantalla se eliminó el 25 de
+  septiembre. Lo que sigue en pie es el tope de 1.000 en los scripts que leen `hallazgos`
+  —el expediente, la cosecha—, que tienen que paginar con `.range()`.
 - **La búsqueda dentro de las transcripciones se corta en 1.000 coincidencias.** Pide los
   turnos que contienen el término para sacar de qué sesiones son; con una palabra muy común
   puede dejar sesiones fuera del resultado. Se arregla preguntando sesión por sesión.
@@ -450,9 +449,10 @@ el comité antes de continuar con las fases siguientes»*.
 | Qué | De quién | Cuándo |
 |---|---|---|
 | 🔴 **Revisar el registro de horas y corregirlo.** Ya está cargado y itemizado en `/dashboard/programa`: **38 partidas**, cada una con la base de su número. Revisadas con Gabriel el 31 de agosto: el mes 1 cierra en **137 h contra 107**. Lo que falta es la última pasada antes del corte, que es en seis días | Gabriel | **Primer corte: 6 de septiembre** |
+| 🔴 **Revisar las 24 partidas de septiembre.** Cargadas el 25 con la base de cada una y el peso en Jesús Planas, como pidió Gabriel: **119 h**, procesos +51 sobre su cuota. Solo las 9 h por persona del entrenamiento del 23 salen de un dato; el resto son estimaciones, como las de agosto antes de su revisión. **Si se corrigen desde el panel, pasar la corrección a `scripts/sembrar-horas.mjs`**: el script ya no escribe si la base tiene partidas que él no conoce | Gabriel | Antes del reporte de septiembre |
 | 🔴 **Redactar el reporte mensual de consumo**, que es obligación de la cláusula 8 y nunca se ha entregado uno. **`/dashboard/programa` ya está escrito para que lo lea Iberia** —qué horas, quién las dedicó y cómo va el calendario—, así que el reporte se apoya en la página en vez de repetirla: lo que aporta es la lectura, no la tabla | **Boosty** | **6 de septiembre** |
 | **Dar de alta a Iberia en el dashboard.** El módulo del programa ya se puede leer con el rol **Lector Iberia**, pero no consta que exista ninguna cuenta de Iberia. Sin eso, la decisión de abrirlo no cambia nada | **Boosty** crea · Alberto decide quiénes | |
-| **Revisar con Gabriel la matriz de «Lector Iberia» antes de dar la primera cuenta.** Hoy reproduce lo que el nivel lector veía antes del 25 de septiembre: panel, entrevistas, archivos, hallazgos, el editor del informe en lectura, el programa, el adiestramiento, el canal, el mapa y las doce secciones (solo las publicadas). Es mucho más que el informe y el programa: conviene decidir si la dirección de Iberia ve las transcripciones y los hallazgos crudos | Gabriel decide · **Boosty** marca en `/dashboard/roles` | Antes del alta de Iberia |
+| **Revisar con Gabriel la matriz de «Lector Iberia» antes de dar la primera cuenta.** *(El 25 de septiembre ya estaba ajustada desde el panel: no ve entrevistas, archivos ni hallazgos. Queda confirmar que así se da.)* Hoy reproduce lo que el nivel lector veía antes del 25 de septiembre: panel, entrevistas, archivos, el programa, el adiestramiento, el canal y las once secciones (solo las publicadas). *(Hallazgos y el editor del informe salieron del panel el 25; el mapa se ve ahora con la casilla de su sección.)* Es mucho más que el informe y el programa: conviene decidir si la dirección de Iberia ve las transcripciones y los hallazgos crudos | Gabriel decide · **Boosty** marca en `/dashboard/roles` | Antes del alta de Iberia |
 | ~~La barra lateral le ofrece al lector páginas que no puede abrir~~ ✅ **Resuelto el 25 de septiembre**: cada destino sale solo si el rol puede abrirlo | ✅ | |
 | ⚠️ **El certificado con lecciones apagadas.** Si a un rol se le apagan lecciones en la matriz, el índice del curso ofrece el certificado al terminar las que ve, pero el certificado solo se emite con las nueve completadas. Los cuatro roles de fábrica ven las nueve, así que hoy no pasa; si alguien arma un rol con menos, hay que decidir qué certifica | **Boosty** | Si se arma un rol así |
 | ~~¿El dashboard del levantamiento consume bolsa?~~ **Sí**, decidido. Sus 40 h quedan dentro | ✅ |
