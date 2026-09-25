@@ -39,6 +39,9 @@ línea.
 **La lista completa está en `PENDIENTES.md`**, ordenada por los siete entregables de la
 cláusula 5. Aquí solo lo urgente:
 
+- 🔴 **La reunión con Alberto, el martes 29 de 11:00 a 13:00.** Es la que abre la Fase 2: se le
+  muestran los tres dibujos y los alivios. Lo que falta para llegar está en `PENDIENTES.md`,
+  bajo el Documento de Arquitectura.
 - 🔴 **Cosechar los hallazgos de la ronda 2.** Son 6.605 turnos del dinero, la gente, las
   compras por dentro, el laboratorio, la seguridad y los servicios generales, y no hay ni
   uno cargado. **El informe entero está construido sobre la cadena física**, que es lo único
@@ -61,6 +64,69 @@ cláusula 5. Aquí solo lo urgente:
 - **Refijar la revisión del canal con mercadeo** — Alberto la agenda. *(Bloqueaba el despliegue; el sitio salió el 25/9 a pedido de Gabriel, y la revisión sigue antes de dar cuentas del canal.)*
 - **Leer los 42 hallazgos redactados** del informe y validar los que los sostienen.
 - **Pedirle a Capital Humano cédula y celular por ficha.** El padrón llegó sin ellos.
+
+---
+
+## 25 de septiembre de 2026 · Sesión 43 — lo que pidió la reunión del equipo
+
+El equipo se reunió el 25 para recorrer el informe antes de mostrárselo a Alberto el martes 29.
+Gabriel pasó la transcripción, pidió comentarios y la lista de pendientes, y después que se
+ejecutara lo que le tocaba a Boosty.
+
+⚠️ **La transcripción no se cargó al panel ni se cosechó.** Trae juicios muy francos sobre
+personas del cliente, el panel ya está en línea, y no es una sesión del levantamiento. Tampoco
+va aquí ni en `PENDIENTES.md`, que están en un repositorio público.
+
+### Lo que se corrigió en el informe
+
+- **La numeración del circuito iba 8 → 10 → 9.** Se movieron los dos trombos, no los números: la
+  tabla de puntos de «Los hallazgos» ya decía «9 · Entrega» y «10 · Devoluciones».
+- **«Se vende lo que el sistema ve» pasó a «se factura»**: Iberia produce contra pronóstico, y en
+  la sala se leyó como si produjera lo ya vendido.
+- **Cada estación del flujo lleva debajo el área que la ejecuta**, como se pidió. Son nombres de
+  Iberia, así que viven en la base, no en el código.
+- 🔴 **«Nuevo» pasó a «No documentado».** Lo propuso el señor Carlos: un proceso que se hace desde
+  hace años no es nuevo, es que nadie lo escribió, y «nuevo» hacía creer que el levantamiento lo
+  había inventado. Contado en la base, son **99 de los 142 procesos** y 6 de los 20
+  macroprocesos. Lo único nuevo de verdad —la gestión de la transformación y adopción
+  tecnológica, que abrió el programa— lleva **«Propuesto»**, con estado propio en la base.
+- **«Los hallazgos» abre con lo que atraviesa a los 42: la operación no está escrita.** Fue «el
+  gran hallazgo» de la reunión. Y las fichas dicen en su primera pantalla que salen de las
+  entrevistas y no de documentos: lo único escrito era el organigrama.
+- **H-18 decía «la sostiene una persona desde su casa»**, y la sala lo leyó como trabajo remoto.
+  La cita (ENT-001) dice otra cosa: de vacaciones pide que le manden el archivo y lo corre igual.
+  Ahora es «depende de una sola persona, aun de vacaciones», con su ancla en las fichas y en las
+  oportunidades.
+- **El trombo 4 decía a la vez que sin liberación no se despacha y que el material se usa antes
+  del resultado.** Las dos cosas pasan: la norma y la práctica. Ahora lo dice así.
+
+### Lo que se buscó y no era hallazgo nuevo
+
+- **Las devoluciones de materia prima**: en la reunión se dijo que Calidad no las registra.
+  Almacén dice lo contrario —Calidad emite la nota de devolución (ENT-003)—; lo que no existe
+  es el historial de rechazos como dato, y eso ya es la oportunidad del indicador de recepciones.
+- **El peso de cuentas clave en la facturación y la política de cobranza** no están en ninguna
+  transcripción. Quedan como preguntas para Iberia.
+
+### Lo que costó
+
+- ⚠️ **Los talleres de las fichas, el mapa e Inicio no están en esta máquina**: son de Jesús.
+  Esas secciones se corrigieron en la base y el generador ya escribe lo nuevo, pero su taller
+  todavía tiene el título viejo de H-18 y el «desde su casa». Anotado para él en `PENDIENTES.md`;
+  si corre el generador antes de corregirlo, el enlace de la ficha a H-18 se rompe.
+- **Las áreas de arriba del anillo las tapaban las burbujas que cuentan los hallazgos de cada
+  trombo**: la de la recepción tapaba «Almacén de». Se subieron encima del nombre de la estación.
+  La primera verificación no lo cazó porque comparaba texto contra texto; ahora mide también
+  contra las burbujas.
+
+**Verificado en producción**: `mirar-reunion` 14 de 14 —el orden de los trombos, el codo, las
+áreas sin pisarse, los enlaces a H-18 desde las fichas y las oportunidades, las marcas y la
+leyenda del mapa—; `tipos`, `lint` y `build` limpios. Respaldo antes de tocar la base en
+`Insumos/Respaldo_Informe_2026-09-25_1603`.
+
+**Dónde quedamos.** Lo de Boosty para el martes, hecho. Lo que queda es de Gabriel —el estimado
+de la Fase 2, la respuesta a la objeción de seguridad, cómo se rotulan las fases— y está en
+`PENDIENTES.md`.
 
 ---
 

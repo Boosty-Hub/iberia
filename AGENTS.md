@@ -34,6 +34,12 @@ El contexto de fondo del encargo está en `CONTEXTO_IBERIA.md`, cargado en el m�
 archivos del dashboard: contrato, mapa de personas con sus notas de manejo, vocabulario
 obligatorio hacia el cliente y reglas de comunicación.
 
+⚠️ **Trabajan varias personas sobre el mismo repositorio.** `git pull` antes de empezar y
+push al terminar la sesión, no al día siguiente: el 25 de septiembre dos personas trabajaron
+sobre versiones distintas y hubo conflicto. Los talleres de `contenido/` no viajan por git —están
+en la máquina de quien los escribe—: lo que dependa de un taller ajeno se corrige en la base y
+se le deja dicho a su dueño en `PENDIENTES.md`.
+
 **Lo que falta está en `PENDIENTES.md`** —ordenado por lo que bloquea y con el nombre de
 quién tiene cada cosa— y cómo poner esto en línea, en `DESPLIEGUE.md`. Al cerrar algo, se
 tacha ahí: si hay dos listas de pendientes, en dos semanas dicen cosas distintas.
@@ -754,7 +760,7 @@ asignan a cada usuario en `/dashboard/usuarios`. Tablas `roles` y `rol_permisos`
   vez (`mis_permisos()`) y va con `cache()`: layout y página la piden en la misma petición.
 - **Dónde cierra la base y dónde la app.** La casilla entra en la RLS del informe
   (`informe_secciones`), del mapa (`macroprocesos` y `procesos`, con la casilla del mapa de
-  procesos o la de las fichas, que marcan «Nuevo» con ellas) y de las lecciones, que es lo que
+  procesos o la de las fichas, que marcan «No documentado» con ellas) y de las lecciones, que es lo que
   se abre a gente que no es del equipo. En el resto de módulos la matriz la aplica
   el servidor de la app, con el nivel como techo en la base.
 - **Cuatro roles de fábrica**, que reproducen el acceso de antes: Administrador, Consultor
@@ -828,9 +834,15 @@ leen bien en el texto crudo:
   `###`, `##` o `---` va en una tarjeta con la barra del color de la etiqueta de su primera
   línea. ⚠️ Lo que se escribe después de la última tarjeta de un `##` cae **dentro** de ella:
   un cierre va tras un `---`.
-- **La marca «Nuevo»** en los procesos y macroprocesos nuevos de las fichas y del mapa, que se
-  pone al pintar con el dato de `macroprocesos.nuevo` y `procesos.estado` —el texto del
-  generador no se toca— y en todo `**nuevo**` suelto.
+- **La marca «No documentado»** en los procesos y macroprocesos que se hacen pero no figuraban
+  en el inventario de partida, y **«Propuesto»** en lo que trae el programa. Se pone al pintar
+  con el dato de `macroprocesos.nuevo` y `procesos.estado` (`NUEVO` y `PROPUESTO`) —el texto
+  del generador no se toca— y en todo `**no documentado**` o `**propuesto**` suelto.
+  ⚠️ **Decía «Nuevo» hasta el 25 de septiembre de 2026**, y el equipo lo cambió: un proceso que
+  se hace desde hace años no es nuevo, es que nadie lo escribió, y «nuevo» le hacía creer a la
+  dirección que el levantamiento lo había inventado. La base conserva `nuevo` y `NUEVO`; cambió
+  el rótulo. `PROPUESTO` lo lleva hoy un solo proceso, la gestión de la transformación y adopción
+  tecnológica; si `sembrar:procesos` corre con un taller que diga `NUEVO`, lo devuelve.
 
 ⚠️ **Va después de `rehype-slug`**: los ids ya están puestos cuando se envuelve en tarjetas,
 así que las anclas no cambian.
@@ -961,6 +973,12 @@ oportunidades → 10 La arquitectura de IA: el sistema Iberia → 11 La ruta de 
   a 150 caracteres por línea.
 - ⚠️ **Un tipo de destape nuevo necesita su rótulo en `DESTAPE`**, o sale como etiqueta vacía
   sin error. `sembrar:circuitos` falla si falta.
+- **Cada estación del flujo lleva el área que la ejecuta** (`textos.flujo.areas` del taller, en
+  el orden de `EST_TOP` y `EST_BOT`). Son nombres de Iberia, así que van en la base y no en el
+  código. Arriba del anillo el área va **encima** del nombre: debajo la tapaban las burbujas que
+  cuentan los hallazgos de cada trombo. `mirar-reunion` mide que no se pisen.
+- **La numeración de los trombos sigue el flujo**, y si un número queda fuera de orden se mueve
+  el trombo, no el número: la tabla de puntos de «Los hallazgos» y la prosa citan los números.
 - **La ficha de un punto o de un módulo se abre en un panel a la derecha** (`Cajon`, 25 de
   septiembre de 2026), no debajo del dibujo: debajo había que bajar a leerla y perder el
   circuito de vista. Tres decisiones:
