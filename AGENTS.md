@@ -457,8 +457,16 @@ Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).
   su trigger**: la RLS decide qué filas, no qué columnas.
 - **`SUPABASE_SECRET_KEY` bypasea RLS.** Solo en `createAdminClient()`, y solo para
   provisionar usuarios. Nunca para leer datos por cuenta de un usuario.
-- **Sin registro abierto**: las cuentas se crean desde `/dashboard/usuarios` o con
-  `npm run crear:usuario`.
+- **Sin registro abierto**: las cuentas se crean desde `/dashboard/usuarios`, desde el
+  padrón al acuñar un enlace, o con `npm run crear:usuario` — las tres por la API de
+  administrador. 🔴 **Y el registro de Supabase está cerrado (`disable_signup`)**, que es lo
+  que de verdad lo cumple: `handle_new_user` toma el rol de los metadatos del alta, así que
+  con el registro abierto cualquiera con la clave pública se creaba una cuenta de
+  administrador. Estuvo abierto hasta el 25 de septiembre de 2026, sin que nadie lo usara;
+  `probar:supabase` falla si se vuelve a abrir. La interfaz sin botón de registro no cerraba
+  nada: la API de Supabase es pública.
+- **Producción está en Netlify**, en la cuenta de Iberia, y cada push a `main` despliega.
+  Cómo está configurado y qué variables lleva, en `DESPLIEGUE.md`.
 - **Bucket privado**: se descarga por `app/dashboard/archivos/[id]/descargar/route.ts`,
   que exige sesión y firma una URL de 60 s.
 - **Y se previsualiza por `[id]/ver`**, que es otra ruta por una diferencia de una palabra:

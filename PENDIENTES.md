@@ -16,7 +16,7 @@ del contrato **CONT-2026-08-0002**. Los dos documentos están en el módulo de a
 | | Entregable | Vence | Cómo va |
 |---|---|---|---|
 | 1 | Plan de comunicación y comunicado oficial | **6 sep** | 🟡 **El comunicado salió**; falta el plan con fecha y el vocero |
-| 2 | App de comunicación interna (v1) **desplegada** | 30 sep | 🟡 Construida, sin revisar y sin desplegar |
+| 2 | App de comunicación interna (v1) **desplegada** | 30 sep | 🟡 **Desplegada el 25 de septiembre** en `iberiavenezuela.netlify.app`, con el resto del panel. Falta la revisión con mercadeo y limpiar las fichas de muestra antes de dar cuentas |
 | 3 | Las tres formaciones y el chat de Claude andando | 31 oct | 🟡 **Dos dictadas**: la directiva el 26 de agosto y los gerentes el 23 de septiembre. Falta la de los líderes y su fecha |
 | 4 | Entrevistas y levantamiento (informes por área) | 7 nov | 🟡 **33 de ~25** y una programada · 394 hallazgos, 42 desarrollados · **0 informes por área** |
 | 5 | Inventario de sistemas, datos, equipos y conectividad | 14 nov | 🟠 Sale de las entrevistas y ya está saliendo |
@@ -95,7 +95,7 @@ el 12 de agosto —«el primer entregable que se puede tocar»—.
 | **Criterio de privacidad sobre los registros de uso** | Martha Fuentes / Milagro Salas | |
 | **Integración con el directorio de personal existente** | Gustavo Carballo | |
 | 🔴 **El padrón está cargado, pero sin teléfonos.** Las **276 personas** ya están en `/dashboard/empleados` con su ficha, cargo, departamento, nivel y familia de oficio. Pero el archivo **no trae cédula, ni celular, ni correo, ni sede**: sin celular no hay enlace personal y sin cédula no hay correo interno derivado. Hace falta un segundo archivo con **ficha + cédula + celular** | Gustavo Carballo | Bloquea el enlace personal y el empujón, que son de Fase 2 |
-| **Depurar las 17 fichas de muestra.** Son las que se sembraron en agosto para poder ver el canal, y ahora **duplican a gente real** —«Alberto García-Ramos» aparece dos veces— y llevan cédulas inventadas tipo `PADRON-002`. No las borré: de ellas cuelgan las 5 publicaciones del feed y 6 matrículas de prueba, y el canal todavía no se ha revisado con mercadeo. **Hay que limpiarlas antes de desplegar** | **Boosty** | |
+| **Depurar las 17 fichas de muestra.** Son las que se sembraron en agosto para poder ver el canal, y ahora **duplican a gente real** —«Alberto García-Ramos» aparece dos veces— y llevan cédulas inventadas tipo `PADRON-002`. No las borré: de ellas cuelgan las 5 publicaciones del feed y 6 matrículas de prueba, y el canal todavía no se ha revisado con mercadeo. **Hay que limpiarlas antes de dar la primera cuenta del canal.** *(El sitio se desplegó el 25 de septiembre; hoy solo tienen cuenta los dos administradores de Boosty, así que nadie más las ve)* | **Boosty** | |
 | **Confirmar la sede de cada quien.** El archivo no la trae. Por centro de costo se intuye ~163 en planta y ~69 en administración, pero hay **35 en territorios de venta** repartidos por todo el país que no son ni Caracas ni Cagua | Gustavo Carballo | |
 | **Avatares de planta** — operadora de envasado, montacarguista, técnico, despachador. Los 18 que mandaron son de oficina | Martha E. Álvarez y la agencia | |
 
@@ -440,7 +440,8 @@ el comité antes de continuar con las fases siguientes»*.
   *(Desde el 25 de septiembre `obtenerSesion` va con `cache()`, así que layout y página ya
   no la piden dos veces; falta el proxy y paralelizar el curso.)* Con el
   servidor en la región de Supabase (ver `DESPLIEGUE.md`) pesa mucho menos, así que va
-  después de desplegar y de medir allá.
+  después de desplegar y de medir allá. *(Desplegado el 25 de septiembre, con las funciones
+  en `us-east-1`: falta medir en producción.)*
 
 ---
 
@@ -459,7 +460,11 @@ el comité antes de continuar con las fases siguientes»*.
 | **Cadencia de las reuniones de seguimiento y gobierno.** La cláusula 10 nos obliga a asistir «a las acordadas» y a entregar «la reportería pactada». No consta que estén acordadas — pero el **comité de comunicaciones** propuesto el 27 de agosto es la vía más corta para cerrarlo: ya tiene las tres patas y solo le falta cadencia | Gabriel con Alberto | |
 | **Designación del liderazgo interno del proyecto** (cláusula 7). Martha Fuentes fue nombrada «coordinadora»; hay que verificar si eso lo cierra o si falta la figura transversal | Alberto García-Ramos | |
 | **Responsable interno de comunicación** (cláusula 10) | Alberto García-Ramos | |
-| 🔴 **Pegar en `.env.local` una `AZURE_SPEECH_KEY` que funcione.** La que hay **ya no autentica**: el 24 de septiembre Azure devolvió 401 en las veinte regiones probadas y en el endpoint propio del recurso. Lo más probable es que se hizo lo que pedía esta fila —regenerarla, porque quedó visible en una captura— y no se copió la nueva. Mientras tanto **la devolución de Ajito sale solo escrita y las notas de voz no se transcriben**: `probar:ajito` dio 8 de 8 contestadas y 0 con audio. Consola de Azure → recurso `industriasiberiait-9652-resource` → Keys and Endpoint | **Boosty**, quien tenga la consola de Azure | Antes de enseñar el curso a nadie |
+| 🔴 **Pegar en `.env.local` —y en Netlify, como secreta de producción— una `AZURE_SPEECH_KEY` que funcione.** *(El 25 de septiembre seguía en 401 y no se subió al despliegue; después de pegarla en Netlify hay que volver a desplegar.)* La que hay **ya no autentica**: el 24 de septiembre Azure devolvió 401 en las veinte regiones probadas y en el endpoint propio del recurso. Lo más probable es que se hizo lo que pedía esta fila —regenerarla, porque quedó visible en una captura— y no se copió la nueva. Mientras tanto **la devolución de Ajito sale solo escrita y las notas de voz no se transcriben**: `probar:ajito` dio 8 de 8 contestadas y 0 con audio. Consola de Azure → recurso `industriasiberiait-9652-resource` → Keys and Endpoint | **Boosty**, quien tenga la consola de Azure | Antes de enseñar el curso a nadie |
+| 🔴 **Elegir el dominio definitivo antes de mandar el primer enlace personal.** Hoy es `iberiavenezuela.netlify.app`, y los ~200 enlaces llevan el dominio dentro: cambiarlo después obliga a acuñarlos y mandarlos otra vez. Al cambiarlo: `NEXT_PUBLIC_SITE_URL` en Netlify, *Site URL* y *Redirect URLs* en Supabase, y desplegar | Gabriel con Iberia | Antes del primer envío |
+| **Probar `/entrar` de punta a punta en producción** con una persona de prueba y un teléfono de verdad: acuñar su enlace en el padrón, abrirlo y entrar sin clave. Es la puerta de las 200 personas | **Boosty** | Antes del primer envío |
+| ⚠️ **Que `handle_new_user` deje de fiarse de los metadatos del alta.** Hoy toma el rol de `raw_user_meta_data`, que en un registro lo pone quien se registra. Con el registro cerrado —desde el 25 de septiembre— no hay por dónde, pero si alguien lo reabre vuelve la escalada. Lo sólido es pasar el rol a `app_metadata`, que solo escribe la clave de servicio, en las tres altas del código y en el trigger | **Boosty** | |
+| **La cuenta de Netlify deja el login de equipo como valor de fábrica.** Un sitio nuevo en esa cuenta nace cerrado a quien no sea miembro. Es buen valor por defecto; se deja dicho para que un 401 en un sitio nuevo no se busque en el código | — | |
 | **Apagar los JWT legacy en Supabase.** El código no los usa; falta apagarlos en el panel. Antes, comprobar que nada fuera de este repositorio los use | **Boosty** | |
 | **Registrar los certificados en Capital Humano** cuando llegue la Fase 2 | Gustavo Carballo | |
 

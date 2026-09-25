@@ -22,7 +22,7 @@ línea.
 |---|---|
 | **Fase** | 1 · Entender · **día 50 de 153**. Contrato `CONT-2026-08-0002`, firmado el 6/7 de agosto de 2026 |
 | **Calendario** | Adelantado: **nada se entrega después del 6 de diciembre**, porque el aviso de no renovación vence antes que el entregable que sirve para decidir |
-| **Dashboard** | Operativo en local. **Sin desplegar**. Roles y permisos configurables desde el 25/9. **Sin módulo de hallazgos ni editor del informe** desde el 25/9: el informe se escribe en las sesiones |
+| **Dashboard** | **En línea desde el 25/9** en `iberiavenezuela.netlify.app`, cuenta de Netlify de Iberia, público con su propio login. Roles y permisos configurables desde el 25/9. **Sin módulo de hallazgos ni editor del informe** desde el 25/9: el informe se escribe en las sesiones |
 | **Levantamiento** | **42 sesiones grabadas · 27.951 turnos**. **33 entrevistas hechas de ~25** y una programada (ENT-029) · los 20 macroprocesos cubiertos |
 | **Hallazgos** | **394, todos con cita textual verificada** · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
 | **Informe** | **11 secciones** y 20 de 20 fichas, **sin citas, sin códigos y sin nombres** (18/9, con Gabriel). Ninguna publicada. **Desde el 25/9 son 11, hallazgos primero**: lo que encontramos → cómo funciona hoy → qué proponemos, en tarjetas con nivel de criticidad. Ocho se escriben en Supabase; el generador solo lleva inicio, mapa y fichas |
@@ -58,9 +58,52 @@ cláusula 5. Aquí solo lo urgente:
 - **Cerrar el acceso antes de la segunda formación**, no en la sala: en la primera se fueron
   48 de los 240 minutos en que la gente lograra entrar.
 - **Aclarar el estado de las licencias de Claude Team** y fechar la tercera formación. *(La segunda, a los gerentes, se dio el 23 de septiembre.)*
-- **Refijar la revisión del canal con mercadeo** — Alberto la agenda. Bloquea el despliegue.
+- **Refijar la revisión del canal con mercadeo** — Alberto la agenda. *(Bloqueaba el despliegue; el sitio salió el 25/9 a pedido de Gabriel, y la revisión sigue antes de dar cuentas del canal.)*
 - **Leer los 42 hallazgos redactados** del informe y validar los que los sostienen.
 - **Pedirle a Capital Humano cédula y celular por ficha.** El padrón llegó sin ellos.
+
+---
+
+## 25 de septiembre de 2026 · Sesión 42 — en línea, y el registro que estaba abierto
+
+Encargo de Gabriel: entrar a Netlify con la credencial de `.env.local`, cargar las variables
+que hagan falta y dejar el sitio funcionando y público.
+
+**Lo que había.** Una cuenta de Netlify **de Industrias Iberia**, plan Pro, con un solo sitio
+—`iberiavenezuela`— conectado al repositorio y desplegando cada push a `main`. Dos cosas lo
+tenían muerto: **ninguna variable de entorno** y el **login de equipo de Netlify** activo, que
+le respondía 401 a quien no fuera miembro de la cuenta.
+
+### 🔴 Antes de abrirlo: cualquiera se podía hacer administrador
+
+Al revisar Supabase salió que **el registro público estaba abierto**, y `handle_new_user` toma
+el rol de los metadatos del alta. O sea: con la clave pública —que va en el JavaScript de
+cualquier sitio publicado— una llamada de registro con `rol: 'admin'` daba una cuenta de
+administrador. «Sin registro abierto» se cumplía en la interfaz, que no tiene botón de
+registro, pero no en la API. **Se cerró antes de quitar el login de Netlify**; solo existen las
+dos cuentas de administrador de Boosty, así que nadie lo aprovechó. Comprobado desde afuera: un
+intento de alta devuelve `signup_disabled`, y `probar:supabase` ahora falla si se reabre.
+
+### Lo que quedó
+
+- **Seis variables**: las tres públicas, la región de Azure, y la clave secreta de Supabase y la
+  de Anthropic con saldo **como secretas y solo en producción** —el repositorio es público y una
+  vista previa la puede disparar un PR de afuera—.
+- ⚠️ **La clave de Azure no se subió**: sigue en 401 y además quedó expuesta en una captura. Sin
+  ella, Ajito contesta escrito y las notas de voz no se transcriben.
+- **Las funciones pasaron de `us-east-2` a `us-east-1`**, la región de Supabase, que es lo que
+  pedía `DESPLIEGUE.md`.
+- **Supabase apunta al dominio**: *Site URL* y *Redirect URLs*, con `localhost` para seguir
+  trabajando en local.
+- **Público**: sin el login de Netlify, las rutas protegidas mandan al login de la app y un
+  enlace inventado de `/entrar` cae en el aviso genérico.
+
+`capturar` contra producción, con sesión real: **14 páginas, cero errores de consola**, y el
+panel con los datos de la base. `DESPLIEGUE.md` se reescribió con cómo quedó.
+
+**Dónde quedamos.** En línea en **https://iberiavenezuela.netlify.app**. Antes del primer enlace
+personal falta elegir el dominio definitivo y probar `/entrar` con un teléfono de verdad; está
+en `PENDIENTES.md`.
 
 ---
 

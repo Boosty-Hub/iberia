@@ -1,64 +1,74 @@
 # Desplegar
 
-La base ya está en producción: el proyecto de Supabase es el real, las migraciones
-están aplicadas y los buckets tienen los audios y las fichas. **Lo que falta por
-desplegar es la aplicación de Next**, que hoy solo corre en local.
-
-No está desplegada porque hace falta una decisión que no es técnica: **en qué cuenta y
-en qué plataforma vive material de Iberia bajo NDA.** Eso lo decide Boosty, no el
-repositorio.
-
----
-
-## Lo que hay que decidir primero
+**Desplegado desde el 25 de septiembre de 2026** en Netlify:
+**https://iberiavenezuela.netlify.app**. La base es el proyecto real de Supabase, con las
+migraciones aplicadas y los buckets con los audios y las fichas.
 
 | | |
 |---|---|
-| **Dónde** | Vercel es lo natural — Next.js sin configuración, y el proyecto no usa nada que ate a un proveedor. Cualquier sitio que corra Node 22 sirve igual. |
-| **En qué región** | ⚠️ **La misma que Supabase: East US, Virginia** — en Vercel, `iad1`. Cada página encadena de 4 a 8 consultas a la base y, medido desde Caracas, cada una cuesta de 90 a 140 ms: ese es casi todo el medio segundo que tarda hoy cualquier pantalla. Con el servidor al lado de la base, cada vuelta baja a milisegundos. En otra región, la app sería lenta por geografía y no por código. |
-| **En qué cuenta** | Tiene que ser una de Boosty, no personal. Los enlaces de la gente de planta van a apuntar ahí durante los cinco meses de la Fase 1. |
-| **Con qué dominio** | Los ~200 enlaces personales llevan el dominio dentro. Cambiarlo después obliga a volver a acuñarlos y a mandarlos otra vez. **Elegir el definitivo antes del primer envío.** |
+| **Cuenta** | **Industrias Iberia** en Netlify, plan Pro — no una personal ni de Boosty. El token está en `.env.local` como `TOKEN_ACCESS_NETLIFY` |
+| **Sitio** | `iberiavenezuela`, conectado a `Boosty-Hub/iberia`, rama `main`. **Cada push a `main` despliega solo**, con `@netlify/plugin-nextjs` |
+| **Región de las funciones** | **`us-east-1`, la misma de Supabase.** Venía en `us-east-2`. Cada página encadena de 4 a 8 consultas a la base; en otra región la app es lenta por geografía y no por código |
+| **Acceso** | **Público.** El sitio tenía el login de equipo de Netlify activo y respondía 401 a cualquiera que no fuera miembro de la cuenta; se quitó. La app pide su propio inicio de sesión y la RLS cierra la base. ⚠️ La cuenta sigue con ese login como valor de fábrica para los sitios **nuevos** |
+| **Dominio** | Todavía el de Netlify. ⚠️ **Los ~200 enlaces personales llevan el dominio dentro**: cambiarlo después obliga a volver a acuñarlos y mandarlos. Elegir el definitivo antes del primer envío, y al cambiarlo, cambiar `NEXT_PUBLIC_SITE_URL` y las URLs de Supabase |
 
 ---
 
 ## Las variables de entorno
 
-Las siete que pide el código, tal cual están en `.env.local`:
+Cargadas en Netlify el 25 de septiembre. **Las secretas van marcadas como secretas y solo en
+el contexto de producción**: el repositorio es público, y una vista previa la puede disparar
+un PR de afuera.
 
-| Variable | Para qué |
-|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | La base |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | La clave pública |
-| `SUPABASE_SECRET_KEY` | **Secreta.** Bypasea RLS; solo provisiona usuarios y acuña sesiones desde `/entrar/[token]` |
-| `NEXT_PUBLIC_SITE_URL` | **La URL de producción.** No es cosmética: con ella se arman los enlaces personales y el del curso en los recordatorios. Si queda en `localhost`, los enlaces que se manden no llevan a ninguna parte. *(Los redirects de `/entrar` ya no dependen de ella desde el 24 de septiembre: van al origen de la petición, para que la sesión y la persona caigan en el mismo host.)* |
-| `AZURE_SPEECH_KEY` | **Secreta.** Transcribir las notas de voz y hablar las devoluciones |
-| `AZURE_SPEECH_REGION` | `westus3` |
-| `ANTHROPIC_API_KEY` | **Secreta.** Las devoluciones de Ajito |
+| Variable | Contexto | Para qué |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | todos | La base |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | todos | La clave pública |
+| `NEXT_PUBLIC_SITE_URL` | todos | `https://iberiavenezuela.netlify.app`. **No es cosmética**: con ella se arman los enlaces personales y el del curso en los recordatorios. *(Los redirects de `/entrar` no dependen de ella: van al origen de la petición.)* |
+| `SUPABASE_SECRET_KEY` | producción · secreta | Bypasea RLS; solo provisiona usuarios y acuña sesiones desde `/entrar/[token]` |
+| `ANTHROPIC_API_KEY_SALDO` | producción · secreta | Las devoluciones de Ajito. `lib/clave-anthropic.ts` la prefiere; la otra, `ANTHROPIC_API_KEY`, no se subió |
+| `AZURE_SPEECH_REGION` | todos | `westus3` |
+| `AZURE_SPEECH_KEY` | — | 🔴 **No está subida.** La de `.env.local` devuelve 401, y además quedó visible en una captura. Hay que regenerarla en Azure (Keys and Endpoint → Regenerate Key 1), pegarla en `.env.local` y en Netlify como secreta de producción, y volver a desplegar. Sin ella, la devolución de Ajito sale escrita y las notas de voz no se transcriben |
 
-⚠️ **Regenerar `AZURE_SPEECH_KEY` antes de ponerla en producción**: quedó visible en una
-captura de pantalla. Consola de Azure → Keys and Endpoint → Regenerate Key 1.
-🔴 **Y la de `.env.local` ya no autentica** (24 de septiembre: 401 en todas las regiones).
-Lo más probable es que ya se regeneró y no se pegó la nueva. Hay que copiarla de la consola.
+**Lo que no se sube**: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_ORG_ID`,
+`SUPABASE_PROJECT_REF`, `AZURE_SPEECH_RESOURCE` y `TOKEN_ACCESS_NETLIFY` son de las
+herramientas, no de la app.
+
+⚠️ **Las `NEXT_PUBLIC_` se meten en el código al compilar.** Cambiar una en Netlify no hace
+nada hasta el próximo despliegue.
 
 ---
 
-## Después de desplegar, en este orden
+## Supabase
 
-1. **Supabase → Authentication → URL Configuration.** Añadir el dominio a *Site URL* y a
-   *Redirect URLs*. Sin esto, `/entrar/[token]` acuña la sesión y no puede devolver a
-   nadie a ninguna parte.
-2. **Comprobar `/entrar` de punta a punta** con una persona de prueba: acuñar su enlace
-   desde `/dashboard/empleados`, abrirlo en un teléfono de verdad y ver que entra sin
-   clave. Es la puerta de las 200 personas; si falla, no falla para una.
-3. **Las verificaciones contra producción**, apuntando `BASE_URL` al dominio:
+- **Authentication → URL Configuration**: *Site URL* es el dominio de Netlify, y las
+  *Redirect URLs* lo incluyen junto con `localhost:3000` y `localhost:3001` para trabajar en
+  local. Si cambia el dominio, se cambia aquí.
+- 🔴 **El registro público está cerrado** (`disable_signup`). Estaba abierto, y
+  `handle_new_user` toma el rol de los metadatos del alta: con la clave pública —que va en el
+  JavaScript del sitio— cualquiera se creaba una cuenta de administrador. Se cerró antes de
+  abrir el sitio; no había ninguna cuenta ajena. Las altas del código pasan todas por la API
+  de administrador, que no depende del registro. `probar:supabase` falla si se vuelve a abrir.
+
+---
+
+## Lo que falta, en este orden
+
+1. **Comprobar `/entrar` de punta a punta** con una persona de prueba: acuñar su enlace desde
+   `/dashboard/empleados`, abrirlo en un teléfono de verdad y ver que entra sin clave. Es la
+   puerta de las 200 personas; si falla, no falla para una.
+2. **Las verificaciones contra producción**, apuntando `BASE_URL` al dominio. `capturar` ya
+   pasó el 25 de septiembre: 14 páginas, cero errores de consola.
 
    ```
-   BASE_URL=https://… npm run probar:padron
-   BASE_URL=https://… npm run capturar:adiestramiento
+   BASE_URL=https://iberiavenezuela.netlify.app npm run capturar
+   BASE_URL=https://iberiavenezuela.netlify.app npm run probar:padron
+   BASE_URL=https://iberiavenezuela.netlify.app npm run capturar:adiestramiento
    ```
 
-4. **Abrir el curso** desde `/dashboard/adiestramiento` — viene cerrado a propósito, para
-   poder dejar todo listo y abrirlo el mismo día para todos.
+3. **La clave de Azure**, ver arriba.
+4. **Abrir el curso** desde `/dashboard/adiestramiento` — viene cerrado a propósito, y es de
+   Fase 2.
 
 ---
 
@@ -78,13 +88,11 @@ Se corren desde una máquina con las claves, no desde el servidor.
 
 ## Lo que sigue sin estar listo
 
-Ninguna de las dos cosas impide desplegar; las dos impiden **abrir el curso**:
+Ninguna impide usar el panel y el informe; las dos impiden **abrir el curso**:
 
 - ~~Saldo en la cuenta de Anthropic~~ ✅ **Resuelto el 31 de agosto** con
   `ANTHROPIC_API_KEY_SALDO`: Ajito contesta.
-- 🔴 **Una clave de Azure que funcione.** Sin ella la devolución de Ajito sale solo escrita
-  —sin la nota de voz— y **las notas de voz de la gente no se transcriben**: quien quiera
-  contestar hablando tiene que escribir. Ver arriba.
+- 🔴 **Una clave de Azure que funcione.** Ver la tabla de variables.
 - **La cuenta de WhatsApp Business y su plantilla aprobada.** Sin ella los enlaces y los
   recordatorios se copian del panel y se mandan a mano, que funciona pero no escala a
   doscientos.

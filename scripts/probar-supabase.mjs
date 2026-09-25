@@ -263,6 +263,16 @@ const NUEVAS = [
     const cerrada = Boolean(error) || (data ?? []).length === 0
     comprobar(`${vista}: nada sin sesión`, cerrada, `devolvió ${(data ?? []).length} filas`)
   }
+
+  // 🔴 El registro tiene que estar cerrado. `handle_new_user` toma el rol de los
+  // metadatos del alta, y con el registro abierto cualquiera con la clave pública
+  // —que va en el JavaScript del sitio— se creaba una cuenta de administrador.
+  // Estuvo abierto hasta el 25 de septiembre de 2026. Se pregunta a la API, como
+  // lo haría alguien de afuera, sin intentar el alta.
+  const ajustes = await fetch(`${URL_SUPA}/auth/v1/settings`, {
+    headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY },
+  }).then((r) => r.json())
+  comprobar('el registro público está cerrado', ajustes.disable_signup === true, `disable_signup = ${ajustes.disable_signup}`)
 }
 
 // --- 4) los buckets ----------------------------------------------------------
