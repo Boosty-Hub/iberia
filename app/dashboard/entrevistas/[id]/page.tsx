@@ -14,7 +14,7 @@ import {
 import { ImportadorFireflies } from '@/components/importador-fireflies'
 import { Transcripcion } from '@/components/transcripcion'
 import { Insignia } from '@/components/ui'
-import { esEditor, requerirSesion } from '@/lib/auth'
+import { puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { formatBytes, formatFecha, nombreSesion } from '@/lib/utils'
 import {
@@ -112,8 +112,11 @@ function comoLineas(valor: unknown): string[] {
 export default async function EntrevistaPage({
   params,
 }: PageProps<'/dashboard/entrevistas/[id]'>) {
-  const [{ perfil }, { id }] = await Promise.all([requerirSesion(), params])
-  const puedeEditar = esEditor(perfil)
+  const [sesion, { id }] = await Promise.all([requerirPermiso('modulo:entrevistas'), params])
+  const puedeEditar = puede(sesion, 'modulo:entrevistas', 'editar')
+  const puedeEliminar = puede(sesion, 'modulo:entrevistas', 'eliminar')
+  // Marcar una cita como hallazgo es crear un hallazgo, no editar la sesión.
+  const puedeCrearHallazgo = puede(sesion, 'modulo:hallazgos', 'crear')
   const supabase = await createClient()
 
   const { data: entrevista } = await supabase
@@ -218,19 +221,19 @@ export default async function EntrevistaPage({
           </Insignia>
 
           {puedeEditar && (
-            <>
-              <Link href={`/dashboard/entrevistas/${id}/editar`} className="btn-neutro">
-                <IconoEditar className="h-4 w-4" />
-                Editar
-              </Link>
-              <form action={eliminarEntrevista}>
-                <input type="hidden" name="id" value={id} />
-                <button type="submit" className="btn-peligro">
-                  <IconoBasura className="h-4 w-4" />
-                  Eliminar
-                </button>
-              </form>
-            </>
+            <Link href={`/dashboard/entrevistas/${id}/editar`} className="btn-neutro">
+              <IconoEditar className="h-4 w-4" />
+              Editar
+            </Link>
+          )}
+          {puedeEliminar && (
+            <form action={eliminarEntrevista}>
+              <input type="hidden" name="id" value={id} />
+              <button type="submit" className="btn-peligro">
+                <IconoBasura className="h-4 w-4" />
+                Eliminar
+              </button>
+            </form>
           )}
         </div>
       </div>
@@ -269,7 +272,7 @@ export default async function EntrevistaPage({
           <Transcripcion
             segmentos={segmentos}
             entrevistaId={id}
-            puedeEditar={puedeEditar}
+            puedeEditar={puedeCrearHallazgo}
           />
         </div>
 
@@ -399,7 +402,7 @@ export default async function EntrevistaPage({
                   {hallazgos?.length ?? 0}
                 </span>
               </h2>
-              {puedeEditar && (
+              {puedeCrearHallazgo && (
                 <Link
                   href={{
                     pathname: '/dashboard/hallazgos/nuevo',

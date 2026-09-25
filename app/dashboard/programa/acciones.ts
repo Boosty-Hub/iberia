@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { requerirEditor } from '@/lib/auth'
+import { requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import {
   ENTREGABLES,
@@ -50,7 +50,7 @@ export async function cargarHoras(
   _anterior: EstadoFormulario,
   fd: FormData
 ): Promise<EstadoFormulario> {
-  const { userId } = await requerirEditor()
+  const { userId } = await requerirPermiso('modulo:programa', 'crear')
   const supabase = await createClient()
 
   const dia = fecha(fd, 'fecha')
@@ -90,7 +90,7 @@ export async function cargarHoras(
 }
 
 export async function borrarHoras(fd: FormData) {
-  await requerirEditor()
+  await requerirPermiso('modulo:programa', 'eliminar')
   const supabase = await createClient()
 
   const id = String(fd.get('id') ?? '')
@@ -104,7 +104,7 @@ export async function crearHito(
   _anterior: EstadoFormulario,
   fd: FormData
 ): Promise<EstadoFormulario> {
-  const { userId } = await requerirEditor()
+  const { userId } = await requerirPermiso('modulo:programa', 'crear')
   const supabase = await createClient()
 
   const dia = fecha(fd, 'fecha')

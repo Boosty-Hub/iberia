@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { requerirEditor } from '@/lib/auth'
+import { requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { PARTES_INFORME, type ParteInforme } from '@/lib/types'
 
@@ -28,6 +28,17 @@ function slugificar(valor: string): string {
     .slice(0, 80)
 }
 
+/**
+ * El slug de una sección por su id, para pedir el permiso de esa sección. Si la
+ * RLS no la deja ver, no existe: nadie edita lo que no puede leer.
+ */
+async function slugDe(id: string): Promise<string | null> {
+  if (!id) return null
+  const supabase = await createClient()
+  const { data } = await supabase.from('informe_secciones').select('slug').eq('id', id).maybeSingle()
+  return data?.slug ?? null
+}
+
 function revalidarInforme(slug?: string) {
   revalidatePath('/dashboard')
   revalidatePath('/dashboard/informe')
@@ -39,11 +50,12 @@ export async function actualizarSeccion(
   _anterior: EstadoSeccion,
   fd: FormData
 ): Promise<EstadoSeccion> {
-  const { userId } = await requerirEditor()
-  const supabase = await createClient()
-
   const id = texto(fd, 'id')
   if (!id) return { error: 'Falta el identificador de la sección.' }
+  const slugActual = await slugDe(id)
+  if (!slugActual) return { error: 'Esa sección no existe o tu rol no la puede ver.' }
+  const { userId } = await requerirPermiso(`informe:${slugActual}`, 'editar')
+  const supabase = await createClient()
 
   const titulo = texto(fd, 'titulo')
   if (!titulo) return { error: 'El título es obligatorio.' }
@@ -70,6 +82,8 @@ export async function actualizarSeccion(
     .maybeSingle()
 
   if (error) return { error: `No se pudo guardar: ${error.message}` }
+  // Sin permiso de la base, el update no falla: no toca nada y vuelve vacío.
+  if (!data) return { error: 'La base no dejó guardar: tu rol no puede editar esta sección.' }
 
   revalidarInforme(data?.slug ?? undefined)
 
@@ -81,7 +95,7 @@ export async function crearSeccion(
   _anterior: EstadoSeccion,
   fd: FormData
 ): Promise<EstadoSeccion> {
-  const { userId } = await requerirEditor()
+  const { userId } = await requerirPermiso('modulo:informe', 'crear')
   const supabase = await createClient()
 
   const titulo = texto(fd, 'titulo')
@@ -126,11 +140,11 @@ export async function crearSeccion(
 }
 
 export async function alternarPublicacion(fd: FormData) {
-  await requerirEditor()
-  const supabase = await createClient()
-
   const id = String(fd.get('id') ?? '')
-  if (!id) return
+  const slug = await slugDe(id)
+  if (!slug) return
+  await requerirPermiso(`informe:${slug}`, 'editar')
+  const supabase = await createClient()
 
   const { data: actual } = await supabase
     .from('informe_secciones')
@@ -149,11 +163,11 @@ export async function alternarPublicacion(fd: FormData) {
 }
 
 export async function eliminarSeccion(fd: FormData) {
-  await requerirEditor()
-  const supabase = await createClient()
-
   const id = String(fd.get('id') ?? '')
-  if (!id) return
+  const slug = await slugDe(id)
+  if (!slug) return
+  await requerirPermiso(`informe:${slug}`, 'eliminar')
+  const supabase = await createClient()
 
   await supabase.from('informe_secciones').delete().eq('id', id)
 

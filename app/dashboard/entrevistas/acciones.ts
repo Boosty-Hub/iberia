@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { requerirEditor } from '@/lib/auth'
+import { requerirPermiso } from '@/lib/auth'
 import type { MetaTranscripcion } from '@/lib/fireflies'
 import { createClient } from '@/lib/supabase/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -103,7 +103,7 @@ export async function crearEntrevista(
   _anterior: EstadoFormulario,
   fd: FormData
 ): Promise<EstadoFormulario> {
-  const { userId } = await requerirEditor()
+  const { userId } = await requerirPermiso('modulo:entrevistas', 'crear')
   const supabase = await createClient()
 
   const tipo = opcion(fd, 'tipo', TIPOS) ?? 'entrevista'
@@ -169,7 +169,7 @@ export async function actualizarEntrevista(
   _anterior: EstadoFormulario,
   fd: FormData
 ): Promise<EstadoFormulario> {
-  await requerirEditor()
+  await requerirPermiso('modulo:entrevistas', 'editar')
   const supabase = await createClient()
 
   const id = texto(fd, 'id')
@@ -223,7 +223,7 @@ export async function actualizarEntrevista(
 // -----------------------------------------------------------------------------
 
 export async function eliminarEntrevista(fd: FormData) {
-  await requerirEditor()
+  await requerirPermiso('modulo:entrevistas', 'eliminar')
   const supabase = await createClient()
 
   const id = String(fd.get('id') ?? '')
@@ -322,7 +322,7 @@ export async function crearEntrevistaDesdeArchivo(payload: {
   meta?: MetaTranscripcion | null
   segmentos: SegmentoEntrante[]
 }): Promise<{ error?: string; id?: string; codigo?: string; segmentos?: number }> {
-  const { userId } = await requerirEditor()
+  const { userId } = await requerirPermiso('modulo:entrevistas', 'crear')
   const supabase = await createClient()
 
   const nombre = payload.entrevistadoNombre?.trim()
@@ -410,7 +410,7 @@ export async function guardarTranscripcion(payload: {
   meta?: MetaTranscripcion | null
   sobrescribirResumen?: boolean
 }): Promise<ResultadoImportacion> {
-  await requerirEditor()
+  await requerirPermiso('modulo:entrevistas', 'editar')
   const supabase = await createClient()
 
   const { entrevistaId } = payload

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { IconoBuscar, IconoImportar, IconoMas, IconoReloj, IconoSede } from '@/components/iconos'
 import { EncabezadoPagina, EstadoVacio, Insignia } from '@/components/ui'
-import { esEditor, requerirSesion } from '@/lib/auth'
+import { puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { formatFecha, nombreSesion } from '@/lib/utils'
 import {
@@ -41,8 +41,8 @@ function unico<T extends { id: string }>(filas: T[]): T[] {
 export default async function EntrevistasPage({
   searchParams,
 }: PageProps<'/dashboard/entrevistas'>) {
-  const [{ perfil }, params] = await Promise.all([requerirSesion(), searchParams])
-  const puedeEditar = esEditor(perfil)
+  const [sesion, params] = await Promise.all([requerirPermiso('modulo:entrevistas'), searchParams])
+  const puedeCrear = puede(sesion, 'modulo:entrevistas', 'crear')
   const supabase = await createClient()
 
   const valor = (k: string) => {
@@ -129,7 +129,7 @@ export default async function EntrevistasPage({
         titulo="Entrevistas y sesiones"
         descripcion="Todo lo levantado: entrevistas a directores, gerentes y coordinadores, más las reuniones de comité y los recorridos de planta. Cada sesión guarda su transcripción, sus participantes y los hallazgos que salieron de ella."
         acciones={
-          puedeEditar ? (
+          puedeCrear ? (
             <>
               <Link href="/dashboard/entrevistas/importar" className="btn-acento">
                 <IconoImportar className="h-4 w-4" />
@@ -220,7 +220,7 @@ export default async function EntrevistasPage({
             titulo="Todavía no hay entrevistas"
             descripcion="Carga los archivos de Fireflies y el sistema arma cada entrevista con sus datos y su transcripción. No hace falta escribir nada."
             accion={
-              puedeEditar
+              puedeCrear
                 ? { href: '/dashboard/entrevistas/importar', etiqueta: 'Importar de Fireflies' }
                 : undefined
             }

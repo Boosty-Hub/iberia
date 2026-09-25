@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { CURSO } from '@/lib/adiestramiento'
-import { requerirAdmin, requerirEditor } from '@/lib/auth'
+import { requerirAdmin, requerirPermiso } from '@/lib/auth'
 import { escalonQueToca, redactar } from '@/lib/recordatorios'
 import { createClient } from '@/lib/supabase/server'
 import { estaLista, mandarPlantilla, probarConexion, type Conexion } from '@/lib/whatsapp'
@@ -77,7 +77,7 @@ export async function probarWhatsapp() {
  * darle diez veces al botón no prepara diez mensajes.
  */
 export async function prepararRecordatorios() {
-  await requerirEditor()
+  await requerirPermiso('modulo:recordatorios', 'editar')
   const supabase = await createClient()
 
   const { data: curso } = await supabase
@@ -150,7 +150,7 @@ export async function prepararRecordatorios() {
  * mejor vía para quien no contesta mensajes de un número desconocido.
  */
 export async function marcarAMano(datos: FormData) {
-  await requerirEditor()
+  await requerirPermiso('modulo:recordatorios', 'editar')
   const id = String(datos.get('id') ?? '')
   if (!id) return
 
@@ -172,7 +172,7 @@ export async function marcarAMano(datos: FormData) {
  * llega dos veces.
  */
 export async function mandarPorWhatsapp() {
-  await requerirEditor()
+  await requerirPermiso('modulo:recordatorios', 'editar')
   const supabase = await createClient()
 
   const { data: conexion } = await supabase

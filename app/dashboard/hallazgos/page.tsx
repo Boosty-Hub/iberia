@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { IconoBuscar, IconoCheck, IconoMas } from '@/components/iconos'
 import { EncabezadoPagina, EstadoVacio, Insignia } from '@/components/ui'
-import { esEditor, requerirSesion } from '@/lib/auth'
+import { puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import {
   ESTADOS_HALLAZGO,
@@ -35,8 +35,10 @@ function limpiarBusqueda(q: string): string {
 export default async function HallazgosPage({
   searchParams,
 }: PageProps<'/dashboard/hallazgos'>) {
-  const [{ perfil }, params] = await Promise.all([requerirSesion(), searchParams])
-  const puedeEditar = esEditor(perfil)
+  const [sesion, params] = await Promise.all([requerirPermiso('modulo:hallazgos'), searchParams])
+  const puedeCrear = puede(sesion, 'modulo:hallazgos', 'crear')
+  // Validar es cambiar el estado: va con «editar».
+  const puedeEditar = puede(sesion, 'modulo:hallazgos', 'editar')
   const supabase = await createClient()
 
   const valor = (k: string) => {
@@ -85,7 +87,7 @@ export default async function HallazgosPage({
         titulo="Hallazgos"
         descripcion="Lo que el diagnóstico leyó: cuellos de botella, trabajo manual repetitivo, datos disponibles y oportunidades de IA. Cada uno con la cita que lo respalda."
         acciones={
-          puedeEditar ? (
+          puedeCrear ? (
             <Link href="/dashboard/hallazgos/nuevo" className="btn-acento">
               <IconoMas className="h-4 w-4" />
               Nuevo hallazgo
@@ -184,7 +186,7 @@ export default async function HallazgosPage({
             titulo="Todavía no hay hallazgos"
             descripcion="Los hallazgos se marcan sobre la transcripción de una entrevista, o se crean a mano desde aquí."
             accion={
-              puedeEditar
+              puedeCrear
                 ? { href: '/dashboard/hallazgos/nuevo', etiqueta: 'Crear hallazgo' }
                 : undefined
             }

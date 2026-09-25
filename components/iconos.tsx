@@ -236,3 +236,41 @@ export const IconoNuevaPestana = (p: Props) => (
     <path d="M18 14v4.5A1.5 1.5 0 0 1 16.5 20h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10" />
   </Base>
 )
+
+/** Las tres rayas del menú de teléfono. */
+export const IconoMenu = (p: Props) => (
+  <Base {...p}>
+    <path d="M4 7h16M4 12h16M4 17h10" />
+  </Base>
+)
+
+export const IconoCerrar = (p: Props) => (
+  <Base {...p}>
+    <path d="M6 6l12 12M18 6L6 18" />
+  </Base>
+)
+
+/** Roles y permisos: un escudo con la marca de visto. */
+export const IconoEscudo = (p: Props) => (
+  <Base {...p}>
+    <path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.2-7.5 9.5-4.3-1.3-7.5-4.9-7.5-9.5V6L12 3z" />
+    <path d="M9 12l2 2 4-4" />
+  </Base>
+)
+
+export const IconoCandado = (p: Props) => (
+  <Base {...p}>
+    <rect x="5" y="10.5" width="14" height="10" rx="2" />
+    <path d="M8 10.5V7.5a4 4 0 018 0v3" />
+  </Base>
+)
+
+/** Lista con viñetas: el índice de la sección. */
+export const IconoLista = (p: Props) => (
+  <Base {...p}>
+    <path d="M9 6h11M9 12h11M9 18h11" />
+    <circle cx="4.5" cy="6" r="0.9" fill="currentColor" />
+    <circle cx="4.5" cy="12" r="0.9" fill="currentColor" />
+    <circle cx="4.5" cy="18" r="0.9" fill="currentColor" />
+  </Base>
+)

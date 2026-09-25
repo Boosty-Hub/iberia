@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { requerirEditor } from '@/lib/auth'
+import { requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import {
   ESTADOS_HALLAZGO,
@@ -61,7 +61,7 @@ export async function crearHallazgo(
   _anterior: EstadoFormularioHallazgo,
   fd: FormData
 ): Promise<EstadoFormularioHallazgo> {
-  const { userId } = await requerirEditor()
+  const { userId } = await requerirPermiso('modulo:hallazgos', 'crear')
   const supabase = await createClient()
 
   const titulo = texto(fd, 'titulo')
@@ -86,7 +86,7 @@ export async function actualizarHallazgo(
   _anterior: EstadoFormularioHallazgo,
   fd: FormData
 ): Promise<EstadoFormularioHallazgo> {
-  await requerirEditor()
+  await requerirPermiso('modulo:hallazgos', 'editar')
   const supabase = await createClient()
 
   const id = texto(fd, 'id')
@@ -113,7 +113,7 @@ export async function actualizarHallazgo(
 }
 
 export async function eliminarHallazgo(fd: FormData) {
-  await requerirEditor()
+  await requerirPermiso('modulo:hallazgos', 'eliminar')
   const supabase = await createClient()
 
   const id = String(fd.get('id') ?? '')
@@ -136,7 +136,7 @@ export async function eliminarHallazgo(fd: FormData) {
 
 /** Cambio rápido de estado desde la lista, sin abrir el formulario completo. */
 export async function cambiarEstadoHallazgo(fd: FormData) {
-  await requerirEditor()
+  await requerirPermiso('modulo:hallazgos', 'editar')
   const supabase = await createClient()
 
   const id = String(fd.get('id') ?? '')

@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { IconoAtras, IconoBasura } from '@/components/iconos'
 import { FormularioHallazgo } from '@/components/formulario-hallazgo'
 import { EncabezadoPagina, Insignia } from '@/components/ui'
-import { esEditor, requerirSesion } from '@/lib/auth'
+import { puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import {
   ESTADOS_HALLAZGO,
@@ -32,8 +32,9 @@ const TONO_ESTADO: Record<EstadoHallazgo, 'ambar' | 'verde' | 'neutro'> = {
 }
 
 export default async function HallazgoPage({ params }: PageProps<'/dashboard/hallazgos/[id]'>) {
-  const [{ perfil }, { id }] = await Promise.all([requerirSesion(), params])
-  const puedeEditar = esEditor(perfil)
+  const [sesion, { id }] = await Promise.all([requerirPermiso('modulo:hallazgos'), params])
+  const puedeEditar = puede(sesion, 'modulo:hallazgos', 'editar')
+  const puedeEliminar = puede(sesion, 'modulo:hallazgos', 'eliminar')
   const supabase = await createClient()
 
   const { data: hallazgo } = await supabase
@@ -59,12 +60,24 @@ export default async function HallazgoPage({ params }: PageProps<'/dashboard/hal
         Hallazgos
       </Link>
 
-      {/* Los lectores ven la ficha; los editores el formulario. */}
+      {/* Quien no edita ve la ficha; quien edita, el formulario. Borrar va aparte:
+          un rol puede eliminar sin poder editar. */}
       {!puedeEditar ? (
         <>
           <EncabezadoPagina
             rotulo={TIPOS_HALLAZGO[hallazgo.tipo as TipoHallazgo]}
             titulo={hallazgo.titulo}
+            acciones={
+              puedeEliminar ? (
+                <form action={eliminarHallazgo} className="shrink-0">
+                  <input type="hidden" name="id" value={id} />
+                  <button type="submit" className="btn-peligro">
+                    <IconoBasura className="h-4 w-4" />
+                    Eliminar
+                  </button>
+                </form>
+              ) : undefined
+            }
           />
 
           <div className="mb-5 flex flex-wrap gap-1.5">
@@ -128,13 +141,15 @@ export default async function HallazgoPage({ params }: PageProps<'/dashboard/hal
               )}
             </div>
 
-            <form action={eliminarHallazgo} className="shrink-0">
-              <input type="hidden" name="id" value={id} />
-              <button type="submit" className="btn-peligro">
-                <IconoBasura className="h-4 w-4" />
-                Eliminar
-              </button>
-            </form>
+            {puedeEliminar && (
+              <form action={eliminarHallazgo} className="shrink-0">
+                <input type="hidden" name="id" value={id} />
+                <button type="submit" className="btn-peligro">
+                  <IconoBasura className="h-4 w-4" />
+                  Eliminar
+                </button>
+              </form>
+            )}
           </div>
 
           <FormularioHallazgo

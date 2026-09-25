@@ -4,7 +4,7 @@ import { IconoBasura, IconoBuscar, IconoDescargar } from '@/components/iconos'
 import { SubirArchivo } from '@/components/subir-archivo'
 import { PreviaArchivo } from '@/components/previa-archivo'
 import { EncabezadoPagina, EstadoVacio, Insignia } from '@/components/ui'
-import { esEditor, requerirSesion } from '@/lib/auth'
+import { puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { formatBytes, formatFecha } from '@/lib/utils'
 import { CATEGORIAS_ARCHIVO, type CategoriaArchivo } from '@/lib/types'
@@ -30,8 +30,9 @@ function limpiarBusqueda(q: string): string {
 }
 
 export default async function ArchivosPage({ searchParams }: PageProps<'/dashboard/archivos'>) {
-  const [{ perfil }, params] = await Promise.all([requerirSesion(), searchParams])
-  const puedeEditar = esEditor(perfil)
+  const [sesion, params] = await Promise.all([requerirPermiso('modulo:archivos'), searchParams])
+  const puedeSubir = puede(sesion, 'modulo:archivos', 'crear')
+  const puedeEliminar = puede(sesion, 'modulo:archivos', 'eliminar')
   const supabase = await createClient()
 
   const valor = (k: string) => {
@@ -78,7 +79,7 @@ export default async function ArchivosPage({ searchParams }: PageProps<'/dashboa
         descripcion="Documentos del levantamiento: manuales, reportes del ERP, muestras de data, políticas y material de comunicación."
       />
 
-      {puedeEditar && (
+      {puedeSubir && (
         <div className="mb-6">
           <SubirArchivo areas={areas ?? []} entrevistas={entrevistas ?? []} />
         </div>
@@ -145,7 +146,7 @@ export default async function ArchivosPage({ searchParams }: PageProps<'/dashboa
           <EstadoVacio
             titulo="Todavía no hay archivos"
             descripcion={
-              puedeEditar
+              puedeSubir
                 ? 'Sube el primer documento del levantamiento con el formulario de arriba.'
                 : 'El equipo consultor aún no ha cargado documentos.'
             }
@@ -214,7 +215,7 @@ export default async function ArchivosPage({ searchParams }: PageProps<'/dashboa
                     <span className="sr-only">Descargar</span>
                   </a>
 
-                  {puedeEditar && (
+                  {puedeEliminar && (
                     <form action={eliminarArchivo}>
                       <input type="hidden" name="id" value={a.id} />
                       <button

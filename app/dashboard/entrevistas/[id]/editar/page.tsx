@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { FormularioEntrevista } from '@/components/formulario-entrevista'
 import { EncabezadoPagina } from '@/components/ui'
-import { requerirEditor } from '@/lib/auth'
+import { requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { actualizarEntrevista } from '../../acciones'
 
@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: 'Editar entrevista' }
 export default async function EditarEntrevistaPage({
   params,
 }: PageProps<'/dashboard/entrevistas/[id]/editar'>) {
-  await requerirEditor()
+  await requerirPermiso('modulo:entrevistas', 'editar')
   const { id } = await params
   const supabase = await createClient()
 

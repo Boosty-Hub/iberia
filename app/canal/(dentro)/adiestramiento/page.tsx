@@ -10,7 +10,7 @@ import {
   minutosTexto,
   type FormaIA,
 } from '@/lib/adiestramiento'
-import { esEditor, obtenerSesion } from '@/lib/auth'
+import { obtenerSesion, puede } from '@/lib/auth'
 import { requerirEmpleado } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
@@ -20,7 +20,7 @@ export const metadata: Metadata = { title: 'Conoce a Ajito' }
 export default async function AdiestramientoPage() {
   const empleado = await requerirEmpleado()
   const sesion = await obtenerSesion()
-  const puedeReiniciar = esEditor(sesion?.perfil)
+  const puedeReiniciar = puede(sesion, 'modulo:adiestramiento', 'editar')
   const supabase = await createClient()
 
   const { data: curso } = await supabase
@@ -76,8 +76,23 @@ export default async function AdiestramientoPage() {
     (avances ?? []).map((a) => [a.leccion_id, a.estado])
   )
 
-  const total = lecciones?.length ?? 0
-  const hechas = (avances ?? []).filter((a) => a.estado === 'completada').length
+  // Las lecciones llegan filtradas por la RLS según el rol (`leccion:N`). El
+  // avance se cuenta sobre las que esta persona ve, no sobre las nueve.
+  const visibles = new Set((lecciones ?? []).map((l) => l.id))
+  const total = visibles.size
+  const hechas = (avances ?? []).filter(
+    (a) => a.estado === 'completada' && visibles.has(a.leccion_id)
+  ).length
+
+  if (total === 0) {
+    return (
+      <Aviso
+        titulo="Todavía no tienes clases asignadas"
+        detalle="Cuando el equipo del programa te habilite las lecciones, van a aparecer aquí."
+        conAjito
+      />
+    )
+  }
 
   // La siguiente es la primera sin completar. Si no queda ninguna, terminó.
   const siguiente = lecciones?.find(

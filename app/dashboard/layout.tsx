@@ -1,25 +1,51 @@
 import { cerrarSesion } from '@/app/login/actions'
 import { IconoSalir } from '@/components/iconos'
 import { Marca } from '@/components/marca'
-import { NavLateral } from '@/components/nav-lateral'
+import { MenuMovil } from '@/components/menu-movil'
+import { NavLateral, type ClaveNav } from '@/components/nav-lateral'
 import { Insignia } from '@/components/ui'
-import { esAdmin, requerirSesion } from '@/lib/auth'
-import { ORGANIZACIONES, ROLES, type Organizacion, type Rol } from '@/lib/types'
+import { puede, requerirSesion, type Sesion } from '@/lib/auth'
+import { ORGANIZACIONES, type Organizacion } from '@/lib/types'
+
+/** Qué destinos de la barra puede abrir esta sesión: el mismo permiso que exige cada página. */
+function destinosPermitidos(sesion: Sesion): ClaveNav[] {
+  const reglas: [ClaveNav, boolean][] = [
+    ['panel', puede(sesion, 'modulo:panel')],
+    ['entrevistas', puede(sesion, 'modulo:entrevistas')],
+    ['archivos', puede(sesion, 'modulo:archivos')],
+    ['hallazgos', puede(sesion, 'modulo:hallazgos')],
+    ['adiestramiento', puede(sesion, 'modulo:adiestramiento')],
+    // El padrón se abre con «editar»: sus vistas solo le responden al equipo.
+    ['empleados', puede(sesion, 'modulo:empleados', 'editar')],
+    ['informe', puede(sesion, 'modulo:informe')],
+    ['programa', puede(sesion, 'modulo:programa')],
+    ['usuarios', puede(sesion, 'modulo:usuarios')],
+    ['roles', puede(sesion, 'modulo:roles')],
+    ['curso', puede(sesion, 'modulo:adiestramiento', 'editar') && puede(sesion, 'modulo:canal')],
+    [
+      'ver-informe',
+      Object.entries(sesion.permisos).some(([r, p]) => r.startsWith('informe:') && p.ver) ||
+        sesion.rol.nivel === 'admin',
+    ],
+  ]
+  return reglas.filter(([, si]) => si).map(([clave]) => clave)
+}
 
 export default async function DashboardLayout({ children }: LayoutProps<'/dashboard'>) {
-  const { perfil, email } = await requerirSesion()
-  const rol = perfil.rol as Rol
+  const sesion = await requerirSesion()
+  const { perfil, email, rol } = sesion
+  const permitidos = destinosPermitidos(sesion)
 
   return (
     <div className="flex min-h-full flex-1">
       {/* Barra lateral. En claro, como el canal: el carbón oscuro partía el
           producto en dos mitades que no parecían la misma aplicación. */}
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-[var(--borde)] bg-white lg:flex">
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-[var(--borde)] bg-white lg:flex">
         <div className="border-b border-[var(--borde)] px-5 py-4">
           <Marca />
         </div>
         <div className="flex-1 overflow-y-auto">
-          <NavLateral esAdmin={esAdmin(perfil)} />
+          <NavLateral permitidos={permitidos} />
         </div>
         <div className="border-t border-[var(--borde)] px-5 py-3">
           <p className="text-[11px] leading-relaxed text-marca-400">
@@ -32,10 +58,15 @@ export default async function DashboardLayout({ children }: LayoutProps<'/dashbo
 
       {/* Columna de contenido */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between gap-4 border-b border-[var(--borde)] bg-white px-5 py-3">
-          {/* En móvil la marca vive en la barra superior, no en el aside. */}
+        <header className="sticky top-0 z-30 flex h-[60px] items-center gap-3 border-b border-[var(--borde)] bg-white/95 px-4 backdrop-blur sm:px-5">
+          {/* En teléfono, la barra se abre desde aquí. Antes se pintaba entera
+              arriba del contenido: ocho enlaces antes de la primera línea de
+              la página. */}
+          <MenuMovil titulo="Menú" etiqueta="Abrir el menú">
+            <NavLateral permitidos={permitidos} />
+          </MenuMovil>
           <div className="lg:hidden">
-            <Marca />
+            <Marca compacta alto={26} />
           </div>
 
           <div className="ml-auto flex items-center gap-3">
@@ -47,15 +78,12 @@ export default async function DashboardLayout({ children }: LayoutProps<'/dashbo
                 {ORGANIZACIONES[perfil.organizacion as Organizacion] ?? perfil.organizacion}
               </p>
             </div>
-            <Insignia tono={rol === 'lector' ? 'neutro' : 'acento'}>{ROLES[rol] ?? rol}</Insignia>
+            <Insignia tono={rol.nivel === 'lector' ? 'neutro' : 'acento'} className="hidden sm:inline-flex">
+              {rol.nombre}
+            </Insignia>
 
             <form action={cerrarSesion}>
-              <button
-                type="submit"
-                className="btn-neutro px-3"
-                title="Cerrar sesión"
-                aria-label="Cerrar sesión"
-              >
+              <button type="submit" className="btn-neutro h-10 px-3" title="Cerrar sesión" aria-label="Cerrar sesión">
                 <IconoSalir className="h-4 w-4" />
                 <span className="sr-only sm:not-sr-only">Salir</span>
               </button>
@@ -63,12 +91,7 @@ export default async function DashboardLayout({ children }: LayoutProps<'/dashbo
           </div>
         </header>
 
-        {/* Navegación compacta para móvil */}
-        <div className="border-b border-[var(--borde)] bg-white lg:hidden">
-          <NavLateral esAdmin={esAdmin(perfil)} />
-        </div>
-
-        <main className="flex-1 px-5 py-6 lg:px-8 lg:py-8">
+        <main className="flex-1 px-4 py-6 sm:px-5 lg:px-8 lg:py-8">
           <div className="mx-auto max-w-6xl">{children}</div>
         </main>
       </div>

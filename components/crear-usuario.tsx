@@ -4,7 +4,10 @@ import { useActionState } from 'react'
 import { useFormStatus } from 'react-dom'
 import { crearUsuario, type EstadoUsuario } from '@/app/dashboard/usuarios/acciones'
 import { IconoAlerta, IconoCheck, IconoMas } from '@/components/iconos'
-import { ORGANIZACIONES, ROLES, ROL_DESCRIPCION, type Rol } from '@/lib/types'
+import { NIVELES, type Nivel } from '@/lib/permisos'
+import { ORGANIZACIONES } from '@/lib/types'
+
+export type RolElegible = { id: string; clave: string; nombre: string; nivel: string; descripcion: string | null }
 
 function BotonCrear() {
   const { pending } = useFormStatus()
@@ -16,7 +19,7 @@ function BotonCrear() {
   )
 }
 
-export function CrearUsuario() {
+export function CrearUsuario({ roles }: { roles: RolElegible[] }) {
   const [estado, enviar] = useActionState<EstadoUsuario, FormData>(crearUsuario, {})
 
   return (
@@ -96,24 +99,29 @@ export function CrearUsuario() {
         </div>
 
         <div>
-          <label htmlFor="rol" className="etiqueta">
+          <label htmlFor="rol_id" className="etiqueta">
             Rol
           </label>
-          <select id="rol" name="rol" defaultValue="consultor" className="campo">
-            {Object.entries(ROLES).map(([k, v]) => (
-              <option key={k} value={k}>
-                {v}
+          <select
+            id="rol_id"
+            name="rol_id"
+            defaultValue={roles.find((r) => r.clave === 'consultor')?.id ?? roles[0]?.id}
+            className="campo"
+          >
+            {roles.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.nombre} · {NIVELES[r.nivel as Nivel] ?? r.nivel}
               </option>
             ))}
           </select>
         </div>
       </div>
 
+      {/* Qué da cada rol se decide en Roles y permisos; aquí solo se recuerda. */}
       <ul className="mt-4 space-y-1 border-t border-[var(--borde)] pt-4 text-xs text-marca-500">
-        {(Object.keys(ROLES) as Rol[]).map((r) => (
-          <li key={r}>
-            <span className="font-medium text-marca-700">{ROLES[r]}:</span>{' '}
-            {ROL_DESCRIPCION[r]}
+        {roles.map((r) => (
+          <li key={r.id}>
+            <span className="font-medium text-marca-700">{r.nombre}:</span> {r.descripcion ?? NIVELES[r.nivel as Nivel]}
           </li>
         ))}
       </ul>

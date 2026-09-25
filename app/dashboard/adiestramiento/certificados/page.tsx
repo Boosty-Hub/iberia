@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CertificadoHoja, fechaLarga } from '@/components/certificado-hoja'
-import { requerirEditor } from '@/lib/auth'
+import { requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = { title: 'Certificados' }
@@ -20,7 +20,7 @@ export const metadata: Metadata = { title: 'Certificados' }
  * el que queda.
  */
 export default async function CertificadosPage() {
-  await requerirEditor()
+  await requerirPermiso('modulo:certificados')
   const supabase = await createClient()
 
   const { data: certificados } = await supabase

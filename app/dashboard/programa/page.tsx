@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { EncabezadoPagina, Insignia, Metrica, type Tono } from '@/components/ui'
-import { esEditor, requerirSesion } from '@/lib/auth'
+import { esEditor, puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import {
   AVISO_RENOVACION,
@@ -244,8 +244,11 @@ function Hilo({ eventos, marcarRiesgo }: { eventos: Evento[]; marcarRiesgo: bool
 }
 
 export default async function ProgramaPage() {
-  const sesion = await requerirSesion()
-  const puedeEditar = esEditor(sesion.perfil)
+  const sesion = await requerirPermiso('modulo:programa')
+  const puedeCargar = puede(sesion, 'modulo:programa', 'crear')
+  // La marca «en riesgo» es juicio de seguimiento interno: la ve el equipo por su
+  // nivel, no por una casilla de la matriz. Iberia lee su programa sin ella.
+  const verRiesgo = esEditor(sesion.perfil)
   const supabase = await createClient()
 
   const [{ data: linea }, { data: registros }] = await Promise.all([
@@ -605,7 +608,7 @@ export default async function ProgramaPage() {
       </section>
 
       {/* --- Cargar horas · solo editores ------------------------------------ */}
-      {puedeEditar && (
+      {puedeCargar && (
         <section className="mb-10">
           <h2 className="mb-1 text-lg font-semibold text-marca-900">Cargar horas</h2>
           <p className="mb-4 text-sm text-marca-600">
@@ -627,7 +630,7 @@ export default async function ProgramaPage() {
           El calendario se adelantó un mes respecto de la propuesta, para que el Documento de
           Arquitectura esté sobre la mesa cuando Iberia decida la continuidad.
         </p>
-        <Hilo eventos={porVenir} marcarRiesgo={puedeEditar} />
+        <Hilo eventos={porVenir} marcarRiesgo={verRiesgo} />
       </section>
 
       <section className="mt-10">
@@ -637,7 +640,7 @@ export default async function ProgramaPage() {
           la primera. Cada entrevista, recorrido y formación queda registrada con su fecha y
           su duración.
         </p>
-        <Hilo eventos={hecho} marcarRiesgo={puedeEditar} />
+        <Hilo eventos={hecho} marcarRiesgo={verRiesgo} />
       </section>
 
       <p className="mt-10 text-xs text-marca-500">

@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { obtenerSesion } from '@/lib/auth'
+import { obtenerSesion, puede } from '@/lib/auth'
 import { BUCKET_ARCHIVOS } from '@/lib/storage'
 import { createClient } from '@/lib/supabase/server'
 
@@ -31,6 +31,10 @@ export async function GET(
   const sesion = await obtenerSesion()
   if (!sesion) {
     return NextResponse.json({ error: 'Sesión requerida' }, { status: 401 })
+  }
+  // Una ruta, no una página: sin permiso responde como sin sesión, con su código.
+  if (!puede(sesion, 'modulo:archivos')) {
+    return NextResponse.json({ error: 'Tu rol no tiene permiso para abrir archivos' }, { status: 403 })
   }
 
   const { id } = await params

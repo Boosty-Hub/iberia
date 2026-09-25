@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import guion from '@/contenido/adiestramiento/guion.json'
 import { CURSO } from '@/lib/adiestramiento'
-import { esEditor, obtenerSesion } from '@/lib/auth'
+import { obtenerSesion, puede } from '@/lib/auth'
 import { requerirEmpleado } from '@/lib/canal'
 import { turnoDelEjercicio, type LeccionGuion } from '@/lib/guion'
 import { BUCKET_RESPUESTAS } from '@/lib/storage'
@@ -282,7 +282,7 @@ export async function terminarLeccion(datos: FormData) {
 export async function reiniciarMiCurso() {
   const empleado = await requerirEmpleado()
   const sesion = await obtenerSesion()
-  if (!esEditor(sesion?.perfil)) {
+  if (!puede(sesion, 'modulo:adiestramiento', 'editar')) {
     return { error: 'Esto solo lo puede hacer el equipo de Boosty.' }
   }
 

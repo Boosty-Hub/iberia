@@ -2,13 +2,13 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ImportarEntrevistas } from '@/components/importar-entrevistas'
 import { EncabezadoPagina } from '@/components/ui'
-import { requerirEditor } from '@/lib/auth'
+import { requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = { title: 'Importar entrevistas' }
 
 export default async function ImportarEntrevistasPage() {
-  await requerirEditor()
+  await requerirPermiso('modulo:entrevistas', 'crear')
   const supabase = await createClient()
 
   const { data: areas } = await supabase.from('areas').select('id, nombre, slug, tipo').order('orden')

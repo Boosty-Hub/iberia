@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { CURSO } from '@/lib/adiestramiento'
 import { acunarToken, cuandoCaduca, enlaceDe, huella } from '@/lib/accesos'
-import { requerirEditor } from '@/lib/auth'
+import { requerirPermiso } from '@/lib/auth'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { aInternacional } from '@/lib/telefono'
 import { estaLista, mandarPlantilla, type Conexion } from '@/lib/whatsapp'
@@ -27,7 +27,7 @@ function marcados(datos: FormData): string[] {
  * conserva el oficio con el que se armaron sus ejercicios.
  */
 export async function matricularSeleccionados(datos: FormData) {
-  await requerirEditor()
+  await requerirPermiso('modulo:empleados', 'editar')
   const ids = marcados(datos)
   if (!ids.length) return
 
@@ -82,7 +82,7 @@ export async function matricularSeleccionados(datos: FormData) {
  * dejar fuera a quien todavía estaba usando el primero.
  */
 export async function acunarEnlaces(datos: FormData) {
-  await requerirEditor()
+  await requerirPermiso('modulo:empleados', 'editar')
   const ids = marcados(datos)
   if (!ids.length) return
 
@@ -118,6 +118,9 @@ export async function acunarEnlaces(datos: FormData) {
           cargo: persona.cargo,
           organizacion: 'iberia',
           rol: 'lector',
+          // Su rol propio: el canal y el curso, sin el panel ni el informe que ve
+          // la dirección de Iberia con el rol de lectura.
+          rol_clave: 'personal-planta',
         },
       })
 
@@ -155,7 +158,7 @@ export async function acunarEnlaces(datos: FormData) {
  * dos veces.
  */
 export async function mandarEnlaces(datos: FormData) {
-  await requerirEditor()
+  await requerirPermiso('modulo:empleados', 'editar')
   const ids = marcados(datos)
   if (!ids.length) return
 
@@ -205,7 +208,7 @@ export async function mandarEnlaces(datos: FormData) {
  * siendo la mejor vía para quien no abre mensajes de un número desconocido.
  */
 export async function marcarEnlacesMandados(datos: FormData) {
-  await requerirEditor()
+  await requerirPermiso('modulo:empleados', 'editar')
   const ids = marcados(datos)
   if (!ids.length) return
 

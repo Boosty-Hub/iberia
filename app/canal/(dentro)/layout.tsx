@@ -3,8 +3,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { IconoCampana } from '@/components/iconos'
 import { NavInferior } from '@/components/canal/nav-inferior'
+import { destinoInicial, obtenerSesion, puede } from '@/lib/auth'
 import { iniciales, requerirEmpleado } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
   title: { default: 'Iberia', template: '%s · Iberia' },
@@ -23,6 +25,15 @@ export const viewport: Viewport = {
 
 export default async function CanalLayout({ children }: LayoutProps<'/canal'>) {
   const empleado = await requerirEmpleado()
+
+  // Estar en el padrón no basta: el rol tiene que tener el canal. Sin él, a su
+  // destino inicial. `destinoInicial` solo devuelve '/canal' cuando el canal está
+  // permitido, así que esto no se cierra sobre sí mismo.
+  const sesion = await obtenerSesion()
+  if (!puede(sesion, 'modulo:canal')) {
+    const destino = sesion ? destinoInicial(sesion) : '/canal/entrar'
+    redirect(destino === '/canal' ? '/sin-acceso' : destino)
+  }
   const supabase = await createClient()
 
   // Los dos contadores de la cabecera y del pie. Se preguntan aquí una vez y

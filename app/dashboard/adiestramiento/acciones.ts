@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { CURSO } from '@/lib/adiestramiento'
-import { requerirEditor } from '@/lib/auth'
+import { requerirPermiso } from '@/lib/auth'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 
 /**
@@ -14,7 +14,7 @@ import { createAdminClient, createClient } from '@/lib/supabase/server'
  * el curso promete.
  */
 export async function guardarConfiguracion(datos: FormData) {
-  await requerirEditor()
+  await requerirPermiso('modulo:adiestramiento', 'editar')
   const supabase = await createClient()
 
   await supabase
@@ -40,7 +40,7 @@ export async function guardarConfiguracion(datos: FormData) {
  * una operación que deba poder disparar una sesión de navegador comprometida.
  */
 export async function matricularPendientes() {
-  await requerirEditor()
+  await requerirPermiso('modulo:adiestramiento', 'editar')
 
   const admin = createAdminClient()
   await admin.rpc('matricular_pendientes', { curso_clave: CURSO })

@@ -1525,6 +1525,7 @@ export type Database = {
           nombre_completo: string | null
           organizacion: string
           rol: string
+          rol_id: string
           updated_at: string
         }
         Insert: {
@@ -1536,6 +1537,7 @@ export type Database = {
           nombre_completo?: string | null
           organizacion?: string
           rol?: string
+          rol_id: string
           updated_at?: string
         }
         Update: {
@@ -1547,9 +1549,18 @@ export type Database = {
           nombre_completo?: string | null
           organizacion?: string
           rol?: string
+          rol_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_rol_id_fkey"
+            columns: ["rol_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       publicacion_lecturas: {
         Row: {
@@ -1967,6 +1978,74 @@ export type Database = {
           },
         ]
       }
+      rol_permisos: {
+        Row: {
+          crear: boolean
+          editar: boolean
+          eliminar: boolean
+          recurso: string
+          rol_id: string
+          ver: boolean
+        }
+        Insert: {
+          crear?: boolean
+          editar?: boolean
+          eliminar?: boolean
+          recurso: string
+          rol_id: string
+          ver?: boolean
+        }
+        Update: {
+          crear?: boolean
+          editar?: boolean
+          eliminar?: boolean
+          recurso?: string
+          rol_id?: string
+          ver?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rol_permisos_rol_id_fkey"
+            columns: ["rol_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roles: {
+        Row: {
+          clave: string
+          created_at: string
+          descripcion: string | null
+          id: string
+          nivel: string
+          nombre: string
+          sistema: boolean
+          updated_at: string
+        }
+        Insert: {
+          clave: string
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          nivel: string
+          nombre: string
+          sistema?: boolean
+          updated_at?: string
+        }
+        Update: {
+          clave?: string
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          nivel?: string
+          nombre?: string
+          sistema?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sesion_participantes: {
         Row: {
           created_at: string
@@ -2268,7 +2347,18 @@ export type Database = {
       mi_empleado: { Args: never; Returns: string }
       mi_matricula: { Args: { curso: string }; Returns: string }
       mi_rol: { Args: never; Returns: string }
+      mis_permisos: {
+        Args: never
+        Returns: {
+          crear: boolean
+          editar: boolean
+          eliminar: boolean
+          recurso: string
+          ver: boolean
+        }[]
+      }
       participo_en: { Args: { conv: string }; Returns: boolean }
+      puede: { Args: { p_accion: string; p_recurso: string }; Returns: boolean }
       puede_publicar: { Args: never; Returns: boolean }
       renombrar_hablante: {
         Args: { p_entrevista: string; p_etiqueta: string; p_nombre: string }

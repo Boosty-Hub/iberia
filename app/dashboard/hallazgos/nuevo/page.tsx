@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { FormularioHallazgo } from '@/components/formulario-hallazgo'
 import { EncabezadoPagina } from '@/components/ui'
-import { requerirEditor } from '@/lib/auth'
+import { requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { crearHallazgo } from '../acciones'
 
@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: 'Nuevo hallazgo' }
 export default async function NuevoHallazgoPage({
   searchParams,
 }: PageProps<'/dashboard/hallazgos/nuevo'>) {
-  await requerirEditor()
+  await requerirPermiso('modulo:hallazgos', 'crear')
   const params = await searchParams
   const supabase = await createClient()
 

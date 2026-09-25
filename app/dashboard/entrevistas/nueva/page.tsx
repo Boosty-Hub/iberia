@@ -1,14 +1,14 @@
 import type { Metadata } from 'next'
 import { FormularioEntrevista } from '@/components/formulario-entrevista'
 import { EncabezadoPagina } from '@/components/ui'
-import { requerirEditor } from '@/lib/auth'
+import { requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { crearEntrevista } from '../acciones'
 
 export const metadata: Metadata = { title: 'Nueva entrevista' }
 
 export default async function NuevaEntrevistaPage() {
-  await requerirEditor()
+  await requerirPermiso('modulo:entrevistas', 'crear')
   const supabase = await createClient()
 
   const { data: areas } = await supabase.from('areas').select('id, nombre, tipo').order('orden')

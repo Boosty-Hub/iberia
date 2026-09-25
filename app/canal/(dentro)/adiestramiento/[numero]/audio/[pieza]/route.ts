@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { CURSO } from '@/lib/adiestramiento'
+import { obtenerSesion, puede } from '@/lib/auth'
 import { empleadoActual } from '@/lib/canal'
 import { BUCKET_ADIESTRAMIENTO, rutaAudio } from '@/lib/storage'
 import { createClient } from '@/lib/supabase/server'
@@ -55,6 +56,12 @@ export async function GET(
 
   if (!matricula) {
     return NextResponse.json({ error: 'Sin matrícula en el curso' }, { status: 403 })
+  }
+
+  // Y la lección tiene que estar entre las que su rol ve (`leccion:N`): sin esto,
+  // una lección apagada en la matriz se seguiría bajando escribiendo la ruta.
+  if (!puede(await obtenerSesion(), `leccion:${numero}`)) {
+    return NextResponse.json({ error: 'Esa lección no está habilitada para tu rol' }, { status: 403 })
   }
 
   const { data, error } = await supabase.storage

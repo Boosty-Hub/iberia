@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { IconoAtras, IconoBasura, IconoNuevaPestana } from '@/components/iconos'
 import { EditorSeccion } from '@/components/editor-seccion'
 import { Insignia } from '@/components/ui'
-import { requerirEditor } from '@/lib/auth'
+import { puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { PARTES_INFORME, type ParteInforme } from '@/lib/types'
 import { actualizarSeccion, eliminarSeccion } from '../acciones'
@@ -26,8 +26,8 @@ export async function generateMetadata({
 export default async function EditarSeccionPage({
   params,
 }: PageProps<'/dashboard/informe/[slug]'>) {
-  await requerirEditor()
   const { slug } = await params
+  const sesion = await requerirPermiso(`informe:${slug}`, 'editar')
   const supabase = await createClient()
 
   const { data: seccion } = await supabase
@@ -75,6 +75,7 @@ export default async function EditarSeccionPage({
             {seccion.publicado ? 'Publicada' : 'Borrador'}
           </Insignia>
 
+          {puede(sesion, `informe:${seccion.slug}`, 'eliminar') && (
           <form action={eliminarSeccion}>
             <input type="hidden" name="id" value={seccion.id} />
             <button type="submit" className="btn-peligro">
@@ -82,6 +83,7 @@ export default async function EditarSeccionPage({
               Eliminar
             </button>
           </form>
+          )}
         </div>
       </div>
 

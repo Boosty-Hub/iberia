@@ -1,13 +1,13 @@
 import type { Metadata } from 'next'
 import { EditorSeccion } from '@/components/editor-seccion'
 import { EncabezadoPagina } from '@/components/ui'
-import { requerirEditor } from '@/lib/auth'
+import { requerirPermiso } from '@/lib/auth'
 import { crearSeccion } from '../acciones'
 
 export const metadata: Metadata = { title: 'Nueva sección' }
 
 export default async function NuevaSeccionPage() {
-  await requerirEditor()
+  await requerirPermiso('modulo:informe', 'crear')
 
   return (
     <>

@@ -153,8 +153,15 @@ body {
    Prosa del informe — se usa en la página del informe y en las vistas previas
    -------------------------------------------------------------------------- */
 
+/* 16 px en teléfono y 17 en escritorio, con 1,75 de interlineado: a 15 px y
+   28 de interlínea el texto se leía chico y suelto, como una lista de renglones.
+   Las anclas se corren lo que mide la cabecera fija (60 px) y un respiro: sin
+   eso, saltar a un encabezado lo dejaba escondido debajo de ella. */
 .prosa {
-  @apply text-[15px] leading-7 text-marca-700;
+  @apply text-base leading-[1.75] text-marca-700 lg:text-[17px];
+}
+.prosa :is(h1, h2, h3, h4) {
+  scroll-margin-top: 88px;
 }
 .prosa > * + * {
   @apply mt-4;
@@ -163,7 +170,10 @@ body {
   @apply mt-0 text-2xl font-bold text-marca-900;
 }
 .prosa h2 {
-  @apply mt-8 text-xl font-bold text-marca-900;
+  @apply mt-12 text-[1.375rem] leading-snug font-bold tracking-tight text-balance text-marca-900;
+}
+.prosa > h2:first-child {
+  @apply mt-0;
 }
 /* La escalera saltaba de `xl` a `base`, así que un h3 se veía igual que el
    `**negrita**` de un párrafo: en las veinte fichas de proceso el título de la
@@ -225,10 +235,25 @@ body {
   @apply my-8 border-[var(--borde)];
 }
 
-/* Tabla del informe: nunca desborda el ancho de la página. */
+/* Tabla del informe: nunca desborda el ancho de la página. Cuando se desliza,
+   una sombra en el borde avisa que hay más: sin ella, en el teléfono una tabla
+   cortada a la mitad parecía completa. Las sombras van con `background-attachment`
+   `local`/`scroll`, sin JavaScript. */
 .prosa .tabla-scroll,
 .tabla-scroll {
   @apply overflow-x-auto;
+  background:
+    linear-gradient(to right, #fff 30%, rgb(255 255 255 / 0)) left / 24px 100% no-repeat local,
+    linear-gradient(to left, #fff 30%, rgb(255 255 255 / 0)) right / 24px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgb(38 33 30 / 0.14), transparent) left / 10px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgb(38 33 30 / 0.14), transparent) right / 10px 100% no-repeat scroll;
+}
+/* En teléfono, cada columna guarda un ancho mínimo: una tabla de seis columnas
+   en 350 px partía cada celda en una palabra por renglón. Mejor deslizar. */
+@media (max-width: 639px) {
+  .prosa :is(th, td) {
+    min-width: 8.5rem;
+  }
 }
 
 /* -----------------------------------------------------------------------------
@@ -845,7 +870,7 @@ body {
 .circ .atenuado { opacity: 0.22; }
 
 /* --- La escena del espejo ---------------------------------------------------- */
-.circ-escena { min-width: 900px !important; }
+.circ-escena { min-width: 1000px !important; }
 .circ-panel-jd { fill: var(--c-tinta); }
 .circ-t-jd-titulo { fill: #f6f7f9; font-size: 16px; font-weight: 700; }
 .circ-t-jd { fill: #b8b3b1; font-size: 11.5px; }
@@ -964,6 +989,226 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .circ-punto, .circ-item, .circ-modulo { transition: none; }
   .circ-viga, .circ-haz { animation: none; }
+}
+
+/* -----------------------------------------------------------------------------
+   Informe · la cáscara de lectura
+   La hoja, el índice de la sección (en su columna o plegado), las secciones
+   contiguas y el índice del documento en teléfono. Medidas en la cabecera de
+   app/informe/[slug]/page.tsx.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.informe-cascara) {
+    scroll-behavior: smooth;
+  }
+}
+
+/* En teléfono la hoja va de borde a borde, sin tarjeta: el margen y el borde
+   de una tarjeta se comían 40 px de un ancho que no sobra. */
+.hoja-informe {
+  @apply bg-white px-5 py-8 sm:rounded-2xl sm:border sm:border-[var(--borde)] sm:px-8 sm:py-10 lg:px-12 lg:py-12;
+}
+@media (min-width: 640px) {
+  .hoja-informe {
+    box-shadow: var(--sombra-tarjeta);
+  }
+}
+
+/* Las tarjetas del contenido en la portada: todas del mismo alto por fila, con
+   el número arriba, para que la rejilla se lea como un índice y no como un
+   mosaico. */
+.tarjeta-seccion {
+  @apply flex h-full flex-col rounded-2xl border border-[var(--borde)] bg-white px-5 py-4
+         transition-colors hover:border-acento-300;
+  box-shadow: var(--sombra-tarjeta);
+}
+
+.migas-enlace {
+  @apply inline-flex min-h-8 items-center rounded-md px-1 text-marca-500 transition-colors hover:text-acento-700;
+}
+
+.contigua {
+  @apply flex min-h-16 flex-col justify-center gap-1 rounded-xl border border-[var(--borde)] px-4 py-3
+         transition-colors hover:border-acento-300 hover:bg-acento-50/40;
+}
+.contigua-titulo {
+  @apply flex items-baseline gap-2 text-sm font-semibold text-marca-800;
+}
+
+.indice-seccion-titulo {
+  @apply mb-3 text-[11px] font-semibold tracking-[0.12em] text-marca-400 uppercase;
+}
+.indice-seccion-lista {
+  @apply space-y-0.5 border-l border-[var(--borde)];
+}
+.indice-seccion-enlace {
+  @apply -ml-px block border-l-2 border-transparent py-1.5 pl-3 text-[13px] leading-snug text-marca-500
+         transition-colors hover:border-marca-300 hover:text-acento-700;
+}
+.indice-seccion-enlace.activo {
+  @apply border-acento-500 font-semibold text-acento-700;
+}
+
+.indice-seccion-plegado {
+  @apply rounded-xl border border-[var(--borde)] bg-[var(--fondo)];
+}
+.indice-seccion-plegado > summary {
+  @apply flex min-h-12 cursor-pointer list-none items-center gap-2.5 px-4 text-sm font-semibold text-marca-800;
+}
+.indice-seccion-plegado > summary::-webkit-details-marker {
+  display: none;
+}
+.indice-seccion-plegado > summary::after {
+  content: '';
+  @apply h-2 w-2 shrink-0 rotate-45 border-r-2 border-b-2 border-marca-400 transition-transform duration-150;
+}
+.indice-seccion-plegado[open] > summary::after {
+  @apply -rotate-[135deg];
+}
+.indice-seccion-plegado nav {
+  @apply border-t border-[var(--borde)] px-2 py-2;
+}
+.indice-seccion-plegado .indice-seccion-lista {
+  @apply border-l-0;
+}
+.indice-seccion-plegado .indice-seccion-enlace {
+  @apply ml-0 flex min-h-11 items-center rounded-lg border-l-0 px-3 text-sm hover:bg-white;
+}
+.indice-seccion-cuenta {
+  @apply rounded-full bg-white px-2 py-0.5 font-mono text-xs font-normal text-marca-500;
+}
+
+/* La navegación de teléfono (informe y panel): un panel que entra por la izquierda. */
+.menu-movil {
+  position: fixed;
+  inset: 0 auto 0 0;
+  margin: 0;
+  width: min(88vw, 340px);
+  height: 100dvh;
+  max-height: 100dvh;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.menu-movil::backdrop {
+  background: rgb(38 33 30 / 0.4);
+}
+.menu-movil-panel {
+  @apply flex h-full flex-col bg-white;
+  box-shadow: 0 10px 40px rgb(38 33 30 / 0.25);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .menu-movil[open] .menu-movil-panel {
+    animation: menu-entra 180ms ease-out;
+  }
+}
+@keyframes menu-entra {
+  from {
+    transform: translateX(-24px);
+    opacity: 0;
+  }
+}
+
+/* Los mandos de los circuitos, al alcance del dedo: en pantalla táctil los
+   chips medían 29 px. */
+/* En el panel del teléfono, cada destino del índice mide 40 px de alto. */
+.menu-movil nav a {
+  min-height: 2.5rem;
+  align-items: center;
+}
+
+@media (pointer: coarse) {
+  .circ-chip,
+  .circ-pestana,
+  .circ-ir,
+  .plegable-mandos button {
+    min-height: 40px;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   Roles y permisos · la matriz
+   Filas por recurso y columnas por acción. La casilla va dentro de una etiqueta
+   de 44 px: en el teléfono se marca con el dedo, no con el cursor.
+   -------------------------------------------------------------------------- */
+
+.tarjeta-rol {
+  @apply flex h-full flex-col rounded-2xl border border-[var(--borde)] bg-white p-5 transition-colors
+         hover:border-acento-300;
+  box-shadow: var(--sombra-tarjeta);
+}
+
+.nivel-opcion {
+  @apply flex cursor-pointer items-start gap-2.5 rounded-xl border border-[var(--borde)] bg-white px-3.5 py-3
+         transition-colors hover:border-acento-300;
+}
+.nivel-opcion:has(input:checked) {
+  @apply border-acento-400 bg-acento-50/50;
+}
+fieldset:disabled .nivel-opcion {
+  @apply cursor-not-allowed opacity-60 hover:border-[var(--borde)];
+}
+
+.matriz-herramientas {
+  @apply mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between;
+}
+.matriz-aviso {
+  @apply mb-4 flex items-start gap-2 rounded-xl border border-[var(--borde)] bg-[var(--fondo)] px-4 py-3 text-sm
+         text-pretty text-marca-600;
+}
+.matriz-grupo {
+  @apply mb-5 overflow-hidden rounded-2xl border border-[var(--borde)] bg-white;
+  box-shadow: var(--sombra-tarjeta);
+}
+.matriz-tabla {
+  @apply w-full border-collapse text-sm;
+}
+.matriz-tabla thead {
+  @apply border-b border-[var(--borde)] bg-[var(--fondo)];
+}
+/* En el teléfono las cuatro columnas caben en 358 px sin deslizar: 8 rem para
+   el nombre y 52 px por acción, que siguen dejando los 44 px de la casilla. */
+.matriz-recurso-th {
+  @apply min-w-32 px-3 py-3 text-left align-bottom sm:min-w-44 sm:px-5;
+}
+.matriz-accion-th {
+  @apply w-[3.25rem] px-0.5 py-3 text-center align-bottom text-[10px] font-semibold text-marca-500 uppercase
+         sm:w-20 sm:px-1 sm:text-[11px] sm:tracking-wide;
+}
+.matriz-tabla tbody tr {
+  @apply border-b border-[var(--borde)] last:border-b-0;
+}
+.matriz-tabla tbody tr:hover {
+  @apply bg-[var(--fondo)];
+}
+.matriz-recurso {
+  @apply px-3 py-2.5 text-left align-middle font-normal sm:px-5;
+}
+.matriz-celda {
+  @apply px-1 text-center align-middle;
+}
+/* Lo que cambió y todavía no se guarda, con un fondo ámbar tenue: el mismo
+   tono del resaltado de búsqueda, para no leerse como error. */
+.matriz-celda.cambiada {
+  @apply bg-amber-50;
+}
+.matriz-toque {
+  @apply mx-auto flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg hover:bg-marca-100;
+}
+.matriz-check {
+  @apply h-[18px] w-[18px] cursor-pointer;
+  accent-color: var(--color-acento-600);
+}
+
+/* La barra de guardar se pega abajo cuando hay algo que guardar o que contar. */
+.matriz-barra {
+  @apply sticky bottom-3 z-20 mt-2 hidden flex-wrap items-center gap-3 rounded-2xl border border-[var(--borde)]
+         bg-white/95 px-4 py-3 backdrop-blur;
+  box-shadow: 0 8px 30px rgb(38 33 30 / 0.12);
+}
+.matriz-barra.visible {
+  @apply flex;
 }
 
 @media print {

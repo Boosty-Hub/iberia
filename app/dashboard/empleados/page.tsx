@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { EncabezadoPagina, EstadoVacio, Insignia, Metrica } from '@/components/ui'
 import { TablaPadron } from '@/components/padron/tabla-padron'
 import { FAMILIAS_OFICIO, type FamiliaOficio } from '@/lib/adiestramiento'
-import { requerirEditor } from '@/lib/auth'
+import { requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { estaLista, type Conexion } from '@/lib/whatsapp'
 import { comoSeLee } from '@/lib/telefono'
@@ -31,7 +31,9 @@ export const metadata: Metadata = { title: 'Empleados' }
 export default async function EmpleadosPage({
   searchParams,
 }: PageProps<'/dashboard/empleados'>) {
-  await requerirEditor()
+  // La tabla es el padrón de trabajo —teléfonos, enlaces, matrícula— y su vista
+  // solo responde a editores: se abre con «editar», que es lo que se hace aquí.
+  await requerirPermiso('modulo:empleados', 'editar')
   const filtros = await searchParams
   const supabase = await createClient()
 

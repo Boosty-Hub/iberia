@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { requerirEditor } from '@/lib/auth'
+import { requerirPermiso } from '@/lib/auth'
 import { BUCKET_ARCHIVOS } from '@/lib/storage'
 import { createClient } from '@/lib/supabase/server'
 import { CATEGORIAS_ARCHIVO, type CategoriaArchivo } from '@/lib/types'
@@ -26,7 +26,7 @@ export async function registrarArchivo(entrada: {
   fase?: number | null
   confidencial?: boolean
 }): Promise<ResultadoArchivo> {
-  const { userId } = await requerirEditor()
+  const { userId } = await requerirPermiso('modulo:archivos', 'crear')
   const supabase = await createClient()
 
   const nombre = entrada.nombre?.trim()
@@ -85,14 +85,14 @@ export async function registrarArchivo(entrada: {
  * almacenamiento.
  */
 export async function descartarSubida(storagePath: string): Promise<void> {
-  await requerirEditor()
+  await requerirPermiso('modulo:archivos', 'crear')
   if (!storagePath) return
   const supabase = await createClient()
   await supabase.storage.from(BUCKET_ARCHIVOS).remove([storagePath])
 }
 
 export async function eliminarArchivo(fd: FormData) {
-  await requerirEditor()
+  await requerirPermiso('modulo:archivos', 'eliminar')
   const supabase = await createClient()
 
   const id = String(fd.get('id') ?? '')

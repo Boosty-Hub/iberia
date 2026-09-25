@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { IconoEditar, IconoMas, IconoNuevaPestana, IconoVerInforme } from '@/components/iconos'
 import { EncabezadoPagina, Insignia } from '@/components/ui'
-import { esEditor, requerirSesion } from '@/lib/auth'
+import { esEditor, puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { formatFecha } from '@/lib/utils'
 import { PARTES_INFORME, PARTES_INFORME_ORDEN, type ParteInforme } from '@/lib/types'
@@ -11,8 +11,11 @@ import { alternarPublicacion } from './acciones'
 export const metadata: Metadata = { title: 'Editor del informe' }
 
 export default async function EditorInformePage() {
-  const { perfil } = await requerirSesion()
-  const puedeEditar = esEditor(perfil)
+  const sesion = await requerirPermiso('modulo:informe')
+  // Quien escribe es del equipo; qué sección puede tocar lo dice su matriz.
+  const quienEscribe = esEditor(sesion.perfil)
+  const puedeCrear = quienEscribe && puede(sesion, 'modulo:informe', 'crear')
+  const puedeEditar = (slug: string) => quienEscribe && puede(sesion, `informe:${slug}`, 'editar')
   const supabase = await createClient()
 
   const { data: secciones } = await supabase
@@ -20,7 +23,7 @@ export default async function EditorInformePage() {
     .select('id, slug, numero, titulo, subtitulo, parte, orden, publicado, contenido_md, updated_at')
     .order('orden')
 
-  const todas = secciones ?? []
+  const todas = (secciones ?? []).filter((s) => puede(sesion, `informe:${s.slug}`))
   const publicadas = todas.filter((s) => s.publicado).length
   const conContenido = todas.filter((s) => s.contenido_md?.trim()).length
 
@@ -38,7 +41,7 @@ export default async function EditorInformePage() {
               <IconoNuevaPestana className="h-3.5 w-3.5 text-marca-400" />
               <span className="sr-only">(abre en otra pestaña)</span>
             </Link>
-            {puedeEditar && (
+            {puedeCrear && (
               <Link href="/dashboard/informe/nueva" className="btn-acento">
                 <IconoMas className="h-4 w-4" />
                 Nueva sección
@@ -100,7 +103,7 @@ export default async function EditorInformePage() {
                         <Insignia tono="ambar">Borrador</Insignia>
                       )}
 
-                      {puedeEditar && (
+                      {puedeEditar(s.slug) && (
                         <>
                           <form action={alternarPublicacion}>
                             <input type="hidden" name="id" value={s.id} />

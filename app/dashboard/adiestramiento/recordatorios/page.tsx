@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { EncabezadoPagina, EstadoVacio, Insignia, Metrica } from '@/components/ui'
 import { CopiarMensaje } from '@/components/copiar-mensaje'
 import { CURSO } from '@/lib/adiestramiento'
-import { esAdmin, requerirEditor } from '@/lib/auth'
+import { esAdmin, requerirPermiso } from '@/lib/auth'
 import { escalera } from '@/lib/recordatorios'
 import { createClient } from '@/lib/supabase/server'
 import { estaLista, type Conexion } from '@/lib/whatsapp'
@@ -27,7 +27,7 @@ export const metadata: Metadata = { title: 'Recordatorios' }
  * se copian y alguien los manda desde su teléfono.
  */
 export default async function RecordatoriosPage() {
-  const { perfil } = await requerirEditor()
+  const { perfil } = await requerirPermiso('modulo:recordatorios', 'editar')
   const puedeConfigurar = esAdmin(perfil)
   const supabase = await createClient()
 

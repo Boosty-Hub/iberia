@@ -9,15 +9,15 @@ import {
   FAMILIAS_ORDEN,
   type FamiliaOficio,
 } from '@/lib/adiestramiento'
-import { esEditor, requerirSesion } from '@/lib/auth'
+import { puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { guardarConfiguracion, matricularPendientes } from './acciones'
 
 export const metadata: Metadata = { title: 'Adiestramiento' }
 
 export default async function AdiestramientoAdminPage() {
-  const { perfil } = await requerirSesion()
-  const puedeEditar = esEditor(perfil)
+  const sesion = await requerirPermiso('modulo:adiestramiento')
+  const puedeEditar = puede(sesion, 'modulo:adiestramiento', 'editar')
   const supabase = await createClient()
 
   const { data: curso } = await supabase
@@ -115,12 +115,17 @@ export default async function AdiestramientoAdminPage() {
                 ? 'Asistente libre encendido'
                 : 'Asistente libre apagado'}
             </Insignia>
-            <Link href="/dashboard/adiestramiento/recordatorios" className="btn-neutro">
-              El empujón
-            </Link>
-            <Link href="/dashboard/adiestramiento/certificados" className="btn-neutro">
-              Certificados
-            </Link>
+            {/* Cada botón, si el rol abre esa pantalla: el empujón se abre con «editar». */}
+            {puede(sesion, 'modulo:recordatorios', 'editar') && (
+              <Link href="/dashboard/adiestramiento/recordatorios" className="btn-neutro">
+                El empujón
+              </Link>
+            )}
+            {puede(sesion, 'modulo:certificados') && (
+              <Link href="/dashboard/adiestramiento/certificados" className="btn-neutro">
+                Certificados
+              </Link>
+            )}
           </div>
         }
       />

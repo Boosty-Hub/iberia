@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { requerirSesion } from '@/lib/auth'
+import { puede, requerirPermiso } from '@/lib/auth'
 import { Aviso, EncabezadoPagina, Insignia, Metrica } from '@/components/ui'
 import { IconoNuevaPestana } from '@/components/iconos'
 import { formatFecha, nombreSesion } from '@/lib/utils'
@@ -23,8 +23,17 @@ const TONO_ESTADO: Record<EstadoEntrevista, 'neutro' | 'ambar' | 'marca' | 'verd
 }
 
 export default async function PanelPage({ searchParams }: PageProps<'/dashboard'>) {
-  const [{ perfil }, params] = await Promise.all([requerirSesion(), searchParams])
+  const [sesion, params] = await Promise.all([requerirPermiso('modulo:panel'), searchParams])
+  const { perfil } = sesion
   const supabase = await createClient()
+
+  // El panel resume los módulos; cada bloque sale solo si el rol puede abrir el
+  // módulo al que lleva. Un enlace a una pantalla prohibida es un aviso seguro.
+  const verEntrevistas = puede(sesion, 'modulo:entrevistas')
+  const crearEntrevistas = puede(sesion, 'modulo:entrevistas', 'crear')
+  const verHallazgos = puede(sesion, 'modulo:hallazgos')
+  const verArchivos = puede(sesion, 'modulo:archivos')
+  const verEditorInforme = puede(sesion, 'modulo:informe')
 
   const [entrevistasRes, hallazgosRes, archivosRes, seccionesRes] = await Promise.all([
     supabase
@@ -75,6 +84,12 @@ export default async function PanelPage({ searchParams }: PageProps<'/dashboard'
           Esa sección es exclusiva de los administradores del programa.
         </Aviso>
       )}
+      {aviso === 'sin-permiso' && (
+        <Aviso tono="ambar">
+          Tu rol no tiene permiso para abrir esa pantalla. Si lo necesitas, pídeselo a un
+          administrador del programa.
+        </Aviso>
+      )}
 
       <EncabezadoPagina
         rotulo="Fase 1 · Entender"
@@ -82,33 +97,44 @@ export default async function PanelPage({ searchParams }: PageProps<'/dashboard'
         descripcion="Estado del diagnóstico y del levantamiento de procesos que alimenta el Documento de Arquitectura de IA."
       />
 
+      {(verEntrevistas || verHallazgos || verArchivos) && (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Metrica
-          valor={entrevistas.length}
-          sufijo={`de ~${META_ENTREVISTAS}`}
-          etiqueta="Entrevistas registradas"
-          href="/dashboard/entrevistas"
-        />
-        <Metrica
-          valor={otrasSesiones.length}
-          sufijo={transcritas > 0 ? `${transcritas} transcritas` : undefined}
-          etiqueta="Reuniones y visitas"
-          href="/dashboard/entrevistas?tipo=reunion"
-        />
-        <Metrica
-          valor={hallazgos.length}
-          sufijo={hallazgosValidados > 0 ? `${hallazgosValidados} validados` : undefined}
-          etiqueta="Hallazgos"
-          href="/dashboard/hallazgos"
-        />
-        <Metrica
-          valor={archivosRes.count ?? 0}
-          etiqueta="Archivos"
-          href="/dashboard/archivos"
-        />
+        {verEntrevistas && (
+          <Metrica
+            valor={entrevistas.length}
+            sufijo={`de ~${META_ENTREVISTAS}`}
+            etiqueta="Entrevistas registradas"
+            href="/dashboard/entrevistas"
+          />
+        )}
+        {verEntrevistas && (
+          <Metrica
+            valor={otrasSesiones.length}
+            sufijo={transcritas > 0 ? `${transcritas} transcritas` : undefined}
+            etiqueta="Reuniones y visitas"
+            href="/dashboard/entrevistas?tipo=reunion"
+          />
+        )}
+        {verHallazgos && (
+          <Metrica
+            valor={hallazgos.length}
+            sufijo={hallazgosValidados > 0 ? `${hallazgosValidados} validados` : undefined}
+            etiqueta="Hallazgos"
+            href="/dashboard/hallazgos"
+          />
+        )}
+        {verArchivos && (
+          <Metrica
+            valor={archivosRes.count ?? 0}
+            etiqueta="Archivos"
+            href="/dashboard/archivos"
+          />
+        )}
       </div>
+      )}
 
       {/* Avance de la Corriente B */}
+      {verEntrevistas && (
       <section className="tarjeta mt-6 p-5">
         <div className="mb-4 flex items-baseline justify-between gap-4">
           <h2 className="text-sm font-semibold text-marca-800">
@@ -144,9 +170,11 @@ export default async function PanelPage({ searchParams }: PageProps<'/dashboard'
           ))}
         </dl>
       </section>
+      )}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         {/* Últimas sesiones */}
+        {verEntrevistas && (
         <section className="tarjeta lg:col-span-2">
           <div className="flex items-baseline justify-between gap-4 border-b border-[var(--borde)] px-5 py-3.5">
             <h2 className="text-sm font-semibold text-marca-800">Últimas sesiones</h2>
@@ -160,14 +188,19 @@ export default async function PanelPage({ searchParams }: PageProps<'/dashboard'
 
           {sesiones.length === 0 ? (
             <p className="px-5 py-8 text-center text-sm text-marca-500">
-              Todavía no hay entrevistas registradas.{' '}
-              <Link
-                href="/dashboard/entrevistas/nueva"
-                className="font-medium text-acento-700 hover:underline"
-              >
-                Registrar la primera
-              </Link>
-              .
+              Todavía no hay entrevistas registradas.
+              {crearEntrevistas && (
+                <>
+                  {' '}
+                  <Link
+                    href="/dashboard/entrevistas/nueva"
+                    className="font-medium text-acento-700 hover:underline"
+                  >
+                    Registrar la primera
+                  </Link>
+                  .
+                </>
+              )}
             </p>
           ) : (
             <ul className="divide-y divide-[var(--borde)]">
@@ -206,17 +239,20 @@ export default async function PanelPage({ searchParams }: PageProps<'/dashboard'
             </ul>
           )}
         </section>
+        )}
 
         {/* Estado del informe */}
         <section className="tarjeta">
           <div className="flex items-baseline justify-between gap-4 border-b border-[var(--borde)] px-5 py-3.5">
             <h2 className="text-sm font-semibold text-marca-800">Informe</h2>
-            <Link
-              href="/dashboard/informe"
-              className="text-xs font-medium text-acento-700 hover:underline"
-            >
-              Editar
-            </Link>
+            {verEditorInforme && (
+              <Link
+                href="/dashboard/informe"
+                className="text-xs font-medium text-acento-700 hover:underline"
+              >
+                Editar
+              </Link>
+            )}
           </div>
           <div className="px-5 py-4">
             <p className="flex items-baseline gap-1.5">
