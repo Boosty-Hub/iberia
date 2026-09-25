@@ -156,6 +156,10 @@ const RELACIONES = {
   recordatorios_pendientes: 'matricula_id, dias, ultimo_escalon, lecciones_hechas',
   accesos_estado: 'id, empleado_id, motivo, enviado_en, usos, vigente',
   padron_estado: 'id, nombre_completo, telefono, matricula_id, acceso_expira, acceso_usos',
+  // Los circuitos del informe: los dibujos de las secciones 9 y 11 leen de aquí.
+  informe_circuito_puntos: 'id, circuito, numero, titulo, fase, tipo, destapes, pos_x, pos_y',
+  informe_modulos: 'id, numero, ola, nombre, titulo, cubre, lee, postea, destapa, pos_x',
+  informe_circuito_textos: 'clave, contenido',
 }
 
 for (const [relacion, columnas] of Object.entries(RELACIONES)) {
@@ -227,6 +231,10 @@ const NUEVAS = [
   'recordatorios',
   'ajustes_whatsapp',
   'accesos',
+  // Material de Iberia bajo NDA, como el resto del informe.
+  'informe_circuito_puntos',
+  'informe_modulos',
+  'informe_circuito_textos',
 ]
 
 {

@@ -87,12 +87,23 @@ const SECCIONES = [
   ['levantamiento', 'hallazgos', 'Los hallazgos', 'Los siete patrones del diagnóstico, y los cuarenta y dos hallazgos que los sostienen'],
 
   // --- Arquitectura ----------------------------------------------------------
-  // Primero qué se puede hacer y qué no, después con qué reglas, y solo entonces
-  // el plano. Al revés, el plano parece la respuesta antes de la pregunta.
+  // Rehecha el 24 de septiembre de 2026, con Gabriel. Primero los circuitos
+  // —dónde espera el trabajo y por dónde viaja el dato—, después qué se puede
+  // hacer, y el plano al final: el sistema Iberia como espejo de JD y la ruta
+  // para construirlo.
+  //
+  // ⚠️ **`circuitos`, `arquitectura-ia` y `hoja-de-ruta` NO se generan.** Su
+  // prosa se escribe en Supabase y el editor manda: este script solo les pone
+  // título, número y orden. Por eso no están en `GENERADAS`. Los dibujos de
+  // circuitos salen de sus propias tablas (`sembrar:circuitos`).
+  //
+  // «Dónde no va la IA» salió como sección: lo que prometía —decir dónde
+  // interviene la IA y dónde no— ahora lo dice cada módulo del sistema Iberia,
+  // capacidad por capacidad.
+  ['arquitectura', 'circuitos', 'Los circuitos del negocio', 'Dónde espera el trabajo y por dónde viaja el dato'],
   ['arquitectura', 'oportunidades', 'Las oportunidades, priorizadas', 'Impacto, costo, dependencias y disponibilidad del dato'],
-  ['arquitectura', 'donde-no-va-la-ia', 'Dónde no va la IA', 'Lo que se resuelve sin un modelo, y por qué decirlo importa'],
-  ['arquitectura', 'arquitectura-ia', 'La arquitectura propuesta', 'El plano completo: capas, flujos de datos y conexiones al núcleo'],
-  ['arquitectura', 'hoja-de-ruta', 'Hoja de ruta', 'Fases siguientes: secuencia, dependencias y puntos de control'],
+  ['arquitectura', 'arquitectura-ia', 'La arquitectura de IA: el sistema Iberia', 'El espejo de JD, sus módulos, dónde opera la IA y la tecnología que lo sostiene'],
+  ['arquitectura', 'hoja-de-ruta', 'La ruta de construcción', 'Paso a paso y por olas: qué necesita cada paso y cómo se sabe que funcionó'],
 ]
 
 /**
@@ -2788,9 +2799,9 @@ const GENERADAS = {
   hallazgos: losHallazgos,
   'fichas-procesos': fichasDeProceso,
   'sistemas-datos': sistemasYDato,
-  'donde-no-va-la-ia': dondeNoVaLaIA,
-  'arquitectura-ia': laArquitectura,
-  'hoja-de-ruta': laHojaDeRuta,
+  // `arquitectura-ia` y `hoja-de-ruta` salieron el 24/9: se escriben en
+  // Supabase (ver la nota en SECCIONES). `donde-no-va-la-ia` ya no es sección.
+  // Sus generadoras quedan escritas arriba, desconectadas, como las demás.
   'riesgo-continuidad': riesgoYContinuidad,
   trabas: dondeSeTraba,
 }

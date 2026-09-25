@@ -180,6 +180,27 @@ try {
   )
 }
 
+// --- Los circuitos -------------------------------------------------------------
+//
+// Los dibujos de «Los circuitos del negocio» y de «La arquitectura de IA» no
+// viven en `informe_secciones`: tienen sus tres tablas, sembradas desde
+// `contenido/circuitos/circuitos.json`. Van las filas y el taller, por lo mismo
+// que arriba: el taller no está en git y esta copia es su único historial.
+let circuitos = 'no'
+try {
+  const volcado = {}
+  for (const tabla of ['informe_circuito_puntos', 'informe_modulos', 'informe_circuito_textos']) {
+    const { data, error: e } = await admin.from(tabla).select('*')
+    if (e) throw new Error(`${tabla}: ${e.message}`)
+    volcado[tabla] = data
+  }
+  await writeFile(join(SALIDA, 'circuitos.json'), JSON.stringify(volcado, null, 2), 'utf8')
+  await cp(join('contenido', 'circuitos'), join(SALIDA, 'taller-circuitos'), { recursive: true })
+  circuitos = `${volcado.informe_circuito_puntos.length} puntos · ${volcado.informe_modulos.length} módulos`
+} catch (e) {
+  console.warn('  ⚠️ No se pudieron respaldar los circuitos: ' + e.message.slice(0, 120))
+}
+
 // --- El expediente de trazabilidad ------------------------------------------
 //
 // ⚠️ **Desde que el informe va sin citas, sin códigos y sin nombres, el
@@ -203,6 +224,7 @@ try {
 console.log(`\nRespaldo en ${SALIDA}`)
 console.log(`  ${secciones.length} secciones · ${conTexto.length} con texto · ${caracteres.toLocaleString('es-VE')} caracteres`)
 console.log(`  informe.json · informe-completo.md · secciones/ · taller/ (${archivosTaller} json) · expediente/ (${expediente})`)
+console.log(`  circuitos.json · taller-circuitos/ (${circuitos})`)
 console.log('\nSecciones con texto:')
 for (const s of conTexto) {
   console.log(`  ${String(s.numero ?? '').padStart(2)} · ${String(s.contenido_md.length).padStart(6)}c · ${s.titulo}`)

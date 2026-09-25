@@ -1,6 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import {
+  CircuitosDelNegocio,
+  EspejoIberia,
+  type ModuloIberia,
+  type PuntoCircuito,
+  type TextosCircuitos,
+} from '@/components/circuitos-informe'
 import { Markdown } from '@/components/markdown'
 import { MarkdownPlegable } from '@/components/markdown-plegable'
 import { Insignia } from '@/components/ui'
@@ -24,6 +31,32 @@ import { PARTES_INFORME, type ParteInforme } from '@/lib/types'
  * otra sección crece hasta ahí, se añade su slug y ya.
  */
 const PLEGABLES = new Set(['fichas-procesos'])
+
+/**
+ * Las secciones que llevan una vista interactiva de los circuitos arriba de su
+ * prosa. Van por slug por lo mismo que `PLEGABLES`: enseñar el dibujo es una
+ * decisión de esta página. Y van más anchas: el anillo mide 1080 de ancho y a
+ * la medida de lectura del resto se volvería ilegible.
+ */
+const CON_CIRCUITOS = new Set(['circuitos', 'arquitectura-ia'])
+
+/**
+ * El contenido de los circuitos sale de la base, no del código: el repositorio
+ * es público y los textos son de Iberia. Lo siembra `sembrar:circuitos`.
+ */
+async function leerCircuitos() {
+  const supabase = await createClient()
+  const [{ data: puntos }, { data: modulos }, { data: textos }] = await Promise.all([
+    supabase.from('informe_circuito_puntos').select('*').order('numero'),
+    supabase.from('informe_modulos').select('*').order('numero'),
+    supabase.from('informe_circuito_textos').select('clave, contenido'),
+  ])
+  return {
+    puntos: (puntos ?? []) as unknown as PuntoCircuito[],
+    modulos: (modulos ?? []) as unknown as ModuloIberia[],
+    textos: Object.fromEntries((textos ?? []).map((t) => [t.clave, t.contenido])) as TextosCircuitos,
+  }
+}
 
 /** Las secciones que el usuario puede ver, ya filtradas por RLS. */
 async function leerSecciones() {
@@ -57,8 +90,8 @@ export async function generateMetadata({
   }
 }
 
-export default async function SeccionInformePage({ params }: PageProps<'/informe/[slug]'>) {
-  const { slug } = await params
+export default async function SeccionInformePage({ params, searchParams }: PageProps<'/informe/[slug]'>) {
+  const [{ slug }, consulta] = await Promise.all([params, searchParams])
   const { puedeEditar, visibles } = await leerSecciones()
 
   const i = visibles.findIndex((s) => s.slug === slug)
@@ -68,9 +101,17 @@ export default async function SeccionInformePage({ params }: PageProps<'/informe
   const anterior = i > 0 ? visibles[i - 1] : null
   const siguiente = i < visibles.length - 1 ? visibles[i + 1] : null
   const escrita = Boolean(seccion.contenido_md?.trim())
+  const conCircuitos = CON_CIRCUITOS.has(seccion.slug)
+  const circuitos = conCircuitos ? await leerCircuitos() : null
+  const pedido = (clave: string) => {
+    const v = consulta[clave]
+    return typeof v === 'string' ? v : undefined
+  }
 
   return (
-    <article className="tarjeta mx-4 my-8 max-w-4xl px-5 py-10 lg:mx-8 lg:my-10 lg:px-10 lg:py-12">
+    <article
+      className={`tarjeta mx-4 my-8 px-5 py-10 lg:mx-8 lg:my-10 lg:px-10 lg:py-12 ${conCircuitos ? 'max-w-6xl' : 'max-w-4xl'}`}
+    >
       <header className="border-b border-[var(--borde)] pb-6">
         <div className="flex flex-wrap items-center gap-2">
           <Link href="/informe" className="text-xs text-marca-400 hover:text-acento-700">
@@ -115,7 +156,28 @@ export default async function SeccionInformePage({ params }: PageProps<'/informe
         </div>
       )}
 
-      <div className="py-8">
+      {/* Los circuitos van arriba de la prosa: la sección se lee mirando el
+          dibujo, y el texto explica lo que el lector ya tiene delante. */}
+      {circuitos && seccion.slug === 'circuitos' && (
+        <CircuitosDelNegocio
+          puntos={circuitos.puntos}
+          modulos={circuitos.modulos}
+          textos={circuitos.textos}
+          inicial={pedido('punto')}
+        />
+      )}
+      {circuitos && seccion.slug === 'arquitectura-ia' && (
+        <EspejoIberia
+          modulos={circuitos.modulos}
+          puntos={circuitos.puntos}
+          textos={circuitos.textos}
+          inicial={pedido('modulo')}
+        />
+      )}
+
+      {/* Solo el dibujo va ancho. La prosa vuelve a la medida de lectura del
+          resto del informe: a todo el ancho salían 150 caracteres por línea. */}
+      <div className={`py-8 ${conCircuitos ? 'max-w-[51rem]' : ''}`}>
         {escrita ? (
           // «Las fichas de proceso» son veinte macroprocesos y cincuenta mil
           // caracteres: de corrido no se leen. Se pliegan por nivel. El resto de

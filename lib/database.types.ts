@@ -1037,6 +1037,132 @@ export type Database = {
         }
         Relationships: []
       }
+      informe_circuito_puntos: {
+        Row: {
+          centro: string | null
+          cifras: Json
+          circuito: string
+          destapes: Json
+          donde: string | null
+          fase: string | null
+          id: string
+          numero: number
+          pos_x: number
+          pos_y: number
+          que_pasa: string
+          sistemas: string[]
+          tipo: string | null
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          centro?: string | null
+          cifras?: Json
+          circuito: string
+          destapes?: Json
+          donde?: string | null
+          fase?: string | null
+          id: string
+          numero: number
+          pos_x: number
+          pos_y: number
+          que_pasa: string
+          sistemas?: string[]
+          tipo?: string | null
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          centro?: string | null
+          cifras?: Json
+          circuito?: string
+          destapes?: Json
+          donde?: string | null
+          fase?: string | null
+          id?: string
+          numero?: number
+          pos_x?: number
+          pos_y?: number
+          que_pasa?: string
+          sistemas?: string[]
+          tipo?: string | null
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      informe_circuito_textos: {
+        Row: {
+          clave: string
+          contenido: Json
+          updated_at: string
+        }
+        Insert: {
+          clave: string
+          contenido: Json
+          updated_at?: string
+        }
+        Update: {
+          clave?: string
+          contenido?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      informe_modulos: {
+        Row: {
+          cifras: Json
+          cubre: Json
+          deja_atras: string
+          destapa: string[]
+          dispositivo: string
+          id: string
+          lee: string
+          nombre: string[]
+          nota: string | null
+          numero: number
+          ola: string
+          pos_x: number
+          postea: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          cifras?: Json
+          cubre?: Json
+          deja_atras: string
+          destapa?: string[]
+          dispositivo: string
+          id: string
+          lee: string
+          nombre: string[]
+          nota?: string | null
+          numero: number
+          ola: string
+          pos_x: number
+          postea: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          cifras?: Json
+          cubre?: Json
+          deja_atras?: string
+          destapa?: string[]
+          dispositivo?: string
+          id?: string
+          lee?: string
+          nombre?: string[]
+          nota?: string | null
+          numero?: number
+          ola?: string
+          pos_x?: number
+          postea?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       informe_secciones: {
         Row: {
           contenido_md: string | null

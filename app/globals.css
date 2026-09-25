@@ -772,6 +772,200 @@ body {
  * y el Gerente de Planta los entrega en mano. Lo que se imprime es la hoja
  * —una por página— sin la navegación ni los rótulos de la pantalla.
  * -------------------------------------------------------------------------- */
+/* =============================================================================
+   Los circuitos del informe · el flujo, los sistemas y el espejo
+   (components/circuitos-informe.tsx)
+
+   Mismo lenguaje que el resto: el rojo de Iberia para los trombos, el oro para
+   lo que se construye, el carbón para JD. El rojo sigue siendo marca y peligro
+   a la vez, y aquí se distingue igual: por forma. El trombo es un punto sólido;
+   el dato que viaja a mano es una línea punteada.
+   ============================================================================= */
+.circ {
+  --c-vena: var(--color-acento-200);
+  --c-vena-2: var(--color-acento-400);
+  --c-trombo: var(--color-acento-500);
+  --c-halo: rgba(212, 51, 44, 0.16);
+  --c-tinta: var(--color-marca-800);
+  --c-tinta-2: var(--color-marca-500);
+  --c-tinta-3: var(--color-marca-400);
+  --c-oro: var(--color-oro-400);
+  --c-oro-halo: rgba(242, 183, 5, 0.22);
+  --c-oro-suave: var(--color-oro-100);
+  --c-oro-tinta: var(--color-oro-800);
+  display: grid;
+  gap: 18px;
+  margin-top: 28px;
+}
+.circ-controles { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: space-between; }
+.circ-rotulo-vista { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-oro-tinta); }
+.circ-pestanas { display: inline-flex; padding: 4px; gap: 4px; border-radius: 14px; background: var(--fondo); border: 1px solid var(--borde); }
+.circ-pestana { font: inherit; font-size: 14px; font-weight: 500; color: var(--c-tinta-2); border: 0; background: transparent; padding: 7px 14px; border-radius: 10px; cursor: pointer; }
+.circ-pestana[aria-selected='true'] { background: var(--c-tinta); color: #fff; }
+.circ-filtros { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.circ-filtros .etiqueta { font-size: 12px; color: var(--c-tinta-3); margin-right: 2px; }
+.circ-chip { font: inherit; font-size: 12.5px; color: var(--c-tinta-2); cursor: pointer; border: 1px solid var(--borde); background: #fff; border-radius: 999px; padding: 4px 11px; }
+.circ-chip[aria-pressed='true'] { border-color: var(--c-tinta); color: var(--c-tinta); font-weight: 500; }
+.circ-chip.dorado[aria-pressed='true'] { background: var(--c-oro-suave); border-color: var(--c-oro); color: var(--c-oro-tinta); }
+.circ-pestana:focus-visible, .circ-chip:focus-visible, .circ-item:focus-visible, .circ-ir:focus-visible { outline: 2px solid var(--c-trombo); outline-offset: 2px; }
+
+.circ-figura { margin: 0; display: grid; gap: 10px; }
+.circ-lienzo { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--borde); border-radius: 16px; background: #fff; padding: 12px; }
+.circ-lienzo svg { display: block; width: 100%; height: auto; min-width: 820px; color: var(--c-tinta-2); }
+.circ-desliza { margin: -2px 0 0; font-size: 12px; color: var(--c-tinta-2); text-align: center; }
+.circ-leyenda { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--c-tinta-2); align-items: center; }
+.circ-leyenda > span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* --- El anillo ------------------------------------------------------------- */
+.circ-vaso { fill: none; stroke: var(--c-vena); stroke-width: 16; }
+.circ-chevron { fill: none; stroke: var(--c-vena-2); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.circ-estacion { fill: #fff; stroke: var(--c-tinta); stroke-width: 2; }
+.circ-t-estacion { fill: var(--c-tinta); font-size: 12.5px; font-weight: 500; text-anchor: middle; }
+.circ-t-carril { fill: var(--c-tinta-3); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; }
+.circ-t-nota { fill: var(--c-tinta-2); font-size: 11.5px; }
+.circ-t-centro { font-weight: 500; }
+.circ-t-tesis { fill: var(--c-tinta); font-size: 23px; font-weight: 700; text-anchor: middle; letter-spacing: -0.01em; }
+.circ-t-subtesis { fill: var(--c-tinta-2); font-size: 13px; text-anchor: middle; }
+.circ-retorno { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-dasharray: 5 5; }
+.circ-modo-sistema { fill: none; stroke: var(--c-tinta); stroke-width: 4; }
+.circ-modo-mano { fill: none; stroke: var(--c-trombo); stroke-width: 4; stroke-dasharray: 9 6; }
+.circ-retorno-sistema { fill: none; stroke: var(--c-tinta); stroke-width: 2.5; }
+.circ-t-medio { font-size: 11px; font-style: italic; text-anchor: middle; }
+.circ-t-medio.mano { fill: var(--c-trombo); }
+.circ-t-medio.sistema { fill: var(--c-tinta); font-weight: 500; }
+.circ-punto { cursor: pointer; transition: opacity 0.2s ease; }
+.circ-punto .halo { fill: var(--c-halo); }
+.circ-punto .nucleo { fill: var(--c-trombo); }
+.circ-punto .numero { fill: #fff; font-size: 13px; font-weight: 700; text-anchor: middle; dominant-baseline: central; font-family: var(--font-mono, ui-monospace, monospace); }
+.circ-punto .anillo { fill: none; stroke: transparent; stroke-width: 3; }
+.circ-punto.resaltado .anillo { stroke: var(--c-oro); }
+.circ-punto.sel .anillo { stroke: var(--c-tinta); stroke-width: 2.5; }
+.circ-punto:focus-visible { outline: none; }
+.circ-punto:focus-visible .anillo { stroke: var(--c-trombo); }
+.circ .atenuado { opacity: 0.22; }
+
+/* --- La escena del espejo ---------------------------------------------------- */
+.circ-escena { min-width: 900px !important; }
+.circ-panel-jd { fill: var(--c-tinta); }
+.circ-t-jd-titulo { fill: #f6f7f9; font-size: 16px; font-weight: 700; }
+.circ-t-jd { fill: #b8b3b1; font-size: 11.5px; }
+.circ-vidrio-a { stop-color: rgba(255, 244, 199, 0.96); }
+.circ-vidrio-b { stop-color: rgba(255, 255, 255, 0.92); }
+.circ-espejo { stroke: var(--c-oro); stroke-width: 2.5; }
+.circ-espejo-halo { fill: none; stroke: var(--c-oro-halo); stroke-width: 10; }
+.circ-brillo { fill: rgba(255, 255, 255, 0.55); }
+.circ-t-espejo-titulo { fill: var(--c-oro-tinta); font-size: 16px; font-weight: 700; letter-spacing: 0.04em; }
+.circ-t-espejo { fill: var(--c-tinta-2); font-size: 11.5px; }
+.circ-t-espejo-fuerte { fill: var(--c-tinta); font-size: 12px; font-weight: 700; }
+.circ-t-espejo-reflejo { fill: var(--c-tinta-3); font-size: 11px; font-style: italic; }
+.circ-t-espejo-lema { fill: var(--c-oro-tinta); font-size: 12.5px; font-weight: 500; font-style: italic; }
+.circ-separador { stroke: var(--c-oro); stroke-width: 1; opacity: 0.6; }
+.circ-viga { fill: none; stroke: var(--c-tinta-2); stroke-width: 1.8; stroke-dasharray: 7 6; animation: circ-fluir 1.6s linear infinite; }
+.circ-t-viga { fill: var(--c-tinta); font-size: 12px; font-weight: 700; }
+.circ-t-viga-2 { fill: var(--c-tinta-2); font-size: 11.5px; }
+.circ-haz { fill: none; stroke: var(--c-oro); stroke-width: 1.5; stroke-dasharray: 3 5; opacity: 0.75; animation: circ-fluir 1.2s linear infinite; }
+.circ-haz.on { stroke-width: 3; opacity: 1; }
+@keyframes circ-fluir { to { stroke-dashoffset: -26; } }
+.circ-modulo { cursor: pointer; transition: opacity 0.2s ease; }
+.circ-modulo .cara-sup { stroke: transparent; stroke-width: 2.5; }
+.circ-modulo.ola1 .cara-sup { fill: var(--c-oro); }
+.circ-modulo.ola1 .cara-izq { fill: #c99300; }
+.circ-modulo.ola1 .cara-der { fill: #e0a600; }
+.circ-modulo.ola2 .cara-sup { fill: #fff; stroke: var(--c-oro); }
+.circ-modulo.ola2 .cara-izq { fill: #f3e3a6; }
+.circ-modulo.ola2 .cara-der { fill: #fbefc4; }
+.circ-modulo.ola3 .cara-sup { fill: #fff; stroke: var(--c-oro); stroke-dasharray: 4 3; }
+.circ-modulo.ola3 .cara-izq { fill: var(--fondo); stroke: var(--borde); }
+.circ-modulo.ola3 .cara-der { fill: #fff; stroke: var(--borde); }
+.circ-modulo.base .cara-sup { fill: var(--c-tinta); }
+.circ-modulo.base .cara-izq { fill: #121110; }
+.circ-modulo.base .cara-der { fill: #474342; }
+.circ-modulo .n-mod { font-family: var(--font-mono, ui-monospace, monospace); font-size: 13px; font-weight: 500; text-anchor: middle; dominant-baseline: central; }
+.circ-modulo.ola1 .n-mod { fill: #2b2100; }
+.circ-modulo.ola2 .n-mod, .circ-modulo.ola3 .n-mod { fill: var(--c-oro-tinta); }
+.circ-modulo.base .n-mod { fill: #fff; }
+.circ-modulo .t-mod { fill: var(--c-tinta); font-size: 12.5px; font-weight: 500; text-anchor: middle; }
+.circ-modulo.sel .cara-sup { stroke: var(--c-tinta); stroke-dasharray: none; stroke-width: 3; }
+.circ-modulo:focus-visible { outline: none; }
+.circ-modulo:focus-visible .cara-sup { stroke: var(--c-trombo); stroke-width: 3; }
+
+/* --- Barra de traspasos y funciones dormidas -------------------------------- */
+.circ-traspasos { display: grid; gap: 8px; }
+.circ-traspasos p { margin: 0; font-size: 14px; color: var(--c-tinta-2); }
+.circ-traspasos b { color: var(--c-tinta); font-variant-numeric: tabular-nums; }
+.circ-barra { display: flex; height: 16px; border-radius: 6px; overflow: hidden; border: 1px solid var(--borde); }
+.circ-barra i { display: block; height: 100%; }
+.circ-barra .sis { background: var(--c-tinta); }
+.circ-barra .mano { background: repeating-linear-gradient(90deg, var(--c-trombo) 0 10px, var(--c-vena) 10px 16px); }
+.circ-dormidas { display: flex; flex-wrap: wrap; gap: 6px; }
+.circ-dormidas span { font-size: 12.5px; border: 1px dashed var(--c-tinta-3); border-radius: 999px; padding: 2px 10px; color: var(--c-tinta-2); }
+
+/* --- Lista y ficha ---------------------------------------------------------- */
+.circ-detalle { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 18px; align-items: start; }
+@media (max-width: 900px) { .circ-detalle { grid-template-columns: 1fr; } }
+.circ-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px; }
+.circ-item { font: inherit; text-align: left; color: inherit; cursor: pointer; display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; align-items: start;
+  padding: 9px 11px; border-radius: 12px; border: 1px solid transparent; background: transparent; transition: opacity 0.2s ease; }
+.circ-item:hover { background: var(--fondo); border-color: var(--borde); }
+.circ-item[aria-pressed='true'] { background: #fff; border-color: var(--c-trombo); }
+.circ-item.mod[aria-pressed='true'] { border-color: var(--c-oro); }
+.circ-item .tit { display: block; font-size: 13.5px; font-weight: 500; line-height: 1.3; color: var(--c-tinta); }
+.circ-item .meta { display: block; font-size: 11.5px; color: var(--c-tinta-3); margin-top: 2px; }
+.circ-badge { width: 24px; height: 24px; border-radius: 50%; background: var(--c-trombo); color: #fff; display: inline-grid; place-items: center;
+  font-family: var(--font-mono, ui-monospace, monospace); font-size: 12px; font-weight: 500; flex: none; }
+.circ-badge.mod { border-radius: 6px; background: var(--c-oro); color: #2b2100; }
+.circ-badge.mod.ola2, .circ-badge.mod.ola3 { background: #fff; color: var(--c-oro-tinta); border: 2px solid var(--c-oro); }
+.circ-badge.mod.ola3 { border-style: dashed; }
+.circ-badge.mod.base { background: var(--c-tinta); color: #fff; }
+.circ-leyenda .circ-badge { width: 16px; height: 16px; font-size: 9px; }
+.circ-ficha { border: 1px solid var(--borde); border-radius: 16px; background: #fff; padding: 20px 22px; display: grid; gap: 14px; }
+.circ-ficha-cabeza { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 14px; align-items: start; }
+.circ-ficha-num { width: 48px; height: 48px; border-radius: 50%; background: var(--c-trombo); color: #fff; display: grid; place-items: center;
+  font-family: var(--font-mono, ui-monospace, monospace); font-size: 19px; font-weight: 500; box-shadow: 0 0 0 7px var(--c-halo); }
+.circ-ficha-num.mod { border-radius: 12px; background: var(--c-oro); color: #2b2100; box-shadow: 0 0 0 7px var(--c-oro-halo); }
+.circ-ficha-num.mod.ola2, .circ-ficha-num.mod.ola3 { background: #fff; color: var(--c-oro-tinta); border: 2px solid var(--c-oro); }
+.circ-ficha-num.mod.base { background: var(--c-tinta); color: #fff; box-shadow: 0 0 0 7px var(--c-halo); }
+.circ-ficha-titulo { margin: 0; font-size: 19px; line-height: 1.25; font-weight: 700; color: var(--c-tinta); text-wrap: balance; }
+.circ-donde { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin-top: 6px; font-size: 13px; color: var(--c-tinta-2); }
+.circ-etq { font-size: 11.5px; font-weight: 500; border-radius: 999px; padding: 2px 9px; border: 1px solid var(--borde); color: var(--c-tinta-2); }
+.circ-etq.f2 { background: var(--c-oro-suave); border-color: var(--c-oro); color: var(--c-oro-tinta); }
+.circ-etq.f3 { border-color: var(--c-tinta-2); color: var(--c-tinta); }
+.circ-etq.sin { border-style: dashed; }
+.circ-etq.rojo { border-color: var(--c-trombo); color: var(--c-trombo); }
+.circ-etq.sis { border-radius: 6px; font-family: var(--font-mono, ui-monospace, monospace); font-size: 11px; }
+.circ-ficha p { margin: 0; font-size: 14.5px; line-height: 1.55; color: var(--c-tinta); }
+.circ-h3 { margin: 0 0 6px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-tinta-3); font-weight: 700; }
+.circ-cifras { margin: 0; padding: 0; list-style: none; display: grid; gap: 5px; }
+.circ-cifras li { font-size: 14px; font-variant-numeric: tabular-nums; padding-left: 16px; position: relative; color: var(--c-tinta); }
+.circ-cifras li::before { content: ''; position: absolute; left: 0; top: 0.6em; width: 7px; height: 7px; border-radius: 50%; background: var(--c-vena-2); }
+.circ-destapes { display: grid; gap: 7px; }
+.circ-destape { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: baseline; font-size: 14px; color: var(--c-tinta); }
+.circ-tipo { font-size: 11px; font-weight: 500; white-space: nowrap; border-radius: 6px; padding: 1px 8px; border: 1px solid var(--borde); color: var(--c-tinta-2); }
+.circ-tipo.ia { border-color: var(--c-trombo); color: var(--c-trombo); }
+.circ-cubre { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+.circ-cubre li { padding-left: 20px; position: relative; font-size: 14px; color: var(--c-tinta); }
+.circ-cubre li::before { content: ''; position: absolute; left: 2px; top: 0.5em; width: 8px; height: 8px; border-radius: 2px; background: var(--c-oro); transform: rotate(45deg); }
+.circ-marca-ia { margin-left: 8px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; color: var(--c-trombo); border: 1px solid var(--c-trombo); border-radius: 4px; padding: 0 5px; }
+.circ-tres { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.circ-tres > div { border: 1px solid var(--borde); border-radius: 12px; padding: 10px 12px; background: var(--fondo); }
+.circ-tres p { font-size: 13.5px; }
+.circ-enlaces { display: flex; flex-wrap: wrap; gap: 6px; }
+.circ-ir { font-size: 13px; border: 1px solid var(--borde); background: var(--fondo); color: var(--c-tinta); border-radius: 999px; padding: 3px 10px 3px 4px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.circ-ir:hover { border-color: var(--c-tinta-2); }
+.circ-ir .mini { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-mono, ui-monospace, monospace); font-size: 11px; background: var(--c-trombo); color: #fff; }
+.circ-ir .mini.mod { border-radius: 5px; background: var(--c-oro); color: #2b2100; }
+.circ-ir .mini.mod.base { background: var(--c-tinta); color: #fff; }
+.circ-nada { font-size: 13px; color: var(--c-tinta-3); }
+.circ-relojes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.circ-reloj { border-left: 3px solid var(--c-trombo); padding: 4px 0 4px 12px; display: grid; gap: 2px; }
+.circ-reloj b { font-size: 21px; font-weight: 700; letter-spacing: -0.02em; color: var(--c-tinta); font-variant-numeric: tabular-nums; }
+.circ-reloj span { font-size: 13.5px; color: var(--c-tinta-2); }
+
+@media (prefers-reduced-motion: reduce) {
+  .circ-punto, .circ-item, .circ-modulo { transition: none; }
+  .circ-viga, .circ-haz { animation: none; }
+}
+
 @media print {
   .no-imprimir,
   nav,
