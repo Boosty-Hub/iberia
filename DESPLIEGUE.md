@@ -15,6 +15,7 @@ repositorio.
 | | |
 |---|---|
 | **Dónde** | Vercel es lo natural — Next.js sin configuración, y el proyecto no usa nada que ate a un proveedor. Cualquier sitio que corra Node 22 sirve igual. |
+| **En qué región** | ⚠️ **La misma que Supabase: East US, Virginia** — en Vercel, `iad1`. Cada página encadena de 4 a 8 consultas a la base y, medido desde Caracas, cada una cuesta de 90 a 140 ms: ese es casi todo el medio segundo que tarda hoy cualquier pantalla. Con el servidor al lado de la base, cada vuelta baja a milisegundos. En otra región, la app sería lenta por geografía y no por código. |
 | **En qué cuenta** | Tiene que ser una de Boosty, no personal. Los enlaces de la gente de planta van a apuntar ahí durante los cinco meses de la Fase 1. |
 | **Con qué dominio** | Los ~200 enlaces personales llevan el dominio dentro. Cambiarlo después obliga a volver a acuñarlos y a mandarlos otra vez. **Elegir el definitivo antes del primer envío.** |
 
@@ -29,13 +30,15 @@ Las siete que pide el código, tal cual están en `.env.local`:
 | `NEXT_PUBLIC_SUPABASE_URL` | La base |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | La clave pública |
 | `SUPABASE_SECRET_KEY` | **Secreta.** Bypasea RLS; solo provisiona usuarios y acuña sesiones desde `/entrar/[token]` |
-| `NEXT_PUBLIC_SITE_URL` | **La URL de producción.** No es cosmética: con ella se arman los enlaces personales y los redirects de `/entrar`. Si queda en `localhost`, los enlaces que se manden no llevan a ninguna parte |
+| `NEXT_PUBLIC_SITE_URL` | **La URL de producción.** No es cosmética: con ella se arman los enlaces personales y el del curso en los recordatorios. Si queda en `localhost`, los enlaces que se manden no llevan a ninguna parte. *(Los redirects de `/entrar` ya no dependen de ella desde el 24 de septiembre: van al origen de la petición, para que la sesión y la persona caigan en el mismo host.)* |
 | `AZURE_SPEECH_KEY` | **Secreta.** Transcribir las notas de voz y hablar las devoluciones |
 | `AZURE_SPEECH_REGION` | `westus3` |
 | `ANTHROPIC_API_KEY` | **Secreta.** Las devoluciones de Ajito |
 
 ⚠️ **Regenerar `AZURE_SPEECH_KEY` antes de ponerla en producción**: quedó visible en una
 captura de pantalla. Consola de Azure → Keys and Endpoint → Regenerate Key 1.
+🔴 **Y la de `.env.local` ya no autentica** (24 de septiembre: 401 en todas las regiones).
+Lo más probable es que ya se regeneró y no se pegó la nueva. Hay que copiarla de la consola.
 
 ---
 
@@ -77,9 +80,11 @@ Se corren desde una máquina con las claves, no desde el servidor.
 
 Ninguna de las dos cosas impide desplegar; las dos impiden **abrir el curso**:
 
-- **Saldo en la cuenta de Anthropic.** Sin él Ajito no contesta los ejercicios: la
-  respuesta se guarda y sale «No pude contestarte ahorita». Con unos $60 sobra para las
-  200 personas.
+- ~~Saldo en la cuenta de Anthropic~~ ✅ **Resuelto el 31 de agosto** con
+  `ANTHROPIC_API_KEY_SALDO`: Ajito contesta.
+- 🔴 **Una clave de Azure que funcione.** Sin ella la devolución de Ajito sale solo escrita
+  —sin la nota de voz— y **las notas de voz de la gente no se transcriben**: quien quiera
+  contestar hablando tiene que escribir. Ver arriba.
 - **La cuenta de WhatsApp Business y su plantilla aprobada.** Sin ella los enlaces y los
   recordatorios se copian del panel y se mandan a mano, que funciona pero no escala a
   doscientos.

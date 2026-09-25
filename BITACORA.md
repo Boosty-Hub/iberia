@@ -25,13 +25,13 @@ línea.
 | **Dashboard** | Operativo en local. **Sin desplegar** |
 | **Levantamiento** | **42 sesiones · 27.951 turnos**. **34 entrevistas de ~25 (136%)** · los 20 macroprocesos cubiertos |
 | **Hallazgos** | **394, todos con cita textual verificada** · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
-| **Informe** | **12 secciones** y 20 de 20 fichas, **sin citas, sin códigos y sin nombres** (18/9, con Gabriel). Ninguna publicada |
+| **Informe** | **12 secciones** y 20 de 20 fichas, **sin citas, sin códigos y sin nombres** (18/9, con Gabriel). Ninguna publicada. **La parte de arquitectura se rehízo el 24/9**: los circuitos, el sistema Iberia y la ruta de construcción |
 | **Horas** | **137 h en el mes 1 contra una bolsa de 107**, ya revisadas con Gabriel. Aparte: 111 h de la etapa anterior y 104 h del curso de planta, que se factura en Fase 2 |
 | **Comunicación** | **El comunicado salió.** Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | **276 personas cargadas** con ficha, cargo, nivel y familia de oficio. ⚠️ Sin cédula, sin celular y sin correo |
 | **Canal** | Funciona en local. Anunciado el 12 de agosto; **la revisión con mercadeo se cayó y no tiene fecha** |
 | **Formación dirigente** | Uno a uno con Alberto el 17 de agosto y **Petit Comité dictado el 26**. Faltan dos formaciones, sus fechas y aclarar las licencias |
-| **Adiestramiento de planta** | Completo: guion, **70 audios (20 min 02 s)**, 10 fichas, certificado, padrón, recordatorios. **Ajito ya contesta** con la clave que tiene saldo. **Es de Fase 2** — avance para mostrar, no para abrir |
+| **Adiestramiento de planta** | Completo: guion, **70 audios (20 min 02 s)**, 10 fichas, certificado, padrón, recordatorios. **Ajito ya contesta** con la clave que tiene saldo — 🔴 **pero sin voz desde el 24/9**: la clave de Azure no autentica, y con ella cae la transcripción de las notas de voz. **Es de Fase 2** — avance para mostrar, no para abrir |
 | **Repositorio** | `Boosty-Hub/iberia` — 🔴 **público**. Cinco commits subidos el 17/9 con la bitácora dentro. Hace falta un administrador de la organización para cerrarlo |
 
 ### Lo que aprieta
@@ -50,9 +50,9 @@ cláusula 5. Aquí solo lo urgente:
   partidas ya están revisadas y el mes cierra en **137 h contra 107**, con la mezcla que
   promete la propuesta. **`/dashboard/programa` ya está escrito para que lo lea Iberia**, así
   que el reporte se apoya en él en vez de repetirlo.
-- **Agendar lo que falta del levantamiento**: Alberto (E1), Antonio Sorrentino (E2), Arianna
-  González y Martha E. Álvarez (O6), Martha Fuentes (TI, va de última) y **Yelitza Pérez**,
-  que se cayó de la ronda 2 y es la puerta que más veces nombra la ronda 1.
+- **Agendar lo que falta del levantamiento**: queda **Alberto (E1)** y `ENT-029`, programada.
+  *(Corregido el 24/9: Antonio Sorrentino, Arianna González, Martha E. Álvarez, Martha
+  Fuentes y Yelitza Pérez se entrevistaron entre el 10 y el 15 de septiembre.)*
 - **Confirmar el comunicado** —día, vía y acuse— y sacar la nota del boletín. Y **aprobar el
   comité de comunicaciones** propuesto el 27, que de paso cierra la cadencia de gobierno.
 - **Cerrar el acceso antes de la segunda formación**, no en la sala: en la primera se fueron
@@ -61,6 +61,173 @@ cláusula 5. Aquí solo lo urgente:
 - **Refijar la revisión del canal con mercadeo** — Alberto la agenda. Bloquea el despliegue.
 - **Leer los 42 hallazgos redactados** del informe y validar los que los sostienen.
 - **Pedirle a Capital Humano cédula y celular por ficha.** El padrón llegó sin ellos.
+
+---
+
+## 24 de septiembre de 2026 · Sesión 37 — los circuitos y el sistema Iberia entran al informe
+
+Empezó con la reunión del equipo del 22 —el señor Carlos, Ruth, Jesús y Gabriel— y la pregunta
+de Gabriel: cómo va Iberia de la venta a la factura y de la materia prima al producto
+terminado. Terminó rehaciendo la parte de arquitectura del informe.
+
+### Lo que decidió Gabriel
+
+- **JD se queda.** No por lo que hace bien solamente: nadie recibió inducción, cuesta
+  aprenderlo y nadie lo sabe explicar. Por eso no se construye más dentro de él.
+- **Delante va el sistema Iberia, un espejo de JD de primera mano**, con una capa de
+  actualización continua. Obtiene, se trabaja ahí —fácil de enseñar y en el teléfono— y
+  **postea en JD cuando toca**. En el sistema Iberia se ve todo.
+- **La explosión de materiales corre en el sistema Iberia**, leyendo fórmulas e inventario de
+  JD, y se recalcula con cada consumo y cada recepción.
+- ⚠️ **La primera idea era «JD como facturador» y se afinó a «JD como registro contable y
+  fiscal».** Ocho agentes volvieron a leer las entrevistas crudas, y seis de los ocho grupos
+  traen la misma evidencia: sin cerrar y costear la orden en JD no se vende, la liberación de
+  Calidad en JD es el único candado, y la orden de compra aprobada vive ahí. El espejo nunca
+  guarda su versión de un asiento, una factura o un costo.
+
+Primero se armó un artefacto privado con los tres circuitos —flujo, sistemas y espejo en
+3D—; lo que se validó ahí es lo que entró al informe.
+
+### El informe
+
+```
+09 Los circuitos del negocio          nueva · los dos anillos, interactivos
+10 Las oportunidades, priorizadas     igual, renumerada
+11 La arquitectura de IA: el sistema Iberia    reescrita · el espejo en 3D
+12 La ruta de construcción            reescrita · paso 0 y tres olas, sin fechas
+   «Dónde no va la IA»                fuera
+```
+
+- **La arquitectura nombra productos** —lectura de DB2 por JDBC y captura de cambios, el espejo
+  en PostgreSQL, el Orchestrator para escribir, Microsoft 365 para la identidad, Claude con
+  licencia corporativa— como recomendación de los consultores. **Sin costos.** Antes decía «no
+  fija productos»; Gabriel pidió lo contrario.
+- **«Dónde no va la IA» salió** porque lo que prometía lo dice ahora cada módulo: 17 de 47
+  capacidades son IA. En palabras de Gabriel: ser claros en qué proceso se construye el sistema
+  y en cuál de esos procesos, con ese sistema, opera la IA.
+- **La Fase 2 que se recomienda es el paso 0 y la ola 1** (Compras, Comercial y Finanzas). El
+  paso 0 cierra cuando el espejo cuadra con JD cuatro semanas seguidas.
+
+⚠️ **«Todo lo que el informe documenta tiene que existir en Supabase»**, dicho así por Gabriel.
+Los dibujos salen de tres tablas nuevas sembradas desde `contenido/circuitos/circuitos.json`, y
+las tres secciones **se escriben en la base, no en el generador**. Cómo funciona está en
+`AGENTS.md`. Y una consecuencia: **las fechas de la ruta ya no se leen de `lib/programa.ts`**; si
+el calendario cambia, hay que corregir la prosa a mano.
+
+### Lo que se cazó
+
+- 🔴 **El punto 2 del circuito contradecía la decisión**: decía «Fase 3» y proponía hacer la
+  explosión «en JD o en el sistema nuevo». Corregido en el taller, y `sembrar:circuitos` ahora
+  falla si un destape trae un tipo sin rótulo, porque el nuevo salía como etiqueta vacía.
+- **Escribí que JD resistió «los dos ataques»**; lo que está documentado es que resistió el de
+  febrero. Corregido antes de cargar.
+- **A todo el ancho, la prosa salía a 150 caracteres por línea.** Solo el dibujo va ancho.
+- **En el teléfono el dibujo abría por el borde izquierdo**, que está casi vacío. Arranca
+  centrado y avisa que se desliza.
+- **Tres referencias de capítulo quedaron viejas** en fichas, riesgo y trabas. Se parcharon en
+  la base, pero dos viven en los talleres de Jesús como `{cap:donde-no-va-la-ia}`: su próxima
+  corrida las vuelve a pisar y el generador avisará. **Anotado en `PENDIENTES.md`, y Gabriel le
+  avisa que haga pull antes de correrlo.**
+
+### Verificación
+
+`tipos` y `build` limpios, `lint` sin errores. `probar:supabase` pasa de 52 a **58**: las tres
+tablas existen y no devuelven nada sin sesión. Capturas a 1440 y a 390 px de las tres
+secciones, con enlaces cruzados entre punto y módulo: **cero errores de consola y ningún
+desborde**. Respaldo antes de tocar la base en `contenido/circuitos/`, y
+`respaldar:informe` guarda ahora también los circuitos.
+
+**Dónde quedamos.** Las tres secciones sin publicar. Falta que Gabriel y Jesús lean la prosa,
+contrastarla con la Gerencia de Tecnología y que Iberia decida dónde vive el espejo.
+
+---
+
+## 24 de septiembre de 2026 · Sesión 36 — verificación completa, la velocidad por módulo y el informe en otra pestaña
+
+Encargo de Gabriel: verificar todo lo construido, medir cuánto tarda en cargar cada módulo,
+y que el informe abra en pestaña nueva desde el panel, «igual que el curso de Ajito».
+
+**El curso tampoco abría en pestaña nueva**, así que ahora lo hacen los dos: «Ver el informe»
+en el menú, en el panel y en el editor, y «El curso de Ajito». Llevan el icono de la flecha
+que sale de la caja. Comprobado con clic de verdad: se abre la pestaña y la de origen se
+queda en el panel.
+
+### La velocidad, medida sobre la compilación de producción
+
+`next build` + `next start`, tres vueltas con caché vacía por ruta y la mediana. **51 rutas,
+todas en 200 y cero errores de consola.**
+
+```
+Panel y sus módulos, escritorio    lo visible en 0,37 – 0,77 s
+Informe, 12 secciones y el mapa    0,46 – 0,61 s
+Canal y curso, teléfono            0,40 – 0,84 s
+Canal y curso, 4G lento y CPU 4×   lo visible en 1,0 – 1,9 s · completo en 1,8 – 2,5 s
+Clic en el menú, ya dentro         0,40 – 0,69 s
+```
+
+⚠️ **Casi todo ese tiempo es distancia, no código.** Cada consulta a Supabase cuesta de 90 a
+140 ms desde aquí —el proyecto está en Virginia— y una página encadena de cuatro a ocho: el
+proxy valida la sesión, `requerirSesion` la vuelve a validar, el perfil, y lo de la página.
+Desplegada en la misma región, cada vuelta baja a milisegundos. **Quedó escrito en
+`DESPLIEGUE.md`, porque es una decisión de despliegue y no se puede arreglar después con
+código.**
+
+### 🔴 Las transcripciones largas se cortaban en el turno mil
+
+Supabase corta cada consulta en 1.000 filas y no avisa. **Seis sesiones pasan de ahí**, y
+FOR-002 enseñaba 1.000 de sus 2.723 turnos; el buscador de la página no encontraba nada de lo
+que se dijo después. Ahora pagina, y deja de traer `busqueda` —el tsvector del buscador, que
+el navegador no usa—: en ENT-010 la consulta baja de 282 a 149 KB. FOR-002 completa carga en
+1,1 s.
+
+El mismo tope estaba en `corregir-nombre` y `sembrar-contexto-completo`: renombrar a alguien
+con más de mil turnos dejaba el resto con el nombre viejo, y Gabriel tiene 5.463. **Revisado
+en la base: no quedó ningún nombre viejo regado**, porque las correcciones hechas cayeron por
+debajo del tope. Ahora van en tandas hasta vaciar. La trampa quedó en `AGENTS.md`.
+
+### 🔴 Ajito se quedó sin voz
+
+`probar:ajito` dio **8 de 8 contestadas, con buen personaje, y 0 con audio**. Azure devuelve
+401 en las veinte regiones probadas y en el endpoint propio del recurso: la clave de
+`.env.local` ya no vale. Lo más probable es que se regeneró —estaba en pendientes, por una
+captura— y no se pegó la nueva. Cae también la transcripción de las notas de voz. La
+devolución escrita sigue saliendo, que es el respaldo con que se diseñó.
+
+### `/entrar/[token]` mandaba a la persona a otra máquina
+
+Abría la sesión en el host que recibía el enlace y redirigía a `NEXT_PUBLIC_SITE_URL`. En esta
+máquina el 3000 lo ocupa el Website Boosty, así que `probar:padron` entraba y caía en un 404
+ajeno. En producción habría pasado igual con cualquier host distinto del configurado —una
+vista previa, `www`—: la cookie en uno y la persona en otro, sin sesión. Ahora redirige al
+mismo origen, como ya hacía el proxy. 25 de 25.
+
+⚠️ **Las suites apuntan al 3000 por defecto.** Aquí hay que pasarles `BASE_URL`, o prueban
+otra aplicación.
+
+### Lo demás que salió de mirar
+
+- La tarjeta «Reuniones y visitas» decía **«8 · 41 transcritas»**: contaba las entrevistas.
+- El editor de sección enseñaba `/informe#inicio`, el ancla de cuando el informe era una sola
+  página. Ahora es enlace a `/informe/inicio`, en pestaña nueva.
+- `capturar` y `probar:paginas` seguían apuntando a `resumen-ejecutivo`, que ya no existe:
+  capturaban un 404 y nadie lo miraba.
+- `20260918120000_mapa_de_procesos` estaba aplicada a mano y fuera del historial. Se comparó
+  el esquema remoto contra el archivo —columnas, restricciones, políticas— y se reparó el
+  historial: el próximo `db push` habría fallado al recrear las políticas.
+- El error de hidratación de `/dashboard/hallazgos` **ya no aparece**, ni en producción ni en
+  desarrollo.
+
+### Lo que corrió y lo que no
+
+| | |
+|---|---|
+| `tipos` · `lint` · `build` | limpios · 0 errores, 10 avisos viejos en `estructura-informe.mjs` |
+| fireflies · derivación · guion · audios | 50 · 26 · de acuerdo · 70 sin cambios |
+| adiestramiento · certificado · recordatorios · padrón | 17 · 17 · 38 · 25 |
+| `capturar` · `:adiestramiento` · `:oficios` | sin errores de consola · cada oficio recibe lo suyo |
+| `probar:supabase` | 52 · migraciones 23 de 23 · tipos idénticos a los del proyecto |
+| `probar:ajito` | 8 de 8 contestadas · **0 con voz** |
+| **No corrieron** | `probar:acceso`, `probar:paginas`, `probar:canal`, `capturar:canal` y `probar:importacion`: piden contraseña. Anotado en pendientes |
 
 ---
 
@@ -610,7 +777,7 @@ de las oportunidades» en medio de un párrafo de prosa.
 
 ### Y cuadro de mando en la 13
 
-Mismo tratamiento para **«Dónde no va la IA»**. Ahí el cuadro tiene una columna que no tienen
+Mismo tratamiento para **«Dónde no va la IA»** *(sección retirada el 24 de septiembre)*. Ahí el cuadro tiene una columna que no tienen
 los otros dos y es la que más pesa: **quién lo tiene que hacer**.
 
 ```
@@ -1051,6 +1218,10 @@ Son **cinco cosas y no más**: las nueve reglas, las seis capas y la conexión a
 orden de los tres grupos, lo que queda fuera, y que la capa de captura se presupueste aparte.
 Y se dice también lo que **no** se aprueba: ni herramientas, ni proveedores, ni inversión.
 
+*(⚠️ Cambió el 24 de septiembre: la ruta ahora es un paso 0 y tres olas de módulos del
+sistema Iberia, y las cinco cosas que se aprueban son otras. Las fechas ya no se leen de
+`lib/programa.ts`, porque la sección se escribe en Supabase. Ver sesión 37.)*
+
 ### El dato que abre y cierra el capítulo
 
 **De los 394 hallazgos, 2 están validados.** Es el punto de control más urgente y el que no
@@ -1149,6 +1320,10 @@ todos los servidores en el mismo edificio, con el historial que documenta el cap
 plano no debe fingir que lo resuelve. Tampoco fija productos ni proveedores: eso es decisión de
 fase 2.
 
+*(⚠️ Cambió el 24 de septiembre: la arquitectura se rehízo como el sistema Iberia —JD de
+registro y un espejo delante— y ahora sí nombra productos, como recomendación de los
+consultores. Las seis capas se fueron. Ver sesión 37.)*
+
 ### El diagrama, y una corrección mía
 
 Va en bloque de código monoespaciado porque el renderizador no tiene mermaid. ⚠️ **Al revisarlo
@@ -1167,6 +1342,9 @@ No es fallo del comando. Antes de seguir, liberar memoria y volver a levantarlo.
 ---
 
 ## 17 de septiembre de 2026 · Sesión 16 — la 11, y los cuatro filtros
+
+*(⚠️ La sección salió del armazón el 24 de septiembre: lo que decía lo dice ahora cada módulo
+del sistema Iberia, capacidad por capacidad. Ver sesión 37.)*
 
 Se escribió **«11 · Dónde no va la IA»**, el par de la 10. Nueve bloques, 21 citas, siete
 enlaces al capítulo 9 comprobados. 17.724 caracteres. El informe va en **215.124 caracteres ·
@@ -1267,7 +1445,8 @@ prometer la foto del anaquel para el primer trimestre.
   salta una alerta.
 - **Se dice en el capítulo qué parte no es IA** —el asistente de la sábana de compras es en
   buena medida parametrizar el ERP—, porque decirlo ahí y no al pasar la factura es lo que
-  separa un programa de un catálogo.
+  separa un programa de un catálogo. *(⚠️ Cambió el 24 de septiembre: la explosión corre en el
+  sistema Iberia, no en el MRP de JD. Ver sesión 37.)*
 
 ### La guarda nueva: cobertura en las dos direcciones
 
@@ -1429,7 +1608,9 @@ vive en un Excel, teniendo el ERP módulo de MRP.
 La brecha que describe el capítulo **no es entre lo que hay y lo que haría falta, sino entre
 lo que ya está pagado y lo que se explota**. Eso cambia el orden de la fase siguiente: buena
 parte de lo que se pidió en las entrevistas no necesita un modelo, necesita terminar de
-configurar el ERP.
+configurar el ERP. *(⚠️ Matizado el 24 de septiembre: lo que es de JD se configura en JD; lo
+que JD hace mal o no trae —la explosión entre ello, que se probó y se desbordó— se construye
+en el espejo. Es la regla 8 de la arquitectura. Ver sesión 37.)*
 
 El resto del argumento, en orden: dónde vive el dato que el ERP no tiene (Excel, papel,
 WhatsApp, correo, Access); que los sistemas no se hablan —siete años sin interfaz contable
@@ -1787,7 +1968,8 @@ exactamente Caracas**: Dirección, Planificación Comercial, Comercialización y
 Tecnología de la Información. La ronda 1 remitía siempre a las mismas cuatro puertas y la
 ronda 2 abrió tres.
 
-🔴 **Yelitza Pérez, de Crédito y Cobranza, no vino.** Es la puerta que más veces nombra la
+🔴 **Yelitza Pérez, de Crédito y Cobranza, no vino.** *(Se entrevistó después, el 10 de
+septiembre: `ENT-023`.)* Es la puerta que más veces nombra la
 ronda 1 —la liberación que comprime el despacho— y sigue sin levantar.
 
 ✅ **Las guías nuevas midieron bien.** Seis de las diez sesiones cayeron entre 62 y 86 minutos

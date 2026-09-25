@@ -308,6 +308,11 @@ Eso obliga a tratarlo como lo que es —una contraseña—, y de ahí las reglas
   al navegador. Y **no dice por qué falló**: caducado, inventado o de alguien que ya no
   está devuelven todos lo mismo, porque distinguirlos convierte la ruta en una forma de
   averiguar qué tokens existen.
+- **`/entrar/[token]` redirige al origen de la petición, no a `NEXT_PUBLIC_SITE_URL`.** La
+  cookie de sesión queda en el host que recibió el enlace; mandar a la persona a otro
+  —una vista previa, `www` contra el dominio pelado— la deja sin sesión, en el login que el
+  enlace viene a evitar. `NEXT_PUBLIC_SITE_URL` es para los enlaces que **salen** de la app:
+  el del mensaje y el de los recordatorios.
 - `/entrar` y `/canal/entrar` son las únicas rutas públicas nuevas en `lib/supabase/sesion.ts`.
   Tienen que serlo: quien llega con su enlace **todavía no tiene sesión**.
 
@@ -472,6 +477,12 @@ Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).
 - **`.insert().select()` bajo RLS falla si la política de SELECT aún no te alcanza.**
   Al crear una conversación todavía no participas en ella, así que el `RETURNING` vuelve
   vacío. Generar el id con `crypto.randomUUID()` antes de insertar.
+- ⚠️ **Supabase corta cada consulta en 1.000 filas (`max_rows`) y no avisa**: devuelve
+  las primeras mil como si fueran todas. Pasó con la transcripción —FOR-002 tiene 2.723
+  turnos y la página enseñaba 1.000— y con los scripts que renombran hablantes, que leían
+  los ids de una vez y dejaban el resto con el nombre viejo. Lo que pueda pasar de mil se
+  pagina con `.range()`; un `update` masivo va en tandas hasta que no quede nada que
+  coincida; y para contar, `count: 'exact', head: true`, nunca el largo del arreglo.
 - Un módulo `'use server'` solo puede exportar funciones async. Las constantes
   compartidas van aparte — por eso existe `lib/storage.ts`.
 - Los tipos de ruta (`PageProps<'/…'>`) se generan: tras añadir una ruta, correr
@@ -538,10 +549,13 @@ npm run sembrar:horas                       # el registro de horas, partida por 
 npm run sembrar:horas -- --limpiar          # y borra las que ya no están en el archivo
 npm run importar:padron                     # las 276 personas de Capital Humano
 npm run importar:padron -- --sedes          # el reparto crudo por centro de costo
-npm run informe:estructura                  # las 14 secciones y los anexos que se generan solos
+npm run informe:estructura                  # las 12 secciones: genera las suyas y numera las demás
 npm run expediente                          # el dossier de trazabilidad, a Insumos/ · SOLO consultores
 npm run sembrar:procesos                    # el inventario del taller a la base, para el mapa
 npm run sembrar:procesos -- --revisar       # dice qué sembraría, sin escribir
+npm run sembrar:circuitos                   # los dibujos de las secciones 9 y 11, del taller
+npm run sembrar:circuitos -- --revisar      # dice qué sembraría, sin escribir
+npm run respaldar:informe                   # el informe, sus talleres y los circuitos a disco
 npm run generar:guias                       # las 3 guías de entrevista adaptadas a Iberia
 ```
 
@@ -676,11 +690,9 @@ El armazón se comprimió de 15 a 12 el 18 de septiembre de 2026, y cada fusión
   `{cap:slug}` y el generador **avisa y falla** si una apunta a un capítulo que ya no existe —
   lo cazó tres veces ese mismo día.
 
-- **Los tres anexos se regeneran siempre** de la base: sesiones, catálogo de hallazgos e
-  inventario de sistemas. Son el reflejo del dato, no prosa; si alguien los edita a mano, la
-  próxima corrida los pisa, y así debe ser.
-- **Las secciones de prosa se escriben solo si están vacías.** En cuanto alguien las toca
-  desde el editor, el editor manda y el script no las vuelve a tocar.
+- **Lo que está en `GENERADAS` se regenera siempre** desde el taller y la base: si alguien lo
+  edita a mano, la próxima corrida lo pisa, y así debe ser. **Tres secciones no están ahí** —ver
+  la parte de arquitectura, abajo— y en esas el editor manda.
 - **Todo entra sin publicar.** Un lector de Iberia solo ve lo publicado, y no se publica
   nada mientras los hallazgos que lo sostienen sigan en `propuesto`.
 - 🔴 **El informe va sin citas, sin códigos de sesión y sin nombres.** Decisión del cliente
@@ -712,12 +724,47 @@ El armazón se comprimió de 15 a 12 el 18 de septiembre de 2026, y cada fusión
   - **El ancla se calcula con el mismo `github-slugger` que el generador.** Construirla a
     mano dejaría los veinte enlaces apuntando a la nada, y sin error visible.
 
-- Tres secciones existen por una razón que conviene no perder: **«Dónde no va la IA»**
-  porque la propuesta promete decir «dónde interviene la IA y dónde no», y porque buena
-  parte de los hallazgos se resuelve parametrizando el ERP y no con un modelo; **«La
-  decisión»** porque la cláusula 7 hace de este documento la condición para pasar a Fase 2 y
-  ninguna sección era la decisión; y **«De quién depende cada proceso»** porque el hallazgo
-  más repetido del levantamiento no es tecnológico.
+### La parte de arquitectura: los circuitos y el sistema Iberia
+
+Rehecha el 24 de septiembre de 2026, con Gabriel. **09 Los circuitos del negocio → 10 Las
+oportunidades → 11 La arquitectura de IA: el sistema Iberia → 12 La ruta de construcción.**
+Primero dónde espera el trabajo y por dónde viaja el dato; después el plano y el orden para
+construirlo.
+
+- **La arquitectura es una decisión, no un catálogo de capas.** JD se queda como **registro
+  contable y fiscal**, y delante va el **sistema Iberia: un espejo de JD** que *obtiene* —una
+  capa de actualización continua lee la base sin tocar el ERP—, donde se *trabaja* —captura,
+  flujos, planificación, conciliación, tableros, IA— y que *postea* en JD lo que tiene
+  consecuencia contable, **por el Orchestrator, como EXA**. La explosión de materiales corre en
+  el espejo, leyendo fórmulas e inventario de JD. Si el espejo se cae, JD sigue facturando.
+- **Es la recomendación de los consultores y nombra productos concretos**, con licencias a
+  nombre de Iberia y **sin costos**. Tecnología confirma cada pieza en el paso 0.
+- **«Dónde no va la IA» salió como sección.** Lo que prometía —decir dónde interviene la IA y
+  dónde no— lo dice ahora cada módulo, capacidad por capacidad: **17 de 47 son IA**. Vender como
+  IA un formulario bien hecho es lo que cuesta la credibilidad el día de la demostración.
+- **Qué aprueba el comité** vive en «La ruta de construcción»: la cláusula 7 hace de este
+  documento la condición para pasar a Fase 2. La Fase 2 que se recomienda es **el paso 0 y la
+  ola 1** (Compras, Comercial y Finanzas); la ruta va por olas y dependencias, sin fechas.
+- ⚠️ **`circuitos`, `arquitectura-ia` y `hoja-de-ruta` se escriben en Supabase, no en el
+  generador.** No están en `GENERADAS`: el script solo les pone título, número y orden. Su
+  prosa se redactó en `contenido/circuitos/secciones/*.md` y se cargó una vez; desde ahí manda
+  el editor. **Todo lo que el informe documenta tiene que existir en la base**, no solo en el
+  código ni en un archivo local.
+- **Los dibujos salen de tres tablas**, con RLS: `informe_circuito_puntos` (12 puntos del
+  flujo y 15 de sistemas), `informe_modulos` (los nueve módulos del espejo) e
+  `informe_circuito_textos`. Se siembran desde `contenido/circuitos/circuitos.json` con
+  **`sembrar:circuitos`**, que comprueba la coherencia del taller antes de escribir y borra lo
+  que ya no está en él: **el taller manda**, como en `sembrar:procesos`.
+  `components/circuitos-informe.tsx` solo guarda geometría, porque el repositorio es público.
+- **Los dos dibujos se enlazan entre sí.** Un punto dice qué módulo lo atiende
+  (`/informe/arquitectura-ia?modulo=M4#espejo`) y un módulo, qué puntos destapa
+  (`/informe/circuitos?punto=T2#circuitos`). La página los pinta por slug (`CON_CIRCUITOS`),
+  por lo mismo que `PLEGABLES`, y **solo el dibujo va ancho**: a todo el ancho, la prosa salía
+  a 150 caracteres por línea.
+- ⚠️ **Un tipo de destape nuevo necesita su rótulo en `DESTAPE`**, o sale como etiqueta vacía
+  sin error. `sembrar:circuitos` falla si falta.
+- **`respaldar:informe` guarda también las tres tablas y el taller de los circuitos**, que no
+  está en git.
 
 ## Los hallazgos
 

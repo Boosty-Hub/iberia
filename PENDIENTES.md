@@ -217,9 +217,10 @@ las ~25 entrevistas que compromete la cláusula 5. No es casualidad y conviene d
 Diez sesiones en una jornada, dos pistas simultáneas. **Salió casi tal como se propuso a
 Martha**, con dos cambios:
 
-- 🔴 **Yelitza Pérez, de Crédito y Cobranza, no vino.** Jesús lo deja dicho al cerrar
-  Contabilidad: «como no está Yaylitza, no tengo la presión…». Es **la puerta que más veces
-  nombra la ronda 1** —la liberación que comprime el despacho— y sigue sin levantar.
+- **Yelitza Pérez, de Crédito y Cobranza, no vino.** Jesús lo deja dicho al cerrar
+  Contabilidad: «como no está Yaylitza, no tengo la presión…». Era **la puerta que más veces
+  nombra la ronda 1** —la liberación que comprime el despacho—. ✅ *Se entrevistó el 10 de
+  septiembre (`ENT-023`).*
 - La fila de **S4** se dio en dos sesiones en vez de una, así que la cuenta cerró en diez.
 
 | Pista | Código | Quién | Duración |
@@ -243,16 +244,16 @@ los 60 planificados, y ninguna se quedó a medias. Las cuatro cortas —38, 36, 
 
 | | Quién | Qué cierra |
 |---|---|---|
-| 1 | **Alberto García-Ramos** · Gerencia General | **E1 · Dirección y Gobierno** |
-| 2 | **Antonio Sorrentino** · Dirección de Comercialización | **E2 · Planificación Comercial** |
-| 3 | **Arianna González** y **Martha E. Álvarez** | **O6 · Comercialización y Ventas** |
-| 4 | **Martha Fuentes** · Tecnología de la Información | **S2**, y con él el **inventario de sistemas**. Va de última, para validar lo que dijeron los demás |
-| 5 | **Yelitza Pérez** · Crédito y Cobranza | Lo que falta de **S1** |
+| 1 | 🔴 **Alberto García-Ramos** · Gerencia General | **E1 · Dirección y Gobierno**. Su sesión del 17 de agosto (`FOR-001`) fue formación, no entrevista |
+| 2 | ✅ ~~Antonio Sorrentino~~ · Dirección de Comercialización | **E2** · `ENT-025`, 11 sep |
+| 3 | ✅ ~~Arianna González y Martha E. Álvarez~~ | **O6** · `ENT-033` y `ENT-031`, 15 sep |
+| 4 | ✅ ~~Martha Fuentes~~ · Tecnología de la Información | **S2** e inventario de sistemas · `ENT-020`, 10 sep, con `ENT-021` y `ENT-022` de su equipo |
+| 5 | ✅ ~~Yelitza Pérez~~ · Crédito y Cobranza | Lo que faltaba de **S1** · `ENT-023`, 10 sep |
 
-⚠️ **Falta agendarlas.** Cuatro son en Caracas y una en Cagua; con el mismo formato de dos
-pistas cabe en una jornada y media. **Es lo que hay que pedir esta semana**: el
-levantamiento vence el 7 de noviembre pero alimenta el Documento de Arquitectura, que
-vence el 6 de diciembre y del que depende que haya Fase 2.
+*(Actualizado el 24 de septiembre: la tabla seguía dando por pendientes cuatro sesiones
+hechas entre el 10 y el 15.)* **Queda Alberto**, y `ENT-029` —el Coordinador de
+Distribuidores— está programada y sin hacer. El levantamiento vence el 7 de noviembre y
+alimenta el Documento de Arquitectura, que vence el 6 de diciembre.
 
 ⚠️ **Y hay dos personas de la lista original que conviene no perder de vista**: Vasco De
 Freitas, que el padrón registra como **Director Gerente** (ficha 5001) y que en `ENT-013`
@@ -299,7 +300,7 @@ distintos del mismo insumo, y el manual de macroprocesos no está en la propuest
 | Qué falta | De quién |
 |---|---|
 | 🔴 **Cosechar los hallazgos de la ronda 2.** Son 6.605 turnos de las áreas que la ronda 1 no tocó —el dinero, la gente, las compras por dentro, el laboratorio, la seguridad y los servicios generales— y **no hay ni un hallazgo cargado de ellas**. El informe está construido sobre 236 observaciones que son todas de la cadena física | **Boosty** |
-| 🔴 **Agendar lo que falta**: las cuatro de Caracas y Crédito y Cobranza. Con dos pistas cabe en una jornada y media | Martha Fuentes agenda · Gabriel, Jesús y Ruth ejecutan |
+| 🔴 **Agendar lo que falta**: la entrevista de Alberto (E1) y hacer `ENT-029`. *Las cuatro de Caracas y Crédito y Cobranza se hicieron entre el 10 y el 15 de septiembre* | Martha Fuentes agenda · Gabriel, Jesús y Ruth ejecutan |
 | ✅ ~~Agendar la ronda 2~~ **Hecha el 27 de agosto**, diez sesiones en una jornada | |
 | 🟡 **El consentimiento de grabación.** En la ronda 1 se pidió en 1 de 8. En la ronda 2 la pista B ya abre diciendo «el proceso es todo confidencial, esto es solamente para nosotros» —`ENT-018`— y en `ENT-017` la entrevistada misma lo confirma. **Falta que quede en las diez y con la frase completa**: qué se graba, para qué y quién lo oye | Gabriel, Jesús y Ruth |
 | 🔴 **Cero documentos pedidos en 8 entrevistas.** Hay nueve artefactos nombrados y no recogidos —el Excel de explosión de Rafael, el maestro de fórmulas de Maury, el listado de 430 equipos, el tabulador de fletes, el plano del almacén—. Se pueden recuperar con un correo esta semana | Gabriel y Ruth |
@@ -376,12 +377,11 @@ todo de Fase 2 y no bloquea nada de la Fase 1:
 
 ## 7 · Documento de Arquitectura de IA · **vence 6 de diciembre**
 
-**13 secciones, todas en blanco y ninguna publicada.** El 16 de septiembre Jesús mandó
-vaciar el documento entero —los 155.232 caracteres eran relleno anterior al procesamiento de
-las entrevistas— y rehacer el armazón: tres partes, sin anexos, con el índice a la izquierda.
-Está respaldado en `Insumos/Respaldo_Informe_2026-09-16_antes-de-vaciar` y la restauración
-está probada. **Ninguna sección se autogenera**: las generadoras quedaron desconectadas a
-propósito.
+**12 secciones escritas y ninguna publicada.** *(Corregido el 24 de septiembre: aquí decía
+«13 secciones, todas en blanco», que era el estado del 16.)* La parte de arquitectura se
+rehízo el 24 con Gabriel: **los circuitos del negocio, la arquitectura del sistema Iberia —JD
+como registro y un espejo delante— y la ruta de construcción por olas.** Esas tres se
+escriben en Supabase; el resto lo genera `informe:estructura` desde los talleres de Jesús.
 
 🔴 **Y lo que hoy le falta al documento no es estructura: es la mitad administrativa de la
 empresa.** Los 28 hallazgos redactados salen todos de la cadena física, porque son los
@@ -397,8 +397,12 @@ el comité antes de continuar con las fases siguientes»*.
 | Qué falta | De quién |
 |---|---|
 | ~~Cerrar la estructura~~ **Rehecha el 16 de septiembre: 13 secciones en blanco.** Sin anexos; lo que era anexo se volvió sección, pegado al argumento que sostiene. El informe por área lo absorbe «Las fichas de proceso» | ✅ |
-| **Escribir las trece.** Empezando por las cinco que salen del dato y hoy están desconectadas —mapa de procesos, fichas, cifras, inventario de sistemas y hallazgos—: reconectarlas es devolver su entrada a `GENERADAS` en `estructura-informe.mjs` | **Boosty** |
-| ⚠️ **Decidir dónde vive «qué aprueba el comité».** La sección «La decisión» se eliminó a petición de Jesús, y con ella el único sitio donde eso estaba escrito | Gabriel decide |
+| ~~Escribir las trece~~ **Escritas: son 12** desde que el armazón se comprimió el 18 de septiembre | ✅ |
+| ~~Decidir dónde vive «qué aprueba el comité»~~ **En «La ruta de construcción»**, bajo «Lo que se aprueba en diciembre»: cinco cosas y no más | ✅ |
+| 🔴 **Jesús: hacer `git pull` antes de volver a correr `informe:estructura`.** El generador cambió el 24: «Dónde no va la IA» ya no existe y entraron los circuitos. Y en sus talleres hay que corregir tres cosas, que se parcharon en la base pero **la próxima corrida las vuelve a pisar**: la referencia `{cap:donde-no-va-la-ia}` de **riesgo-continuidad** («se trata en el capítulo 11») y la de **trabas** («el capítulo 11 separa, módulo por módulo, lo que es IA de lo que no»); y el cierre de **oportunidades**, que dice que la sábana de compras «es parametrizar el ERP» y que la requisición «depende de que el MRP corra» — la decisión ahora es que la explosión corre en el espejo. Los `{cap:oportunidades}` se renumeran solos | **Jesús** · Gabriel le avisa |
+| **Leer y ajustar la prosa de las secciones 9, 11 y 12** antes de publicar. Es la recomendación de los consultores con productos concretos, y la firman Gabriel y Jesús | Gabriel y Jesús |
+| **Contrastar la arquitectura con la Gerencia de Tecnología antes del comité**: el usuario de solo lectura en DB2, qué operaciones expone el Orchestrator y con qué usuario de servicio, qué tablas necesitan tiempo real. Si Tecnología no la hace suya, el paso 0 no arranca | Gabriel con la Gerencia de TI |
+| 🔴 **Decidir dónde vive el espejo: en la planta o en la nube.** Es la única decisión técnica que la ruta pide antes de diciembre, porque sin ella el paso 0 no puede empezar el día que se apruebe | **Iberia** · la Gerencia de TI |
 | ~~Cosechar la ronda 2~~ **Hecho el 16 de septiembre: 394 hallazgos, 37 de 42 sesiones.** Quedan fuera ENT-005 (sin consentimiento), ENT-029 (sin hacer) y las dos formaciones más la reunión con la agencia, que no contienen hallazgos de proceso | ✅ |
 | 🔴 **Validar los hallazgos con Iberia. Es el paso que bloquea publicar.** De los 394, **solo 2 están validados**: nada se publica mientras los que sostienen una sección sigan en «propuesto», y validar lo hace quien estuvo en la entrevista, no nosotros. Si no arranca ya, es el cuello de botella de diciembre | **Iberia**, con Gabriel |
 | ⚠️ **Identificar a los hablantes de `SES-002`** (siete sin nombre) y parte de `SES-005`. De ahí salen hallazgos de gobierno cuya cita es literal pero que no se pueden atribuir por nombre. Quien estuvo en la sala los reconoce de una | Gabriel o Martha |
@@ -409,18 +413,34 @@ el comité antes de continuar con las fases siguientes»*.
 > ⚠️ **Lo que más va a costar defender.** De los 236 hallazgos, buena parte no se arregla
 > con IA: se arregla parametrizando JD Edwards, dando un permiso o capturando un dato que
 > hoy nadie captura. Si el documento vende todo eso como inteligencia artificial, el
-> primero que lo lea con cuidado nos lo tumba. Por eso la sección de «dónde no va la IA»
-> no es un gesto de honestidad: es lo que sostiene el resto del documento.
+> primero que lo lea con cuidado nos lo tumba. Por eso «La arquitectura de IA» separa,
+> módulo por módulo, lo que es IA de lo que no —17 de 47 capacidades—: no es un gesto de
+> honestidad, es lo que sostiene el resto del documento. *(Hasta el 24 de septiembre eso lo
+> hacía la sección «Dónde no va la IA», que salió del armazón.)*
 
 ---
 
 ## El dashboard — lo que hay que arreglar
 
-- ⚠️ **`/dashboard/hallazgos` da un error de hidratación** («some attributes of the server
-  rendered HTML didn't match»). Lo caza `npm run capturar` y es la única página que lo da.
-  No rompe nada visible, pero es la página desde la que se validan los hallazgos, que es el
-  paso que desbloquea el informe. Detectado el 16 de septiembre; **no lo causó el armazón**
-  —esa página no renderiza markdown— y no se persiguió para no mezclarlo con el informe.
+- ~~`/dashboard/hallazgos` da un error de hidratación~~ ✅ **Ya no aparece** (24 de
+  septiembre): `capturar` sale limpio en producción y en desarrollo.
+- ⚠️ **Paginar el listado de hallazgos.** Con 394 la página pesa **2 MB de HTML** —la más
+  pesada del panel, aunque todavía carga en 0,8 s— y va a crecer con cada cosecha. Y a los
+  **1.000 se corta sin avisar**, por el tope de Supabase: el listado, los contadores del
+  panel y los del informe dirían 1.000 cuando fueran más. Hoy no se llega; conviene
+  resolverlo antes de que la cosecha lo acerque.
+- **La búsqueda dentro de las transcripciones se corta en 1.000 coincidencias.** Pide los
+  turnos que contienen el término para sacar de qué sesiones son; con una palabra muy común
+  puede dejar sesiones fuera del resultado. Se arregla preguntando sesión por sesión.
+- **Cinco suites siguen pidiendo contraseña** —`probar:acceso`, `probar:paginas`,
+  `probar:canal`, `capturar:canal` y `probar:importacion`— y por eso no corrieron en la
+  verificación del 24. `capturar` y las del curso ya acuñan la sesión con la clave de
+  servicio; estas cinco tienen que hacer lo mismo, o seguirán saltándose.
+- *Velocidad, cuando haya despliegue:* cada página valida la sesión dos veces —el proxy y
+  `requerirSesion`— y el índice del curso encadena ocho consultas una detrás de otra.
+  Deduplicar con `cache()` y paralelizar ahorra dos o tres vueltas por página. Con el
+  servidor en la región de Supabase (ver `DESPLIEGUE.md`) pesa mucho menos, así que va
+  después de desplegar y de medir allá.
 
 ---
 
@@ -436,7 +456,7 @@ el comité antes de continuar con las fases siguientes»*.
 | **Cadencia de las reuniones de seguimiento y gobierno.** La cláusula 10 nos obliga a asistir «a las acordadas» y a entregar «la reportería pactada». No consta que estén acordadas — pero el **comité de comunicaciones** propuesto el 27 de agosto es la vía más corta para cerrarlo: ya tiene las tres patas y solo le falta cadencia | Gabriel con Alberto | |
 | **Designación del liderazgo interno del proyecto** (cláusula 7). Martha Fuentes fue nombrada «coordinadora»; hay que verificar si eso lo cierra o si falta la figura transversal | Alberto García-Ramos | |
 | **Responsable interno de comunicación** (cláusula 10) | Alberto García-Ramos | |
-| **Regenerar `AZURE_SPEECH_KEY`**, que quedó visible en una captura | **Boosty** | |
+| 🔴 **Pegar en `.env.local` una `AZURE_SPEECH_KEY` que funcione.** La que hay **ya no autentica**: el 24 de septiembre Azure devolvió 401 en las veinte regiones probadas y en el endpoint propio del recurso. Lo más probable es que se hizo lo que pedía esta fila —regenerarla, porque quedó visible en una captura— y no se copió la nueva. Mientras tanto **la devolución de Ajito sale solo escrita y las notas de voz no se transcriben**: `probar:ajito` dio 8 de 8 contestadas y 0 con audio. Consola de Azure → recurso `industriasiberiait-9652-resource` → Keys and Endpoint | **Boosty**, quien tenga la consola de Azure | Antes de enseñar el curso a nadie |
 | **Apagar los JWT legacy en Supabase.** El código no los usa; falta apagarlos en el panel. Antes, comprobar que nada fuera de este repositorio los use | **Boosty** | |
 | **Registrar los certificados en Capital Humano** cuando llegue la Fase 2 | Gustavo Carballo | |
 
