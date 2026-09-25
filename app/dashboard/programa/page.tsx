@@ -12,6 +12,7 @@ import {
   IMPUTACIONES,
   IMPUTACION_DETALLE,
   IMPUTACION_TITULO,
+  LO_QUE_TRAJO_EL_MES,
   ORDEN_ENTREGABLES,
   ORDEN_PERFILES,
   PERFILES,
@@ -34,7 +35,7 @@ import { TIPOS_SESION, type TipoSesion } from '@/lib/types'
 import { formatFecha } from '@/lib/utils'
 import { FormularioHoras } from './formulario-horas'
 
-export const metadata: Metadata = { title: 'El programa' }
+export const metadata: Metadata = { title: 'Consumos y línea de tiempo' }
 
 /**
  * ⚠️ **Esta página la lee Iberia**, no solo el equipo de Boosty. Es la vista que
@@ -196,17 +197,23 @@ function Hilo({ eventos, marcarRiesgo }: { eventos: Evento[]; marcarRiesgo: bool
             {delMes.map((ev) => {
               const futuro = (ev.fecha ?? '') > HOY
               const enRiesgo = marcarRiesgo && ev.estado === 'en_riesgo'
+              // Lo que tenía fecha y no se ha hecho: «pendiente», en neutro. Es
+              // la misma regla de «nada de alarmas» —el plazo ya lo dice—, pero
+              // sin rotularlo «previsto» con una fecha que ya pasó.
+              const pendiente = !futuro && ev.estado !== 'hecho' && ev.estado !== 'cancelado'
               return (
                 <li key={`${ev.origen}-${ev.id}`} className="relative pb-6 last:pb-0">
                   <span
                     className={`absolute top-1.5 -left-[27px] h-2.5 w-2.5 rounded-full border-2 border-white ${
-                      enRiesgo ? 'bg-amber-400' : futuro ? 'bg-marca-300' : 'bg-acento-500'
+                      enRiesgo ? 'bg-amber-400' : futuro || pendiente ? 'bg-marca-300' : 'bg-acento-500'
                     }`}
                   />
                   <p className="text-xs text-marca-500">{formatFecha(ev.fecha)}</p>
                   <p className="mt-0.5 flex flex-wrap items-baseline gap-2">
                     <span className="font-semibold text-marca-900">{ev.titulo}</span>
-                    {ev.duracion_minutos && (
+                    {/* La duración, solo de lo que ocurrió: la de una sesión
+                        programada es la que se reservó, no la que tuvo. */}
+                    {ev.duracion_minutos && ev.estado === 'hecho' && (
                       <span className="text-xs text-marca-500">{ev.duracion_minutos} min</span>
                     )}
                   </p>
@@ -223,13 +230,14 @@ function Hilo({ eventos, marcarRiesgo }: { eventos: Evento[]; marcarRiesgo: bool
                     {/* «En riesgo» es un juicio de seguimiento interno: para el
                         cliente, un previsto con su fecha ya dice lo que hay que
                         saber. La urgencia se transmite con el plazo. */}
-                    {ev.estado === 'previsto' && (
+                    {pendiente && !enRiesgo && <Insignia tono="neutro">Pendiente</Insignia>}
+                    {!pendiente && ev.estado === 'previsto' && (
                       <Insignia tono="neutro">{ESTADOS_HITO.previsto}</Insignia>
                     )}
                     {enRiesgo && (
                       <Insignia tono={TONO_ESTADO.en_riesgo}>{ESTADOS_HITO.en_riesgo}</Insignia>
                     )}
-                    {!marcarRiesgo && ev.estado === 'en_riesgo' && (
+                    {!marcarRiesgo && !pendiente && ev.estado === 'en_riesgo' && (
                       <Insignia tono="neutro">{ESTADOS_HITO.previsto}</Insignia>
                     )}
                   </div>
@@ -264,11 +272,13 @@ export default async function ProgramaPage() {
   // «vence el aviso de renovación» antes que «se entrega la arquitectura»
   // invierte la historia, y las dos caen el 6 de diciembre.
   const orden = (e: Evento) => `${e.fecha}-${e.tipo === 'contrato' ? '1' : '0'}`
-  const porVenir = eventos
-    .filter((e) => (e.fecha ?? '') > HOY)
-    .sort((a, b) => orden(a).localeCompare(orden(b)))
-  const hecho = eventos.filter((e) => (e.fecha ?? '') <= HOY)
-  const sesionesDeTrabajo = eventos.filter((e) => e.origen === 'sesion').length
+  // ⚠️ **Lo que viene es lo que no se ha hecho, no lo que tiene fecha futura.**
+  // Separando por fecha, una sesión programada que no ocurrió y un entregable con
+  // el plazo vencido caían en «Lo hecho»: ENT-029 salía hecha con sus 60 minutos.
+  const yaOcurrio = (e: Evento) => (e.fecha ?? '') <= HOY && (e.estado === 'hecho' || e.estado === 'cancelado')
+  const porVenir = eventos.filter((e) => !yaOcurrio(e)).sort((a, b) => orden(a).localeCompare(orden(b)))
+  const hecho = eventos.filter(yaOcurrio)
+  const sesionesDeTrabajo = eventos.filter((e) => e.origen === 'sesion' && e.estado === 'hecho').length
 
   // --- Consumo por mes --------------------------------------------------------
   // El reporte arranca en el mes más viejo con horas, aunque sea anterior a la
@@ -331,9 +341,6 @@ export default async function ProgramaPage() {
     horas: suma(aparte.filter((r) => imputacionDe(r) === imp)),
   }))
 
-  // Meses ya empezados: es contra eso que se mide el promedio de fase, no contra
-  // los cinco completos (cláusula 8, «como promedio dentro de cada fase»).
-  const mesesCorridos = meses.filter((m) => consumeBolsa(m) && m <= mesDe(HOY)).length
 
   // --- Quién dedicó las horas -------------------------------------------------
   const porPersona = new Map<string, { horas: number; perfiles: Set<Perfil> }>()
@@ -372,7 +379,7 @@ export default async function ProgramaPage() {
   return (
     <>
       <EncabezadoPagina
-        rotulo="El programa"
+        rotulo="Consumos y línea de tiempo"
         titulo="Cómo va el programa"
         descripcion={
           <>
@@ -406,15 +413,24 @@ export default async function ProgramaPage() {
           <strong>como promedio dentro de la fase</strong>: unos meses van por encima y
           otros por debajo, y lo que cuenta es el conjunto de los cinco.
         </p>
+        {/* Una línea por mes corrido, de `LO_QUE_TRAJO_EL_MES`: el párrafo único
+            que había envejecía en cuanto empezaba el mes siguiente. */}
+        <ul className="mt-3 space-y-1.5">
+          {meses
+            .filter((m) => consumeBolsa(m) && m <= mesDe(HOY) && LO_QUE_TRAJO_EL_MES[m.slice(0, 7)])
+            .map((m) => (
+              <li key={m}>
+                <strong className="capitalize">{nombreMes(m).replace(/ de \d{4}$/, '')}</strong> trajo{' '}
+                {LO_QUE_TRAJO_EL_MES[m.slice(0, 7)]}.
+              </li>
+            ))}
+        </ul>
         <p className="mt-3">
-          {mesesCorridos === 1 ? 'El primer mes' : `Los primeros ${mesesCorridos} meses`} de
-          la fase concentró el arranque: los dos rodajes de entrevistas en Cagua, la primera
-          formación de la directiva y el desarrollo del aplicativo cayeron todos aquí. De
-          aquí a diciembre el peso se mueve hacia la consultoría y la redacción del{' '}
-          <strong>Documento de Arquitectura de IA</strong>, que se entrega el{' '}
+          De aquí a diciembre el peso se mueve hacia la validación con las áreas y la entrega
+          del <strong>Documento de Arquitectura de IA</strong>, el{' '}
           {formatFecha(VENCE.arquitectura)}: el calendario se adelantó un mes respecto de la
-          propuesta para que el comité pueda decidir la continuidad con el documento en la
-          mano y no de memoria.
+          propuesta para que el comité pueda decidir la continuidad con el documento en la mano y
+          no de memoria.
         </p>
       </div>
 

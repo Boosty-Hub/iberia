@@ -304,7 +304,7 @@ const HORAS = [
     perfil: 'director_arquitecto',
     horas: 7,
     persona: 'Gabriel Montiel Toro',
-    entregable: 'formacion',
+    entregable: 'gestion',
     descripcion:
       'Formación uno a uno con la Gerencia General, en su oficina. 3 h 05 min grabadas de ' +
       'hora y media pedida + 3 h de preparación del ambiente y los ejemplos + traslado.',
@@ -313,7 +313,7 @@ const HORAS = [
     fecha: '2026-08-19',
     perfil: 'consultor_procesos',
     horas: 6,
-    persona: 'Gabriel Montiel Toro',
+    persona: 'Jesús Planas',
     entregable: 'levantamiento',
     descripcion:
       'Preparación del rodaje: guion de entrevista, reparto de las nueve en dos pistas y ' +
@@ -353,7 +353,7 @@ const HORAS = [
     fecha: '2026-08-22',
     perfil: 'consultor_procesos',
     horas: 12,
-    persona: 'Boosty',
+    persona: 'Jesús Planas',
     entregable: 'levantamiento',
     descripcion:
       'Lectura de las nueve entrevistas completas y extracción de los 236 hallazgos con su ' +
@@ -378,33 +378,52 @@ const HORAS = [
     fecha: '2026-08-25',
     perfil: 'consultor_procesos',
     horas: 5,
-    persona: 'Boosty',
+    persona: 'Jesús Planas',
     entregable: 'levantamiento',
     descripcion:
       'Preparación de la ronda 2: reparto de las diez en dos pistas, coordinación de agendas ' +
       'con planta, y la reubicación de la fila 5 al caer que Comercial y Mercadeo despachan ' +
       'desde Caracas.',
   },
+  // El 26 de agosto se partió desde el panel: la sala va a `formacion` y la
+  // preparación y el traslado, a `gestion`. Es el criterio para las formaciones.
   {
     fecha: '2026-08-26',
     perfil: 'director_arquitecto',
-    horas: 11,
+    horas: 4,
     persona: 'Gabriel Montiel Toro',
     entregable: 'formacion',
     descripcion:
-      'Sesión IA Petit Comité, la primera de las tres formaciones. 4 h 00 min grabadas + 4 h ' +
-      'de preparación —licencias, prueba del acceso, ejemplos por área— + ' +
-      `${VIA} h de traslado. La sala quedó en seis de Iberia y dos de Boosty.`,
+      'Sesión IA Petit Comité, la primera de las tres formaciones. 4 h 00 min grabadas. La ' +
+      'sala quedó en seis de Iberia y dos de Boosty.',
+  },
+  {
+    fecha: '2026-08-26',
+    perfil: 'director_arquitecto',
+    horas: 7,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'gestion',
+    descripcion:
+      'Preparación y traslado de la Sesión IA Petit Comité: licencias, prueba del acceso y ' +
+      'ejemplos por área (4 h) + 3 h de traslado.',
   },
   {
     fecha: '2026-08-26',
     perfil: 'consultor_procesos',
-    horas: 7,
+    horas: 4,
     persona: 'Amanda Leañez',
     entregable: 'formacion',
     descripcion:
       'Acompañamiento de la formación directiva en Caracas: apoyo en sala mientras cada ' +
-      `participante montaba su cuenta y su primer artefacto. 4 h de sala + ${VIA} h de traslado.`,
+      'participante montaba su cuenta y su primer artefacto. 4 h de sala.',
+  },
+  {
+    fecha: '2026-08-26',
+    perfil: 'consultor_procesos',
+    horas: 3,
+    persona: 'Amanda Leañez',
+    entregable: 'gestion',
+    descripcion: 'Traslado para el acompañamiento de la formación directiva en Caracas. 3 h.',
   },
   {
     fecha: '2026-08-27',
@@ -451,9 +470,283 @@ const HORAS = [
       'con su mapa de hablantes triangulado uno por uno, los nombres y cargos cotejados contra ' +
       'el padrón de Capital Humano, y las fichas de las quince personas nuevas.',
   },
+
+  // ===========================================================================
+  // MES 2 · septiembre. Decisión de Gabriel: el peso va en Jesús Planas, que
+  // condujo el levantamiento y lo estructuró —el mapa de procesos validado, la
+  // cosecha de hallazgos y el armazón del informe—. Estimadas el 25 de
+  // septiembre con la base de cada una; las del entrenamiento del 23 las dio
+  // Gabriel: de 7:00 a 16:00, ida y vuelta a Cagua incluida.
+  // ===========================================================================
+  {
+    fecha: '2026-09-09',
+    perfil: 'consultor_procesos',
+    horas: 4,
+    persona: 'Jesús Planas',
+    entregable: 'levantamiento',
+    descripcion:
+      'Preparación del tercer rodaje: agendas con la coordinación del programa, guías por área ' +
+      'para Tecnología de la Información, Crédito y Cobranza y la parte comercial, y el reparto ' +
+      'entre Cagua y Caracas.',
+  },
+  {
+    fecha: '2026-09-10',
+    perfil: 'consultor_procesos',
+    horas: 11,
+    persona: 'Jesús Planas',
+    entregable: 'levantamiento',
+    descripcion:
+      'Cuatro entrevistas en Cagua: la Gerencia de Tecnología de la Información con su ' +
+      'coordinación de redes y su análisis de sistemas, y Crédito y Cobranza. 5 h 49 min ' +
+      `grabadas + ${VIA} h de traslado + 2 h de espera entre citas y notas.`,
+  },
+  {
+    fecha: '2026-09-11',
+    perfil: 'consultor_procesos',
+    horas: 6,
+    persona: 'Ruth Velázquez',
+    entregable: 'levantamiento',
+    descripcion:
+      'Cinco entrevistas en Caracas: Ventas nacionales, Dirección de Comercialización, Cuentas ' +
+      'Clave, Mercadeo y Ventas, y Desarrollo Comercial. 3 h 38 min grabadas + 1 h de traslado ' +
+      'en la ciudad + 1,5 h de espera y notas.',
+  },
+  {
+    fecha: '2026-09-15',
+    perfil: 'consultor_procesos',
+    horas: 7,
+    persona: 'Ruth Velázquez',
+    entregable: 'levantamiento',
+    descripcion:
+      'Cuatro entrevistas en Caracas: Entrenamiento en Ventas, Mercadeo, Trade Marketing y ' +
+      'Desarrollo Comercial. 4 h 31 min grabadas + 1 h de traslado + 1,5 h de espera y notas.',
+  },
+  {
+    fecha: '2026-09-15',
+    perfil: 'consultor_procesos',
+    horas: 3,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'levantamiento',
+    descripcion:
+      'Entrevista en Caracas con el Canal de Distribuidores. 1 h 37 min grabados + 1 h de ' +
+      'traslado. La de la Coordinación de Distribuidores quedó programada.',
+  },
+  {
+    fecha: '2026-09-16',
+    perfil: 'desarrollador_ia',
+    horas: 3,
+    persona: 'Boosty',
+    entregable: 'levantamiento',
+    descripcion:
+      'Carga del tercer rodaje: catorce transcripciones con su mapa de hablantes y los nombres ' +
+      'y cargos cotejados contra el padrón.',
+  },
+  {
+    fecha: '2026-09-16',
+    perfil: 'consultor_procesos',
+    horas: 8,
+    persona: 'Jesús Planas',
+    entregable: 'levantamiento',
+    descripcion:
+      'Validación del mapa de procesos contra las 36 notas de entrevista: de 47 procesos N1 a ' +
+      '20 macroprocesos y 142 procesos vigentes —30 confirmados, 6 que no se ejecutan, 11 con ' +
+      'el dueño equivocado y cinco macroprocesos nuevos—, y el inventario V2.',
+  },
+  {
+    fecha: '2026-09-16',
+    perfil: 'consultor_procesos',
+    horas: 6,
+    persona: 'Jesús Planas',
+    entregable: 'levantamiento',
+    descripcion:
+      'Cosecha y selección de hallazgos de 29 sesiones: de 236 a 394, cada uno con su cita ' +
+      'contra el turno exacto de la transcripción, y los 42 que se desarrollan en el informe.',
+  },
+  {
+    fecha: '2026-09-16',
+    perfil: 'consultor_procesos',
+    horas: 4,
+    persona: 'Jesús Planas',
+    entregable: 'arquitectura',
+    descripcion:
+      'Rearmado del informe: se vació el borrador anterior a las entrevistas y se montó el ' +
+      'armazón en tres partes, por pares que afirman y respaldan.',
+  },
+  {
+    fecha: '2026-09-17',
+    perfil: 'consultor_procesos',
+    horas: 10,
+    persona: 'Jesús Planas',
+    entregable: 'arquitectura',
+    descripcion:
+      'Redacción y revisión de las secciones del levantamiento: las veinte fichas de proceso, ' +
+      'sistemas y estado del dato, inventario de sistemas, riesgo y continuidad, trabas y ' +
+      'hallazgos, con sus tablas.',
+  },
+  {
+    fecha: '2026-09-18',
+    perfil: 'consultor_procesos',
+    horas: 6,
+    persona: 'Jesús Planas',
+    entregable: 'arquitectura',
+    descripcion:
+      'La estructura final del informe: de quince secciones a doce, sin citas, códigos ni ' +
+      'nombres; la portada con los siete patrones; el mapa interactivo de procesos, y doce ' +
+      'encargos de pulido.',
+  },
+  {
+    fecha: '2026-09-22',
+    perfil: 'consultor_procesos',
+    horas: 2,
+    persona: 'Jesús Planas',
+    entregable: 'arquitectura',
+    descripcion:
+      'Reunión del equipo sobre el flujo de Iberia —de la venta a la factura y de la materia ' +
+      'prima al producto terminado— para alimentar la arquitectura. 1 h 42 min grabados.',
+  },
+  {
+    fecha: '2026-09-22',
+    perfil: 'consultor_procesos',
+    horas: 2,
+    persona: 'Ruth Velázquez',
+    entregable: 'arquitectura',
+    descripcion:
+      'Reunión del equipo sobre el flujo de Iberia, de la venta a la factura y de la materia ' +
+      'prima al producto terminado. 1 h 42 min grabados.',
+  },
+  {
+    fecha: '2026-09-22',
+    perfil: 'consultor_senior',
+    horas: 2,
+    persona: 'Carlos Quintana',
+    entregable: 'arquitectura',
+    descripcion:
+      'Reunión del equipo sobre el flujo de Iberia y el mapa del negocio que alimenta la ' +
+      'arquitectura. 1 h 42 min grabados.',
+  },
+  {
+    fecha: '2026-09-22',
+    perfil: 'director_arquitecto',
+    horas: 2,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'arquitectura',
+    descripcion:
+      'Conducción de la reunión del equipo sobre el flujo de Iberia: el mapa del negocio de ' +
+      'punta a punta para la arquitectura. 1 h 42 min grabados.',
+  },
+  // El entrenamiento de gerentes, la segunda de las tres formaciones. Con el
+  // criterio del 26 de agosto: la jornada en planta va a `formacion` y el
+  // traslado, a `gestion`. De 7:00 a 16:00 son 9 h: 6 en Cagua y 3 de vía.
+  {
+    fecha: '2026-09-23',
+    perfil: 'director_arquitecto',
+    horas: 6,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'formacion',
+    descripcion:
+      'Entrenamiento de gerentes en Cagua, la segunda de las tres formaciones. 6 h en planta ' +
+      'entre montaje, entrenamiento y cierre.',
+  },
+  {
+    fecha: '2026-09-23',
+    perfil: 'director_arquitecto',
+    horas: 3,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'gestion',
+    descripcion: `Traslado Caracas–Cagua para el entrenamiento de gerentes. ${VIA} h.`,
+  },
+  {
+    fecha: '2026-09-23',
+    perfil: 'consultor_procesos',
+    horas: 6,
+    persona: 'Ruth Velázquez',
+    entregable: 'formacion',
+    descripcion:
+      'Acompañamiento del entrenamiento de gerentes en Cagua: apoyo en sala mientras cada ' +
+      'gerente trabajaba con su cuenta. 6 h en planta.',
+  },
+  {
+    fecha: '2026-09-23',
+    perfil: 'consultor_procesos',
+    horas: 3,
+    persona: 'Ruth Velázquez',
+    entregable: 'gestion',
+    descripcion: `Traslado para el acompañamiento del entrenamiento de gerentes en Cagua. ${VIA} h.`,
+  },
+  {
+    fecha: '2026-09-23',
+    perfil: 'consultor_procesos',
+    horas: 6,
+    persona: 'Humberto',
+    entregable: 'formacion',
+    descripcion:
+      'Apoyo del entrenamiento de gerentes en Cagua: montaje del salón, equipos y apoyo en ' +
+      'sala. 6 h en planta.',
+  },
+  {
+    fecha: '2026-09-23',
+    perfil: 'consultor_procesos',
+    horas: 3,
+    persona: 'Humberto',
+    entregable: 'gestion',
+    descripcion: `Traslado para el apoyo del entrenamiento de gerentes en Cagua. ${VIA} h.`,
+  },
+  {
+    fecha: '2026-09-24',
+    perfil: 'director_arquitecto',
+    horas: 5,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'arquitectura',
+    descripcion:
+      'La arquitectura del sistema Iberia: la decisión de dejar JD como registro y construir ' +
+      'el espejo delante, la explosión de materiales en el espejo, y la revisión de los ' +
+      'circuitos y de la ruta de construcción.',
+  },
+  {
+    fecha: '2026-09-24',
+    perfil: 'desarrollador_ia',
+    horas: 5,
+    persona: 'Boosty',
+    entregable: 'arquitectura',
+    descripcion:
+      'Los circuitos del negocio y el espejo en 3D: la relectura de las entrevistas crudas, ' +
+      'las tres tablas que los sostienen y las secciones 9, 11 y 12 escritas en la base.',
+  },
+  {
+    fecha: '2026-09-25',
+    perfil: 'desarrollador_ia',
+    horas: 6,
+    persona: 'Boosty',
+    entregable: 'gestion',
+    descripcion:
+      'Verificación completa del aplicativo y de su velocidad; roles y permisos configurables ' +
+      'con su matriz, con el cierre de la escalada de privilegios; y el informe rediseñado ' +
+      'para escritorio y teléfono.',
+  },
 ]
 
 // -----------------------------------------------------------------------------
+
+// ⚠️ **Antes de escribir, lo que está solo en la base.** Las partidas se corrigen
+// desde el panel —el 26 de agosto se partió en sala y traslado, a tres se les
+// cambió la persona— y el archivo no se enteraba: volver a correrlo metía otra vez
+// la versión vieja al lado de la corregida, 18 h de más, y deshacía los cambios de
+// persona. Se cazó el 25 de septiembre, comparando antes de cargar septiembre.
+// Ahora, si la base tiene partidas que el archivo no conoce, no se escribe nada:
+// primero se pasan al archivo, o se borran con `--limpiar`.
+if (!revisar && !process.argv.includes('--limpiar') && !process.argv.includes('--forzar')) {
+  const { data: enBase } = await admin.from('registros_horas').select('fecha, descripcion, horas')
+  const conocidas = new Set(HORAS.map((r) => `${r.fecha}|${r.descripcion}`))
+  const ajenas = (enBase ?? []).filter((r) => !conocidas.has(`${r.fecha}|${r.descripcion}`))
+  if (ajenas.length) {
+    console.error(`\n✖ Hay ${ajenas.length} partidas en la base que este archivo no tiene:`)
+    for (const h of ajenas) console.error(`     · ${h.fecha}  ${h.horas} h  ${h.descripcion.slice(0, 70)}…`)
+    console.error('\n  Seguramente se corrigieron desde el panel. Pásalas al archivo antes de')
+    console.error('  cargar —si no, la versión vieja entra al lado de la corregida—, o bórralas')
+    console.error('  con --limpiar si de verdad sobran. --forzar escribe igual.\n')
+    process.exit(1)
+  }
+}
 
 let nuevas = 0
 let actualizadas = 0
@@ -542,14 +835,27 @@ const CUOTA = {
 console.log(`\n── Etapa anterior · Fase 0, no descuenta bolsa`)
 console.log(`   ${suma(previas)} h en ${previas.length} partidas`)
 
-console.log(`\n── Mes 1 · agosto, desde el 6`)
-for (const p of ['consultor_senior', 'director_arquitecto', 'consultor_procesos', 'desarrollador_ia']) {
-  const h = porPerfil[p] ?? 0
-  const d = h - CUOTA[p]
-  const señal = d === 0 ? '  = su cuota' : `  ${d > 0 ? '+' : '−'}${Math.abs(d)} sobre ${CUOTA[p]} h`
-  console.log(`   ${p.padEnd(22)} ${String(h).padStart(6)} h${señal}`)
-}
-console.log(`   ${'TOTAL'.padEnd(22)} ${String(suma(fase)).padStart(6)} h  de 107 h de bolsa`)
+// Un cuadro por mes, igual que la pantalla: la bolsa se administra como promedio
+// dentro de la fase, pero se factura y se reporta mes a mes.
+const NOMBRE_MES = { '08': 'agosto, desde el 6', '09': 'septiembre', '10': 'octubre', '11': 'noviembre', '12': 'diciembre', '01': 'enero' }
+const meses = [...new Set(fase.map((r) => r.fecha.slice(0, 7)))].sort()
+meses.forEach((mes, i) => {
+  const delMes = fase.filter((r) => r.fecha.startsWith(mes))
+  const porPerfilMes = {}
+  for (const r of delMes) porPerfilMes[r.perfil] = (porPerfilMes[r.perfil] ?? 0) + r.horas
+  console.log(`\n── Mes ${i + 1} · ${NOMBRE_MES[mes.slice(5)] ?? mes}`)
+  for (const p of ['consultor_senior', 'director_arquitecto', 'consultor_procesos', 'desarrollador_ia']) {
+    const h = porPerfilMes[p] ?? 0
+    const d = h - CUOTA[p]
+    const señal = d === 0 ? '  = su cuota' : `  ${d > 0 ? '+' : '−'}${Math.abs(d)} sobre ${CUOTA[p]} h`
+    console.log(`   ${p.padEnd(22)} ${String(h).padStart(6)} h${señal}`)
+  }
+  console.log(`   ${'TOTAL'.padEnd(22)} ${String(suma(delMes)).padStart(6)} h  de 107 h de bolsa`)
+  const porPersona = {}
+  for (const r of delMes) porPersona[r.persona] = (porPersona[r.persona] ?? 0) + r.horas
+  const orden = Object.entries(porPersona).sort((a, b) => b[1] - a[1])
+  console.log(`   por persona: ${orden.map(([n, h]) => `${n} ${h}`).join(' · ')}`)
+})
 
 if (faseAparte.length) {
   console.log(`\n── Fuera de la bolsa · se factura aparte en la Fase 2`)

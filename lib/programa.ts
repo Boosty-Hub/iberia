@@ -165,6 +165,25 @@ export const VENCE: Record<Entregable, string | null> = {
   gestion: null,
 }
 
+/**
+ * En qué se fue cada mes, en una línea, para el resumen de arriba de la página.
+ *
+ * Es un mapa por mes y no un párrafo porque el párrafo envejecía: se escribió en
+ * agosto diciendo «el primer mes concentró el arranque» y en septiembre seguía
+ * diciendo lo mismo con el contador en dos. **Al cargar las horas de un mes, se
+ * añade su línea aquí.** Lo lee Iberia: se cuenta lo que se hizo, sin cifras de
+ * horas —esas van en el cuadro— y sin alarmas.
+ */
+export const LO_QUE_TRAJO_EL_MES: Record<string, string> = {
+  '2026-08':
+    'el arranque: los dos primeros rodajes de entrevistas en Cagua, la formación de la ' +
+    'directiva y el desarrollo del aplicativo',
+  '2026-09':
+    'el levantamiento y su estructura: el tercer rodaje, entre Cagua y Caracas, con el que se ' +
+    'pasó la meta de entrevistas; el mapa de procesos validado contra lo que contó la gente; la ' +
+    'formación de los gerentes, y el Documento de Arquitectura completo en borrador',
+}
+
 /** El orden en que se leen: por fecha de vencimiento, no por importancia. */
 export const ORDEN_ENTREGABLES: Entregable[] = [
   'comunicacion',

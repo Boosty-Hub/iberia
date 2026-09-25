@@ -102,6 +102,45 @@ const HITOS = [
     estado: 'previsto',
   },
 
+  // --- Septiembre ---------------------------------------------------------------
+  // Los rodajes y la formación de gerentes del 23 no van aquí: viven en
+  // `entrevistas` (el 23 es FOR-003) y la vista los une solos.
+  {
+    fecha: '2026-09-15',
+    titulo: 'El levantamiento pasa la meta: 33 entrevistas de ~25',
+    descripcion:
+      'Con el rodaje del 10 de septiembre en Cagua —Tecnología de la Información y Crédito y ' +
+      'Cobranza— y los del 11 y 15 en Caracas —la parte comercial—, el levantamiento llega a ' +
+      '33 entrevistas y cubre los veinte macroprocesos. Queda una más, la de la Coordinación de ' +
+      'Distribuidores, programada.',
+    tipo: 'hito',
+    entregable: 'levantamiento',
+    estado: 'hecho',
+  },
+  {
+    fecha: '2026-09-16',
+    titulo: 'El mapa de procesos, validado contra las entrevistas',
+    descripcion:
+      'De los 47 procesos del mapa de partida, 30 se confirmaron tal cual; seis no se ejecutan ' +
+      'y once tenían otro dueño. El mapa queda en 20 macroprocesos y 142 procesos vigentes, con ' +
+      'cinco macroprocesos que se ejecutan y no estaban en el papel.',
+    tipo: 'hito',
+    entregable: 'levantamiento',
+    estado: 'hecho',
+  },
+  {
+    fecha: '2026-09-24',
+    titulo: 'El Documento de Arquitectura, completo en borrador',
+    descripcion:
+      'Las doce secciones escritas: el levantamiento —el mapa de procesos, las veinte fichas, ' +
+      'los sistemas, el riesgo, dónde se traba el trabajo y los hallazgos— y la arquitectura: ' +
+      'los circuitos del negocio, las oportunidades, el sistema Iberia y su ruta de ' +
+      'construcción. Sigue en borrador hasta validar con cada área los hallazgos que lo sostienen.',
+    tipo: 'hito',
+    entregable: 'arquitectura',
+    estado: 'hecho',
+  },
+
   // --- Lo previsto, con el calendario adelantado ------------------------------
   {
     fecha: '2026-09-06',
@@ -118,20 +157,22 @@ const HITOS = [
     fecha: '2026-09-30',
     titulo: 'App de comunicación interna desplegada',
     descripcion:
-      'Revisada con Mercadeo y con su dominio definitivo, que hay que fijar antes del primer ' +
-      'envío de enlaces personales: el dominio va dentro de cada enlace, y cambiarlo después ' +
-      'obliga a volver a mandarlos.',
+      'Construida y funcionando en el ambiente de prueba. Para desplegarla falta la revisión ' +
+      'con Mercadeo y fijar el dominio definitivo antes del primer envío de enlaces personales: ' +
+      'el dominio va dentro de cada enlace, y cambiarlo después obliga a volver a mandarlos.',
     tipo: 'entregable',
     entregable: 'app',
-    estado: 'previsto',
+    // La revisión con Mercadeo no tiene fecha y sin ella no se despliega. Es
+    // marca interna: el lector de Iberia no ve «en riesgo».
+    estado: 'en_riesgo',
   },
   {
     fecha: '2026-10-31',
     titulo: 'Las tres formaciones dictadas y el chat organizacional andando',
     descripcion:
       'Directiva, gerentes y líderes, con las licencias corporativas a nombre de Iberia. ' +
-      'La primera se dictó el 26 de agosto en Caracas; faltan las dos siguientes y sus ' +
-      'fechas.',
+      'Van dos: la directiva, el 26 de agosto en Caracas, y los gerentes, el 23 de septiembre ' +
+      'en Cagua. Falta la tercera, con los líderes que escojan los gerentes, y su fecha.',
     tipo: 'entregable',
     entregable: 'formacion',
     estado: 'previsto',
@@ -140,10 +181,9 @@ const HITOS = [
     fecha: '2026-11-07',
     titulo: 'Las ~25 entrevistas cerradas, con su informe por área',
     descripcion:
-      'Van 19, en dos rodajes en Cagua. Lo que falta está en Caracas —Dirección y Gobierno, ' +
-      'Planificación Comercial, Comercialización y Ventas, y Tecnología de la Información— más ' +
-      'Crédito y Cobranza. Cabe en una jornada y media, y de ahí salen los informes de ' +
-      'levantamiento por área.',
+      'Las entrevistas ya están: 33 hechas y una programada, en tres rodajes —dos en Cagua y uno ' +
+      'repartido entre Cagua y Caracas—, con los veinte macroprocesos cubiertos. Lo que cierra el entregable es el ' +
+      'informe de levantamiento por área, que sale de los hallazgos validados.',
     tipo: 'entregable',
     entregable: 'levantamiento',
     estado: 'previsto',
@@ -152,9 +192,10 @@ const HITOS = [
     fecha: '2026-11-14',
     titulo: 'Inventario de sistemas, datos, equipos y conectividad',
     descripcion:
-      'Se arma con los sistemas, archivos y equipos que la propia gente nombra en las ' +
-      'entrevistas, cada uno con quién lo usa. Cierra con la sesión de Tecnología de la ' +
-      'Información, que va de última para validar lo que contaron las demás áreas.',
+      'Armado con los sistemas, archivos y equipos que la propia gente nombró en las ' +
+      'entrevistas, y cerrado con la sesión de Tecnología de la Información del 10 de ' +
+      'septiembre: 27 sistemas en ocho capas, cada uno con su dueño y su estado, dentro del ' +
+      'informe. Falta confirmarlo con las áreas.',
     tipo: 'entregable',
     entregable: 'inventario',
     estado: 'previsto',
@@ -175,7 +216,8 @@ const HITOS = [
     titulo: 'Documento de Arquitectura de IA al comité',
     descripcion:
       'El único entregable en firme de la Fase 1. La cláusula 7 lo hace condición para ' +
-      'pasar a la Fase 2: el comité tiene que aprobarlo antes de continuar.',
+      'pasar a la Fase 2: el comité tiene que aprobarlo antes de continuar. Está completo en ' +
+      'borrador desde el 24 de septiembre; lo que falta es validarlo con las áreas.',
     tipo: 'entregable',
     entregable: 'arquitectura',
     estado: 'previsto',
