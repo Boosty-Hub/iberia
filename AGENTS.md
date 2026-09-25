@@ -935,7 +935,9 @@ oportunidades → 10 La arquitectura de IA: el sistema Iberia → 11 La ruta de 
 - **Es la recomendación de los consultores y nombra productos concretos**, con licencias a
   nombre de Iberia y **sin costos**. Tecnología confirma cada pieza en el paso 0.
 - **«Dónde no va la IA» salió como sección.** Lo que prometía —decir dónde interviene la IA y
-  dónde no— lo dice ahora cada módulo, capacidad por capacidad: **17 de 47 son IA**. Vender como
+  dónde no— lo dice ahora cada módulo, capacidad por capacidad: **21 de 51 son IA**. *(Eran 17 de
+  47 hasta que las cuatro oportunidades de IA que no cabían entraron a su módulo, el 25 de
+  septiembre; las tres que esperan un dato lo dicen en la nota del módulo.)* Vender como
   IA un formulario bien hecho es lo que cuesta la credibilidad el día de la demostración.
 - **Qué aprueba el comité** vive en «La ruta de construcción»: la cláusula 7 hace de este
   documento la condición para pasar a Fase 2. La Fase 2 que se recomienda es **el paso 0 y la

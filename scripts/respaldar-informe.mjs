@@ -26,6 +26,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { mkdir, writeFile, readFile, cp, readdir } from 'node:fs/promises'
 import { execFileSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 
 const args = {}
@@ -74,7 +75,14 @@ if (args.restaurar) {
 }
 
 // --- Respaldar ---------------------------------------------------------------
-const SALIDA = args.salida ?? join('Insumos', `Respaldo_Informe_${hoy}`)
+// ⚠️ Un respaldo no pisa otro. El 25 de septiembre la segunda corrida del día
+// escribió encima de la primera —la de antes de reestructurar el informe— porque
+// la carpeta solo llevaba la fecha. Ahora, si ya existe, lleva la hora detrás.
+let SALIDA = args.salida ?? join('Insumos', `Respaldo_Informe_${hoy}`)
+if (existsSync(SALIDA)) {
+  const hora = new Date().toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Caracas' }).replace(':', '')
+  SALIDA = `${SALIDA}_${hora}`
+}
 
 const { data: secciones, error } = await admin
   .from('informe_secciones')

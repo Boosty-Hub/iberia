@@ -64,7 +64,7 @@ cláusula 5. Aquí solo lo urgente:
 
 ---
 
-## 25 de septiembre de 2026 · Sesión 42 — en línea, y el registro que estaba abierto
+## 25 de septiembre de 2026 · Sesión 42 — en línea, el registro que estaba abierto, y las cuatro que no cabían
 
 Encargo de Gabriel: entrar a Netlify con la credencial de `.env.local`, cargar las variables
 que hagan falta y dejar el sitio funcionando y público.
@@ -100,6 +100,26 @@ intento de alta devuelve `signup_disabled`, y `probar:supabase` ahora falla si s
 
 `capturar` contra producción, con sesión real: **14 páginas, cero errores de consola**, y el
 panel con los datos de la base. `DESPLIEGUE.md` se reescribió con cómo quedó.
+
+### Las cuatro oportunidades de IA, a su módulo
+
+Gabriel decidió que **las cuatro que no cabían entran a la arquitectura**: la foto del anaquel a
+Comercial, los audios de anomalía a Distribución, la ubicación al recibir a Calidad y la
+secuencia de corridas a Planta. El sistema pasa de **47 capacidades y 17 de IA a 51 y 21**, y
+fuera quedan cuatro oportunidades, ninguna de IA.
+
+⚠️ **Tres de las cuatro esperan un dato que no existe** —la captura en el punto de venta, el mapa
+de posiciones del almacén, las reglas de secuenciación escritas—, y **la del anaquel cae en la
+ola 1, que es la Fase 2 que se recomienda**. Para que eso no se lea como una promesa, cada módulo
+lleva una nota («entra al módulo, no a su primera entrega») y la arquitectura lo dice debajo de su
+tabla. Cambió el taller de circuitos y se volvió a sembrar; en la base, las oportunidades, la
+arquitectura y la ruta. Verificado en producción: las cuatro con su marca de IA y su nota, 16 de
+16; las oportunidades, 10 de 10.
+
+⚠️ **El respaldo de esta mañana pisó el de antes de reestructurar**: la carpeta de `Insumos/` solo
+llevaba la fecha. Ese estado sigue en `contenido/informe-v2/respaldo-antes-de-reestructurar.json`,
+y `respaldar:informe` ahora le pone la hora si la carpeta ya existe. El de antes de este cambio
+está en `Insumos/Respaldo_Informe_2026-09-25_antes-de-las-cuatro`.
 
 **Dónde quedamos.** En línea en **https://iberiavenezuela.netlify.app**. Antes del primer enlace
 personal falta elegir el dominio definitivo y probar `/entrar` con un teléfono de verdad; está
@@ -143,7 +163,7 @@ generador de Jesús**: se escribe en Supabase, como las otras seis.
   está entre las 17 capacidades de la arquitectura —la foto del anaquel, los audios del
   transporte, la ubicación al recibir, la secuenciación de corridas—. No se metieron a la fuerza:
   van aparte, con el módulo más cercano nombrado. Es decisión para Gabriel y Jesús si alguna
-  entra a un módulo.
+  entra a un módulo. *(Decidido el mismo día: entraron las cuatro. Ver sesión 42.)*
 - **Finanzas y Personas no traen ninguna oportunidad de la lista.** Sus módulos salen del
   circuito, no de lo que las áreas pidieron. Y la ola 3 guarda cinco de las doce que arrancan ya:
   va al final por lo físico, no por el dato.
@@ -246,7 +266,8 @@ corrió la verificación: se ajustó desde el panel después de la sesión 38. D
 `probar:supabase` 65 · `probar:permisos` 34 · carga, subíndice, salto y marcas 10 · roles 33 ·
 auditoría del informe en cuatro anchos: 52 páginas, 584 enlaces del índice y **0 rotos**, 0
 desbordes y 0 errores de consola · `tipos`, `lint` y `build` limpios. Respaldo antes de tocar la
-base en `Insumos/Respaldo_Informe_2026-09-25` y en `contenido/informe-v2/`.
+base en `contenido/informe-v2/respaldo-antes-de-reestructurar.json`. *(El de `Insumos/` del mismo
+día lo pisó otra corrida: ver sesión 42.)*
 
 **Dónde quedamos.** El informe completo en borrador con su orden nuevo. Falta que Gabriel y Jesús
 lean las secciones reescritas y confirmen los niveles, y que Jesús haga pull antes de volver a
@@ -422,7 +443,7 @@ Primero se armó un artefacto privado con los tres circuitos —flujo, sistemas 
   licencia corporativa— como recomendación de los consultores. **Sin costos.** Antes decía «no
   fija productos»; Gabriel pidió lo contrario.
 - **«Dónde no va la IA» salió** porque lo que prometía lo dice ahora cada módulo: 17 de 47
-  capacidades son IA. En palabras de Gabriel: ser claros en qué proceso se construye el sistema
+  capacidades son IA *(21 de 51 desde la sesión 42)*. En palabras de Gabriel: ser claros en qué proceso se construye el sistema
   y en cuál de esos procesos, con ese sistema, opera la IA.
 - **La Fase 2 que se recomienda es el paso 0 y la ola 1** (Compras, Comercial y Finanzas). El
   paso 0 cierra cuando el espejo cuadra con JD cuatro semanas seguidas.
