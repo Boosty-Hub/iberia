@@ -237,26 +237,21 @@ const MEDIO: Record<string, number> = { t0: 231.5, t1: 334.5, t2: 437.5, t3: 540
 const CHEVRONES: [number, number, number][] = [[231, 120, 0], [643, 120, 0], [990, 153, 40], [990, 367, 140], [90, 367, -140], [90, 153, -40]]
 
 /**
- * El nombre de la estación y, debajo, el área que la lleva. Arriba del anillo el
- * rótulo sube para dejarle sitio al área sin tocar la estación; abajo, el área va
- * detrás del nombre. Se pidió en la reunión del equipo del 25 de septiembre: «el
- * departamento responsable debería estar en el propio gráfico».
+ * El nombre de la estación y el área que la lleva. Se pidió en la reunión del
+ * equipo del 25 de septiembre: «el departamento responsable debería estar en el
+ * propio gráfico».
+ *
+ * ⚠️ **Arriba del anillo el área va encima del nombre, no debajo.** Debajo quedaba
+ * a la altura de las burbujas que cuentan los hallazgos de cada trombo, y la de la
+ * recepción tapaba «Almacén de». Abajo no pasa —ahí las burbujas quedan del lado de
+ * adentro del anillo— y el área va detrás del nombre.
  */
 function Rotulo({ x, nombre, area, abajo = false }: { x: number; nombre: string | string[]; area?: string | string[]; abajo?: boolean }) {
   const lineas = Array.isArray(nombre) ? nombre : [nombre]
   const areas = area ? (Array.isArray(area) ? area : [area]) : []
-  let y: number
-  let yArea: number
-  if (abajo) {
-    y = 444
-    yArea = 444 + lineas.length * 15 - 1
-  } else if (areas.length) {
-    y = 74 - (lineas.length - 1) * 15
-    yArea = 89
-  } else {
-    y = lineas.length > 1 ? 71 : 86
-    yArea = 0
-  }
+  const y = abajo ? 444 : lineas.length > 1 ? 71 : 86
+  // Abajo, detrás del nombre; arriba, terminando 14 px por encima de él.
+  const yArea = abajo ? 444 + lineas.length * 15 - 1 : y - 14 - (areas.length - 1) * 11
   return (
     <>
       {lineas.map((l, i) => <text key={l} className="circ-t-estacion" x={x} y={y + i * 15}>{l}</text>)}
@@ -463,7 +458,7 @@ export function CircuitosDelNegocio({
         <Lienzo>
           {vista === 'flujo' ? (
             <svg viewBox="0 0 1080 520" role="group" aria-label="El circuito del negocio con los puntos donde el flujo espera">
-              <Anillo id="flujo" areas={tf?.areas}>
+              <Anillo id="flujo" areas={tf?.areas} lanesTop={tf?.areas ? 22 : 36}>
                 <path className="circ-retorno" d={RETORNO} markerEnd="url(#flujo-flecha)" />
               </Anillo>
               {tf && (
