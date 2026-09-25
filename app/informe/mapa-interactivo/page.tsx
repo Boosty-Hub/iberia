@@ -1,8 +1,9 @@
 import GithubSlugger from 'github-slugger'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import { MapaInteractivo, type MacroDelMapa } from '@/components/mapa-interactivo'
-import { requerirSesion } from '@/lib/auth'
+import { esEditor, puede, requerirSesion } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 
 /**
@@ -24,8 +25,23 @@ export const metadata: Metadata = {
 const NIVELES = ['Estratégico', 'Operativo', 'Soporte']
 
 export default async function MapaInteractivoPage() {
-  await requerirSesion()
+  const sesion = await requerirSesion()
   const supabase = await createClient()
+
+  // ⚠️ El mapa es el inventario entero de procesos. Hasta el 25 de septiembre lo
+  // abría cualquiera con sesión, aunque el informe no tuviera nada publicado:
+  // un lector de Iberia veía por aquí lo que la sección 2 todavía no le
+  // mostraba. Ahora exige su permiso y, para quien no escribe, que la sección
+  // del mapa de procesos esté publicada y a su alcance (la RLS decide eso).
+  if (!puede(sesion, 'informe:mapa-interactivo')) notFound()
+  if (!esEditor(sesion.perfil)) {
+    const { data: puerta } = await supabase
+      .from('informe_secciones')
+      .select('slug')
+      .eq('slug', 'mapa-procesos')
+      .maybeSingle()
+    if (!puerta) notFound()
+  }
 
   const { data } = await supabase
     .from('macroprocesos')

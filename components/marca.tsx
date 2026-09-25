@@ -15,11 +15,15 @@ const ALTO_INTRINSECO = 362
 export function Marca({
   tono = 'claro',
   alto = 30,
+  compacta = false,
   className,
 }: {
   tono?: 'claro' | 'oscuro'
   /** Alto mostrado en píxeles. El ancho lo deriva el navegador. */
   alto?: number
+  /** En teléfono, sin la línea del programa: junto a los botones de una
+   *  cabecera se partía en dos renglones. */
+  compacta?: boolean
   className?: string
 }) {
   const oscuro = tono === 'oscuro'
@@ -42,7 +46,8 @@ export function Marca({
       <span
         className={cn(
           'text-[10px] leading-none font-medium tracking-[0.11em] uppercase',
-          oscuro ? 'text-white/55' : 'text-marca-500'
+          oscuro ? 'text-white/55' : 'text-marca-500',
+          compacta && 'hidden sm:block'
         )}
       >
         Programa de Adopción de IA

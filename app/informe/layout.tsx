@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import { cerrarSesion } from '@/app/login/actions'
-import { IconoPanel, IconoSalir } from '@/components/iconos'
+import { IconoEditar, IconoPanel, IconoSalir } from '@/components/iconos'
 import GithubSlugger from 'github-slugger'
 import { IndiceInforme, type EntradaIndice, type NivelIndice } from '@/components/indice-informe'
+import { MenuInforme } from '@/components/informe/menu-informe'
 import { Marca } from '@/components/marca'
-import { esEditor, requerirSesion } from '@/lib/auth'
+import { esEditor, puede, requerirSesion } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 
 /**
@@ -55,17 +56,19 @@ function subindice(slug: string, md: string | null): NivelIndice[] | undefined {
 }
 
 export default async function InformeLayout({ children }: LayoutProps<'/informe'>) {
-  const { perfil } = await requerirSesion()
-  const puedeEditar = esEditor(perfil)
+  const sesion = await requerirSesion()
+  const puedeEditar = esEditor(sesion.perfil)
   const supabase = await createClient()
 
-  // RLS ya filtra: los lectores de Iberia solo reciben las secciones publicadas.
+  // RLS ya filtra dos veces: por publicado (el lector solo recibe lo publicado)
+  // y por la casilla «ver» de su rol. El filtro de aquí repite la segunda para
+  // que el índice no dependa de que la política esté bien escrita.
   const { data: secciones } = await supabase
     .from('informe_secciones')
     .select('slug, numero, titulo, parte, contenido_md')
     .order('orden')
 
-  const todas = secciones ?? []
+  const todas = (secciones ?? []).filter((s) => puede(sesion, `informe:${s.slug}`))
   // Para el lector de Iberia, solo lo escrito: un índice lleno de vacíos no es
   // un informe. Para quien lo escribe, el armazón completo — si no, mientras las
   // secciones estén en blanco no hay forma de ver la estructura.
@@ -82,24 +85,34 @@ export default async function InformeLayout({ children }: LayoutProps<'/informe'
   }))
 
   return (
-    <div className="flex min-h-full flex-1 flex-col">
-      <header className="sticky top-0 z-20 border-b border-[var(--borde)] bg-white/95 backdrop-blur">
-        <div className="flex items-center justify-between gap-4 px-5 py-3 lg:px-8">
-          <Marca />
+    <div className="informe-cascara flex min-h-full flex-1 flex-col">
+      {/* La cabecera mide 60 px en todos los anchos: las anclas de las
+          secciones se corren esa altura (`scroll-margin-top` en `.prosa`). */}
+      <header className="sticky top-0 z-30 h-[60px] border-b border-[var(--borde)] bg-white/95 backdrop-blur">
+        <div className="flex h-full items-center gap-3 px-4 sm:px-6 lg:px-8">
+          <MenuInforme secciones={visibles} />
+          <Link href="/informe" aria-label="Portada del informe" className="flex min-h-10 min-w-0 items-center">
+            <Marca compacta alto={26} />
+          </Link>
 
-          <div className="flex items-center gap-2">
-            {puedeEditar && (
-              <Link href="/dashboard/informe" className="btn-neutro px-3 text-xs">
-                <IconoPanel className="h-4 w-4" />
+          {/* En teléfono, solo iconos de 40 px: con texto no cabían junto a la
+              marca y la partían en dos renglones. */}
+          <div className="ml-auto flex items-center gap-2">
+            {puedeEditar && puede(sesion, 'modulo:informe') && (
+              // En teléfono no: la sección ya trae su «Editar» junto a la miga de pan.
+              <Link href="/dashboard/informe" className="btn-neutro hidden h-10 px-3 text-xs sm:inline-flex" aria-label="Editar el informe">
+                <IconoEditar className="h-4 w-4" />
                 <span className="hidden sm:inline">Editar</span>
               </Link>
             )}
-            <Link href="/dashboard" className="btn-neutro px-3 text-xs">
-              <span className="hidden sm:inline">Dashboard</span>
-              <span className="sm:hidden">Panel</span>
-            </Link>
+            {puede(sesion, 'modulo:panel') && (
+              <Link href="/dashboard" className="btn-neutro h-10 min-w-10 px-2.5 text-xs sm:px-3" aria-label="Ir al panel">
+                <IconoPanel className="h-4 w-4" />
+                <span className="hidden sm:inline">Panel</span>
+              </Link>
+            )}
             <form action={cerrarSesion}>
-              <button type="submit" className="btn-neutro px-3 text-xs" aria-label="Cerrar sesión">
+              <button type="submit" className="btn-neutro h-10 w-10 p-0" aria-label="Cerrar sesión" title="Cerrar sesión">
                 <IconoSalir className="h-4 w-4" />
               </button>
             </form>
@@ -110,9 +123,9 @@ export default async function InformeLayout({ children }: LayoutProps<'/informe'
       <div className="flex min-h-0 flex-1">
         {/* El índice, con el lenguaje de la barra del panel: columna blanca de
             256 px con borde a la derecha. Se pega debajo de la cabecera, que
-            mide 57 px. En teléfono se va: allí el índice lo da la portada. */}
+            mide 60 px. En teléfono se va: allí el índice lo abre el botón de menú. */}
         <aside className="hidden w-64 shrink-0 border-r border-[var(--borde)] bg-white lg:block">
-          <div className="sticky top-[57px] max-h-[calc(100vh-57px)] overflow-y-auto">
+          <div className="sticky top-[60px] max-h-[calc(100vh-60px)] overflow-y-auto">
             {visibles.length > 0 && <IndiceInforme secciones={visibles} />}
           </div>
         </aside>
@@ -120,7 +133,7 @@ export default async function InformeLayout({ children }: LayoutProps<'/informe'
         <main className="min-w-0 flex-1">{children}</main>
       </div>
 
-      <footer className="border-t border-[var(--borde)] bg-[var(--fondo)] px-5 py-6 lg:px-8">
+      <footer className="border-t border-[var(--borde)] bg-white px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-marca-500">
             Información confidencial de Industrias Iberia bajo acuerdo de confidencialidad.
