@@ -10,6 +10,7 @@ import {
   IconoGrupo,
   IconoHallazgos,
   IconoInforme,
+  IconoNuevaPestana,
   IconoPanel,
   IconoReloj,
   IconoUsuarios,
@@ -91,18 +92,18 @@ export function NavLateral({ esAdmin }: { esAdmin: boolean }) {
               dice cómo va la gente; esto es la clase de Ajito tal como la abre
               un operador en su teléfono, y hasta ahora no se llegaba a ella
               desde el menú: había que escribir la ruta a mano. Es la única
-              forma de oír un audio después de regrabarlo. */}
+              forma de oír un audio después de regrabarlo.
+              Abre en otra pestaña, igual que el informe: es otra aplicación,
+              sin esta barra, y volver al panel no puede costar el sitio. */}
           <Link
             href="/canal/adiestramiento"
-            className={cn(
-              'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors',
-              activo('/canal/adiestramiento')
-                ? 'bg-marca-100 font-semibold text-marca-900'
-                : INACTIVO
-            )}
+            target="_blank"
+            className={cn('flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors', INACTIVO)}
           >
             <IconoChat className="h-[18px] w-[18px] shrink-0" />
             El curso de Ajito
+            <IconoNuevaPestana className="ml-auto h-3.5 w-3.5 shrink-0 text-marca-400" />
+            <span className="sr-only">(abre en otra pestaña)</span>
           </Link>
         </>
       )}
@@ -110,10 +111,13 @@ export function NavLateral({ esAdmin }: { esAdmin: boolean }) {
       <div className="mt-5 border-t border-[var(--borde)] pt-3">
         <Link
           href="/informe"
+          target="_blank"
           className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-acento-700 transition-colors hover:bg-acento-50"
         >
           <IconoVerInforme className="h-[18px] w-[18px] shrink-0" />
           Ver el informe
+          <IconoNuevaPestana className="ml-auto h-3.5 w-3.5 shrink-0" />
+          <span className="sr-only">(abre en otra pestaña)</span>
         </Link>
       </div>
     </nav>

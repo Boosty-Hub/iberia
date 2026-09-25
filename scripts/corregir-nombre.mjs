@@ -12,6 +12,11 @@ if (!viejo || !nuevo) {
   console.error('\n✖ Uso: corregir-nombre.mjs "Nombre viejo" "Nombre nuevo"\n')
   process.exit(1)
 }
+// Iguales, la reatribución de abajo nunca se quedaría sin turnos que renombrar.
+if (viejo === nuevo) {
+  console.error('\n✖ El nombre nuevo es igual al viejo.\n')
+  process.exit(1)
+}
 
 const admin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -49,17 +54,28 @@ for (const s of sesiones ?? []) {
 }
 
 // --- Atribuciones en la transcripción ----------------------------------------
-const { data: turnos } = await admin
-  .from('transcripcion_segmentos')
-  .select('id')
-  .eq('hablante', viejo)
+// En tandas hasta que no quede ninguno: Supabase corta cada consulta en 1.000
+// filas, y un entrevistador pasa de sobra de ahí —Gabriel lleva más de 5.000
+// turnos—. Leerlos de una vez reatribuía los primeros mil y dejaba el resto con
+// el nombre viejo, sin avisar. Cada tanda ya renombrada deja de coincidir con
+// el filtro, así que la siguiente consulta trae la próxima.
+let reatribuidos = 0
+for (;;) {
+  const { data: turnos, error } = await admin
+    .from('transcripcion_segmentos')
+    .select('id')
+    .eq('hablante', viejo)
+    .limit(500)
+  if (error) throw new Error(`transcripción: ${error.message}`)
+  if (!turnos?.length) break
 
-if (turnos?.length) {
-  for (let i = 0; i < turnos.length; i += 500) {
-    const lote = turnos.slice(i, i + 500).map((t) => t.id)
-    await admin.from('transcripcion_segmentos').update({ hablante: nuevo }).in('id', lote)
-  }
-  console.log(`  ${turnos.length} turnos de transcripción reatribuidos`)
+  const { error: errUpd } = await admin
+    .from('transcripcion_segmentos')
+    .update({ hablante: nuevo })
+    .in('id', turnos.map((t) => t.id))
+  if (errUpd) throw new Error(`transcripción: ${errUpd.message}`)
+  reatribuidos += turnos.length
 }
+if (reatribuidos) console.log(`  ${reatribuidos} turnos de transcripción reatribuidos`)
 
 console.log(`\n✔ "${viejo}" → "${nuevo}"\n`)

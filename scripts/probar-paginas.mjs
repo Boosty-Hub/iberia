@@ -99,7 +99,7 @@ const RUTAS = [
   { ruta: '/dashboard/hallazgos', marcadores: ['Hallazgos'] },
   { ruta: '/dashboard/hallazgos/nuevo', marcadores: ['Crear hallazgo', 'Cita que lo respalda'] },
   { ruta: '/dashboard/informe', marcadores: ['Editor del informe', 'Levantamiento'] },
-  { ruta: '/dashboard/informe/resumen-ejecutivo', marcadores: ['Resumen ejecutivo', 'Publicar esta secci'] },
+  { ruta: '/dashboard/informe/inicio', marcadores: ['Inicio', 'Publicar esta secci'] },
   { ruta: '/dashboard/usuarios', marcadores: ['Provisionar acceso', 'Cuentas'] },
   { ruta: '/informe', marcadores: ['arquitectura de IA', 'construcci'] },
 ]

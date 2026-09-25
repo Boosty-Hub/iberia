@@ -227,3 +227,12 @@ export const IconoVerInforme = (p: Props) => (
     <circle cx="12" cy="12" r="2.8" />
   </Base>
 )
+
+/** Abre en otra pestaña: la flecha que sale de la caja. */
+export const IconoNuevaPestana = (p: Props) => (
+  <Base {...p}>
+    <path d="M14 4h6v6" />
+    <path d="M20 4 11 13" />
+    <path d="M18 14v4.5A1.5 1.5 0 0 1 16.5 20h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10" />
+  </Base>
+)

@@ -60,6 +60,43 @@ const TONO_HALLAZGO: Record<EstadoHallazgo, 'neutro' | 'ambar' | 'verde'> = {
   descartado: 'neutro',
 }
 
+/**
+ * Solo lo que pinta la transcripción. Con `*` viajaba también `busqueda`, el
+ * tsvector del buscador, que dobla el peso de la página sin que el navegador lo
+ * use: 282 KB contra 149 KB en una sesión de 921 turnos.
+ */
+const CAMPOS_SEGMENTO = 'id, hablante, hablante_original, texto, inicio_segundos'
+const TAMANO_PAGINA = 1000
+
+/**
+ * La transcripción entera, por páginas. Supabase corta cada consulta en 1.000
+ * filas (`max_rows` del proyecto) y seis sesiones pasan de ahí —FOR-002 tiene
+ * 2.723 turnos—: sin paginar, la transcripción se quedaba a medias sin avisar,
+ * y el buscador de la página no encontraba lo que se dijo después del turno
+ * mil. La primera página trae el total; las demás se piden a la vez.
+ */
+async function transcripcionCompleta(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  entrevistaId: string
+) {
+  const pagina = (desde: number) =>
+    supabase
+      .from('transcripcion_segmentos')
+      .select(CAMPOS_SEGMENTO, { count: desde === 0 ? 'exact' : undefined })
+      .eq('entrevista_id', entrevistaId)
+      .order('indice')
+      .range(desde, desde + TAMANO_PAGINA - 1)
+
+  const primera = await pagina(0)
+  const total = primera.count ?? 0
+  const resto = await Promise.all(
+    Array.from({ length: Math.max(0, Math.ceil(total / TAMANO_PAGINA) - 1) }, (_, i) =>
+      pagina((i + 1) * TAMANO_PAGINA)
+    )
+  )
+  return [primera, ...resto].flatMap((r) => r.data ?? [])
+}
+
 /** El jsonb de Fireflies puede traer string o arreglo; se normaliza a líneas. */
 function comoLineas(valor: unknown): string[] {
   if (!valor) return []
@@ -87,13 +124,9 @@ export default async function EntrevistaPage({
 
   if (!entrevista) notFound()
 
-  const [{ data: segmentos }, { data: hallazgos }, { data: archivos }, { data: participantes }] =
+  const [segmentos, { data: hallazgos }, { data: archivos }, { data: participantes }] =
     await Promise.all([
-    supabase
-      .from('transcripcion_segmentos')
-      .select('*')
-      .eq('entrevista_id', id)
-      .order('indice'),
+    transcripcionCompleta(supabase, id),
     supabase
       .from('hallazgos')
       .select('id, titulo, tipo, estado, impacto')
@@ -119,7 +152,7 @@ export default async function EntrevistaPage({
   // Hablantes de la transcripción que todavía no tienen persona asignada.
   const hablantesSinIdentificar = [
     ...new Set(
-      (segmentos ?? [])
+      segmentos
         .map((s) => s.hablante_original ?? s.hablante)
         .filter((h): h is string => !!h && /^speaker/i.test(h))
     ),
@@ -229,12 +262,12 @@ export default async function EntrevistaPage({
             <ImportadorFireflies
               entrevistaId={id}
               tieneResumen={!!entrevista.resumen}
-              segmentosActuales={segmentos?.length ?? 0}
+              segmentosActuales={segmentos.length}
             />
           )}
 
           <Transcripcion
-            segmentos={segmentos ?? []}
+            segmentos={segmentos}
             entrevistaId={id}
             puedeEditar={puedeEditar}
           />

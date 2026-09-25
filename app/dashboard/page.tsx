@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { requerirSesion } from '@/lib/auth'
 import { Aviso, EncabezadoPagina, Insignia, Metrica } from '@/components/ui'
+import { IconoNuevaPestana } from '@/components/iconos'
 import { formatFecha, nombreSesion } from '@/lib/utils'
 import {
   ESTADOS_ENTREVISTA,
@@ -50,7 +51,10 @@ export default async function PanelPage({ searchParams }: PageProps<'/dashboard'
     total: entrevistas.filter((e) => e.estado === estado).length,
   }))
 
-  const transcritas = sesiones.filter(
+  // De las reuniones y visitas, que es la tarjeta donde se pinta. Contando todas
+  // las sesiones la tarjeta decía «8 · 41 transcritas»: más transcritas que
+  // reuniones, porque las 34 entrevistas se colaban en la cuenta.
+  const transcritas = otrasSesiones.filter(
     (e) => e.estado === 'transcrita' || e.estado === 'analizada'
   ).length
   const hallazgosValidados = hallazgos.filter((h) => h.estado === 'validado').length
@@ -228,8 +232,10 @@ export default async function PanelPage({ searchParams }: PageProps<'/dashboard'
               dónde interviene la IA y en qué orden.
             </p>
 
-            <Link href="/informe" className="btn-neutro mt-4 w-full">
+            <Link href="/informe" target="_blank" className="btn-neutro mt-4 w-full">
               Ver el informe
+              <IconoNuevaPestana className="h-3.5 w-3.5 text-marca-400" />
+              <span className="sr-only">(abre en otra pestaña)</span>
             </Link>
           </div>
         </section>

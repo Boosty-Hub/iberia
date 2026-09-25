@@ -46,7 +46,7 @@ export function Transcripcion({
   entrevistaId,
   puedeEditar,
 }: {
-  segmentos: Segmento[]
+  segmentos: Pick<Segmento, 'id' | 'hablante' | 'texto' | 'inicio_segundos'>[]
   entrevistaId: string
   puedeEditar: boolean
 }) {

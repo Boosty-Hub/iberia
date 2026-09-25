@@ -60,7 +60,7 @@ const PAGINAS = [
   { nombre: '06-hallazgos', ruta: '/dashboard/hallazgos' },
   { nombre: '07-hallazgo-nuevo', ruta: '/dashboard/hallazgos/nuevo' },
   { nombre: '08-informe-editor', ruta: '/dashboard/informe' },
-  { nombre: '09-informe-seccion', ruta: '/dashboard/informe/resumen-ejecutivo' },
+  { nombre: '09-informe-seccion', ruta: '/dashboard/informe/inicio' },
   { nombre: '10-usuarios', ruta: '/dashboard/usuarios' },
   { nombre: '11-informe', ruta: '/informe' },
   // Cada sección del informe es su propia página; esta es una cualquiera, para

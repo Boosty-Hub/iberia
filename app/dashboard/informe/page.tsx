@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { IconoEditar, IconoMas, IconoVerInforme } from '@/components/iconos'
+import { IconoEditar, IconoMas, IconoNuevaPestana, IconoVerInforme } from '@/components/iconos'
 import { EncabezadoPagina, Insignia } from '@/components/ui'
 import { esEditor, requerirSesion } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
@@ -32,9 +32,11 @@ export default async function EditorInformePage() {
         descripcion="El Documento de Arquitectura de IA se escribe aquí, sección por sección. Lo que publiques queda visible para los lectores de Iberia en la página del informe."
         acciones={
           <>
-            <Link href="/informe" className="btn-neutro">
+            <Link href="/informe" target="_blank" className="btn-neutro">
               <IconoVerInforme className="h-4 w-4" />
               Ver el informe
+              <IconoNuevaPestana className="h-3.5 w-3.5 text-marca-400" />
+              <span className="sr-only">(abre en otra pestaña)</span>
             </Link>
             {puedeEditar && (
               <Link href="/dashboard/informe/nueva" className="btn-acento">

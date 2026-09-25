@@ -26,16 +26,27 @@ import { createAdminClient, createClient } from '@/lib/supabase/server'
  * ya no está en el padrón devuelven todos lo mismo: la pantalla de entrar con un
  * aviso. Distinguirlos por fuera convierte esta ruta en una forma de averiguar
  * qué tokens existen.
+ *
+ * Redirige **al mismo origen de la petición**, no a `NEXT_PUBLIC_SITE_URL`: la
+ * cookie de sesión se acaba de poner en el host que recibió el enlace, y
+ * mandarla a otro —una vista previa de Vercel, `www` contra el dominio pelado—
+ * la deja fuera de su sesión, en el login que el enlace viene a evitar. Pasó en
+ * local: con otro proyecto en el 3000, `probar:padron` entraba y caía en un 404.
  */
 export async function GET(
-  _peticion: NextRequest,
+  peticion: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params
+  const destino = (ruta: string) => {
+    const url = peticion.nextUrl.clone()
+    const [pathname, busqueda = ''] = ruta.split('?')
+    url.pathname = pathname
+    url.search = busqueda ? `?${busqueda}` : ''
+    return NextResponse.redirect(url)
+  }
   const alCanal = (motivo?: string) =>
-    NextResponse.redirect(
-      new URL(`/canal/entrar${motivo ? `?aviso=${motivo}` : ''}`, process.env.NEXT_PUBLIC_SITE_URL)
-    )
+    destino(`/canal/entrar${motivo ? `?aviso=${motivo}` : ''}`)
 
   // La forma se mira antes de tocar la base: un token mal formado no es un
   // intento legítimo y no merece una consulta.
@@ -88,10 +99,5 @@ export async function GET(
     })
     .eq('id', acceso.id)
 
-  return NextResponse.redirect(
-    new URL(
-      acceso.motivo === 'curso' ? '/canal/adiestramiento' : '/canal',
-      process.env.NEXT_PUBLIC_SITE_URL
-    )
-  )
+  return destino(acceso.motivo === 'curso' ? '/canal/adiestramiento' : '/canal')
 }

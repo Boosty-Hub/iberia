@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { IconoAtras, IconoBasura } from '@/components/iconos'
+import { IconoAtras, IconoBasura, IconoNuevaPestana } from '@/components/iconos'
 import { EditorSeccion } from '@/components/editor-seccion'
 import { Insignia } from '@/components/ui'
 import { requerirEditor } from '@/lib/auth'
@@ -57,7 +57,17 @@ export default async function EditarSeccionPage({
           <h1 className="text-2xl font-bold tracking-tight text-marca-800">
             {seccion.titulo}
           </h1>
-          <p className="mt-1 font-mono text-xs text-marca-400">/informe#{seccion.slug}</p>
+          {/* Cada sección es su propia página desde que el informe dejó de ser
+              un solo documento largo; el ancla `#slug` ya no llevaba a nada. */}
+          <Link
+            href={`/informe/${seccion.slug}`}
+            target="_blank"
+            className="mt-1 inline-flex items-center gap-1 font-mono text-xs text-marca-400 hover:text-acento-700"
+          >
+            /informe/{seccion.slug}
+            <IconoNuevaPestana className="h-3 w-3" />
+            <span className="sr-only">(abre en otra pestaña)</span>
+          </Link>
         </div>
 
         <div className="flex shrink-0 items-center gap-2">

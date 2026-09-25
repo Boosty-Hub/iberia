@@ -112,14 +112,20 @@ for (const [viejo, nuevo] of CORRECCIONES) {
   await admin.from('personas').update({ nombre_completo: nuevo }).eq('id', persona.id)
 
   // La transcripción ya renombrada también arrastra el apellido equivocado.
-  const { data: turnos } = await admin
-    .from('transcripcion_segmentos')
-    .select('id')
-    .eq('hablante', viejo)
-
-  for (let i = 0; i < (turnos?.length ?? 0); i += 500) {
-    const lote = turnos.slice(i, i + 500).map((t) => t.id)
-    await admin.from('transcripcion_segmentos').update({ hablante: nuevo }).in('id', lote)
+  // En tandas hasta que no quede ninguno: Supabase corta cada consulta en 1.000
+  // filas, y leerlos de una vez dejaba el resto con el nombre viejo.
+  for (;;) {
+    const { data: turnos } = await admin
+      .from('transcripcion_segmentos')
+      .select('id')
+      .eq('hablante', viejo)
+      .limit(500)
+    if (!turnos?.length) break
+    const { error } = await admin
+      .from('transcripcion_segmentos')
+      .update({ hablante: nuevo })
+      .in('id', turnos.map((t) => t.id))
+    if (error) throw new Error(`transcripción: ${error.message}`)
   }
 
   const { data: sesiones } = await admin
