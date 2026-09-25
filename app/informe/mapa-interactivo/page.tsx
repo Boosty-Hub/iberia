@@ -81,7 +81,7 @@ export default async function MapaInteractivoPage() {
     .sort((a, b) => NIVELES.indexOf(a.nivel) - NIVELES.indexOf(b.nivel) || a.numero - b.numero)
 
   const totalProcesos = macros.reduce(
-    (t, m) => t + m.procesos.filter((p) => p.estado === 'VIGENTE' || p.estado === 'NUEVO').length,
+    (t, m) => t + m.procesos.filter((p) => p.estado === 'VIGENTE' || p.estado === 'NUEVO' || p.estado === 'PROPUESTO').length,
     0
   )
 

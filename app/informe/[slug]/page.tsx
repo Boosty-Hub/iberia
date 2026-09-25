@@ -66,17 +66,22 @@ const EN_TARJETAS = new Set(['hallazgos', 'sistemas-datos', 'inventario-sistemas
 const CON_NUEVOS = new Set(['fichas-procesos'])
 
 /**
- * Los nombres de los procesos y macroprocesos nuevos, de la base: son los que el
- * levantamiento encontró y no estaban en el mapa de partida. La marca se pone al
- * pintar, sin tocar el texto que escribe el generador.
+ * Los que el levantamiento encontró y no estaban en el inventario de partida
+ * («No documentado») y los que propone el programa («Propuesto»). `nuevo` y
+ * `NUEVO` son los nombres de la base; el rótulo cambió el 25 de septiembre, el
+ * dato no. La marca se pone al pintar, sin tocar el texto que escribe el generador.
  */
-async function leerNuevos(): Promise<string[]> {
+async function leerNuevos(): Promise<{ nuevos: string[]; propuestos: string[] }> {
   const supabase = await createClient()
-  const [{ data: macros }, { data: procesos }] = await Promise.all([
+  const [{ data: macros }, { data: procesos }, { data: propuestos }] = await Promise.all([
     supabase.from('macroprocesos').select('nombre').eq('nuevo', true),
     supabase.from('procesos').select('nombre').eq('estado', 'NUEVO'),
+    supabase.from('procesos').select('nombre').eq('estado', 'PROPUESTO'),
   ])
-  return [...(macros ?? []), ...(procesos ?? [])].map((x) => normalizarNombre(x.nombre))
+  return {
+    nuevos: [...(macros ?? []), ...(procesos ?? [])].map((x) => normalizarNombre(x.nombre)),
+    propuestos: (propuestos ?? []).map((x) => normalizarNombre(x.nombre)),
+  }
 }
 
 /**
@@ -273,12 +278,13 @@ export default async function SeccionInformePage({ params, searchParams }: PageP
           <div className={cn('py-8', conCircuitos && 'mx-auto max-w-[760px]')}>
             {escrita ? (
               plegable ? (
-                <MarkdownPlegable contenido={seccion.contenido_md!} nuevos={nuevos} />
+                <MarkdownPlegable contenido={seccion.contenido_md!} nuevos={nuevos?.nuevos} propuestos={nuevos?.propuestos} />
               ) : (
                 <Markdown
                   contenido={seccion.contenido_md!}
                   tarjetas={EN_TARJETAS.has(seccion.slug)}
-                  nuevos={nuevos}
+                  nuevos={nuevos?.nuevos}
+                  propuestos={nuevos?.propuestos}
                 />
               )
             ) : (

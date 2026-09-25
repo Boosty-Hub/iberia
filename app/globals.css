@@ -675,9 +675,17 @@ body {
   color: var(--color-marca-800);
 }
 
+/* «No documentado»: se hace, pero no figuraba en el inventario de partida. Rojo,
+   porque es un hallazgo. La clase conserva el nombre de cuando decía «Nuevo». */
 .marca-nuevo {
   @apply rounded bg-acento-500 px-1.5 py-px text-[0.6rem] font-semibold tracking-wide
-         text-white uppercase not-italic;
+         text-white uppercase not-italic whitespace-nowrap;
+}
+/* «Propuesto»: lo único nuevo de verdad, lo que trae el programa. Oro, que en el
+   producto es lo destacado. */
+.marca-propuesto {
+  @apply rounded border border-oro-400 bg-oro-100 px-1.5 py-px text-[0.6rem] font-semibold
+         tracking-wide text-oro-800 uppercase not-italic whitespace-nowrap;
 }
 .marca-aviso {
   @apply rounded bg-oro-100 px-1.5 py-px text-[0.62rem] font-medium text-oro-800 not-italic;
@@ -813,6 +821,7 @@ body {
    parte de la palabra —«(MRP)NUEVO»—. En la caja no hace falta, que ahí va en su
    propia línea con `gap`. */
 .p-nombre .marca-nuevo,
+.p-nombre .marca-propuesto,
 .p-nombre .marca-aviso {
   @apply ml-1.5;
 }
@@ -949,6 +958,7 @@ body {
 .circ-estacion { fill: #fff; stroke: var(--c-tinta); stroke-width: 2; }
 .circ-t-estacion { fill: var(--c-tinta); font-size: 12.5px; font-weight: 500; text-anchor: middle; }
 .circ-t-carril { fill: var(--c-tinta-3); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; }
+.circ-t-area { fill: var(--c-tinta-3); font-size: 10px; font-style: italic; text-anchor: middle; }
 .circ-t-nota { fill: var(--c-tinta-2); font-size: 11.5px; }
 .circ-t-centro { font-weight: 500; }
 .circ-t-tesis { fill: var(--c-tinta); font-size: 23px; font-weight: 700; text-anchor: middle; letter-spacing: -0.01em; }

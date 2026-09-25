@@ -13,7 +13,14 @@
  *   · con `tarjetas`, cada `###` y lo que sigue hasta el próximo `###`, `##` o
  *     `---` → una tarjeta, con el borde del nivel de su primera línea.
  *   · con `nuevos`, la primera celda de una fila cuyo texto sea un proceso o un
- *     macroproceso nuevo → la marca «Nuevo». Y un `**nuevo**` suelto, también.
+ *     macroproceso que no figuraba en el inventario de partida → la marca «No
+ *     documentado»; con `propuestos`, la de «Propuesto». Y un `**nuevo**`,
+ *     `**no documentado**` o `**propuesto**` suelto, también.
+ *
+ *     ⚠️ **Se llamaba «Nuevo» y se cambió el 25 de septiembre de 2026**, en la reunión
+ *     del equipo: un proceso que se hace desde hace años no es nuevo, es que nadie lo
+ *     escribió. Lo único nuevo de verdad es lo que el programa propone. La clase
+ *     sigue siendo `marca-nuevo` para no romper estilos ni pruebas.
  *
  * ⚠️ **Va después de `rehype-slug`**: los ids de los encabezados ya están puestos
  * cuando se envuelven en tarjetas, así que las anclas no cambian.
@@ -32,9 +39,14 @@ type Raiz = { type: 'root'; children: Nodo[] }
 export type OpcionesInforme = {
   /** Envolver cada `###` en una tarjeta. */
   tarjetas?: boolean
-  /** Nombres de procesos y macroprocesos nuevos, ya normalizados con `normalizarNombre`. */
+  /** Procesos y macroprocesos no documentados, ya normalizados con `normalizarNombre`. */
   nuevos?: string[]
+  /** Procesos que propone el programa, normalizados igual. */
+  propuestos?: string[]
 }
+
+export const ROTULO_NO_DOCUMENTADO = 'No documentado'
+export const ROTULO_PROPUESTO = 'Propuesto'
 
 const NIVELES: Record<string, { clave: string; rotulo: string }> = {
   crítico: { clave: 'critico', rotulo: 'Crítico' },
@@ -95,7 +107,7 @@ function etiquetar(el: Elemento): string | null {
   return nivel.clave
 }
 
-function recorrer(n: Nodo, opciones: OpcionesInforme, nuevos: Set<string>) {
+function recorrer(n: Nodo, opciones: OpcionesInforme, nuevos: Set<string>, propuestos: Set<string>) {
   if (!esElemento(n) && n.type !== 'root') return
   const el = n as Elemento
 
@@ -121,21 +133,32 @@ function recorrer(n: Nodo, opciones: OpcionesInforme, nuevos: Set<string>) {
     }
   }
 
-  // «**nuevo**» suelto, como lo escribe el mapa de procesos.
-  if (esElemento(el, 'strong') && normalizarNombre(textoDe(el)) === 'nuevo') {
-    el.tagName = 'span'
-    el.properties = { className: ['marca-nuevo'] }
-    el.children = [{ type: 'text', value: 'Nuevo' }]
-  }
-
-  if (nuevos.size && esElemento(el, 'tr')) {
-    const celda = el.children.find((c) => esElemento(c, 'td')) as Elemento | undefined
-    if (celda && nuevos.has(normalizarNombre(textoDe(celda)))) {
-      celda.children.push({ type: 'text', value: ' ' }, span('marca-nuevo', 'Nuevo'))
+  // «**no documentado**» o «**propuesto**» suelto, como lo escribe el mapa de
+  // procesos. «**nuevo**» se sigue entendiendo: es lo que escribía antes.
+  if (esElemento(el, 'strong')) {
+    const t = normalizarNombre(textoDe(el))
+    if (t === 'nuevo' || t === 'no documentado') {
+      el.tagName = 'span'
+      el.properties = { className: ['marca-nuevo'] }
+      el.children = [{ type: 'text', value: ROTULO_NO_DOCUMENTADO }]
+    } else if (t === 'propuesto') {
+      el.tagName = 'span'
+      el.properties = { className: ['marca-propuesto'] }
+      el.children = [{ type: 'text', value: ROTULO_PROPUESTO }]
     }
   }
 
-  for (const hijo of el.children ?? []) recorrer(hijo, opciones, nuevos)
+  if ((nuevos.size || propuestos.size) && esElemento(el, 'tr')) {
+    const celda = el.children.find((c) => esElemento(c, 'td')) as Elemento | undefined
+    const nombre = celda ? normalizarNombre(textoDe(celda)) : ''
+    if (celda && propuestos.has(nombre)) {
+      celda.children.push({ type: 'text', value: ' ' }, span('marca-propuesto', ROTULO_PROPUESTO))
+    } else if (celda && nuevos.has(nombre)) {
+      celda.children.push({ type: 'text', value: ' ' }, span('marca-nuevo', ROTULO_NO_DOCUMENTADO))
+    }
+  }
+
+  for (const hijo of el.children ?? []) recorrer(hijo, opciones, nuevos, propuestos)
 }
 
 /** Envuelve cada `###` y lo que lo sigue en una `<section class="tarjeta-md">`. */
@@ -170,8 +193,9 @@ function enTarjetas(raiz: Raiz) {
 
 export function rehypeInforme(opciones: OpcionesInforme = {}) {
   const nuevos = new Set(opciones.nuevos ?? [])
+  const propuestos = new Set(opciones.propuestos ?? [])
   return (arbol: Raiz) => {
-    recorrer(arbol as unknown as Nodo, opciones, nuevos)
+    recorrer(arbol as unknown as Nodo, opciones, nuevos, propuestos)
     if (opciones.tarjetas) enTarjetas(arbol)
   }
 }

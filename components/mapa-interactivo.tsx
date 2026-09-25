@@ -440,7 +440,7 @@ export function MapaInteractivo({ macros }: { macros: MacroDelMapa[] }) {
                     {vivos.length} {vivos.length === 1 ? 'proceso' : 'procesos'}
                   </span>
                   <span className="nodo-marcas">
-                    {m.nuevo && <span className="marca-nuevo">nuevo</span>}
+                    {m.nuevo && <span className="marca-nuevo">no documentado</span>}
                     {fuera > 0 && <span className="marca-aviso">⚠ {fuera}</span>}
                   </span>
                 </span>
@@ -496,8 +496,12 @@ export function MapaInteractivo({ macros }: { macros: MacroDelMapa[] }) {
               Orientan la cadena · la sostienen
             </li>
             <li>
-              <span className="marca-nuevo">nuevo</span>
-              Macroproceso que el inventario no recogía
+              <span className="marca-nuevo">no documentado</span>
+              Se hace, pero no figuraba en el inventario de partida
+            </li>
+            <li>
+              <span className="marca-propuesto">propuesto</span>
+              Lo propone el programa
             </li>
             <li>
               <span className="marca-aviso">⚠ n</span>
@@ -589,7 +593,8 @@ export function MapaInteractivo({ macros }: { macros: MacroDelMapa[] }) {
                     </span>
                     <span className="p-nombre">
                       {p.nombre}
-                      {p.estado === 'NUEVO' && <em className="marca-nuevo">nuevo</em>}
+                      {p.estado === 'NUEVO' && <em className="marca-nuevo">no documentado</em>}
+                      {p.estado === 'PROPUESTO' && <em className="marca-propuesto">propuesto</em>}
                       {p.dueno_corregido && <em className="marca-aviso">dueño corregido</em>}
                     </span>
                     {p.area && <span className="p-area">{p.area}</span>}

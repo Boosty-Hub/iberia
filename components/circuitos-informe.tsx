@@ -71,7 +71,11 @@ const NIVEL_HALLAZGO: Record<string, string> = { critico: 'Crítico', atencion: 
 
 type Tramo = [modo: 'mano' | 'sistema', rotulo: string | null]
 export type TextosCircuitos = {
-  flujo?: { tesis: string; subtesis: string; retorno: string; codo_izq: string[]; codo_der: string[]; relojes: { cifra: string; texto: string }[] }
+  flujo?: {
+    tesis: string; subtesis: string; retorno: string; codo_izq: string[]; codo_der: string[]; relojes: { cifra: string; texto: string }[]
+    /** El área que lleva cada estación, en el orden de `EST_TOP` y `EST_BOT`. Son nombres de Iberia: viven en la base. */
+    areas?: { arriba: (string | string[])[]; abajo: (string | string[])[] }
+  }
   sistemas?: {
     tesis: string; subtesis: string; retorno: string; codo_izq: string[]; codo_der: string[]
     tramos: Record<string, Tramo>
@@ -232,12 +236,36 @@ const RETORNO = 'M180,391 C300,300 660,300 778,389'
 const MEDIO: Record<string, number> = { t0: 231.5, t1: 334.5, t2: 437.5, t3: 540, t4: 642.5, t5: 745.5, t6: 848.5, b0: 840, b1: 720, b2: 600, b3: 480, b4: 360, b5: 240 }
 const CHEVRONES: [number, number, number][] = [[231, 120, 0], [643, 120, 0], [990, 153, 40], [990, 367, 140], [90, 367, -140], [90, 153, -40]]
 
-function Rotulo({ x, y, nombre }: { x: number; y: number; nombre: string | string[] }) {
+/**
+ * El nombre de la estación y, debajo, el área que la lleva. Arriba del anillo el
+ * rótulo sube para dejarle sitio al área sin tocar la estación; abajo, el área va
+ * detrás del nombre. Se pidió en la reunión del equipo del 25 de septiembre: «el
+ * departamento responsable debería estar en el propio gráfico».
+ */
+function Rotulo({ x, nombre, area, abajo = false }: { x: number; nombre: string | string[]; area?: string | string[]; abajo?: boolean }) {
   const lineas = Array.isArray(nombre) ? nombre : [nombre]
-  return <>{lineas.map((l, i) => <text key={l} className="circ-t-estacion" x={x} y={y + i * 15}>{l}</text>)}</>
+  const areas = area ? (Array.isArray(area) ? area : [area]) : []
+  let y: number
+  let yArea: number
+  if (abajo) {
+    y = 444
+    yArea = 444 + lineas.length * 15 - 1
+  } else if (areas.length) {
+    y = 74 - (lineas.length - 1) * 15
+    yArea = 89
+  } else {
+    y = lineas.length > 1 ? 71 : 86
+    yArea = 0
+  }
+  return (
+    <>
+      {lineas.map((l, i) => <text key={l} className="circ-t-estacion" x={x} y={y + i * 15}>{l}</text>)}
+      {areas.map((l, i) => <text key={`a-${l}`} className="circ-t-area" x={x} y={yArea + i * 11}>{l}</text>)}
+    </>
+  )
 }
 
-function Anillo({ id, chevrones = true, lanesTop = 36, lanesBot = 506, children }: { id: string; chevrones?: boolean; lanesTop?: number; lanesBot?: number; children?: React.ReactNode }) {
+function Anillo({ id, chevrones = true, lanesTop = 36, lanesBot = 506, areas, children }: { id: string; chevrones?: boolean; lanesTop?: number; lanesBot?: number; areas?: { arriba: (string | string[])[]; abajo: (string | string[])[] }; children?: React.ReactNode }) {
   return (
     <>
       <defs>
@@ -251,10 +279,10 @@ function Anillo({ id, chevrones = true, lanesTop = 36, lanesBot = 506, children 
       {children}
       {chevrones && CHEVRONES.map(([x, y, r]) => <path key={`${x}-${y}`} className="circ-chevron" transform={`translate(${x},${y}) rotate(${r})`} d="M-4,-6 L3,0 L-4,6" />)}
       {TOPX.map((x, i) => (
-        <g key={`t${x}`}><circle className="circ-estacion" cx={x} cy={120} r={7} /><Rotulo x={x} y={Array.isArray(EST_TOP[i]) ? 71 : 86} nombre={EST_TOP[i]} /></g>
+        <g key={`t${x}`}><circle className="circ-estacion" cx={x} cy={120} r={7} /><Rotulo x={x} nombre={EST_TOP[i]} area={areas?.arriba[i]} /></g>
       ))}
       {BOTX.map((x, i) => (
-        <g key={`b${x}`}><circle className="circ-estacion" cx={x} cy={400} r={7} /><Rotulo x={x} y={444} nombre={EST_BOT[i]} /></g>
+        <g key={`b${x}`}><circle className="circ-estacion" cx={x} cy={400} r={7} /><Rotulo x={x} nombre={EST_BOT[i]} area={areas?.abajo[i]} abajo /></g>
       ))}
     </>
   )
@@ -435,7 +463,7 @@ export function CircuitosDelNegocio({
         <Lienzo>
           {vista === 'flujo' ? (
             <svg viewBox="0 0 1080 520" role="group" aria-label="El circuito del negocio con los puntos donde el flujo espera">
-              <Anillo id="flujo">
+              <Anillo id="flujo" areas={tf?.areas}>
                 <path className="circ-retorno" d={RETORNO} markerEnd="url(#flujo-flecha)" />
               </Anillo>
               {tf && (

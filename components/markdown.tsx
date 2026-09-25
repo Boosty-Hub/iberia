@@ -20,13 +20,16 @@ export function Markdown({
   className,
   tarjetas = false,
   nuevos,
+  propuestos,
 }: {
   contenido: string
   className?: string
   /** Cada `###` en una tarjeta. Ver `lib/rehype-informe.ts`. */
   tarjetas?: boolean
-  /** Procesos y macroprocesos nuevos, normalizados, para su marca. */
+  /** Procesos y macroprocesos no documentados, normalizados, para su marca. */
   nuevos?: string[]
+  /** Procesos que propone el programa, normalizados. */
+  propuestos?: string[]
 }) {
   return (
     <div className={cn('prosa', className)}>
@@ -34,7 +37,7 @@ export function Markdown({
         remarkPlugins={[remarkGfm]}
         // El orden importa: primero los ids, después las tarjetas, para que
         // envolver un encabezado no le cambie el ancla.
-        rehypePlugins={[rehypeSlug, [rehypeInforme, { tarjetas, nuevos }]]}
+        rehypePlugins={[rehypeSlug, [rehypeInforme, { tarjetas, nuevos, propuestos }]]}
         components={{
           table: ({ children }) => (
             <div className="tabla-scroll">

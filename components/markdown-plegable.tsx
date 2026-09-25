@@ -65,11 +65,14 @@ export function MarkdownPlegable({
   contenido,
   className,
   nuevos,
+  propuestos,
 }: {
   contenido: string
   className?: string
-  /** Procesos y macroprocesos nuevos, normalizados: llevan su marca. */
+  /** Procesos y macroprocesos no documentados, normalizados: llevan su marca. */
   nuevos?: string[]
+  /** Procesos que propone el programa, normalizados. */
+  propuestos?: string[]
 }) {
   const esNuevo = (titulo: string) =>
     Boolean(nuevos?.includes(normalizarNombre(titulo.replace(/^[\d.]+\s*·\s*/, ''))))
@@ -131,18 +134,18 @@ export function MarkdownPlegable({
           </summary>
           <div className="plegable-cuerpo">
             {/* El encabezado del nivel, para que el ancla del nivel exista. */}
-            <Markdown contenido={`## ${b.titulo}\n\n${b.cuerpo}`} className={className} nuevos={nuevos} />
+            <Markdown contenido={`## ${b.titulo}\n\n${b.cuerpo}`} className={className} nuevos={nuevos} propuestos={propuestos} />
 
             {b.fichas.map((f) => (
               <details key={f.titulo} className="plegable plegable-ficha">
                 <summary>
                   <span className="plegable-titulo">
                     {f.titulo}
-                    {esNuevo(f.titulo) && <span className="marca-nuevo ml-2 align-middle">Nuevo</span>}
+                    {esNuevo(f.titulo) && <span className="marca-nuevo ml-2 align-middle">No documentado</span>}
                   </span>
                 </summary>
                 <div className="plegable-cuerpo">
-                  <Markdown contenido={`### ${f.titulo}\n\n${f.cuerpo}`} className={className} nuevos={nuevos} />
+                  <Markdown contenido={`### ${f.titulo}\n\n${f.cuerpo}`} className={className} nuevos={nuevos} propuestos={propuestos} />
                 </div>
               </details>
             ))}

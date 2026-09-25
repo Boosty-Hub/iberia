@@ -888,7 +888,7 @@ async function mapaDeProcesos() {
       'de su macroproceso, bajo «Lo que NO se hace».'
   )
   l.push('')
-  l.push('| Nivel | Macroprocesos | Procesos | De ellos, nuevos |')
+  l.push('| Nivel | Macroprocesos | Procesos | De ellos, no documentados |')
   l.push('| --- | ---: | ---: | ---: |')
   for (const f of conteoPorNivel(macros)) {
     l.push(`| ${f.nivel} | ${f.macros} | ${f.procesos} | ${f.nuevos} |`)
@@ -906,7 +906,9 @@ async function mapaDeProcesos() {
       l.push(`### ${numeroDeNivel(nivelActual)}. ${nivelActual}`)
       l.push('')
     }
-    const marca = m.nuevo ? ' · **nuevo**' : ''
+    // «No documentado», no «nuevo»: se hace desde hace años, lo que falta es que
+    // esté escrito (reunión del equipo del 25 de septiembre de 2026).
+    const marca = m.nuevo ? ' · **no documentado**' : ''
     l.push(
       `**${numeroDeFicha(m)}. [${m.nombre}](${RUTA_FICHAS}#${anclaDe(m)})** — ${m.procesos.length} procesos${marca}`
     )
@@ -976,6 +978,23 @@ async function fichasDeProceso() {
       'este documento no es un manual de procesos, y no pretende serlo.'
   )
   l.push('')
+  // De dónde sale lo que dicen las fichas, dicho en la primera pantalla: lo pidió
+  // el equipo el 25 de septiembre, para que la dirección no lea como documentado
+  // lo que se armó escuchando. Las cifras se cuentan del inventario.
+  {
+    const procesos = macros.flatMap((m) => m.procesos)
+    const noDoc = procesos.filter((p) => p.estado === 'NUEVO').length
+    const macrosNoDoc = macros.filter((m) => m.nuevo).length
+    l.push('> [!CLAVE]')
+    l.push(
+      '> **Estas fichas salen de las entrevistas, no de documentos.** En el levantamiento no apareció ningún ' +
+        'manual ni procedimiento escrito; lo único documentado era el organigrama, y está desactualizado. Lo que ' +
+        'aquí se describe es lo que las personas contaron que hacen. Por eso lo que se hace pero no figuraba en ' +
+        `el inventario de partida lleva la marca **no documentado** —${macrosNoDoc} de los ${macros.length} ` +
+        `macroprocesos y ${noDoc} de los ${procesos.length} procesos—, y lo único que trae el programa, **propuesto**.`
+    )
+    l.push('')
+  }
 
   let nivelActual = ''
   for (const m of macros) {
@@ -990,7 +1009,7 @@ async function fichasDeProceso() {
     l.push(`### ${tituloDeFicha(m)}`)
     if (m.nuevo) {
       l.push('')
-      l.push('> **Macroproceso nuevo.** No figuraba en el inventario de partida.')
+      l.push('> **Macroproceso no documentado.** Se hace, pero no figuraba en el inventario de partida.')
     }
     l.push('')
     const prosa = PROSA_FICHAS[`${m.nivel} ${m.numero}`] ?? {}
