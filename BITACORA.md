@@ -22,7 +22,7 @@ línea.
 |---|---|
 | **Fase** | 1 · Entender · **día 25 de 153**. Contrato `CONT-2026-08-0002`, firmado el 6/7 de agosto de 2026 |
 | **Calendario** | Adelantado: **nada se entrega después del 6 de diciembre**, porque el aviso de no renovación vence antes que el entregable que sirve para decidir |
-| **Dashboard** | Operativo en local. **Sin desplegar** |
+| **Dashboard** | Operativo en local. **Sin desplegar**. Roles y permisos configurables desde el 25/9 |
 | **Levantamiento** | **42 sesiones · 27.951 turnos**. **34 entrevistas de ~25 (136%)** · los 20 macroprocesos cubiertos |
 | **Hallazgos** | **394, todos con cita textual verificada** · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
 | **Informe** | **12 secciones** y 20 de 20 fichas, **sin citas, sin códigos y sin nombres** (18/9, con Gabriel). Ninguna publicada. **La parte de arquitectura se rehízo el 24/9**: los circuitos, el sistema Iberia y la ruta de construcción |
@@ -61,6 +61,83 @@ cláusula 5. Aquí solo lo urgente:
 - **Refijar la revisión del canal con mercadeo** — Alberto la agenda. Bloquea el despliegue.
 - **Leer los 42 hallazgos redactados** del informe y validar los que los sostienen.
 - **Pedirle a Capital Humano cédula y celular por ficha.** El padrón llegó sin ellos.
+
+---
+
+## 25 de septiembre de 2026 · Sesión 38 — el informe se rediseña, y los roles se vuelven configurables
+
+Dos encargos de Gabriel: revisar con Playwright todo el diseño del informe —«hay muchos
+espacios vacíos a los lados»— hasta dejarlo de nivel profesional y responsive, y un módulo
+de **roles y permisos** con matriz de ver, crear, editar y eliminar sobre todos los módulos,
+las secciones del informe y las lecciones de Ajito.
+
+### 🔴 Lo más grave: cualquiera se podía hacer administrador
+
+Al leer las políticas de `profiles` para enlazar los roles salió esto: **«actualizar perfil
+propio» deja escribir la fila entera**, porque la RLS decide qué filas y no qué columnas. Con
+una cuenta de prueba de nivel lector, una llamada a la API con la clave pública puso
+`rol = 'admin'` y **la base lo aceptó**. Estuvo abierto desde el 11 de agosto. No hay cuentas
+de Iberia todavía —solo existen los dos administradores de Boosty—, así que no hubo a quién
+aprovecharlo, pero con el repositorio público era de las puertas fáciles de ver. Cerrado con
+un trigger que rechaza cambios de rol, estado, organización o correo que no vengan de un
+administrador, y comprobado por `probar:permisos`.
+
+### El informe
+
+La auditoría midió lo que Gabriel vio: a 1920 px la hoja medía 896 y dejaba **736 px vacíos**
+a la derecha, pegada a la izquierda; en teléfono no había forma de pasar de sección sin volver
+a la portada, y los enlaces de la cabecera medían 16 px de alto.
+
+- **La hoja se centra**, con medida de lectura fija, y a partir de 1400 px sale a su lado el
+  índice «En esta sección», que marca dónde va el lector. Por debajo, plegado arriba del texto.
+- **En teléfono**, la hoja va de borde a borde (el texto ganó 32 px de 390), la cabecera lleva
+  iconos de 40 px y el índice del documento se abre desde un menú.
+- **La portada** pasa de una lista a tarjetas por parte, en rejilla; las cifras, en tarjetas.
+- Texto a 16/17 px con interlineado de 1,75; las anclas ya no quedan debajo de la cabecera
+  fija; las tablas avisan con sombra cuando se deslizan.
+- ⚠️ **El mapa interactivo lo abría cualquiera con sesión** aunque el informe no tuviera nada
+  publicado: el lector veía por ahí el inventario entero de procesos. Ahora exige su permiso y
+  que la sección del mapa esté publicada.
+- El panel ganó el mismo menú de teléfono: antes pintaba los ocho enlaces arriba del contenido.
+
+### Roles y permisos
+
+Decisión de diseño que conviene no perder: **el nivel es el techo y la matriz afina por
+debajo.** Cada rol tiene un nivel (administrador, equipo consultor, solo lectura) que se copia
+al viejo `profiles.rol`, así que las políticas que ya existían siguen valiendo sin tocarlas, y
+**una casilla nunca puede dar más de lo que la base deja escribir**. La alternativa —meter la
+matriz en las cuarenta políticas— era reescribir la seguridad entera a ciegas contra
+producción. La matriz entra en la RLS solo donde se abre a gente de fuera del equipo: el
+informe, el mapa y las lecciones. Cómo funciona, en `AGENTS.md`.
+
+- **Cuatro roles de fábrica** que reproducen el acceso de ayer, y uno de ellos nuevo:
+  **Personal de planta**, el que recibe quien entra con su enlace. Antes tenía rol de lector y
+  con él podía abrir el panel y el informe publicado; ahora solo el canal y las nueve lecciones.
+- **Empleados y recordatorios no tienen «ver» a secas**: sus vistas solo le responden al
+  equipo, así que una casilla de ver abría una pantalla vacía. Lo cazó el agente que conectó la
+  matriz en los módulos.
+- Una sección nueva del informe entra sola en la matriz: en los roles de fábrica con lo que su
+  nivel veía, y en los creados desde el panel, apagada.
+
+### Verificación
+
+| | |
+|---|---|
+| `probar:permisos` (nuevo) | **34** · escalada cerrada, techo del nivel, «ver» cerrando la lectura y «editar»/«eliminar» la escritura, con cuentas y una sección temporales que se borran |
+| Auditoría del informe | 14 páginas × 5 anchos × 2 perfiles · **750 enlaces del índice, 0 rotos** · 0 desbordes · 0 errores de consola |
+| Auditoría de roles | **33** · el módulo de punta a punta por la interfaz (crear, marcar, guardar, bajar de nivel, borrar) y el destino de cada tipo de cuenta · 0 desbordes a 1440, 1024 y 390 |
+| `probar:supabase` | **63** · `roles` y `rol_permisos` cerradas sin sesión |
+| adiestramiento · padrón · certificado · recordatorios | 17 · 25 · 17 · 38 |
+| `capturar` · `capturar:adiestramiento` | limpias, salvo la voz, que sigue sin clave de Azure |
+| `tipos` · `lint` · `build` | limpios |
+
+⚠️ **Un `sed` sobre la bitácora le puso una comilla invertida al principio de cada línea**: en
+GNU sed, `` \` `` es el ancla de inicio del texto, no una comilla. Se restauró de git. Para
+tocar markdown con comillas invertidas, la herramienta de edición o un script de Node.
+
+**Dónde quedamos.** Todo aplicado en la base. Antes de dar la primera cuenta a Iberia hay que
+decidir qué ve «Lector Iberia»: hoy reproduce lo de antes, que incluye las transcripciones y
+los hallazgos crudos. Anotado en `PENDIENTES.md`.
 
 ---
 

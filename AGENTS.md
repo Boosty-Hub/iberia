@@ -443,11 +443,18 @@ Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).
 
 - **RLS activa en todas las tablas.** Nada es legible sin sesión. Al crear una tabla,
   habilitar RLS y escribir sus políticas en la misma migración.
-- **Autorización en dos capas**: `lib/auth.ts` (`requerirSesion`, `requerirEditor`,
-  `requerirAdmin`) en el servidor, y RLS en la base. Una página nunca confía solo en
-  el `proxy.ts`.
-- **Roles**: `admin` y `consultor` (Boosty) editan; `lector` (Iberia) solo lee y no ve
-  las secciones del informe en borrador.
+- **Autorización en dos capas**: `lib/auth.ts` (`requerirPermiso`, `puede`,
+  `requerirSesion`) en el servidor, y RLS en la base. Una página nunca confía solo en
+  el `proxy.ts`, y una acción de servidor no confía en que el botón estuviera escondido.
+- **Roles configurables, con un nivel como techo.** Ver «Roles y permisos», abajo.
+  `profiles.rol` sigue existiendo —todas las políticas viejas lo leen— pero ya no se
+  escribe a mano: sale del rol asignado.
+- 🔴 **Nadie cambia su propio rol, estado u organización.** La política «actualizar
+  perfil propio» deja escribir la fila entera —RLS no restringe columnas— y hasta el 25
+  de septiembre de 2026 un lector se hacía administrador con una llamada a la API.
+  Lo cierra el trigger `a_profiles_proteger_acceso`, y `probar:permisos` lo comprueba.
+  **Cualquier política de «lo propio» sobre una tabla con columnas de acceso necesita
+  su trigger**: la RLS decide qué filas, no qué columnas.
 - **`SUPABASE_SECRET_KEY` bypasea RLS.** Solo en `createAdminClient()`, y solo para
   provisionar usuarios. Nunca para leer datos por cuenta de un usuario.
 - **Sin registro abierto**: las cuentas se crean desde `/dashboard/usuarios` o con
@@ -483,6 +490,12 @@ Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).
   los ids de una vez y dejaban el resto con el nombre viejo. Lo que pueda pasar de mil se
   pagina con `.range()`; un `update` masivo va en tandas hasta que no quede nada que
   coincida; y para contar, `count: 'exact', head: true`, nunca el largo del arreglo.
+- ⚠️ **En una inserción de varias filas, supabase-js pone NULL en la columna que una fila
+  no trae** —no el valor por defecto de la tabla—. Con columnas `not null` la inserción
+  entera falla. Cada fila lleva todas las columnas.
+- **Git Bash convierte en ruta de Windows cualquier argumento que empiece por `/`**:
+  `/dashboard/roles` llega al script como `C:/Program Files/Git/dashboard/roles`. Para
+  pasarle rutas de la app a un script, `MSYS_NO_PATHCONV=1`.
 - Un módulo `'use server'` solo puede exportar funciones async. Las constantes
   compartidas van aparte — por eso existe `lib/storage.ts`.
 - Los tipos de ruta (`PageProps<'/…'>`) se generan: tras añadir una ruta, correr
@@ -538,6 +551,7 @@ npm run probar:certificado                  # guardas de emisión y vista, con c
 npm run probar:recordatorios                # la escalera del empujón y los mensajes
 npm run probar:padron                       # el enlace como credencial · 25 comprobaciones
 npm run probar:supabase                     # que todo exista de verdad en el proyecto
+npm run probar:permisos                     # roles y permisos contra la RLS real · 34 comprobaciones
 npm run importar:transcripciones            # el levantamiento, con los hablantes por nombre
 npm run importar:transcripciones -- --revisar   # dice qué cargaría, sin escribir
 npm run cargar:hallazgos                    # hallazgos propuestos desde contenido/hallazgos/
@@ -668,7 +682,61 @@ cambia `scripts/generar-guias.mjs` y se regeneran, igual que la marca y las fich
   macroprocesos y sus N1 es su base, y si la Junta pide después los manuales, eso es otro
   proyecto con el levantamiento ya hecho. Va dicho dentro de las guías.
 
+## Roles y permisos (`/dashboard/roles`)
+
+Los roles se crean desde el panel, cada uno con una **matriz de ver, crear, editar y
+eliminar** por módulo, por sección del informe y por lección del curso de Ajito, y se
+asignan a cada usuario en `/dashboard/usuarios`. Tablas `roles` y `rol_permisos`;
+`profiles.rol_id` dice cuál tiene cada quien.
+
+- ⚠️ **El nivel es el techo y la matriz afina por debajo.** Cada rol tiene un `nivel`
+  (`admin`, `consultor`, `lector`) que un trigger copia a `profiles.rol`, así que todas las
+  políticas que ya preguntaban por `es_editor()` siguen valiendo. Un rol de nivel lectura
+  solo puede ver; uno de nivel consultor no administra usuarios ni roles; **el nivel
+  administrador lo puede todo y su matriz no se edita** — así nadie deja al programa sin
+  quien lo administre desmarcando una casilla. La base rechaza guardar una casilla por
+  encima del techo, y **nunca se queda sin un administrador activo** (trigger diferido).
+- **Un recurso es `modulo:<clave>`, `informe:<slug>` o `leccion:<numero>`.** Los módulos
+  están en `MODULOS` de `lib/permisos.ts` —una pantalla nueva del panel se añade ahí el
+  mismo día—; las secciones y las lecciones salen de la base, así que una nueva aparece
+  sola en la matriz. En los roles de fábrica entra con lo que su nivel veía ayer
+  (triggers `informe_secciones_permisos` y `lecciones_permisos`); en uno creado desde el
+  panel entra apagada.
+- **Cada módulo declara solo las acciones que existen.** Una casilla que no hace nada es
+  una mentira: sale como «no aplica». Empleados y Recordatorios **no tienen «ver» a
+  secas**: leen vistas que solo le responden al equipo, así que se abren con «editar».
+- **La regla vive dos veces y tiene que decir lo mismo**: `public.puede(recurso, accion)`
+  en la base y `permite()` en `lib/permisos.ts`. En la app se pregunta con
+  `puede(sesion, recurso, accion)` y se exige con `requerirPermiso(recurso, accion)`, que
+  sirve igual en páginas y en acciones. `obtenerSesion()` trae el rol y la matriz de una
+  vez (`mis_permisos()`) y va con `cache()`: layout y página la piden en la misma petición.
+- **Dónde cierra la base y dónde la app.** La casilla entra en la RLS del informe
+  (`informe_secciones`), del mapa (`macroprocesos`, `procesos`) y de las lecciones, que es
+  lo que se abre a gente que no es del equipo. En el resto de módulos la matriz la aplica
+  el servidor de la app, con el nivel como techo en la base.
+- **Cuatro roles de fábrica**, que reproducen el acceso de antes: Administrador, Consultor
+  Boosty, Lector Iberia y **Personal de planta** —el canal y las nueve lecciones, nada
+  más—, que es el que se le da a quien entra con su enlace (`rol_clave` en los metadatos
+  del alta). No se borran ni cambian de nivel.
+- **A dónde va cada quien al entrar** lo decide `destinoInicial()`: el panel si lo tiene,
+  si no el canal, si no el informe, y si no `/sin-acceso`, que existe para que el panel
+  no se redirija a sí mismo en bucle.
+
 ## El informe (`/dashboard/informe` y `/informe`)
+
+**La cáscara de lectura** (25 de septiembre de 2026). La hoja se centra con una medida de
+lectura fija —840 px, texto a 16/17 px con 1,75 de interlineado— y a partir de 1400 px
+sale a su lado el índice «En esta sección», pegado al hacer scroll y marcando dónde va el
+lector; por debajo va plegado arriba del texto. En teléfono la hoja va de borde a borde y
+el índice del documento se abre desde el botón de menú (`MenuMovil`, un `<dialog>`, el
+mismo del panel). Antes la hoja iba pegada a la izquierda y a 1920 px dejaba 736 px vacíos.
+
+- ⚠️ **Los ids del índice se calculan como los pinta `rehype-slug`**: un solo
+  `GithubSlugger` para todo el documento y en orden (`lib/encabezados.ts`). Uno por
+  encabezado da el mismo id a dos títulos iguales. La auditoría comprueba que cada enlace
+  encuentre su destino: 750 revisados, 0 rotos.
+- Las anclas se corren lo que mide la cabecera fija (`scroll-margin-top` en `.prosa`), y
+  las tablas avisan con una sombra en el borde cuando se deslizan.
 
 Son **12 secciones** en cuatro partes, y `npm run informe:estructura` es quien las mantiene.
 El armazón se comprimió de 15 a 12 el 18 de septiembre de 2026, y cada fusión tiene su razón:
@@ -723,6 +791,10 @@ El armazón se comprimió de 15 a 12 el 18 de septiembre de 2026, y cada fusión
     la encuentra no avisa: el lector se queda en la ficha, que es a donde iba igual.
   - **El ancla se calcula con el mismo `github-slugger` que el generador.** Construirla a
     mano dejaría los veinte enlaces apuntando a la nada, y sin error visible.
+  - ⚠️ **Es el inventario entero de procesos, y se abre con su permiso**
+    (`informe:mapa-interactivo`) y, para quien no escribe, solo si la sección del mapa de
+    procesos está publicada. Hasta el 25 de septiembre lo abría cualquiera con sesión, aunque
+    el informe no tuviera nada publicado.
 
 ### La parte de arquitectura: los circuitos y el sistema Iberia
 

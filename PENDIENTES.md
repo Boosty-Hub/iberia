@@ -438,7 +438,8 @@ el comité antes de continuar con las fases siguientes»*.
   servicio; estas cinco tienen que hacer lo mismo, o seguirán saltándose.
 - *Velocidad, cuando haya despliegue:* cada página valida la sesión dos veces —el proxy y
   `requerirSesion`— y el índice del curso encadena ocho consultas una detrás de otra.
-  Deduplicar con `cache()` y paralelizar ahorra dos o tres vueltas por página. Con el
+  *(Desde el 25 de septiembre `obtenerSesion` va con `cache()`, así que layout y página ya
+  no la piden dos veces; falta el proxy y paralelizar el curso.)* Con el
   servidor en la región de Supabase (ver `DESPLIEGUE.md`) pesa mucho menos, así que va
   después de desplegar y de medir allá.
 
@@ -450,8 +451,10 @@ el comité antes de continuar con las fases siguientes»*.
 |---|---|---|
 | 🔴 **Revisar el registro de horas y corregirlo.** Ya está cargado y itemizado en `/dashboard/programa`: **38 partidas**, cada una con la base de su número. Revisadas con Gabriel el 31 de agosto: el mes 1 cierra en **137 h contra 107**. Lo que falta es la última pasada antes del corte, que es en seis días | Gabriel | **Primer corte: 6 de septiembre** |
 | 🔴 **Redactar el reporte mensual de consumo**, que es obligación de la cláusula 8 y nunca se ha entregado uno. **`/dashboard/programa` ya está escrito para que lo lea Iberia** —qué horas, quién las dedicó y cómo va el calendario—, así que el reporte se apoya en la página en vez de repetirla: lo que aporta es la lectura, no la tabla | **Boosty** | **6 de septiembre** |
-| **Dar de alta a Iberia en el dashboard.** El módulo del programa ya se puede leer con rol `lector`, pero no consta que exista ninguna cuenta de Iberia. Sin eso, la decisión de abrirlo no cambia nada | **Boosty** crea · Alberto decide quiénes | |
-| ⚠️ **La barra lateral le ofrece al lector páginas que no puede abrir.** «Adiestramiento», «Empleados» y «Editor del informe» exigen editor y lo devuelven al panel con un aviso. Con el programa abierto a Iberia eso deja de ser teórico: hay que gatear `PRINCIPALES` en `components/nav-lateral.tsx` por rol, como ya se hace con «Usuarios» | **Boosty** | |
+| **Dar de alta a Iberia en el dashboard.** El módulo del programa ya se puede leer con el rol **Lector Iberia**, pero no consta que exista ninguna cuenta de Iberia. Sin eso, la decisión de abrirlo no cambia nada | **Boosty** crea · Alberto decide quiénes | |
+| **Revisar con Gabriel la matriz de «Lector Iberia» antes de dar la primera cuenta.** Hoy reproduce lo que el nivel lector veía antes del 25 de septiembre: panel, entrevistas, archivos, hallazgos, el editor del informe en lectura, el programa, el adiestramiento, el canal, el mapa y las doce secciones (solo las publicadas). Es mucho más que el informe y el programa: conviene decidir si la dirección de Iberia ve las transcripciones y los hallazgos crudos | Gabriel decide · **Boosty** marca en `/dashboard/roles` | Antes del alta de Iberia |
+| ~~La barra lateral le ofrece al lector páginas que no puede abrir~~ ✅ **Resuelto el 25 de septiembre**: cada destino sale solo si el rol puede abrirlo | ✅ | |
+| ⚠️ **El certificado con lecciones apagadas.** Si a un rol se le apagan lecciones en la matriz, el índice del curso ofrece el certificado al terminar las que ve, pero el certificado solo se emite con las nueve completadas. Los cuatro roles de fábrica ven las nueve, así que hoy no pasa; si alguien arma un rol con menos, hay que decidir qué certifica | **Boosty** | Si se arma un rol así |
 | ~~¿El dashboard del levantamiento consume bolsa?~~ **Sí**, decidido. Sus 40 h quedan dentro | ✅ |
 | **Cadencia de las reuniones de seguimiento y gobierno.** La cláusula 10 nos obliga a asistir «a las acordadas» y a entregar «la reportería pactada». No consta que estén acordadas — pero el **comité de comunicaciones** propuesto el 27 de agosto es la vía más corta para cerrarlo: ya tiene las tres patas y solo le falta cadencia | Gabriel con Alberto | |
 | **Designación del liderazgo interno del proyecto** (cláusula 7). Martha Fuentes fue nombrada «coordinadora»; hay que verificar si eso lo cierra o si falta la figura transversal | Alberto García-Ramos | |
