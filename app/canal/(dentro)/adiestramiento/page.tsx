@@ -234,7 +234,7 @@ function ElegirVoz({ actual }: { actual: string }) {
       <p className="text-[13px] font-semibold text-marca-800">¿Con qué voz quieres oír a Ajito?</p>
       <div className="mt-2 grid grid-cols-2 gap-2" role="group" aria-label="La voz de Ajito">
         {CLAVES_VOZ.map((clave) => {
-          const { rotulo } = VOCES[clave]
+          const { rotulo, corto } = VOCES[clave]
           const elegida = rotulo === actual
           return (
             <button
@@ -243,15 +243,16 @@ function ElegirVoz({ actual }: { actual: string }) {
               name="voz"
               value={clave}
               aria-pressed={elegida}
+              aria-label={rotulo}
               className={cn(
-                'toque gap-1.5 rounded-xl border px-3 text-[15px] font-semibold transition-colors',
+                'toque gap-1.5 rounded-xl border px-3 text-[15px] font-semibold whitespace-nowrap transition-colors',
                 elegida
                   ? 'border-acento-500 bg-acento-50 text-acento-700'
                   : 'border-marca-200 bg-white text-marca-600 active:bg-marca-50'
               )}
             >
-              {elegida && <IconoCheck className="h-4 w-4" />}
-              {rotulo}
+              {elegida && <IconoCheck className="h-4 w-4 shrink-0" />}
+              {corto}
             </button>
           )
         })}

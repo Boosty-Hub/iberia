@@ -98,9 +98,10 @@ export const SEBASTIAN: VozAjito = {
  */
 export type ClaveVoz = 'mujer' | 'hombre'
 
-export const VOCES: Record<ClaveVoz, VozAjito & { rotulo: string; carpeta: string }> = {
-  mujer: { ...PAOLA, rotulo: 'Voz de mujer', carpeta: '' },
-  hombre: { ...SEBASTIAN, rotulo: 'Voz de hombre', carpeta: 'hombre' },
+/** `corto` va en el botón: con el ✓ al lado, «Voz de hombre» no cabía en un teléfono. */
+export const VOCES: Record<ClaveVoz, VozAjito & { rotulo: string; corto: string; carpeta: string }> = {
+  mujer: { ...PAOLA, rotulo: 'Voz de mujer', corto: 'Mujer', carpeta: '' },
+  hombre: { ...SEBASTIAN, rotulo: 'Voz de hombre', corto: 'Hombre', carpeta: 'hombre' },
 }
 
 export const CLAVES_VOZ = Object.keys(VOCES) as ClaveVoz[]
