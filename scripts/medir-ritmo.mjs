@@ -7,13 +7,17 @@
  *
  * El objetivo son **192 palabras por minuto** (ver `lib/voz.ts`). En agosto se
  * cronometró el texto y el `+16%` parecía dar 192; medido sobre el audio daba 174.
- * Así que esto pide el WAV a Azure, mide la energía en marcos de 10 ms, recorta el
- * silencio de las puntas y cuenta: palabras por minuto sobre lo que suena, cuántas
- * pausas hay y cuántas pasan de 400 ms —que es cuando el audio empieza a sonar a
- * frases sueltas—.
+ * Así que esto pide el WAV a Azure y cuenta palabras por minuto **sobre el WAV
+ * entero**, con el medio segundo de silencio que Azure deja en cada punta —así se
+ * midió en agosto—. Al lado va la cifra sin las puntas, y con la energía en marcos
+ * de 10 ms cuenta cuántas pausas hay y cuántas pasan de 400 ms, que es cuando el
+ * audio empieza a sonar a frases sueltas.
  *
  * ⚠️ **Arranca siempre con Paola a +12% como testigo.** Tiene que dar ~192: es la
- * medida con la que se eligió. Si no, el que está mal es el método, no la voz.
+ * medida con la que se eligió. Si no, el que está mal es el método, no la voz. La
+ * primera versión recortaba las puntas y el testigo dio 199 —un 3,6% más rápido que
+ * agosto—; mover el umbral de silencio no cambiaba nada, porque la diferencia era el
+ * silencio de las puntas. Lo que importa es que las dos voces se midan igual.
  *
  * El texto es el Audio 1 de la lección 0, del guion —86 palabras—, el mismo de la
  * calibración de agosto. Cuesta menos de un centavo por escalón.
@@ -42,6 +46,9 @@ if (!base) {
   process.exit(1)
 }
 const escalera = (args.escalera ?? '-12,-8,-4,0').split(',').map(Number)
+// Silencio: por debajo de esta fracción del marco más fuerte. Se ajusta hasta que el
+// testigo dé 192, que es como se midió en agosto.
+const UMBRAL = Number(args.umbral ?? 0.04)
 
 const archivo = 'leccion-00-bienvenida.md'
 const leccion = leerLeccion(await readFile(`contenido/adiestramiento/${archivo}`, 'utf8'), archivo)
@@ -95,8 +102,7 @@ function medir(buffer) {
     }
     rms.push(Math.sqrt(suma / porMarco))
   }
-  // Silencio: por debajo del 4% del marco más fuerte.
-  const umbral = Math.max(...rms) * 0.04
+  const umbral = Math.max(...rms) * UMBRAL
   const suena = rms.map((v) => v > umbral)
   const primero = suena.indexOf(true)
   const ultimo = suena.lastIndexOf(true)
@@ -110,16 +116,20 @@ function medir(buffer) {
     }
   }
   const segundos = (ultimo - primero + 1) / 100
-  return { segundos, pausas }
+  // El WAV entero, con el silencio que Azure deja en las puntas: es como se midió en agosto.
+  const entero = rms.length / 100
+  return { segundos, entero, pausas }
 }
 
 async function escalon(nombre, voz) {
   const m = medir(await wav(voz))
-  const ppm = (palabras / m.segundos) * 60
+  const ppm = (palabras / m.entero) * 60
+  const ppmRecortado = (palabras / m.segundos) * 60
   const largas = m.pausas.filter((p) => p >= 400).length
   const marca = Math.abs(ppm - 192) <= 2 ? '  ← 192' : ''
   console.log(
-    `  ${nombre.padEnd(28)} ${m.segundos.toFixed(1).padStart(5)} s → ${ppm.toFixed(0).padStart(3)} ppm` +
+    `  ${nombre.padEnd(28)} ${m.entero.toFixed(1).padStart(5)} s → ${ppm.toFixed(0).padStart(3)} ppm` +
+      ` (sin las puntas: ${m.segundos.toFixed(1)} s, ${ppmRecortado.toFixed(0)})` +
       ` · ${String(m.pausas.length).padStart(2)} pausas, ${largas} de 400 ms o más${marca}`
   )
   return ppm

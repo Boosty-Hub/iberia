@@ -302,6 +302,16 @@ for (const nombre of BUCKETS) {
   }
   comprobar(`los 70 audios del guion están arriba (${mp3})`, mp3 === 70, String(mp3))
 
+  // Y los mismos 70 con la voz de hombre, en `hombre/`: si faltan, quien la eligió
+  // oye la de mujer sin que nada avise (ver la ruta de los audios).
+  const { data: deHombre } = await admin.storage.from('adiestramiento').list('hombre', { limit: 100 })
+  let mp3Hombre = 0
+  for (const carpeta of (deHombre ?? []).filter((f) => /^leccion-\d+$/.test(f.name))) {
+    const { data } = await admin.storage.from('adiestramiento').list(`hombre/${carpeta.name}`, { limit: 100 })
+    mp3Hombre += (data ?? []).filter((f) => f.name.endsWith('.mp3')).length
+  }
+  comprobar(`y los 70 con la voz de hombre (${mp3Hombre})`, mp3Hombre === mp3, `${mp3Hombre} de ${mp3}`)
+
   const { data: fichas } = await admin.storage.from('adiestramiento').list('fichas', { limit: 100 })
   const png = (fichas ?? []).filter((f) => f.name.endsWith('.png')).length
   comprobar(`las 10 fichas están arriba (${png})`, png === 10, String(png))

@@ -72,15 +72,24 @@ export const PAOLA: VozAjito = {
 }
 
 /**
- * El venezolano. Trae mejor paso de fábrica: de fábrica va a 200 palabras por
- * minuto, un 20% más rápido que Paola. Se calibra a las **mismas 192** que ella
- * con `npm run medir:ritmo`, sobre el audio y no sobre el texto — las dos voces
- * dicen la misma clase y tienen que durar lo mismo.
+ * El venezolano. De fábrica corre más que Paola, así que va **a −7%** para decir la
+ * clase a las **mismas 192** palabras por minuto que ella. Medido el 26 de
+ * septiembre con `npm run medir:ritmo`, sobre el WAV del Audio 1 de la lección 0
+ * —86 palabras—, con Paola a +12% de testigo dando sus 192 de agosto:
+ *
+ *   Paola +12% ... 26,9 s → 192 ppm   · el testigo
+ *   −8% .......... 27,2 s → 190 ppm
+ *   −7% .......... 26,9 s → 191 ppm   ← elegida: dura lo mismo que Paola, con las
+ *                                        puntas y sin ellas (25,9 s)
+ *   −6% .......... 26,7 s → 194 ppm
+ *   +0% .......... 25,2 s → 205 ppm
+ *
+ * Ninguna escala mete pausas de 400 ms: la cadencia de las dos queda igual.
  */
 export const SEBASTIAN: VozAjito = {
   nombre: 'es-VE-SebastianNeural',
   etiqueta: 'Sebastián · venezolano',
-  velocidad: 0,
+  velocidad: -7,
   tono: 0,
   pausaFrase: 180,
 }

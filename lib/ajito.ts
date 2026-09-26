@@ -306,7 +306,11 @@ export async function devolver(contexto: Contexto): Promise<Devolucion> {
   const { clave } = claveAnthropic()
   if (!clave) return { ok: false, motivo: 'sin-configurar' }
 
-  const cliente = new Anthropic({ apiKey: clave })
+  // Y la dirección, también explícita. ⚠️ En Netlify, el SDK tomaba del entorno
+  // una `ANTHROPIC_BASE_URL` que no es nuestra —la pone su pasarela de IA—, le
+  // mandaba ahí nuestra clave y volvía un 401 sin cuerpo: en local funcionaba y en
+  // producción no (26 de septiembre de 2026).
+  const cliente = new Anthropic({ apiKey: clave, baseURL: 'https://api.anthropic.com' })
 
   const instruccion = contexto.esCampo
     ? INSTRUCCION_CAMPO
