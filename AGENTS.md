@@ -157,10 +157,21 @@ y una ruedita en vez de piernas.
   corto a mitad, `ended` pone el ✓. Y cargando **no se pinta avance en la barra**: un trozo a
   un tercio del ancho se lee como «va por el 33%», que es un número inventado.
   `capturar:adiestramiento` comprueba los tres colores con `getComputedStyle`, no por captura.
-- **La voz vive en `lib/voz.ts`** — `es-VE-PaolaNeural` de Azure, venezolana de fábrica,
-  a `+12%` porque de fábrica va lenta. Ahí está la perilla y ahí se cambia para todo el
-  curso a la vez. El guion se escribe en crudo: `aSSML()` arma los párrafos y aplica
-  velocidad, tono y pausas.
+- **Las voces viven en `lib/voz.ts`, y son dos a elegir** (`VOCES`, desde el 26 de
+  septiembre de 2026): `es-VE-PaolaNeural` —la de siempre, a `+12%` porque de fábrica va
+  lenta— y `es-VE-SebastianNeural`, las dos venezolanas de Azure. Quien hace el curso escoge
+  en el índice («Mujer» u «Hombre»); queda en `matriculas.voz` y vale para la clase grabada
+  **y para las devoluciones**, que `hablar()` genera con esa misma voz: si la clase la dijera
+  una y la devolución otra, habría dos Ajitos. El guion se escribe en crudo: `aSSML()` arma
+  los párrafos y aplica velocidad, tono y pausas.
+  - **Cada voz tiene su carpeta**: la de mujer, las rutas de siempre (`leccion-NN/`, en el
+    disco y en el bucket); la de hombre, `hombre/leccion-NN/`. `generar:audios` graba las
+    dos, cada una con su huella, y `subir:audios` sube las dos.
+  - **Si a la voz elegida le falta un audio, la ruta sirve el de la de siempre**: un audio
+    nuevo del guion que todavía no se grabó con las dos no deja a nadie en silencio.
+  - **Las dos van a las mismas 192 palabras por minuto**, medidas sobre el audio con
+    `medir:ritmo`, que arranca con Paola a `+12%` de testigo: si el testigo no da ~192, el
+    que está mal es el método.
 - ⚠️ **En SSML, un salto de línea del guion es una pausa, y las citas del markdown están
   ajustadas a 78 columnas.** O sea que Azure metía un silencio en mitad de cualquier frase
   partida —entre «Me» y «parece bien»—. `aSSML()` deshace los saltos sueltos: **la pausa la
@@ -206,9 +217,10 @@ y una ruedita en vez de piernas.
   texto y de los ajustes de voz, así que cambiar una coma regraba un audio y cambiar la
   velocidad los regraba los 70. **Solo graba los audios numerados**, que son la clase;
   las devoluciones se generan en el momento.
-- **Ajito no lleva género, y el trabajador tampoco.** El audio grabado es uno solo y lo
-  oyen hombres y mujeres: nada de «estoy listo», «cuando estés lista». En lo generado sí
-  se puede, que el padrón trae el nombre.
+- **Ajito no lleva género, y el trabajador tampoco.** El audio grabado lo oyen hombres y
+  mujeres, y además **lo dicen dos voces**, una de mujer y una de hombre: nada de «estoy
+  listo», «cuando estés lista». En lo generado sí se puede tratar a la persona según su
+  nombre, que el padrón lo trae, pero Ajito sigue sin género.
 - **El ejercicio bifurca por oficio, no por nivel** (`empleados.familia_oficio`). Bajo
   `nivel = 'planta'` conviven la operadora de envasado, la cocinera de pruebas y el
   vigilante. **Ante la duda va a `generico`**, que no es el descarte: es el ejercicio
@@ -242,8 +254,10 @@ npm run probar:adiestramiento                # 17 comprobaciones de RLS reales
 npm run capturar:adiestramiento              # iPhone 14 + panel, con el flujo
 npm run probar:voz                           # 7 muestras de voz para elegir de oído
 npm run generar:guion                        # el guion → guion.json, y lo comprueba
-npm run generar:audios                       # graba los 70 audios del guion
+npm run generar:audios                       # graba los audios del guion con las dos voces
+npm run generar:audios -- --voz hombre       # solo una voz
 npm run generar:audios -- --revisar          # dice qué grabaría, sin llamar a Azure
+npm run medir:ritmo                          # palabras por minuto sobre el audio, en escalera
 npm run subir:audios                         # los sube al bucket privado
 npm run capturar:oficios                     # el curso visto por los 8 oficios
 npm run capturar:oficios -- --leccion 7      # otra lección
@@ -555,7 +569,8 @@ npm run capturar:adiestramiento             # el curso en teléfono y el panel
 npm run sembrar:adiestramiento -- --abrir   # oficios, matrículas y apertura
 npm run probar:voz                          # muestras de Paola y Sebastián
 npm run generar:guion                       # el guion a datos, con su chequeo
-npm run generar:audios                      # los audios de Ajito, del guion
+npm run generar:audios                      # los audios de Ajito, del guion, con las dos voces
+npm run medir:ritmo                         # calibrar una voz a 192 palabras por minuto
 npm run subir:audios                        # al bucket privado
 npm run capturar:oficios                    # el curso visto por cada oficio
 npm run probar:ajito                        # qué contesta Ajito · pide ANTHROPIC_API_KEY

@@ -31,7 +31,7 @@ línea.
 | **Padrón** | **276 personas cargadas** con ficha, cargo, nivel y familia de oficio. ⚠️ Sin cédula, sin celular y sin correo |
 | **Canal** | Funciona en local. Anunciado el 12 de agosto; **la revisión con mercadeo se cayó y no tiene fecha** |
 | **Formación dirigente** | Uno a uno con Alberto el 17 de agosto, **Petit Comité el 26** y **gerentes el 23 de septiembre en Cagua**. Falta la tercera —los líderes— y su fecha |
-| **Adiestramiento de planta** | Completo: guion, **70 audios (20 min 02 s)**, 10 fichas, certificado, padrón, recordatorios. **Ajito ya contesta** con la clave que tiene saldo — 🔴 **pero sin voz desde el 24/9**: la clave de Azure no autentica, y con ella cae la transcripción de las notas de voz. **Es de Fase 2** — avance para mostrar, no para abrir |
+| **Adiestramiento de planta** | Completo: guion, **70 audios (20 min 02 s)**, **dos voces a elegir desde el 26/9** —la de hombre falta grabarla—, 10 fichas, certificado, padrón, recordatorios. **Ajito ya contesta** con la clave que tiene saldo — 🔴 **pero sin voz desde el 24/9**: la clave de Azure no autentica, y con ella cae la transcripción de las notas de voz. **Es de Fase 2** — avance para mostrar, no para abrir |
 | **Repositorio** | `Boosty-Hub/iberia` — 🔴 **público**. Cinco commits subidos el 17/9 con la bitácora dentro. Hace falta un administrador de la organización para cerrarlo |
 
 ### Lo que aprieta
@@ -64,6 +64,39 @@ cláusula 5. Aquí solo lo urgente:
 - **Refijar la revisión del canal con mercadeo** — Alberto la agenda. *(Bloqueaba el despliegue; el sitio salió el 25/9 a pedido de Gabriel, y la revisión sigue antes de dar cuentas del canal.)*
 - **Leer los 42 hallazgos redactados** del informe y validar los que los sostienen.
 - **Pedirle a Capital Humano cédula y celular por ficha.** El padrón llegó sin ellos.
+
+---
+
+## 26 de septiembre de 2026 · Sesión 44 — Ajito, con dos voces
+
+Encargo de Gabriel: que el curso tenga dos voces, una de mujer y una de hombre, y que cada quien
+escoja con cuál oye a Ajito.
+
+### Lo que quedó
+
+- **Paola y Sebastián**, las dos venezolanas de Azure —no hay más en `es-VE`—. En el índice del
+  curso, debajo del botón de seguir, «¿Con qué voz quieres oír a Ajito?» y dos botones:
+  «Mujer» y «Hombre». Se cambia cuando se quiera y queda en `matriculas.voz`.
+- **La elección vale para todo**: la clase grabada y las devoluciones que se generan en el
+  momento. Si la clase la dijera una voz y la devolución otra, habría dos Ajitos.
+- **El guion no cambia**: ya estaba escrito sin género, para Ajito y para quien lo oye.
+- **Cada voz en su carpeta**: la de mujer conserva sus rutas y sus 70 audios; la de hombre va en
+  `hombre/`. Si a la voz elegida le falta un audio, se sirve el de la de siempre: mejor otra voz
+  que el silencio.
+- **`medir:ritmo`, nuevo**: las palabras por minuto sobre el WAV, como la calibración de agosto,
+  que se había hecho a mano. Arranca con Paola a `+12%` de testigo.
+
+⚠️ **La primera versión del botón decía «Voz de hombre», y con el ✓ al lado no cabía**: se partía
+en dos renglones en un iPhone 14. Ahora dice «Mujer» y «Hombre», porque la pregunta de arriba ya
+dice de qué se trata. Lo cazó la captura, no la comprobación, que ahora mide que siga en un
+renglón.
+
+**Verificado en producción** con `mirar-voces`, en un iPhone 14: las dos voces, 44 px por botón,
+elegir marca y guarda, y sin la voz de hombre grabada el audio cae en la de siempre. 9 de 9.
+
+🔴 **Dónde quedamos: falta la clave de Azure.** Sin ella no se pueden grabar los 70 audios de
+Sebastián ni calibrarlo, y por ahora «Hombre» suena con la voz de mujer. Con la clave, lo que
+sigue está en `PENDIENTES.md`.
 
 ---
 
@@ -2897,7 +2930,8 @@ del markdown metían pausas falsas.)*
   Sebastián a 200 — Paola a +20% dura exactamente lo mismo que Sebastián, y eso era lo que
   sonaba lento. **192 ppm** es el objetivo: a 199 queda de pódcast de oficina, y quien va a
   oír esto está entendiendo por primera vez qué es la IA, en el comedor y con ruido.
-  **La voz quedó cerrada aquí; no queda prueba a ciegas pendiente.**
+  **La voz quedó cerrada aquí; no queda prueba a ciegas pendiente.** *(El 26 de septiembre se
+  sumó Sebastián como segunda voz a elegir: ver sesión 44.)*
   *(⚠️ El porcentaje que da esas 192 cambió a `+12%` el 31 de agosto. Aquí se escribió +16%
   porque la medición se hizo cronometrando el texto y no el audio, que llevaba pausas de más
   adentro. El objetivo no cambió; el número que lo consigue, sí.)*
