@@ -7,6 +7,7 @@ import { requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { estaLista, type Conexion } from '@/lib/whatsapp'
 import { comoSeLee } from '@/lib/telefono'
+import { resolverCorreccion } from './acciones'
 
 export const metadata: Metadata = { title: 'Empleados' }
 
@@ -46,9 +47,15 @@ export default async function EmpleadosPage({
   if (buscar) consulta = consulta.ilike('nombre_completo', `%${buscar}%`)
   if (nivel) consulta = consulta.eq('nivel', nivel)
 
-  const [{ data: padron }, { data: conexion }] = await Promise.all([
+  const [{ data: padron }, { data: conexion }, { data: correcciones }] = await Promise.all([
     consulta,
     supabase.from('ajustes_whatsapp').select('*').eq('id', true).maybeSingle(),
+    // Lo que la gente corrigió de su ficha con «No soy yo» en la lección 0.
+    supabase
+      .from('correcciones_padron')
+      .select('id, nombre, area, nombre_padron, cargo_padron, area_padron, created_at')
+      .is('resuelta_en', null)
+      .order('created_at'),
   ])
 
   const todos = padron ?? []
@@ -114,6 +121,53 @@ export default async function EmpleadosPage({
           </Link>
           .
         </p>
+      )}
+
+      {(correcciones ?? []).length > 0 && (
+        <section className="tarjeta mb-6 px-5 py-4" data-correcciones-padron>
+          <h2 className="text-sm font-semibold text-marca-900">
+            Para Capital Humano · {correcciones!.length}{' '}
+            {correcciones!.length === 1 ? 'ficha corregida' : 'fichas corregidas'}
+          </h2>
+          <p className="mt-1 text-sm text-marca-500">
+            Dijeron «No soy yo» en la lección 0 y escribieron cómo se llaman. El padrón no
+            cambia solo: se le pasa a Capital Humano y, cuando lo corrija, vuelve con{' '}
+            <code>importar:padron</code>.
+          </p>
+          <ul className="mt-3 divide-y divide-marca-100">
+            {correcciones!.map((c) => (
+              <li key={c.id} className="flex flex-wrap items-center gap-x-6 gap-y-2 py-3">
+                <div className="min-w-56 flex-1 text-sm">
+                  <p className="text-marca-500">
+                    En el padrón:{' '}
+                    <span className="text-marca-800">
+                      {[c.nombre_padron, c.cargo_padron, c.area_padron].filter(Boolean).join(' · ')}
+                    </span>
+                  </p>
+                  <p className="text-marca-500">
+                    Escribió:{' '}
+                    <strong className="text-marca-900">
+                      {[c.nombre, c.area].filter(Boolean).join(' · ')}
+                    </strong>
+                  </p>
+                </div>
+                <span className="text-xs text-marca-400">
+                  {new Date(c.created_at).toLocaleDateString('es-VE', {
+                    day: 'numeric',
+                    month: 'short',
+                    timeZone: 'America/Caracas',
+                  })}
+                </span>
+                <form action={resolverCorreccion}>
+                  <input type="hidden" name="id" value={c.id} />
+                  <button type="submit" className="btn-neutro">
+                    Ya se le pasó
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       {/* ------------------------------------------------------------------ */}

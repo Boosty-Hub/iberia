@@ -105,15 +105,24 @@ export async function empezarLeccion(datos: FormData) {
  */
 export async function avanzarPaso(datos: FormData) {
   const numero = Number(datos.get('numero'))
-  const desde = Number(datos.get('turno'))
   const ctx = await contexto(numero)
   if (!ctx) return
 
-  const { supabase, matricula, leccion } = ctx
-  const ahora = new Date().toISOString()
+  await adelantar(ctx, Number(datos.get('turno')))
+  revalidatePath(`/canal/adiestramiento/${numero}`)
+}
 
-  // El turno viene del navegador, pero solo puede empujar el avance de esta
-  // persona y nunca hacia atrás: no hay nada que ganar mintiendo.
+/**
+ * Deja el avance en el turno que sigue a `desde`.
+ *
+ * El turno viene del navegador, pero solo puede empujar el avance de esta
+ * persona y nunca hacia atrás: no hay nada que ganar mintiendo. ⚠️ Y se mide
+ * desde el turno que se tocó, no desde el avance guardado: sumándole uno al
+ * avance, dos toques seguidos al mismo botón se saltaban el turno de después.
+ */
+async function adelantar(ctx: NonNullable<Awaited<ReturnType<typeof contexto>>>, desde: number) {
+  const { supabase, matricula, leccion } = ctx
+
   const { data: avance } = await supabase
     .from('avances')
     .select('paso')
@@ -121,7 +130,8 @@ export async function avanzarPaso(datos: FormData) {
     .eq('leccion_id', leccion.id)
     .maybeSingle()
 
-  const siguiente = Math.max((avance?.paso ?? 0) + 1, Number.isFinite(desde) ? desde + 1 : 0)
+  const paso = avance?.paso ?? 0
+  const siguiente = Number.isFinite(desde) ? Math.max(paso, desde + 1) : paso + 1
 
   await supabase
     .from('avances')
@@ -129,18 +139,51 @@ export async function avanzarPaso(datos: FormData) {
     .eq('matricula_id', matricula.id)
     .eq('leccion_id', leccion.id)
 
-  await supabase.from('matriculas').update({ ultimo_toque: ahora }).eq('id', matricula.id)
-
-  revalidatePath(`/canal/adiestramiento/${numero}`)
+  await supabase
+    .from('matriculas')
+    .update({ ultimo_toque: new Date().toISOString() })
+    .eq('id', matricula.id)
 }
 
 /**
- * Guarda lo que la persona respondió, y con eso adelanta el turno.
+ * «No soy yo»: la persona corrige su ficha del padrón y la lección sigue.
  *
- * La devolución de Ajito todavía no se genera: falta cerrar el modelo (ver
- * `contenido/adiestramiento/herramientas.md`). Lo que sí se guarda es la
- * respuesta, que es lo que no se puede perder.
+ * Lo que escribe queda en `correcciones_padron` como aviso para Capital
+ * Humano —el padrón no se toca desde el teléfono: de ahí salen los
+ * certificados— y el equipo lo ve en `/dashboard/empleados`. Lo único que
+ * cambia en el acto es cómo la llama Ajito: el nombre del padrón era justo el
+ * que estaba mal, y seguir diciéndolo en la consigna de al lado sería no haberla
+ * oído.
  */
+export async function corregirPadron(datos: FormData): Promise<{ ok: boolean }> {
+  const numero = Number(datos.get('numero'))
+  const nombre = String(datos.get('nombre') ?? '').replace(/\s+/g, ' ').trim()
+  const area = String(datos.get('area') ?? '').replace(/\s+/g, ' ').trim()
+  if (nombre.length < 2 || nombre.length > 120 || area.length > 120) return { ok: false }
+
+  const ctx = await contexto(numero)
+  if (!ctx) return { ok: false }
+  const { empleado, supabase, matricula } = ctx
+
+  const { error } = await supabase
+    .from('correcciones_padron')
+    .insert({ empleado_id: empleado.id, nombre, area: area || null })
+  if (error) {
+    console.error('[adiestramiento] no se guardó la corrección del padrón:', error.message)
+    return { ok: false }
+  }
+
+  const primero = nombre.split(' ')[0]
+  await supabase
+    .from('matriculas')
+    .update({ nombre_corto: primero.charAt(0).toLocaleUpperCase('es') + primero.slice(1) })
+    .eq('id', matricula.id)
+
+  await adelantar(ctx, Number(datos.get('turno')))
+  revalidatePath(`/canal/adiestramiento/${numero}`)
+  return { ok: true }
+}
+
 /**
  * Guarda lo que la persona contestó y adelanta la lección.
  *

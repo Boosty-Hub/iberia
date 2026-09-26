@@ -7,6 +7,7 @@ import { AudioAjito } from '@/components/canal/audio-ajito'
 import { BotonSigue } from '@/components/canal/boton-sigue'
 import { DevolucionAjito } from '@/components/canal/devolucion-ajito'
 import { EntradaRespuesta } from '@/components/canal/entrada-respuesta'
+import { QuienEres } from '@/components/canal/quien-eres'
 import { IconoAtras, IconoCheck } from '@/components/iconos'
 import {
   CURSO,
@@ -76,7 +77,7 @@ export default async function LeccionPage({
   const familia = matricula.familia_oficio as FamiliaOficio
   const nombre = matricula.nombre_corto ?? empleado.nombre_completo.split(' ')[0]
 
-  const [{ data: avance }, { data: respuestas }] = await Promise.all([
+  const [{ data: avance }, { data: respuestas }, { data: correccion }] = await Promise.all([
     supabase
       .from('avances')
       .select('*')
@@ -89,6 +90,14 @@ export default async function LeccionPage({
       .eq('matricula_id', matricula.id)
       .eq('leccion_id', leccion.id)
       .order('created_at'),
+    // Lo último que corrigió de su ficha con «No soy yo», si lo hizo.
+    supabase
+      .from('correcciones_padron')
+      .select('nombre, area')
+      .eq('empleado_id', empleado.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ])
 
   const contestadas = new Map((respuestas ?? []).map((r) => [r.clave_paso, r]))
@@ -222,6 +231,7 @@ export default async function LeccionPage({
                 nombre: empleado.nombre_completo,
                 cargo: empleado.cargo,
                 area: empleado.areas?.nombre ?? null,
+                correccion,
               }}
             />
           ))}
@@ -279,10 +289,17 @@ function TurnoVista({
   /** Cuál es cada audio dentro de la lección, para el «3 de 8». */
   ordenAudio: Map<string, number>
   /** Lo que dice Capital Humano de quien oye, para la tarjeta de la lección 0. */
-  padron: { nombre: string; cargo: string | null; area: string | null }
+  padron: Padron
 }) {
   const bloques = segunInterruptor(turno.bloques, asistenteLibre)
   const primerAudio = bloques.findIndex((b) => b.tipo === 'audio')
+
+  // El turno de la tarjeta del padrón pregunta «¿Eres tú?», y su «No soy yo» no
+  // avanza a secas: abre dónde escribir quién es. Ver `QuienEres`.
+  const conPadron = bloques.some((b) => b.tipo === 'pieza' && b.clase === 'padron')
+  const opciones = turno.espera.tipo === 'botones' ? turno.espera.opciones : []
+  const noSoyYo = conPadron && !esFinal ? opciones.find((o) => /^no\b/i.test(o)) : undefined
+  const siSoyYo = noSoyYo ? opciones.find((o) => o !== noSoyYo) : undefined
 
   return (
     <section className="space-y-3">
@@ -342,7 +359,11 @@ function TurnoVista({
         return null
       })}
 
-      {turno.espera.tipo === 'botones' && esActual && (
+      {esActual && noSoyYo && siSoyYo && (
+        <QuienEres numero={numero} turno={turno.indice} si={siSoyYo} no={noSoyYo} />
+      )}
+
+      {turno.espera.tipo === 'botones' && esActual && !noSoyYo && (
         <div className="flex flex-wrap gap-2">
           {turno.espera.opciones.map((opcion) =>
             esSalida(opcion) ? (
@@ -392,22 +413,25 @@ function TurnoVista({
   )
 }
 
+type Padron = {
+  nombre: string
+  cargo: string | null
+  area: string | null
+  /** Lo que escribió con «No soy yo», si lo hizo. */
+  correccion: { nombre: string; area: string | null } | null
+}
+
 /**
  * Quién dice Capital Humano que eres.
  *
  * El audio de la lección 0 no puede decir el nombre —se graba uno solo para
  * todos—, así que lo dice esta tarjeta y Ajito pregunta si está bien. El cargo
  * llega del listado en mayúsculas y aquí se escribe como se lee.
+ *
+ * Si la persona dijo «No soy yo», debajo queda lo que escribió: al volver a la
+ * lección tiene que ver que se la oyó, no la misma ficha equivocada sola.
  */
-function PadronVista({
-  nombre,
-  cargo,
-  area,
-}: {
-  nombre: string
-  cargo: string | null
-  area: string | null
-}) {
+function PadronVista({ nombre, cargo, area, correccion }: Padron) {
   const detalle = [cargo && legible(cargo), area].filter(Boolean).join(' · ')
   return (
     <div className="tarjeta-canal px-5 py-4" data-padron>
@@ -418,6 +442,15 @@ function PadronVista({
       <p className="mt-0.5 text-[15px] leading-relaxed text-marca-600">
         {detalle || 'Sin cargo ni área en la lista'}
       </p>
+      {correccion && (
+        <div data-padron-corregido className="mt-3 rounded-xl bg-oro-300/25 px-3 py-2.5">
+          <p className="text-[13px] font-semibold text-marca-700">Lo que corregiste</p>
+          <p className="text-[15px] leading-relaxed text-marca-800">
+            {[correccion.nombre, correccion.area].filter(Boolean).join(' · ')}
+          </p>
+          <p className="mt-0.5 text-[13px] text-marca-500">Se le avisó a Capital Humano.</p>
+        </div>
+      )}
     </div>
   )
 }

@@ -11,7 +11,9 @@
  * Lo que se verifica, además de que las operaciones funcionen:
  *  · que nadie pueda avanzar ni responder por cuenta de otra matrícula,
  *  · que las respuestas de una persona no las lea otra,
- *  · que `matricular_pendientes` esté fuera del alcance de una sesión.
+ *  · que `matricular_pendientes` esté fuera del alcance de una sesión,
+ *  · que la corrección de la ficha («No soy yo») la escriba solo su dueño y la
+ *    lea solo él y el equipo.
  *
  * Todo lo que crea, lo borra. Opciones: --email
  */
@@ -94,7 +96,7 @@ const { data: lecciones } = await admin
 // Matrícula propia temporal, y una ajena para probar que no se puede tocar.
 const { data: otro } = await admin
   .from('empleados')
-  .select('id, perfil_id')
+  .select('id, perfil_id, nombre_completo')
   .neq('id', yo.id)
   .eq('nivel', 'planta')
   .limit(1)
@@ -107,6 +109,8 @@ let matriculaAjenaEsDeLaPrueba = false
 let respuestaAjena = null
 let usuarioPrueba = null
 let perfilOriginal = null
+/** Las correcciones del padrón que crea esta corrida, para borrarlas al salir. */
+const correccionesPrueba = []
 
 /** Con esto se reconoce y se barre lo que crea esta prueba. */
 const PREFIJO_PRUEBA = 'prueba-adiestramiento-'
@@ -317,6 +321,67 @@ try {
         (tableroEmpleado ?? []).reduce((t, f) => t + (f.matriculados ?? 0), 0) === 1,
         JSON.stringify(tableroEmpleado)
       )
+
+      // --- «No soy yo»: la corrección de la ficha del padrón -------------------
+      // La escribe su dueño, no se la da por resuelta él mismo, lo que decía el
+      // padrón no lo manda el navegador, y no la lee nadie más que el equipo.
+      const { data: corregida, error: errCorr } = await comoEmpleado
+        .from('correcciones_padron')
+        .insert({
+          empleado_id: otro.id,
+          nombre: 'Nombre de prueba',
+          area: 'Área de prueba',
+          nombre_padron: 'inventado por el navegador',
+          resuelta_en: new Date().toISOString(),
+        })
+        .select('id, nombre_padron, resuelta_en')
+        .single()
+      if (corregida) correccionesPrueba.push(corregida.id)
+      comprobar(
+        'corrijo mi ficha del padrón, y lo que decía el padrón lo pone la base',
+        !errCorr && corregida?.nombre_padron === otro.nombre_completo && !corregida?.resuelta_en,
+        errCorr?.message ?? JSON.stringify(corregida)
+      )
+
+      const { error: errCorrAjena } = await comoEmpleado
+        .from('correcciones_padron')
+        .insert({ empleado_id: yo.id, nombre: 'Por cuenta de otro' })
+      comprobar('no puedo corregir la ficha de otro', !!errCorrAjena, 'lo dejó pasar')
+
+      if (corregida) {
+        await comoEmpleado
+          .from('correcciones_padron')
+          .update({ resuelta_en: new Date().toISOString() })
+          .eq('id', corregida.id)
+        const { data: sigue } = await admin
+          .from('correcciones_padron')
+          .select('resuelta_en')
+          .eq('id', corregida.id)
+          .single()
+        comprobar('no me la puedo dar por resuelta', !sigue?.resuelta_en, 'la marcó resuelta')
+
+        const { data: comoEquipo } = await cliente
+          .from('correcciones_padron')
+          .select('id')
+          .eq('id', corregida.id)
+        comprobar('el equipo la lee en el padrón', comoEquipo?.length === 1)
+      }
+
+      const { data: ajena } = await admin
+        .from('correcciones_padron')
+        .insert({ empleado_id: yo.id, nombre: 'Corrección de otra persona' })
+        .select('id')
+        .single()
+      if (ajena) correccionesPrueba.push(ajena.id)
+      const { data: fisgoneoCorr } = await comoEmpleado
+        .from('correcciones_padron')
+        .select('id')
+        .eq('empleado_id', yo.id)
+      comprobar(
+        'un empleado corriente no lee la corrección de otro',
+        !fisgoneoCorr?.length,
+        `vio ${fisgoneoCorr?.length}`
+      )
     }
   }
 
@@ -345,6 +410,7 @@ try {
  * hubiera caído a mitad de camino.
  */
 async function limpiar() {
+  for (const id of correccionesPrueba) await admin.from('correcciones_padron').delete().eq('id', id)
   if (respuestaAjena) await admin.from('respuestas').delete().eq('id', respuestaAjena)
   // La matricula ajena solo se borra si la abrio esta corrida. Si ya estaba, es
   // de alguien y no se toca.

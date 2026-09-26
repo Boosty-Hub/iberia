@@ -58,7 +58,11 @@ nombre sin explicar cómo es exactamente lo que no queremos.*
 ⌨️ `Sí, soy yo` · `No soy yo`
 
 **Si dice que no:** se recoge nombre y área a mano y queda una marca para
-Capital Humano. El curso sigue igual.
+Capital Humano. El curso sigue igual. En pantalla, debajo de la tarjeta, sin audio:
+«Corrígelo aquí» · «¿Cómo te llamas?» (obligatorio) · «¿En qué área trabajas?» (solo
+si también está mal) · «Se le avisa a Capital Humano para que lo corrija. El curso
+sigue igual.» · botón «Mandar y seguir», y «Mejor sí soy yo» para volver. Desde ahí
+Ajito la llama por el nombre que escribió. La marca la ve el equipo en el padrón.
 
 ---
 

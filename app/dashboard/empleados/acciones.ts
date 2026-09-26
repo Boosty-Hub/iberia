@@ -239,3 +239,27 @@ function mensajeDeBienvenida(nombreCompleto: string, enlace: string): string {
     `Este enlace es tuyo, no lo compartas. Con él entras directo, sin clave:\n${enlace}`
   )
 }
+
+/**
+ * Marca como resuelta una corrección que alguien hizo de su ficha con «No soy
+ * yo» en la lección 0: quiere decir que ya se le pasó a Capital Humano. El
+ * padrón no se toca aquí —lo corrige Capital Humano y vuelve con
+ * `importar:padron`—; esto solo saca el aviso de la lista.
+ */
+export async function resolverCorreccion(datos: FormData) {
+  await requerirPermiso('modulo:empleados', 'editar')
+  const id = String(datos.get('id') ?? '')
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  await supabase
+    .from('correcciones_padron')
+    .update({ resuelta_en: new Date().toISOString(), resuelta_por: user?.id ?? null })
+    .eq('id', id)
+
+  revalidatePath(RUTA)
+}

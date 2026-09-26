@@ -109,8 +109,26 @@ la nota de voz, el pensando inmediato, el turno retenido, la fecha, sin desborde
 `capturar:oficios` en la lección 0 con los ocho oficios, y `probar:ajito` con dos casos nuevos
 (fecha y clima).
 
-**Dónde quedamos.** «No soy yo» sigue sin recoger el nombre a mano ni dejar la marca para Capital
-Humano que dice el guion: por ahora solo avanza (en `PENDIENTES.md`).
+### «No soy yo», con dónde escribir quién es
+
+Lo pidió Gabriel al cerrar la tanda. Hasta ahí el botón solo avanzaba: quien decía que no, no
+tenía dónde decir quién era. Ahora abre dos campos —el nombre y, si también está mal, el área—, y
+al mandarlos la lección sigue y Ajito la llama por el nombre que escribió.
+
+- **Queda como aviso para Capital Humano, no como dato**, en una tabla nueva
+  (`correcciones_padron`). El padrón no se corrige desde un teléfono: de ahí salen los
+  certificados. El equipo lo ve arriba del padrón en el panel, con lo que decía la ficha al lado,
+  y lo saca con «Ya se le pasó».
+- De paso, **dos toques seguidos a un botón de la lección podían saltarse un turno**: el avance se
+  sumaba sobre el ya guardado. Ahora se mide desde el turno que se tocó.
+
+**Verificado**: `probar:adiestramiento` 22 de 22, con cinco nuevas sobre quién escribe y quién lee
+la corrección; `probar:supabase` 68 de 68; y el recorrido en el teléfono y en el panel, en
+producción.
+
+**Dónde quedamos.** El apodo que la persona le dice a Ajito en la lección 0 no se guarda: Ajito
+promete «así te digo de aquí en adelante» y las consignas siguen con el primer nombre del padrón
+(en `PENDIENTES.md`).
 
 ---
 

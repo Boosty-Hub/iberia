@@ -220,6 +220,14 @@ y una ruedita en vez de piernas.
   nombre de una trabajadora de ejemplo, y el 1 de la lección 3 la llamaba por su apodo. El
   nombre, el cargo y el área van en la **tarjeta del padrón** (`🖼 **Tarjeta del padrón**` en
   el guion, clase `padron` en `lib/guion.ts`), y Ajito dice de dónde los sacó.
+- **«No soy yo» abre dónde escribir quién es** (`QuienEres`): el nombre —obligatorio— y el
+  área —solo si también está mal—. Queda en `correcciones_padron` como **aviso para Capital
+  Humano, no como dato**: el padrón no se toca desde el teléfono, porque de ahí salen los
+  certificados. El equipo lo ve arriba del padrón en `/dashboard/empleados` y lo saca con
+  «Ya se le pasó». Lo que decía el padrón lo congela un trigger —no lo manda el navegador—, y
+  lo único que cambia en el acto es `matriculas.nombre_corto`: Ajito deja de llamarla por el
+  nombre que estaba mal. `probar:adiestramiento` comprueba que solo su dueño la escribe, que
+  no se la da por resuelta y que otra persona no la lee.
 - **Se contesta hablando, con foto o escrito, y ninguna vía está cerrada.** El guion
   dice cuál sale por defecto; el resto está a un toque — **la nota de voz, siempre**, también
   debajo de la caja de los ejercicios que se proponen escritos. Al tocar «Mandárselo a
@@ -276,7 +284,7 @@ que la acción **mira el error de cada borrado y vuelve a contar antes de decir 
 
 ```
 npm run sembrar:adiestramiento  -- --abrir   # clasifica oficios, matricula y abre
-npm run probar:adiestramiento                # 17 comprobaciones de RLS reales
+npm run probar:adiestramiento                # 22 comprobaciones de RLS reales
 npm run capturar:adiestramiento              # iPhone 14 + panel, con el flujo
 npm run probar:voz                           # 7 muestras de voz para elegir de oído
 npm run generar:guion                        # el guion → guion.json, y lo comprueba

@@ -603,6 +603,67 @@ export type Database = {
           },
         ]
       }
+      correcciones_padron: {
+        Row: {
+          area: string | null
+          area_padron: string | null
+          cargo_padron: string | null
+          created_at: string
+          empleado_id: string
+          id: string
+          nombre: string
+          nombre_padron: string
+          resuelta_en: string | null
+          resuelta_por: string | null
+        }
+        Insert: {
+          area?: string | null
+          area_padron?: string | null
+          cargo_padron?: string | null
+          created_at?: string
+          empleado_id: string
+          id?: string
+          nombre: string
+          nombre_padron?: string
+          resuelta_en?: string | null
+          resuelta_por?: string | null
+        }
+        Update: {
+          area?: string | null
+          area_padron?: string | null
+          cargo_padron?: string | null
+          created_at?: string
+          empleado_id?: string
+          id?: string
+          nombre?: string
+          nombre_padron?: string
+          resuelta_en?: string | null
+          resuelta_por?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "correcciones_padron_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "empleados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "correcciones_padron_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "correcciones_padron_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["empleado_id"]
+          },
+        ]
+      }
       cursos: {
         Row: {
           abierto: boolean

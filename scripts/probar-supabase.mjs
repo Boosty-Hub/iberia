@@ -236,6 +236,8 @@ const NUEVAS = [
   'recordatorios',
   'ajustes_whatsapp',
   'accesos',
+  // Dice de alguien que el padrón lo tiene mal: la lee su dueño y el equipo.
+  'correcciones_padron',
   // Material de Iberia bajo NDA, como el resto del informe.
   'informe_circuito_puntos',
   'informe_modulos',
