@@ -4,6 +4,7 @@ import { obtenerSesion, puede } from '@/lib/auth'
 import { empleadoActual } from '@/lib/canal'
 import { BUCKET_ADIESTRAMIENTO, rutaAudio } from '@/lib/storage'
 import { createClient } from '@/lib/supabase/server'
+import { vozDe } from '@/lib/voz'
 
 /** Lo justo para que el reproductor empiece. El enlace no se puede compartir. */
 const SEGUNDOS_VALIDEZ = 60
@@ -16,6 +17,10 @@ const SEGUNDOS_VALIDEZ = 60
  * no sobra — sin eso, cualquiera con sesión de Iberia podría bajarse el curso
  * completo aunque no le toque, y la mitad del material habla de lo que la
  * empresa va a hacer con la IA.
+ *
+ * **Sale con la voz que eligió** (`matriculas.voz`). Si a esa voz le falta el
+ * archivo —un audio nuevo del guion que todavía no se grabó con ella—, se sirve
+ * el de la voz de siempre: mejor la otra voz que el silencio.
  */
 export async function GET(
   _peticion: NextRequest,
@@ -49,7 +54,7 @@ export async function GET(
 
   const { data: matricula } = await supabase
     .from('matriculas')
-    .select('id')
+    .select('id, voz')
     .eq('curso_id', curso.id)
     .eq('empleado_id', empleado.id)
     .maybeSingle()
@@ -64,9 +69,16 @@ export async function GET(
     return NextResponse.json({ error: 'Esa lección no está habilitada para tu rol' }, { status: 403 })
   }
 
-  const { data, error } = await supabase.storage
+  const voz = vozDe(matricula.voz)
+  let { data, error } = await supabase.storage
     .from(BUCKET_ADIESTRAMIENTO)
-    .createSignedUrl(rutaAudio(numero, pieza), SEGUNDOS_VALIDEZ)
+    .createSignedUrl(rutaAudio(numero, pieza, voz.carpeta), SEGUNDOS_VALIDEZ)
+
+  if ((error || !data?.signedUrl) && voz.carpeta) {
+    ;({ data, error } = await supabase.storage
+      .from(BUCKET_ADIESTRAMIENTO)
+      .createSignedUrl(rutaAudio(numero, pieza), SEGUNDOS_VALIDEZ))
+  }
 
   if (error || !data?.signedUrl) {
     return NextResponse.json({ error: 'No se encontró el audio' }, { status: 404 })

@@ -1347,6 +1347,7 @@ export type Database = {
           nombre_corto: string | null
           ultimo_empujon: string | null
           ultimo_toque: string | null
+          voz: string
         }
         Insert: {
           completado_en?: string | null
@@ -1361,6 +1362,7 @@ export type Database = {
           nombre_corto?: string | null
           ultimo_empujon?: string | null
           ultimo_toque?: string | null
+          voz?: string
         }
         Update: {
           completado_en?: string | null
@@ -1375,6 +1377,7 @@ export type Database = {
           nombre_corto?: string | null
           ultimo_empujon?: string | null
           ultimo_toque?: string | null
+          voz?: string
         }
         Relationships: [
           {

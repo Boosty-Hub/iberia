@@ -9,6 +9,7 @@ import { requerirEmpleado } from '@/lib/canal'
 import { turnoDelEjercicio, type LeccionGuion } from '@/lib/guion'
 import { BUCKET_RESPUESTAS } from '@/lib/storage'
 import { createClient } from '@/lib/supabase/server'
+import { esClaveVoz } from '@/lib/voz'
 
 const LECCIONES = guion.lecciones as LeccionGuion[]
 
@@ -41,6 +42,28 @@ async function contexto(numero: number) {
 
   if (!matricula || !leccion) return null
   return { empleado, supabase, curso, matricula, leccion }
+}
+
+/**
+ * Con qué voz oye a Ajito. Vale para toda la clase y para lo que Ajito le
+ * contesta, y la cambia cuando quiera. Ver `VOCES` en `lib/voz.ts`.
+ */
+export async function elegirVoz(datos: FormData) {
+  const voz = datos.get('voz')
+  if (!esClaveVoz(voz)) return
+
+  const empleado = await requerirEmpleado()
+  const supabase = await createClient()
+  const { data: curso } = await supabase.from('cursos').select('id').eq('clave', CURSO).maybeSingle()
+  if (!curso) return
+
+  await supabase
+    .from('matriculas')
+    .update({ voz })
+    .eq('curso_id', curso.id)
+    .eq('empleado_id', empleado.id)
+
+  revalidatePath('/canal/adiestramiento', 'layout')
 }
 
 /**

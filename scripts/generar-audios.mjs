@@ -20,15 +20,20 @@
  * todos. A 16 dólares el millón de caracteres, esto es más por disciplina que
  * por plata — pero evita que una corrida distraída cambie 70 archivos.
  *
- * Opciones: --leccion N (solo una) · --revisar (no llama a Azure, solo dice qué
- * haría) · --forzar (regraba todo) · --salida
+ * **Graba con las dos voces** (`VOCES` de `lib/voz.ts`): la de mujer en
+ * `audio/leccion-NN/`, que son las rutas de siempre, y la de hombre en
+ * `audio/hombre/leccion-NN/`. Cada voz lleva su propia huella, así que ajustar la
+ * velocidad de una regraba solo esa.
+ *
+ * Opciones: --leccion N (solo una) · --voz mujer|hombre (solo esa) · --revisar
+ * (no llama a Azure, solo dice qué haría) · --forzar (regraba todo) · --salida
  */
 
 import { createHash } from 'node:crypto'
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { basename, join } from 'node:path'
-import { VOZ, aSSML } from '../lib/voz.ts'
+import { CLAVES_VOZ, VOCES, aSSML } from '../lib/voz.ts'
 import { audiosDe, leerLeccion } from '../lib/guion.ts'
 
 const args = {}
@@ -45,6 +50,12 @@ const SALIDA = typeof args.salida === 'string' ? args.salida : join(GUION, 'audi
 const SOLO = args.leccion ? String(args.leccion) : null
 const REVISAR = !!args.revisar
 const FORZAR = !!args.forzar
+const SOLO_VOZ = typeof args.voz === 'string' ? args.voz : null
+if (SOLO_VOZ && !CLAVES_VOZ.includes(SOLO_VOZ)) {
+  console.error(`\n✖ --voz tiene que ser ${CLAVES_VOZ.join(' o ')}.\n`)
+  process.exit(1)
+}
+const VOCES_A_GRABAR = SOLO_VOZ ? [SOLO_VOZ] : CLAVES_VOZ
 
 const CLAVE = process.env.AZURE_SPEECH_KEY
 const REGION = process.env.AZURE_SPEECH_REGION
@@ -59,10 +70,10 @@ if (!REVISAR && (!CLAVE || !REGION)) {
 const FORMATO = 'audio-24khz-48kbitrate-mono-mp3'
 const PUNTO = `https://${REGION}.tts.speech.microsoft.com/cognitiveservices/v1`
 
-/** Huella del texto y de los ajustes: si cambia, hay que regrabar. */
-function huella(texto) {
+/** Huella del texto y de los ajustes de la voz: si cambia, hay que regrabar. */
+function huella(texto, voz) {
   return createHash('sha256')
-    .update(`${VOZ.nombre}|${VOZ.velocidad}|${VOZ.tono}|${VOZ.pausaFrase}|${texto}`)
+    .update(`${voz.nombre}|${voz.velocidad}|${voz.tono}|${voz.pausaFrase}|${texto}`)
     .digest('hex')
     .slice(0, 16)
 }
@@ -80,9 +91,12 @@ let saltados = 0
 let caracteres = 0
 const fallos = []
 
-console.log(`\nVoz: ${VOZ.nombre} ${VOZ.velocidad >= 0 ? '+' : ''}${VOZ.velocidad}%, pausa ${VOZ.pausaFrase} ms`)
-if (REVISAR) console.log('Modo revisión: no se llama a Azure.\n')
-else console.log('')
+if (REVISAR) console.log('\nModo revisión: no se llama a Azure.')
+
+for (const claveVoz of VOCES_A_GRABAR) {
+const VOZ = VOCES[claveVoz]
+const SALIDA_VOZ = VOZ.carpeta ? join(SALIDA, VOZ.carpeta) : SALIDA
+console.log(`\n${VOZ.rotulo} · ${VOZ.nombre} ${VOZ.velocidad >= 0 ? '+' : ''}${VOZ.velocidad}%, pausa ${VOZ.pausaFrase} ms · ${SALIDA_VOZ}/\n`)
 
 for (const archivo of archivos) {
   const numero = basename(archivo).match(/^leccion-(\d+)/)[1]
@@ -91,7 +105,7 @@ for (const archivo of archivos) {
   const audios = audiosDe(leerLeccion(await readFile(join(GUION, archivo), 'utf8'), archivo))
   if (!audios.length) continue
 
-  const carpeta = join(SALIDA, `leccion-${numero}`)
+  const carpeta = join(SALIDA_VOZ, `leccion-${numero}`)
   await mkdir(carpeta, { recursive: true })
 
   console.log(`Lección ${Number(numero)} · ${audios.length} audios`)
@@ -100,7 +114,7 @@ for (const archivo of archivos) {
     const nombre = `audio-${id}`
     const mp3 = join(carpeta, `${nombre}.mp3`)
     const sha = join(carpeta, `${nombre}.sha`)
-    const actual = huella(texto)
+    const actual = huella(texto, VOZ)
 
     if (!FORZAR && existsSync(mp3) && existsSync(sha)) {
       const previa = (await readFile(sha, 'utf8')).trim()
@@ -130,7 +144,7 @@ for (const archivo of archivos) {
         'X-Microsoft-OutputFormat': FORMATO,
         'User-Agent': 'iberia-adiestramiento',
       },
-      body: aSSML(texto),
+      body: aSSML(texto, VOZ),
     })
 
     if (!respuesta.ok) {
@@ -152,6 +166,7 @@ for (const archivo of archivos) {
     const aviso = kb > 1024 ? '  ⚠ pasa de 1 MB' : ''
     console.log(`  ✓ ${nombre.padEnd(12)} ${String(kb).padStart(4)} KB  ${dur.toFixed(1).padStart(5)} s${aviso}`)
   }
+}
 }
 
 console.log(`

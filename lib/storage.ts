@@ -18,9 +18,14 @@ export const BUCKET_ARCHIVOS = 'archivos'
  */
 export const BUCKET_ADIESTRAMIENTO = 'adiestramiento'
 
-/** `leccion-03/audio-1.mp3` — la ruta dentro del bucket. */
-export function rutaAudio(leccion: number, pieza: string): string {
-  return `leccion-${String(leccion).padStart(2, '0')}/audio-${pieza}.mp3`
+/**
+ * `leccion-03/audio-1.mp3` — la ruta dentro del bucket. Con la carpeta de una
+ * voz delante, la de esa voz: `hombre/leccion-03/audio-1.mp3`. La voz de mujer
+ * no lleva carpeta: son las rutas de siempre.
+ */
+export function rutaAudio(leccion: number, pieza: string, carpetaVoz = ''): string {
+  const ruta = `leccion-${String(leccion).padStart(2, '0')}/audio-${pieza}.mp3`
+  return carpetaVoz ? `${carpetaVoz}/${ruta}` : ruta
 }
 
 /**

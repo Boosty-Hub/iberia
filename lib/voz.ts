@@ -71,7 +71,12 @@ export const PAOLA: VozAjito = {
   pausaFrase: 180,
 }
 
-/** La otra venezolana. Trae mejor paso de fábrica. */
+/**
+ * El venezolano. Trae mejor paso de fábrica: de fábrica va a 200 palabras por
+ * minuto, un 20% más rápido que Paola. Se calibra a las **mismas 192** que ella
+ * con `npm run medir:ritmo`, sobre el audio y no sobre el texto — las dos voces
+ * dicen la misma clase y tienen que durar lo mismo.
+ */
 export const SEBASTIAN: VozAjito = {
   nombre: 'es-VE-SebastianNeural',
   etiqueta: 'Sebastián · venezolano',
@@ -80,8 +85,40 @@ export const SEBASTIAN: VozAjito = {
   pausaFrase: 180,
 }
 
-/** La que se usa. Se cambia aquí y cambia en todo el curso. */
-export const VOZ = PAOLA
+/**
+ * **Las dos voces de Ajito, a elegir** (26 de septiembre de 2026, decisión de
+ * Gabriel). Quien hace el curso escoge en el índice con cuál lo oye, y la
+ * elección vale para todo: la clase grabada y las devoluciones que se generan en
+ * el momento —si no, habría dos Ajitos—. El guion no cambia: ya está escrito sin
+ * género, para Ajito y para quien lo oye.
+ *
+ * `carpeta` es dónde viven sus audios, en el disco y en el bucket. La voz de
+ * mujer conserva las rutas de siempre —los 70 audios que ya estaban— y la de
+ * hombre va en `hombre/`.
+ */
+export type ClaveVoz = 'mujer' | 'hombre'
+
+export const VOCES: Record<ClaveVoz, VozAjito & { rotulo: string; carpeta: string }> = {
+  mujer: { ...PAOLA, rotulo: 'Voz de mujer', carpeta: '' },
+  hombre: { ...SEBASTIAN, rotulo: 'Voz de hombre', carpeta: 'hombre' },
+}
+
+export const CLAVES_VOZ = Object.keys(VOCES) as ClaveVoz[]
+
+/** La de quien todavía no ha elegido. */
+export const VOZ_POR_DEFECTO: ClaveVoz = 'mujer'
+
+export function esClaveVoz(valor: unknown): valor is ClaveVoz {
+  return typeof valor === 'string' && valor in VOCES
+}
+
+/** La voz de una clave cualquiera; lo que no sea una clave conocida, la de siempre. */
+export function vozDe(clave: unknown) {
+  return VOCES[esClaveVoz(clave) ? clave : VOZ_POR_DEFECTO]
+}
+
+/** La que se usa cuando no se dice cuál. */
+export const VOZ = VOCES[VOZ_POR_DEFECTO]
 
 /**
  * Junta las líneas de un párrafo en una sola.

@@ -9,6 +9,7 @@ import {
 import { devolver, type Contexto } from '@/lib/ajito'
 import { empleadoActual } from '@/lib/canal'
 import { hablar } from '@/lib/hablar'
+import { vozDe, type VozAjito } from '@/lib/voz'
 import { BUCKET_RESPUESTAS, rutaDevolucion } from '@/lib/storage'
 import { createClient } from '@/lib/supabase/server'
 
@@ -68,7 +69,7 @@ export async function POST(
   const [{ data: matricula }, { data: leccion }] = await Promise.all([
     supabase
       .from('matriculas')
-      .select('id, familia_oficio, nombre_corto')
+      .select('id, familia_oficio, nombre_corto, voz')
       .eq('curso_id', curso.id)
       .eq('empleado_id', empleado.id)
       .maybeSingle(),
@@ -113,7 +114,7 @@ export async function POST(
     if (respuesta.devolucion_audio) {
       return NextResponse.json({ texto: respuesta.devolucion, audio: true })
     }
-    const ruta = await ponerVoz(supabase, respuesta.id, empleado.id, numero, clavePaso, respuesta.devolucion)
+    const ruta = await ponerVoz(supabase, respuesta.id, empleado.id, numero, clavePaso, respuesta.devolucion, vozDe(matricula.voz))
     return NextResponse.json({ texto: respuesta.devolucion, audio: Boolean(ruta) })
   }
 
@@ -215,7 +216,8 @@ export async function POST(
     empleado.id,
     numero,
     clavePaso,
-    dicho.texto
+    dicho.texto,
+    vozDe(matricula.voz)
   )
 
   return NextResponse.json({ texto: dicho.texto, audio: Boolean(rutaAudio) })
@@ -235,9 +237,11 @@ async function ponerVoz(
   empleadoId: string,
   numero: number,
   clavePaso: string,
-  texto: string
+  texto: string,
+  voz: VozAjito
 ): Promise<string | null> {
-  const hablado = await hablar(texto)
+  // Con la voz que eligió: la devolución suena como su clase.
+  const hablado = await hablar(texto, voz)
   if (!hablado.ok) {
     console.error('[ajito] síntesis fallida:', hablado.detalle ?? hablado.motivo)
     return null

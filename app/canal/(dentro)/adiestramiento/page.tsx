@@ -14,6 +14,8 @@ import { obtenerSesion, puede } from '@/lib/auth'
 import { requerirEmpleado } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
+import { CLAVES_VOZ, VOCES, vozDe } from '@/lib/voz'
+import { elegirVoz } from './acciones'
 
 export const metadata: Metadata = { title: 'Conoce a Ajito' }
 
@@ -144,6 +146,8 @@ export default async function AdiestramientoPage() {
             </Link>
           )}
 
+          <ElegirVoz actual={vozDe(matricula.voz).rotulo} />
+
           {/* Solo para el equipo de Boosty: es herramienta de trabajo, no una
               opción del alumno. Ver `reiniciarMiCurso`. */}
           {puedeReiniciar && <ReiniciarCurso />}
@@ -215,6 +219,47 @@ export default async function AdiestramientoPage() {
         sale tu certificado.
       </p>
     </div>
+  )
+}
+
+/**
+ * Con qué voz oye a Ajito: mujer u hombre. Un formulario con dos botones, sin
+ * JavaScript: funciona igual con la conexión de la planta. La elegida se marca
+ * con el ✓ y el rojo de la acción —forma, no solo tono—, y cada botón mide los
+ * 44 px del canal.
+ */
+function ElegirVoz({ actual }: { actual: string }) {
+  return (
+    <form action={elegirVoz} className="mt-4 border-t border-marca-100 pt-4">
+      <p className="text-[13px] font-semibold text-marca-800">¿Con qué voz quieres oír a Ajito?</p>
+      <div className="mt-2 grid grid-cols-2 gap-2" role="group" aria-label="La voz de Ajito">
+        {CLAVES_VOZ.map((clave) => {
+          const { rotulo } = VOCES[clave]
+          const elegida = rotulo === actual
+          return (
+            <button
+              key={clave}
+              type="submit"
+              name="voz"
+              value={clave}
+              aria-pressed={elegida}
+              className={cn(
+                'toque gap-1.5 rounded-xl border px-3 text-[15px] font-semibold transition-colors',
+                elegida
+                  ? 'border-acento-500 bg-acento-50 text-acento-700'
+                  : 'border-marca-200 bg-white text-marca-600 active:bg-marca-50'
+              )}
+            >
+              {elegida && <IconoCheck className="h-4 w-4" />}
+              {rotulo}
+            </button>
+          )
+        })}
+      </div>
+      <p className="mt-2 text-[12px] leading-snug text-marca-500">
+        La cambias cuando quieras. Vale para las clases y para lo que Ajito te contesta.
+      </p>
+    </form>
   )
 }
 

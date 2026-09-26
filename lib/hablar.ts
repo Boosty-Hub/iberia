@@ -1,5 +1,5 @@
 import 'server-only'
-import { aSSML } from '@/lib/voz'
+import { aSSML, VOZ, type VozAjito } from '@/lib/voz'
 
 /**
  * Poner a hablar a Ajito en el momento.
@@ -19,7 +19,8 @@ export type Hablado =
   | { ok: true; mp3: ArrayBuffer }
   | { ok: false; motivo: 'sin-configurar' | 'fallo'; detalle?: string }
 
-export async function hablar(texto: string): Promise<Hablado> {
+/** Con la voz que eligió quien hace el curso: la devolución suena como su clase. */
+export async function hablar(texto: string, voz: VozAjito = VOZ): Promise<Hablado> {
   const clave = process.env.AZURE_SPEECH_KEY
   const region = process.env.AZURE_SPEECH_REGION
   if (!clave || !region) return { ok: false, motivo: 'sin-configurar' }
@@ -34,7 +35,7 @@ export async function hablar(texto: string): Promise<Hablado> {
         'X-Microsoft-OutputFormat': FORMATO,
         'User-Agent': 'iberia-adiestramiento',
       },
-      body: aSSML(texto),
+      body: aSSML(texto, voz),
     })
   } catch (error) {
     return { ok: false, motivo: 'fallo', detalle: String(error) }

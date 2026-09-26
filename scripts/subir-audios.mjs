@@ -18,6 +18,7 @@ import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createClient } from '@supabase/supabase-js'
 import { BUCKET_ADIESTRAMIENTO } from '../lib/storage.ts'
+import { CLAVES_VOZ, VOCES } from '../lib/voz.ts'
 
 const FORZAR = process.argv.includes('--forzar')
 const ORIGEN = 'contenido/adiestramiento/audio'
@@ -53,10 +54,23 @@ let saltados = 0
 let bytes = 0
 const fallos = []
 
-const carpetas = (await readdir(ORIGEN, { withFileTypes: true }))
-  .filter((d) => d.isDirectory())
-  .map((d) => d.name)
-  .sort()
+// Cada voz, con su carpeta: la de mujer en las rutas de siempre (`leccion-NN/`),
+// la de hombre en `hombre/leccion-NN/`, en el disco y en el bucket. Ver `VOCES`.
+const carpetas = []
+for (const clave of CLAVES_VOZ) {
+  const prefijo = VOCES[clave].carpeta
+  const origen = prefijo ? join(ORIGEN, prefijo) : ORIGEN
+  let dentro = []
+  try {
+    dentro = await readdir(origen, { withFileTypes: true })
+  } catch {
+    console.log(`  (sin audios de la ${VOCES[clave].rotulo.toLowerCase()} en ${origen}/)`)
+  }
+  for (const d of dentro) {
+    if (d.isDirectory() && d.name.startsWith('leccion-')) carpetas.push(prefijo ? `${prefijo}/${d.name}` : d.name)
+  }
+}
+carpetas.sort()
 
 if (!carpetas.length) {
   console.error(`\n✖ No hay audios en ${ORIGEN}/. Corre primero: npm run generar:audios\n`)
