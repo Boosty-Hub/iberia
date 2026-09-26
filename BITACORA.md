@@ -100,10 +100,11 @@ letra—, y «Habla tranquilo» le ponía género a quien graba.
 
 ⚠️ **La búsqueda web no acepta `country: 'VE'`**: la API contesta «Country code VE is not
 supported» y tumbaba la devolución entera. Va sin país, y si la API la rechaza, Ajito contesta sin
-buscar.
+buscar. Y lo que contesta después de buscar llega en trozos, por las citas: pegados sin cuidar el
+espacio, en producción salió «se esperacielo cubierto».
 
-**Verificado** en un iPhone 14 contra el servidor local, con un trabajador de prueba que se borra
-al salir: 16 de 16 —halo, «1 de 8», arrastrar antes de cargar y a mitad, la tarjeta, los botones,
+**Verificado** en un iPhone 14 contra el servidor local y otra vez en producción, con un
+trabajador de prueba que se borra al salir: 16 de 16 —halo, «1 de 8», arrastrar antes de cargar y a mitad, la tarjeta, los botones,
 la nota de voz, el pensando inmediato, el turno retenido, la fecha, sin desbordes y 44 px—.
 `capturar:oficios` en la lección 0 con los ocho oficios, y `probar:ajito` con dos casos nuevos
 (fecha y clima).

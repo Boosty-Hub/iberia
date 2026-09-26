@@ -464,7 +464,9 @@ export async function devolver(contexto: Contexto): Promise<Devolucion> {
 
     // Solo lo que dijo después de la última búsqueda: lo de antes es el «déjame
     // ver» con el que la anuncia, y eso no va en el audio. Y los trozos se pegan
-    // sin salto, porque con citas el modelo parte una misma frase en varios.
+    // sin salto, porque con citas el modelo parte una misma frase en varios —pero
+    // con el espacio que a veces no trae ninguno de los dos lados: salía «se
+    // esperacielo cubierto»—.
     const bloques = respuesta.content
     let desde = 0
     bloques.forEach((bloque, i) => {
@@ -474,7 +476,12 @@ export async function devolver(contexto: Contexto): Promise<Devolucion> {
       .slice(desde)
       .filter((bloque): bloque is Anthropic.TextBlock => bloque.type === 'text')
       .map((bloque) => bloque.text)
-      .join(desde ? '' : '\n')
+      .reduce((dicho, trozo) => {
+        if (!dicho) return trozo
+        if (!desde) return `${dicho}\n${trozo}`
+        const falta = !/\s$/.test(dicho) && !/^[\s.,;:!?»)]/.test(trozo)
+        return dicho + (falta ? ' ' : '') + trozo
+      }, '')
       .trim()
 
     if (!texto) return { ok: false, motivo: 'fallo', detalle: 'respuesta vacía' }
