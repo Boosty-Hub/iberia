@@ -420,7 +420,9 @@ no la calidad.
 porque la original se quedó sin crédito, y la función **dice cuál eligió**: dos claves con
 una precedencia invisible es lo que hizo perder una hora buscando en el código un fallo que
 estaba en la consola de facturación. Se pasa explícita al SDK; dejándosela adivinar tomaba
-la vacía.
+la vacía. ⚠️ **Y la dirección de la API, también explícita**: en Netlify el entorno trae una
+`ANTHROPIC_BASE_URL` de su pasarela de IA, el SDK la tomaba sola, y la clave nuestra volvía con
+un 401 sin cuerpo —en local funcionaba—.
 
 La devolución **se pide aparte de guardar la respuesta**, y ese orden importa: lo que la
 persona dijo es lo que no se puede perder, así que se guarda primero y siempre. Si el
@@ -1072,7 +1074,7 @@ formato y no por que responda. `probar:supabase` falla si alguien vuelve a meter
 hecho existe en el proyecto real.** Son dos cosas distintas y se separan solas el día del
 despliegue. Mira que las tablas, vistas, columnas y funciones estén; que **la RLS cierre
 de verdad** —pidiendo cada tabla con la clave pública y sin sesión, no preguntando por el
-flag—; que los tres buckets sean privados y tengan dentro los 70 audios y las 10 fichas;
+flag—; que los tres buckets sean privados y tengan dentro los 70 audios de cada voz y las 10 fichas;
 y que no queden fichas ni cuentas de prueba en el padrón, que las verificaciones corren
 contra producción.
 

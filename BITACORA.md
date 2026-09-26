@@ -31,7 +31,7 @@ línea.
 | **Padrón** | **276 personas cargadas** con ficha, cargo, nivel y familia de oficio. ⚠️ Sin cédula, sin celular y sin correo |
 | **Canal** | Funciona en local. Anunciado el 12 de agosto; **la revisión con mercadeo se cayó y no tiene fecha** |
 | **Formación dirigente** | Uno a uno con Alberto el 17 de agosto, **Petit Comité el 26** y **gerentes el 23 de septiembre en Cagua**. Falta la tercera —los líderes— y su fecha |
-| **Adiestramiento de planta** | Completo: guion, **70 audios (20 min 02 s)**, **dos voces a elegir desde el 26/9** —la de hombre falta grabarla—, 10 fichas, certificado, padrón, recordatorios. **Ajito ya contesta** con la clave que tiene saldo — 🔴 **pero sin voz desde el 24/9**: la clave de Azure no autentica, y con ella cae la transcripción de las notas de voz. **Es de Fase 2** — avance para mostrar, no para abrir |
+| **Adiestramiento de planta** | Completo: guion, **70 audios por voz (20 min 02 s y 20 min 09 s)**, **dos voces a elegir desde el 26/9**, 10 fichas, certificado, padrón, recordatorios. **Ajito contesta y habla en producción**, y las notas de voz se transcriben: Azure volvió el 26/9, al pasar la suscripción a pago por uso. **Es de Fase 2** — avance para mostrar, no para abrir |
 | **Repositorio** | `Boosty-Hub/iberia` — 🔴 **público**. Cinco commits subidos el 17/9 con la bitácora dentro. Hace falta un administrador de la organización para cerrarlo |
 
 ### Lo que aprieta
@@ -94,11 +94,28 @@ renglón.
 **Verificado en producción** con `mirar-voces`, en un iPhone 14: las dos voces, 44 px por botón,
 elegir marca y guarda, y sin la voz de hombre grabada el audio cae en la de siempre. 9 de 9.
 
-🔴 **Dónde quedamos: Azure está pausado.** Al ir a buscar la clave, el portal dijo por qué no
-autentica desde el 24: **la prueba gratuita venció, los servicios están en pausa y el 15 de
-octubre la cuenta se borra**. No era la clave. Hasta que se reactive con pago por uso no se
-pueden grabar los 70 audios de Sebastián ni calibrarlo, y «Hombre» suena con la voz de mujer.
-Lo que sigue está en `PENDIENTES.md`.
+### Azure estaba en pausa, no sin clave
+
+Al ir a buscar la clave, el portal dijo por qué no autenticaba desde el 24: **la prueba gratuita
+había vencido, los servicios estaban en pausa y el 15 de octubre la cuenta se borraba**. Gabriel
+la pasó a pago por uso, y **la clave de siempre volvió a servir**: no había que cambiarla.
+
+- **Sebastián quedó a −7%.** `medir:ritmo` lo midió contra Paola: dura lo mismo en el audio de
+  prueba, y el curso entero queda en 20 min 09 s contra 20 min 02 s. ⚠️ La primera medición daba
+  al testigo en 199 y no en 192: recortaba el silencio de las puntas, y en agosto se había medido
+  el WAV entero. Ahora mide igual que entonces.
+- **Los 70 de la voz de hombre, grabados y subidos**, por 0,31 USD. De paso se subió un audio de
+  Paola de la lección 7 que en el bucket no correspondía con el guion vigente.
+- 🔴 **En producción, Ajito devolvía un 401 sin cuerpo, y en local contestaba.** El SDK de
+  Anthropic tomaba del entorno de Netlify una `ANTHROPIC_BASE_URL` que no es nuestra —la de su
+  pasarela de IA— y le mandaba nuestra clave. Se fija la dirección en `lib/ajito.ts`, como ya se
+  hacía con la clave.
+- **Verificado en producción**: la devolución sale hablada (`probar:ajito`), el audio sale de la
+  voz elegida (`mirar-voces`, 9 de 9), una frase dicha por Sebastián se transcribe exacta, y
+  `probar:supabase` comprueba los 70 de cada voz (67 de 67).
+
+**Dónde quedamos.** Las dos voces andando, y Ajito habla y escucha otra vez. Lo que queda de Azure
+es opcional: regenerar la clave, que quedó visible en una captura.
 
 ---
 

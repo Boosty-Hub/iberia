@@ -28,7 +28,7 @@ un PR de afuera.
 | `SUPABASE_SECRET_KEY` | producción · secreta | Bypasea RLS; solo provisiona usuarios y acuña sesiones desde `/entrar/[token]` |
 | `ANTHROPIC_API_KEY_SALDO` | producción · secreta | Las devoluciones de Ajito. `lib/clave-anthropic.ts` la prefiere; la otra, `ANTHROPIC_API_KEY`, no se subió |
 | `AZURE_SPEECH_REGION` | todos | `westus3` |
-| `AZURE_SPEECH_KEY` | — | 🔴 **No está subida.** La de `.env.local` devuelve 401 porque **la prueba gratuita de Azure venció y los servicios están en pausa** (26 de septiembre; la cuenta se borra el 15 de octubre si no se reactiva con pago por uso). Además quedó visible en una captura. Hay que regenerarla en Azure (Keys and Endpoint → Regenerate Key 1), pegarla en `.env.local` y en Netlify como secreta de producción, y volver a desplegar. Sin ella, la devolución de Ajito sale escrita y las notas de voz no se transcriben |
+| `AZURE_SPEECH_KEY` | producción · secreta | La voz de Ajito, las devoluciones habladas y la transcripción de las notas de voz. Subida el 26 de septiembre, cuando la suscripción de Azure pasó a pago por uso: devolvía 401 porque la prueba gratuita había vencido, no por la clave. Quedó visible en una captura: regenerarla es opcional, y si se hace, va en `.env.local` y en Netlify y se vuelve a desplegar |
 
 **Lo que no se sube**: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_ORG_ID`,
 `SUPABASE_PROJECT_REF`, `AZURE_SPEECH_RESOURCE` y `TOKEN_ACCESS_NETLIFY` son de las
