@@ -94,9 +94,11 @@ renglón.
 **Verificado en producción** con `mirar-voces`, en un iPhone 14: las dos voces, 44 px por botón,
 elegir marca y guarda, y sin la voz de hombre grabada el audio cae en la de siempre. 9 de 9.
 
-🔴 **Dónde quedamos: falta la clave de Azure.** Sin ella no se pueden grabar los 70 audios de
-Sebastián ni calibrarlo, y por ahora «Hombre» suena con la voz de mujer. Con la clave, lo que
-sigue está en `PENDIENTES.md`.
+🔴 **Dónde quedamos: Azure está pausado.** Al ir a buscar la clave, el portal dijo por qué no
+autentica desde el 24: **la prueba gratuita venció, los servicios están en pausa y el 15 de
+octubre la cuenta se borra**. No era la clave. Hasta que se reactive con pago por uso no se
+pueden grabar los 70 audios de Sebastián ni calibrarlo, y «Hombre» suena con la voz de mujer.
+Lo que sigue está en `PENDIENTES.md`.
 
 ---
 
@@ -630,7 +632,8 @@ debajo del tope. Ahora van en tandas hasta vaciar. La trampa quedó en `AGENTS.m
 `probar:ajito` dio **8 de 8 contestadas, con buen personaje, y 0 con audio**. Azure devuelve
 401 en las veinte regiones probadas y en el endpoint propio del recurso: la clave de
 `.env.local` ya no vale. Lo más probable es que se regeneró —estaba en pendientes, por una
-captura— y no se pegó la nueva. Cae también la transcripción de las notas de voz. La
+captura— y no se pegó la nueva. *(No era eso: la prueba gratuita de Azure había vencido y los
+servicios estaban en pausa. Se supo el 26 de septiembre, ver sesión 44.)* Cae también la transcripción de las notas de voz. La
 devolución escrita sigue saliendo, que es el respaldo con que se diseñó.
 
 ### `/entrar/[token]` mandaba a la persona a otra máquina
