@@ -80,6 +80,10 @@ export function DevolucionAjito({
       router.refresh()
     } catch {
       setEstado('fallo')
+      // La lección no sigue mientras Ajito no conteste (ver la página). Cuando
+      // falla, la ruta ya dejó la marca de intentada, y el refresco suelta el
+      // turno siguiente: este se queda con su botón de reintentar.
+      router.refresh()
     }
   }
 

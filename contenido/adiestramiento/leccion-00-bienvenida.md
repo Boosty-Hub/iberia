@@ -36,21 +36,26 @@ Notación en `00-reglas-del-guion.md`.
 
 ## 0.2 · Quién eres
 
-🔊 **Audio 2** · 22 s
+🔊 **Audio 2** · 15 s
 
-> Antes de arrancar. En la lista que me pasó Capital Humano dice que tú eres
-> **Yulimar Rodríguez**, de **envasado**.
+> Antes de arrancar. Aquí abajo te pongo tu nombre y tu área, tal como vienen en
+> la lista que me pasó Capital Humano.
 >
-> Dime si está bien, porque de ahí depende lo que te vaya a mostrar. A un
-> montacarguista no le voy a poner los mismos ejercicios que a ti.
+> Dime si están bien, porque de ahí depende lo que te voy a mostrar: los
+> ejercicios van a estar adaptados a lo que tú haces todos los días.
 
-*Nombre y área salen del padrón. Ajito dice de dónde los sacó — en una planta
-donde acaban de instalar cámaras, que el asistente sepa tu nombre sin explicar
-cómo es exactamente lo que no queremos.*
+🖼 **Tarjeta del padrón** — nombre, cargo y área de quien oye, como vienen de
+Capital Humano
+
+*Nombre, cargo y área salen del padrón y se ven en la tarjeta, no en el audio: el
+audio se graba uno solo para las doscientas personas, y hasta el 26 de septiembre
+decía el nombre de una trabajadora de ejemplo a todo el mundo. Ajito dice de dónde
+los sacó — en una planta donde acaban de instalar cámaras, que el asistente sepa tu
+nombre sin explicar cómo es exactamente lo que no queremos.*
 
 💬 `¿Eres tú?`
 
-⌨️ `Sí, esa soy` · `Ese no soy yo`
+⌨️ `Sí, soy yo` · `No soy yo`
 
 **Si dice que no:** se recoge nombre y área a mano y queda una marca para
 Capital Humano. El curso sigue igual.
@@ -83,10 +88,11 @@ tu mejor prompt», y ahí es donde la gente abandona.*
 *El momento más importante de la lección. Va en el minuto dos, no en el
 cuarenta.*
 
-🔊 **Audio 4** · 25 s
+🔊 **Audio 4** · 19 s
 
 > Ahora quiero que hagas una cosa. Mándame lo que sea. Una pregunta, un saludo,
-> lo primero que se te ocurra.
+> lo primero que se te ocurra. Por ejemplo: qué día es hoy, cómo va a estar el
+> clima, o cómo se hace una buena arepa.
 >
 > Escríbeme sin pena, que yo no me ofendo ni me canso. Es para que veas de una
 > vez de qué se trata todo esto.

@@ -78,6 +78,39 @@ const CASOS = [
     respuesta: 'Yorge, asi me dicen todos aqui',
   },
   {
+    // «Mándame lo que sea» y lo primero que se le ocurre a la gente es esto. Antes
+    // del 26 de septiembre contestaba que no tenía forma de saberlo.
+    caso: 'fecha',
+    leccion: 0,
+    clave: 'primer-toque',
+    familia: 'linea',
+    nombre: 'Yorgelis Pérez',
+    cargo: 'Operadora de Envasado',
+    entrada: 'texto',
+    respuesta: 'que dia es hoy',
+    debeTener: [
+      new RegExp(
+        new Intl.DateTimeFormat('es-VE', { timeZone: 'America/Caracas', weekday: 'long' }).format(new Date()),
+        'i'
+      ),
+    ],
+    noPuedeTener: /no tengo (c[óo]mo|forma|manera)|no puedo saber/i,
+  },
+  {
+    // Lo de afuera lo busca. Pide que la organización tenga la búsqueda web
+    // habilitada en la consola de Anthropic.
+    caso: 'clima',
+    leccion: 0,
+    clave: 'primer-toque',
+    familia: 'almacen',
+    nombre: 'Wilmer Godoy',
+    cargo: 'Montacarguista',
+    entrada: 'texto',
+    respuesta: 'Dame el clima de caracas',
+    debeTener: [/grados|°|llov|lluvia|sol|nublado|calor/i],
+    noPuedeTener: /no tengo (c[óo]mo|forma|manera|acceso)|no puedo saber/i,
+  },
+  {
     caso: 'pregunta-corta',
     leccion: 1,
     clave: 'pregunta-corta',

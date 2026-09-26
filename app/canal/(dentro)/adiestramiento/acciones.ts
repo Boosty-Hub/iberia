@@ -141,7 +141,14 @@ export async function avanzarPaso(datos: FormData) {
  * `contenido/adiestramiento/herramientas.md`). Lo que sí se guarda es la
  * respuesta, que es lo que no se puede perder.
  */
-export async function responder(datos: FormData) {
+/**
+ * Guarda lo que la persona contestó y adelanta la lección.
+ *
+ * Devuelve si quedó guardado: la caja de respuesta pone a Ajito «viendo lo que
+ * le mandaste» en el acto, y si esto falla tiene que devolverle su texto con un
+ * aviso, no dejarla mirando un cargando que no termina.
+ */
+export async function responder(datos: FormData): Promise<{ ok: boolean }> {
   const numero = Number(datos.get('numero'))
   const clavePaso = String(datos.get('clave_paso') ?? '').trim()
   const texto = String(datos.get('texto') ?? '').trim()
@@ -153,14 +160,16 @@ export async function responder(datos: FormData) {
   const cruda = String(datos.get('entrada') ?? 'texto')
   const entrada = ['texto', 'voz', 'foto', 'boton'].includes(cruda) ? cruda : 'texto'
 
-  if (!clavePaso || !texto) return
+  if (!clavePaso || !texto) return { ok: false }
 
   const ctx = await contexto(numero)
-  if (!ctx) return
+  if (!ctx) return { ok: false }
 
   const { empleado, supabase, matricula, leccion } = ctx
 
-  await supabase.from('respuestas').insert({
+  // Si no se guardó, la lección no se adelanta: adelantarla dejaría el
+  // ejercicio atrás sin contestar y el siguiente audio sonando.
+  const { error: errGuardar } = await supabase.from('respuestas').insert({
     matricula_id: matricula.id,
     leccion_id: leccion.id,
     clave_paso: clavePaso,
@@ -175,6 +184,10 @@ export async function responder(datos: FormData) {
     familia_oficio: matricula.familia_oficio,
     area_id: empleado.area_id,
   })
+  if (errGuardar) {
+    console.error('[adiestramiento] no se guardó la respuesta:', errGuardar.message)
+    return { ok: false }
+  }
 
   // Hasta dónde adelantar sale del guion, no del formulario: el turno de cada
   // ejercicio está fijado por su clave.
@@ -202,6 +215,7 @@ export async function responder(datos: FormData) {
     .eq('id', matricula.id)
 
   revalidatePath(`/canal/adiestramiento/${numero}`)
+  return { ok: true }
 }
 
 /** Da la lección por vista y manda a la siguiente, o al índice si era la última. */

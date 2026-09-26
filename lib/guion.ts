@@ -38,8 +38,12 @@ export type Bloque =
        * del guion — como los audios. `portada` es la tarjeta cuadrada de la
        * lección, que dentro de la aplicación ya la hace el encabezado. `otra`
        * es todo lo demás: la animación de bienvenida, las fotos autorizadas.
+       *
+       * `padron` es la tarjeta con el nombre, el cargo y el área de quien oye,
+       * tal como vienen de Capital Humano. El audio no los puede decir —se graba
+       * uno solo para las doscientas personas—, así que se ven en pantalla.
        */
-      clase: 'ficha' | 'portada' | 'otra'
+      clase: 'ficha' | 'portada' | 'padron' | 'otra'
       /** El contenido de la ficha. La primera línea es el título. */
       lineas: string[]
       /**
@@ -182,6 +186,7 @@ export function leerLeccion(markdown: string, archivo: string): LeccionGuion {
       const descripcion = limpiarMarcado(partes.join(' '))
       const esFicha = /^Ficha\b/i.test(descripcion)
       const esPortada = /^(Tarjeta cuadrada|Portada)\b/i.test(descripcion)
+      const esPadron = /^Tarjeta del padr[óo]n/i.test(descripcion)
 
       // La ficha lleva su contenido en la cita de debajo, igual que un audio.
       // Se lee de ahí y no de una lista aparte: si el guion dice otra cosa que
@@ -193,7 +198,7 @@ export function leerLeccion(markdown: string, archivo: string): LeccionGuion {
       actual.bloques.push({
         tipo: 'pieza',
         descripcion,
-        clase: esFicha ? 'ficha' : esPortada ? 'portada' : 'otra',
+        clase: esFicha ? 'ficha' : esPortada ? 'portada' : esPadron ? 'padron' : 'otra',
         lineas: texto
           ? texto
               .split('\n')

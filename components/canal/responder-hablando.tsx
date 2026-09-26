@@ -229,7 +229,7 @@ export function ResponderHablando({
 
       {estado.fase === 'grabando' ? (
         <p className="text-center text-[13px] text-marca-400">
-          Habla tranquilo. Toca arriba cuando termines — máximo un minuto.
+          Habla con calma. Toca arriba cuando termines — máximo un minuto.
         </p>
       ) : (
         <button

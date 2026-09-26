@@ -157,6 +157,17 @@ y una ruedita en vez de piernas.
   corto a mitad, `ended` pone el ✓. Y cargando **no se pinta avance en la barra**: un trozo a
   un tercio del ancho se lee como «va por el 33%», que es un número inventado.
   `capturar:adiestramiento` comprueba los tres colores con `getComputedStyle`, no por captura.
+- **La barra se arrastra**, como la de una nota de voz de WhatsApp, para volver a oír una
+  frase o saltarse lo oído (desde el 26 de septiembre de 2026). Es un `<input type="range">`
+  de 44 px de alto, `.barra-audio` en `globals.css`, y va **fuera** del botón que alterna:
+  un control dentro de otro no se toca. ⚠️ Con `preload="none"` el archivo no existe hasta el
+  primer toque y mover `currentTime` no hace nada: el arrastre se guarda y se aplica en
+  `loadedmetadata`. Y **cada audio de la clase dice cuál es** —«3 de 8»—, contando solo los
+  que suenan (de los dos cierres de la lección 8 suena uno); las devoluciones no llevan.
+- **El botón que hace avanzar late** (`BotonSigue`, `.btn-canal-sigue`): un halo rojo que se
+  abre y se apaga, apagado con `prefers-reduced-motion`. Al terminar un audio la pantalla se
+  quedaba quieta y no decía qué tocar. Y **gira mientras la acción va y vuelve**: en una
+  conexión de planta es un segundo o dos, y sin nada en pantalla la gente tocaba otra vez.
 - **Las voces viven en `lib/voz.ts`, y son dos a elegir** (`VOCES`, desde el 26 de
   septiembre de 2026): `es-VE-PaolaNeural` —la de siempre, a `+12%` porque de fábrica va
   lenta— y `es-VE-SebastianNeural`, las dos venezolanas de Azure. Quien hace el curso escoge
@@ -198,8 +209,23 @@ y una ruedita en vez de piernas.
   `turnosDe()`, y en cuál va cada quien vive en `avances.paso`: quien deje la lección por
   la mitad la retoma donde estaba, que es lo que Ajito promete en la lección 0. Los
   turnos anteriores quedan arriba, como en un chat.
+- ⚠️ **Pero no se pasa de un ejercicio que Ajito no ha contestado.** Guardar la respuesta
+  adelanta `avances.paso` en el acto —lo dicho es lo que no se puede perder— y la
+  devolución llega segundos después; hasta el 26 de septiembre el audio siguiente salía
+  debajo mientras Ajito seguía «viendo lo que le mandaste». La página corta en el primer
+  ejercicio con respuesta y sin devolución; **la que ya falló no retiene** —tiene fecha sin
+  texto y su botón de reintentar—, y por eso `DevolucionAjito` refresca también al fallar.
+- **Lo grabado no dice el nombre de nadie.** El audio es uno solo para las doscientas
+  personas; hasta el 26 de septiembre el Audio 2 de la lección 0 le decía a todo el mundo el
+  nombre de una trabajadora de ejemplo, y el 1 de la lección 3 la llamaba por su apodo. El
+  nombre, el cargo y el área van en la **tarjeta del padrón** (`🖼 **Tarjeta del padrón**` en
+  el guion, clase `padron` en `lib/guion.ts`), y Ajito dice de dónde los sacó.
 - **Se contesta hablando, con foto o escrito, y ninguna vía está cerrada.** El guion
-  dice cuál sale por defecto; el resto está a un toque. La transcripción usa el endpoint
+  dice cuál sale por defecto; el resto está a un toque — **la nota de voz, siempre**, también
+  debajo de la caja de los ejercicios que se proponen escritos. Al tocar «Mandárselo a
+  Ajito», **Ajito sale pensando en el acto**: la caja pinta ya lo que se va a ver cuando
+  vuelva la acción, y si no se guardó devuelve el texto con un aviso (`responder` dice si
+  guardó). La transcripción usa el endpoint
   clásico de Azure en `es-VE` —el rápido devuelve 429 en el recurso de Iberia— y por eso
   el navegador convierte a WAV 16 kHz en `lib/wav.ts` antes de subir. **Siempre se
   muestra lo que se entendió y se puede corregir antes de guardar**: una transcripción
@@ -261,7 +287,7 @@ npm run medir:ritmo                          # palabras por minuto sobre el audi
 npm run subir:audios                         # los sube al bucket privado
 npm run capturar:oficios                     # el curso visto por los 8 oficios
 npm run capturar:oficios -- --leccion 7      # otra lección
-npm run probar:ajito                         # qué contesta Ajito, en 8 casos con filo
+npm run probar:ajito                         # qué contesta Ajito, en 10 casos con filo
 npm run probar:ajito -- --caso plata         # uno solo, para iterar el personaje
 npm run generar:fichas                       # las 10 fichas de bolsillo, del guion
 npm run subir:fichas                         # al bucket privado
@@ -403,7 +429,13 @@ mano y la ficha de la lección 8 salió con Ajito cortado por abajo.
 maneras según el interruptor y cada despedida lleva su ficha; sin el sufijo heredado se
 oye una despedida y se ve la otra.
 
-**Ajito contesta desde `lib/ajito.ts`, y ahí vive el personaje.** Son las mismas reglas
+**Ajito contesta desde `lib/ajito.ts`, y ahí vive el personaje.** **Sabe qué día y qué
+hora es en Venezuela** —se le dice en cada mensaje; sin eso, «¿qué día es hoy?» salía como
+«no tengo forma de saberlo» en la primera lección— y **puede buscar en internet solo donde la
+persona pregunta lo que quiera** (`PUEDE_BUSCAR`: el primer toque y la lección 1), para el
+clima o un resultado. ⚠️ **Nunca en la lección 7**, que enseña que no sabe lo de adentro de
+Iberia, y la búsqueda va **sin `country`**: «VE» no está soportado y tumbaba la devolución.
+Si la API rechaza la búsqueda, contesta sin ella. Son las mismas reglas
 de `contenido/adiestramiento/00-reglas-del-guion.md` traducidas a instrucción: si una
 cambia allá, cambia aquí el mismo día — es un solo Ajito, y quien oye el curso no
 distingue qué salió grabado y qué salió del modelo. Cada ejercicio lleva además su

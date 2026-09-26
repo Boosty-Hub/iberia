@@ -42,8 +42,15 @@
             {
               "tipo": "audio",
               "id": "2",
-              "texto": "Antes de arrancar. En la lista que me pasó Capital Humano dice que tú eres\nYulimar Rodríguez, de envasado.\n\nDime si está bien, porque de ahí depende lo que te vaya a mostrar. A un\nmontacarguista no le voy a poner los mismos ejercicios que a ti.",
-              "segundos": 22
+              "texto": "Antes de arrancar. Aquí abajo te pongo tu nombre y tu área, tal como vienen en\nla lista que me pasó Capital Humano.\n\nDime si están bien, porque de ahí depende lo que te voy a mostrar: los\nejercicios van a estar adaptados a lo que tú haces todos los días.",
+              "segundos": 15
+            },
+            {
+              "tipo": "pieza",
+              "descripcion": "Tarjeta del padrón — nombre, cargo y área de quien oye, como vienen de Capital Humano",
+              "clase": "padron",
+              "lineas": [],
+              "sufijo": ""
             },
             {
               "tipo": "texto",
@@ -52,8 +59,8 @@
             {
               "tipo": "botones",
               "opciones": [
-                "Sí, esa soy",
-                "Ese no soy yo"
+                "Sí, soy yo",
+                "No soy yo"
               ]
             }
           ]
@@ -87,8 +94,8 @@
             {
               "tipo": "audio",
               "id": "4",
-              "texto": "Ahora quiero que hagas una cosa. Mándame lo que sea. Una pregunta, un saludo,\nlo primero que se te ocurra.\n\nEscríbeme sin pena, que yo no me ofendo ni me canso. Es para que veas de una\nvez de qué se trata todo esto.",
-              "segundos": 25
+              "texto": "Ahora quiero que hagas una cosa. Mándame lo que sea. Una pregunta, un saludo,\nlo primero que se te ocurra. Por ejemplo: qué día es hoy, cómo va a estar el\nclima, o cómo se hace una buena arepa.\n\nEscríbeme sin pena, que yo no me ofendo ni me canso. Es para que veas de una\nvez de qué se trata todo esto.",
+              "segundos": 19
             },
             {
               "tipo": "texto",
@@ -595,8 +602,8 @@
             {
               "tipo": "audio",
               "id": "1",
-              "texto": "Yuli, hoy toca algo que a mí me gusta.\n\nHasta ahora me has escrito y me has hablado. Hoy te toca mostrarme.\n\nYo veo fotos. Le tomas una foto a lo que sea, me la mandas, y yo te digo qué\nhay ahí. Te leo lo que está escrito aunque esté chiquito, aunque esté medio\nborroso. Te cuento cuántas cosas hay. Te digo de qué color son.\n\nY ojo con esto, que es lo más importante de hoy: yo veo la foto que tú me\nmandas, y nada más. Yo no tengo cámara. Yo no estoy viendo la planta. Yo no\nsé dónde estás. Veo lo que tú me pones en la mano, y hasta ahí llego.",
-              "segundos": 48
+              "texto": "Hoy toca algo que a mí me gusta.\n\nHasta ahora me has escrito y me has hablado. Hoy te toca mostrarme.\n\nYo veo fotos. Le tomas una foto a lo que sea, me la mandas, y yo te digo qué\nhay ahí. Te leo lo que está escrito aunque esté chiquito, aunque esté medio\nborroso. Te cuento cuántas cosas hay. Te digo de qué color son.\n\nY ojo con esto, que es lo más importante de hoy: yo veo la foto que tú me\nmandas, y nada más. Yo no tengo cámara. Yo no estoy viendo la planta. Yo no\nsé dónde estás. Veo lo que tú me pones en la mano, y hasta ahí llego.",
+              "segundos": 33
             },
             {
               "tipo": "botones",

@@ -106,6 +106,21 @@ eficiencia. Tampoco «medir» sin decir qué.
 **Nunca prometes que la empresa va a hacer algo**, ni hablas de puestos de trabajo,
 de turnos, de sueldos ni de decisiones de Iberia. Eso no te toca a ti.
 
+**De adentro de Iberia no sabes nada**: ni producción, ni inventario, ni lotes, ni
+despachos, ni lo que pasó hoy en la planta. No tienes acceso a sus sistemas. Nunca le
+ofreces a nadie que te pregunte por eso, ni como ejemplo.
+
+**De política no hablas**, ni de gobierno, ni de elecciones, ni de protestas. Si te
+preguntan, dices con calma que de eso no hablas aquí y le ofreces otra cosa.
+
+**Sabes qué día y qué hora es**: te lo digo en cada mensaje, con la hora de Venezuela.
+Si te lo preguntan, lo contestas, con el día de la semana y la fecha dichos como se
+hablan. La hora la dices una sola vez, redondeada a los cinco minutos —«las dos menos
+cuarto», «las tres y diez»—, y no te corriges después. Y si te preguntan algo que está pasando afuera —el clima, un resultado de
+béisbol, a cómo amaneció algo— y tienes cómo buscarlo, lo buscas y lo dices en una
+frase, sin nombrar de dónde lo sacaste. Si no tienes cómo buscarlo, dices que eso no
+lo sabes: nunca lo adivinas.
+
 **Palabras de la casa que sí se usan:** bache, lote, merma, picking, paletizado, rack,
 cámara, molino, molienda, cuarentena, ticket amarillo, bata, gorro, adiestramiento
 (nunca «capacitación»).
@@ -143,7 +158,9 @@ const INSTRUCCION: Record<string, string> = {
   'primer-toque':
     'Es lo primero que te manda en la vida. Contéstale lo que te preguntó, de verdad y ' +
     'corto. Si no te preguntó nada, respóndele a lo que dijo. Y le haces notar que no ' +
-    'tuvo que aprenderse ninguna clave: escribió como habla y le entendiste.',
+    'tuvo que aprenderse ninguna clave: escribió como habla y le entendiste. Aquí NO ' +
+    'le dices qué le faltó ni le muestras cómo preguntarlo mejor: es su primera vez, y ' +
+    'lo único que tiene que quedar es que funcionó.',
 
   // --- Lección 1 · entiende lo que le dices -----------------------------------
   'pregunta-corta':
@@ -247,6 +264,59 @@ const INSTRUCCION: Record<string, string> = {
     'equipo que armó el curso.',
 }
 
+/**
+ * Dónde Ajito puede buscar en internet.
+ *
+ * Solo en los ejercicios donde la persona pregunta lo que quiera: ahí «¿cómo está
+ * el clima en Caracas?» es una pregunta legítima, y un «no sé» de la herramienta
+ * que la lección está vendiendo la desmiente. En el resto Ajito trabaja con lo que
+ * le mandaron. ⚠️ **Y nunca en la lección 7**: enseña que la IA no sabe lo de
+ * adentro de Iberia, y una búsqueda que devuelva algo de la empresa convertiría el
+ * «no sé» en una cifra con cara de dato.
+ */
+const PUEDE_BUSCAR = new Set(['primer-toque', 'pregunta-corta', 'pregunta-con-contexto', 'mas-facil'])
+
+/**
+ * La búsqueda se sitúa donde está la gente, no en un servidor de Virginia.
+ *
+ * ⚠️ Sin `country`: la API contesta «Country code VE is not supported» y tumba la
+ * devolución entera. La ciudad y la zona alcanzan para el clima de Caracas.
+ */
+const BUSQUEDA: Anthropic.WebSearchTool20250305 = {
+  type: 'web_search_20250305',
+  name: 'web_search',
+  max_uses: 2,
+  user_location: {
+    type: 'approximate',
+    city: 'Caracas',
+    region: 'Distrito Capital',
+    timezone: 'America/Caracas',
+  },
+}
+
+/**
+ * «Hoy es viernes 26 de septiembre de 2026, 1:24 p. m.», en la hora de Venezuela.
+ *
+ * El modelo no sabe qué día es: sin esto, «¿qué día es hoy?» salía como «no tengo
+ * forma de saberlo» — en la primera lección, que es donde se decide si vale la pena
+ * seguir. El servidor corre en UTC, así que la zona va explícita.
+ */
+function ahora(): string {
+  const fecha = new Intl.DateTimeFormat('es-VE', {
+    timeZone: 'America/Caracas',
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date())
+  const hora = new Intl.DateTimeFormat('es-VE', {
+    timeZone: 'America/Caracas',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(new Date())
+  return `Hoy es ${fecha}, y son las ${hora} en Venezuela.`
+}
+
 /** La pregunta de campo cierra las nueve lecciones y todas se contestan igual. */
 const INSTRUCCION_CAMPO =
   'Esta es la pregunta de cierre de la lección: lo que la persona sabe de su puesto y ' +
@@ -318,7 +388,14 @@ export async function devolver(contexto: Contexto): Promise<Devolucion> {
       'Reconoce concreto lo que te mandó y devuélveselo mejor hecho, según la forma de ' +
         'la devolución.')
 
+  const buscar = !contexto.esCampo && PUEDE_BUSCAR.has(contexto.clave)
+
   const encabezado = [
+    ahora(),
+    buscar
+      ? 'En este ejercicio puedes buscar en internet si te pregunta algo de afuera.'
+      : 'En este ejercicio no puedes buscar en internet.',
+    '',
     `Lección ${contexto.leccion} · ${contexto.tituloLeccion}`,
     `A quien le contestas se le dice ${contexto.nombre}.`,
     `Su oficio: ${FAMILIAS_OFICIO[contexto.familia]}.`,
@@ -347,13 +424,37 @@ export async function devolver(contexto: Contexto): Promise<Devolucion> {
   contenido.push({ type: 'text', text: `${encabezado}\n\n${contexto.texto}` })
 
   try {
-    const respuesta = await cliente.messages.create({
-      model: MODELO,
-      max_tokens: 4000,
-      system: PERSONAJE,
-      output_config: { effort: ESFUERZO },
-      messages: [{ role: 'user', content: contenido }],
-    })
+    const mensajes: Anthropic.MessageParam[] = [{ role: 'user', content: contenido }]
+    let conBusqueda = buscar
+    const pedir = () =>
+      cliente.messages.create({
+        model: MODELO,
+        max_tokens: 4000,
+        system: PERSONAJE,
+        output_config: { effort: ESFUERZO },
+        ...(conBusqueda ? { tools: [BUSQUEDA] } : {}),
+        messages: mensajes,
+      })
+
+    let respuesta: Anthropic.Message
+    try {
+      respuesta = await pedir()
+    } catch (error) {
+      // La búsqueda es un extra: si la API la rechaza —apagada en la organización,
+      // un parámetro que dejó de aceptar—, Ajito contesta sin ella antes que no
+      // contestar. El saldo agotado no se reintenta: fallaría igual.
+      if (!conBusqueda || !(error instanceof Anthropic.BadRequestError)) throw error
+      if (clasificar(error).motivo === 'sin-saldo') throw error
+      console.warn('[ajito] la búsqueda falló; contesto sin ella:', clasificar(error).detalle)
+      conBusqueda = false
+      respuesta = await pedir()
+    }
+    // Con la búsqueda, el servidor puede cortar el turno a mitad y pedir que se le
+    // devuelva tal cual para seguir. Una vuelta alcanza con dos búsquedas de tope.
+    if (respuesta.stop_reason === 'pause_turn') {
+      mensajes.push({ role: 'assistant', content: respuesta.content })
+      respuesta = await pedir()
+    }
 
     // Los clasificadores pueden declinar una petición y eso llega como una
     // respuesta normal, sin contenido. Hay que mirarlo antes de leer el texto.
@@ -361,10 +462,19 @@ export async function devolver(contexto: Contexto): Promise<Devolucion> {
       return { ok: false, motivo: 'fallo', detalle: 'rechazado por el modelo' }
     }
 
-    const texto = respuesta.content
+    // Solo lo que dijo después de la última búsqueda: lo de antes es el «déjame
+    // ver» con el que la anuncia, y eso no va en el audio. Y los trozos se pegan
+    // sin salto, porque con citas el modelo parte una misma frase en varios.
+    const bloques = respuesta.content
+    let desde = 0
+    bloques.forEach((bloque, i) => {
+      if (bloque.type === 'web_search_tool_result') desde = i + 1
+    })
+    const texto = bloques
+      .slice(desde)
       .filter((bloque): bloque is Anthropic.TextBlock => bloque.type === 'text')
       .map((bloque) => bloque.text)
-      .join('\n')
+      .join(desde ? '' : '\n')
       .trim()
 
     if (!texto) return { ok: false, motivo: 'fallo', detalle: 'respuesta vacía' }

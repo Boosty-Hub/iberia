@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import guion from '@/contenido/adiestramiento/guion.json'
 import { AudioAjito } from '@/components/canal/audio-ajito'
+import { BotonSigue } from '@/components/canal/boton-sigue'
 import { DevolucionAjito } from '@/components/canal/devolucion-ajito'
 import { EntradaRespuesta } from '@/components/canal/entrada-respuesta'
 import { IconoAtras, IconoCheck } from '@/components/iconos'
@@ -114,18 +115,38 @@ export default async function LeccionPage({
 
   // Hasta dónde ha llegado. Se muestran los turnos anteriores completos —como
   // en un chat, donde lo dicho sigue arriba— y el actual esperando.
-  const hasta = Math.min(avance?.paso ?? 0, Math.max(turnos.length - 1, 0))
+  //
+  // ⚠️ **Pero no se pasa de un ejercicio que Ajito no ha contestado.** Guardar
+  // la respuesta adelanta `avances.paso` en el acto —lo que la persona dijo es
+  // lo que no se puede perder—, y la devolución llega segundos después. Así que
+  // el audio siguiente salía debajo mientras Ajito seguía «viendo lo que le
+  // mandaste», y se oía la clase antes que la respuesta. La devolución que ya
+  // falló —fecha sin texto— no retiene: tiene su botón de reintentar.
+  const esperandoA = turnos.findIndex((t) => {
+    if (t.espera.tipo !== 'ejercicio' || !t.espera.clave) return false
+    const r = contestadas.get(t.espera.clave)
+    return Boolean(r?.texto && !r.devolucion && !r.devolucion_en)
+  })
+  const llegado = Math.min(avance?.paso ?? 0, Math.max(turnos.length - 1, 0))
+  const hasta = esperandoA >= 0 && esperandoA < llegado ? esperandoA : llegado
+  const esperandoAjito = esperandoA >= 0 && esperandoA <= hasta
   const visibles = turnos.slice(0, hasta + 1)
   const enElUltimo = hasta >= turnos.length - 1
+
+  // «Audio 3 de 8»: cuál es cada uno dentro de la lección, contando solo los
+  // que suenan — de los dos cierres de la lección 8 suena uno.
+  const ordenAudio = new Map<string, number>()
+  for (const turno of turnos) {
+    for (const b of segunInterruptor(turno.bloques, curso.asistente_libre_activo)) {
+      if (b.tipo === 'audio') ordenAudio.set(b.id, ordenAudio.size + 1)
+    }
+  }
 
   const pendientes = turnos.filter(
     (t) => t.espera.tipo === 'ejercicio' && t.espera.clave && !contestadas.has(t.espera.clave)
   ).length
 
-  const audios = turnos.reduce(
-    (t, x) => t + x.bloques.filter((b) => b.tipo === 'audio').length,
-    0
-  )
+  const audios = ordenAudio.size
 
   return (
     <div className="space-y-4">
@@ -177,9 +198,7 @@ export default async function LeccionPage({
           </p>
           <form action={empezarLeccion}>
             <input type="hidden" name="numero" value={numero} />
-            <button type="submit" className="btn-canal btn-canal-rojo w-full">
-              Empezar la lección
-            </button>
+            <BotonSigue>Empezar la lección</BotonSigue>
           </form>
         </>
       ) : (
@@ -198,21 +217,23 @@ export default async function LeccionPage({
               pregunta={pregunta}
               contestadas={contestadas}
               siguienteSinDevolucion={siguienteSinDevolucion}
+              ordenAudio={ordenAudio}
+              padron={{
+                nombre: empleado.nombre_completo,
+                cargo: empleado.cargo,
+                area: empleado.areas?.nombre ?? null,
+              }}
             />
           ))}
 
-          {enElUltimo && turnos[hasta]?.espera.tipo !== 'botones' && (
+          {enElUltimo && !esperandoAjito && turnos[hasta]?.espera.tipo !== 'botones' && (
             <form action={terminarLeccion} className="pt-2">
               <input type="hidden" name="numero" value={numero} />
-              <button
-                type="submit"
-                disabled={pendientes > 0}
-                className="btn-canal btn-canal-rojo w-full"
-              >
+              <BotonSigue disabled={pendientes > 0}>
                 {avance.estado === 'completada'
                   ? 'Seguir a la siguiente'
                   : 'Terminar la lección'}
-              </button>
+              </BotonSigue>
               {pendientes > 0 && (
                 <p className="mt-2 text-center text-[13px] text-marca-400">
                   Te falta{pendientes > 1 ? 'n' : ''} {pendientes}{' '}
@@ -239,6 +260,8 @@ function TurnoVista({
   pregunta,
   contestadas,
   siguienteSinDevolucion,
+  ordenAudio,
+  padron,
 }: {
   turno: Turno
   esActual: boolean
@@ -253,6 +276,10 @@ function TurnoVista({
   contestadas: Map<string, Contestada>
   /** La única clave que puede pedirle devolución a Ajito ahora mismo. */
   siguienteSinDevolucion: string | null
+  /** Cuál es cada audio dentro de la lección, para el «3 de 8». */
+  ordenAudio: Map<string, number>
+  /** Lo que dice Capital Humano de quien oye, para la tarjeta de la lección 0. */
+  padron: { nombre: string; cargo: string | null; area: string | null }
 }) {
   const bloques = segunInterruptor(turno.bloques, asistenteLibre)
   const primerAudio = bloques.findIndex((b) => b.tipo === 'audio')
@@ -271,6 +298,11 @@ function TurnoVista({
               // seguidos se leen como un error.
               etiqueta={i === primerAudio && !turno.continuacion ? turno.titulo : 'Ajito sigue'}
               segundos={bloque.segundos}
+              orden={
+                ordenAudio.has(bloque.id)
+                  ? { numero: ordenAudio.get(bloque.id) ?? 0, total: ordenAudio.size }
+                  : undefined
+              }
             />
           )
         }
@@ -286,6 +318,10 @@ function TurnoVista({
               {bloque.texto}
             </p>
           )
+        }
+
+        if (bloque.tipo === 'pieza' && bloque.clase === 'padron') {
+          return <PadronVista key={i} {...padron} />
         }
 
         // La ficha de bolsillo es lo que la persona se guarda en la galería y
@@ -327,13 +363,7 @@ function TurnoVista({
               >
                 <input type="hidden" name="numero" value={numero} />
                 <input type="hidden" name="turno" value={turno.indice} />
-                <button
-                  type="submit"
-                  disabled={esFinal && pendientes > 0}
-                  className="btn-canal btn-canal-rojo w-full"
-                >
-                  {opcion}
-                </button>
+                <BotonSigue disabled={esFinal && pendientes > 0}>{opcion}</BotonSigue>
               </form>
             )
           )}
@@ -360,6 +390,43 @@ function TurnoVista({
       )}
     </section>
   )
+}
+
+/**
+ * Quién dice Capital Humano que eres.
+ *
+ * El audio de la lección 0 no puede decir el nombre —se graba uno solo para
+ * todos—, así que lo dice esta tarjeta y Ajito pregunta si está bien. El cargo
+ * llega del listado en mayúsculas y aquí se escribe como se lee.
+ */
+function PadronVista({
+  nombre,
+  cargo,
+  area,
+}: {
+  nombre: string
+  cargo: string | null
+  area: string | null
+}) {
+  const detalle = [cargo && legible(cargo), area].filter(Boolean).join(' · ')
+  return (
+    <div className="tarjeta-canal px-5 py-4" data-padron>
+      <p className="text-[11px] font-bold tracking-[0.12em] text-marca-400 uppercase">
+        En la lista de Capital Humano
+      </p>
+      <p className="mt-1.5 text-lg leading-snug font-bold text-marca-900">{nombre}</p>
+      <p className="mt-0.5 text-[15px] leading-relaxed text-marca-600">
+        {detalle || 'Sin cargo ni área en la lista'}
+      </p>
+    </div>
+  )
+}
+
+/** «OPERADOR DE ENVASADO» → «Operador de envasado». Lo que ya viene bien, se queda. */
+function legible(texto: string): string {
+  if (texto !== texto.toUpperCase()) return texto
+  const bajo = texto.toLocaleLowerCase('es')
+  return bajo.charAt(0).toLocaleUpperCase('es') + bajo.slice(1)
 }
 
 /**
@@ -478,8 +545,12 @@ function EjercicioVista({
   )
 }
 
-/** «Tómate una foto» → «Yuli, tómate una foto». */
+/**
+ * «Tómate una foto» → «Rosa, tómate una foto».
+ *
+ * La primera **letra**, no el primer carácter: con «¿Cómo te digo?» bajaba el
+ * «¿» y quedaba «Rosa, ¿Cómo te digo?».
+ */
 function minuscula(texto: string): string {
-  const [primera, ...resto] = texto
-  return primera ? primera.toLowerCase() + resto.join('') : texto
+  return texto.replace(/^([¿¡«"]*)(\p{L})/u, (_, signos: string, letra: string) => signos + letra.toLowerCase())
 }

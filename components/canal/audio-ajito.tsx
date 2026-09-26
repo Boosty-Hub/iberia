@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { cn } from '@/lib/utils'
 
 /**
@@ -44,6 +44,13 @@ import { cn } from '@/lib/utils'
  *    toque y ella hay un hueco de segundos en una conexión de planta — y el
  *    hueco era justamente lo que no se veía. `waiting` vuelve a poner el
  *    cargando si el buffer se queda corto a mitad, que en el piso pasa.
+ *  · **La barra se arrastra**, como la de WhatsApp: para volver a oír una
+ *    frase o saltarse lo que ya se oyó. Es un `<input type="range">` de 44 px
+ *    de alto y va **fuera** del botón —un control dentro de otro no se puede
+ *    tocar—. Con `preload="none"` el archivo no existe hasta el primer toque,
+ *    así que un arrastre anterior se guarda y se aplica cuando llega.
+ *  · **Cada audio de la lección dice cuál es** —«3 de 8»—, para saber por
+ *    dónde se va sin contar tarjetas.
  */
 
 type Estado = 'quieto' | 'cargando' | 'sonando' | 'oido' | 'error'
@@ -52,13 +59,18 @@ export function AudioAjito({
   src,
   etiqueta,
   segundos,
+  orden,
 }: {
   src: string
   etiqueta: string
   /** Lo que dice el guion. Sirve de rótulo antes de que el archivo cargue. */
   segundos: number | null
+  /** Cuál es dentro de la lección. Las devoluciones no llevan: no son de la clase. */
+  orden?: { numero: number; total: number }
 }) {
   const ref = useRef<HTMLAudioElement>(null)
+  // Un arrastre antes de que el archivo cargue: se aplica en `loadedmetadata`.
+  const saltoPendiente = useRef<number | null>(null)
   const [estado, setEstado] = useState<Estado>('quieto')
   const [yaOido, setYaOido] = useState(false)
   const [posicion, setPosicion] = useState(0)
@@ -71,6 +83,10 @@ export function AudioAjito({
     const alTiempo = () => setPosicion(audio.currentTime)
     const alCargar = () => {
       if (Number.isFinite(audio.duration)) setDuracion(audio.duration)
+      if (saltoPendiente.current !== null) {
+        audio.currentTime = Math.min(saltoPendiente.current, audio.duration || Infinity)
+        saltoPendiente.current = null
+      }
     }
     // `playing` es el que dice que **de verdad** está saliendo sonido. `play()`
     // se dispara antes, con el archivo todavía bajando.
@@ -132,6 +148,15 @@ export function AudioAjito({
     }
   }
 
+  function saltar(segundo: number) {
+    const audio = ref.current
+    setPosicion(segundo)
+    if (!audio) return
+    // Sin metadatos, mover `currentTime` no hace nada en Safari: se guarda.
+    if (audio.readyState >= 1) audio.currentTime = segundo
+    else saltoPendiente.current = segundo
+  }
+
   const total = duracion ?? 0
   const avance = total ? Math.min(100, (posicion / total) * 100) : 0
   const activo = estado === 'sonando' || estado === 'cargando'
@@ -186,13 +211,13 @@ export function AudioAjito({
         )}
       </button>
 
-      <button
-        type="button"
-        onClick={alternar}
-        disabled={estado === 'error'}
-        className="min-w-0 flex-1 py-2 text-left"
-      >
-        <span className="flex items-center gap-2">
+      <div className="min-w-0 flex-1">
+        <button
+          type="button"
+          onClick={alternar}
+          disabled={estado === 'error'}
+          className="flex min-h-11 w-full items-center gap-2 pt-1 text-left"
+        >
           <Image
             src="/marca/ajito.png"
             alt=""
@@ -208,7 +233,7 @@ export function AudioAjito({
           <span
             aria-live="polite"
             className={cn(
-              'truncate text-[14px] font-semibold',
+              'min-w-0 flex-1 truncate text-[14px] font-semibold',
               estado === 'sonando'
                 ? 'text-marca-900'
                 : estado === 'oido'
@@ -218,43 +243,51 @@ export function AudioAjito({
           >
             {rotulo}
           </span>
-        </span>
+          {orden && (
+            <span
+              data-orden-audio
+              className={cn(
+                'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums',
+                estado === 'sonando' ? 'bg-oro-200 text-marca-900' : 'bg-marca-100 text-marca-600'
+              )}
+            >
+              {orden.numero} de {orden.total}
+            </span>
+          )}
+        </button>
 
-        <span className="mt-2 flex items-center gap-2">
-          <span
-            className={cn(
-              'h-1.5 flex-1 overflow-hidden rounded-full',
-              estado === 'sonando' ? 'bg-oro-200' : 'bg-marca-100'
-            )}
-          >
-            {/* Cargando, la barra va **vacía**. La primera versión ponía un
-                trozo latiendo a un tercio del ancho y se leía como «va por el
-                33%», que es un número inventado. Lo que dice que hay que esperar
-                es el anillo girando y el rótulo; una barra que miente estorba. */}
-            {estado !== 'cargando' && (
-              <span
-                className={cn(
-                  'block h-full rounded-full transition-[width] duration-150',
-                  // Carbón sobre el dorado, no dorado sobre dorado: `oro-500`
-                  // encima de `oro-200` no se distinguía a un brazo de
-                  // distancia, y el avance es justo lo que hay que poder ver
-                  // sin fijarse. De paso casa con el ⏸, que también es carbón.
-                  estado === 'sonando' ? 'bg-marca-800' : 'bg-acento-600'
-                )}
-                style={{ width: `${avance}%` }}
-              />
-            )}
-          </span>
+        <div className="-mt-1 flex items-center gap-2">
+          {/* La barra pinta solo la posición de verdad: cargando no se inventa
+              avance. La primera versión ponía un trozo latiendo a un tercio del
+              ancho y se leía como «va por el 33%», que era un número inventado.
+              Lo que dice que hay que esperar es el anillo girando y el rótulo.
+              Sonando, el avance va en carbón sobre el dorado: `oro-500` encima
+              de `oro-200` no se distinguía a un brazo de distancia. */}
+          <input
+            type="range"
+            min={0}
+            max={total || 1}
+            step={0.1}
+            value={total ? Math.min(posicion, total) : 0}
+            disabled={!total || estado === 'error'}
+            onChange={(e) => saltar(Number(e.target.value))}
+            aria-label={`Mover el audio · ${etiqueta}`}
+            aria-valuetext={`${reloj(posicion)} de ${reloj(total)}`}
+            className={cn('barra-audio min-w-0 flex-1', estado === 'sonando' && 'sonando')}
+            style={{ '--avance': `${avance}%` } as CSSProperties}
+          />
           <span
             className={cn(
               'shrink-0 text-[12px] tabular-nums',
               estado === 'sonando' ? 'text-oro-800' : 'text-marca-500'
             )}
           >
-            {reloj(activo || posicion > 0 ? total - posicion : total)}
+            {/* Sin duración todavía —la devolución no trae la del guion— va una
+                raya: «0:00» se leía como un audio vacío. */}
+            {total ? reloj(activo || posicion > 0 ? total - posicion : total) : '—'}
           </span>
-        </span>
-      </button>
+        </div>
+      </div>
     </div>
   )
 }

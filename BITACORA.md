@@ -67,6 +67,52 @@ cláusula 5. Aquí solo lo urgente:
 
 ---
 
+## 26 de septiembre de 2026 · Sesión 45 — el curso, recorrido por Gabriel
+
+Gabriel hizo la lección 0 en el teléfono y trajo ocho cosas. Todas quedaron; cómo funciona cada
+una está en `AGENTS.md`, bajo el adiestramiento.
+
+- 🔴 **El Audio 2 de la lección 0 le decía a todo el mundo el nombre de una trabajadora de
+  ejemplo**, y el 1 de la lección 3 la llamaba por su apodo. Era texto de muestra que se grabó.
+  Ahora el audio dice que el nombre y el área están «aquí abajo», los muestra una **tarjeta del
+  padrón** con los datos de Capital Humano, y la línea del montacarguista pasó a «los ejercicios
+  van a estar adaptados a lo que tú haces todos los días». Los botones, sin género: «Sí, soy yo»
+  y «No soy yo». Se regrabaron los tres audios en las dos voces y se subieron.
+- 🔴 **El audio siguiente salía mientras Ajito seguía pensando.** Guardar la respuesta adelantaba
+  la lección en el acto y la devolución llegaba después. La página ya no pasa de un ejercicio sin
+  contestar; la devolución que falló no retiene.
+- **Ajito no sabía qué día era**, y en la primera lección contestaba que no tenía forma de saberlo.
+  Ahora se le da la fecha y la hora de Venezuela, y **busca en internet** donde la persona pregunta
+  lo que quiera —el primer toque y la lección 1—, para el clima o un resultado. Nunca en la 7. De
+  paso se le cerraron dos puertas: no ofrece preguntarle por lotes o despachos —lo ofreció en una
+  prueba—, y de política no habla.
+- **La barra de los audios se arrastra**, hacia atrás y hacia adelante, y **cada audio dice cuál
+  es** («3 de 8»).
+- **Los botones que hacen avanzar laten**, y giran mientras la acción va y vuelve.
+- **La nota de voz está siempre a mano**, también debajo de la caja escrita.
+- **Al tocar «Mandárselo a Ajito», Ajito sale pensando en el acto** (31 ms medidos). Antes la caja
+  se quedaba quieta uno o dos segundos y parecía que el botón no servía.
+- **El primer toque trae ejemplos** —qué día es hoy, el clima en Cagua, una buena arepa—, que
+  Ajito contesta de verdad.
+
+De paso: «Rosa, ¿Cómo te digo?» salía con mayúscula tras la coma —se bajaba el «¿» y no la
+letra—, y «Habla tranquilo» le ponía género a quien graba.
+
+⚠️ **La búsqueda web no acepta `country: 'VE'`**: la API contesta «Country code VE is not
+supported» y tumbaba la devolución entera. Va sin país, y si la API la rechaza, Ajito contesta sin
+buscar.
+
+**Verificado** en un iPhone 14 contra el servidor local, con un trabajador de prueba que se borra
+al salir: 16 de 16 —halo, «1 de 8», arrastrar antes de cargar y a mitad, la tarjeta, los botones,
+la nota de voz, el pensando inmediato, el turno retenido, la fecha, sin desbordes y 44 px—.
+`capturar:oficios` en la lección 0 con los ocho oficios, y `probar:ajito` con dos casos nuevos
+(fecha y clima).
+
+**Dónde quedamos.** «No soy yo» sigue sin recoger el nombre a mano ni dejar la marca para Capital
+Humano que dice el guion: por ahora solo avanza (en `PENDIENTES.md`).
+
+---
+
 ## 26 de septiembre de 2026 · Sesión 44 — Ajito, con dos voces
 
 Encargo de Gabriel: que el curso tenga dos voces, una de mujer y una de hombre, y que cada quien

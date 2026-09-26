@@ -287,7 +287,10 @@ export function ejerciciosDeLeccion(
     case 'bienvenida':
       return [
         { clave: 'apodo', consigna: '¿Cómo te digo? No el nombre del carnet: como te dicen aquí.', entrada: 'texto' },
-        { clave: 'primer-toque', consigna: 'Mándame lo que sea. Una pregunta, un saludo, lo primero que se te ocurra.', entrada: 'texto' },
+        // Con ejemplo: «lo que sea» a secas dejaba a la gente mirando la caja
+        // sin saber qué poner. Los tres se contestan de verdad —Ajito sabe la
+        // fecha y aquí puede buscar el clima—; ver `lib/ajito.ts`.
+        { clave: 'primer-toque', consigna: 'Mándame lo que sea. Por ejemplo: «¿qué día es hoy?», «¿cómo va a estar el clima en Cagua?» o «¿cómo se hace una buena arepa?».', entrada: 'texto' },
       ]
     case 'entiende':
       return [

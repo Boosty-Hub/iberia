@@ -30,9 +30,9 @@ mano, `Lección 3 · Ajito ve`, barra de avance en 3 de 9.
 
 ## 3.2 · La clase
 
-🔊 **Audio 1** · 48 s
+🔊 **Audio 1** · 33 s
 
-> Yuli, hoy toca algo que a mí me gusta.
+> Hoy toca algo que a mí me gusta.
 >
 > Hasta ahora me has escrito y me has hablado. Hoy te toca **mostrarme**.
 >

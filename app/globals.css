@@ -894,6 +894,85 @@ body {
   }
 }
 
+/* El botón que hace avanzar la lección late: un halo rojo que se abre y se
+   apaga. Sin él, al terminar un audio la pantalla se quedaba quieta y no
+   decía qué tocar para seguir. Es halo y no rebote: se nota con el rabillo del
+   ojo sin mover el texto, que se lee a un brazo de distancia. */
+.btn-canal-sigue:not(:disabled) {
+  animation: canal-late 1.8s ease-out infinite;
+}
+
+@keyframes canal-late {
+  0% { box-shadow: 0 0 0 0 rgb(212 51 44 / 0.45); }
+  70% { box-shadow: 0 0 0 12px rgb(212 51 44 / 0); }
+  100% { box-shadow: 0 0 0 0 rgb(212 51 44 / 0); }
+}
+
+/* El que está esperando a que termine de mandarse no late: ya se tocó. */
+.btn-canal-sigue[aria-busy='true'] {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-canal-sigue:not(:disabled) { animation: none; }
+}
+
+/* La barra del audio se arrastra, como la de una nota de voz de WhatsApp. El
+   control ocupa 44 px de alto —el objetivo táctil del canal— y lo que se ve es
+   una pista de 6 px con su avance pintado y una bolita. `--avance` lo pone el
+   componente; los colores salen del estado de la tarjeta. */
+.barra-audio {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 2.75rem;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: pan-y;
+  --pista: var(--color-marca-100);
+  --relleno: var(--color-acento-600);
+}
+.barra-audio:disabled { cursor: default; }
+.barra-audio:focus { outline: none; }
+.barra-audio::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: linear-gradient(to right, var(--relleno) var(--avance, 0%), var(--pista) var(--avance, 0%));
+}
+.barra-audio::-moz-range-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: linear-gradient(to right, var(--relleno) var(--avance, 0%), var(--pista) var(--avance, 0%));
+}
+.barra-audio::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+  border-radius: 9999px;
+  background: var(--relleno);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+}
+.barra-audio::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: var(--relleno);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+}
+.barra-audio:disabled::-webkit-slider-thumb { visibility: hidden; }
+.barra-audio:disabled::-moz-range-thumb { visibility: hidden; }
+.barra-audio:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px rgb(212 51 44 / 0.3); }
+.barra-audio.sonando {
+  --pista: var(--color-oro-200);
+  --relleno: var(--color-marca-800);
+}
+
 
 /* -----------------------------------------------------------------------------
  * Impresión
