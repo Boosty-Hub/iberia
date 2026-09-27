@@ -306,6 +306,10 @@ y una ruedita en vez de piernas.
     imagen que parece foto es justo lo que la sección 4.6 enseña a desconfiar. Si se pide a
     Ajito, se dibuja a partir de su imagen (`referencias/ajito.png` en el bucket del curso)
     para que salga igualito, con el logo de su pechera.
+  - ⚠️ **«Iberia» es la aerolínea para el generador.** A «una mayonesa voladora con el logo de
+    Iberia» le pintó un avión con el logo de la aerolínea española. Cuando el pedido nombra a
+    Iberia se le dice que es Industrias Iberia (`IBERIA_DE_VERDAD`) y se le pasa el logo
+    verdadero como referencia (`referencias/iberia.png`, lo sube `generar:ejemplos`).
   - **WebP a 80**: 1024×1024 pesa unos 110 KB, contra 1,7 MB en PNG, y se baja con el plan de
     datos de un teléfono de planta.
   - **Los tres ejemplos de «Muéstrame»** salen del bloque `🖼 Tres ejemplos ya hechos` del

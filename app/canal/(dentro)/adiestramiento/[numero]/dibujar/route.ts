@@ -7,6 +7,7 @@ import {
   BUCKET_ADIESTRAMIENTO,
   BUCKET_RESPUESTAS,
   RUTA_REFERENCIA_AJITO,
+  RUTA_REFERENCIA_IBERIA,
   rutaRespuesta,
 } from '@/lib/storage'
 import { createClient } from '@/lib/supabase/server'
@@ -142,13 +143,16 @@ export async function POST(
 
   // --- el dibujo ----------------------------------------------------------------
 
-  let referencia: Blob | null = null
-  if (/ajito/i.test(respuesta.texto)) {
-    const { data } = await supabase.storage.from(BUCKET_ADIESTRAMIENTO).download(RUTA_REFERENCIA_AJITO)
-    referencia = data ?? null
-  }
+  // Las referencias que nombra el pedido: Ajito tal como es, y el logo de
+  // Industrias Iberia —sin él, «el logo de Iberia» salía el de la aerolínea—.
+  const bajar = async (ruta: string) =>
+    (await supabase.storage.from(BUCKET_ADIESTRAMIENTO).download(ruta)).data ?? null
+  const [ajito, iberia] = await Promise.all([
+    /ajito/i.test(respuesta.texto) ? bajar(RUTA_REFERENCIA_AJITO) : null,
+    /iberia/i.test(respuesta.texto) ? bajar(RUTA_REFERENCIA_IBERIA) : null,
+  ])
 
-  const hecho = await dibujar(respuesta.texto, clavePaso, referencia)
+  const hecho = await dibujar(respuesta.texto, clavePaso, { ajito, iberia })
   if (!hecho.ok) {
     if (hecho.motivo === 'rechazado') return esCampo ? sinDibujo('no_va') : noVa('no_va')
     console.error(`[dibujo] ${hecho.motivo} · ${clavePaso}:`, hecho.detalle ?? '')

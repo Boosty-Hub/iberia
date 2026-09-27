@@ -34,6 +34,18 @@ export const MODELO_DIBUJO = 'gpt-image-2.5-flare'
 export const AJITO_IGUALITO =
   'El personaje de la imagen es Ajito: tiene que salir igualito, con el logo de Iberia en su pechera.'
 
+/**
+ * Cuando se nombra a Iberia. ⚠️ Sin esto el generador entiende la aerolínea: a
+ * «una mayonesa voladora con el logo de Iberia» le pintó un avión con la cola y
+ * el logo de la aerolínea española (27 de septiembre de 2026). Va con el logo
+ * verdadero como imagen de referencia (`referencias/iberia.png`).
+ */
+export const IBERIA_DE_VERDAD =
+  'Iberia es Industrias Iberia, la empresa venezolana de salsas, mayonesas y condimentos, no la ' +
+  'aerolínea: nada de aviones, colas de avión ni colores o logos de aerolínea que no se pidan. ' +
+  'Su logo es el de la imagen de referencia —la palabra IBERIA en rojo con una onda debajo—, y ' +
+  'donde vaya un logo de Iberia, va ese, igualito.'
+
 /** Lo que va en todo pedido de imagen, además de lo que se pidió. */
 export const SIN_AGREGADOS =
   'No agregues banderas, escudos patrios ni símbolos políticos o religiosos que no se pidan.'

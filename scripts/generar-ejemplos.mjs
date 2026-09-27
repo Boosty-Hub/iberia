@@ -21,7 +21,12 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { createClient } from '@supabase/supabase-js'
 import { AJITO_IGUALITO, MODELO_DIBUJO, SIN_AGREGADOS } from '../lib/dibujo.ts'
 import { leerLeccion } from '../lib/guion.ts'
-import { BUCKET_ADIESTRAMIENTO, RUTA_REFERENCIA_AJITO, rutaEjemplo } from '../lib/storage.ts'
+import {
+  BUCKET_ADIESTRAMIENTO,
+  RUTA_REFERENCIA_AJITO,
+  RUTA_REFERENCIA_IBERIA,
+  rutaEjemplo,
+} from '../lib/storage.ts'
 
 const REVISAR = process.argv.includes('--revisar')
 const LECCION = 4
@@ -121,7 +126,9 @@ const subir = async (ruta, bytes, tipo) => {
 }
 
 await subir(RUTA_REFERENCIA_AJITO, referencia, 'image/png')
+// Y el logo de Industrias Iberia: sin él, «el logo de Iberia» salía el de la aerolínea.
+await subir(RUTA_REFERENCIA_IBERIA, await readFile('public/marca/iberia.png'), 'image/png')
 for (const [i] of pieza.lineas.entries()) {
   await subir(rutaEjemplo(LECCION, i + 1), await readFile(`${SALIDA}/ejemplo-${i + 1}.webp`), 'image/webp')
 }
-console.log(`\nSubidos: ${pieza.lineas.length} ejemplos y la referencia de Ajito · bucket ${BUCKET_ADIESTRAMIENTO}\n`)
+console.log(`\nSubidos: ${pieza.lineas.length} ejemplos y las referencias de Ajito y de Iberia · bucket ${BUCKET_ADIESTRAMIENTO}\n`)

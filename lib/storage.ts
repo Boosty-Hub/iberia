@@ -59,6 +59,13 @@ export function rutaEscudoPublicado(empleadoId: string, respuestaId: string): st
  */
 export const RUTA_REFERENCIA_AJITO = 'referencias/ajito.png'
 
+/**
+ * El logo de Industrias Iberia, para que un dibujo que lo pide lleve el de verdad
+ * y no el de la aerolínea, que es lo que el generador entendía (ver
+ * `IBERIA_DE_VERDAD` en `lib/dibujo.ts`).
+ */
+export const RUTA_REFERENCIA_IBERIA = 'referencias/iberia.png'
+
 /** Los ejemplos ya hechos de la lección 4 —«Ajito en la playa»…—, del guion. */
 export function rutaEjemplo(leccion: number, numero: number): string {
   return `ejemplos/leccion-${String(leccion).padStart(2, '0')}/ejemplo-${numero}.webp`

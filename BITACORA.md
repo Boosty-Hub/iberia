@@ -166,6 +166,11 @@ dos textos de lo que Ajito dice cuando un dibujo no va, que el guion tenía pend
   gorro— se dibujaron a partir de su imagen, y en un carrusel.
 - **Cada dibujo pesa unos 110 KB** en WebP; en PNG eran 1,7 MB.
 
+🔴 **Para el generador, «Iberia» es la aerolínea.** Al dibujar la pregunta de campo de Gabriel
+—«una mayonesa voladora con el logo de Iberia»— pintó un avión con el logo de la aerolínea
+española. Ahora se le aclara que es Industrias Iberia y se le pasa el logo verdadero. Sus dos
+dibujos, que eran de antes de que la pregunta de campo dibujara, se rehicieron.
+
 ⚠️ **`flare` agrega banderas y letreros por su cuenta**, y le quitó a Ajito el logo de la pechera
 cuando se le pidió «sin letras». Las dos cosas van dichas en cada pedido.
 

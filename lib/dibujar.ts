@@ -1,7 +1,7 @@
 import 'server-only'
 import Anthropic from '@anthropic-ai/sdk'
 import { claveAnthropic } from '@/lib/clave-anthropic'
-import { AJITO_IGUALITO, MODELO_DIBUJO, SIN_AGREGADOS } from '@/lib/dibujo'
+import { AJITO_IGUALITO, IBERIA_DE_VERDAD, MODELO_DIBUJO, SIN_AGREGADOS } from '@/lib/dibujo'
 
 /**
  * Ajito dibuja: la lección 4.
@@ -135,9 +135,14 @@ const ENCABEZADO: Record<string, string> = {
   campo: 'Un dibujo sencillo y claro que explique esto del trabajo de quien lo cuenta: ',
 }
 
+/** Las imágenes de referencia, por si lo que se pide las nombra. */
+export type Referencias = { ajito?: Blob | null; iberia?: Blob | null }
+
 /**
- * Hace el dibujo. `referencia` es la imagen de Ajito: si lo que se pide lo
- * incluye, se le pasa para que salga igualito y no un ajo cualquiera.
+ * Hace el dibujo. Si lo que se pide nombra a Ajito o a Iberia, se le pasan sus
+ * imágenes de referencia —Ajito tal como es, el logo de Industrias Iberia— para
+ * que salgan igualitos: sin la de Ajito salía un ajo cualquiera, y sin la de
+ * Iberia, el logo de la aerolínea.
  *
  * WebP a 80: una imagen de 1024×1024 en PNG pesa 1,7 MB, y esto se baja en el
  * plan de datos de un teléfono de planta. En WebP pesa unos 130 KB.
@@ -145,25 +150,44 @@ const ENCABEZADO: Record<string, string> = {
 export async function dibujar(
   texto: string,
   clave: string,
-  referencia?: Blob | null
+  referencias: Referencias = {}
 ): Promise<Dibujo> {
   const claveOpenAI = process.env.OPENAI_API_KEY
   if (!claveOpenAI) return { ok: false, motivo: 'sin-configurar' }
 
-  const pedido = `${ENCABEZADO[clave] ?? ''}${texto.slice(0, 1500)}\n\n${reglas(clave)}`
-  const conAjito = Boolean(referencia) && /ajito/i.test(texto)
+  const nombraIberia = /iberia/i.test(texto)
+  const imagenes: { blob: Blob; nombre: string; quien: string }[] = []
+  if (/ajito/i.test(texto) && referencias.ajito) {
+    imagenes.push({ blob: referencias.ajito, nombre: 'ajito.png', quien: 'Ajito' })
+  }
+  if (nombraIberia && referencias.iberia) {
+    imagenes.push({ blob: referencias.iberia, nombre: 'iberia.png', quien: 'el logo de Industrias Iberia' })
+  }
+
+  // Lo que va delante: quién es quién en las imágenes de referencia, y que
+  // Iberia no es la aerolínea —esto va aunque no haya logo que pasar—.
+  const delante = [
+    imagenes.length > 1
+      ? `Imágenes de referencia, en orden: ${imagenes.map((i, n) => `${n + 1}, ${i.quien}`).join('; ')}.`
+      : '',
+    imagenes.some((i) => i.quien === 'Ajito') ? AJITO_IGUALITO : '',
+    nombraIberia ? IBERIA_DE_VERDAD : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+  const pedido = `${delante ? `${delante}\n\n` : ''}${ENCABEZADO[clave] ?? ''}${texto.slice(0, 1500)}\n\n${reglas(clave)}`
 
   let respuesta: Response
   try {
-    if (conAjito && referencia) {
+    if (imagenes.length) {
       const forma = new FormData()
       forma.append('model', MODELO_DIBUJO)
-      forma.append('prompt', `${AJITO_IGUALITO} ${pedido}`)
+      forma.append('prompt', pedido)
       forma.append('size', '1024x1024')
       forma.append('quality', 'medium')
       forma.append('output_format', 'webp')
       forma.append('output_compression', '80')
-      forma.append('image[]', referencia, 'ajito.png')
+      for (const imagen of imagenes) forma.append('image[]', imagen.blob, imagen.nombre)
       respuesta = await fetch('https://api.openai.com/v1/images/edits', {
         method: 'POST',
         headers: { Authorization: `Bearer ${claveOpenAI}` },
