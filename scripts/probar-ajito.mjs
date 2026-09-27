@@ -29,6 +29,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { barrerCarpeta } from './barrer-carpeta.mjs'
 
 const args = {}
 for (let i = 2; i < process.argv.length; i++) {
@@ -282,7 +283,11 @@ async function limpiar() {
   const usuarios = (data?.users ?? []).filter((u) => (u.email ?? '').startsWith(PREFIJO))
 
   const { data: fichas } = await admin.from('empleados').select('id').like('cedula', `${CEDULA}%`)
-  for (const ficha of fichas ?? []) await admin.from('empleados').delete().eq('id', ficha.id)
+  for (const ficha of fichas ?? []) {
+    // Los audios de las devoluciones se quedan en el bucket si no se barren.
+    await barrerCarpeta(admin, ficha.id)
+    await admin.from('empleados').delete().eq('id', ficha.id)
+  }
   for (const usuario of usuarios) await admin.auth.admin.deleteUser(usuario.id)
 }
 

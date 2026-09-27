@@ -28,6 +28,7 @@ un PR de afuera.
 | `SUPABASE_SECRET_KEY` | producción · secreta | Bypasea RLS; solo provisiona usuarios y acuña sesiones desde `/entrar/[token]` |
 | `ANTHROPIC_API_KEY_SALDO` | producción · secreta | Las devoluciones de Ajito. `lib/clave-anthropic.ts` la prefiere; la otra, `ANTHROPIC_API_KEY`, no se subió |
 | `AZURE_SPEECH_REGION` | todos | `westus3` |
+| `OPENAI_API_KEY` | producción · secreta | Los dibujos de Ajito en la lección 4 (`gpt-image-2.5-flare`) y los ejemplos que dibuja `generar:ejemplos`. De la cuenta de OpenAI de Iberia, con la organización verificada —sin eso los modelos de imagen no responden—. Subida el 27 de septiembre. Sin ella, los dos ejercicios de dibujo no dibujan y sale el botón de reintentar |
 | `AZURE_SPEECH_KEY` | producción · secreta | La voz de Ajito, las devoluciones habladas y la transcripción de las notas de voz. Subida el 26 de septiembre, cuando la suscripción de Azure pasó a pago por uso: devolvía 401 porque la prueba gratuita había vencido, no por la clave. Quedó visible en una captura: regenerarla es opcional, y si se hace, va en `.env.local` y en Netlify y se vuelve a desplegar |
 
 **Lo que no se sube**: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_ORG_ID`,

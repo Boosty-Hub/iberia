@@ -251,8 +251,8 @@ la clave, `npm run probar:ajito` dice en un minuto si Ajito habla como Ajito.
 
 | Candidato | Estado |
 |---|---|
-| **OpenAI `gpt-image-1-mini`** | ✅ **Recomendado.** 12,3 s a calidad media y 1024×1024, y respeta el estilo que se le pide |
-| OpenAI `gpt-image-2.5-flare` | 12,5 s, pero sale casi foto aunque se pida ilustración, y agrega lo que nadie pidió: una bandera y un letrero con texto |
+| **OpenAI `gpt-image-2.5-flare`** | ✅ **Elegido por Gabriel el 27 de septiembre.** 12,5 s. Sale casi foto aunque se pida ilustración y agrega lo que nadie pidió —una bandera, un letrero—, así que cada pedido lleva reglas contra eso (`lib/dibujo.ts`). Escribe bien los lemas del escudo y dibuja a Ajito igualito a partir de su imagen |
+| OpenAI `gpt-image-1-mini` | 12,3 s y respeta el estilo que se le pide. Era el recomendado |
 | OpenAI `gpt-image-2.5-sunburst` | 17 s, mismo comportamiento que `flare` |
 | OpenAI `gpt-image-2` | 41 s: descartado |
 | Nano Banana (Google) | Sin probar. La alternativa si OpenAI resulta lento con carga |

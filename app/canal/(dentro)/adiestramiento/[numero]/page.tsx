@@ -7,6 +7,7 @@ import { AudioAjito } from '@/components/canal/audio-ajito'
 import { BotonSigue } from '@/components/canal/boton-sigue'
 import { DevolucionAjito } from '@/components/canal/devolucion-ajito'
 import { EntradaRespuesta } from '@/components/canal/entrada-respuesta'
+import { OtroDibujo } from '@/components/canal/otro-dibujo'
 import { QuienEres } from '@/components/canal/quien-eres'
 import { IconoAtras, IconoCheck } from '@/components/iconos'
 import {
@@ -20,6 +21,7 @@ import {
   type FormaIA,
 } from '@/lib/adiestramiento'
 import { requerirEmpleado } from '@/lib/canal'
+import { DIBUJOS } from '@/lib/dibujar'
 import { esSalida, segunInterruptor, turnosDe, type LeccionGuion, type Turno } from '@/lib/guion'
 import { createClient } from '@/lib/supabase/server'
 import { avanzarPaso, empezarLeccion, marcarOido, terminarLeccion } from '../acciones'
@@ -30,10 +32,14 @@ const LECCIONES = guion.lecciones as LeccionGuion[]
 
 /** Lo que ya contestó, y lo que Ajito le contestó a eso. */
 type Contestada = {
+  id: string
   clave_paso: string
   texto: string | null
   entrada: string
   media_url: string | null
+  /** El dibujo que hizo Ajito (lección 4), y qué decidió el filtro antes. */
+  dibujo: string | null
+  dibujo_veredicto: string | null
   devolucion: string | null
   devolucion_audio: string | null
   /** Cuándo se le pidió. Con fecha y sin texto: se intentó y no salió. */
@@ -88,7 +94,7 @@ export default async function LeccionPage({
       .maybeSingle(),
     supabase
       .from('respuestas')
-      .select('clave_paso, texto, entrada, media_url, devolucion, devolucion_audio, devolucion_en')
+      .select('id, clave_paso, texto, entrada, media_url, dibujo, dibujo_veredicto, devolucion, devolucion_audio, devolucion_en')
       .eq('matricula_id', matricula.id)
       .eq('leccion_id', leccion.id)
       .order('created_at'),
@@ -355,6 +361,10 @@ function TurnoVista({
           return <PadronVista key={i} {...padron} />
         }
 
+        if (bloque.tipo === 'pieza' && bloque.clase === 'ejemplos' && bloque.lineas.length) {
+          return <EjemplosVista key={i} numero={numero} ejemplos={bloque.lineas} />
+        }
+
         // La ficha de bolsillo es lo que la persona se guarda en la galería y
         // vuelve a mirar en el bus dos semanas después. Las demás piezas —la
         // portada cuadrada, las fotos autorizadas— no se dibujan: la portada ya
@@ -478,6 +488,36 @@ function legible(texto: string): string {
 }
 
 /**
+ * Los ejemplos ya hechos de la lección 4 —«Ajito en la playa»…—, los que salen
+ * al tocar «Muéstrame».
+ *
+ * Van de lado, como fotos mandadas en un chat, y cada uno con lo que se pidió
+ * debajo: la lección enseña que lo que se escribe es lo que sale. Los dibuja
+ * `generar:ejemplos` del guion y los sirve `[numero]/ejemplo/[n]`.
+ */
+function EjemplosVista({ numero, ejemplos }: { numero: number; ejemplos: string[] }) {
+  return (
+    <div
+      data-ejemplos
+      className="-mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-2"
+    >
+      {ejemplos.map((ejemplo, i) => (
+        <figure key={ejemplo} className="w-[82%] shrink-0 snap-start space-y-1.5">
+          {/* eslint-disable-next-line @next/next/no-img-element -- la sirve una ruta con sesión que redirige a un enlace firmado */}
+          <img
+            src={`/canal/adiestramiento/${numero}/ejemplo/${i + 1}`}
+            alt={ejemplo}
+            loading={i === 0 ? 'eager' : 'lazy'}
+            className="aspect-square w-full rounded-2xl border border-marca-200/60 bg-marca-50 object-cover"
+          />
+          <figcaption className="px-1 text-[13px] text-marca-500">«{ejemplo}»</figcaption>
+        </figure>
+      ))}
+    </div>
+  )
+}
+
+/**
  * La ficha de bolsillo.
  *
  * Sale a lo ancho y sin recortar, porque el gesto que tiene que provocar es
@@ -538,6 +578,8 @@ function EjercicioVista({
   if (!consigna) return null
 
   const hecha = respuesta !== null
+  // La lección 4: lo que se contesta es un pedido, y lo que devuelve Ajito, un dibujo.
+  const dibuja = DIBUJOS.has(clave) && !esCampo
 
   return (
     // `data-ejercicio` no pinta nada: lo lee `capturar:oficios` para comprobar
@@ -585,7 +627,23 @@ function EjercicioVista({
               {respuesta.texto}
             </p>
           )}
+          {/* El dibujo de Ajito, a lo ancho: es lo que la persona se va a querer
+              guardar. Sale apenas está, mientras Ajito lo comenta. */}
+          {respuesta.dibujo && (
+            // eslint-disable-next-line @next/next/no-img-element -- la sirve una ruta con sesión que redirige a un enlace firmado de 60 s
+            <img
+              data-dibujo={clave}
+              src={`/canal/adiestramiento/${numero}/dibujo/${clave}`}
+              alt={`El dibujo que hizo Ajito: ${respuesta.texto ?? ''}`}
+              className="mt-3 w-full rounded-2xl border border-marca-200/60"
+            />
+          )}
           <DevolucionAjito
+            // Una por respuesta: tras un «no va» se pide otro dibujo, que es otra
+            // respuesta del mismo ejercicio. Sin la llave se reutilizaba el
+            // componente del pedido rechazado, que ya había pedido lo suyo, y el
+            // dibujo nuevo nunca se pedía.
+            key={respuesta.id}
             numero={numero}
             clave={clave}
             texto={respuesta.devolucion}
@@ -594,7 +652,16 @@ function EjercicioVista({
             intentada={Boolean(respuesta.devolucion_en)}
             oida={oida}
             alOir={marcarOido.bind(null, numero, `devolucion-${clave}`)}
+            dibuja={dibuja}
           />
+          {dibuja && respuesta.devolucion && (respuesta.dibujo_veredicto === 'persona' || respuesta.dibujo_veredicto === 'no_va') && (
+            <OtroDibujo
+              numero={numero}
+              clave={clave}
+              entrada={delCatalogo?.entrada ?? 'texto'}
+              esCampo={esCampo}
+            />
+          )}
         </>
       ) : (
         <EntradaRespuesta
@@ -604,6 +671,7 @@ function EjercicioVista({
           // que más cuesta escribir en un teléfono.
           entrada={esCampo ? 'voz' : (delCatalogo?.entrada ?? 'texto')}
           esCampo={esCampo}
+          dibuja={dibuja}
         />
       )}
     </div>

@@ -41,6 +41,18 @@ export function rutaFicha(pieza: string): string {
 }
 
 /**
+ * El dibujo de Ajito tal como es, para que el generador de la lección 4 lo
+ * dibuje igualito cuando alguien lo pide. Va en el bucket del curso, no en
+ * `public/`: en Netlify la función no ve los archivos públicos del sitio.
+ */
+export const RUTA_REFERENCIA_AJITO = 'referencias/ajito.png'
+
+/** Los ejemplos ya hechos de la lección 4 —«Ajito en la playa»…—, del guion. */
+export function rutaEjemplo(leccion: number, numero: number): string {
+  return `ejemplos/leccion-${String(leccion).padStart(2, '0')}/ejemplo-${numero}.webp`
+}
+
+/**
  * Bucket de lo que manda la gente: notas de voz y fotos de los ejercicios.
  *
  * Reglas distintas de las del bucket de los audios. Los audios de Ajito los oye

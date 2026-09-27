@@ -19,6 +19,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { barrerCarpeta } from './barrer-carpeta.mjs'
 import { ejerciciosDeLeccion, preguntaDeCampo } from '../lib/adiestramiento.ts'
 import { chromium, devices } from 'playwright'
 import { mkdir } from 'node:fs/promises'
@@ -75,7 +76,9 @@ async function limpiar() {
     .like('cedula', `${CEDULA}%`)
 
   for (const ficha of fichas ?? []) {
-    // Las matrículas, avances y respuestas caen en cascada con la ficha.
+    // Las matrículas, avances y respuestas caen en cascada con la ficha; los
+    // archivos del bucket no, y se barren antes.
+    await barrerCarpeta(admin, ficha.id)
     await admin.from('empleados').delete().eq('id', ficha.id)
   }
   for (const usuario of usuarios) {

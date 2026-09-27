@@ -8,9 +8,10 @@ import {
 } from '@/lib/adiestramiento'
 import { devolver, sacarApodo, type Contexto } from '@/lib/ajito'
 import { empleadoActual } from '@/lib/canal'
-import { hablar } from '@/lib/hablar'
-import { vozDe, type VozAjito } from '@/lib/voz'
-import { BUCKET_RESPUESTAS, rutaDevolucion } from '@/lib/storage'
+import { ponerVoz } from '@/lib/devolucion-hablada'
+import { DIBUJOS } from '@/lib/dibujar'
+import { vozDe } from '@/lib/voz'
+import { BUCKET_RESPUESTAS } from '@/lib/storage'
 import { createClient } from '@/lib/supabase/server'
 
 /**
@@ -90,7 +91,7 @@ export async function POST(
   // para que la consulta sea precisa, no para autorizar.
   const { data: respuesta } = await supabase
     .from('respuestas')
-    .select('id, texto, entrada, media_url, devolucion, devolucion_audio, es_pregunta_campo')
+    .select('id, texto, entrada, media_url, dibujo, devolucion, devolucion_audio, es_pregunta_campo')
     .eq('matricula_id', matricula.id)
     .eq('leccion_id', leccion.id)
     .eq('clave_paso', clavePaso)
@@ -158,6 +159,20 @@ export async function POST(
     }
   }
 
+  // En la lección 4 lo que Ajito mira es **su propio dibujo**, que ya hizo la
+  // ruta `dibujar` —va primero, en su propia petición—. Sin dibujo todavía no hay
+  // nada que comentar: se le dice al navegador que dibuje primero.
+  if (DIBUJOS.has(clavePaso) && !esCampo) {
+    if (!respuesta.dibujo) {
+      return NextResponse.json({ error: 'Falta el dibujo', falta: 'dibujo' }, { status: 409 })
+    }
+    const { data: archivo } = await supabase.storage.from(BUCKET_RESPUESTAS).download(respuesta.dibujo)
+    if (archivo) {
+      const bytes = Buffer.from(await archivo.arrayBuffer())
+      imagen = { base64: bytes.toString('base64'), tipo: 'image/webp' }
+    }
+  }
+
   // Una foto que llegó en un formato que el modelo no abre —HEIC de un iPhone
   // que no pasó por la cámara del navegador— no es un fallo del sistema, y no se
   // le puede decir «algo salió mal». Se le dice qué pasó, y **se guarda** como su
@@ -193,6 +208,7 @@ export async function POST(
       texto: respuesta.texto || 'No le puso nota: solo la foto.',
       entrada: respuesta.entrada as Contexto['entrada'],
       imagen,
+      imagenEsDibujo: DIBUJOS.has(clavePaso) && !esCampo && Boolean(respuesta.dibujo),
     }),
     clavePaso === 'apodo' && !esCampo && respuesta.texto
       ? sacarApodo(respuesta.texto)
@@ -252,39 +268,3 @@ export async function POST(
   return NextResponse.json({ texto: dicho.texto, audio: Boolean(rutaAudio) })
 }
 
-/**
- * Sintetiza la devolución, la guarda en el bucket privado y la deja apuntada en
- * la fila. Devuelve la ruta, o `null` si no se pudo — y en ese caso la fila
- * conserva su texto: nunca se pierde lo que Ajito dijo por no poder decirlo.
- *
- * Sale de la función que genera el texto a propósito, para poder pedir solo la
- * voz de una devolución que ya existe.
- */
-async function ponerVoz(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  respuestaId: string,
-  empleadoId: string,
-  numero: number,
-  clavePaso: string,
-  texto: string,
-  voz: VozAjito
-): Promise<string | null> {
-  // Con la voz que eligió: la devolución suena como su clase.
-  const hablado = await hablar(texto, voz)
-  if (!hablado.ok) {
-    console.error('[ajito] síntesis fallida:', hablado.detalle ?? hablado.motivo)
-    return null
-  }
-
-  const ruta = rutaDevolucion(empleadoId, numero, clavePaso)
-  const { error } = await supabase.storage
-    .from(BUCKET_RESPUESTAS)
-    .upload(ruta, hablado.mp3, { contentType: 'audio/mpeg', upsert: false })
-  if (error) {
-    console.error('[ajito] no se pudo guardar el audio:', error.message)
-    return null
-  }
-
-  await supabase.from('respuestas').update({ devolucion_audio: ruta }).eq('id', respuestaId)
-  return ruta
-}

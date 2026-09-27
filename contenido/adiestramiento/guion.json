@@ -808,8 +808,12 @@
             {
               "tipo": "pieza",
               "descripcion": "Tres ejemplos ya hechos, mandados de una: Ajito en la playa · Ajito manejando un montacargas · Ajito con un tapaboca y un gorro de cocina.",
-              "clase": "otra",
-              "lineas": [],
+              "clase": "ejemplos",
+              "lineas": [
+                "Ajito en la playa",
+                "Ajito manejando un montacargas",
+                "Ajito con un tapaboca y un gorro de cocina"
+              ],
               "sufijo": ""
             }
           ]

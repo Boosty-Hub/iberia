@@ -28,6 +28,7 @@ export function DevolucionAjito({
   intentada,
   oida = false,
   alOir,
+  dibuja = false,
 }: {
   numero: number
   clave: string
@@ -56,6 +57,13 @@ export function DevolucionAjito({
   /** Si ya la oyó hasta el final: su ✓ sigue al recargar. */
   oida?: boolean
   alOir?: () => void | Promise<void>
+  /**
+   * Si este ejercicio devuelve un dibujo (lección 4). Entonces se pide primero
+   * el dibujo —`dibujar`, que tarda unos 12 segundos— y después la devolución,
+   * que lo comenta. Van en dos peticiones: juntas rozaban lo que aguanta una
+   * función de Netlify.
+   */
+  dibuja?: boolean
 }) {
   const router = useRouter()
   const [estado, setEstado] = useState<'pensando' | 'fallo' | 'quieto'>(
@@ -64,6 +72,8 @@ export function DevolucionAjito({
   // React monta dos veces en desarrollo. Sin esto, dos llamadas al modelo por
   // cada ejercicio — y las dos se cobran.
   const pedida = useRef(false)
+  // Qué está haciendo Ajito, para decirlo: dibujar tarda y tiene que verse.
+  const [fase, setFase] = useState<'dibujando' | 'viendo'>(dibuja ? 'dibujando' : 'viendo')
   // El texto de ahora, para mirarlo después del refresco sin atarse a un render.
   const textoActual = useRef(texto)
   useEffect(() => {
@@ -81,6 +91,29 @@ export function DevolucionAjito({
   async function pedir() {
     setEstado('pensando')
     try {
+      if (dibuja) {
+        // Idempotente: si el dibujo ya está, contesta de una sin volver a dibujar.
+        setFase('dibujando')
+        const dibujo = await fetch(`/canal/adiestramiento/${numero}/dibujar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ clave_paso: clave }),
+        })
+        if (!dibujo.ok) throw new Error()
+        const hecho = (await dibujo.json()) as { dibujo?: boolean; rechazado?: boolean; listo?: boolean }
+        // El dibujo sale en pantalla apenas está, mientras Ajito lo comenta.
+        router.refresh()
+        // «No va»: la devolución ya quedó guardada —el texto del guion— y no hay
+        // dibujo que comentar.
+        if (hecho.rechazado || (hecho.listo && !hecho.dibujo)) {
+          setTimeout(() => {
+            if (!textoActual.current) setEstado('fallo')
+          }, 12000)
+          return
+        }
+        setFase('viendo')
+      }
+
       const respuesta = await fetch(`/canal/adiestramiento/${numero}/devolver`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -133,7 +166,11 @@ export function DevolucionAjito({
     return (
       <p className="mt-3 flex min-h-11 items-center gap-2 text-[15px] text-marca-500">
         <span className="h-2 w-2 animate-pulse rounded-full bg-acento-600" />
-        Ajito está viendo lo que le mandaste…
+        {fase === 'dibujando'
+          ? 'Ajito está dibujando lo que le pediste… tarda unos segundos'
+          : dibuja
+            ? 'Ajito está viendo cómo le quedó…'
+            : 'Ajito está viendo lo que le mandaste…'}
       </p>
     )
   }

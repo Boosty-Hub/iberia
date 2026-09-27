@@ -168,7 +168,7 @@ y una ruedita en vez de piernas.
   audio, `marcarOido` lo anota con `marcar_oido()` —una sola sentencia, para que dos audios que
   terminan juntos no se pisen— y la página arranca cada reproductor desde ahí. Antes vivía solo en
   la página, y al recargar la lección entera salía sin oír. Las devoluciones van como
-  `devolucion-<clave>`. `capturas/mirar-oidos.mjs` lo recorre: oye, recarga y mira.
+  `devolucion-<clave>`. `scripts/mirar-oidos.mjs` lo recorre: oye, recarga y mira.
 - **El botón que hace avanzar late** (`BotonSigue`, `.btn-canal-sigue`): un halo rojo que se
   abre y se apaga, apagado con `prefers-reduced-motion`. Al terminar un audio la pantalla se
   quedaba quieta y no decía qué tocar. Y **gira mientras la acción va y vuelve**: en una
@@ -255,7 +255,7 @@ y una ruedita en vez de piernas.
   más para lo que el ejercicio pide. Por eso «hay respuesta» es texto **o** foto, en la página y
   en la ruta de la devolución, y la cita de lo que mandó es la foto misma, servida por
   `[numero]/foto/[clave]` con la misma regla que el audio de la devolución: la ruta se lee de
-  la fila propia, no de la URL. `capturas/mirar-foto.mjs` lo recorre.
+  la fila propia, no de la URL. `scripts/mirar-foto.mjs` lo recorre.
 - ⚠️ **La nota de voz y la foto comparten `respuestas.media_url`** —el `.wav` o la imagen—, así
   que lo que decide si hay foto es `entrada = 'foto'`, nunca que haya archivo. Hasta el 27 de
   septiembre de 2026 la ruta de la devolución tomaba el `.wav` por una foto ilegible, contestaba
@@ -288,6 +288,32 @@ y una ruedita en vez de piernas.
 - **Lo que la gente responde no lo lee su supervisor** ni quien modera el canal — solo su
   autor y los editores de Boosty. Ajito lo promete en la lección 0 y la RLS lo cumple;
   `puede_publicar()` no alcanza para leer `respuestas`.
+- **Ajito dibuja de verdad en la lección 4** (27 de septiembre de 2026), con OpenAI
+  `gpt-image-2.5-flare`, elegido por Gabriel (`lib/dibujo.ts`; las mediciones, en
+  `herramientas.md`). En los ejercicios `libre` y `escudo` la devolución va en **dos
+  peticiones**, porque juntas rozaban lo que aguanta una función de Netlify:
+  - **`[numero]/dibujar`** revisa primero el pedido con el modelo chico (`revisarPedido()`):
+    `va`, `persona` —alguien de verdad— o `no_va`. Lo que no va no llega al generador: la
+    devolución es **el texto fijo del guion** (`NO_VA` en `lib/dibujar.ts`, copia literal
+    del guion: si cambia allá, cambia aquí) y la persona puede **pedir otro dibujo**, que es
+    otra respuesta del mismo ejercicio. Si va, dibuja y guarda el WebP en su carpeta del bucket
+    de respuestas (`respuestas.dibujo`). Sin poder revisar, no dibuja. El filtro de OpenAI
+    queda detrás, de respaldo.
+  - **`devolver`** encuentra el dibujo hecho, se lo pasa a Ajito como imagen
+    (`imagenEsDibujo`) y Ajito lo comenta.
+  - **En cada pedido se le dice que no agregue banderas, símbolos ni letreros** que no se
+    pidan —`flare` los pone por su cuenta— y que, sin estilo pedido, haga ilustración: una
+    imagen que parece foto es justo lo que la sección 4.6 enseña a desconfiar. Si se pide a
+    Ajito, se dibuja a partir de su imagen (`referencias/ajito.png` en el bucket del curso)
+    para que salga igualito, con el logo de su pechera.
+  - **WebP a 80**: 1024×1024 pesa unos 110 KB, contra 1,7 MB en PNG, y se baja con el plan de
+    datos de un teléfono de planta.
+  - **Los tres ejemplos de «Muéstrame»** salen del bloque `🖼 Tres ejemplos ya hechos` del
+    guion (clase `ejemplos` en `lib/guion.ts`) y los dibuja `generar:ejemplos`, que es
+    incremental y los sube al bucket. `scripts/mirar-dibujo.mjs` recorre la lección entera.
+  - ⚠️ **`DevolucionAjito` lleva `key` por respuesta.** Tras un «no va» se reutilizaba el
+    componente del pedido rechazado, que ya había pedido lo suyo, y el dibujo nuevo nunca se
+    pedía.
 - **`asistente_libre_activo` viene apagado.** Encendido, aparece «pregúntale lo que sea»
   y la lección 8 se despide distinto. Por eso ese cierre está escrito en dos versiones.
 - **Ajito se genera, no se edita a mano**, igual que la marca:
@@ -322,6 +348,7 @@ npm run probar:ajito                         # qué contesta Ajito, en 10 casos 
 npm run probar:ajito -- --caso plata         # uno solo, para iterar el personaje
 npm run generar:fichas                       # las 10 fichas de bolsillo, del guion
 npm run subir:fichas                         # al bucket privado
+npm run generar:ejemplos                     # los 3 dibujos de ejemplo de la lección 4, y los sube
 npm run probar:certificado                   # 17 comprobaciones · guardas y vista
 npm run probar:recordatorios                 # 38 comprobaciones · la escalera y los mensajes
 ```
@@ -521,6 +548,11 @@ ninguna credencial. `probar:voz` sí necesita `AZURE_SPEECH_KEY` y `AZURE_SPEECH
 
 `capturar:canal` mide lo que una captura no muestra: desbordes horizontales y objetivos
 táctiles menores de 44 px.
+
+⚠️ **Toda verificación que crea fichas de prueba barre su carpeta del bucket al borrarlas**
+(`scripts/barrer-carpeta.mjs`). Borrar la ficha se lleva en cascada las filas, no los
+archivos: hasta el 27 de septiembre de 2026 habían quedado 115 sueltos —fotos, audios de
+devoluciones— en 101 carpetas sin dueño. `probar:supabase` falla si vuelve a quedar alguna.
 
 ## Seguridad — no negociable
 

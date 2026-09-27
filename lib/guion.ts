@@ -42,8 +42,12 @@ export type Bloque =
        * `padron` es la tarjeta con el nombre, el cargo y el área de quien oye,
        * tal como vienen de Capital Humano. El audio no los puede decir —se graba
        * uno solo para las doscientas personas—, así que se ven en pantalla.
+       *
+       * `ejemplos` son los dibujos ya hechos de la lección 4 —«Ajito en la
+       * playa · …»—: sus `lineas` son lo que se dibuja, una por ejemplo, y los
+       * dibuja `generar:ejemplos` del guion, como los audios.
        */
-      clase: 'ficha' | 'portada' | 'padron' | 'otra'
+      clase: 'ficha' | 'portada' | 'padron' | 'ejemplos' | 'otra'
       /** El contenido de la ficha. La primera línea es el título. */
       lineas: string[]
       /**
@@ -187,6 +191,14 @@ export function leerLeccion(markdown: string, archivo: string): LeccionGuion {
       const esFicha = /^Ficha\b/i.test(descripcion)
       const esPortada = /^(Tarjeta cuadrada|Portada)\b/i.test(descripcion)
       const esPadron = /^Tarjeta del padr[óo]n/i.test(descripcion)
+      const esEjemplos = /ejemplos ya hechos/i.test(descripcion)
+      // «Tres ejemplos ya hechos, mandados de una: A · B · C.» → [A, B, C]
+      const ejemplos = esEjemplos
+        ? (descripcion.split(':').slice(1).join(':') || '')
+            .split('·')
+            .map((e) => e.trim().replace(/\.$/, ''))
+            .filter(Boolean)
+        : []
 
       // La ficha lleva su contenido en la cita de debajo, igual que un audio.
       // Se lee de ahí y no de una lista aparte: si el guion dice otra cosa que
@@ -198,13 +210,23 @@ export function leerLeccion(markdown: string, archivo: string): LeccionGuion {
       actual.bloques.push({
         tipo: 'pieza',
         descripcion,
-        clase: esFicha ? 'ficha' : esPortada ? 'portada' : esPadron ? 'padron' : 'otra',
-        lineas: texto
-          ? texto
-              .split('\n')
-              .map((l) => l.trim())
-              .filter(Boolean)
-          : [],
+        clase: esFicha
+          ? 'ficha'
+          : esPortada
+            ? 'portada'
+            : esPadron
+              ? 'padron'
+              : esEjemplos
+                ? 'ejemplos'
+                : 'otra',
+        lineas: esEjemplos
+          ? ejemplos
+          : texto
+            ? texto
+                .split('\n')
+                .map((l) => l.trim())
+                .filter(Boolean)
+            : [],
         sufijo,
       })
 

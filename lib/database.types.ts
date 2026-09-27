@@ -2001,6 +2001,8 @@ export type Database = {
           devolucion: string | null
           devolucion_audio: string | null
           devolucion_en: string | null
+          dibujo: string | null
+          dibujo_veredicto: string | null
           entrada: string
           es_pregunta_campo: boolean
           familia_oficio: string
@@ -2019,6 +2021,8 @@ export type Database = {
           devolucion?: string | null
           devolucion_audio?: string | null
           devolucion_en?: string | null
+          dibujo?: string | null
+          dibujo_veredicto?: string | null
           entrada?: string
           es_pregunta_campo?: boolean
           familia_oficio?: string
@@ -2037,6 +2041,8 @@ export type Database = {
           devolucion?: string | null
           devolucion_audio?: string | null
           devolucion_en?: string | null
+          dibujo?: string | null
+          dibujo_veredicto?: string | null
           entrada?: string
           es_pregunta_campo?: boolean
           familia_oficio?: string

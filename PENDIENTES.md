@@ -374,10 +374,11 @@ todo de Fase 2 y no bloquea nada de la Fase 1:
 - «Guardarlo» y «mandárselo a alguien» bajo el certificado — es una decisión, no un olvido
 - ~~«No soy yo» en la lección 0~~ ✅ **Hecho el 26 de septiembre**: recoge nombre y área, deja el
   aviso en el padrón del panel y la lección sigue
-- **Ajito dibuja de verdad (lección 4).** La clave de OpenAI está en `.env.local` y funciona, y
-  `gpt-image-1-mini` es el recomendado (12 s, ver `herramientas.md`). Falta: **aprobar los dos
-  textos de «no va»** del guion — **Gabriel** —, y después construirlo y subir la clave a
-  Netlify — **Boosty**
+- ~~Ajito dibuja de verdad (lección 4)~~ ✅ **Hecho el 27 de septiembre**, con
+  `gpt-image-2.5-flare` y los dos textos de «no va» aprobados por Gabriel
+- **«Publicarlo en el canal», debajo del escudo, no publica nada**: avanza igual que «Solo para
+  mí». El guion pide que lo publique en «Nuestra gente» si la persona lo decide. O se
+  construye, o se cambia el botón en el guion — **Gabriel decide, Boosty lo hace**
 - ~~El apodo de la lección 0 no se guarda~~ ✅ **Hecho el 27 de septiembre**: se saca de lo que
   la persona contestó y las consignas lo dicen desde la siguiente
 

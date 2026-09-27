@@ -151,6 +151,31 @@ día o desde otro teléfono.
 tomó, y ese texto era obligatorio. Ahora se elige la foto, se ve mientras se manda, Ajito la
 contesta, y queda a la vista arriba de su respuesta.
 
+### Ajito dibuja de verdad
+
+Gabriel lo pidió al llegar a la lección 4, donde Ajito decía «todavía no puedo hacer imágenes».
+Pegó una clave de OpenAI de Iberia, y la cuenta tenía seis modelos de imagen: se midieron cuatro
+con la misma descripción y **Gabriel eligió `gpt-image-2.5-flare`** (12,5 s). También aprobó los
+dos textos de lo que Ajito dice cuando un dibujo no va, que el guion tenía pendientes.
+
+- **Antes de dibujar, el modelo chico revisa el pedido.** «Dibuja a mi supervisor» recibe el
+  texto aprobado y la persona puede pedir otro; lo que no va no llega al generador.
+- **Ajito ve su dibujo y lo comenta**, nombrando lo que la persona pidió. El escudo sale con su
+  lema bien escrito.
+- **Los tres ejemplos de «Muéstrame»** —Ajito en la playa, en montacargas, con tapaboca y
+  gorro— se dibujaron a partir de su imagen, y en un carrusel.
+- **Cada dibujo pesa unos 110 KB** en WebP; en PNG eran 1,7 MB.
+
+⚠️ **`flare` agrega banderas y letreros por su cuenta**, y le quitó a Ajito el logo de la pechera
+cuando se le pidió «sin letras». Las dos cosas van dichas en cada pedido.
+
+🔴 **Las verificaciones dejaban los archivos de sus fichas de prueba en el bucket**: 115 fotos y
+audios en 101 carpetas sin dueño, y los dos scripts de esta mañana limpiaban un bucket que no
+existe. Se barrieron, las limpiezas ahora los borran, y `probar:supabase` avisa si queda alguno.
+
+**Dónde quedamos.** «Publicarlo en el canal», debajo del escudo, no publica nada (en
+`PENDIENTES.md`).
+
 ⚠️ **El 27, el informe daba 500 en local y no en producción.** Era el servidor de desarrollo de
 la noche anterior: el sistema le cortó la terminal por falta de memoria, él siguió vivo con la
 salida rota, y cada ruta con parámetro moría al lanzar su proceso hijo. Se cerró y se levantó con

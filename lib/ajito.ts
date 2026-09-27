@@ -206,16 +206,21 @@ const INSTRUCCION: Record<string, string> = {
     'chiquita.',
 
   // --- Lección 4 · dibuja -----------------------------------------------------
+  // Desde el 27 de septiembre de 2026 Ajito dibuja de verdad (`lib/dibujar.ts`):
+  // la imagen que recibe es su dibujo, hecho con lo que la persona pidió. Antes
+  // decía «todavía no puedo hacer la imagen» y contaba la que habría salido.
   libre:
-    'Te describió algo que quiere ver dibujado. Todavía no puedes hacer la imagen, y ' +
-    'eso se lo dices sin rodeos en una frase. Lo que sí haces es contarle en voz alta ' +
-    'la imagen que saldría de lo que te pidió, con los detalles que él puso, para que ' +
-    'oiga cómo sus palabras se convierten en una escena.',
+    'Te describió algo que quería ver y ya lo dibujaste: es la imagen que tienes delante. ' +
+    'Dile qué hiciste nombrando dos o tres detalles que la persona puso y dónde quedaron ' +
+    'en el dibujo. Si algo lo decidiste tú porque no lo dijo —el color, la hora, el ' +
+    'sitio—, díselo: así ve que mientras más cuente, más sale lo suyo. No describas nada ' +
+    'que no esté en la imagen.',
   escudo:
-    'Te describió el escudo de su equipo. Todavía no puedes hacer la imagen y se lo ' +
-    'dices en una frase. Después le cuentas el escudo que saldría de lo que te dio ' +
-    '—la forma, el animal, los colores, dónde iría el lema—, usando lo que él eligió y ' +
-    'sin cambiárselo por lo que a ti te parezca mejor.',
+    'Te describió el escudo de su gente y ya lo dibujaste: es la imagen que tienes ' +
+    'delante. Nómbrale los elementos que pidió —la forma, el animal, los colores, el ' +
+    'lema— y dónde quedaron, con lo que eligió y no con lo que a ti te parezca mejor. Si ' +
+    'el lema salió escrito distinto de como lo pidió, se lo dices sin rodeos. Cierras con ' +
+    'que se lo puede enseñar a los muchachos.',
 
   // --- Lección 5 · habla ------------------------------------------------------
   'dime-algo':
@@ -340,8 +345,14 @@ export type Contexto = {
   texto: string
   /** Cómo lo mandó. Cambia lo que Ajito puede decir de la respuesta. */
   entrada: 'texto' | 'voz' | 'foto' | 'boton'
-  /** La foto del ejercicio, si la hubo. */
+  /** La foto del ejercicio, si la hubo — o el dibujo de Ajito, si `imagenEsDibujo`. */
   imagen?: { base64: string; tipo: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' }
+  /**
+   * La imagen no la mandó la persona: es el dibujo que Ajito hizo con lo que le
+   * pidió (lección 4). Sin decírselo, comentaba el dibujo como si fuera una foto
+   * de ella.
+   */
+  imagenEsDibujo?: boolean
 }
 
 /**
@@ -405,7 +416,9 @@ export async function devolver(contexto: Contexto): Promise<Devolucion> {
     '',
     `Qué te toca hacer con lo que te mandó: ${instruccion}`,
     '',
-    'Esto fue lo que te mandó:',
+    contexto.imagenEsDibujo
+      ? 'La imagen que ves es el dibujo que tú hiciste con lo que te pidió. Esto fue lo que te pidió:'
+      : 'Esto fue lo que te mandó:',
   ].join('\n')
 
   // La foto va delante del texto: es lo que la persona está enseñando, y la nota

@@ -146,7 +146,7 @@ const RELACIONES = {
   avances: 'id, matricula_id, leccion_id, estado, paso, oidos',
   correcciones_padron: 'id, empleado_id, nombre, area, nombre_padron, resuelta_en',
   respuestas:
-    'id, clave_paso, texto, media_url, entrada, devolucion, devolucion_audio, devolucion_en',
+    'id, clave_paso, texto, media_url, entrada, dibujo, dibujo_veredicto, devolucion, devolucion_audio, devolucion_en',
   certificados: 'id, codigo, nombre_completo, cedula, cargo, area_nombre, emitido_en, entregado_en',
   recordatorios: 'id, matricula_id, escalon, via, estado, mensaje, enviado_en',
   ajustes_whatsapp: 'id, activo, id_numero, token, plantilla, probado_en, probado_ok',
@@ -318,6 +318,18 @@ for (const nombre of BUCKETS) {
   const { data: fichas } = await admin.storage.from('adiestramiento').list('fichas', { limit: 100 })
   const png = (fichas ?? []).filter((f) => f.name.endsWith('.png')).length
   comprobar(`las 10 fichas están arriba (${png})`, png === 10, String(png))
+
+  // Los ejemplos de la lección 4 y la referencia con la que Ajito sale igualito
+  // cuando alguien lo pide en un dibujo (`generar:ejemplos`).
+  const { data: ejemplos } = await admin.storage.from('adiestramiento').list('ejemplos/leccion-04', { limit: 20 })
+  const webp = (ejemplos ?? []).filter((e) => e.name.endsWith('.webp')).length
+  comprobar(`los 3 ejemplos de «Ajito dibuja» están arriba (${webp})`, webp === 3, String(webp))
+  const { data: referencias } = await admin.storage.from('adiestramiento').list('referencias', { limit: 20 })
+  comprobar(
+    'y la referencia de Ajito para dibujarlo',
+    (referencias ?? []).some((r) => r.name === 'ajito.png'),
+    (referencias ?? []).map((r) => r.name).join(', ') || 'no está'
+  )
 }
 
 // --- 5) el curso, sembrado ---------------------------------------------------
@@ -355,6 +367,30 @@ console.log('\nSin restos de las pruebas\n')
     (fichas ?? []).length === 0,
     (fichas ?? []).map((f) => f.cedula).join(', ')
   )
+
+  // Las carpetas del bucket de respuestas son de un empleado cada una. Si el
+  // empleado ya no existe, sus archivos —fotos, notas de voz, dibujos— quedaron
+  // sueltos: el 27 de septiembre de 2026 había 115 de las fichas de prueba.
+  {
+    const carpetas = []
+    for (let desde = 0; ; desde += 100) {
+      const { data: tanda } = await admin.storage
+        .from('adiestramiento-respuestas')
+        .list('respuestas', { limit: 100, offset: desde })
+      carpetas.push(...(tanda ?? []).map((c) => c.name))
+      if (!tanda || tanda.length < 100) break
+    }
+    const ids = carpetas.filter((c) => /^[0-9a-f-]{36}$/i.test(c))
+    const { data: vivos } = ids.length
+      ? await admin.from('empleados').select('id').in('id', ids)
+      : { data: [] }
+    const huerfanas = ids.length - (vivos ?? []).length
+    comprobar(
+      'no quedan archivos de fichas borradas en el bucket de respuestas',
+      huerfanas === 0,
+      `${huerfanas} carpetas sin empleado`
+    )
+  }
 
   const { data } = await admin.auth.admin.listUsers({ perPage: 500 })
   const sobrantes = (data?.users ?? []).filter((u) => (u.email ?? '').startsWith('prueba-'))

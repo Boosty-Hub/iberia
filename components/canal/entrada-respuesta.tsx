@@ -28,11 +28,14 @@ export function EntradaRespuesta({
   clave,
   entrada,
   esCampo,
+  dibuja = false,
 }: {
   numero: number
   clave: string
   entrada: TipoEntrada
   esCampo: boolean
+  /** Si lo que se pide es un dibujo (lección 4): cambia lo que se dice mientras. */
+  dibuja?: boolean
 }) {
   const [modo, setModo] = useState<TipoEntrada>(entrada === 'boton' ? 'texto' : entrada)
   const [media, setMedia] = useState<string | null>(null)
@@ -93,7 +96,11 @@ export function EntradaRespuesta({
         )}
         <p className="mt-3 flex min-h-11 items-center gap-2 text-[15px] text-marca-500">
           <span className="h-2 w-2 animate-pulse rounded-full bg-acento-600" />
-          {subiendo ? 'Mandándole la foto a Ajito…' : 'Ajito está viendo lo que le mandaste…'}
+          {subiendo
+            ? 'Mandándole la foto a Ajito…'
+            : dibuja
+              ? 'Ajito está dibujando lo que le pediste… tarda unos segundos'
+              : 'Ajito está viendo lo que le mandaste…'}
         </p>
       </>
     )
