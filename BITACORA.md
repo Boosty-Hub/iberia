@@ -173,8 +173,10 @@ cuando se le pidió «sin letras». Las dos cosas van dichas en cada pedido.
 audios en 101 carpetas sin dueño, y los dos scripts de esta mañana limpiaban un bucket que no
 existe. Se barrieron, las limpiezas ahora los borran, y `probar:supabase` avisa si queda alguno.
 
-**Dónde quedamos.** «Publicarlo en el canal», debajo del escudo, no publica nada (en
-`PENDIENTES.md`).
+**Y el escudo se publica en el feed**, a pedido de Gabriel: «Publicarlo en el canal» lo pone en
+«Nuestra gente» como «Este es el escudo que construí con Ajito», firmado por quien lo hizo. Hasta
+ahí el botón solo avanzaba, igual que «Solo para mí». Como un trabajador de planta no puede
+publicar en el feed, pasa por una función propia que publica solo el escudo de quien la llama.
 
 ⚠️ **El 27, el informe daba 500 en local y no en producción.** Era el servidor de desarrollo de
 la noche anterior: el sistema le cortó la terminal por falta de memoria, él siguió vivo con la

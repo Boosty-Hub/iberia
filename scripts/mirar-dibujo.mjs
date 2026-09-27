@@ -7,9 +7,13 @@
  * Crea un trabajador de prueba, recorre la lección y mira lo que no se ve
  * leyendo el código: que los tres ejemplos carguen, que un pedido que no va
  * reciba el texto aprobado del guion y deje pedir otro, que el dibujo aparezca
- * y que Ajito lo comente, y que el escudo salga con su lema. Al salir borra la
- * ficha, la cuenta **y los archivos de su carpeta en el bucket**: fotos, dibujos
- * y audios de una persona, aunque sea de prueba, no se dejan sueltos.
+ * y que Ajito lo comente, que el escudo salga con su lema, y que «Publicarlo en
+ * el canal» lo ponga en el feed con su imagen entera. Al salir borra la ficha,
+ * la cuenta, **los archivos de su carpeta en el bucket** y la publicación: fotos,
+ * dibujos y audios de una persona, aunque sea de prueba, no se dejan sueltos.
+ *
+ * ⚠️ La publicación de prueba está en el feed de producción mientras dura la
+ * corrida —un minuto, más o menos— y se borra al salir.
  *
  * Gasta de verdad: dos dibujos y tres devoluciones, unos centavos.
  */
@@ -38,6 +42,11 @@ async function limpiar() {
   const { data } = await admin.auth.admin.listUsers({ perPage: 200 })
   const { data: fichas } = await admin.from('empleados').select('id').like('cedula', `${CEDULA}%`)
   for (const f of fichas ?? []) {
+    // La publicación va antes que la ficha: al borrar la ficha, el autor queda
+    // en nulo y la publicación seguiría en el feed sin nadie que la nombre.
+    await admin.from('publicaciones').delete().eq('autor_id', f.id)
+    const { data: escudos } = await admin.storage.from('canal').list(`escudos/${f.id}`)
+    if (escudos?.length) await admin.storage.from('canal').remove(escudos.map((e) => `escudos/${f.id}/${e.name}`))
     await barrerCarpeta(admin, f.id)
     await admin.from('empleados').delete().eq('id', f.id)
   }
@@ -167,6 +176,38 @@ try {
   await p.locator('[data-dibujo="escudo"]').scrollIntoViewIfNeeded()
   await p.screenshot({ path: `${SALIDA}/04-escudo.png` })
 
+  const pesos = await p.evaluate(async () =>
+    Promise.all([...document.querySelectorAll('[data-dibujo]')].map(async (i) => {
+      const r = await fetch(i.src)
+      return Math.round((await r.blob()).size / 1024)
+    }))
+  )
+  exigir(pesos.length === 2 && pesos.every((kb) => kb < 400), `cada dibujo pesa poco para un plan de datos: ${pesos.join(' KB, ')} KB`)
+
+  // --- «Publicarlo en el canal» -------------------------------------------------
+  await p.getByRole('button', { name: 'Publicarlo en el canal' }).click()
+  await p.locator('[data-publicado]').waitFor({ timeout: 30000 })
+  exigir(true, 'publicado: la tarjeta del escudo dice que está en el canal')
+  await p.locator('[data-publicado]').scrollIntoViewIfNeeded()
+  await p.screenshot({ path: `${SALIDA}/05-publicado.png` })
+
+  await p.goto(`${BASE}/canal`, { waitUntil: 'domcontentloaded' })
+  const tarjeta = p.locator('article', { hasText: 'Este es el escudo que construí con Ajito' }).first()
+  await tarjeta.waitFor({ timeout: 20000 })
+  await p.waitForFunction(() => {
+    const a = [...document.querySelectorAll('article')].find((x) => x.textContent.includes('Este es el escudo que construí con Ajito'))
+    const img = a?.querySelector('img')
+    return img && img.complete && img.naturalWidth > 0
+  }, null, { timeout: 30000 })
+  const caja = await tarjeta.locator('img').boundingBox()
+  exigir(
+    Boolean(caja) && Math.abs(caja.width - caja.height) < 4,
+    `en el feed, con su nombre y el escudo entero: ${Math.round(caja?.width ?? 0)}×${Math.round(caja?.height ?? 0)}`
+  )
+  exigir(/Rosa Delgado/.test(await tarjeta.innerText()), 'firmado por quien lo hizo')
+  await tarjeta.scrollIntoViewIfNeeded()
+  await p.screenshot({ path: `${SALIDA}/06-feed.png` })
+
   const { data: filas } = await admin
     .from('respuestas')
     .select('clave_paso, dibujo, dibujo_veredicto')
@@ -177,13 +218,6 @@ try {
       JSON.stringify([['libre', 'persona', false], ['libre', 'va', true], ['escudo', 'va', true]]),
     `en la base, la negativa y los dos dibujos: ${JSON.stringify(filas?.map((f) => [f.clave_paso, f.dibujo_veredicto, Boolean(f.dibujo)]))}`
   )
-  const pesos = await p.evaluate(async () =>
-    Promise.all([...document.querySelectorAll('[data-dibujo]')].map(async (i) => {
-      const r = await fetch(i.src)
-      return Math.round((await r.blob()).size / 1024)
-    }))
-  )
-  exigir(pesos.every((kb) => kb < 400), `cada dibujo pesa poco para un plan de datos: ${pesos.join(' KB, ')} KB`)
 } finally {
   await nav.close()
   await limpiar()

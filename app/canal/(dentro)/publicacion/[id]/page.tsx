@@ -59,7 +59,16 @@ export default async function PublicacionPage({
       <article className="tarjeta-canal overflow-hidden">
         {publicacion.imagen_url && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={publicacion.imagen_url} alt="" className="h-52 w-full object-cover" />
+          <img
+            src={publicacion.imagen_url}
+            alt=""
+            // El escudo del adiestramiento va completo: ver `TarjetaPublicacion`.
+            className={
+              publicacion.respuesta_id
+                ? 'aspect-square w-full bg-white object-contain'
+                : 'h-52 w-full object-cover'
+            }
+          />
         )}
 
         <div className="p-5">

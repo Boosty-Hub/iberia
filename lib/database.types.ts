@@ -1742,10 +1742,12 @@ export type Database = {
           estado: string
           fijado: boolean
           id: string
+          imagen_ruta: string | null
           imagen_url: string | null
           oficial: boolean
           permite_comentarios: boolean
           publicado_en: string | null
+          respuesta_id: string | null
           tipo: string
           titulo: string
           updated_at: string
@@ -1761,10 +1763,12 @@ export type Database = {
           estado?: string
           fijado?: boolean
           id?: string
+          imagen_ruta?: string | null
           imagen_url?: string | null
           oficial?: boolean
           permite_comentarios?: boolean
           publicado_en?: string | null
+          respuesta_id?: string | null
           tipo?: string
           titulo: string
           updated_at?: string
@@ -1780,10 +1784,12 @@ export type Database = {
           estado?: string
           fijado?: boolean
           id?: string
+          imagen_ruta?: string | null
           imagen_url?: string | null
           oficial?: boolean
           permite_comentarios?: boolean
           publicado_en?: string | null
+          respuesta_id?: string | null
           tipo?: string
           titulo?: string
           updated_at?: string
@@ -1816,6 +1822,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "recordatorios_pendientes"
             referencedColumns: ["empleado_id"]
+          },
+          {
+            foreignKeyName: "publicaciones_respuesta_id_fkey"
+            columns: ["respuesta_id"]
+            isOneToOne: false
+            referencedRelation: "respuestas"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2483,6 +2496,10 @@ export type Database = {
         }[]
       }
       participo_en: { Args: { conv: string }; Returns: boolean }
+      publicar_mi_escudo: {
+        Args: { p_imagen_ruta: string; p_respuesta: string }
+        Returns: string
+      }
       puede: { Args: { p_accion: string; p_recurso: string }; Returns: boolean }
       puede_publicar: { Args: never; Returns: boolean }
       renombrar_hablante: {

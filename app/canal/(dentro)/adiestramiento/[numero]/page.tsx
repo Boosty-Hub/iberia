@@ -8,6 +8,7 @@ import { BotonSigue } from '@/components/canal/boton-sigue'
 import { DevolucionAjito } from '@/components/canal/devolucion-ajito'
 import { EntradaRespuesta } from '@/components/canal/entrada-respuesta'
 import { OtroDibujo } from '@/components/canal/otro-dibujo'
+import { PublicarEscudo } from '@/components/canal/publicar-escudo'
 import { QuienEres } from '@/components/canal/quien-eres'
 import { IconoAtras, IconoCheck } from '@/components/iconos'
 import {
@@ -115,6 +116,13 @@ export default async function LeccionPage({
     Boolean(r && (r.texto || (r.entrada === 'foto' && r.media_url)))
   // Los audios que ya oyó hasta el final: su ✓ sigue ahí al recargar.
   const oidos = new Set(avance?.oidos ?? [])
+
+  // Los escudos que ya publicó en el canal, para decírselo en su tarjeta.
+  const conDibujo = (respuestas ?? []).filter((r) => r.dibujo).map((r) => r.id)
+  const { data: publicadas } = conDibujo.length
+    ? await supabase.from('publicaciones').select('id, respuesta_id').in('respuesta_id', conDibujo)
+    : { data: [] }
+  const publicacionDe = new Map((publicadas ?? []).map((p) => [p.respuesta_id ?? '', p.id]))
 
   // A cuál le toca pedirle la devolución a Ajito. Solo una a la vez: quien abre
   // una lección con varias respuestas viejas sin contestar no puede disparar
@@ -242,6 +250,7 @@ export default async function LeccionPage({
               siguienteSinDevolucion={siguienteSinDevolucion}
               ordenAudio={ordenAudio}
               oidos={oidos}
+              publicacionDe={publicacionDe}
               padron={{
                 nombre: empleado.nombre_completo,
                 cargo: empleado.cargo,
@@ -287,6 +296,7 @@ function TurnoVista({
   siguienteSinDevolucion,
   ordenAudio,
   oidos,
+  publicacionDe,
   padron,
 }: {
   turno: Turno
@@ -306,6 +316,8 @@ function TurnoVista({
   ordenAudio: Map<string, number>
   /** Los audios que ya oyó hasta el final. */
   oidos: Set<string>
+  /** Respuesta → publicación del canal, para los escudos ya publicados. */
+  publicacionDe: Map<string, string>
   /** Lo que dice Capital Humano de quien oye, para la tarjeta de la lección 0. */
   padron: Padron
 }) {
@@ -390,7 +402,11 @@ function TurnoVista({
       {turno.espera.tipo === 'botones' && esActual && !noSoyYo && (
         <div className="flex flex-wrap gap-2">
           {turno.espera.opciones.map((opcion) =>
-            esSalida(opcion) ? (
+            // «Publicarlo en el canal», debajo del escudo, publica de verdad: ver
+            // `PublicarEscudo`. Hasta el 27 de septiembre avanzaba y ya.
+            /^publicarlo en el canal$/i.test(opcion) && !esFinal ? (
+              <PublicarEscudo key={opcion} numero={numero} turno={turno.indice} etiqueta={opcion} />
+            ) : esSalida(opcion) ? (
               <Link
                 key={opcion}
                 href="/canal/adiestramiento"
@@ -432,6 +448,7 @@ function TurnoVista({
           respuesta={contestadas.get(turno.espera.clave) ?? null}
           leToca={turno.espera.clave === siguienteSinDevolucion}
           oida={oidos.has(`devolucion-${turno.espera.clave}`)}
+          publicacion={publicacionDe.get(contestadas.get(turno.espera.clave)?.id ?? '') ?? null}
         />
       )}
     </section>
@@ -560,6 +577,7 @@ function EjercicioVista({
   respuesta,
   leToca,
   oida,
+  publicacion,
 }: {
   numero: number
   nombre: string
@@ -571,6 +589,8 @@ function EjercicioVista({
   leToca: boolean
   /** Si ya oyó la devolución de Ajito hasta el final. */
   oida: boolean
+  /** La publicación del canal, si publicó este escudo. */
+  publicacion: string | null
 }) {
   const esCampo = clave === 'campo'
   const delCatalogo = catalogo.get(clave)
@@ -654,6 +674,16 @@ function EjercicioVista({
             alOir={marcarOido.bind(null, numero, `devolucion-${clave}`)}
             dibuja={dibuja}
           />
+          {publicacion && (
+            <Link
+              data-publicado
+              href={`/canal/publicacion/${publicacion}`}
+              className="toque mt-3 w-full justify-between rounded-xl bg-oro-300/25 px-4 text-[14px] font-medium text-marca-800 active:bg-oro-300/40"
+            >
+              <span>Está en el canal, en «Nuestra gente»</span>
+              <span className="underline underline-offset-4">Verlo</span>
+            </Link>
+          )}
           {dibuja && respuesta.devolucion && (respuesta.dibujo_veredicto === 'persona' || respuesta.dibujo_veredicto === 'no_va') && (
             <OtroDibujo
               numero={numero}

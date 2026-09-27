@@ -376,9 +376,8 @@ todo de Fase 2 y no bloquea nada de la Fase 1:
   aviso en el padrón del panel y la lección sigue
 - ~~Ajito dibuja de verdad (lección 4)~~ ✅ **Hecho el 27 de septiembre**, con
   `gpt-image-2.5-flare` y los dos textos de «no va» aprobados por Gabriel
-- **«Publicarlo en el canal», debajo del escudo, no publica nada**: avanza igual que «Solo para
-  mí». El guion pide que lo publique en «Nuestra gente» si la persona lo decide. O se
-  construye, o se cambia el botón en el guion — **Gabriel decide, Boosty lo hace**
+- ~~«Publicarlo en el canal» no publicaba nada~~ ✅ **Hecho el 27 de septiembre**: lo publica en
+  «Nuestra gente» como «Este es el escudo que construí con Ajito»
 - ~~El apodo de la lección 0 no se guarda~~ ✅ **Hecho el 27 de septiembre**: se saca de lo que
   la persona contestó y las consignas lo dicen desde la siguiente
 

@@ -382,6 +382,42 @@ try {
         !fisgoneoCorr?.length,
         `vio ${fisgoneoCorr?.length}`
       )
+
+      // --- «Publicarlo en el canal»: el escudo propio, y nada más ---------------
+      // Solo lo que NO se puede: esta suite corre contra producción, y una
+      // publicación de verdad aparecería en el feed de todo el mundo.
+      const { error: errSubirAjeno } = await comoEmpleado.storage
+        .from('canal')
+        .upload(`escudos/${yo.id}/prueba.webp`, new Blob(['x'], { type: 'image/webp' }))
+      comprobar('no puedo subir a la carpeta de escudos de otro', !!errSubirAjeno, 'lo dejó subir')
+      if (!errSubirAjeno) await admin.storage.from('canal').remove([`escudos/${yo.id}/prueba.webp`])
+
+      const { data: miPrueba } = await admin
+        .from('respuestas')
+        .select('id')
+        .eq('matricula_id', miMatricula)
+        .eq('clave_paso', 'prueba')
+        .limit(1)
+        .maybeSingle()
+      const { error: errAjeno2 } = await comoEmpleado.rpc('publicar_mi_escudo', {
+        p_respuesta: miPrueba?.id ?? '00000000-0000-0000-0000-000000000000',
+        p_imagen_ruta: `escudos/${otro.id}/x.webp`,
+      })
+      comprobar(
+        'no puedo publicar el escudo de otro',
+        /no es tuyo/i.test(errAjeno2?.message ?? ''),
+        errAjeno2?.message ?? 'lo publicó'
+      )
+
+      const { error: errNoEscudo } = await comoEmpleado.rpc('publicar_mi_escudo', {
+        p_respuesta: respuestaAjena,
+        p_imagen_ruta: `escudos/${otro.id}/x.webp`,
+      })
+      comprobar(
+        'ni publicar lo que no es un escudo',
+        /no es un escudo/i.test(errNoEscudo?.message ?? ''),
+        errNoEscudo?.message ?? 'lo publicó'
+      )
     }
   }
 

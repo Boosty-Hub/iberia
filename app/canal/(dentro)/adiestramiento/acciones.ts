@@ -7,7 +7,7 @@ import { CURSO } from '@/lib/adiestramiento'
 import { obtenerSesion, puede } from '@/lib/auth'
 import { requerirEmpleado } from '@/lib/canal'
 import { turnoDelEjercicio, type LeccionGuion } from '@/lib/guion'
-import { BUCKET_RESPUESTAS } from '@/lib/storage'
+import { BUCKET_CANAL, BUCKET_RESPUESTAS, rutaEscudoPublicado } from '@/lib/storage'
 import { createClient } from '@/lib/supabase/server'
 import { esClaveVoz } from '@/lib/voz'
 
@@ -161,6 +161,60 @@ async function adelantar(ctx: NonNullable<Awaited<ReturnType<typeof contexto>>>,
     .from('matriculas')
     .update({ ultimo_toque: new Date().toISOString() })
     .eq('id', matricula.id)
+}
+
+/**
+ * «Publicarlo en el canal»: el escudo de la lección 4, en el feed de Iberia.
+ *
+ * Lo decide la persona —el guion lo pide así: no se publica nada sin que ella
+ * lo mande— y sale en «Nuestra gente» como «Este es el escudo que construí con
+ * Ajito», con su nombre. El escudo original vive en su carpeta privada, así que
+ * se copia a su carpeta del bucket del canal, con su propia sesión, y
+ * `publicar_mi_escudo()` hace el resto: comprueba que el escudo sea suyo y haya
+ * pasado el filtro, y no lo publica dos veces.
+ */
+export async function publicarEscudo(datos: FormData): Promise<{ ok: boolean; id?: string }> {
+  const numero = Number(datos.get('numero'))
+  const ctx = await contexto(numero)
+  if (!ctx) return { ok: false }
+  const { empleado, supabase, matricula, leccion } = ctx
+
+  const { data: respuesta } = await supabase
+    .from('respuestas')
+    .select('id, dibujo, dibujo_veredicto')
+    .eq('matricula_id', matricula.id)
+    .eq('leccion_id', leccion.id)
+    .eq('clave_paso', 'escudo')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (!respuesta?.dibujo || respuesta.dibujo_veredicto !== 'va') return { ok: false }
+
+  const { data: archivo } = await supabase.storage.from(BUCKET_RESPUESTAS).download(respuesta.dibujo)
+  if (!archivo) return { ok: false }
+
+  const ruta = rutaEscudoPublicado(empleado.id, respuesta.id)
+  const { error: errSubir } = await supabase.storage
+    .from(BUCKET_CANAL)
+    .upload(ruta, archivo, { contentType: 'image/webp', upsert: true })
+  if (errSubir) {
+    console.error('[canal] no se pudo copiar el escudo:', errSubir.message)
+    return { ok: false }
+  }
+
+  const { data: id, error } = await supabase.rpc('publicar_mi_escudo', {
+    p_respuesta: respuesta.id,
+    p_imagen_ruta: ruta,
+  })
+  if (error || !id) {
+    console.error('[canal] no se publicó el escudo:', error?.message)
+    return { ok: false }
+  }
+
+  await adelantar(ctx, Number(datos.get('turno')))
+  revalidatePath('/canal')
+  revalidatePath(`/canal/adiestramiento/${numero}`)
+  return { ok: true, id }
 }
 
 /**

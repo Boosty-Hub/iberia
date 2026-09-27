@@ -311,6 +311,15 @@ y una ruedita en vez de piernas.
   - **Los tres ejemplos de «Muéstrame»** salen del bloque `🖼 Tres ejemplos ya hechos` del
     guion (clase `ejemplos` en `lib/guion.ts`) y los dibuja `generar:ejemplos`, que es
     incremental y los sube al bucket. `scripts/mirar-dibujo.mjs` recorre la lección entera.
+  - **«Publicarlo en el canal», debajo del escudo, lo publica en el feed** —«Nuestra gente»,
+    «Este es el escudo que construí con Ajito», firmado por quien lo hizo— y «Solo para mí»
+    no publica. Publicar en el feed es de pocos (`puede_publicar()`) y el escudo vive en la
+    carpeta privada de su dueño, así que `publicarEscudo` lo copia con la sesión de la
+    persona al bucket `canal` —que lee cualquiera con sesión, y donde cada quien escribe solo
+    en `escudos/<su empleado>/`— y `publicar_mi_escudo()`, `security definer` como el
+    certificado, publica **solo el escudo propio**, solo si pasó el filtro, y una vez. La
+    imagen la sirve `/canal/publicacion/[id]/imagen`, y en el feed va cuadrada y entera: en
+    la franja de las fotos se cortaba el lema.
   - ⚠️ **`DevolucionAjito` lleva `key` por respuesta.** Tras un «no va» se reutilizaba el
     componente del pedido rechazado, que ya había pedido lo suyo, y el dibujo nuevo nunca se
     pedía.
@@ -333,7 +342,7 @@ que la acción **mira el error de cada borrado y vuelve a contar antes de decir 
 
 ```
 npm run sembrar:adiestramiento  -- --abrir   # clasifica oficios, matricula y abre
-npm run probar:adiestramiento                # 22 comprobaciones de RLS reales
+npm run probar:adiestramiento                # 25 comprobaciones de RLS reales
 npm run capturar:adiestramiento              # iPhone 14 + panel, con el flujo
 npm run probar:voz                           # 7 muestras de voz para elegir de oído
 npm run generar:guion                        # el guion → guion.json, y lo comprueba

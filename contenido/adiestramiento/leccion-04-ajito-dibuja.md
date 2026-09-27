@@ -150,9 +150,11 @@ trabajadores.*
 
 💬 `Si te gustó, mándaselo a tu gente.`
 
-*Aquí conviene un botón que lo publique en el canal, en «Nuestra gente». Es
-opcional y la persona decide. Si se publica, hay galería; si no se publica, no
-hay galería. No se publica nada sin que la persona lo mande.*
+*«Publicarlo en el canal» lo publica en el feed de Iberia, en «Nuestra gente», con
+el título **«Este es el escudo que construí con Ajito»**, el escudo y el nombre de
+quien lo hizo. Es opcional y la persona decide: no se publica nada sin que lo mande,
+y «Solo para mí» no publica. Una vez por escudo. (27 de septiembre de 2026, pedido
+de Gabriel; antes los dos botones solo avanzaban.)*
 
 ⌨️ `Publicarlo en el canal` · `Solo para mí`
 

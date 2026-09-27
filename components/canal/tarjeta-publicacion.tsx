@@ -14,6 +14,8 @@ export type PublicacionFeed = {
   titulo: string
   bajada: string | null
   imagen_url: string | null
+  /** Si salió del adiestramiento: el escudo que alguien construyó con Ajito. */
+  respuesta_id?: string | null
   oficial: boolean
   fijado: boolean
   publicado_en: string | null
@@ -60,7 +62,12 @@ export function TarjetaPublicacion({
           <img
             src={publicacion.imagen_url}
             alt=""
-            className="h-44 w-full object-cover"
+            // Un escudo es cuadrado y tiene el lema abajo: recortado a una franja,
+            // como las fotos de Comunicaciones, se perdía justo el lema.
+            className={cn(
+              'w-full',
+              publicacion.respuesta_id ? 'aspect-square bg-white object-contain' : 'h-44 object-cover'
+            )}
             loading="lazy"
           />
         )}

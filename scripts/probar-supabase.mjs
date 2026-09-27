@@ -285,7 +285,7 @@ console.log('\nStorage\n')
 const { data: buckets } = await admin.storage.listBuckets()
 const porNombre = new Map((buckets ?? []).map((b) => [b.name, b]))
 
-const BUCKETS = ['archivos', 'adiestramiento', 'adiestramiento-respuestas']
+const BUCKETS = ['archivos', 'adiestramiento', 'adiestramiento-respuestas', 'canal']
 for (const nombre of BUCKETS) {
   const bucket = porNombre.get(nombre)
   comprobar(`bucket ${nombre} existe`, Boolean(bucket))

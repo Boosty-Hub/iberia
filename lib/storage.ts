@@ -41,6 +41,18 @@ export function rutaFicha(pieza: string): string {
 }
 
 /**
+ * Bucket de las imágenes del feed del canal. Lo lee cualquiera con sesión —es el
+ * feed— y cada quien escribe solo en `escudos/<su empleado>/`: ahí va la copia
+ * del escudo que decidió publicar, porque el original vive en su carpeta privada
+ * del bucket de respuestas y nadie más lo lee.
+ */
+export const BUCKET_CANAL = 'canal'
+
+export function rutaEscudoPublicado(empleadoId: string, respuestaId: string): string {
+  return `escudos/${empleadoId}/${respuestaId}.webp`
+}
+
+/**
  * El dibujo de Ajito tal como es, para que el generador de la lección 4 lo
  * dibuje igualito cuando alguien lo pide. Va en el bucket del curso, no en
  * `public/`: en Netlify la función no ve los archivos públicos del sitio.
