@@ -60,7 +60,9 @@ const GENTE = [
   { id: 'a-medias', nombre: 'Douglas Rangel', cargo: 'Vigilante', familia: 'seguridad' },
   // Llega al turno del certificado de la lección 8 sin certificado todavía: es la
   // lección la que tiene que emitirlo al abrirse ese turno.
-  { id: 'leccion-8', nombre: 'Maryori Castillo', cargo: 'COCINERA DE PRUEBAS', familia: 'cocina' },
+  // Y sin cédula, como las 276 del listado de Capital Humano: con su número de ficha.
+  // Hasta el 27 de septiembre de 2026 a esta gente no se le podía emitir nada.
+  { id: 'leccion-8', nombre: 'Maryori Castillo', cargo: 'COCINERA DE PRUEBAS', familia: 'cocina', ficha: '99801' },
 ]
 
 const problemas = []
@@ -79,7 +81,11 @@ function comprobar(descripcion, condicion, detalle = '') {
 async function limpiar() {
   const { data } = await admin.auth.admin.listUsers({ perPage: 200 })
   const usuarios = (data?.users ?? []).filter((u) => (u.email ?? '').startsWith(PREFIJO))
-  const { data: fichas } = await admin.from('empleados').select('id').like('cedula', `${CEDULA}%`)
+  // Por la cédula de prueba, o por el número de ficha de prueba de quien va sin cédula.
+  const { data: fichas } = await admin
+    .from('empleados')
+    .select('id')
+    .or(`cedula.like.${CEDULA}%,ficha.in.(${GENTE.filter((g) => g.ficha).map((g) => g.ficha).join(',')})`)
   // Lo que publicaron en el canal: la fila y la imagen de su carpeta. La ficha se
   // lleva en cascada lo demás, pero no los archivos.
   for (const f of fichas ?? []) {
@@ -156,7 +162,8 @@ try {
     const { data: ficha } = await admin
       .from('empleados')
       .insert({
-        cedula: `${CEDULA}${persona.id}`,
+        cedula: persona.ficha ? null : `${CEDULA}${persona.id}`,
+        ficha: persona.ficha ?? null,
         nombre_completo: persona.nombre,
         cargo: persona.cargo,
         area_id: area?.id ?? null,
@@ -336,6 +343,7 @@ try {
       if (tiene) {
         const texto = await tarjeta.innerText()
         comprobar('con su nombre', texto.includes(persona.nombre))
+        comprobar('sin cédula, con su número de ficha', texto.includes(`Ficha ${GENTE.find((g) => g.id === persona.id).ficha}`) && !texto.includes('C.I.'), texto.replace(/\s+/g, ' ').slice(0, 300))
         comprobar('con el cargo escrito como se lee', texto.includes('Cocinera de pruebas'), texto.slice(0, 200))
         comprobar(
           'con sus tres botones',

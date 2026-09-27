@@ -317,11 +317,12 @@ export type Database = {
         Row: {
           area_nombre: string | null
           cargo: string | null
-          cedula: string
+          cedula: string | null
           codigo: string
           created_at: string
           emitido_en: string
           entregado_en: string | null
+          ficha: string | null
           id: string
           matricula_id: string
           nombre_completo: string
@@ -329,11 +330,12 @@ export type Database = {
         Insert: {
           area_nombre?: string | null
           cargo?: string | null
-          cedula: string
+          cedula?: string | null
           codigo: string
           created_at?: string
           emitido_en?: string
           entregado_en?: string | null
+          ficha?: string | null
           id?: string
           matricula_id: string
           nombre_completo: string
@@ -341,11 +343,12 @@ export type Database = {
         Update: {
           area_nombre?: string | null
           cargo?: string | null
-          cedula?: string
+          cedula?: string | null
           codigo?: string
           created_at?: string
           emitido_en?: string
           entregado_en?: string | null
+          ficha?: string | null
           id?: string
           matricula_id?: string
           nombre_completo?: string
@@ -2589,11 +2592,12 @@ export type Database = {
         Returns: {
           area_nombre: string | null
           cargo: string | null
-          cedula: string
+          cedula: string | null
           codigo: string
           created_at: string
           emitido_en: string
           entregado_en: string | null
+          ficha: string | null
           id: string
           matricula_id: string
           nombre_completo: string

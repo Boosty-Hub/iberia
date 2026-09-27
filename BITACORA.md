@@ -119,6 +119,13 @@ viene del rol de administrador. Recorrido con una cuenta de prueba de su rol y l
 (`mirar-puertas --rol administrador --como 4774`, 43 de 43): el canal, el curso, el panel entero, la
 administración y el informe.
 
+🔴 **Y a nadie del padrón real se le podía emitir el certificado.** El listado de Capital Humano
+llegó sin cédulas y el certificado las exigía: al terminar el curso, Martha Álvarez —y cualquiera de
+las 276— iba a ver «tu certificado se está preparando». Salió al redactarle el correo de acceso.
+Ahora el certificado lleva el número de ficha cuando no hay cédula («Ficha 5034»), y los ya emitidos
+recibieron el suyo. `probar:certificado` suma el caso —una persona sin cédula que llega a la lección
+8— y pasa 33 de 33; `mirar-puertas` con los datos de Martha, sin fallos.
+
 Martha ya se matriculó así. De paso, `probar:adiestramiento` y `probar:certificado` creaban a sus
 trabajadores con el rol de la dirección, que ahora lee el tablero y los certificados: pasan a
 Personal de planta. **Verificado** con `mirar-puertas` (25 de 25, con el rol de Martha y uno sin

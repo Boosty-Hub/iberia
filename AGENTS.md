@@ -396,7 +396,7 @@ npm run probar:ajito -- --caso plata         # uno solo, para iterar el personaj
 npm run generar:fichas                       # las 10 fichas de bolsillo, del guion
 npm run subir:fichas                         # al bucket privado
 npm run generar:ejemplos                     # los 3 dibujos de ejemplo de la lección 4, y los sube
-npm run probar:certificado                   # 32 comprobaciones · guardas, lección 8, imagen y canal
+npm run probar:certificado                   # 33 comprobaciones · guardas, lección 8, sin cédula, imagen y canal
 npm run probar:recordatorios                 # 38 comprobaciones · la escalera y los mensajes
 ```
 
@@ -601,7 +601,13 @@ curso, y el papel es el que queda. Los estilos de impresión están al final de
 `app/globals.css`.
 
 **Los datos van congelados en la fila**, no leídos del padrón: si la persona cambia de
-cargo en noviembre, el certificado sigue diciendo lo que era el día que lo hizo. Y el
+cargo en noviembre, el certificado sigue diciendo lo que era el día que lo hizo.
+⚠️ **La cédula es opcional y el número de ficha la sustituye** (`identificacion()` en
+`lib/certificado.ts`): el listado de Capital Humano llegó sin cédulas, y hasta el 27 de
+septiembre de 2026 `certificados.cedula` era `not null` —ninguna de las 276 personas del padrón
+real podía recibir su certificado, y la lección 8 decía «se está preparando»—. Ahora la fila
+congela también `ficha`, y el certificado dice «C.I. …» o, sin cédula, «Ficha …». En el que va al
+canal no sale ninguno de los dos. Y el
 código va legible —`IB-AJITO-2026-0042`— porque alguien de Capital Humano lo va a
 teclear copiándolo del impreso.
 

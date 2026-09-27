@@ -28,10 +28,25 @@ export const TEXTOS = {
 export type DatosCertificado = {
   codigo: string
   nombre_completo: string
-  cedula: string
+  /** El listado de Capital Humano no trae cédulas: puede faltar. */
+  cedula: string | null
+  /** El número de ficha de Capital Humano. */
+  ficha?: string | null
   cargo: string | null
   area_nombre: string | null
   emitido_en: string
+}
+
+/**
+ * Con qué se identifica a la persona en el certificado: «C.I. V-12345678», o
+ * «Ficha 5034» si no hay cédula —el listado de Capital Humano llegó sin ellas, y
+ * hasta el 27 de septiembre de 2026 eso impedía emitir el certificado a
+ * cualquiera del padrón real—. Sin ninguna de las dos, nada.
+ */
+export function identificacion(c: Pick<DatosCertificado, 'cedula' | 'ficha'>): string | null {
+  if (c.cedula) return `C.I. ${c.cedula}`
+  if (c.ficha) return `Ficha ${c.ficha}`
+  return null
 }
 
 export function fechaLarga(iso: string): string {

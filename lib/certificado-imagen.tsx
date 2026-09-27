@@ -2,7 +2,7 @@ import 'server-only'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { ImageResponse } from 'next/og'
-import { fechaLarga, legible, TEXTOS, type DatosCertificado } from '@/lib/certificado'
+import { fechaLarga, identificacion, legible, TEXTOS, type DatosCertificado } from '@/lib/certificado'
 
 /**
  * El certificado en imagen: el que se guarda en el teléfono, el que se manda
@@ -185,8 +185,9 @@ export async function imagenCertificado(
           >
             {certificado.nombre_completo}
           </div>
-          {conCedula && (
-            <div style={{ marginTop: 14, fontSize: 36, color: SUAVE, flexShrink: 0 }}>{`C.I. ${certificado.cedula}`}</div>
+          {/* En el canal no va ni la cédula ni la ficha: son de la persona. */}
+          {conCedula && identificacion(certificado) && (
+            <div style={{ marginTop: 14, fontSize: 36, color: SUAVE, flexShrink: 0 }}>{identificacion(certificado)}</div>
           )}
 
           <div

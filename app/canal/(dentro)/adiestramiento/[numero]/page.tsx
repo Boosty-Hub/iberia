@@ -608,7 +608,7 @@ async function certificadoDe(
 ): Promise<EnLeccion> {
   let { data: hoja } = await supabase
     .from('certificados')
-    .select('id, codigo, nombre_completo, cedula, cargo, area_nombre, emitido_en')
+    .select('id, codigo, nombre_completo, cedula, ficha, cargo, area_nombre, emitido_en')
     .eq('matricula_id', matricula.id)
     .maybeSingle()
   if (!hoja && avance.estado !== 'completada') {

@@ -33,7 +33,7 @@ export async function GET(peticion: NextRequest) {
 
   const { data: certificado } = await supabase
     .from('certificados')
-    .select('codigo, nombre_completo, cedula, cargo, area_nombre, emitido_en')
+    .select('codigo, nombre_completo, cedula, ficha, cargo, area_nombre, emitido_en')
     .eq('matricula_id', matricula.id)
     .maybeSingle()
   if (!certificado) return NextResponse.json({ error: 'Todavía no hay certificado' }, { status: 404 })

@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { fechaLarga, legible, TEXTOS, type DatosCertificado } from '@/lib/certificado'
+import { fechaLarga, identificacion, legible, TEXTOS, type DatosCertificado } from '@/lib/certificado'
 
 export { fechaLarga }
 
@@ -50,7 +50,9 @@ export function CertificadoHoja({ certificado }: { certificado: Certificado }) {
         {certificado.nombre_completo}
       </h1>
 
-      <p className="mt-1 text-[14px] text-marca-500">C.I. {certificado.cedula}</p>
+      {identificacion(certificado) && (
+        <p className="mt-1 text-[14px] text-marca-500">{identificacion(certificado)}</p>
+      )}
 
       <div className="my-6 h-1.5 w-20 rounded-full bg-acento-600" />
 

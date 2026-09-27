@@ -263,7 +263,7 @@ export async function publicarCertificado(datos: FormData): Promise<{ ok: boolea
 
   const { data: certificado } = await supabase
     .from('certificados')
-    .select('id, codigo, nombre_completo, cedula, cargo, area_nombre, emitido_en')
+    .select('id, codigo, nombre_completo, cedula, ficha, cargo, area_nombre, emitido_en')
     .eq('matricula_id', matricula.id)
     .maybeSingle()
   if (!certificado) return { ok: false }
