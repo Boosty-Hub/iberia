@@ -164,7 +164,18 @@ y una ruedita en vez de piernas.
   primer toque y mover `currentTime` no hace nada: el arrastre se guarda y se aplica en
   `loadedmetadata`. Y **cada audio de la clase dice cuál es** —«3 de 8»—, contando solo los
   que suenan (de los dos cierres de la lección 8 suena uno); las devoluciones no llevan.
-- **El ✓ de «ya oído» se guarda** en `avances.oidos` (27 de septiembre de 2026): al terminar un
+- **El turno se abre a medida que se oye** (`TurnoProgresivo`, 27 de septiembre de 2026). Un turno
+  puede traer dos o tres audios seguidos, y salían todos de una: se veía el segundo antes de oír
+  el primero, y los botones antes de oír nada. Ahora, en el turno actual, cada cosa —el audio
+  siguiente, lo que lo acompaña, y al final los botones o el ejercicio— aparece cuando **sonó al
+  menos la mitad** del audio de antes. ⚠️ Cuenta el tiempo que sonó, no la barra: arrastrarla
+  hasta el final no abre nada. Los turnos de arriba y un turno ya contestado salen enteros.
+  «Terminar la lección» es parte del cierre del último turno por lo mismo.
+- **La manito**: el audio que toca oír lleva una mano que toca su play, y el play late como los
+  botones que avanzan. Se va apenas suena y se queda quieta con `prefers-reduced-motion`.
+  `scripts/mirar-progresivo.mjs` recorre las dos cosas.
+- **El ✓ de «ya oído» se guarda** en `avances.oidos` (27 de septiembre de 2026) **al oír la
+  mitad** —antes, al terminar—, que es lo mismo que abre el turno: al llegar a la mitad de un
   audio, `marcarOido` lo anota con `marcar_oido()` —una sola sentencia, para que dos audios que
   terminan juntos no se pisen— y la página arranca cada reproductor desde ahí. Antes vivía solo en
   la página, y al recargar la lección entera salía sin oír. Las devoluciones van como

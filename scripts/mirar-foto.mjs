@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import { chromium, devices } from 'playwright'
 import { mkdir } from 'node:fs/promises'
 import { barrerCarpeta } from './barrer-carpeta.mjs'
+import { oirLoQueFalta } from './oir-lo-que-falta.mjs'
 
 const args = {}
 for (let i = 2; i < process.argv.length; i++) {
@@ -84,11 +85,16 @@ try {
   // Se avanza con el botón que late hasta que aparezca el ejercicio de la selfie.
   const selfie = p.locator('[data-ejercicio="selfie"]')
   for (let i = 0; i < 8 && !(await selfie.count()); i++) {
+    await oirLoQueFalta(p)
+    if (await selfie.count()) break
     const sigue = p.locator('button.btn-canal-sigue:not([disabled])').last()
     await sigue.waitFor({ timeout: 20000 })
+    const turnos = await p.locator('section').count()
     await sigue.click()
-    await p.waitForTimeout(1500)
+    // Se espera el turno nuevo: si no, no hay manito que oír todavía.
+    await p.waitForFunction((n) => document.querySelectorAll('section').length > n, turnos, { timeout: 20000 }).catch(() => {})
   }
+  await oirLoQueFalta(p)
   await selfie.waitFor({ timeout: 20000 })
   exigir(await selfie.locator('textarea').count() === 0, 'la selfie no pide escribir nada')
 

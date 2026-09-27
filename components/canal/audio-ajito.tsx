@@ -62,6 +62,8 @@ export function AudioAjito({
   orden,
   oido = false,
   alOir,
+  alMitad,
+  invitar = false,
 }: {
   src: string
   etiqueta: string
@@ -69,10 +71,17 @@ export function AudioAjito({
   segundos: number | null
   /** Cuál es dentro de la lección. Las devoluciones no llevan: no son de la clase. */
   orden?: { numero: number; total: number }
-  /** Si ya lo oyó hasta el final otro día: arranca con su ✓. */
+  /** Si ya lo oyó otro día —al menos la mitad—: arranca con su ✓. */
   oido?: boolean
-  /** Se llama la primera vez que termina, para que el ✓ se guarde. */
+  /** Se llama la primera vez que se oye la mitad, para que quede guardado. */
   alOir?: () => void | Promise<void>
+  /**
+   * Se llama una vez, cuando **sonó** al menos la mitad. Es lo que abre lo que
+   * viene después en el turno (`TurnoProgresivo`).
+   */
+  alMitad?: () => void
+  /** Si lleva la manito: es el audio que toca oír ahora. */
+  invitar?: boolean
 }) {
   const ref = useRef<HTMLAudioElement>(null)
   // Un arrastre antes de que el archivo cargue: se aplica en `loadedmetadata`.
@@ -84,11 +93,42 @@ export function AudioAjito({
   const [posicion, setPosicion] = useState(0)
   const [duracion, setDuracion] = useState<number | null>(segundos)
 
+  // ⚠️ **La mitad cuenta lo que sonó, no dónde está la barra.** Se suma el avance
+  // entre dos `timeupdate` seguidos mientras suena; un salto de la barra da un
+  // brinco grande y no se suma. Arrastrarla hasta la mitad no abre lo siguiente.
+  const sonado = useRef(0)
+  const ultimo = useRef(0)
+  const mitadAvisada = useRef(oido)
+  // Para las verificaciones: `data-mitad` dice que ya sonó la mitad.
+  const [mitad, setMitad] = useState(oido)
+  // Las funciones de afuera, en refs: si no, cada render re-engancharía los eventos.
+  const avisos = useRef({ alOir, alMitad })
+  useEffect(() => {
+    avisos.current = { alOir, alMitad }
+  }, [alOir, alMitad])
+
   useEffect(() => {
     const audio = ref.current
     if (!audio) return
 
-    const alTiempo = () => setPosicion(audio.currentTime)
+    const alTiempo = () => {
+      const ahora = audio.currentTime
+      const paso = ahora - ultimo.current
+      if (!audio.paused && paso > 0 && paso < 1.5) sonado.current += paso
+      ultimo.current = ahora
+      setPosicion(ahora)
+
+      const largo = Number.isFinite(audio.duration) ? audio.duration : (segundos ?? 0)
+      if (!mitadAvisada.current && largo && sonado.current >= largo * 0.5) {
+        mitadAvisada.current = true
+        setMitad(true)
+        avisos.current.alMitad?.()
+        void avisos.current.alOir?.()
+      }
+    }
+    const alSaltar = () => {
+      ultimo.current = audio.currentTime
+    }
     const alCargar = () => {
       if (Number.isFinite(audio.duration)) setDuracion(audio.duration)
       if (saltoPendiente.current !== null) {
@@ -102,7 +142,6 @@ export function AudioAjito({
     const alEsperar = () => setEstado((e) => (e === 'sonando' ? 'cargando' : e))
     const alPausar = () => setEstado((e) => (e === 'error' ? e : yaOido ? 'oido' : 'quieto'))
     const alTerminar = () => {
-      if (!yaOido) void alOir?.()
       setYaOido(true)
       setEstado('oido')
       setPosicion(0)
@@ -110,6 +149,7 @@ export function AudioAjito({
     const alFallar = () => setEstado('error')
 
     audio.addEventListener('timeupdate', alTiempo)
+    audio.addEventListener('seeked', alSaltar)
     audio.addEventListener('loadedmetadata', alCargar)
     audio.addEventListener('playing', alSonar)
     audio.addEventListener('waiting', alEsperar)
@@ -119,6 +159,7 @@ export function AudioAjito({
 
     return () => {
       audio.removeEventListener('timeupdate', alTiempo)
+      audio.removeEventListener('seeked', alSaltar)
       audio.removeEventListener('loadedmetadata', alCargar)
       audio.removeEventListener('playing', alSonar)
       audio.removeEventListener('waiting', alEsperar)
@@ -126,7 +167,7 @@ export function AudioAjito({
       audio.removeEventListener('ended', alTerminar)
       audio.removeEventListener('error', alFallar)
     }
-  }, [yaOido, alOir])
+  }, [yaOido, segundos])
 
   async function alternar() {
     const audio = ref.current
@@ -183,6 +224,7 @@ export function AudioAjito({
     <div
       // `data-estado` no pinta nada: lo leen las verificaciones.
       data-estado={estado}
+      data-mitad={mitad ? 'si' : 'no'}
       className={cn(
         'flex items-center gap-3 rounded-2xl border px-3 py-3 transition-colors',
         estado === 'sonando'
@@ -194,6 +236,7 @@ export function AudioAjito({
     >
       <audio ref={ref} src={src} preload="none" />
 
+      <span className="relative shrink-0">
       <button
         type="button"
         onClick={alternar}
@@ -201,6 +244,8 @@ export function AudioAjito({
         aria-label={activo ? `Pausar ${etiqueta}` : `Escuchar ${etiqueta}`}
         className={cn(
           'grid h-14 w-14 shrink-0 place-items-center rounded-full transition-colors',
+          // El que toca oír late, como los botones que hacen avanzar.
+          invitar && estado === 'quieto' && !yaOido && 'audio-invita',
           'focus-visible:ring-2 focus-visible:ring-acento-500/40 focus-visible:outline-none',
           estado === 'error'
             ? 'bg-marca-100 text-marca-400'
@@ -221,6 +266,8 @@ export function AudioAjito({
           <IconoPlay />
         )}
       </button>
+      {invitar && estado === 'quieto' && !yaOido && <Manito />}
+      </span>
 
       <div className="min-w-0 flex-1">
         <button
@@ -307,6 +354,37 @@ function reloj(segundos: number): string {
   if (!Number.isFinite(segundos) || segundos < 0) return '—'
   const s = Math.round(segundos)
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+}
+
+/**
+ * La manito que toca el play del audio que toca oír. No recibe toques —el toque
+ * es del botón de abajo— y se queda quieta con `prefers-reduced-motion`.
+ *
+ * Se dibuja dos veces la misma mano: primero con trazo grueso y después rellena
+ * encima, así solo queda el borde de afuera y se lee sobre el rojo y sobre el
+ * blanco.
+ */
+function Manito() {
+  const mano = (
+    <>
+      <rect x="12" y="2" width="6" height="18" rx="3" />
+      <rect x="17" y="11" width="5" height="9" rx="2.5" />
+      <rect x="21" y="12.5" width="5" height="9" rx="2.5" />
+      <rect x="25" y="14.5" width="4" height="8" rx="2" />
+      <rect x="7" y="16" width="7" height="5" rx="2.5" />
+      <rect x="10" y="17" width="19" height="12" rx="6" />
+    </>
+  )
+  return (
+    <span data-manito aria-hidden="true" className="manito pointer-events-none absolute -right-1 -bottom-6 h-9 w-9">
+      <svg viewBox="0 0 32 32" className="h-full w-full -rotate-[25deg] drop-shadow">
+        <g fill="currentColor" stroke="currentColor" strokeWidth="3" className="text-marca-800">
+          {mano}
+        </g>
+        <g fill="#fff">{mano}</g>
+      </svg>
+    </span>
+  )
 }
 
 function IconoPlay() {

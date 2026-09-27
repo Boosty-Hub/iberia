@@ -917,6 +917,27 @@ body {
   .btn-canal-sigue:not(:disabled) { animation: none; }
 }
 
+/* El play del audio que toca oír: el mismo halo que los botones que avanzan, y
+   una manito que lo toca. Sin esto, quien nunca ha usado esto miraba la tarjeta
+   sin saber que había que tocar el círculo rojo. */
+.audio-invita {
+  animation: canal-late 1.8s ease-out infinite;
+}
+
+.manito {
+  animation: manito-toca 1.6s ease-in-out infinite;
+  transform-origin: 40% 10%;
+}
+
+@keyframes manito-toca {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40%, 55% { transform: translate(-7px, -8px) scale(0.9); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .audio-invita, .manito { animation: none; }
+}
+
 /* La barra del audio se arrastra, como la de una nota de voz de WhatsApp. El
    control ocupa 44 px de alto —el objetivo táctil del canal— y lo que se ve es
    una pista de 6 px con su avance pintado y una bolita. `--avance` lo pone el

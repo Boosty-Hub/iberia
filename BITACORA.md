@@ -166,6 +166,10 @@ dos textos de lo que Ajito dice cuando un dibujo no va, que el guion tenía pend
   gorro— se dibujaron a partir de su imagen, y en un carrusel.
 - **Cada dibujo pesa unos 110 KB** en WebP; en PNG eran 1,7 MB.
 
+**Y la lección se abre a medida que se oye.** En la lección 5 salieron el audio 6 y el 7 juntos, y
+Gabriel pidió que lo siguiente aparezca al oír al menos la mitad de la nota de voz, y una manito
+que toque el play. Cuenta lo que sonó, no la barra, y queda guardado al recargar.
+
 🔴 **Para el generador, «Iberia» es la aerolínea.** Al dibujar la pregunta de campo de Gabriel
 —«una mayonesa voladora con el logo de Iberia»— pintó un avión con el logo de la aerolínea
 española. Ahora se le aclara que es Industrias Iberia y se le pasa el logo verdadero. Sus dos

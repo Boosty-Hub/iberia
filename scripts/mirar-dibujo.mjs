@@ -22,6 +22,7 @@ import { createClient } from '@supabase/supabase-js'
 import { chromium, devices } from 'playwright'
 import { mkdir } from 'node:fs/promises'
 import { barrerCarpeta } from './barrer-carpeta.mjs'
+import { oirLoQueFalta } from './oir-lo-que-falta.mjs'
 
 const args = {}
 for (let i = 2; i < process.argv.length; i++) {
@@ -114,13 +115,17 @@ try {
   async function avanzarHasta(selector) {
     const destino = p.locator(selector)
     for (let i = 0; i < 10 && !(await destino.count()); i++) {
+      await oirLoQueFalta(p)
+      if (await destino.count()) break
       const sigue = p.locator('button.btn-canal-sigue:not([disabled])').last()
       await sigue.waitFor({ timeout: 30000 })
+      const turnos = await p.locator('section').count()
       await sigue.click()
-      // El turno que sigue puede no traer botón —termina en ejercicio—: se
-      // espera a lo que se busca, no un rato fijo.
-      await destino.first().waitFor({ timeout: 8000 }).catch(() => {})
+      // Se espera el turno nuevo, no un rato fijo: si no, no hay manito que oír
+      // todavía, y lo que se busca puede venir detrás de un audio.
+      await p.waitForFunction((n) => document.querySelectorAll('section').length > n, turnos, { timeout: 20000 }).catch(() => {})
     }
+    await oirLoQueFalta(p)
     await destino.first().waitFor({ timeout: 30000 })
   }
 
@@ -185,6 +190,7 @@ try {
   exigir(pesos.length === 2 && pesos.every((kb) => kb < 400), `cada dibujo pesa poco para un plan de datos: ${pesos.join(' KB, ')} KB`)
 
   // --- «Publicarlo en el canal» -------------------------------------------------
+  await oirLoQueFalta(p)
   await p.getByRole('button', { name: 'Publicarlo en el canal' }).click()
   await p.locator('[data-publicado]').waitFor({ timeout: 30000 })
   exigir(true, 'publicado: la tarjeta del escudo dice que está en el canal')

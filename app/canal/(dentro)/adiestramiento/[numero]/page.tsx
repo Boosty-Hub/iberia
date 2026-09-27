@@ -1,15 +1,16 @@
 import type { Metadata } from 'next'
+import type { ReactNode } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import guion from '@/contenido/adiestramiento/guion.json'
-import { AudioAjito } from '@/components/canal/audio-ajito'
 import { BotonSigue } from '@/components/canal/boton-sigue'
 import { DevolucionAjito } from '@/components/canal/devolucion-ajito'
 import { EntradaRespuesta } from '@/components/canal/entrada-respuesta'
 import { OtroDibujo } from '@/components/canal/otro-dibujo'
 import { PublicarEscudo } from '@/components/canal/publicar-escudo'
 import { QuienEres } from '@/components/canal/quien-eres'
+import { TurnoProgresivo, type AudioDelTurno } from '@/components/canal/turno-progresivo'
 import { IconoAtras, IconoCheck } from '@/components/iconos'
 import {
   CURSO,
@@ -179,6 +180,27 @@ export default async function LeccionPage({
 
   const audios = ordenAudio.size
 
+  // «Terminar la lección» es el cierre del último turno cuando ese turno no
+  // termina en botones: va dentro de él, para que salga después de oír su audio
+  // y no antes (`TurnoProgresivo`).
+  const terminar =
+    enElUltimo && !esperandoAjito && turnos[hasta]?.espera.tipo !== 'botones' && avance ? (
+      <form action={terminarLeccion} className="pt-2">
+        <input type="hidden" name="numero" value={numero} />
+        <BotonSigue disabled={pendientes > 0}>
+          {avance.estado === 'completada'
+            ? 'Seguir a la siguiente'
+            : 'Terminar la lección'}
+        </BotonSigue>
+        {pendientes > 0 && (
+          <p className="mt-2 text-center text-[13px] text-marca-400">
+            Te falta{pendientes > 1 ? 'n' : ''} {pendientes}{' '}
+            {pendientes > 1 ? 'cosas' : 'cosa'} por contestar más arriba.
+          </p>
+        )}
+      </form>
+    ) : null
+
   return (
     <div className="space-y-4">
       <Link
@@ -252,6 +274,7 @@ export default async function LeccionPage({
               oidos={oidos}
               publicacionDe={publicacionDe}
               forma={forma}
+              alFinal={turno.indice === hasta ? terminar : null}
               padron={{
                 nombre: empleado.nombre_completo,
                 cargo: empleado.cargo,
@@ -261,22 +284,6 @@ export default async function LeccionPage({
             />
           ))}
 
-          {enElUltimo && !esperandoAjito && turnos[hasta]?.espera.tipo !== 'botones' && (
-            <form action={terminarLeccion} className="pt-2">
-              <input type="hidden" name="numero" value={numero} />
-              <BotonSigue disabled={pendientes > 0}>
-                {avance.estado === 'completada'
-                  ? 'Seguir a la siguiente'
-                  : 'Terminar la lección'}
-              </BotonSigue>
-              {pendientes > 0 && (
-                <p className="mt-2 text-center text-[13px] text-marca-400">
-                  Te falta{pendientes > 1 ? 'n' : ''} {pendientes}{' '}
-                  {pendientes > 1 ? 'cosas' : 'cosa'} por contestar más arriba.
-                </p>
-              )}
-            </form>
-          )}
         </>
       )}
     </div>
@@ -300,6 +307,7 @@ function TurnoVista({
   publicacionDe,
   forma,
   padron,
+  alFinal,
 }: {
   turno: Turno
   esActual: boolean
@@ -324,6 +332,8 @@ function TurnoVista({
   forma: string
   /** Lo que dice Capital Humano de quien oye, para la tarjeta de la lección 0. */
   padron: Padron
+  /** Lo que cierra la lección, si este turno es el último: «Terminar la lección». */
+  alFinal?: ReactNode
 }) {
   const bloques = segunInterruptor(turno.bloques, asistenteLibre)
   const primerAudio = bloques.findIndex((b) => b.tipo === 'audio')
@@ -335,128 +345,151 @@ function TurnoVista({
   const noSoyYo = conPadron && !esFinal ? opciones.find((o) => /^no\b/i.test(o)) : undefined
   const siSoyYo = noSoyYo ? opciones.find((o) => o !== noSoyYo) : undefined
 
-  return (
-    <section className="space-y-3">
-      {bloques.map((bloque, i) => {
-        if (bloque.tipo === 'audio') {
-          return (
-            <AudioAjito
-              key={i}
-              src={`/canal/adiestramiento/${numero}/audio/${bloque.id}`}
-              // El título de la sección solo va en el primer audio que la
-              // abre. Ni el segundo audio del mismo turno ni el turno que
-              // retoma la misma sección lo repiten: dos rótulos iguales
-              // seguidos se leen como un error.
-              etiqueta={i === primerAudio && !turno.continuacion ? turno.titulo : 'Ajito sigue'}
-              segundos={bloque.segundos}
-              oido={oidos.has(bloque.id)}
-              alOir={marcarOido.bind(null, numero, bloque.id)}
-              orden={
-                ordenAudio.has(bloque.id)
-                  ? { numero: ordenAudio.get(bloque.id) ?? 0, total: ordenAudio.size }
-                  : undefined
-              }
-            />
-          )
-        }
-
-        if (bloque.tipo === 'texto') {
-          // Cuando el turno termina en ejercicio, esta línea dice lo mismo que
-          // la consigna de la tarjeta —«Mándame una nota de voz» y debajo
-          // «Nancy, mándame una nota de voz contándome…»—. En el chat del guion
-          // hace falta porque el input va aparte; aquí sobra.
-          if (turno.espera.tipo === 'ejercicio') return null
-          return (
-            <p key={i} className="px-1 text-[15px] leading-relaxed text-marca-700">
-              {bloque.texto}
-            </p>
-          )
-        }
-
-        if (bloque.tipo === 'pieza' && bloque.clase === 'padron') {
-          return <PadronVista key={i} {...padron} />
-        }
-
-        if (bloque.tipo === 'pieza' && bloque.clase === 'ejemplos' && bloque.lineas.length) {
-          return <EjemplosVista key={i} numero={numero} ejemplos={bloque.lineas} />
-        }
-
-        // La ficha de bolsillo es lo que la persona se guarda en la galería y
-        // vuelve a mirar en el bus dos semanas después. Las demás piezas —la
-        // portada cuadrada, las fotos autorizadas— no se dibujan: la portada ya
-        // la hace el encabezado de arriba, y las fotos están por tomar en Cagua.
-        if (bloque.tipo === 'pieza' && bloque.clase === 'ficha' && bloque.lineas.length > 1) {
-          return (
-            <FichaVista
-              key={i}
-              numero={numero}
-              pieza={`${String(numero).padStart(2, '0')}${bloque.sufijo}`}
-              titulo={bloque.lineas[0]}
-            />
-          )
-        }
-
-        return null
-      })}
-
-      {esActual && noSoyYo && siSoyYo && (
-        <QuienEres numero={numero} turno={turno.indice} si={siSoyYo} no={noSoyYo} />
-      )}
-
-      {turno.espera.tipo === 'botones' && esActual && !noSoyYo && (
-        <div className="flex flex-wrap gap-2">
-          {turno.espera.opciones.map((opcion) =>
-            // «Publicarlo en el canal», debajo del escudo, publica de verdad: ver
-            // `PublicarEscudo`. Hasta el 27 de septiembre avanzaba y ya.
-            /^publicarlo en el canal$/i.test(opcion) && !esFinal ? (
-              <PublicarEscudo key={opcion} numero={numero} turno={turno.indice} etiqueta={opcion} />
-            ) : esSalida(opcion) ? (
-              <Link
-                key={opcion}
-                href="/canal/adiestramiento"
-                className="btn-canal btn-canal-suave flex-1"
-              >
-                {opcion}
-              </Link>
-            ) : (
-              // En el último turno, «Sigo ahora» ES terminar la lección: poner
-              // debajo otro botón que dice lo mismo es preguntar dos veces.
-              <form
-                key={opcion}
-                action={esFinal ? terminarLeccion : avanzarPaso}
-                className="min-w-[45%] flex-1"
-              >
-                <input type="hidden" name="numero" value={numero} />
-                <input type="hidden" name="turno" value={turno.indice} />
-                <BotonSigue disabled={esFinal && pendientes > 0}>{opcion}</BotonSigue>
-              </form>
-            )
-          )}
-        </div>
-      )}
-
-      {turno.espera.tipo === 'botones' && esActual && esFinal && pendientes > 0 && (
-        <p className="text-center text-[13px] text-marca-400">
-          Te falta{pendientes > 1 ? 'n' : ''} {pendientes}{' '}
-          {pendientes > 1 ? 'cosas' : 'cosa'} por contestar más arriba.
+  // Lo que pinta cada bloque que no es audio.
+  const pintar = (bloque: (typeof bloques)[number], i: number): ReactNode => {
+    if (bloque.tipo === 'texto') {
+      // Cuando el turno termina en ejercicio, esta línea dice lo mismo que
+      // la consigna de la tarjeta —«Mándame una nota de voz» y debajo
+      // «Nancy, mándame una nota de voz contándome…»—. En el chat del guion
+      // hace falta porque el input va aparte; aquí sobra.
+      if (turno.espera.tipo === 'ejercicio') return null
+      return (
+        <p key={i} className="px-1 text-[15px] leading-relaxed text-marca-700">
+          {bloque.texto}
         </p>
-      )}
+      )
+    }
 
-      {turno.espera.tipo === 'ejercicio' && turno.espera.clave && (
-        <EjercicioVista
+    if (bloque.tipo === 'pieza' && bloque.clase === 'padron') {
+      return <PadronVista key={i} {...padron} />
+    }
+
+    if (bloque.tipo === 'pieza' && bloque.clase === 'ejemplos' && bloque.lineas.length) {
+      return <EjemplosVista key={i} numero={numero} ejemplos={bloque.lineas} />
+    }
+
+    // La ficha de bolsillo es lo que la persona se guarda en la galería y
+    // vuelve a mirar en el bus dos semanas después. Las demás piezas —la
+    // portada cuadrada, las fotos autorizadas— no se dibujan: la portada ya
+    // la hace el encabezado de arriba, y las fotos están por tomar en Cagua.
+    if (bloque.tipo === 'pieza' && bloque.clase === 'ficha' && bloque.lineas.length > 1) {
+      return (
+        <FichaVista
+          key={i}
           numero={numero}
-          nombre={nombre}
-          clave={turno.espera.clave}
-          catalogo={catalogo}
-          pregunta={pregunta}
-          respuesta={contestadas.get(turno.espera.clave) ?? null}
-          leToca={turno.espera.clave === siguienteSinDevolucion}
-          oida={oidos.has(`devolucion-${turno.espera.clave}`)}
-          publicacion={publicacionDe.get(contestadas.get(turno.espera.clave)?.id ?? '') ?? null}
-          forma={forma}
+          pieza={`${String(numero).padStart(2, '0')}${bloque.sufijo}`}
+          titulo={bloque.lineas[0]}
         />
-      )}
-    </section>
+      )
+    }
+
+    return null
+  }
+
+  // Cada audio con lo que viene detrás de él, hasta el próximo audio. Así
+  // `TurnoProgresivo` puede abrir el turno de a poco, a medida que se oye.
+  const antes: ReactNode[] = []
+  const segmentos: { audio: AudioDelTurno; resto: ReactNode[] }[] = []
+  bloques.forEach((bloque, i) => {
+    if (bloque.tipo === 'audio') {
+      segmentos.push({
+        audio: {
+          id: bloque.id,
+          src: `/canal/adiestramiento/${numero}/audio/${bloque.id}`,
+          // El título de la sección solo va en el primer audio que la abre. Ni
+          // el segundo audio del mismo turno ni el turno que retoma la misma
+          // sección lo repiten: dos rótulos iguales seguidos se leen como error.
+          etiqueta: i === primerAudio && !turno.continuacion ? turno.titulo : 'Ajito sigue',
+          segundos: bloque.segundos,
+          oido: oidos.has(bloque.id),
+          alOir: marcarOido.bind(null, numero, bloque.id),
+          orden: ordenAudio.has(bloque.id)
+            ? { numero: ordenAudio.get(bloque.id) ?? 0, total: ordenAudio.size }
+            : undefined,
+        },
+        resto: [],
+      })
+      return
+    }
+    const nodo = pintar(bloque, i)
+    if (!nodo) return
+    if (segmentos.length) segmentos[segmentos.length - 1].resto.push(nodo)
+    else antes.push(nodo)
+  })
+
+  // Un turno cuyo ejercicio ya se contestó se ve entero: ya se pasó.
+  const contestada =
+    turno.espera.tipo === 'ejercicio' &&
+    Boolean(turno.espera.clave && contestadas.has(turno.espera.clave))
+
+  return (
+    <TurnoProgresivo
+      activo={esActual && !contestada}
+      antes={antes}
+      segmentos={segmentos.map((s) => ({ audio: s.audio, resto: s.resto }))}
+      final={
+        <>
+          {esActual && noSoyYo && siSoyYo && (
+            <QuienEres numero={numero} turno={turno.indice} si={siSoyYo} no={noSoyYo} />
+          )}
+
+          {turno.espera.tipo === 'botones' && esActual && !noSoyYo && (
+            <div className="flex flex-wrap gap-2">
+              {turno.espera.opciones.map((opcion) =>
+                // «Publicarlo en el canal», debajo del escudo, publica de verdad: ver
+                // `PublicarEscudo`. Hasta el 27 de septiembre avanzaba y ya.
+                /^publicarlo en el canal$/i.test(opcion) && !esFinal ? (
+                  <PublicarEscudo key={opcion} numero={numero} turno={turno.indice} etiqueta={opcion} />
+                ) : esSalida(opcion) ? (
+                  <Link
+                    key={opcion}
+                    href="/canal/adiestramiento"
+                    className="btn-canal btn-canal-suave flex-1"
+                  >
+                    {opcion}
+                  </Link>
+                ) : (
+                  // En el último turno, «Sigo ahora» ES terminar la lección: poner
+                  // debajo otro botón que dice lo mismo es preguntar dos veces.
+                  <form
+                    key={opcion}
+                    action={esFinal ? terminarLeccion : avanzarPaso}
+                    className="min-w-[45%] flex-1"
+                  >
+                    <input type="hidden" name="numero" value={numero} />
+                    <input type="hidden" name="turno" value={turno.indice} />
+                    <BotonSigue disabled={esFinal && pendientes > 0}>{opcion}</BotonSigue>
+                  </form>
+                )
+              )}
+            </div>
+          )}
+
+          {turno.espera.tipo === 'botones' && esActual && esFinal && pendientes > 0 && (
+            <p className="text-center text-[13px] text-marca-400">
+              Te falta{pendientes > 1 ? 'n' : ''} {pendientes}{' '}
+              {pendientes > 1 ? 'cosas' : 'cosa'} por contestar más arriba.
+            </p>
+          )}
+
+          {turno.espera.tipo === 'ejercicio' && turno.espera.clave && (
+            <EjercicioVista
+              numero={numero}
+              nombre={nombre}
+              clave={turno.espera.clave}
+              catalogo={catalogo}
+              pregunta={pregunta}
+              respuesta={contestadas.get(turno.espera.clave) ?? null}
+              leToca={turno.espera.clave === siguienteSinDevolucion}
+              oida={oidos.has(`devolucion-${turno.espera.clave}`)}
+              publicacion={publicacionDe.get(contestadas.get(turno.espera.clave)?.id ?? '') ?? null}
+              forma={forma}
+            />
+          )}
+          {alFinal}
+        </>
+      }
+    />
   )
 }
 

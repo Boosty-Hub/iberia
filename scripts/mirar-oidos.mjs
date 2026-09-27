@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import { chromium, devices } from 'playwright'
 import { mkdir } from 'node:fs/promises'
 import { barrerCarpeta } from './barrer-carpeta.mjs'
+import { oirLoQueFalta } from './oir-lo-que-falta.mjs'
 
 const args = {}
 for (let i = 2; i < process.argv.length; i++) {
@@ -80,18 +81,12 @@ try {
 
   await p.goto(`${BASE}/canal/adiestramiento/0`, { waitUntil: 'domcontentloaded' })
   await p.getByRole('button', { name: /empezar la lecci/i }).click()
-  await p.getByRole('button', { name: 'Vamos' }).waitFor()
+  await p.locator('[data-estado]').first().waitFor()
 
-  // Al final del primer audio: se arrastra a 0:33 de 0:35 y se le da play.
-  const barra = p.locator('input.barra-audio').first()
-  await barra.evaluate((el) => {
-    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set
-    setter.call(el, '33')
-    el.dispatchEvent(new Event('input', { bubbles: true }))
-  })
-  await p.getByRole('button', { name: /^Escuchar/ }).first().click()
-  await p.locator('[data-estado="oido"]').first().waitFor({ timeout: 30000 })
-  exigir(true, 'al terminar, el primer audio queda con su ✓')
+  // Se oye la mitad del primer audio: es lo que lo marca como oído.
+  await oirLoQueFalta(p)
+  await p.getByRole('button', { name: 'Vamos' }).waitFor({ timeout: 30000 })
+  exigir(true, 'oída la mitad del primer audio, sale «Vamos»')
   await p.waitForTimeout(2500)
 
   const { data: avance } = await admin.from('avances').select('oidos').eq('matricula_id', matricula.id).maybeSingle()

@@ -20,6 +20,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { oirLoQueFalta } from './oir-lo-que-falta.mjs'
 import { chromium, devices } from 'playwright'
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -365,6 +366,10 @@ try {
       // Los ejercicios salen por defecto en voz o en foto. Sin micrófono ni
       // cámara en el navegador de pruebas, se toma la salida escrita — que es
       // justamente la que tiene que estar siempre disponible.
+      // El turno se abre a medida que se oye: se oye lo que falta antes de
+      // buscar qué contestar o qué tocar.
+      await oirLoQueFalta(pagina)
+
       const prefiero = pagina.getByRole('button', { name: /prefiero (escribirlo|cont[aá]rselo)/i })
       if (await prefiero.count()) await prefiero.last().click()
 
