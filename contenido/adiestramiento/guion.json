@@ -922,8 +922,8 @@
             {
               "tipo": "audio",
               "id": "7",
-              "texto": "La pregunta de hoy, hablando.\n\nEn tu trabajo, ¿hay algo que sería más fácil de explicar con un dibujo que con\npalabras? ¿Qué cosa?",
-              "segundos": 18
+              "texto": "La pregunta de hoy, hablando.\n\nEn tu trabajo, ¿hay algo que sería más fácil de explicar con un dibujo que con\npalabras? ¿Qué cosa? Cuéntamelo y te lo dibujo.",
+              "segundos": 10
             },
             {
               "tipo": "texto",
@@ -933,7 +933,7 @@
               "tipo": "ejercicio",
               "indice": 3,
               "clave": "campo",
-              "nota": "voz o texto"
+              "nota": "voz o texto → devuelve imagen, si hay qué dibujar"
             }
           ]
         },

@@ -9,7 +9,7 @@ import {
 import { devolver, sacarApodo, type Contexto } from '@/lib/ajito'
 import { empleadoActual } from '@/lib/canal'
 import { ponerVoz } from '@/lib/devolucion-hablada'
-import { DIBUJOS } from '@/lib/dibujar'
+import { dibujaEn } from '@/lib/dibujar'
 import { vozDe } from '@/lib/voz'
 import { BUCKET_RESPUESTAS } from '@/lib/storage'
 import { createClient } from '@/lib/supabase/server'
@@ -161,8 +161,10 @@ export async function POST(
 
   // En la lección 4 lo que Ajito mira es **su propio dibujo**, que ya hizo la
   // ruta `dibujar` —va primero, en su propia petición—. Sin dibujo todavía no hay
-  // nada que comentar: se le dice al navegador que dibuje primero.
-  if (DIBUJOS.has(clavePaso) && !esCampo) {
+  // nada que comentar: se le dice al navegador que dibuje primero. En la pregunta
+  // de campo el dibujo es un extra: si no lo hay, se contesta sin él.
+  const dibuja = dibujaEn(clavePaso, leccion.forma)
+  if (dibuja && (respuesta.dibujo || !esCampo)) {
     if (!respuesta.dibujo) {
       return NextResponse.json({ error: 'Falta el dibujo', falta: 'dibujo' }, { status: 409 })
     }
@@ -208,7 +210,7 @@ export async function POST(
       texto: respuesta.texto || 'No le puso nota: solo la foto.',
       entrada: respuesta.entrada as Contexto['entrada'],
       imagen,
-      imagenEsDibujo: DIBUJOS.has(clavePaso) && !esCampo && Boolean(respuesta.dibujo),
+      imagenEsDibujo: dibuja && Boolean(respuesta.dibujo),
     }),
     clavePaso === 'apodo' && !esCampo && respuesta.texto
       ? sacarApodo(respuesta.texto)

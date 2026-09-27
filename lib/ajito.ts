@@ -394,7 +394,13 @@ export async function devolver(contexto: Contexto): Promise<Devolucion> {
   const cliente = new Anthropic({ apiKey: clave, baseURL: 'https://api.anthropic.com' })
 
   const instruccion = contexto.esCampo
-    ? INSTRUCCION_CAMPO
+    ? INSTRUCCION_CAMPO +
+      // En la lección 4 la pregunta de campo también se dibuja (`dibujaEn`): el
+      // dibujo es un extra, y lo que manda sigue siendo lo de arriba.
+      (contexto.imagenEsDibujo
+        ? ' Además, ya dibujaste lo que contó: es la imagen que tienes delante. Nómbrale en ' +
+          'una sola frase qué quedó en el dibujo, sin describir nada que no esté ahí.'
+        : '')
     : (INSTRUCCION[contexto.clave] ??
       'Reconoce concreto lo que te mandó y devuélveselo mejor hecho, según la forma de ' +
         'la devolución.')

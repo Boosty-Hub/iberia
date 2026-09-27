@@ -172,7 +172,7 @@ export const PREGUNTA_CAMPO: Partial<Record<FormaIA, PreguntaPorFamilia>> = {
   },
   dibuja: {
     generico:
-      'En tu trabajo, ¿hay algo que sería más fácil de explicar con un dibujo que con palabras? ¿Qué cosa?',
+      'En tu trabajo, ¿hay algo que sería más fácil de explicar con un dibujo que con palabras? ¿Qué cosa? Cuéntamelo y te lo dibujo.',
   },
   habla: {
     generico:

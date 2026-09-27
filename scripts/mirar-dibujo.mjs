@@ -208,6 +208,25 @@ try {
   await tarjeta.scrollIntoViewIfNeeded()
   await p.screenshot({ path: `${SALIDA}/06-feed.png` })
 
+  // --- 4.7 · la pregunta de campo también se dibuja --------------------------------
+  await p.goto(`${BASE}/canal/adiestramiento/4`, { waitUntil: 'domcontentloaded' })
+  await avanzarHasta('[data-ejercicio="campo"]')
+  const campo = p.locator('[data-ejercicio="campo"]')
+  // Sale para contestar hablando; aquí se contesta escrito.
+  await campo.getByRole('button', { name: 'Prefiero escribirlo' }).click()
+  await pedir(
+    'campo',
+    'Cómo se acomodan las cajas en la paleta: abajo las grandes cruzadas, arriba las chiquitas, y el film se envuelve de abajo hacia arriba'
+  )
+  await p.locator('[data-dibujo="campo"]').waitFor({ timeout: 60000 })
+  await cargada('[data-dibujo="campo"]')
+  await p.locator('[data-devolucion="campo"] [data-devolucion-texto]').waitFor({ timeout: 60000 })
+  const deCampo = await p.locator('[data-devolucion="campo"] [data-devolucion-texto]').innerText()
+  exigir(/equipo/i.test(deCampo), `la de campo sale dibujada y con su devolución de siempre: «${deCampo.slice(0, 140)}…»`)
+  exigir((await campo.getByRole('button', { name: 'Pedir otro dibujo' }).count()) === 0, 'y sin «Pedir otro dibujo»')
+  await p.locator('[data-dibujo="campo"]').scrollIntoViewIfNeeded()
+  await p.screenshot({ path: `${SALIDA}/07-campo.png` })
+
   const { data: filas } = await admin
     .from('respuestas')
     .select('clave_paso, dibujo, dibujo_veredicto')
@@ -215,9 +234,55 @@ try {
     .order('created_at')
   exigir(
     JSON.stringify(filas?.map((f) => [f.clave_paso, f.dibujo_veredicto, Boolean(f.dibujo)])) ===
-      JSON.stringify([['libre', 'persona', false], ['libre', 'va', true], ['escudo', 'va', true]]),
+      JSON.stringify([['libre', 'persona', false], ['libre', 'va', true], ['escudo', 'va', true], ['campo', 'va', true]]),
     `en la base, la negativa y los dos dibujos: ${JSON.stringify(filas?.map((f) => [f.clave_paso, f.dibujo_veredicto, Boolean(f.dibujo)]))}`
   )
+
+  // --- la de campo sin nada que dibujar: sin dibujo y sin negativa ----------------
+  {
+    const correo2 = `${PREFIJO}nada@iberia.invalid`
+    const { data: creado2 } = await admin.auth.admin.createUser({
+      email: correo2, email_confirm: true,
+      user_metadata: { nombre_completo: 'Luis Mora', organizacion: 'iberia', rol: 'lector' },
+    })
+    const { data: ficha2 } = await admin.from('empleados').insert({
+      cedula: `${CEDULA}nada`, nombre_completo: 'Luis Mora', cargo: 'MONTACARGUISTA',
+      nivel: 'planta', tipo_nomina: 'diaria', sede: 'cagua', familia_oficio: 'almacen', perfil_id: creado2.user.id,
+    }).select('id').single()
+    const { data: matricula2 } = await admin
+      .from('matriculas')
+      .insert({ curso_id: curso.id, empleado_id: ficha2.id, familia_oficio: 'almacen', nombre_corto: 'Luis' })
+      .select('id')
+      .single()
+    const { data: leccion4 } = await admin.from('lecciones').select('id').eq('curso_id', curso.id).eq('numero', 4).single()
+    await admin.from('respuestas').insert({
+      matricula_id: matricula2.id, leccion_id: leccion4.id, clave_paso: 'campo', es_pregunta_campo: true,
+      entrada: 'texto', texto: 'No, la verdad no se me ocurre nada', familia_oficio: 'almacen',
+    })
+    const sesion2 = await sesion(correo2)
+    const cookie = cookies(sesion2).map((c) => `${c.name}=${c.value}`).join('; ')
+    const pedirA = async (ruta) => {
+      const r = await fetch(`${BASE}/canal/adiestramiento/4/${ruta}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Cookie: cookie },
+        body: JSON.stringify({ clave_paso: 'campo' }),
+      })
+      return { status: r.status, cuerpo: await r.json().catch(() => ({})) }
+    }
+    const dibujo2 = await pedirA('dibujar')
+    exigir(dibujo2.cuerpo.sinDibujo === true, `«no se me ocurre nada»: sin dibujo ${JSON.stringify(dibujo2.cuerpo)}`)
+    const devolucion2 = await pedirA('devolver')
+    exigir(
+      devolucion2.status === 200 && !/no te lo voy a hacer|no las dibujo/i.test(devolucion2.cuerpo.texto ?? ''),
+      `y la pregunta se contesta sin la negativa: «${String(devolucion2.cuerpo.texto ?? '').slice(0, 120)}…»`
+    )
+    const { data: fila2 } = await admin
+      .from('respuestas')
+      .select('dibujo, dibujo_veredicto, devolucion')
+      .eq('matricula_id', matricula2.id)
+      .single()
+    exigir(!fila2?.dibujo && fila2?.dibujo_veredicto === 'nada' && Boolean(fila2?.devolucion), 'en la base: veredicto «nada», sin dibujo, con devolución')
+  }
 } finally {
   await nav.close()
   await limpiar()

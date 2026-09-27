@@ -10,6 +10,16 @@
 export const DIBUJOS = new Set(['libre', 'escudo'])
 
 /**
+ * Si Ajito dibuja en este ejercicio: los dos de la lección 4 y, desde el 27 de
+ * septiembre de 2026, también su pregunta de campo —«¿hay algo en tu trabajo
+ * que sería más fácil de explicar con un dibujo?»—. Ahí el dibujo es un extra:
+ * si no hay nada que dibujar, se contesta la pregunta sin él.
+ */
+export function dibujaEn(clave: string, forma: string | null | undefined): boolean {
+  return DIBUJOS.has(clave) || (clave === 'campo' && forma === 'dibuja')
+}
+
+/**
  * Elegido por Gabriel el 27 de septiembre de 2026, entre cuatro medidos (ver
  * `contenido/adiestramiento/herramientas.md`): 12,5 s a calidad media. Sale
  * casi foto aunque se pida otra cosa y tiende a agregar banderas y letreros que

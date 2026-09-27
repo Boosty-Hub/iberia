@@ -173,6 +173,11 @@ cuando se le pidió «sin letras». Las dos cosas van dichas en cada pedido.
 audios en 101 carpetas sin dueño, y los dos scripts de esta mañana limpiaban un bucket que no
 existe. Se barrieron, las limpiezas ahora los borran, y `probar:supabase` avisa si queda alguno.
 
+**Y la pregunta de campo de la lección 4 también se dibuja** —«¿hay algo en tu trabajo que sería
+más fácil de explicar con un dibujo?»—, a pedido de Gabriel. Es un extra: si la respuesta no
+describe nada dibujable, Ajito la contesta como siempre, sin dibujo y sin negativa. El audio 7 dice
+ahora «Cuéntamelo y te lo dibujo», regrabado en las dos voces.
+
 **Y el escudo se publica en el feed**, a pedido de Gabriel: «Publicarlo en el canal» lo pone en
 «Nuestra gente» como «Este es el escudo que construí con Ajito», firmado por quien lo hizo. Hasta
 ahí el botón solo avanzaba, igual que «Solo para mí». Como un trabajador de planta no puede

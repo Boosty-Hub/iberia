@@ -311,6 +311,13 @@ y una ruedita en vez de piernas.
   - **Los tres ejemplos de «Muéstrame»** salen del bloque `🖼 Tres ejemplos ya hechos` del
     guion (clase `ejemplos` en `lib/guion.ts`) y los dibuja `generar:ejemplos`, que es
     incremental y los sube al bucket. `scripts/mirar-dibujo.mjs` recorre la lección entera.
+  - **La pregunta de campo de la lección 4 también se dibuja** (`dibujaEn()` en
+    `lib/dibujo.ts`), pero ahí el dibujo es un extra: no se pidió un dibujo, se contestó qué
+    cosa del trabajo sería más fácil de explicar con uno. El filtro tiene un cuarto veredicto,
+    `nada` —no describe nada dibujable—, y con `nada`, `persona` o `no_va` Ajito contesta la
+    pregunta **sin dibujo y sin la negativa**, que no tendría a qué responder. Con dibujo, la
+    devolución es la de siempre de la pregunta de campo más una frase sobre el dibujo. El dibujo
+    queda privado, como la respuesta: no se publica y no hay «Pedir otro dibujo».
   - **«Publicarlo en el canal», debajo del escudo, lo publica en el feed** —«Nuestra gente»,
     «Este es el escudo que construí con Ajito», firmado por quien lo hizo— y «Solo para mí»
     no publica. Publicar en el feed es de pocos (`puede_publicar()`) y el escudo vive en la

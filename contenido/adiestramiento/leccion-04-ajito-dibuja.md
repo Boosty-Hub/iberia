@@ -192,18 +192,27 @@ de Gabriel; antes los dos botones solo avanzaban.)*
 
 ## 4.7 · La pregunta de campo
 
-🔊 **Audio 7** · 18 s
+🔊 **Audio 7** · 10 s
 
 > La pregunta de hoy, hablando.
 >
 > En tu trabajo, ¿hay algo que sería más fácil de explicar con un dibujo que con
-> palabras? ¿Qué cosa?
+> palabras? ¿Qué cosa? Cuéntamelo y te lo dibujo.
 
 💬 `Mándame un audio.`
 
-🎯 `campo` — voz o texto
+🎯 `campo` — voz o texto → devuelve imagen, si hay qué dibujar
 
-↩️ 🔊 · 8 s — «Anotado.»
+↩️ 🖼 + 🔊 — Si lo que contó se puede dibujar, Ajito lo dibuja y lo nombra en una
+frase; el resto es la devolución de toda pregunta de campo —no la evalúa, y le
+recuerda que eso lo lee el equipo, sin su nombre—. *(27 de septiembre de 2026, pedido
+de Gabriel.)*
+
+*Aquí no se pidió un dibujo: se contestó qué cosa del trabajo sería más fácil de
+explicar con uno. Si no describe nada dibujable —«no se me ocurre»—, o nombra a
+alguien de verdad, o no va, Ajito contesta sin dibujo y **sin la negativa de 4.3**,
+que no tendría a qué responder. El dibujo queda privado, como la respuesta: no se
+publica.*
 
 ---
 

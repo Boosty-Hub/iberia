@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { CURSO } from '@/lib/adiestramiento'
 import { empleadoActual } from '@/lib/canal'
 import { ponerVoz } from '@/lib/devolucion-hablada'
-import { DIBUJOS, NO_VA, dibujar, revisarPedido } from '@/lib/dibujar'
+import { NO_VA, dibujaEn, dibujar, revisarPedido } from '@/lib/dibujar'
 import {
   BUCKET_ADIESTRAMIENTO,
   BUCKET_RESPUESTAS,
@@ -27,6 +27,11 @@ import { vozDe } from '@/lib/voz'
  *    su respuesta. El filtro del generador queda detrás; si frena, sale el «no
  *    va» general.
  *
+ * **En la pregunta de campo de la lección 4 el dibujo es un extra.** No se pidió
+ * un dibujo: se contestó qué cosa del trabajo sería más fácil de explicar con
+ * uno. Si no describe nada dibujable, o no va, no hay negativa: se marca el
+ * veredicto y `devolver` contesta la pregunta sin dibujo, como en las demás.
+ *
  * Es idempotente: si ya hay dibujo o ya hay devolución, no vuelve a dibujar ni
  * a cobrar.
  */
@@ -46,7 +51,7 @@ export async function POST(
   const cuerpo = (await peticion.json().catch(() => null)) as { clave_paso?: string } | null
   const clavePaso = String(cuerpo?.clave_paso ?? '').trim()
 
-  if (!Number.isInteger(numero) || numero < 0 || !DIBUJOS.has(clavePaso)) {
+  if (!Number.isInteger(numero) || numero < 0 || !/^[\w-]{1,40}$/.test(clavePaso)) {
     return NextResponse.json({ error: 'Petición inválida' }, { status: 400 })
   }
 
@@ -70,7 +75,7 @@ export async function POST(
       .maybeSingle(),
     supabase
       .from('lecciones')
-      .select('id')
+      .select('id, forma')
       .eq('curso_id', curso.id)
       .eq('numero', numero)
       .eq('activa', true)
@@ -79,10 +84,14 @@ export async function POST(
   if (!matricula || !leccion) {
     return NextResponse.json({ error: 'No hay lección' }, { status: 404 })
   }
+  if (!dibujaEn(clavePaso, leccion.forma)) {
+    return NextResponse.json({ error: 'Ese ejercicio no se dibuja' }, { status: 400 })
+  }
+  const esCampo = clavePaso === 'campo'
 
   const { data: respuesta } = await supabase
     .from('respuestas')
-    .select('id, texto, dibujo, devolucion')
+    .select('id, texto, dibujo, dibujo_veredicto, devolucion')
     .eq('matricula_id', matricula.id)
     .eq('leccion_id', leccion.id)
     .eq('clave_paso', clavePaso)
@@ -96,10 +105,14 @@ export async function POST(
   if (respuesta.dibujo || respuesta.devolucion) {
     return NextResponse.json({ dibujo: Boolean(respuesta.dibujo), listo: true })
   }
+  // En la de campo, ya se revisó y no había que dibujar: se sigue sin dibujo.
+  if (esCampo && respuesta.dibujo_veredicto && respuesta.dibujo_veredicto !== 'va') {
+    return NextResponse.json({ sinDibujo: true })
+  }
 
   // --- ¿va? ---------------------------------------------------------------------
 
-  const veredicto = await revisarPedido(respuesta.texto)
+  const veredicto = await revisarPedido(respuesta.texto, esCampo)
   if (!veredicto) {
     // Sin poder revisar no se dibuja: con doscientas personas y nadie mirando,
     // mejor un reintento que un dibujo sin filtro.
@@ -116,7 +129,16 @@ export async function POST(
     return NextResponse.json({ rechazado: true })
   }
 
-  if (veredicto !== 'va') return noVa(veredicto)
+  // La pregunta de campo no es un pedido de dibujo: sin dibujo, sin negativa.
+  const sinDibujo = async (cual: 'persona' | 'no_va' | 'nada') => {
+    await supabase.from('respuestas').update({ dibujo_veredicto: cual }).eq('id', respuesta.id)
+    return NextResponse.json({ sinDibujo: true })
+  }
+
+  if (veredicto !== 'va') {
+    if (esCampo) return sinDibujo(veredicto)
+    return noVa(veredicto === 'nada' ? 'no_va' : veredicto)
+  }
 
   // --- el dibujo ----------------------------------------------------------------
 
@@ -128,7 +150,7 @@ export async function POST(
 
   const hecho = await dibujar(respuesta.texto, clavePaso, referencia)
   if (!hecho.ok) {
-    if (hecho.motivo === 'rechazado') return noVa('no_va')
+    if (hecho.motivo === 'rechazado') return esCampo ? sinDibujo('no_va') : noVa('no_va')
     console.error(`[dibujo] ${hecho.motivo} · ${clavePaso}:`, hecho.detalle ?? '')
     return NextResponse.json(
       { error: 'Ajito no pudo dibujar', motivo: hecho.motivo, detalle: hecho.detalle },

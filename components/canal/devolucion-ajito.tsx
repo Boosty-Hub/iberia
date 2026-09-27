@@ -100,7 +100,14 @@ export function DevolucionAjito({
           body: JSON.stringify({ clave_paso: clave }),
         })
         if (!dibujo.ok) throw new Error()
-        const hecho = (await dibujo.json()) as { dibujo?: boolean; rechazado?: boolean; listo?: boolean }
+        // `sinDibujo`: la pregunta de campo no describía nada dibujable, o no iba. Ahí
+        // no hay negativa: se sigue a la devolución, que la contesta sin dibujo.
+        const hecho = (await dibujo.json()) as {
+          dibujo?: boolean
+          rechazado?: boolean
+          listo?: boolean
+          sinDibujo?: boolean
+        }
         // El dibujo sale en pantalla apenas está, mientras Ajito lo comenta.
         router.refresh()
         // «No va»: la devolución ya quedó guardada —el texto del guion— y no hay

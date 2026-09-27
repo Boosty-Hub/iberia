@@ -22,7 +22,7 @@ import {
   type FormaIA,
 } from '@/lib/adiestramiento'
 import { requerirEmpleado } from '@/lib/canal'
-import { DIBUJOS } from '@/lib/dibujar'
+import { dibujaEn } from '@/lib/dibujar'
 import { esSalida, segunInterruptor, turnosDe, type LeccionGuion, type Turno } from '@/lib/guion'
 import { createClient } from '@/lib/supabase/server'
 import { avanzarPaso, empezarLeccion, marcarOido, terminarLeccion } from '../acciones'
@@ -251,6 +251,7 @@ export default async function LeccionPage({
               ordenAudio={ordenAudio}
               oidos={oidos}
               publicacionDe={publicacionDe}
+              forma={forma}
               padron={{
                 nombre: empleado.nombre_completo,
                 cargo: empleado.cargo,
@@ -297,6 +298,7 @@ function TurnoVista({
   ordenAudio,
   oidos,
   publicacionDe,
+  forma,
   padron,
 }: {
   turno: Turno
@@ -318,6 +320,8 @@ function TurnoVista({
   oidos: Set<string>
   /** Respuesta → publicación del canal, para los escudos ya publicados. */
   publicacionDe: Map<string, string>
+  /** La forma de la lección: en la 4, «dibuja», también se dibuja la de campo. */
+  forma: string
   /** Lo que dice Capital Humano de quien oye, para la tarjeta de la lección 0. */
   padron: Padron
 }) {
@@ -449,6 +453,7 @@ function TurnoVista({
           leToca={turno.espera.clave === siguienteSinDevolucion}
           oida={oidos.has(`devolucion-${turno.espera.clave}`)}
           publicacion={publicacionDe.get(contestadas.get(turno.espera.clave)?.id ?? '') ?? null}
+          forma={forma}
         />
       )}
     </section>
@@ -578,6 +583,7 @@ function EjercicioVista({
   leToca,
   oida,
   publicacion,
+  forma,
 }: {
   numero: number
   nombre: string
@@ -591,6 +597,7 @@ function EjercicioVista({
   oida: boolean
   /** La publicación del canal, si publicó este escudo. */
   publicacion: string | null
+  forma: string
 }) {
   const esCampo = clave === 'campo'
   const delCatalogo = catalogo.get(clave)
@@ -599,7 +606,8 @@ function EjercicioVista({
 
   const hecha = respuesta !== null
   // La lección 4: lo que se contesta es un pedido, y lo que devuelve Ajito, un dibujo.
-  const dibuja = DIBUJOS.has(clave) && !esCampo
+  // En la 4 también la de campo: ahí el dibujo es un extra (ver `dibujaEn`).
+  const dibuja = dibujaEn(clave, forma)
 
   return (
     // `data-ejercicio` no pinta nada: lo lee `capturar:oficios` para comprobar
@@ -684,7 +692,7 @@ function EjercicioVista({
               <span className="underline underline-offset-4">Verlo</span>
             </Link>
           )}
-          {dibuja && respuesta.devolucion && (respuesta.dibujo_veredicto === 'persona' || respuesta.dibujo_veredicto === 'no_va') && (
+          {dibuja && !esCampo && respuesta.devolucion && (respuesta.dibujo_veredicto === 'persona' || respuesta.dibujo_veredicto === 'no_va') && (
             <OtroDibujo
               numero={numero}
               clave={clave}
