@@ -59,6 +59,11 @@ export function DevolucionAjito({
   // React monta dos veces en desarrollo. Sin esto, dos llamadas al modelo por
   // cada ejercicio — y las dos se cobran.
   const pedida = useRef(false)
+  // El texto de ahora, para mirarlo después del refresco sin atarse a un render.
+  const textoActual = useRef(texto)
+  useEffect(() => {
+    textoActual.current = texto
+  }, [texto])
 
   useEffect(() => {
     if (texto || !autoPedir || pedida.current) return
@@ -78,6 +83,13 @@ export function DevolucionAjito({
       })
       if (!respuesta.ok) throw new Error()
       router.refresh()
+      // Red de seguridad: si la ruta dijo que sí y la página sigue sin
+      // devolución, algo no se guardó. En vez de dejar a Ajito «viendo lo que le
+      // mandaste» para siempre —pasó con las notas de voz hasta el 27 de
+      // septiembre—, sale el botón de reintentar.
+      setTimeout(() => {
+        if (!textoActual.current) setEstado('fallo')
+      }, 12000)
     } catch {
       setEstado('fallo')
       // La lección no sigue mientras Ajito no conteste (ver la página). Cuando

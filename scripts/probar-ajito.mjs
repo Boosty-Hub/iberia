@@ -130,6 +130,11 @@ const CASOS = [
     nombre: 'Nancy Ruiz',
     cargo: 'Preparadora de Pruebas',
     entrada: 'voz',
+    // Como las de verdad: la nota de voz deja su .wav en media_url. Hasta el 27
+    // de septiembre la ruta lo tomaba por una foto que no podía abrir y ninguna
+    // respuesta hablada recibía devolución; las pruebas no lo cazaban porque
+    // insertaban la respuesta sin archivo.
+    conNotaDeVoz: true,
     respuesta:
       'Bueno yo saco los ingredientes, aunque antes reviso la formula que me deja Delina en el cuaderno, ' +
       'entonces peso todo en la balanza chiquita porque la grande no agarra los gramos, ah y me lavo las ' +
@@ -409,6 +414,9 @@ try {
       es_pregunta_campo: Boolean(caso.esCampo),
       entrada: caso.entrada,
       texto: caso.respuesta,
+      media_url: caso.conNotaDeVoz
+        ? `respuestas/${ficha.id}/leccion-${String(caso.leccion).padStart(2, '0')}/${caso.clave}-prueba.wav`
+        : null,
       familia_oficio: caso.familia,
       area_id: area?.id ?? null,
     })

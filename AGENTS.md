@@ -245,6 +245,11 @@ y una ruedita en vez de piernas.
   el navegador convierte a WAV 16 kHz en `lib/wav.ts` antes de subir. **Siempre se
   muestra lo que se entendió y se puede corregir antes de guardar**: una transcripción
   mala sin confirmar es una respuesta mala guardada para siempre.
+- ⚠️ **La nota de voz y la foto comparten `respuestas.media_url`** —el `.wav` o la imagen—, así
+  que lo que decide si hay foto es `entrada = 'foto'`, nunca que haya archivo. Hasta el 27 de
+  septiembre de 2026 la ruta de la devolución tomaba el `.wav` por una foto ilegible, contestaba
+  sin guardar y ninguna respuesta hablada recibió devolución. **Toda salida de esa ruta que
+  diga que sí tiene que dejar la devolución guardada**: la lección espera a que exista.
 - **Las notas de voz y las fotos van a otro bucket que los audios de Ajito.** Los audios
   del curso los oye cualquiera con matrícula; lo que manda una persona lo lee ella y los
   editores, nadie más. La política lo comprueba con el dueño metido en la ruta:

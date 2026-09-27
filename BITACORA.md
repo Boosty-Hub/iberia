@@ -134,6 +134,15 @@ ese ejercicio, el modelo chico saca solo el apodo —de «Yorge, así me dicen t
 «Yorge»; de «como tú quieras», nada— y queda en la matrícula antes de que se pinte la consigna
 siguiente. Probado con nueve respuestas, una de ellas un intento de colarle una instrucción.
 
+🔴 **Ninguna respuesta hablada había recibido nunca su devolución.** Lo cazó Gabriel el 27: contestó
+el primer toque con una nota de voz y Ajito se quedó «viendo lo que le mandaste». La nota de voz
+deja su `.wav` en el mismo campo que las fotos, y la ruta de la devolución lo tomaba por una foto
+que no podía abrir: contestaba sin guardar nada. Antes pasaba igual, pero la lección seguía y no se
+notaba; desde que la lección espera a Ajito, la dejaba trancada. Ahora solo es foto lo que se mandó
+como foto, la foto que no se abre también guarda su respuesta, y si una devolución no aparece
+después de doce segundos sale el botón de reintentar. `probar:ajito` no lo cazaba porque metía las
+respuestas de voz sin archivo; ahora una lleva su `.wav`.
+
 ⚠️ **El 27, el informe daba 500 en local y no en producción.** Era el servidor de desarrollo de
 la noche anterior: el sistema le cortó la terminal por falta de memoria, él siguió vivo con la
 salida rota, y cada ruta con parámetro moría al lanzar su proceso hijo. Se cerró y se levantó con

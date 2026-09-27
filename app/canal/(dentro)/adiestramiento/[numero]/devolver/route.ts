@@ -132,11 +132,19 @@ export async function POST(
 
   // --- la foto, si la hubo ---------------------------------------------------
 
+  // ⚠️ Solo lo que se mandó como foto es una foto. La nota de voz también deja su
+  // archivo en `media_url` —el `.wav`, que se guarda con la respuesta—, y hasta el
+  // 27 de septiembre de 2026 esta ruta lo tomaba por una foto que no podía abrir:
+  // contestaba «esa foto me llegó en un formato…» sin guardar nada, y la lección
+  // se quedaba con Ajito «viendo lo que le mandaste» para siempre. Ninguna
+  // respuesta hablada había recibido nunca su devolución.
+  const esFoto = respuesta.entrada === 'foto' && Boolean(respuesta.media_url)
+
   let imagen: Contexto['imagen']
   const extension = respuesta.media_url?.split('.').pop()?.toLowerCase() ?? ''
   const tipo = IMAGENES[extension]
 
-  if (respuesta.media_url && tipo) {
+  if (esFoto && respuesta.media_url && tipo) {
     const { data: archivo } = await supabase.storage
       .from(BUCKET_RESPUESTAS)
       .download(respuesta.media_url)
@@ -149,14 +157,19 @@ export async function POST(
 
   // Una foto que llegó en un formato que el modelo no abre —HEIC de un iPhone
   // que no pasó por la cámara del navegador— no es un fallo del sistema, y no se
-  // le puede decir «algo salió mal». Se le dice qué pasó y qué hacer.
-  if (respuesta.media_url && !tipo) {
-    return NextResponse.json({
-      texto:
-        'Esa foto me llegó en un formato que no puedo abrir. Búscala en la galería y ' +
-        'mándamela otra vez desde ahí, que así sí la veo.',
-      audio: false,
-    })
+  // le puede decir «algo salió mal». Se le dice qué pasó, y **se guarda** como su
+  // devolución: sin guardarla, la lección esperaría para siempre una que no llega.
+  if (esFoto && !tipo) {
+    const texto =
+      'Esa foto me llegó en un formato que no puedo abrir, así que no la pude ver. ' +
+      'Tu respuesta quedó guardada igual. La próxima vez, tómala con la cámara desde ' +
+      'aquí mismo, que así sí me llega.'
+    await supabase
+      .from('respuestas')
+      .update({ devolucion: texto, devolucion_en: new Date().toISOString() })
+      .eq('id', respuesta.id)
+    const ruta = await ponerVoz(supabase, respuesta.id, empleado.id, numero, clavePaso, texto, vozDe(matricula.voz))
+    return NextResponse.json({ texto, audio: Boolean(ruta) })
   }
 
   // --- Ajito -----------------------------------------------------------------
