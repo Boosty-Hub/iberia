@@ -496,6 +496,15 @@ Eso obliga a tratarlo como lo que es —una contraseña—, y de ahí las reglas
   —una vista previa, `www` contra el dominio pelado— la deja sin sesión, en el login que el
   enlace viene a evitar. `NEXT_PUBLIC_SITE_URL` es para los enlaces que **salen** de la app:
   el del mensaje y el de los recordatorios.
+- ⚠️ **Una cuenta creada desde Usuarios no nace enlazada a su ficha**, y el canal cuelga todo
+  de la ficha (`empleados.perfil_id`): sin ella se entra al programa y se queda en «esa cuenta
+  todavía no está asociada a una ficha del padrón». Le pasó el 27 de septiembre de 2026 a la
+  primera cuenta de Iberia hecha para el canal. **Se enlaza en Usuarios** —al crear la cuenta,
+  o después, en la cuenta de Iberia con canal que sale con el aviso ámbar—, y el panel propone la
+  ficha que coincide con el nombre (`mejorFicha()` en `lib/coincidencia.ts`). Solo propone:
+  con homónimos no elige nada. ⚠️ **Hay gente dos veces en el padrón** —las 17 fichas cargadas a
+  mano en agosto, sin número de ficha, y la del listado de Capital Humano—; en un empate gana la
+  que trae número. Las cuentas que se acuñan desde el padrón sí nacen enlazadas.
 - `/entrar` y `/canal/entrar` son las únicas rutas públicas nuevas en `lib/supabase/sesion.ts`.
   Tienen que serlo: quien llega con su enlace **todavía no tiene sesión**.
 

@@ -24,6 +24,46 @@ async function buscarRol(id: string) {
   return data
 }
 
+/**
+ * Enlaza una cuenta con su ficha del padrón.
+ *
+ * El canal cuelga todo de la ficha —el nombre, el área, lo que publica, el curso—,
+ * así que una cuenta sin ficha entra y se queda en «esa cuenta todavía no está
+ * asociada a una ficha del padrón». Pasó el 27 de septiembre de 2026 con la
+ * primera cuenta de Iberia creada desde aquí para el canal: las cuentas que se
+ * acuñan desde el padrón nacen enlazadas, pero las de Usuarios no.
+ *
+ * Con la clave de servicio, como el enlace del padrón: la política de
+ * `empleados` no deja escribir `perfil_id` desde la sesión. Una ficha no se
+ * enlaza a dos cuentas, ni una cuenta a dos fichas.
+ */
+async function enlazar(perfilId: string, empleadoId: string, email: string): Promise<string | null> {
+  const admin = createAdminClient()
+  const { data: ficha } = await admin
+    .from('empleados')
+    .select('id, nombre_completo, perfil_id, activo, email')
+    .eq('id', empleadoId)
+    .maybeSingle()
+  if (!ficha?.activo) return 'Esa ficha no existe o está inactiva.'
+  if (ficha.perfil_id && ficha.perfil_id !== perfilId) {
+    return `La ficha de ${ficha.nombre_completo} ya está enlazada a otra cuenta.`
+  }
+
+  const { data: otra } = await admin
+    .from('empleados')
+    .select('nombre_completo')
+    .eq('perfil_id', perfilId)
+    .neq('id', empleadoId)
+    .maybeSingle()
+  if (otra) return `Esa cuenta ya está enlazada a la ficha de ${otra.nombre_completo}.`
+
+  const { error } = await admin
+    .from('empleados')
+    .update({ perfil_id: perfilId, email: ficha.email ?? email })
+    .eq('id', empleadoId)
+  return error ? `No se pudo enlazar: ${error.message}` : null
+}
+
 export async function crearUsuario(_anterior: EstadoUsuario, fd: FormData): Promise<EstadoUsuario> {
   await requerirPermiso('modulo:usuarios', 'crear')
 
@@ -33,6 +73,7 @@ export async function crearUsuario(_anterior: EstadoUsuario, fd: FormData): Prom
   const cargo = texto(fd, 'cargo')
   const orgCruda = texto(fd, 'organizacion')
   const rol = await buscarRol(texto(fd, 'rol_id'))
+  const empleadoId = texto(fd, 'empleado_id')
 
   if (!email.includes('@')) return { error: 'El correo no es válido.' }
   if (password.length < LARGO_MINIMO_CLAVE) {
@@ -48,7 +89,7 @@ export async function crearUsuario(_anterior: EstadoUsuario, fd: FormData): Prom
   // email_confirm: true porque el acceso lo entrega el equipo del programa
   // junto con la contraseña; no hay flujo de verificación por correo. El rol va
   // por su clave: el alta automática lo enlaza y copia su nivel.
-  const { error } = await admin.auth.admin.createUser({
+  const { data: creado, error } = await admin.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
@@ -68,9 +109,47 @@ export async function crearUsuario(_anterior: EstadoUsuario, fd: FormData): Prom
     return { error: `No se pudo crear el usuario: ${error.message}` }
   }
 
+  // La ficha del padrón, si se eligió: sin ella la cuenta no entra al canal.
+  // Si no se pudo enlazar, la cuenta queda creada igual y se dice por qué.
+  const sinEnlace = empleadoId && creado?.user ? await enlazar(creado.user.id, empleadoId, email) : null
+
   revalidatePath('/dashboard/usuarios')
   revalidatePath('/dashboard/roles')
+  revalidatePath('/dashboard/empleados')
+  if (sinEnlace) return { error: `Usuario ${email} creado, pero sin ficha: ${sinEnlace}` }
   return { ok: `Usuario ${email} creado con el rol ${rol.nombre}. Entrégale el correo y la contraseña.` }
+}
+
+/** Enlaza una cuenta que ya existe con su ficha del padrón. Ver `enlazar`. */
+export async function enlazarFicha(fd: FormData) {
+  await requerirPermiso('modulo:usuarios', 'editar')
+  const id = texto(fd, 'id')
+  const empleadoId = texto(fd, 'empleado_id')
+  if (!id || !empleadoId) return
+
+  const supabase = await createClient()
+  const { data: perfil } = await supabase.from('profiles').select('email').eq('id', id).maybeSingle()
+  if (!perfil) return
+
+  const error = await enlazar(id, empleadoId, perfil.email)
+  if (error) console.error('[usuarios] no se enlazó la ficha:', error)
+
+  revalidatePath('/dashboard/usuarios')
+  revalidatePath('/dashboard/empleados')
+}
+
+/**
+ * Suelta la cuenta de su ficha, para corregir un enlace equivocado. La ficha y
+ * todo lo suyo —lo publicado, el curso— se quedan; lo que se va es la puerta.
+ */
+export async function desenlazarFicha(fd: FormData) {
+  await requerirPermiso('modulo:usuarios', 'editar')
+  const id = texto(fd, 'id')
+  if (!id) return
+  const admin = createAdminClient()
+  await admin.from('empleados').update({ perfil_id: null }).eq('perfil_id', id)
+  revalidatePath('/dashboard/usuarios')
+  revalidatePath('/dashboard/empleados')
 }
 
 export async function cambiarRol(fd: FormData) {

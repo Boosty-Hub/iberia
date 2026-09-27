@@ -19,7 +19,14 @@ function BotonCrear() {
   )
 }
 
-export function CrearUsuario({ roles }: { roles: RolElegible[] }) {
+export function CrearUsuario({
+  roles,
+  fichas,
+}: {
+  roles: RolElegible[]
+  /** Las fichas del padrón sin cuenta todavía, para enlazar la nueva. */
+  fichas: { id: string; rotulo: string }[]
+}) {
   const [estado, enviar] = useActionState<EstadoUsuario, FormData>(crearUsuario, {})
 
   return (
@@ -111,6 +118,21 @@ export function CrearUsuario({ roles }: { roles: RolElegible[] }) {
             {roles.map((r) => (
               <option key={r.id} value={r.id}>
                 {r.nombre} · {NIVELES[r.nivel as Nivel] ?? r.nivel}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Sin ficha, una cuenta de Iberia entra al programa pero no al canal. */}
+        <div className="sm:col-span-2">
+          <label htmlFor="empleado_id" className="etiqueta">
+            Ficha del padrón
+          </label>
+          <select id="empleado_id" name="empleado_id" defaultValue="" className="campo">
+            <option value="">Sin ficha — no entra al canal (las cuentas de Boosty)</option>
+            {fichas.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.rotulo}
               </option>
             ))}
           </select>

@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { obtenerSesion } from '@/lib/auth'
+import { obtenerSesion, puede } from '@/lib/auth'
 import { empleadoActual } from '@/lib/canal'
 import { redirect } from 'next/navigation'
 
@@ -44,12 +44,18 @@ export default async function EntrarCanalPage() {
                 Entraste como <strong>{sesion.email}</strong>, pero esa cuenta todavía
                 no está asociada a una ficha del padrón.
               </p>
+              {/* Le pasó a la primera cuenta de Iberia creada desde Usuarios (27 de
+                  septiembre de 2026): se arregla en Usuarios, enlazando la ficha. */}
               <p className="mt-3 text-sm text-marca-500">
-                Capital Humano es quien incorpora al personal al canal.
+                Pídele al equipo del programa que la enlace con tu ficha: se hace en un
+                minuto, desde Usuarios.
               </p>
-              <Link href="/dashboard" className="btn-canal btn-canal-suave mt-5 w-full">
-                Ir al panel del programa
-              </Link>
+              {/* El panel solo si lo tiene: sin él, el botón la devolvía aquí mismo. */}
+              {puede(sesion, 'modulo:panel') && (
+                <Link href="/dashboard" className="btn-canal btn-canal-suave mt-5 w-full">
+                  Ir al panel del programa
+                </Link>
+              )}
             </>
           ) : (
             <>

@@ -67,6 +67,26 @@ cláusula 5. Aquí solo lo urgente:
 
 ---
 
+## 27 de septiembre de 2026 · Sesión 47 — la cuenta de Martha Álvarez no entraba al canal
+
+Gabriel le creó cuenta a Martha Álvarez (rol Marketing) y al entrar le salía «esa cuenta todavía no
+está asociada a una ficha del padrón». **Las cuentas creadas desde Usuarios no se enlazaban con su
+ficha**, y el canal cuelga todo de ella; solo nacían enlazadas las que se acuñan desde el padrón. Y
+el botón «Ir al panel del programa» la devolvía a la misma pantalla, porque su rol no tiene panel.
+
+- **Usuarios enlaza la ficha**: al crear la cuenta, o después. La cuenta de Iberia con canal y sin
+  ficha sale con un aviso y la ficha que coincide con su nombre, para revisarla y enlazar. La puerta
+  del canal dice a quién pedírselo, y el botón al panel sale solo a quien lo tiene.
+- **Martha quedó enlazada** con su ficha de Capital Humano, la 5034 (Gerente de Mercadeo), desde el
+  botón nuevo. No con «Martha E. Álvarez», que es una de las fichas de muestra de agosto: está dos
+  veces en el padrón, y al proponer gana la que trae número de ficha.
+- Quedan dos cuentas de Iberia sin ficha, Alberto y Martha Fuentes (en `PENDIENTES.md`).
+
+**Verificado** en local: la pantalla propone bien las tres, el botón enlaza, y una cuenta de prueba
+con el rol de Martha llega a la puerta sin ficha y entra al canal con ella.
+
+---
+
 ## 27 de septiembre de 2026 · Sesión 46 — el cierre del curso: el certificado y Ajito que se queda
 
 Gabriel llegó al final de la lección 8 y debajo de «Tu certificado» no había certificado. Pidió
