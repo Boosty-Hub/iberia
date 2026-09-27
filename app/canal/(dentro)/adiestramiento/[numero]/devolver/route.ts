@@ -98,7 +98,10 @@ export async function POST(
     .limit(1)
     .maybeSingle()
 
-  if (!respuesta?.texto) {
+  // Una foto llega sin nota desde el 27 de septiembre de 2026: se manda sola, sin
+  // pedir que se escriba qué se le tomó. Lo que se contestó es la foto.
+  const soloFoto = respuesta?.entrada === 'foto' && Boolean(respuesta.media_url)
+  if (!respuesta || (!respuesta.texto && !soloFoto)) {
     return NextResponse.json({ error: 'Todavía no has contestado eso' }, { status: 404 })
   }
 
@@ -187,11 +190,13 @@ export async function POST(
       clave: clavePaso,
       esCampo,
       consigna,
-      texto: respuesta.texto,
+      texto: respuesta.texto || 'No le puso nota: solo la foto.',
       entrada: respuesta.entrada as Contexto['entrada'],
       imagen,
     }),
-    clavePaso === 'apodo' && !esCampo ? sacarApodo(respuesta.texto) : Promise.resolve(null),
+    clavePaso === 'apodo' && !esCampo && respuesta.texto
+      ? sacarApodo(respuesta.texto)
+      : Promise.resolve(null),
   ])
 
   if (apodo) {

@@ -147,6 +147,10 @@ respuestas de voz sin archivo; ahora una lleva su `.wav`.
 página. Ahora queda en el avance de la lección (`avances.oidos`), así que sigue ahí al volver otro
 día o desde otro teléfono.
 
+**Y la foto se manda sola**, a pedido de Gabriel: antes pedía escribir en una línea qué se le
+tomó, y ese texto era obligatorio. Ahora se elige la foto, se ve mientras se manda, Ajito la
+contesta, y queda a la vista arriba de su respuesta.
+
 ⚠️ **El 27, el informe daba 500 en local y no en producción.** Era el servidor de desarrollo de
 la noche anterior: el sistema le cortó la terminal por falta de memoria, él siguió vivo con la
 salida rota, y cada ruta con parámetro moría al lanzar su proceso hijo. Se cerró y se levantó con

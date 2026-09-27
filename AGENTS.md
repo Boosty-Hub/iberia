@@ -250,6 +250,12 @@ y una ruedita en vez de piernas.
   el navegador convierte a WAV 16 kHz en `lib/wav.ts` antes de subir. **Siempre se
   muestra lo que se entendió y se puede corregir antes de guardar**: una transcripción
   mala sin confirmar es una respuesta mala guardada para siempre.
+- **La foto se manda sola, sin nota** (27 de septiembre de 2026): al elegirla se sube y se
+  guarda de una vez, con `texto` nulo. Antes había que escribir qué se le tomó, y era un paso de
+  más para lo que el ejercicio pide. Por eso «hay respuesta» es texto **o** foto, en la página y
+  en la ruta de la devolución, y la cita de lo que mandó es la foto misma, servida por
+  `[numero]/foto/[clave]` con la misma regla que el audio de la devolución: la ruta se lee de
+  la fila propia, no de la URL. `capturas/mirar-foto.mjs` lo recorre.
 - ⚠️ **La nota de voz y la foto comparten `respuestas.media_url`** —el `.wav` o la imagen—, así
   que lo que decide si hay foto es `entrada = 'foto'`, nunca que haya archivo. Hasta el 27 de
   septiembre de 2026 la ruta de la devolución tomaba el `.wav` por una foto ilegible, contestaba

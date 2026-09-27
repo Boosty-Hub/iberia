@@ -32,6 +32,8 @@ const LECCIONES = guion.lecciones as LeccionGuion[]
 type Contestada = {
   clave_paso: string
   texto: string | null
+  entrada: string
+  media_url: string | null
   devolucion: string | null
   devolucion_audio: string | null
   /** Cuándo se le pidió. Con fecha y sin texto: se intentó y no salió. */
@@ -86,7 +88,7 @@ export default async function LeccionPage({
       .maybeSingle(),
     supabase
       .from('respuestas')
-      .select('clave_paso, texto, devolucion, devolucion_audio, devolucion_en')
+      .select('clave_paso, texto, entrada, media_url, devolucion, devolucion_audio, devolucion_en')
       .eq('matricula_id', matricula.id)
       .eq('leccion_id', leccion.id)
       .order('created_at'),
@@ -101,6 +103,10 @@ export default async function LeccionPage({
   ])
 
   const contestadas = new Map((respuestas ?? []).map((r) => [r.clave_paso, r]))
+  // Hay algo que contestar: un texto, o una foto sola —desde el 27 de septiembre
+  // la foto se manda sin nota—.
+  const trae = (r: Contestada | undefined) =>
+    Boolean(r && (r.texto || (r.entrada === 'foto' && r.media_url)))
   // Los audios que ya oyó hasta el final: su ✓ sigue ahí al recargar.
   const oidos = new Set(avance?.oidos ?? [])
 
@@ -112,7 +118,7 @@ export default async function LeccionPage({
   // pero no texto—: si no, una sola caída congelaría el resto de la lección
   // detrás de ella. Esas muestran su botón y se reintentan a mano.
   const siguienteSinDevolucion =
-    (respuestas ?? []).find((r) => r.texto && !r.devolucion && !r.devolucion_en)?.clave_paso ??
+    (respuestas ?? []).find((r) => trae(r) && !r.devolucion && !r.devolucion_en)?.clave_paso ??
     null
 
   // El recorrido sale del guion; las consignas, del catálogo por oficio. Son dos
@@ -136,7 +142,7 @@ export default async function LeccionPage({
   const esperandoA = turnos.findIndex((t) => {
     if (t.espera.tipo !== 'ejercicio' || !t.espera.clave) return false
     const r = contestadas.get(t.espera.clave)
-    return Boolean(r?.texto && !r.devolucion && !r.devolucion_en)
+    return Boolean(r && trae(r) && !r.devolucion && !r.devolucion_en)
   })
   const llegado = Math.min(avance?.paso ?? 0, Math.max(turnos.length - 1, 0))
   const hasta = esperandoA >= 0 && esperandoA < llegado ? esperandoA : llegado
@@ -563,10 +569,22 @@ function EjercicioVista({
       {respuesta ? (
         <>
           {/* Lo que dijo la persona va sangrado y en gris: es la cita de lo
-              suyo. Lo que contesta Ajito va debajo, con su voz. */}
-          <p className="mt-3 border-l-2 border-marca-200 pl-3 text-[14px] leading-relaxed text-marca-500">
-            {respuesta.texto}
-          </p>
+              suyo. Lo que contesta Ajito va debajo, con su voz. Si mandó una
+              foto, la cita es la foto. */}
+          {respuesta.entrada === 'foto' && respuesta.media_url && (
+            // eslint-disable-next-line @next/next/no-img-element -- la sirve una ruta con sesión que redirige a un enlace firmado de 60 s; el optimizador de Next no pasa por ahí
+            <img
+              data-foto-enviada
+              src={`/canal/adiestramiento/${numero}/foto/${clave}`}
+              alt="La foto que mandaste"
+              className="mt-3 max-h-72 w-auto rounded-xl border border-marca-200/60 object-contain"
+            />
+          )}
+          {respuesta.texto && (
+            <p className="mt-3 border-l-2 border-marca-200 pl-3 text-[14px] leading-relaxed text-marca-500">
+              {respuesta.texto}
+            </p>
+          )}
           <DevolucionAjito
             numero={numero}
             clave={clave}

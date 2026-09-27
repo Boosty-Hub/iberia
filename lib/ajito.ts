@@ -607,7 +607,8 @@ const COMO_LLEGO: Record<Contexto['entrada'], string> = {
   // persona. Ajito no le puede señalar una falta que no cometió.
   voz: 'hablando, y lo que lees es la transcripción de su nota de voz — puede traer ' +
     'alguna palabra cambiada por el ruido, así que no le señales errores de escritura',
-  foto: 'en una foto, con una nota al lado',
+  // Casi siempre sin nota: desde el 27 de septiembre la foto se manda sola.
+  foto: 'en una foto; lo que viene escrito abajo es la nota que le puso, si le puso',
   boton: 'con un botón',
 }
 

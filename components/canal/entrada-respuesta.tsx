@@ -42,6 +42,8 @@ export function EntradaRespuesta({
   // Lo que había escrito, si el envío no se guardó: se le devuelve en la caja.
   const [borrador, setBorrador] = useState('')
   const [mandando, iniciar] = useTransition()
+  // La foto recién tomada, en memoria del teléfono, para verla mientras se manda.
+  const [vistaPrevia, setVistaPrevia] = useState<string | null>(null)
 
   /** Único camino a la base, sea cual sea la forma de contestar. */
   function guardar(texto: string, ruta: string | null, tipo: TipoEntrada) {
@@ -61,28 +63,54 @@ export function EntradaRespuesta({
         setBorrador(texto)
         // Una nota de voz ya transcrita vuelve como texto, para no perderla.
         if (tipo === 'voz') setModo('texto')
-        setFallo('No se pudo mandar. Tu texto sigue aquí: intenta otra vez.')
+        setFallo(
+          tipo === 'foto'
+            ? 'No se pudo mandar la foto. Intenta otra vez.'
+            : 'No se pudo mandar. Tu texto sigue aquí: intenta otra vez.'
+        )
       }
     })
   }
 
-  if (mandando && mandado) {
+  // Mientras sube la foto o mientras se guarda, ya se ve lo mismo que se va a
+  // ver cuando vuelva: lo que mandó, citado, y Ajito mirándolo. Una foto se cita
+  // con la foto misma, que el teléfono ya tiene.
+  if (subiendo || (mandando && mandado !== null)) {
     return (
       <>
-        <p className="mt-3 border-l-2 border-marca-200 pl-3 text-[14px] leading-relaxed text-marca-500">
-          {mandado}
-        </p>
+        {vistaPrevia && (
+          // eslint-disable-next-line @next/next/no-img-element -- es la foto recién tomada, en memoria del teléfono
+          <img
+            src={vistaPrevia}
+            alt="La foto que mandaste"
+            className="mt-3 max-h-72 w-auto rounded-xl border border-marca-200/60 object-contain"
+          />
+        )}
+        {mandado && (
+          <p className="mt-3 border-l-2 border-marca-200 pl-3 text-[14px] leading-relaxed text-marca-500">
+            {mandado}
+          </p>
+        )}
         <p className="mt-3 flex min-h-11 items-center gap-2 text-[15px] text-marca-500">
           <span className="h-2 w-2 animate-pulse rounded-full bg-acento-600" />
-          Ajito está viendo lo que le mandaste…
+          {subiendo ? 'Mandándole la foto a Ajito…' : 'Ajito está viendo lo que le mandaste…'}
         </p>
       </>
     )
   }
 
+  /**
+   * Sube la foto y la manda de una vez, sin nota: hasta el 27 de septiembre de
+   * 2026 había que escribir qué se le tomó antes de poder mandarla, y era un paso
+   * de más para lo que el ejercicio pide, que es la foto.
+   */
   async function subirFoto(archivo: File) {
     setSubiendo(true)
     setFallo(null)
+    setVistaPrevia((anterior) => {
+      if (anterior) URL.revokeObjectURL(anterior)
+      return URL.createObjectURL(archivo)
+    })
 
     const cuerpo = new FormData()
     cuerpo.append('audio', archivo)
@@ -96,10 +124,11 @@ export function EntradaRespuesta({
       if (!respuesta.ok) throw new Error()
       const datos = (await respuesta.json()) as { ruta: string }
       setMedia(datos.ruta)
-    } catch {
-      setFallo('No se pudo subir la foto. Intenta otra vez.')
-    } finally {
       setSubiendo(false)
+      guardar('', datos.ruta, 'foto')
+    } catch {
+      setSubiendo(false)
+      setFallo('No se pudo subir la foto. Intenta otra vez.')
     }
   }
 
@@ -122,17 +151,16 @@ export function EntradaRespuesta({
             </p>
           )}
 
+          {/* Ya subida y sin guardar: el envío falló y se reintenta con la misma
+              foto, sin tener que tomarla de nuevo. */}
           {media ? (
-            <>
-              <p className="rounded-xl bg-marca-50 px-3 py-2 text-[14px] leading-relaxed text-marca-600">
-                Foto recibida. Cuéntame en una línea qué le tomaste y la mando.
-              </p>
-              <CajaTexto
-                etiqueta="Mandárselo a Ajito"
-                inicial={borrador}
-                onEnviar={(texto) => guardar(texto, media, 'foto')}
-              />
-            </>
+            <button
+              type="button"
+              onClick={() => guardar('', media, 'foto')}
+              className="btn-canal btn-canal-rojo btn-canal-sigue w-full"
+            >
+              Mandar la foto otra vez
+            </button>
           ) : (
             <>
               <label

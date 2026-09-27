@@ -221,12 +221,20 @@ export async function responder(datos: FormData): Promise<{ ok: boolean }> {
   const cruda = String(datos.get('entrada') ?? 'texto')
   const entrada = ['texto', 'voz', 'foto', 'boton'].includes(cruda) ? cruda : 'texto'
 
-  if (!clavePaso || !texto) return { ok: false }
+  // La foto se manda sola, sin nota (desde el 27 de septiembre de 2026): antes
+  // había que escribir qué se le tomó, y era un paso de más con guantes puestos.
+  // Todo lo demás necesita texto.
+  const esFoto = entrada === 'foto' && Boolean(mediaUrl)
+  if (!clavePaso || (!texto && !esFoto)) return { ok: false }
 
   const ctx = await contexto(numero)
   if (!ctx) return { ok: false }
 
   const { empleado, supabase, matricula, leccion } = ctx
+
+  // El archivo tiene que ser de la carpeta de quien contesta. La política del
+  // bucket ya impide leer uno ajeno, pero no hay por qué guardar la ruta.
+  if (mediaUrl && !mediaUrl.startsWith(`respuestas/${empleado.id}/`)) return { ok: false }
 
   // Si no se guardó, la lección no se adelanta: adelantarla dejaría el
   // ejercicio atrás sin contestar y el siguiente audio sonando.
@@ -236,7 +244,7 @@ export async function responder(datos: FormData): Promise<{ ok: boolean }> {
     clave_paso: clavePaso,
     es_pregunta_campo: esCampo,
     entrada,
-    texto: texto.slice(0, 4000),
+    texto: texto ? texto.slice(0, 4000) : null,
     // Lo que se guarda es el texto ya confirmado por la persona; la
     // transcripción cruda se queda en el audio, que también se guarda.
     media_url: mediaUrl || null,
