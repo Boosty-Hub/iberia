@@ -43,6 +43,25 @@ export async function oirLoQueFalta(pagina, { maximo = 12 } = {}) {
       { timeout: 60000 }
     )
     await tarjeta.evaluate((t) => t.querySelector('audio').pause())
-    await pagina.waitForTimeout(300)
+    // Oída la devolución de Ajito, la página se refresca para abrir el turno
+    // siguiente: se da un rato a que salga su manito antes de dar por terminado.
+    await pagina.locator('[data-manito]').first().waitFor({ timeout: 5000 }).catch(() => {})
   }
+}
+
+/**
+ * Espera a que salga un turno nuevo, oyendo mientras tanto lo que lo retiene.
+ *
+ * Después de contestar un ejercicio, el turno siguiente no sale hasta que Ajito
+ * contesta **y** suena la mitad de su devolución. Esperar solo a que crezca la
+ * página se quedaba corto: nadie oía la devolución y el turno no llegaba.
+ */
+export async function esperarTurnoNuevo(pagina, antes, { segundos = 90 } = {}) {
+  const fin = Date.now() + segundos * 1000
+  while (Date.now() < fin) {
+    if ((await pagina.locator('section').count()) > antes) return true
+    await oirLoQueFalta(pagina, { maximo: 2 })
+    await pagina.waitForTimeout(1000)
+  }
+  return false
 }

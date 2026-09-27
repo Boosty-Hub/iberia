@@ -8,6 +8,8 @@
  *  · al empezar la lección 0, el primer audio lleva la manito y «Vamos» no sale;
  *  · arrastrar la barra hasta el final no lo abre: la mitad cuenta lo que sonó;
  *  · oír la mitad sí lo abre, y al recargar sigue abierto;
+ *  · contestado un ejercicio, la manito va a lo que contestó Ajito y el turno
+ *    siguiente espera a que suene la mitad de esa devolución;
  *  · en el cierre de la lección 5 —dos audios seguidos—, el segundo sale al oír
  *    la mitad del primero, y «Sigo ahora» al oír la mitad del segundo.
  *
@@ -19,6 +21,7 @@ import { createClient } from '@supabase/supabase-js'
 import { chromium, devices } from 'playwright'
 import { mkdir, readFile } from 'node:fs/promises'
 import { barrerCarpeta } from './barrer-carpeta.mjs'
+import { oirLoQueFalta } from './oir-lo-que-falta.mjs'
 import { turnosDe } from '../lib/guion.ts'
 
 const args = {}
@@ -142,6 +145,40 @@ try {
   await p.locator('[data-estado]').first().waitFor()
   exigir(await p.getByRole('button', { name: 'Vamos' }).isVisible(), 'al recargar sigue abierto: la mitad quedó guardada')
 
+  // --- contestado un ejercicio: primero se oye a Ajito ------------------------------
+  await p.getByRole('button', { name: 'Vamos' }).click()
+  await p.locator('[data-padron]').waitFor({ timeout: 20000 })
+  await oirLoQueFalta(p)
+  await p.getByRole('button', { name: 'Sí, soy yo' }).click()
+  await p.locator('[data-estado]').nth(2).waitFor({ timeout: 20000 })
+  await oirLoQueFalta(p)
+  const apodo = p.locator('[data-ejercicio="apodo"]')
+  await apodo.locator('textarea').fill('Rosi, así me dicen')
+  await apodo.getByRole('button', { name: 'Mandárselo a Ajito' }).click()
+  await p.locator('[data-devolucion="apodo"] [data-manito]').waitFor({ timeout: 60000 })
+  exigir(true, 'contestado el apodo, la manito va a lo que contestó Ajito')
+  const seccionesAntes = await p.locator('section').count()
+  await p.waitForTimeout(1500)
+  exigir(
+    (await p.locator('section').count()) === seccionesAntes,
+    'y el turno siguiente no sale mientras no se oiga la devolución'
+  )
+  await p.locator('[data-devolucion="apodo"]').scrollIntoViewIfNeeded()
+  await p.screenshot({ path: `${SALIDA}/02-devolucion.png` })
+
+  const devolucion = p.locator('[data-devolucion="apodo"] [data-estado]')
+  await devolucion.locator('button').first().click()
+  await p.waitForFunction(() => {
+    const a = document.querySelector('[data-devolucion="apodo"] audio')
+    return a && !a.paused && a.currentTime > 0
+  }, null, { timeout: 30000 })
+  await devolucion.evaluate((c) => { c.querySelector('audio').playbackRate = 4 })
+  await p.waitForFunction((n) => document.querySelectorAll('section').length > n, seccionesAntes, { timeout: 60000 })
+  await p.evaluate(() => document.querySelectorAll('audio').forEach((a) => a.pause()))
+  exigir(true, 'oída la mitad de la devolución, sale el turno siguiente')
+  await p.locator('section').last().locator('[data-manito]').waitFor({ timeout: 10000 })
+  exigir(true, 'con la manito en su audio')
+
   // --- lección 5: el cierre, dos audios seguidos -------------------------------------
   await p.goto(`${BASE}/canal/adiestramiento/5`, { waitUntil: 'domcontentloaded' })
   await p.locator('[data-estado]').first().waitFor()
@@ -152,7 +189,7 @@ try {
   const terminar = p.getByRole('button', { name: 'Sigo ahora' })
   exigir((await terminar.count()) === 0, '«Sigo ahora» no sale antes de oír el cierre')
   await p.locator('[data-estado]').nth(total - 1).scrollIntoViewIfNeeded()
-  await p.screenshot({ path: `${SALIDA}/02-cierre-uno.png` })
+  await p.screenshot({ path: `${SALIDA}/03-cierre-uno.png` })
 
   await sonar(total - 1)
   await p.waitForFunction((n) => document.querySelectorAll('[data-estado]').length > n, total, { timeout: 30000 })
@@ -161,14 +198,14 @@ try {
   await pausarTodo()
   exigir(await p.locator('[data-estado]').nth(total).locator('[data-manito]').isVisible(), 'con la manito ahora en el segundo')
   await p.locator('[data-estado]').nth(total).scrollIntoViewIfNeeded()
-  await p.screenshot({ path: `${SALIDA}/03-cierre-dos.png` })
+  await p.screenshot({ path: `${SALIDA}/04-cierre-dos.png` })
 
   await sonar(total)
   await terminar.waitFor({ timeout: 30000 })
   exigir(true, 'oída la mitad del segundo, salen «Sigo ahora» y «Sigo después»')
   await pausarTodo()
   await terminar.scrollIntoViewIfNeeded()
-  await p.screenshot({ path: `${SALIDA}/04-terminar.png` })
+  await p.screenshot({ path: `${SALIDA}/05-terminar.png` })
   exigir((await p.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)) <= 0, 'sin desborde horizontal')
 } finally {
   await nav.close()

@@ -152,8 +152,10 @@ const INSTRUCCION: Record<string, string> = {
   // que aquí se le dice otra vez.
   apodo:
     'Te acaba de decir cómo quiere que le digas. Salúdalo con ese nombre, dile que así ' +
+    // «Distinto» y no «de otra forma»: con esa frase el modelo escribió «de otra
+    // forra» dos veces de dos (27 de septiembre de 2026).
     'le vas a decir de aquí en adelante, y ciérrale con que si después quiere que le ' +
-    'digas de otra forma, te lo dice y ya. Entre 30 y 45 palabras, y sin ningún ' +
+    'digas distinto, te lo dice y ya. Entre 30 y 45 palabras, y sin ningún ' +
     'adjetivo sobre ti: ni «encantado» ni «encantada».',
   'primer-toque':
     'Es lo primero que te manda en la vida. Contéstale lo que te preguntó, de verdad y ' +
@@ -640,6 +642,9 @@ const COMO_LLEGO: Record<Contexto['entrada'], string> = {
  */
 function limpiar(texto: string): string {
   return texto
+    // Un error del modelo que ya salió dos veces, y que dicho en voz alta suena a
+    // grosería: «de otra forra» por «de otra forma».
+    .replace(/\bde otra forra\b/gi, 'de otra forma')
     .replace(/\*\*?/g, '')
     .replace(/^#{1,6}\s*/gm, '')
     .replace(/^[-–—•]\s+/gm, '')

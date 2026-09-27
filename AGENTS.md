@@ -171,6 +171,12 @@ y una ruedita en vez de piernas.
   menos la mitad** del audio de antes. ⚠️ Cuenta el tiempo que sonó, no la barra: arrastrarla
   hasta el final no abre nada. Los turnos de arriba y un turno ya contestado salen enteros.
   «Terminar la lección» es parte del cierre del último turno por lo mismo.
+  ⚠️ **Y lo que contesta Ajito también se oye antes de seguir.** Con la devolución ya escrita, el
+  turno siguiente salía y la manito se iba a su audio sin haberla oído. La página retiene el turno
+  que sigue al ejercicio recién contestado hasta que suena la mitad de su devolución —la manito
+  va en «Ajito te contesta»— y `DevolucionAjito` refresca al llegar a la mitad. Solo en la
+  frontera: una devolución vieja sin oír más arriba no cierra lo que ya se pasó. Sin audio, no
+  retiene.
 - **La manito**: el audio que toca oír lleva una mano que toca su play, y el play late como los
   botones que avanzan. Se va apenas suena y se queda quieta con `prefers-reduced-motion`.
   `scripts/mirar-progresivo.mjs` recorre las dos cosas.

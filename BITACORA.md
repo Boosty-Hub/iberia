@@ -166,6 +166,11 @@ dos textos de lo que Ajito dice cuando un dibujo no va, que el guion tenía pend
   gorro— se dibujaron a partir de su imagen, y en un carrusel.
 - **Cada dibujo pesa unos 110 KB** en WebP; en PNG eran 1,7 MB.
 
+**Y lo que contesta Ajito también se oye antes de seguir**: contestada la pregunta de campo, la manito
+saltaba al cierre sin haber oído la devolución. Ahora el turno siguiente espera la mitad de lo que
+Ajito contestó, con la manito en su play. De paso, el modelo escribió dos veces «de otra forra» por
+«de otra forma» en el apodo: se cambió la frase de la instrucción y se corrige al limpiar.
+
 **Y la lección se abre a medida que se oye.** En la lección 5 salieron el audio 6 y el 7 juntos, y
 Gabriel pidió que lo siguiente aparezca al oír al menos la mitad de la nota de voz, y una manito
 que toque el play. Cuenta lo que sonó, no la barra, y queda guardado al recargar.

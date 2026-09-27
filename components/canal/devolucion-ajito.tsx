@@ -29,6 +29,7 @@ export function DevolucionAjito({
   oida = false,
   alOir,
   dibuja = false,
+  invitar = false,
 }: {
   numero: number
   clave: string
@@ -64,6 +65,11 @@ export function DevolucionAjito({
    * función de Netlify.
    */
   dibuja?: boolean
+  /**
+   * Si es lo que toca oír: lleva la manito. La lección no sigue hasta que suene
+   * la mitad de lo que Ajito contestó (ver la página).
+   */
+  invitar?: boolean
 }) {
   const router = useRouter()
   const [estado, setEstado] = useState<'pensando' | 'fallo' | 'quieto'>(
@@ -192,7 +198,13 @@ export function DevolucionAjito({
           etiqueta="Ajito te contesta"
           segundos={null}
           oido={oida}
-          alOir={alOir}
+          // Al oír la mitad se guarda, y se refresca la página para que salga lo
+          // que venía detrás: la lección esperaba a que se oyera esto.
+          alOir={async () => {
+            await alOir?.()
+            router.refresh()
+          }}
+          invitar={invitar}
         />
       ) : (
         /* Hay texto pero no salió la voz — Azure falló en su momento. La clase de

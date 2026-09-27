@@ -160,8 +160,25 @@ export default async function LeccionPage({
     return Boolean(r && trae(r) && !r.devolucion && !r.devolucion_en)
   })
   const llegado = Math.min(avance?.paso ?? 0, Math.max(turnos.length - 1, 0))
-  const hasta = esperandoA >= 0 && esperandoA < llegado ? esperandoA : llegado
-  const esperandoAjito = esperandoA >= 0 && esperandoA <= hasta
+  let hasta = esperandoA >= 0 && esperandoA < llegado ? esperandoA : llegado
+
+  // ⚠️ **Y tampoco antes de oír a Ajito.** Con la devolución ya escrita, el
+  // turno siguiente salía debajo —y la manito se iba a su audio— sin haber oído
+  // lo que Ajito contestó (27 de septiembre de 2026). Ahora espera a que suene
+  // la mitad de la devolución, como entre dos audios de la clase. Solo en la
+  // frontera —el ejercicio que se acaba de contestar—: una devolución vieja sin
+  // oír más arriba no cierra lo que ya se pasó. Sin audio, no retiene.
+  const devolucionPorOir = (t: Turno | undefined) => {
+    if (!t || t.espera.tipo !== 'ejercicio' || !t.espera.clave) return false
+    const r = contestadas.get(t.espera.clave)
+    return Boolean(r?.devolucion && r.devolucion_audio && !oidos.has(`devolucion-${t.espera.clave}`))
+  }
+  const enCurso = avance?.estado !== 'completada'
+  if (enCurso && hasta === llegado && llegado >= 1 && devolucionPorOir(turnos[llegado - 1])) {
+    hasta = llegado - 1
+  }
+  const porOirAjito = enCurso && devolucionPorOir(turnos[hasta])
+  const esperandoAjito = (esperandoA >= 0 && esperandoA <= hasta) || porOirAjito
   const visibles = turnos.slice(0, hasta + 1)
   const enElUltimo = hasta >= turnos.length - 1
 
@@ -275,6 +292,7 @@ export default async function LeccionPage({
               publicacionDe={publicacionDe}
               forma={forma}
               alFinal={turno.indice === hasta ? terminar : null}
+              invitarDevolucion={porOirAjito && turno.indice === hasta}
               padron={{
                 nombre: empleado.nombre_completo,
                 cargo: empleado.cargo,
@@ -308,6 +326,7 @@ function TurnoVista({
   forma,
   padron,
   alFinal,
+  invitarDevolucion = false,
 }: {
   turno: Turno
   esActual: boolean
@@ -334,6 +353,8 @@ function TurnoVista({
   padron: Padron
   /** Lo que cierra la lección, si este turno es el último: «Terminar la lección». */
   alFinal?: ReactNode
+  /** Si lo que toca oír ahora es la devolución de Ajito: lleva la manito. */
+  invitarDevolucion?: boolean
 }) {
   const bloques = segunInterruptor(turno.bloques, asistenteLibre)
   const primerAudio = bloques.findIndex((b) => b.tipo === 'audio')
@@ -484,6 +505,7 @@ function TurnoVista({
               oida={oidos.has(`devolucion-${turno.espera.clave}`)}
               publicacion={publicacionDe.get(contestadas.get(turno.espera.clave)?.id ?? '') ?? null}
               forma={forma}
+              invitar={invitarDevolucion}
             />
           )}
           {alFinal}
@@ -617,6 +639,7 @@ function EjercicioVista({
   oida,
   publicacion,
   forma,
+  invitar = false,
 }: {
   numero: number
   nombre: string
@@ -631,6 +654,8 @@ function EjercicioVista({
   /** La publicación del canal, si publicó este escudo. */
   publicacion: string | null
   forma: string
+  /** Si la devolución es lo que toca oír: lleva la manito. */
+  invitar?: boolean
 }) {
   const esCampo = clave === 'campo'
   const delCatalogo = catalogo.get(clave)
@@ -714,6 +739,7 @@ function EjercicioVista({
             oida={oida}
             alOir={marcarOido.bind(null, numero, `devolucion-${clave}`)}
             dibuja={dibuja}
+            invitar={invitar}
           />
           {publicacion && (
             <Link

@@ -19,7 +19,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
-import { oirLoQueFalta } from './oir-lo-que-falta.mjs'
+import { esperarTurnoNuevo, oirLoQueFalta } from './oir-lo-que-falta.mjs'
 import { barrerCarpeta } from './barrer-carpeta.mjs'
 import { ejerciciosDeLeccion, preguntaDeCampo } from '../lib/adiestramiento.ts'
 import { chromium, devices } from 'playwright'
@@ -269,11 +269,9 @@ try {
         await seguir.click()
       }
 
-      const crecio = await pagina
-        .waitForFunction((n) => document.querySelectorAll('section').length > n, antes, {
-          timeout: 15000,
-        })
-        .catch(() => null)
+      // El turno nuevo sale cuando Ajito contestó y se oyó la mitad de lo que
+      // dijo: se espera oyendo, no solo mirando.
+      const crecio = await esperarTurnoNuevo(pagina, antes)
       if (!crecio) break
     }
 

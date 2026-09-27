@@ -20,7 +20,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
-import { oirLoQueFalta } from './oir-lo-que-falta.mjs'
+import { esperarTurnoNuevo, oirLoQueFalta } from './oir-lo-que-falta.mjs'
 import { chromium, devices } from 'playwright'
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -387,11 +387,9 @@ try {
         await seguir.click()
       }
 
-      const crecio = await pagina
-        .waitForFunction((n) => document.querySelectorAll('section').length > n, turnos, {
-          timeout: 15000,
-        })
-        .catch(() => null)
+      // El turno nuevo sale cuando Ajito contestó y se oyó la mitad de lo que
+      // dijo: se espera oyendo, no solo mirando.
+      const crecio = await esperarTurnoNuevo(pagina, turnos)
 
       if (!crecio) break
       if (vuelta === 2) {
