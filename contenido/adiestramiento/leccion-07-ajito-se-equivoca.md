@@ -135,7 +135,7 @@ ahora sí pude, porque me lo contaste tú»*.
 
 ## 7.6 · Lo que no se me cuenta
 
-🔊 **Audio 6** · 30 s
+🔊 **Audio 6** · 27 s
 
 > Y va la última, que es una regla de la casa.
 >
@@ -146,8 +146,12 @@ ahora sí pude, porque me lo contaste tú»*.
 > gente: cédulas, sueldos, direcciones. Y todo lo que esté bajo llave o marcado
 > como confidencial.
 >
-> Si tienes dudas de si algo se puede o no, la regla es fácil: **si no se lo
-> contarías a alguien de la calle, no me lo cuentes a mí.**
+> Si tienes dudas de si algo se puede o no, la regla es fácil: **la información
+> sensible no se comparte si no hace falta.**
+
+*Hasta el 27 de septiembre de 2026 la regla decía «si no se lo contarías a alguien
+de la calle, no me lo cuentes a mí». Gabriel la cambió por la de ahora, que dice lo
+que se protege sin compararlo con nadie. Cambió también en el cierre y en la ficha.*
 
 ⌨️ `Clarísimo`
 
@@ -190,7 +194,7 @@ entrevista.*
 
 ## 7.8 · Cierre
 
-🔊 **Audio 8** · 22 s
+🔊 **Audio 8** · 17 s
 
 > Recogiendo, que esto es lo que hay que llevarse:
 >
@@ -200,7 +204,7 @@ entrevista.*
 >
 > Revísame siempre que la cosa importe.
 >
-> Y lo que no le contarías a alguien de la calle, no me lo cuentes a mí.
+> Y la información sensible no se comparte si no hace falta.
 >
 > Nos queda una sola. Nos vemos.
 
@@ -209,7 +213,7 @@ entrevista.*
 > **AJITO SE EQUIVOCA**
 > Invento cuando no sé, y suena igual de seguro.
 > De aquí adentro no sé nada si no me lo cuentas.
-> Si no se lo contarías a alguien de la calle, no me lo cuentes.
+> Lo sensible no se comparte si no hace falta.
 
 ⌨️ `Sigo ahora` · `Sigo después`
 

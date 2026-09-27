@@ -166,6 +166,10 @@ dos textos de lo que Ajito dice cuando un dibujo no va, que el guion tenía pend
   gorro— se dibujaron a partir de su imagen, y en un carrusel.
 - **Cada dibujo pesa unos 110 KB** en WebP; en PNG eran 1,7 MB.
 
+**La regla de la lección 7 cambió**, a pedido de Gabriel: «si no se lo contarías a alguien de la
+calle, no me lo cuentes a mí» pasó a «la información sensible no se comparte si no hace falta», en
+el Audio 6, en el cierre y en la ficha. Regrabados los dos audios en las dos voces y la ficha.
+
 **Y lo que contesta Ajito también se oye antes de seguir**: contestada la pregunta de campo, la manito
 saltaba al cierre sin haber oído la devolución. Ahora el turno siguiente espera la mitad de lo que
 Ajito contestó, con la manito en su play. De paso, el modelo escribió dos veces «de otra forra» por

@@ -1435,8 +1435,8 @@
             {
               "tipo": "audio",
               "id": "6",
-              "texto": "Y va la última, que es una regla de la casa.\n\nHay cosas de Iberia que no se le cuentan a una máquina de afuera. Ni a mí ni a\nninguna otra:\n\nLas fórmulas. Los precios y lo que se le cobra a cada cliente. Los datos de la\ngente: cédulas, sueldos, direcciones. Y todo lo que esté bajo llave o marcado\ncomo confidencial.\n\nSi tienes dudas de si algo se puede o no, la regla es fácil: si no se lo\ncontarías a alguien de la calle, no me lo cuentes a mí.",
-              "segundos": 30
+              "texto": "Y va la última, que es una regla de la casa.\n\nHay cosas de Iberia que no se le cuentan a una máquina de afuera. Ni a mí ni a\nninguna otra:\n\nLas fórmulas. Los precios y lo que se le cobra a cada cliente. Los datos de la\ngente: cédulas, sueldos, direcciones. Y todo lo que esté bajo llave o marcado\ncomo confidencial.\n\nSi tienes dudas de si algo se puede o no, la regla es fácil: la información\nsensible no se comparte si no hace falta.",
+              "segundos": 27
             },
             {
               "tipo": "botones",
@@ -1475,8 +1475,8 @@
             {
               "tipo": "audio",
               "id": "8",
-              "texto": "Recogiendo, que esto es lo que hay que llevarse:\n\nYo invento cuando no sé, y no se me nota.\n\nDe aquí adentro no sé nada si tú no me lo cuentas.\n\nRevísame siempre que la cosa importe.\n\nY lo que no le contarías a alguien de la calle, no me lo cuentes a mí.\n\nNos queda una sola. Nos vemos.",
-              "segundos": 22
+              "texto": "Recogiendo, que esto es lo que hay que llevarse:\n\nYo invento cuando no sé, y no se me nota.\n\nDe aquí adentro no sé nada si tú no me lo cuentas.\n\nRevísame siempre que la cosa importe.\n\nY la información sensible no se comparte si no hace falta.\n\nNos queda una sola. Nos vemos.",
+              "segundos": 17
             },
             {
               "tipo": "pieza",
@@ -1486,7 +1486,7 @@
                 "AJITO SE EQUIVOCA",
                 "Invento cuando no sé, y suena igual de seguro.",
                 "De aquí adentro no sé nada si no me lo cuentas.",
-                "Si no se lo contarías a alguien de la calle, no me lo cuentes."
+                "Lo sensible no se comparte si no hace falta."
               ],
               "sufijo": ""
             },
