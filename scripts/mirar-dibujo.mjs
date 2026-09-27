@@ -114,11 +114,16 @@ try {
   /** Toca el botón que late hasta que aparezca lo que se busca. */
   async function avanzarHasta(selector) {
     const destino = p.locator(selector)
-    for (let i = 0; i < 10 && !(await destino.count()); i++) {
+    for (let i = 0; i < 24 && !(await destino.count()); i++) {
       await oirLoQueFalta(p)
       if (await destino.count()) break
       const sigue = p.locator('button.btn-canal-sigue:not([disabled])').last()
-      await sigue.waitFor({ timeout: 30000 })
+      // Lo que salga primero: el botón, o un audio que oír antes —el turno nuevo
+      // puede tardar en llegar después de oír a Ajito—. Si es audio, se oye y se vuelve.
+      const manito = p.locator('[data-manito]').first()
+      await Promise.race([sigue.waitFor({ timeout: 30000 }), manito.waitFor({ timeout: 30000 })]).catch(() => {})
+      if (!(await sigue.count()) && (await manito.count())) continue
+      await sigue.waitFor({ timeout: 5000 })
       const turnos = await p.locator('section').count()
       await sigue.click()
       // Se espera el turno nuevo, no un rato fijo: si no, no hay manito que oír
@@ -177,7 +182,8 @@ try {
   await cargada('[data-dibujo="escudo"]')
   await p.locator('[data-devolucion="escudo"] [data-devolucion-texto]').waitFor({ timeout: 60000 })
   const escudo = await p.locator('[data-devolucion="escudo"] [data-devolucion-texto]').innerText()
-  exigir(/bache/i.test(escudo), `el escudo sale y Ajito nombra el lema: «${escudo.slice(0, 140)}…»`)
+  // Si falla se imprime entero: dice si el lema faltó en el dibujo o solo en el comentario.
+  exigir(/bache/i.test(escudo), `el escudo sale y Ajito nombra el lema: «${/bache/i.test(escudo) ? escudo.slice(0, 140) + '…' : escudo}»`)
   await p.locator('[data-dibujo="escudo"]').scrollIntoViewIfNeeded()
   await p.screenshot({ path: `${SALIDA}/04-escudo.png` })
 
@@ -289,6 +295,11 @@ try {
       .single()
     exigir(!fila2?.dibujo && fila2?.dibujo_veredicto === 'nada' && Boolean(fila2?.devolucion), 'en la base: veredicto «nada», sin dibujo, con devolución')
   }
+} catch (error) {
+  // Lo que había en pantalla cuando falló: sin esto, un timeout no dice nada.
+  const paginas = nav.contexts().flatMap((c) => c.pages())
+  if (paginas[0]) await paginas[0].screenshot({ path: `${SALIDA}/fallo.png`, fullPage: true }).catch(() => {})
+  throw error
 } finally {
   await nav.close()
   await limpiar()

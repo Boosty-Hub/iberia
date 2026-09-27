@@ -84,11 +84,16 @@ try {
 
   // Se avanza con el botón que late hasta que aparezca el ejercicio de la selfie.
   const selfie = p.locator('[data-ejercicio="selfie"]')
-  for (let i = 0; i < 8 && !(await selfie.count()); i++) {
+  for (let i = 0; i < 16 && !(await selfie.count()); i++) {
     await oirLoQueFalta(p)
     if (await selfie.count()) break
     const sigue = p.locator('button.btn-canal-sigue:not([disabled])').last()
-    await sigue.waitFor({ timeout: 20000 })
+    // Lo que salga primero: el botón, o un audio que oír antes —el turno nuevo
+    // puede tardar en llegar después de oír a Ajito—. Si es audio, se oye y se vuelve.
+    const manito = p.locator('[data-manito]').first()
+    await Promise.race([sigue.waitFor({ timeout: 20000 }), manito.waitFor({ timeout: 20000 })]).catch(() => {})
+    if (!(await sigue.count()) && (await manito.count())) continue
+    await sigue.waitFor({ timeout: 5000 })
     const turnos = await p.locator('section').count()
     await sigue.click()
     // Se espera el turno nuevo: si no, no hay manito que oír todavía.
