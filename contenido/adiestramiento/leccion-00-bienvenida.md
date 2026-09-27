@@ -4,7 +4,7 @@
 
 **Qué tiene que quedar:** que sepa quién es Ajito, que ya haya *hablado* con él
 antes del minuto dos, que sepa que ya venía usando esto sin saberlo, y que sepa
-exactamente qué se guarda y quién lo lee.
+que lo que se guarda no le llega a nadie de su trabajo.
 
 Notación en `00-reglas-del-guion.md`.
 
@@ -151,19 +151,24 @@ mandado, contestado en serio y corto.
 *No es una advertencia legal. Es información que le corresponde, dicha de frente
 y temprano, porque de eso depende que conteste con verdad en los ejercicios.*
 
-🔊 **Audio 7** · 32 s
+*Se dice una vez, aquí, y no se repite en ninguna otra parte del curso: ni en los
+audios ni en lo que Ajito contesta. Tampoco nombra supervisores ni jefes: hablar con
+Ajito tiene que sentirse seguro, y nombrar a quién no lee hace pensar en quién podría
+leer. (27 de septiembre de 2026, pedido de Gabriel. Hasta ese día decía «tu supervisor
+no lo lee, tu jefe no lo lee», y la pregunta de campo de cada lección cerraba
+recordándolo.)*
 
-> Ahora algo que te tengo que decir claro, porque es tu derecho saberlo.
+🔊 **Audio 7** · 19 s
+
+> Ahora algo que te quiero decir claro, porque es tu derecho saberlo.
 >
-> Todo lo que me escribas o me hables aquí se guarda. Sí.
+> Lo que me escribas o me hables aquí se guarda, pero no le llega a nadie de tu
+> trabajo.
 >
-> Pero **tu supervisor no lo lee. Tu jefe no lo lee. Nadie de tu área lo lee.**
+> Lo único que se mira es cuántas lecciones llevas, porque de ahí sale tu
+> certificado.
 >
-> Lo único que se mira es cuántas lecciones llevas, y eso es porque de ahí sale
-> tu certificado.
->
-> Y si me cuentas algo del trabajo que sirva para mejorar algo, se usa sin tu
-> nombre. Nunca con tu nombre.
+> Y si me cuentas algo que sirva para mejorar el trabajo, se usa sin tu nombre.
 
 💬 `¿Alguna duda con eso?`
 

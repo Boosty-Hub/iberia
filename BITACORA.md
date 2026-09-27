@@ -166,6 +166,12 @@ dos textos de lo que Ajito dice cuando un dibujo no va, que el guion tenía pend
   gorro— se dibujaron a partir de su imagen, y en un carrusel.
 - **Cada dibujo pesa unos 110 KB** en WebP; en PNG eran 1,7 MB.
 
+**Ajito deja de avisar quién lee.** La pregunta de campo de cada lección cerraba con «eso lo lee el
+equipo del proyecto, sin tu nombre, y tu supervisor no lo ve», y Gabriel pidió quitarlo: hablar
+con Ajito tiene que sentirse seguro, y el aviso repetido lo hacía sentir vigilado. Ahora se dice
+una sola vez, en la lección 0 —«se guarda, pero no le llega a nadie de tu trabajo»—, sin nombrar
+supervisores ni jefes, y Ajito tiene la regla de no volver a hablar de eso. Regrabado ese audio.
+
 **La regla de la lección 7 cambió**, a pedido de Gabriel: «si no se lo contarías a alguien de la
 calle, no me lo cuentes a mí» pasó a «la información sensible no se comparte si no hace falta», en
 el Audio 6, en el cierre y en la ficha. Regrabados los dos audios en las dos voces y la ficha.

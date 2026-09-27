@@ -303,8 +303,12 @@ y una ruedita en vez de piernas.
   ejercicio pide una foto de una máquina, una etiqueta de proceso o un documento de
   trabajo: solo a la persona, a un compañero con permiso, o cosas de su casa.
 - **Lo que la gente responde no lo lee su supervisor** ni quien modera el canal — solo su
-  autor y los editores de Boosty. Ajito lo promete en la lección 0 y la RLS lo cumple;
-  `puede_publicar()` no alcanza para leer `respuestas`.
+  autor y los editores de Boosty. La RLS lo cumple; `puede_publicar()` no alcanza para leer
+  `respuestas`. ⚠️ **Pero Ajito no lo anda diciendo** (27 de septiembre de 2026, pedido de
+  Gabriel): se dice una vez, en la lección 0 —«se guarda, pero no le llega a nadie de tu
+  trabajo»—, sin nombrar supervisores ni jefes, y ni los audios ni las devoluciones lo
+  repiten. Un aviso en cada respuesta hacía que hablar con Ajito se sintiera vigilado. La
+  regla está en `PERSONAJE` de `lib/ajito.ts`.
 - **Ajito dibuja de verdad en la lección 4** (27 de septiembre de 2026), con OpenAI
   `gpt-image-2.5-flare`, elegido por Gabriel (`lib/dibujo.ts`; las mediciones, en
   `herramientas.md`). En los ejercicios `libre` y `escudo` la devolución va en **dos

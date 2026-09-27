@@ -147,8 +147,8 @@
             {
               "tipo": "audio",
               "id": "7",
-              "texto": "Ahora algo que te tengo que decir claro, porque es tu derecho saberlo.\n\nTodo lo que me escribas o me hables aquí se guarda. Sí.\n\nPero tu supervisor no lo lee. Tu jefe no lo lee. Nadie de tu área lo lee.\n\nLo único que se mira es cuántas lecciones llevas, y eso es porque de ahí sale\ntu certificado.\n\nY si me cuentas algo del trabajo que sirva para mejorar algo, se usa sin tu\nnombre. Nunca con tu nombre.",
-              "segundos": 32
+              "texto": "Ahora algo que te quiero decir claro, porque es tu derecho saberlo.\n\nLo que me escribas o me hables aquí se guarda, pero no le llega a nadie de tu\ntrabajo.\n\nLo único que se mira es cuántas lecciones llevas, porque de ahí sale tu\ncertificado.\n\nY si me cuentas algo que sirva para mejorar el trabajo, se usa sin tu nombre.",
+              "segundos": 19
             },
             {
               "tipo": "texto",

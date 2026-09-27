@@ -204,8 +204,8 @@ de Gabriel; antes los dos botones solo avanzaban.)*
 🎯 `campo` — voz o texto → devuelve imagen, si hay qué dibujar
 
 ↩️ 🖼 + 🔊 — Si lo que contó se puede dibujar, Ajito lo dibuja y lo nombra en una
-frase; el resto es la devolución de toda pregunta de campo —no la evalúa, y le
-recuerda que eso lo lee el equipo, sin su nombre—. *(27 de septiembre de 2026, pedido
+frase; el resto es la devolución de toda pregunta de campo —no la evalúa, y cierra
+con unas gracias cortas—. *(27 de septiembre de 2026, pedido
 de Gabriel.)*
 
 *Aquí no se pidió un dibujo: se contestó qué cosa del trabajo sería más fácil de
