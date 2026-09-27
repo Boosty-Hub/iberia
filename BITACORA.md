@@ -100,6 +100,16 @@ y ninguna le abría nada. La base no las oía:
   lecciones en su rol toca «Recorrer el curso» y queda matriculado; el feed le muestra la tarjeta
   de Ajito y el panel le pone «El curso de Ajito» en la barra.
 
+**Y Martha Fuentes, matriculada en el padrón, tampoco entraba.** Hay dos Martha Fuentes en el padrón:
+la ficha de muestra de agosto y la de Capital Humano, la 4837. Se matriculó la de muestra, al
+acuñarle el enlace se le creó una cuenta nueva (`padron010@iberia.local`), y su cuenta de verdad
+seguía sin ficha. Se enlazó su cuenta a la 4837, se la matriculó ahí, y se deshizo lo de la de
+muestra: la cuenta nueva —nunca usada—, su enlace —marcado como mandado a mano, sin usar— y la
+matrícula, sin avance. Para que no vuelva a pasar, **el padrón dice el número de ficha y la cuenta
+de cada fila, marca la de muestra repetida y no deja marcarla, ofrece enlazar la cuenta que coincide
+y no le acuña otra**. La búsqueda dejó de distinguir tildes. Verificado con `mirar-padron-cuentas`
+(11 de 11) y `probar:padron` (25 de 25).
+
 Martha ya se matriculó así. De paso, `probar:adiestramiento` y `probar:certificado` creaban a sus
 trabajadores con el rol de la dirección, que ahora lee el tablero y los certificados: pasan a
 Personal de planta. **Verificado** con `mirar-puertas` (25 de 25, con el rol de Martha y uno sin

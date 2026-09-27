@@ -505,6 +505,19 @@ Eso obliga a tratarlo como lo que es —una contraseña—, y de ahí las reglas
   con homónimos no elige nada. ⚠️ **Hay gente dos veces en el padrón** —las 17 fichas cargadas a
   mano en agosto, sin número de ficha, y la del listado de Capital Humano—; en un empate gana la
   que trae número. Las cuentas que se acuñan desde el padrón sí nacen enlazadas.
+- **El padrón dice de quién es cada ficha** (27 de septiembre de 2026): su número de Capital
+  Humano —sin número, «Cargada a mano»— y la cuenta que tiene enlazada. Y cruza dos cosas por
+  el nombre (`cruzarPadron()` en `lib/padron-cuentas.ts`):
+  - **La ficha de muestra repetida** —una cargada a mano que repite a una de Capital Humano—
+    sale marcada, sin casilla, y ni se matricula ni se le acuña enlace: se usa la otra. Pasó con
+    Martha Fuentes: se matriculó «Martha Fuentes», de muestra, en vez de la 4837.
+  - **La cuenta que coincide**: la ficha sin cuenta cuya persona ya tiene una —la de su correo,
+    creada en Usuarios— ofrece «Enlazar» en su fila, y **acuñar no le crea otra**: sin esa
+    guarda, el enlace le hacía una cuenta nueva a la ficha y la de su correo seguía sin ficha.
+  - Enlazar vive en `enlazarCuentaConFicha()`, que usan Usuarios y el padrón.
+  - La búsqueda del padrón no distingue tildes: con `ilike`, «alvarez» no encontraba «Álvarez».
+  `scripts/mirar-padron-cuentas.mjs` arma el caso con gente de prueba y lo recorre hasta la
+  lección 0.
 - `/entrar` y `/canal/entrar` son las únicas rutas públicas nuevas en `lib/supabase/sesion.ts`.
   Tienen que serlo: quien llega con su enlace **todavía no tiene sesión**.
 

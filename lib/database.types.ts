@@ -2527,9 +2527,11 @@ export type Database = {
           area_nombre: string | null
           cargo: string | null
           cedula: string | null
+          cuenta_email: string | null
           email: string | null
           estado_matricula: string | null
           familia_oficio: string | null
+          ficha: string | null
           id: string | null
           lecciones_hechas: number | null
           matricula_id: string | null

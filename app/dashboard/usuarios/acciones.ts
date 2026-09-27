@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { requerirPermiso } from '@/lib/auth'
+import { enlazarCuentaConFicha } from '@/lib/padron-cuentas'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { ORGANIZACIONES, type Organizacion } from '@/lib/types'
 
@@ -24,45 +25,8 @@ async function buscarRol(id: string) {
   return data
 }
 
-/**
- * Enlaza una cuenta con su ficha del padrón.
- *
- * El canal cuelga todo de la ficha —el nombre, el área, lo que publica, el curso—,
- * así que una cuenta sin ficha entra y se queda en «esa cuenta todavía no está
- * asociada a una ficha del padrón». Pasó el 27 de septiembre de 2026 con la
- * primera cuenta de Iberia creada desde aquí para el canal: las cuentas que se
- * acuñan desde el padrón nacen enlazadas, pero las de Usuarios no.
- *
- * Con la clave de servicio, como el enlace del padrón: la política de
- * `empleados` no deja escribir `perfil_id` desde la sesión. Una ficha no se
- * enlaza a dos cuentas, ni una cuenta a dos fichas.
- */
-async function enlazar(perfilId: string, empleadoId: string, email: string): Promise<string | null> {
-  const admin = createAdminClient()
-  const { data: ficha } = await admin
-    .from('empleados')
-    .select('id, nombre_completo, perfil_id, activo, email')
-    .eq('id', empleadoId)
-    .maybeSingle()
-  if (!ficha?.activo) return 'Esa ficha no existe o está inactiva.'
-  if (ficha.perfil_id && ficha.perfil_id !== perfilId) {
-    return `La ficha de ${ficha.nombre_completo} ya está enlazada a otra cuenta.`
-  }
-
-  const { data: otra } = await admin
-    .from('empleados')
-    .select('nombre_completo')
-    .eq('perfil_id', perfilId)
-    .neq('id', empleadoId)
-    .maybeSingle()
-  if (otra) return `Esa cuenta ya está enlazada a la ficha de ${otra.nombre_completo}.`
-
-  const { error } = await admin
-    .from('empleados')
-    .update({ perfil_id: perfilId, email: ficha.email ?? email })
-    .eq('id', empleadoId)
-  return error ? `No se pudo enlazar: ${error.message}` : null
-}
+/** Enlazar una cuenta con su ficha vive en `lib/padron-cuentas.ts`: lo usa también el padrón. */
+const enlazar = enlazarCuentaConFicha
 
 export async function crearUsuario(_anterior: EstadoUsuario, fd: FormData): Promise<EstadoUsuario> {
   await requerirPermiso('modulo:usuarios', 'crear')

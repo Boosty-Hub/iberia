@@ -4,6 +4,8 @@ import { EncabezadoPagina, EstadoVacio, Insignia, Metrica } from '@/components/u
 import { TablaPadron } from '@/components/padron/tabla-padron'
 import { FAMILIAS_OFICIO, type FamiliaOficio } from '@/lib/adiestramiento'
 import { requerirPermiso } from '@/lib/auth'
+import { palabras } from '@/lib/coincidencia'
+import { cruzarPadron } from '@/lib/padron-cuentas'
 import { createClient } from '@/lib/supabase/server'
 import { estaLista, type Conexion } from '@/lib/whatsapp'
 import { comoSeLee } from '@/lib/telefono'
@@ -44,10 +46,9 @@ export default async function EmpleadosPage({
 
   let consulta = supabase.from('padron_estado').select('*').order('nombre_completo')
 
-  if (buscar) consulta = consulta.ilike('nombre_completo', `%${buscar}%`)
   if (nivel) consulta = consulta.eq('nivel', nivel)
 
-  const [{ data: padron }, { data: conexion }, { data: correcciones }] = await Promise.all([
+  const [{ data: padron }, { data: conexion }, { data: correcciones }, cruces] = await Promise.all([
     consulta,
     supabase.from('ajustes_whatsapp').select('*').eq('id', true).maybeSingle(),
     // Lo que la gente corrigió de su ficha con «No soy yo» en la lección 0.
@@ -56,6 +57,8 @@ export default async function EmpleadosPage({
       .select('id, nombre, area, nombre_padron, cargo_padron, area_padron, created_at')
       .is('resuelta_en', null)
       .order('created_at'),
+    // Las fichas de muestra repetidas y las cuentas sin ficha que coinciden.
+    cruzarPadron(supabase),
   ])
 
   const todos = padron ?? []
@@ -63,7 +66,11 @@ export default async function EmpleadosPage({
   // Los filtros de «qué le falta» se aplican aquí y no en la consulta porque son
   // combinaciones de columnas calculadas de la vista, y en SQL quedarían menos
   // legibles que esto. Doscientas filas caben de sobra en memoria.
+  // La búsqueda no distingue tildes: «alvarez» encuentra «Álvarez». Con `ilike` no
+  // la encontraba, y la ficha repetida de Martha Álvarez no salía al buscarla.
+  const buscada = palabras(buscar).join(' ')
   const gente = todos.filter((p) => {
+    if (buscada && !palabras(p.nombre_completo ?? '').join(' ').includes(buscada)) return false
     if (falta === 'matricula') return !p.matricula_id
     if (falta === 'telefono') return !p.telefono
     if (falta === 'enlace') return !p.acceso_expira
@@ -237,6 +244,10 @@ export default async function EmpleadosPage({
             tieneEnlace: Boolean(p.acceso_expira && new Date(p.acceso_expira) > new Date()),
             enlaceMandado: Boolean(p.acceso_enviado),
             entradas: p.acceso_usos ?? 0,
+            ficha: p.ficha,
+            cuenta: p.cuenta_email,
+            duplicada: cruces.duplicadas.get(p.id ?? '') ?? null,
+            cuentaPropuesta: cruces.propuestas.get(p.id ?? '') ?? null,
           }))}
           whatsappListo={whatsappListo}
         />

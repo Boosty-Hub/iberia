@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { CURSO } from '@/lib/adiestramiento'
 import { acunarToken, cuandoCaduca, enlaceDe, huella } from '@/lib/accesos'
 import { requerirPermiso } from '@/lib/auth'
+import { cruzarPadron, enlazarCuentaConFicha } from '@/lib/padron-cuentas'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { aInternacional } from '@/lib/telefono'
 import { estaLista, mandarPlantilla, type Conexion } from '@/lib/whatsapp'
@@ -40,12 +41,14 @@ export async function matricularSeleccionados(datos: FormData) {
     .maybeSingle()
   if (!curso) return
 
-  const { data: gente } = await supabase
-    .from('empleados')
-    .select('id, nombre_completo, familia_oficio')
-    .in('id', ids)
+  const [{ data: gente }, { duplicadas }] = await Promise.all([
+    supabase.from('empleados').select('id, nombre_completo, familia_oficio').in('id', ids),
+    cruzarPadron(supabase),
+  ])
 
-  const filas = (gente ?? []).map((e) => ({
+  // Una ficha de muestra que repite a una de Capital Humano no se matricula: la
+  // matrícula quedaría en la persona equivocada (ver `cruzarPadron`).
+  const filas = (gente ?? []).filter((e) => !duplicadas.has(e.id)).map((e) => ({
     curso_id: curso.id,
     empleado_id: e.id,
     familia_oficio: e.familia_oficio,
@@ -92,9 +95,18 @@ export async function acunarEnlaces(datos: FormData) {
     .from('empleados')
     .select('id, cedula, nombre_completo, cargo, perfil_id, activo')
     .in('id', ids)
+  const { duplicadas, propuestas } = await cruzarPadron(await createClient())
 
   for (const persona of gente ?? []) {
     if (!persona.activo) continue
+
+    // ⚠️ Ni a una ficha de muestra repetida, ni a quien ya tiene una cuenta que
+    // coincide: acuñarle el enlace le crearía una segunda cuenta, y la suya —la
+    // de su correo— se quedaría sin ficha. Eso se enlaza, no se acuña.
+    if (duplicadas.has(persona.id) || (!persona.perfil_id && propuestas.has(persona.id))) {
+      console.error(`[accesos] ${persona.nombre_completo}: ficha repetida o con cuenta por enlazar, no se acuña`)
+      continue
+    }
 
     // Sin cédula no se puede acuñar: el correo interno se deriva de ella, y no
     // se le inventa una a nadie. El padrón de julio de 2026 llegó sin cédulas,
@@ -157,6 +169,27 @@ export async function acunarEnlaces(datos: FormData) {
  * porque uno tenía mal el teléfono obliga a repetirlo, y a la gente le llega
  * dos veces.
  */
+/**
+ * Enlaza la ficha con la cuenta que ya tiene la persona —la de su correo—, desde
+ * el padrón. Es lo mismo que «Enlazar» en Usuarios, y se ofrece donde se
+ * matricula: matricular una ficha sin cuenta no le abre el curso a nadie.
+ */
+export async function enlazarCuenta(datos: FormData) {
+  await requerirPermiso('modulo:empleados', 'editar')
+  const empleadoId = String(datos.get('empleado_id') ?? '')
+  const perfilId = String(datos.get('perfil_id') ?? '')
+  if (!/^[0-9a-f-]{36}$/i.test(empleadoId) || !/^[0-9a-f-]{36}$/i.test(perfilId)) return
+
+  const supabase = await createClient()
+  const { data: perfil } = await supabase.from('profiles').select('email').eq('id', perfilId).maybeSingle()
+  if (!perfil) return
+
+  const error = await enlazarCuentaConFicha(perfilId, empleadoId, perfil.email)
+  if (error) console.error('[padrón] no se enlazó la cuenta:', error)
+  revalidatePath(RUTA)
+  revalidatePath('/dashboard/usuarios')
+}
+
 export async function mandarEnlaces(datos: FormData) {
   await requerirPermiso('modulo:empleados', 'editar')
   const ids = marcados(datos)

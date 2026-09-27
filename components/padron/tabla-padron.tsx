@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import {
   acunarEnlaces,
+  enlazarCuenta,
   mandarEnlaces,
   marcarEnlacesMandados,
   matricularSeleccionados,
@@ -23,6 +24,14 @@ export type Fila = {
   tieneEnlace: boolean
   enlaceMandado: boolean
   entradas: number
+  /** El número de ficha de Capital Humano. Sin número, se cargó a mano. */
+  ficha: string | null
+  /** El correo de la cuenta enlazada, si la tiene. */
+  cuenta: string | null
+  /** Ficha de muestra que repite a una de Capital Humano: se usa aquella. */
+  duplicada: { nombre: string; ficha: string } | null
+  /** Una cuenta de Iberia sin ficha cuyo nombre coincide con esta. */
+  cuentaPropuesta: { id: string; email: string } | null
 }
 
 /**
@@ -50,7 +59,8 @@ export function TablaPadron({
 }) {
   const [marcados, setMarcados] = useState<Set<string>>(new Set())
 
-  const seleccionables = gente.filter((p) => p.activo)
+  // Una ficha de muestra repetida no se marca: se matricula la de Capital Humano.
+  const seleccionables = gente.filter((p) => p.activo && !p.duplicada)
   const todosMarcados = seleccionables.length > 0 && marcados.size === seleccionables.length
 
   function alternar(id: string) {
@@ -69,7 +79,9 @@ export function TablaPadron({
   const elegidos = gente.filter((p) => marcados.has(p.id))
   const sinTelefono = elegidos.filter((p) => !p.telefono).length
   const sinMatricula = elegidos.filter((p) => !p.matriculado).length
-  const sinEnlace = elegidos.filter((p) => !p.tieneEnlace).length
+  // A quien ya tiene una cuenta que coincide no se le acuña: se enlaza.
+  const porEnlazar = elegidos.filter((p) => !p.cuenta && p.cuentaPropuesta).length
+  const sinEnlace = elegidos.filter((p) => !p.tieneEnlace && !(!p.cuenta && p.cuentaPropuesta)).length
   const sinMandar = elegidos.filter((p) => p.tieneEnlace && !p.enlaceMandado).length
 
   return (
@@ -101,7 +113,7 @@ export function TablaPadron({
                     type="checkbox"
                     checked={marcados.has(persona.id)}
                     onChange={() => alternar(persona.id)}
-                    disabled={!persona.activo}
+                    disabled={!persona.activo || Boolean(persona.duplicada)}
                     aria-label={`Marcar a ${persona.nombre}`}
                     className="h-4 w-4"
                   />
@@ -114,9 +126,41 @@ export function TablaPadron({
                     {persona.area ? ` · ${persona.area}` : ''}
                   </p>
                   <p className="text-[12px] text-marca-400">
-                    {persona.cedula} · {persona.nivel} · {persona.familia}
+                    {persona.ficha ? `Ficha ${persona.ficha}` : 'Cargada a mano'}
+                    {persona.cedula && ` · ${persona.cedula}`} · {persona.nivel} · {persona.familia}
                     {!persona.activo && ' · inactivo'}
                   </p>
+                  {/* De quién es la cuenta: matricular una ficha sin cuenta no le
+                      abre el curso a nadie, y una ficha puede tener la cuenta del
+                      enlace o la del correo de la persona. */}
+                  <p className="text-[12px] text-marca-500" data-cuenta>
+                    {persona.cuenta
+                      ? persona.cuenta.endsWith('@iberia.local')
+                        ? 'Cuenta: la de su enlace'
+                        : `Cuenta: ${persona.cuenta}`
+                      : 'Sin cuenta'}
+                  </p>
+
+                  {persona.duplicada && (
+                    <p className="mt-1.5 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[12px] leading-relaxed text-amber-800" data-duplicada>
+                      <span className="font-semibold">Ficha de muestra repetida.</span> La de Capital Humano es{' '}
+                      «{persona.duplicada.nombre}», ficha {persona.duplicada.ficha}: matricula esa.
+                    </p>
+                  )}
+
+                  {!persona.cuenta && persona.cuentaPropuesta && (
+                    <form action={enlazarCuenta} className="mt-1.5 flex flex-wrap items-center gap-2 rounded-lg bg-amber-50 px-2.5 py-1.5" data-cuenta-propuesta>
+                      <input type="hidden" name="empleado_id" value={persona.id} />
+                      <input type="hidden" name="perfil_id" value={persona.cuentaPropuesta.id} />
+                      <span className="text-[12px] leading-relaxed text-amber-800">
+                        Ya tiene cuenta: <span className="font-semibold">{persona.cuentaPropuesta.email}</span>. Enlázala
+                        en vez de acuñarle otra.
+                      </span>
+                      <button type="submit" className="btn-neutro h-8 px-2.5 text-[12px]">
+                        Enlazar
+                      </button>
+                    </form>
+                  )}
                 </td>
 
                 <td className="px-3 py-3 align-top">
@@ -214,6 +258,13 @@ export function TablaPadron({
             >
               Quitar la selección
             </button>
+
+            {porEnlazar > 0 && (
+              <p className="w-full text-[13px] text-amber-800">
+                {porEnlazar} de los marcados ya tiene{porEnlazar === 1 ? '' : 'n'} cuenta: no se le acuña enlace,
+                se enlaza en su fila.
+              </p>
+            )}
 
             {sinTelefono > 0 && (
               <p className="w-full text-[13px] text-acento-700">
