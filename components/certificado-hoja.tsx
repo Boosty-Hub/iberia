@@ -1,4 +1,7 @@
 import Image from 'next/image'
+import { fechaLarga, legible, TEXTOS, type DatosCertificado } from '@/lib/certificado'
+
+export { fechaLarga }
 
 /**
  * La hoja del certificado.
@@ -11,15 +14,13 @@ import Image from 'next/image'
  * **Lo que muestra sale de la fila, no del padrón.** Nombre, cédula, cargo y
  * área quedaron congelados el día de la emisión: si la persona cambia de puesto
  * en noviembre, el certificado sigue diciendo lo que era cuando lo hizo.
+ *
+ * Desde el 27 de septiembre de 2026 sale también dentro de la lección 8, debajo
+ * de «Tu certificado», y tiene una hermana en imagen —la que se guarda y se
+ * publica, `lib/certificado-imagen.tsx`—. El texto de las dos está en
+ * `lib/certificado.ts`.
  */
-export type Certificado = {
-  codigo: string
-  nombre_completo: string
-  cedula: string
-  cargo: string | null
-  area_nombre: string | null
-  emitido_en: string
-}
+export type Certificado = DatosCertificado
 
 export function CertificadoHoja({ certificado }: { certificado: Certificado }) {
   return (
@@ -39,13 +40,11 @@ export function CertificadoHoja({ certificado }: { certificado: Certificado }) {
           className="h-8 w-auto object-contain"
         />
         <span className="text-[11px] font-bold tracking-[0.18em] text-acento-600 uppercase">
-          Nuevo Sabor
+          {TEXTOS.marca}
         </span>
       </header>
 
-      <p className="mt-8 text-[13px] leading-relaxed text-marca-500">
-        Industrias Iberia certifica que
-      </p>
+      <p className="mt-8 text-[13px] leading-relaxed text-marca-500">{TEXTOS.certifica}</p>
 
       <h1 className="mt-1 text-[26px] leading-tight font-bold text-balance text-marca-900">
         {certificado.nombre_completo}
@@ -56,24 +55,22 @@ export function CertificadoHoja({ certificado }: { certificado: Certificado }) {
       <div className="my-6 h-1.5 w-20 rounded-full bg-acento-600" />
 
       <p className="text-[15px] leading-relaxed text-marca-700">
-        completó el adiestramiento{' '}
-        <strong className="font-semibold text-marca-900">
-          Inteligencia artificial en tu puesto
-        </strong>
-        , nueve lecciones del programa <strong className="font-semibold">Nuevo Sabor</strong>,
-        dictadas por Ajito.
+        {TEXTOS.completo}{' '}
+        <strong className="font-semibold text-marca-900">{TEXTOS.curso}</strong>,{' '}
+        {TEXTOS.detalle} <strong className="font-semibold">{TEXTOS.programa}</strong>,{' '}
+        {TEXTOS.dictado}
       </p>
 
       <dl className="mt-7 space-y-3 border-t border-marca-200/70 pt-6">
-        {certificado.cargo && <Dato rotulo="Cargo" valor={certificado.cargo} />}
-        {certificado.area_nombre && <Dato rotulo="Área" valor={certificado.area_nombre} />}
-        <Dato rotulo="Fecha" valor={fechaLarga(certificado.emitido_en)} />
+        {certificado.cargo && <Dato rotulo={TEXTOS.cargo} valor={legible(certificado.cargo)} />}
+        {certificado.area_nombre && <Dato rotulo={TEXTOS.area} valor={certificado.area_nombre} />}
+        <Dato rotulo={TEXTOS.fecha} valor={fechaLarga(certificado.emitido_en)} />
       </dl>
 
       <footer className="mt-7 flex items-end justify-between gap-4 border-t border-marca-200/70 pt-6">
         <div className="min-w-0">
           <p className="text-[11px] font-bold tracking-[0.12em] text-marca-400 uppercase">
-            Código
+            {TEXTOS.codigo}
           </p>
           {/* Alguien de Capital Humano lo va a teclear copiándolo del impreso. */}
           <p className="mt-0.5 font-mono text-[17px] font-semibold tracking-tight text-marca-900">
@@ -101,12 +98,4 @@ function Dato({ rotulo, valor }: { rotulo: string; valor: string }) {
       <dd className="min-w-0 flex-1 text-[15px] text-marca-800">{valor}</dd>
     </div>
   )
-}
-
-export function fechaLarga(iso: string): string {
-  return new Date(iso).toLocaleDateString('es-VE', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
 }

@@ -283,8 +283,13 @@ y una ruedita en vez de piernas.
   editores, nadie más. La política lo comprueba con el dueño metido en la ruta:
   `respuestas/{empleado_id}/…`.
 - **La lección 8 tiene dos cierres** —`Audio 6-A` si Ajito se va, `6-B` si se queda— y
-  suena el que diga `cursos.asistente_libre_activo`. Lo resuelve `segunInterruptor()`;
-  por convención, sufijo `-A` es apagado y `-B` encendido.
+  suena el que diga `cursos.asistente_libre_activo`. **Cada versión es su propio turno**
+  (`Turno.version`, del «versión A/B» del título de la sección) y la página usa
+  `turnosSegun()`, que deja el que toca y renumera: la despedida es el mismo turno con el
+  interruptor en cualquier posición. ⚠️ Hasta el 27 de septiembre de 2026 las dos iban en un
+  solo turno —la A no espera nada y se juntaba con la B hasta su botón— y con el interruptor
+  apagado salían «Escríbeme cuando quieras» y «Preguntarle algo a Ajito» debajo del adiós:
+  `segunInterruptor()` filtraba el audio y la ficha por sufijo, no el texto ni el botón.
 - **Los audios se graban del guion, no de una lista aparte.** `generar:audios` lee los
   bloques `🔊 **Audio N**` de `contenido/adiestramiento/leccion-*.md` y deja los MP3 en
   `contenido/adiestramiento/audio/`. Es incremental: guarda un `.sha` con la huella del
@@ -355,8 +360,9 @@ y una ruedita en vez de piernas.
   - ⚠️ **`DevolucionAjito` lleva `key` por respuesta.** Tras un «no va» se reutilizaba el
     componente del pedido rechazado, que ya había pedido lo suyo, y el dibujo nuevo nunca se
     pedía.
-- **`asistente_libre_activo` viene apagado.** Encendido, aparece «pregúntale lo que sea»
-  y la lección 8 se despide distinto. Por eso ese cierre está escrito en dos versiones.
+- **`asistente_libre_activo` viene apagado.** Encendido, aparece «Pregúntale a Ajito» en
+  el índice y la lección 8 se despide distinto. Por eso ese cierre está escrito en dos
+  versiones. Ver «La conversación con Ajito», abajo.
 - **Ajito se genera, no se edita a mano**, igual que la marca:
 
   ```
@@ -390,9 +396,41 @@ npm run probar:ajito -- --caso plata         # uno solo, para iterar el personaj
 npm run generar:fichas                       # las 10 fichas de bolsillo, del guion
 npm run subir:fichas                         # al bucket privado
 npm run generar:ejemplos                     # los 3 dibujos de ejemplo de la lección 4, y los sube
-npm run probar:certificado                   # 17 comprobaciones · guardas y vista
+npm run probar:certificado                   # 32 comprobaciones · guardas, lección 8, imagen y canal
 npm run probar:recordatorios                 # 38 comprobaciones · la escalera y los mensajes
 ```
+
+## La conversación con Ajito (`/canal/adiestramiento/ajito`)
+
+«Preguntarle algo a Ajito», al final de la lección 8 con el interruptor encendido, y
+«Pregúntale a Ajito» en el índice. Un chat como los de inteligencia artificial, con varias
+conversaciones (`charlas_ajito`, `charla_mensajes`): se le escribe, se le habla o se le
+manda una foto; contesta escrito y hablado, con la voz del curso, se acuerda de lo que se
+habló, busca en internet y dibuja.
+
+- **Quién entra** (`contextoCharla()` en `lib/charla.ts`): con matrícula, y el interruptor
+  encendido —o, apagado, solo los editores, para probarlo—. Lo leído lo lee su autor y los
+  editores, como las respuestas del curso.
+- **Es el mismo Ajito.** El personaje de `lib/ajito.ts` va en piezas: `comoHablas()` y
+  `REGLAS` son comunes; la devolución lleva `EN_EL_CURSO` y `FORMA_DEVOLUCION`, la
+  conversación `EN_LA_CHARLA` y `FORMA_CHARLA`. Una regla nueva de Ajito va en `REGLAS`.
+- **Cuatro pasos, como en los ejercicios**: `mandarAAjito` guarda lo que dijo la persona
+  —primero y aparte—, `contestar` pide la respuesta, `dibujar` hace el dibujo si el modelo lo
+  pidió con su herramienta, y `voz` la pone a hablar. `contestar` es idempotente. El dibujo
+  pasa por el mismo filtro y el mismo generador de la lección 4, y lo que no va recibe el
+  texto del guion.
+- **Tope de 40 mensajes al día por persona** (`TOPE_DIARIO`): cada uno es una llamada al
+  modelo grande, y a veces un dibujo.
+- Todo lo suyo va a `respuestas/{empleado_id}/charla/` del bucket privado, así que
+  `barrerCarpeta` lo recoge.
+
+```
+node --env-file=.env.local scripts/mirar-charla.mjs [--base http://localhost:3001]
+```
+
+Recorre el chat en un iPhone 14 con una cuenta de prueba del equipo: la entrada desde el
+índice, la fecha, la voz, la memoria, un dibujo, recargar, «Nueva», y que otra persona no
+lea ni escriba en la conversación ajena. Gasta unos centavos.
 
 ## El empujón (`/dashboard/adiestramiento/recordatorios`)
 
@@ -495,10 +533,35 @@ insertar: que la matrícula sea de quien llama, y que **las nueve lecciones est�
 completadas de verdad** —las cuenta, no se fía del estado de la matrícula—. Es
 idempotente: emitirlo dos veces devuelve el mismo código.
 
-`terminarLeccion` lo emite al cerrar la novena y redirige al certificado, no al índice:
-es lo que Ajito acaba de prometer en el audio. Si la emisión falla, la lección igual
-queda terminada — perder el avance por no poder emitir un papel sería el peor de los
-dos males.
+**Se emite al abrirse el turno del certificado de la lección 8**, no al terminar la
+lección: ese audio dice «terminaste las nueve» y el certificado sale ahí mismo, con sus
+datos, debajo de «Tu certificado» (la pieza `certificado` del guion). Llegar a ese turno
+da la lección por terminada; la despedida viene después. Lo hace `cerrarLeccion()`
+(`lib/cerrar-curso.ts`), el mismo que usa `terminarLeccion`. Si la emisión falla, la
+lección igual queda terminada — perder el avance por no poder emitir un papel sería el
+peor de los dos males.
+
+⚠️ **Next memoriza los GET idénticos dentro de un mismo render.** El `select` del
+certificado repetido después de emitir devolvía la respuesta vacía del de antes, y la
+lección decía «se está preparando» con el certificado ya emitido. `cerrarLeccion` devuelve
+la fila que emitió, y esa es la que se pinta. Vale para cualquier página que escriba y
+vuelva a leer lo mismo en el mismo render.
+
+**Los botones del certificado hacen lo que dicen** (`CertificadoAcciones`), debajo de la
+hoja en la lección y en `/canal/adiestramiento/certificado`: **Guardarlo** baja la
+imagen; **Mandárselo a alguien** abre el compartir del teléfono con la imagen adentro —un
+enlace no serviría: pide sesión—; **Publicarlo en el canal** lo pone en «Nuestra gente»
+por `publicar_mi_certificado()`, `security definer` como la del escudo: solo el propio,
+una vez.
+
+**La imagen la dibuja `next/og`** (`lib/certificado-imagen.tsx`, 1080 × 1440) con DM Sans
+de `assets/fuentes/` (OFL), el logo y Ajito. El texto sale de `lib/certificado.ts`, el
+mismo de la hoja: son dos maquetas —`next/og` no entiende Tailwind— y un solo texto.
+🔴 **La que va al canal no lleva la cédula**; la que se guarda o se manda, sí.
+⚠️ En Netlify la función no ve `public/` ni `assets/` si no se le dice: van en
+`outputFileTracingIncludes` de `next.config.ts`. Y `next/og` exige `display: flex` en
+toda caja con más de un hijo —`C.I. {cedula}` son dos— y encoge lo que no quepa: todo va
+con `flexShrink: 0` y un espaciador que absorbe.
 
 **Una sola hoja para dos públicos.** `components/certificado-hoja.tsx` la ve el
 trabajador en su teléfono y también sale en `/dashboard/adiestramiento/certificados`,
@@ -730,7 +793,7 @@ npm run capturar:oficios                    # el curso visto por cada oficio
 npm run probar:ajito                        # qué contesta Ajito · pide ANTHROPIC_API_KEY
 npm run generar:fichas                      # las fichas de bolsillo, del guion
 npm run subir:fichas                        # al bucket privado
-npm run probar:certificado                  # guardas de emisión y vista, con capturas
+npm run probar:certificado                  # guardas, la lección 8, la imagen y el canal
 npm run probar:recordatorios                # la escalera del empujón y los mensajes
 npm run probar:padron                       # el enlace como credencial · 25 comprobaciones
 npm run probar:supabase                     # que todo exista de verdad en el proyecto

@@ -31,7 +31,7 @@ línea.
 | **Padrón** | **276 personas cargadas** con ficha, cargo, nivel y familia de oficio. ⚠️ Sin cédula, sin celular y sin correo |
 | **Canal** | Funciona en local. Anunciado el 12 de agosto; **la revisión con mercadeo se cayó y no tiene fecha** |
 | **Formación dirigente** | Uno a uno con Alberto el 17 de agosto, **Petit Comité el 26** y **gerentes el 23 de septiembre en Cagua**. Falta la tercera —los líderes— y su fecha |
-| **Adiestramiento de planta** | Completo: guion, **70 audios por voz (20 min 02 s y 20 min 09 s)**, **dos voces a elegir desde el 26/9**, 10 fichas, certificado, padrón, recordatorios. **Ajito contesta y habla en producción**, y las notas de voz se transcriben: Azure volvió el 26/9, al pasar la suscripción a pago por uso. **Es de Fase 2** — avance para mostrar, no para abrir |
+| **Adiestramiento de planta** | Completo: guion, **70 audios por voz (20 min 02 s y 20 min 09 s)**, **dos voces a elegir desde el 26/9**, 10 fichas, certificado, padrón, recordatorios. **Ajito contesta y habla en producción**, y las notas de voz se transcriben: Azure volvió el 26/9, al pasar la suscripción a pago por uso. **Desde el 27/9 el certificado sale en la lección 8 y se publica en el canal, y hay chat con Ajito** —el asistente libre, apagado: lo ve solo el equipo—. **Es de Fase 2** — avance para mostrar, no para abrir |
 | **Repositorio** | `Boosty-Hub/iberia` — 🔴 **público**. Cinco commits subidos el 17/9 con la bitácora dentro. Hace falta un administrador de la organización para cerrarlo |
 
 ### Lo que aprieta
@@ -64,6 +64,41 @@ cláusula 5. Aquí solo lo urgente:
 - **Refijar la revisión del canal con mercadeo** — Alberto la agenda. *(Bloqueaba el despliegue; el sitio salió el 25/9 a pedido de Gabriel, y la revisión sigue antes de dar cuentas del canal.)*
 - **Leer los 42 hallazgos redactados** del informe y validar los que los sostienen.
 - **Pedirle a Capital Humano cédula y celular por ficha.** El padrón llegó sin ellos.
+
+---
+
+## 27 de septiembre de 2026 · Sesión 46 — el cierre del curso: el certificado y Ajito que se queda
+
+Gabriel llegó al final de la lección 8 y debajo de «Tu certificado» no había certificado. Pidió
+tres cosas; cómo funciona cada una está en `AGENTS.md`.
+
+- **El certificado sale ahí mismo, diseñado**: la hoja que se imprime —logo de Iberia, nombre,
+  cédula, cargo, área, fecha, código y Ajito—, emitida al abrirse ese turno, que es donde el
+  audio dice «terminaste las nueve». **Guardarlo**, **Mandárselo a alguien** y un botón nuevo,
+  **Publicarlo en el canal**, hacen lo que dicen; los tres quedan también en la página del
+  certificado. La imagen la dibuja la aplicación, y la que va al feed **no lleva la cédula**.
+- **«Preguntarle algo a Ajito» abre un chat**, como los de inteligencia artificial: varias
+  conversaciones, texto, nota de voz o foto, respuesta escrita y hablada con la voz del curso,
+  memoria de lo hablado, búsqueda en internet y dibujos. Es el mismo Ajito: las reglas del
+  personaje son comunes a la devolución y a la conversación. Tope de 40 mensajes al día.
+  🟡 **El interruptor sigue apagado**: la ve solo el equipo, desde «Pregúntale a Ajito» en el
+  índice del curso. Prenderlo es decisión de Gabriel (en `PENDIENTES.md`).
+
+🔴 **Con el interruptor apagado, la despedida de la lección 8 traía el final de la otra**:
+«Escríbeme cuando quieras» y el botón de «Preguntarle algo a Ajito» debajo del «me despido».
+Las dos versiones iban en el mismo turno y solo se filtraban su audio y su ficha. Ahora cada
+versión es su turno. Y el audio decía «Despedida — versión A · asistente_libre_activo
+apagado»: ahora dice «Despedida».
+
+⚠️ **La lección emitía el certificado y decía «se está preparando».** Next memoriza las
+consultas idénticas dentro de una misma página, y la segunda búsqueda devolvía la primera,
+vacía. Se pinta la fila que devuelve la emisión.
+
+**Verificado** contra el servidor local, con cuentas de prueba que se borran al salir:
+`probar:certificado` 32 de 32 (la imagen, «Guardarlo», una sola publicación, la lección 8
+emitiéndolo, y quien no terminó sin imagen ni publicación), el recorrido del chat en un iPhone 14
+—fecha, voz, memoria, dibujo, recarga, «Nueva», 44 px y que otra persona no lea ni escriba en
+la ajena—, `probar:supabase` 78 de 78, `probar:adiestramiento` 25 de 25 y `probar:ajito`.
 
 ---
 

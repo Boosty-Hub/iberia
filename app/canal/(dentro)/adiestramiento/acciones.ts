@@ -6,8 +6,15 @@ import guion from '@/contenido/adiestramiento/guion.json'
 import { CURSO } from '@/lib/adiestramiento'
 import { obtenerSesion, puede } from '@/lib/auth'
 import { requerirEmpleado } from '@/lib/canal'
+import { cerrarLeccion } from '@/lib/cerrar-curso'
+import { imagenCertificado } from '@/lib/certificado-imagen'
 import { turnoDelEjercicio, type LeccionGuion } from '@/lib/guion'
-import { BUCKET_CANAL, BUCKET_RESPUESTAS, rutaEscudoPublicado } from '@/lib/storage'
+import {
+  BUCKET_CANAL,
+  BUCKET_RESPUESTAS,
+  rutaCertificadoPublicado,
+  rutaEscudoPublicado,
+} from '@/lib/storage'
 import { createClient } from '@/lib/supabase/server'
 import { esClaveVoz } from '@/lib/voz'
 
@@ -218,6 +225,55 @@ export async function publicarEscudo(datos: FormData): Promise<{ ok: boolean; id
 }
 
 /**
+ * «Publicarlo en el canal», debajo del certificado de la lección 8.
+ *
+ * Como el escudo: lo decide la persona, y sale en «Nuestra gente» como «Terminé
+ * el curso de Ajito y este es mi certificado». La imagen se dibuja aquí mismo
+ * **sin la cédula** —el feed lo leen todos— y se sube a su carpeta del bucket del
+ * canal; `publicar_mi_certificado()` comprueba que el certificado sea suyo y no
+ * lo publica dos veces.
+ *
+ * El turno es opcional: debajo del certificado, en el turno que toca, publicar
+ * también sigue la lección; en la página del certificado solo publica.
+ */
+export async function publicarCertificado(datos: FormData): Promise<{ ok: boolean; id?: string }> {
+  const numero = Number(datos.get('numero'))
+  const ctx = await contexto(numero)
+  if (!ctx) return { ok: false }
+  const { empleado, supabase, matricula } = ctx
+
+  const { data: certificado } = await supabase
+    .from('certificados')
+    .select('id, codigo, nombre_completo, cedula, cargo, area_nombre, emitido_en')
+    .eq('matricula_id', matricula.id)
+    .maybeSingle()
+  if (!certificado) return { ok: false }
+
+  const imagen = await imagenCertificado(certificado, { conCedula: false })
+  const ruta = rutaCertificadoPublicado(empleado.id, certificado.id)
+  const { error: errSubir } = await supabase.storage
+    .from(BUCKET_CANAL)
+    .upload(ruta, await imagen.arrayBuffer(), { contentType: 'image/png', upsert: true })
+  if (errSubir) {
+    console.error('[canal] no se pudo subir el certificado:', errSubir.message)
+    return { ok: false }
+  }
+
+  const { data: id, error } = await supabase.rpc('publicar_mi_certificado', { p_imagen_ruta: ruta })
+  if (error || !id) {
+    console.error('[canal] no se publicó el certificado:', error?.message)
+    return { ok: false }
+  }
+
+  const turno = datos.get('turno')
+  if (turno !== null && turno !== '') await adelantar(ctx, Number(turno))
+  revalidatePath('/canal')
+  revalidatePath(`/canal/adiestramiento/${numero}`)
+  revalidatePath('/canal/adiestramiento/certificado')
+  return { ok: true, id }
+}
+
+/**
  * «No soy yo»: la persona corrige su ficha del padrón y la lección sigue.
  *
  * Lo que escribe queda en `correcciones_padron` como aviso para Capital
@@ -348,54 +404,13 @@ export async function terminarLeccion(datos: FormData) {
   if (!ctx) return
 
   const { supabase, curso, matricula, leccion } = ctx
-  const ahora = new Date().toISOString()
 
-  await supabase.from('avances').upsert(
-    {
-      matricula_id: matricula.id,
-      leccion_id: leccion.id,
-      estado: 'completada',
-      completada_en: ahora,
-    },
-    { onConflict: 'matricula_id,leccion_id' }
-  )
-
-  // ¿Quedó alguna sin terminar? Si no, el curso está completo.
-  const [{ count: totalLecciones }, { count: completadas }] = await Promise.all([
-    supabase
-      .from('lecciones')
-      .select('id', { count: 'exact', head: true })
-      .eq('curso_id', curso.id)
-      .eq('activa', true),
-    supabase
-      .from('avances')
-      .select('id', { count: 'exact', head: true })
-      .eq('matricula_id', matricula.id)
-      .eq('estado', 'completada'),
-  ])
-
-  const termino = (completadas ?? 0) >= (totalLecciones ?? 0)
-
-  await supabase
-    .from('matriculas')
-    .update({
-      estado: termino ? 'completado' : 'en_curso',
-      completado_en: termino ? (matricula.completado_en ?? ahora) : null,
-      ultimo_toque: ahora,
-    })
-    .eq('id', matricula.id)
-
-  // Terminó las nueve: se emite el certificado. La función comprueba por su
-  // cuenta que el curso esté completo —no se fía de esta cuenta de aquí— y
-  // devuelve el mismo si ya existía, así que volver a pasar por aquí no da dos
-  // códigos. Si algo falla, la lección igual queda terminada: perder el avance
-  // por no poder emitir un papel sería el peor de los dos males.
-  if (termino) {
-    const { error } = await supabase.rpc('emitir_mi_certificado', {
-      p_matricula: matricula.id,
-    })
-    if (error) console.error('[certificado] no se pudo emitir:', error.message)
-  }
+  // Terminó las nueve: se emite el certificado. Ver `cerrarLeccion`.
+  const { termino } = await cerrarLeccion(supabase, {
+    cursoId: curso.id,
+    matricula,
+    leccionId: leccion.id,
+  })
 
   revalidatePath('/canal/adiestramiento')
 

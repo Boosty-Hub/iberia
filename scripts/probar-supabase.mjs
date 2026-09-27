@@ -199,6 +199,15 @@ console.log('\nLa función de emisión\n')
 }
 
 {
+  // Publicar el certificado en el canal: sin ficha tiene que negarse, sin
+  // publicar nada. La clave de servicio no tiene empleado, así que cae ahí.
+  const { error } = await admin.rpc('publicar_mi_certificado', { p_imagen_ruta: 'certificados/x/x.png' })
+  const mensaje = error?.message ?? ''
+  comprobar('publicar_mi_certificado existe', !/could not find|does not exist/i.test(mensaje), mensaje)
+  comprobar('y no publica nada sin ficha', /padr[óo]n/i.test(mensaje), mensaje || 'devolvió algo')
+}
+
+{
   // ⚠️ Se pregunta por un curso que no existe **a propósito**.
   //
   // Esta comprobación llamaba con `ajito` y eso no verifica: matricula. El 22 de
@@ -239,6 +248,9 @@ const NUEVAS = [
   'accesos',
   // Dice de alguien que el padrón lo tiene mal: la lee su dueño y el equipo.
   'correcciones_padron',
+  // La conversación libre con Ajito: la lee su autor y el equipo, nadie más.
+  'charlas_ajito',
+  'charla_mensajes',
   // Material de Iberia bajo NDA, como el resto del informe.
   'informe_circuito_puntos',
   'informe_modulos',

@@ -374,6 +374,126 @@ export type Database = {
           },
         ]
       }
+      charla_mensajes: {
+        Row: {
+          audio: string | null
+          charla_id: string
+          created_at: string
+          de: string
+          dibujo_veredicto: string | null
+          entrada: string
+          fallo_en: string | null
+          id: string
+          matricula_id: string
+          media_url: string | null
+          pedido_dibujo: string | null
+          texto: string | null
+        }
+        Insert: {
+          audio?: string | null
+          charla_id: string
+          created_at?: string
+          de: string
+          dibujo_veredicto?: string | null
+          entrada?: string
+          fallo_en?: string | null
+          id?: string
+          matricula_id: string
+          media_url?: string | null
+          pedido_dibujo?: string | null
+          texto?: string | null
+        }
+        Update: {
+          audio?: string | null
+          charla_id?: string
+          created_at?: string
+          de?: string
+          dibujo_veredicto?: string | null
+          entrada?: string
+          fallo_en?: string | null
+          id?: string
+          matricula_id?: string
+          media_url?: string | null
+          pedido_dibujo?: string | null
+          texto?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "charla_mensajes_charla_id_fkey"
+            columns: ["charla_id"]
+            isOneToOne: false
+            referencedRelation: "charlas_ajito"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "charla_mensajes_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "matriculas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "charla_mensajes_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["matricula_id"]
+          },
+          {
+            foreignKeyName: "charla_mensajes_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["matricula_id"]
+          },
+        ]
+      }
+      charlas_ajito: {
+        Row: {
+          actualizada_en: string
+          created_at: string
+          id: string
+          matricula_id: string
+          titulo: string
+        }
+        Insert: {
+          actualizada_en?: string
+          created_at?: string
+          id?: string
+          matricula_id: string
+          titulo?: string
+        }
+        Update: {
+          actualizada_en?: string
+          created_at?: string
+          id?: string
+          matricula_id?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "charlas_ajito_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "matriculas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "charlas_ajito_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["matricula_id"]
+          },
+          {
+            foreignKeyName: "charlas_ajito_matricula_id_fkey"
+            columns: ["matricula_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["matricula_id"]
+          },
+        ]
+      }
       comentarios: {
         Row: {
           created_at: string
@@ -1737,6 +1857,7 @@ export type Database = {
           autor_id: string | null
           bajada: string | null
           busqueda: unknown
+          certificado_id: string | null
           created_at: string
           cuerpo_md: string | null
           estado: string
@@ -1758,6 +1879,7 @@ export type Database = {
           autor_id?: string | null
           bajada?: string | null
           busqueda?: unknown
+          certificado_id?: string | null
           created_at?: string
           cuerpo_md?: string | null
           estado?: string
@@ -1779,6 +1901,7 @@ export type Database = {
           autor_id?: string | null
           bajada?: string | null
           busqueda?: unknown
+          certificado_id?: string | null
           created_at?: string
           cuerpo_md?: string | null
           estado?: string
@@ -1822,6 +1945,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "recordatorios_pendientes"
             referencedColumns: ["empleado_id"]
+          },
+          {
+            foreignKeyName: "publicaciones_certificado_id_fkey"
+            columns: ["certificado_id"]
+            isOneToOne: false
+            referencedRelation: "certificados"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "publicaciones_respuesta_id_fkey"
@@ -2496,6 +2626,10 @@ export type Database = {
         }[]
       }
       participo_en: { Args: { conv: string }; Returns: boolean }
+      publicar_mi_certificado: {
+        Args: { p_imagen_ruta: string }
+        Returns: string
+      }
       publicar_mi_escudo: {
         Args: { p_imagen_ruta: string; p_respuesta: string }
         Returns: string

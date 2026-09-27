@@ -1612,7 +1612,7 @@
             {
               "tipo": "pieza",
               "descripcion": "El certificado — sello IBERIA · Nuevo Sabor, nombre y cédula, cargo, área, fecha, y Ajito en una esquina.",
-              "clase": "otra",
+              "clase": "certificado",
               "lineas": [],
               "sufijo": ""
             },
@@ -1624,7 +1624,8 @@
               "tipo": "botones",
               "opciones": [
                 "Guardarlo",
-                "Mandárselo a alguien"
+                "Mandárselo a alguien",
+                "Publicarlo en el canal"
               ]
             }
           ]
@@ -1668,16 +1669,6 @@
               "segundos": 30
             },
             {
-              "tipo": "texto",
-              "texto": "Escríbeme cuando quieras."
-            },
-            {
-              "tipo": "botones",
-              "opciones": [
-                "Preguntarle algo a Ajito"
-              ]
-            },
-            {
               "tipo": "pieza",
               "descripcion": "Ficha final — las siete formas, más una línea al pie: «Ajito se quedó. Escríbele cuando quieras.»",
               "clase": "ficha",
@@ -1693,6 +1684,16 @@
                 "Ajito se quedó. Escríbele cuando quieras."
               ],
               "sufijo": "-B"
+            },
+            {
+              "tipo": "texto",
+              "texto": "Escríbeme cuando quieras."
+            },
+            {
+              "tipo": "botones",
+              "opciones": [
+                "Preguntarle algo a Ajito"
+              ]
             }
           ]
         }

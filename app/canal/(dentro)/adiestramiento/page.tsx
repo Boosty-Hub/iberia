@@ -146,6 +146,14 @@ export default async function AdiestramientoPage() {
             </Link>
           )}
 
+          {/* El botón permanente del asistente libre (ver `00-reglas-del-guion.md`).
+              Apagado el interruptor, solo lo ve el equipo, para probarlo antes. */}
+          {(curso.asistente_libre_activo || puedeReiniciar) && (
+            <Link href="/canal/adiestramiento/ajito" className="btn-canal btn-canal-suave mt-2 w-full">
+              Pregúntale a Ajito
+            </Link>
+          )}
+
           <ElegirVoz actual={vozDe(matricula.voz).rotulo} />
 
           {/* Solo para el equipo de Boosty: es herramienta de trabajo, no una

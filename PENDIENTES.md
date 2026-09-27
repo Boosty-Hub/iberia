@@ -371,7 +371,13 @@ todo de Fase 2 y no bloquea nada de la Fase 1:
 - Las 11 fotos autorizadas del audio 5 de la lección 3, tomadas en Cagua con permiso de Calidad
 - Probar la transcripción con audio real de planta, con ruido y acento de verdad
 - Que los recordatorios lleven el enlace personal y no el general
-- «Guardarlo» y «mandárselo a alguien» bajo el certificado — es una decisión, no un olvido
+- ~~«Guardarlo» y «mandárselo a alguien» bajo el certificado~~ ✅ **Hecho el 27 de
+  septiembre**: el certificado sale en la lección 8 con sus datos, se guarda, se manda por
+  el compartir del teléfono y se publica en el canal, sin la cédula
+- **Decidir si se prende el asistente libre** (`asistente_libre_activo`, en el panel de
+  Adiestramiento). La conversación con Ajito está hecha y probada; apagado, solo la ve el
+  equipo. Prenderlo cambia cómo se despide la lección 8 y lo que cuesta el curso: hasta 40
+  mensajes al día por persona con el modelo grande — Gabriel
 - ~~«No soy yo» en la lección 0~~ ✅ **Hecho el 26 de septiembre**: recoge nombre y área, deja el
   aviso en el padrón del panel y la lección sigue
 - ~~Ajito dibuja de verdad (lección 4)~~ ✅ **Hecho el 27 de septiembre**, con

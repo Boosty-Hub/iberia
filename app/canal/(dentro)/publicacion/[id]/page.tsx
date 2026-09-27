@@ -62,11 +62,14 @@ export default async function PublicacionPage({
           <img
             src={publicacion.imagen_url}
             alt=""
-            // El escudo del adiestramiento va completo: ver `TarjetaPublicacion`.
+            // El escudo y el certificado del adiestramiento van completos: ver
+            // `TarjetaPublicacion`.
             className={
-              publicacion.respuesta_id
-                ? 'aspect-square w-full bg-white object-contain'
-                : 'h-52 w-full object-cover'
+              publicacion.certificado_id
+                ? 'aspect-[3/4] w-full bg-white object-contain'
+                : publicacion.respuesta_id
+                  ? 'aspect-square w-full bg-white object-contain'
+                  : 'h-52 w-full object-cover'
             }
           />
         )}

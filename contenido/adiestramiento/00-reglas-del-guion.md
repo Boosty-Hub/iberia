@@ -258,7 +258,8 @@ npm run probar:ajito     # imprime lo que contesta, y le pasa las reglas por enc
 - **Apagado:** no existe el botón de «pregúntale lo que sea». El curso son las
   nueve lecciones y cierra con el certificado.
 - **Encendido:** aparece el botón permanente y la lección 9 cierra distinto —
-  *«Ajito se queda aquí contigo»*.
+  *«Ajito se queda aquí contigo»*. El botón abre la conversación con Ajito
+  (`/canal/adiestramiento/ajito`), con las mismas reglas del personaje.
 
 La lección 9 se escribe en dos versiones desde el principio.
 

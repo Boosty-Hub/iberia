@@ -35,11 +35,17 @@ type Estado =
 export function ResponderHablando({
   numero,
   clavePaso,
+  destino,
   onListo,
   onEscribir,
 }: {
   numero: number
   clavePaso: string
+  /**
+   * A dónde se sube la nota. Por defecto, la ruta de la lección; la conversación
+   * con Ajito tiene la suya, que guarda en su carpeta.
+   */
+  destino?: string
   /** Texto confirmado y ruta del audio guardado. */
   onListo: (texto: string, ruta: string) => void
   onEscribir: () => void
@@ -117,7 +123,7 @@ export function ResponderHablando({
       cuerpo.append('audio', new Blob([wav], { type: 'audio/wav' }), 'nota.wav')
       cuerpo.append('clave_paso', clavePaso)
 
-      const respuesta = await fetch(`/canal/adiestramiento/${numero}/adjuntar`, {
+      const respuesta = await fetch(destino ?? `/canal/adiestramiento/${numero}/adjuntar`, {
         method: 'POST',
         body: cuerpo,
       })

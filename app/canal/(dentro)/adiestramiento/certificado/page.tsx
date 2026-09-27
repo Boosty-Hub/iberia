@@ -1,11 +1,17 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import guion from '@/contenido/adiestramiento/guion.json'
+import { CertificadoAcciones } from '@/components/canal/certificado-acciones'
 import { CertificadoHoja, fechaLarga } from '@/components/certificado-hoja'
 import { IconoAtras } from '@/components/iconos'
 import { CURSO } from '@/lib/adiestramiento'
 import { requerirEmpleado } from '@/lib/canal'
+import type { LeccionGuion } from '@/lib/guion'
 import { createClient } from '@/lib/supabase/server'
+
+/** La lección del cierre: publicar el certificado se pide desde su matrícula. */
+const ULTIMA = Math.max(...(guion.lecciones as LeccionGuion[]).map((l) => l.numero))
 
 export const metadata: Metadata = { title: 'Tu certificado' }
 
@@ -42,6 +48,10 @@ export default async function CertificadoPage() {
     .eq('matricula_id', matricula.id)
     .maybeSingle()
 
+  const { data: publicada } = certificado
+    ? await supabase.from('publicaciones').select('id').eq('certificado_id', certificado.id).maybeSingle()
+    : { data: null }
+
   // Sin certificado: o no ha terminado, o la emisión falló al cerrar la novena.
   // Desde aquí se ven igual, y a la persona le sirve la misma salida —volver al
   // curso—, así que no se le cuenta la diferencia.
@@ -66,6 +76,13 @@ export default async function CertificadoPage() {
       <Volver />
 
       <CertificadoHoja certificado={certificado} />
+
+      <CertificadoAcciones
+        numero={ULTIMA}
+        turno={null}
+        codigo={certificado.codigo}
+        publicacion={publicada?.id ?? null}
+      />
 
       <p className="px-1 text-[14px] leading-relaxed text-marca-500">
         Queda registrado en Capital Humano como adiestramiento. El Gerente de Planta te

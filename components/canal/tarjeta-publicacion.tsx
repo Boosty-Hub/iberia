@@ -16,6 +16,8 @@ export type PublicacionFeed = {
   imagen_url: string | null
   /** Si salió del adiestramiento: el escudo que alguien construyó con Ajito. */
   respuesta_id?: string | null
+  /** O el certificado del curso, que alguien publicó al terminarlo. */
+  certificado_id?: string | null
   oficial: boolean
   fijado: boolean
   publicado_en: string | null
@@ -63,10 +65,15 @@ export function TarjetaPublicacion({
             src={publicacion.imagen_url}
             alt=""
             // Un escudo es cuadrado y tiene el lema abajo: recortado a una franja,
-            // como las fotos de Comunicaciones, se perdía justo el lema.
+            // como las fotos de Comunicaciones, se perdía justo el lema. El
+            // certificado va entero también, en su 3:4: recortado se perdía el nombre.
             className={cn(
               'w-full',
-              publicacion.respuesta_id ? 'aspect-square bg-white object-contain' : 'h-44 object-cover'
+              publicacion.certificado_id
+                ? 'aspect-[3/4] bg-white object-contain'
+                : publicacion.respuesta_id
+                  ? 'aspect-square bg-white object-contain'
+                  : 'h-44 object-cover'
             )}
             loading="lazy"
           />

@@ -46,8 +46,13 @@ export type Bloque =
        * `ejemplos` son los dibujos ya hechos de la lección 4 —«Ajito en la
        * playa · …»—: sus `lineas` son lo que se dibuja, una por ejemplo, y los
        * dibuja `generar:ejemplos` del guion, como los audios.
+       *
+       * `certificado` es el de la lección 8, con el nombre, la cédula, el cargo y
+       * el área de quien lo recibe: lo pinta `CertificadoHoja`, la misma hoja que
+       * se imprime. Hasta el 27 de septiembre de 2026 era `otra` y no salía nada
+       * debajo de «Tu certificado».
        */
-      clase: 'ficha' | 'portada' | 'padron' | 'ejemplos' | 'otra'
+      clase: 'ficha' | 'portada' | 'padron' | 'ejemplos' | 'certificado' | 'otra'
       /** El contenido de la ficha. La primera línea es el título. */
       lineas: string[]
       /**
@@ -192,6 +197,7 @@ export function leerLeccion(markdown: string, archivo: string): LeccionGuion {
       const esPortada = /^(Tarjeta cuadrada|Portada)\b/i.test(descripcion)
       const esPadron = /^Tarjeta del padr[óo]n/i.test(descripcion)
       const esEjemplos = /ejemplos ya hechos/i.test(descripcion)
+      const esCertificado = /^El certificado(\s|$)/i.test(descripcion)
       // «Tres ejemplos ya hechos, mandados de una: A · B · C.» → [A, B, C]
       const ejemplos = esEjemplos
         ? (descripcion.split(':').slice(1).join(':') || '')
@@ -218,7 +224,9 @@ export function leerLeccion(markdown: string, archivo: string): LeccionGuion {
               ? 'padron'
               : esEjemplos
                 ? 'ejemplos'
-                : 'otra',
+                : esCertificado
+                  ? 'certificado'
+                  : 'otra',
         lineas: esEjemplos
           ? ejemplos
           : texto
@@ -315,13 +323,24 @@ export type Turno = {
     | { tipo: 'botones'; opciones: string[] }
     | { tipo: 'ejercicio'; clave: string | null }
     | { tipo: 'nada' }
+  /**
+   * La versión de la despedida de la lección 8 —`A` apagado, `B` encendido—,
+   * si el turno es de una. Ver `turnosSegun`.
+   */
+  version?: 'A' | 'B'
+}
+
+/** «8.7 · Despedida — versión B · `asistente_libre_activo` encendido» → `B`. */
+function versionDe(titulo: string): 'A' | 'B' | undefined {
+  const v = /versi[óo]n\s+([AB])\b/i.exec(titulo)?.[1]
+  return v === 'A' || v === 'B' ? v : undefined
 }
 
 export function turnosDe(leccion: LeccionGuion): Turno[] {
   // Se aplana con la sección de cada bloque a cuestas: un turno puede cruzar de
   // una sección a otra, y el rótulo tiene que salir de dónde está el audio.
   const planos = leccion.pasos.flatMap((p) =>
-    p.bloques.map((bloque) => ({ bloque, paso: p.numero, titulo: p.titulo }))
+    p.bloques.map((bloque) => ({ bloque, paso: p.numero, titulo: p.titulo, version: versionDe(p.titulo) }))
   )
 
   const turnos: Turno[] = []
@@ -339,19 +358,36 @@ export function turnosDe(leccion: LeccionGuion): Turno[] {
 
     turnos.push({
       indice: turnos.length,
-      titulo: fuente?.titulo ?? '',
+      // «Despedida — versión A · `asistente_libre_activo` apagado» es el rótulo del
+      // documento; al que oye el audio se le dice «Despedida».
+      titulo: (fuente?.titulo ?? '').replace(/\s*[—–-]\s*versi[óo]n\s+[AB](\s.*)?$/i, ''),
       // Si la sección ya venía sonando en el turno anterior, Ajito no está
       // empezando algo: está retomando. Repetir el título ahí parece un error.
-      continuacion: !!fuente && fuente.paso === pasoAnterior,
+      // Las dos despedidas comparten número de sección (8.7) y no se retoman
+      // una a la otra: la versión entra en la cuenta.
+      continuacion: !!fuente && `${fuente.paso}${fuente.version ?? ''}` === pasoAnterior,
       bloques: acumulado.map((x) => x.bloque),
       espera,
+      ...(acumulado[0]?.version ? { version: acumulado[0].version } : {}),
     })
 
-    if (fuente) pasoAnterior = acumulado[acumulado.length - 1].paso
+    if (fuente) {
+      const ultimo = acumulado[acumulado.length - 1]
+      pasoAnterior = `${ultimo.paso}${ultimo.version ?? ''}`
+    }
     acumulado = []
   }
 
   for (const plano of planos) {
+    // ⚠️ **Un turno no cruza de una versión a otra.** La despedida A no espera
+    // nada, así que se juntaba con la B hasta el botón de esta, y con el
+    // interruptor apagado salían «Escríbeme cuando quieras» y el botón de
+    // «Preguntarle algo a Ajito» debajo del adiós (27 de septiembre de 2026):
+    // `segunInterruptor` quitaba el audio y la ficha de la B, no su texto ni su
+    // botón. Ahora cada versión es su turno, y `turnosSegun` deja el que toca.
+    if (acumulado.length && acumulado[acumulado.length - 1].version !== plano.version) {
+      cerrar({ tipo: 'nada' })
+    }
     if (plano.bloque.tipo === 'botones') {
       cerrar({ tipo: 'botones', opciones: plano.bloque.opciones })
       continue
@@ -368,6 +404,20 @@ export function turnosDe(leccion: LeccionGuion): Turno[] {
   cerrar({ tipo: 'nada' })
 
   return turnos
+}
+
+/**
+ * Los turnos que ve quien hace el curso: los de siempre y, de las dos
+ * despedidas de la lección 8, la que diga el interruptor.
+ *
+ * Se renumeran después de filtrar, así que la despedida es el mismo turno con el
+ * interruptor en cualquier posición: `avances.paso` no cambia de sentido si
+ * alguien lo prende a mitad de la lección.
+ */
+export function turnosSegun(leccion: LeccionGuion, asistenteLibre: boolean): Turno[] {
+  return turnosDe(leccion)
+    .filter((t) => !t.version || (t.version === 'B') === asistenteLibre)
+    .map((t, indice) => ({ ...t, indice }))
 }
 
 /**

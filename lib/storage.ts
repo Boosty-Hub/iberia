@@ -52,6 +52,11 @@ export function rutaEscudoPublicado(empleadoId: string, respuestaId: string): st
   return `escudos/${empleadoId}/${respuestaId}.webp`
 }
 
+/** El certificado que alguien publicó, sin la cédula (ver `lib/certificado-imagen.tsx`). */
+export function rutaCertificadoPublicado(empleadoId: string, certificadoId: string): string {
+  return `certificados/${empleadoId}/${certificadoId}.png`
+}
+
 /**
  * El dibujo de Ajito tal como es, para que el generador de la lección 4 lo
  * dibuje igualito cuando alguien lo pide. Va en el bucket del curso, no en
@@ -89,6 +94,16 @@ export function rutaRespuesta(
 ): string {
   const carpeta = `leccion-${String(leccion).padStart(2, '0')}`
   return `respuestas/${empleadoId}/${carpeta}/${clave}-${Date.now()}.${extension}`
+}
+
+/**
+ * Lo de la conversación libre con Ajito: la foto o la nota de voz de la persona,
+ * el dibujo y el audio de lo que Ajito contestó. Bajo `respuestas/<empleado_id>/`,
+ * como todo lo suyo: la política de dueño-en-la-ruta ya lo cubre, y
+ * `barrerCarpeta` lo encuentra al limpiar.
+ */
+export function rutaCharla(empleadoId: string, que: string, extension: string): string {
+  return `respuestas/${empleadoId}/charla/${que}-${Date.now()}.${extension}`
 }
 
 /**

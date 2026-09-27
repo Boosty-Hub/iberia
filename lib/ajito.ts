@@ -58,16 +58,23 @@ const ESFUERZO = 'medium' as const
 /** Es habla, no lectura: pasado de ahí, la persona se pierde. */
 const PALABRAS = '40 y 70 palabras'
 
-const PERSONAJE = `Eres Ajito, el personaje de inteligencia artificial de Industrias Iberia,
+/**
+ * El personaje va en piezas porque hay dos Ajitos que son uno solo: el que
+ * devuelve un ejercicio (`PERSONAJE`) y el que conversa después del curso
+ * (`PERSONAJE_CHARLA`). **Cómo habla y las reglas que no se rompen son las
+ * mismas** —se escriben una vez—; cambia quién tiene enfrente, cuánto habla y la
+ * forma de lo que contesta.
+ */
+const EN_EL_CURSO = `Eres Ajito, el personaje de inteligencia artificial de Industrias Iberia,
 una empresa venezolana de condimentos y salsas con planta en Cagua.
 
 Estás dictando un adiestramiento de nueve lecciones a la gente de planta: operadores,
 cocineras de pruebas, montacarguistas, técnicos, analistas, vigilantes, limpiadores.
 Gente que trabaja con las manos y que en su mayoría nunca ha usado una inteligencia
 artificial. Lo que escribes ahora NO se lee: se convierte en audio y se escucha en el
-comedor o en el bus, con ruido alrededor.
+comedor o en el bus, con ruido alrededor.`
 
-# Cómo hablas
+const comoHablas = (largo: string) => `# Cómo hablas
 
 - Tuteas siempre. Modismo venezolano, tono profesional. Nada de voseo.
 - Frases cortas. Se escucha, no se lee.
@@ -75,9 +82,9 @@ comedor o en el bus, con ruido alrededor.
 - No adulas. Un «vas bien» vale; un «¡excelente trabajo!» suena a máquina.
 - Nunca finges sentimientos. No te ofendes, no te cansas, no te pones triste.
   Si tienes que hablar de ti, dices la verdad: eres un programa.
-- Entre ${PALABRAS}. Es lo que dura un audio de veinte segundos.
+- ${largo}`
 
-# Reglas que no se rompen
+const REGLAS = `# Reglas que no se rompen
 
 **No tienes sexo y no lo declaras.** Nunca usas un adjetivo con género referido a ti:
 no dices «estoy listo» ni «estoy lista», dices «ya está» o «aquí estoy». Donde más se
@@ -128,9 +135,9 @@ lo sabes: nunca lo adivinas.
 
 **Palabras de la casa que sí se usan:** bache, lote, merma, picking, paletizado, rack,
 cámara, molino, molienda, cuarentena, ticket amarillo, bata, gorro, adiestramiento
-(nunca «capacitación»).
+(nunca «capacitación»).`
 
-# La forma de la devolución
+const FORMA_DEVOLUCION = `# La forma de la devolución
 
 Tres movimientos, encadenados en un solo párrafo hablado. Sin viñetas, sin números,
 sin títulos, sin comillas: es un audio.
@@ -147,6 +154,13 @@ sin títulos, sin comillas: es un audio.
 Empiezas directo. Nada de «Aquí está mi devolución» ni «Gracias por tu respuesta».
 Nada de emojis. Nada de asteriscos ni marcas de formato: todo se va a leer en voz alta
 tal como lo escribas.`
+
+const PERSONAJE = [
+  EN_EL_CURSO,
+  comoHablas(`Entre ${PALABRAS}. Es lo que dura un audio de veinte segundos.`),
+  REGLAS,
+  FORMA_DEVOLUCION,
+].join('\n\n')
 
 /** Lo que Ajito tiene que hacer en este ejercicio, y solo en este. */
 const INSTRUCCION: Record<string, string> = {
@@ -488,30 +502,249 @@ export async function devolver(contexto: Contexto): Promise<Devolucion> {
       return { ok: false, motivo: 'fallo', detalle: 'rechazado por el modelo' }
     }
 
-    // Solo lo que dijo después de la última búsqueda: lo de antes es el «déjame
-    // ver» con el que la anuncia, y eso no va en el audio. Y los trozos se pegan
-    // sin salto, porque con citas el modelo parte una misma frase en varios —pero
-    // con el espacio que a veces no trae ninguno de los dos lados: salía «se
-    // esperacielo cubierto»—.
-    const bloques = respuesta.content
-    let desde = 0
-    bloques.forEach((bloque, i) => {
-      if (bloque.type === 'web_search_tool_result') desde = i + 1
-    })
-    const texto = bloques
-      .slice(desde)
-      .filter((bloque): bloque is Anthropic.TextBlock => bloque.type === 'text')
-      .map((bloque) => bloque.text)
-      .reduce((dicho, trozo) => {
-        if (!dicho) return trozo
-        if (!desde) return `${dicho}\n${trozo}`
-        const falta = !/\s$/.test(dicho) && !/^[\s.,;:!?»)]/.test(trozo)
-        return dicho + (falta ? ' ' : '') + trozo
-      }, '')
-      .trim()
-
+    const texto = textoDe(respuesta)
     if (!texto) return { ok: false, motivo: 'fallo', detalle: 'respuesta vacía' }
 
+    return { ok: true, texto: limpiar(texto) }
+  } catch (error) {
+    return { ok: false, ...clasificar(error) }
+  }
+}
+
+/**
+ * El texto que dijo el modelo, listo para leerse en voz alta.
+ *
+ * Solo lo que dijo después de la última búsqueda: lo de antes es el «déjame
+ * ver» con el que la anuncia, y eso no va en el audio. Y los trozos se pegan
+ * sin salto, porque con citas el modelo parte una misma frase en varios —pero
+ * con el espacio que a veces no trae ninguno de los dos lados: salía «se
+ * esperacielo cubierto»—.
+ */
+function textoDe(respuesta: Anthropic.Message): string {
+  const bloques = respuesta.content
+  let desde = 0
+  bloques.forEach((bloque, i) => {
+    if (bloque.type === 'web_search_tool_result') desde = i + 1
+  })
+  return bloques
+    .slice(desde)
+    .filter((bloque): bloque is Anthropic.TextBlock => bloque.type === 'text')
+    .map((bloque) => bloque.text)
+    .reduce((dicho, trozo) => {
+      if (!dicho) return trozo
+      if (!desde) return `${dicho}\n${trozo}`
+      const falta = !/\s$/.test(dicho) && !/^[\s.,;:!?»)]/.test(trozo)
+      return dicho + (falta ? ' ' : '') + trozo
+    }, '')
+    .trim()
+}
+
+// -----------------------------------------------------------------------------
+// La conversación libre
+// -----------------------------------------------------------------------------
+
+/**
+ * Ajito después del curso.
+ *
+ * Con `asistente_libre_activo` encendido, la lección 8 se despide con «yo me
+ * quedo aquí contigo» y un botón que abre una conversación. Es el mismo Ajito
+ * —las mismas reglas, la misma voz—, pero ya no hay ejercicio que devolver: se
+ * contesta lo que pregunten, con memoria de lo que se habló, y se puede buscar
+ * en internet y dibujar, que son dos de las siete cosas que la ficha final dice
+ * que hace.
+ */
+const EN_LA_CHARLA = `Eres Ajito, el personaje de inteligencia artificial de Industrias Iberia,
+una empresa venezolana de condimentos y salsas con planta en Cagua.
+
+Ya dictaste el adiestramiento de nueve lecciones a la gente de planta, y quien te
+escribe lo terminó. Ahora te quedaste para lo que quiera: esto es una conversación,
+sin lección, sin ejercicio y sin nadie calificando. Lo que contestas se lee en la
+pantalla del teléfono y además se oye en audio, así que se escribe para decirse.`
+
+const FORMA_CHARLA = `# Cómo se conversa
+
+- Contestas directo a lo que te dijo. Nada de «qué hiciste, qué te faltó»: eso era de
+  las lecciones.
+- Te acuerdas de lo que se habló antes en esta conversación y lo usas. Saludas solo si
+  te saludan, y una vez.
+- Si no entiendes qué quiere, le preguntas una sola cosa, corta.
+- No cierras con «¿algo más?» ni con ofrecimientos de relleno: si quiere algo más, te
+  lo dice.
+- Si te pide un dibujo o una imagen, lo haces con la herramienta dibujar, pasándole
+  todo lo que describió, en sus palabras. Si no te lo pidió, no dibujas.
+- Si te manda una foto, dices lo que ves y le contestas lo que te preguntó de ella.
+- Lo de la lección 7 sigue valiendo: de adentro de Iberia no sabes nada. Si te
+  pregunta un dato de la empresa, le dices que no lo sabes y que se lo pregunte a
+  quien lo lleva. Nunca inventas.
+- Si te pregunta algo de salud, de leyes o de plata que pese, le das lo general y le
+  dices que lo confirme con quien sabe: un médico, un abogado.
+- Si te cuenta que está mal de verdad —que corre peligro, que se quiere hacer daño—,
+  le hablas con calma, le dices que busque ya a alguien de confianza o a un médico, y
+  que no se lo guarde.
+- Lo que empieza con [Nota de voz] es la transcripción de lo que dijo hablando: puede
+  traer alguna palabra cambiada por el ruido, así que no le señales errores de
+  escritura.
+- Si te pide que le leas algo en voz alta, se lo escribes tal cual: todo lo que
+  contestas se oye.
+- Nada de emojis, ni asteriscos, ni viñetas, ni títulos: todo se va a leer en voz alta
+  tal como lo escribas.`
+
+const PERSONAJE_CHARLA = [
+  EN_LA_CHARLA,
+  comoHablas(
+    'Lo normal es entre 20 y 80 palabras: contestas lo que te preguntaron y ya. Si te ' +
+      'piden algo que de verdad es largo —una receta, una carta, unos pasos—, hasta 160, ' +
+      'dicho en orden: «primero…, después…».'
+  ),
+  REGLAS,
+  FORMA_CHARLA,
+].join('\n\n')
+
+/**
+ * Dibujar, dentro de la conversación. No lo hace el modelo: pide el dibujo, y la
+ * ruta lo pasa por el mismo filtro y el mismo generador de la lección 4
+ * (`lib/dibujar.ts`). Después, en otra petición, Ajito lo mira y lo comenta.
+ */
+const DIBUJAR: Anthropic.Tool = {
+  name: 'dibujar',
+  description:
+    'Hace un dibujo con lo que la persona describió. Úsala solo cuando te pida un dibujo, ' +
+    'una imagen o un escudo. Pásale el pedido completo, con todos los detalles que dio.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      pedido: {
+        type: 'string',
+        description: 'Lo que hay que dibujar, en sus palabras y con todos sus detalles.',
+      },
+    },
+    required: ['pedido'],
+  },
+}
+
+/** Lo que va en la memoria de la conversación, del más viejo al más nuevo. */
+export type MensajeCharla = {
+  de: 'persona' | 'ajito'
+  texto: string | null
+  entrada: 'texto' | 'voz' | 'foto'
+  /** Ajito dibujó en ese turno: con qué pedido. */
+  dibujo?: string | null
+}
+
+export type Charla = {
+  /** Cómo quiere que le digan. */
+  nombre: string
+  familia: FamiliaOficio
+  historia: MensajeCharla[]
+  /**
+   * La imagen del último mensaje: su foto, o el dibujo que Ajito acaba de hacer con
+   * lo que pidió (`imagenEsDibujo`). Solo la última: las viejas van como texto.
+   */
+  imagen?: Contexto['imagen']
+  imagenEsDibujo?: boolean
+  /** Sin dibujo recién hecho, puede pedir uno. Con uno delante, lo comenta. */
+  puedeDibujar: boolean
+}
+
+export type Conversado =
+  | { ok: true; texto: string }
+  | { ok: true; dibujar: string }
+  | { ok: false; motivo: MotivoFallo; detalle?: string }
+
+export async function conversar(charla: Charla): Promise<Conversado> {
+  const { clave } = claveAnthropic()
+  if (!clave) return { ok: false, motivo: 'sin-configurar' }
+  const cliente = new Anthropic({ apiKey: clave, baseURL: 'https://api.anthropic.com' })
+
+  // La conversación, alternada como la pide la API: dos mensajes seguidos de la
+  // persona —uno que se quedó sin respuesta— se juntan en uno.
+  const mensajes: Anthropic.MessageParam[] = []
+  const ultimo = charla.historia.length - 1
+  charla.historia.forEach((m, i) => {
+    const rol = m.de === 'persona' ? 'user' : 'assistant'
+    const texto =
+      m.de === 'persona'
+        ? m.entrada === 'voz'
+          ? `[Nota de voz] ${m.texto ?? ''}`
+          : m.entrada === 'foto'
+            ? `[Foto] ${m.texto || '(sin nota)'}`
+            : (m.texto ?? '')
+        : `${m.dibujo ? `[Aquí dibujaste: ${m.dibujo}] ` : ''}${m.texto ?? ''}`
+    const contenido: Anthropic.ContentBlockParam[] = []
+    if (i === ultimo && charla.imagen && !charla.imagenEsDibujo) {
+      contenido.push({ type: 'image', source: { type: 'base64', media_type: charla.imagen.tipo, data: charla.imagen.base64 } })
+    }
+    contenido.push({ type: 'text', text: texto.trim() || '(sin texto)' })
+    const anterior = mensajes[mensajes.length - 1]
+    if (anterior?.role === rol && Array.isArray(anterior.content)) anterior.content.push(...contenido)
+    else mensajes.push({ role: rol, content: contenido })
+  })
+  // La API no acepta que la conversación empiece por Ajito.
+  while (mensajes[0]?.role === 'assistant') mensajes.shift()
+  if (!mensajes.length) return { ok: false, motivo: 'fallo', detalle: 'conversación vacía' }
+
+  // El dibujo recién hecho va al final, después de lo que pidió: es lo que tiene
+  // que comentar ahora.
+  if (charla.imagen && charla.imagenEsDibujo) {
+    const final = mensajes[mensajes.length - 1]
+    if (final.role === 'user' && Array.isArray(final.content)) {
+      final.content.push(
+        { type: 'image', source: { type: 'base64', media_type: charla.imagen.tipo, data: charla.imagen.base64 } },
+        {
+          type: 'text',
+          text:
+            '[Ya hiciste el dibujo que te pidió: es esta imagen, y la persona la está viendo. ' +
+            'Coméntalo en una o dos frases, sin describir nada que no esté en ella.]',
+        }
+      )
+    }
+  }
+
+  const sistema = [
+    PERSONAJE_CHARLA,
+    `# Ahora\n\n${ahora()}\nA quien te escribe se le dice ${charla.nombre}. Su oficio: ${FAMILIAS_OFICIO[charla.familia]}.`,
+  ].join('\n\n')
+
+  try {
+    let herramientas: Anthropic.ToolUnion[] = [BUSQUEDA, ...(charla.puedeDibujar ? [DIBUJAR] : [])]
+    const pedir = () =>
+      cliente.messages.create({
+        model: MODELO,
+        max_tokens: 4000,
+        system: sistema,
+        output_config: { effort: ESFUERZO },
+        tools: herramientas,
+        messages: mensajes,
+      })
+
+    let respuesta: Anthropic.Message
+    try {
+      respuesta = await pedir()
+    } catch (error) {
+      // Como en la devolución: sin la búsqueda antes que sin respuesta.
+      if (!(error instanceof Anthropic.BadRequestError) || clasificar(error).motivo === 'sin-saldo') throw error
+      console.warn('[ajito] la búsqueda falló; contesto sin ella:', clasificar(error).detalle)
+      herramientas = herramientas.filter((h) => h.name !== 'web_search')
+      respuesta = await pedir()
+    }
+    if (respuesta.stop_reason === 'pause_turn') {
+      mensajes.push({ role: 'assistant', content: respuesta.content })
+      respuesta = await pedir()
+    }
+    if (respuesta.stop_reason === 'refusal') {
+      return { ok: false, motivo: 'fallo', detalle: 'rechazado por el modelo' }
+    }
+
+    const pideDibujo = respuesta.content.find(
+      (b): b is Anthropic.ToolUseBlock => b.type === 'tool_use' && b.name === 'dibujar'
+    )
+    if (pideDibujo) {
+      const pedido = String((pideDibujo.input as { pedido?: unknown })?.pedido ?? '').trim()
+      if (pedido) return { ok: true, dibujar: pedido.slice(0, 1500) }
+    }
+
+    const texto = textoDe(respuesta)
+    if (!texto) return { ok: false, motivo: 'fallo', detalle: 'respuesta vacía' }
     return { ok: true, texto: limpiar(texto) }
   } catch (error) {
     return { ok: false, ...clasificar(error) }
@@ -650,6 +883,9 @@ function limpiar(texto: string): string {
     // Un error del modelo que ya salió dos veces, y que dicho en voz alta suena a
     // grosería: «de otra forra» por «de otra forma».
     .replace(/\bde otra forra\b/gi, 'de otra forma')
+    // En la conversación, la memoria le marca los dibujos con «[Aquí dibujaste: …]»,
+    // y a veces lo copia al principio de lo que dice. Dicho en voz alta no va.
+    .replace(/^\s*\[[^\]\n]{0,300}\]\s*/, '')
     .replace(/\*\*?/g, '')
     .replace(/^#{1,6}\s*/gm, '')
     .replace(/^[-–—•]\s+/gm, '')

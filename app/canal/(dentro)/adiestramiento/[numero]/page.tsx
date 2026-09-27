@@ -5,12 +5,14 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import guion from '@/contenido/adiestramiento/guion.json'
 import { BotonSigue } from '@/components/canal/boton-sigue'
+import { CertificadoAcciones } from '@/components/canal/certificado-acciones'
 import { DevolucionAjito } from '@/components/canal/devolucion-ajito'
 import { EntradaRespuesta } from '@/components/canal/entrada-respuesta'
 import { OtroDibujo } from '@/components/canal/otro-dibujo'
 import { PublicarEscudo } from '@/components/canal/publicar-escudo'
 import { QuienEres } from '@/components/canal/quien-eres'
 import { TurnoProgresivo, type AudioDelTurno } from '@/components/canal/turno-progresivo'
+import { CertificadoHoja, type Certificado } from '@/components/certificado-hoja'
 import { IconoAtras, IconoCheck } from '@/components/iconos'
 import {
   CURSO,
@@ -23,8 +25,10 @@ import {
   type FormaIA,
 } from '@/lib/adiestramiento'
 import { requerirEmpleado } from '@/lib/canal'
+import { cerrarLeccion } from '@/lib/cerrar-curso'
+import { legible } from '@/lib/certificado'
 import { dibujaEn } from '@/lib/dibujar'
-import { esSalida, segunInterruptor, turnosDe, type LeccionGuion, type Turno } from '@/lib/guion'
+import { esSalida, segunInterruptor, turnosSegun, type LeccionGuion, type Turno } from '@/lib/guion'
 import { createClient } from '@/lib/supabase/server'
 import { avanzarPaso, empezarLeccion, marcarOido, terminarLeccion } from '../acciones'
 
@@ -141,7 +145,7 @@ export default async function LeccionPage({
   // `lib/adiestramiento.ts` decide qué se le pide a un montacarguista y qué a
   // una cocinera. `generar:guion` comprueba que las dos estén de acuerdo.
   const enGuion = LECCIONES.find((l) => l.numero === numero)
-  const turnos = enGuion ? turnosDe(enGuion) : []
+  const turnos = enGuion ? turnosSegun(enGuion, curso.asistente_libre_activo) : []
   const catalogo = new Map(ejerciciosDeLeccion(forma, familia).map((e) => [e.clave, e]))
   const pregunta = preguntaDeCampo(forma, familia)
 
@@ -197,6 +201,22 @@ export default async function LeccionPage({
 
   const audios = ordenAudio.size
 
+  // El certificado de la lección 8, en el turno que lo trae. Llegar a ese turno
+  // es terminar el curso —el audio dice «terminaste las nueve»—, así que al
+  // abrirse se da la lección por terminada y se emite, y el certificado sale ahí
+  // mismo con sus datos. Ver `cerrarLeccion`.
+  const turnoCertificado = turnos.findIndex((t) =>
+    t.bloques.some((b) => b.tipo === 'pieza' && b.clase === 'certificado')
+  )
+  const conCertificado = avance && turnoCertificado >= 0 && hasta >= turnoCertificado
+  const certificado = conCertificado
+    ? await certificadoDe(supabase, { cursoId: curso.id, matricula, leccionId: leccion.id, avance })
+    : null
+
+  // La lección 8 ya queda terminada en el turno del certificado: su botón final
+  // no puede decir «seguir a la siguiente», que no hay.
+  const esLaUltima = numero === Math.max(...LECCIONES.map((l) => l.numero))
+
   // «Terminar la lección» es el cierre del último turno cuando ese turno no
   // termina en botones: va dentro de él, para que salga después de oír su audio
   // y no antes (`TurnoProgresivo`).
@@ -205,7 +225,7 @@ export default async function LeccionPage({
       <form action={terminarLeccion} className="pt-2">
         <input type="hidden" name="numero" value={numero} />
         <BotonSigue disabled={pendientes > 0}>
-          {avance.estado === 'completada'
+          {avance.estado === 'completada' && !esLaUltima
             ? 'Seguir a la siguiente'
             : 'Terminar la lección'}
         </BotonSigue>
@@ -293,6 +313,7 @@ export default async function LeccionPage({
               forma={forma}
               alFinal={turno.indice === hasta ? terminar : null}
               invitarDevolucion={porOirAjito && turno.indice === hasta}
+              certificado={turno.indice === turnoCertificado ? certificado : null}
               padron={{
                 nombre: empleado.nombre_completo,
                 cargo: empleado.cargo,
@@ -327,6 +348,7 @@ function TurnoVista({
   padron,
   alFinal,
   invitarDevolucion = false,
+  certificado = null,
 }: {
   turno: Turno
   esActual: boolean
@@ -355,6 +377,8 @@ function TurnoVista({
   alFinal?: ReactNode
   /** Si lo que toca oír ahora es la devolución de Ajito: lleva la manito. */
   invitarDevolucion?: boolean
+  /** El certificado, en el turno de la lección 8 que lo trae. */
+  certificado?: EnLeccion | null
 }) {
   const bloques = segunInterruptor(turno.bloques, asistenteLibre)
   const primerAudio = bloques.findIndex((b) => b.tipo === 'audio')
@@ -365,6 +389,10 @@ function TurnoVista({
   const opciones = turno.espera.tipo === 'botones' ? turno.espera.opciones : []
   const noSoyYo = conPadron && !esFinal ? opciones.find((o) => /^no\b/i.test(o)) : undefined
   const siSoyYo = noSoyYo ? opciones.find((o) => o !== noSoyYo) : undefined
+  // Los botones del certificado —guardarlo, mandarlo, publicarlo— van debajo de
+  // él y hacen lo que dicen: ver `CertificadoAcciones`. Sin certificado queda un
+  // «Seguir» para que la despedida no se trabe.
+  const conCertificado = bloques.some((b) => b.tipo === 'pieza' && b.clase === 'certificado')
 
   // Lo que pinta cada bloque que no es audio.
   const pintar = (bloque: (typeof bloques)[number], i: number): ReactNode => {
@@ -374,6 +402,9 @@ function TurnoVista({
       // «Nancy, mándame una nota de voz contándome…»—. En el chat del guion
       // hace falta porque el input va aparte; aquí sobra.
       if (turno.espera.tipo === 'ejercicio') return null
+      // «Tu certificado.» es el pie del certificado en el guion; con la hoja en
+      // pantalla sobra, y debajo de los botones quedaba suelto.
+      if (conCertificado && certificado?.hoja) return null
       return (
         <p key={i} className="px-1 text-[15px] leading-relaxed text-marca-700">
           {bloque.texto}
@@ -383,6 +414,18 @@ function TurnoVista({
 
     if (bloque.tipo === 'pieza' && bloque.clase === 'padron') {
       return <PadronVista key={i} {...padron} />
+    }
+
+    if (bloque.tipo === 'pieza' && bloque.clase === 'certificado') {
+      return (
+        <CertificadoVista
+          key={i}
+          numero={numero}
+          turno={esActual ? turno.indice : null}
+          etiquetas={opciones}
+          certificado={certificado}
+        />
+      )
     }
 
     if (bloque.tipo === 'pieza' && bloque.clase === 'ejemplos' && bloque.lineas.length) {
@@ -454,12 +497,31 @@ function TurnoVista({
             <QuienEres numero={numero} turno={turno.indice} si={siSoyYo} no={noSoyYo} />
           )}
 
-          {turno.espera.tipo === 'botones' && esActual && !noSoyYo && (
+          {turno.espera.tipo === 'botones' && esActual && conCertificado && !certificado?.hoja && (
+            <form action={avanzarPaso}>
+              <input type="hidden" name="numero" value={numero} />
+              <input type="hidden" name="turno" value={turno.indice} />
+              <BotonSigue>Seguir</BotonSigue>
+            </form>
+          )}
+
+          {turno.espera.tipo === 'botones' && esActual && !noSoyYo && !conCertificado && (
             <div className="flex flex-wrap gap-2">
               {turno.espera.opciones.map((opcion) =>
                 // «Publicarlo en el canal», debajo del escudo, publica de verdad: ver
                 // `PublicarEscudo`. Hasta el 27 de septiembre avanzaba y ya.
-                /^publicarlo en el canal$/i.test(opcion) && !esFinal ? (
+                // «Preguntarle algo a Ajito», al final de la lección 8 con el
+                // asistente libre encendido, abre la conversación con Ajito. La
+                // lección ya quedó terminada en el turno del certificado.
+                /^preguntarle algo a ajito$/i.test(opcion) ? (
+                  <Link
+                    key={opcion}
+                    href="/canal/adiestramiento/ajito"
+                    className="btn-canal btn-canal-rojo btn-canal-sigue flex-1"
+                  >
+                    {opcion}
+                  </Link>
+                ) : /^publicarlo en el canal$/i.test(opcion) && !esFinal ? (
                   <PublicarEscudo key={opcion} numero={numero} turno={turno.indice} etiqueta={opcion} />
                 ) : esSalida(opcion) ? (
                   <Link
@@ -515,6 +577,113 @@ function TurnoVista({
   )
 }
 
+/** El certificado en el turno que lo trae, o por qué todavía no está. */
+type EnLeccion = {
+  hoja: Certificado | null
+  publicacion: string | null
+  /** Las lecciones que le faltan, si por eso no salió. */
+  faltan: number[]
+}
+
+/**
+ * Busca el certificado y, si no lo hay, cierra la lección para que se emita.
+ *
+ * Se hace al pintar el turno —y no con un botón— porque es lo que el audio acaba
+ * de decir: «tu certificado está listo». Es idempotente: pintar dos veces no
+ * emite dos certificados (`emitir_mi_certificado` devuelve el mismo).
+ */
+async function certificadoDe(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  {
+    cursoId,
+    matricula,
+    leccionId,
+    avance,
+  }: {
+    cursoId: string
+    matricula: { id: string; completado_en: string | null }
+    leccionId: string
+    avance: { estado: string }
+  }
+): Promise<EnLeccion> {
+  let { data: hoja } = await supabase
+    .from('certificados')
+    .select('id, codigo, nombre_completo, cedula, cargo, area_nombre, emitido_en')
+    .eq('matricula_id', matricula.id)
+    .maybeSingle()
+  if (!hoja && avance.estado !== 'completada') {
+    // Con la fila que devuelve la emisión, no con otro `select`: ver `cerrarLeccion`.
+    hoja = (await cerrarLeccion(supabase, { cursoId, matricula, leccionId })).certificado
+  }
+
+  if (!hoja) {
+    // No salió: casi siempre porque quedó alguna lección sin terminar. Se le dice
+    // cuál, que es lo único que puede hacer algo con eso.
+    const [{ data: lecciones }, { data: hechas }] = await Promise.all([
+      supabase.from('lecciones').select('id, numero').eq('curso_id', cursoId).eq('activa', true),
+      supabase
+        .from('avances')
+        .select('leccion_id')
+        .eq('matricula_id', matricula.id)
+        .eq('estado', 'completada'),
+    ])
+    const listas = new Set((hechas ?? []).map((a) => a.leccion_id))
+    const faltan = (lecciones ?? [])
+      .filter((l) => !listas.has(l.id))
+      .map((l) => l.numero)
+      .sort((a, b) => a - b)
+    return { hoja: null, publicacion: null, faltan }
+  }
+
+  const { data: publicada } = await supabase
+    .from('publicaciones')
+    .select('id')
+    .eq('certificado_id', hoja.id)
+    .maybeSingle()
+  return { hoja, publicacion: publicada?.id ?? null, faltan: [] }
+}
+
+/**
+ * El certificado dentro de la lección 8, debajo de «Tu certificado»: la misma
+ * hoja que se imprime, con lo que se hace con ella debajo.
+ */
+function CertificadoVista({
+  numero,
+  turno,
+  etiquetas,
+  certificado,
+}: {
+  numero: number
+  turno: number | null
+  etiquetas: string[]
+  certificado: EnLeccion | null
+}) {
+  if (!certificado?.hoja) {
+    const faltan = certificado?.faltan ?? []
+    return (
+      <div className="tarjeta-canal px-5 py-5" data-certificado-pendiente>
+        <p className="text-[15px] leading-relaxed text-marca-700">
+          {faltan.length
+            ? `Tu certificado sale apenas termines ${faltan.length > 1 ? 'las lecciones' : 'la lección'} ${faltan.join(', ')}.`
+            : 'Tu certificado se está preparando. Lo encuentras en el índice del curso, en «Ver mi certificado».'}
+        </p>
+      </div>
+    )
+  }
+  return (
+    <div className="space-y-3">
+      <CertificadoHoja certificado={certificado.hoja} />
+      <CertificadoAcciones
+        numero={numero}
+        turno={turno}
+        codigo={certificado.hoja.codigo}
+        publicacion={certificado.publicacion}
+        etiquetas={etiquetas.length === 3 ? etiquetas : undefined}
+      />
+    </div>
+  )
+}
+
 type Padron = {
   nombre: string
   cargo: string | null
@@ -555,13 +724,6 @@ function PadronVista({ nombre, cargo, area, correccion }: Padron) {
       )}
     </div>
   )
-}
-
-/** «OPERADOR DE ENVASADO» → «Operador de envasado». Lo que ya viene bien, se queda. */
-function legible(texto: string): string {
-  if (texto !== texto.toUpperCase()) return texto
-  const bajo = texto.toLocaleLowerCase('es')
-  return bajo.charAt(0).toLocaleUpperCase('es') + bajo.slice(1)
 }
 
 /**

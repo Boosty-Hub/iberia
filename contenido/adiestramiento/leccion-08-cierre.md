@@ -108,7 +108,7 @@ del curso es peor que no haber preguntado.*
 
 🎯 **Ejercicio 2** `como-te-fue-el-curso` — voz o texto
 
-↩️ 🔊 · 8 s — «Gracias. Eso también lo leen.»
+↩️ 🔊 · 8 s — «Gracias. Eso sirve para mejorar el curso.»
 
 ---
 
@@ -130,7 +130,21 @@ del curso es peor que no haber preguntado.*
 
 💬 `Tu certificado.`
 
-⌨️ `Guardarlo` · `Mandárselo a alguien`
+⌨️ `Guardarlo` · `Mandárselo a alguien` · `Publicarlo en el canal`
+
+*El certificado sale en pantalla con sus datos de verdad —nombre, cédula, cargo, área,
+fecha y código—, en la misma hoja que se imprime. **Guardarlo** baja la imagen al
+teléfono; **Mandárselo a alguien** abre el compartir del teléfono, con la imagen
+adentro, para mandarla por WhatsApp; **Publicarlo en el canal** lo pone en «Nuestra
+gente» como «Terminé el curso de Ajito y este es mi certificado». La imagen que va al
+canal **no lleva la cédula**: el feed lo leen todos, y la cédula no es del canal.
+Los tres botones se quedan debajo del certificado: se puede guardar hoy y publicarlo
+mañana. (27 de septiembre de 2026, pedido de Gabriel. Hasta ese día debajo de «Tu
+certificado» no salía nada, y los dos botones solo seguían la lección.)*
+
+*Llegar aquí es terminar la lección: el audio dice «terminaste las nueve», y el
+certificado se emite en el momento en que se abre este turno, no después de la
+despedida.*
 
 *Y aparte del PDF, el certificado se imprime y lo entrega el Gerente de Planta en
 persona. Eso pesa más que el archivo.*
@@ -182,10 +196,6 @@ para guardar en la galería.
 >
 > Cuídate mucho. Nos hablamos.
 
-💬 `Escríbeme cuando quieras.`
-
-⌨️ `Preguntarle algo a Ajito`
-
 🖼 **Ficha final** — las siete formas, más una línea al pie: *«Ajito se quedó.
 Escríbele cuando quieras.»*
 
@@ -198,6 +208,16 @@ Escríbele cuando quieras.»*
 > Saco cuentas con los números que me des.
 > Y me equivoco. De aquí adentro no sé nada si no me lo cuentas.
 > Ajito se quedó. Escríbele cuando quieras.
+
+💬 `Escríbeme cuando quieras.`
+
+⌨️ `Preguntarle algo a Ajito`
+
+*El botón abre la conversación con Ajito: una pantalla de chat donde se le escribe,
+se le manda una nota de voz o una foto, y contesta por escrito y hablado —y dibuja si
+se le pide—. No hay lección ni ejercicio. Las reglas del personaje son las mismas de
+todo el curso (`lib/ajito.ts`). La ficha va antes del botón desde el 27 de
+septiembre de 2026: el botón saca de la lección, y lo que quedara debajo no se veía.*
 
 ---
 

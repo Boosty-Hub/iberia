@@ -25,7 +25,7 @@ export default async function CanalPage() {
   let consulta = supabase
     .from('publicaciones')
     .select(
-      'id, tipo, titulo, bajada, imagen_url, respuesta_id, oficial, fijado, publicado_en, audiencia, audiencia_area_id, empleados(nombre_completo, cargo), comentarios(count), reacciones(count)'
+      'id, tipo, titulo, bajada, imagen_url, respuesta_id, certificado_id, oficial, fijado, publicado_en, audiencia, audiencia_area_id, empleados(nombre_completo, cargo), comentarios(count), reacciones(count)'
     )
     .eq('estado', 'publicado')
     .order('fijado', { ascending: false })

@@ -14,6 +14,12 @@
  * Después abre la página con Playwright y la captura, que para eso no hay
  * comprobación automática que valga.
  *
+ * Desde el 27 de septiembre de 2026 comprueba también la imagen —la que se guarda
+ * y se manda, con cédula—, que publicarlo en el canal cree **una** publicación con
+ * la imagen sin cédula, y que la lección 8 emita el certificado y lo enseñe en el
+ * turno que lo trae. Las dos imágenes quedan en la carpeta de capturas: hay que
+ * abrirlas.
+ *
  * Crea dos trabajadores de prueba y los borra al salir, barriendo por prefijo.
  */
 
@@ -50,8 +56,11 @@ const CEDULA = 'PRUEBA-CERT-'
  * que de verdad importa: es quien no debe poder emitir nada.
  */
 const GENTE = [
-  { id: 'termina', nombre: 'Yorgelis Pérez', cargo: 'Operadora de Envasado', familia: 'linea' },
+  { id: 'termina', nombre: 'Yorgelis Carolina Pérez Mendoza', cargo: 'Operadora de Envasado', familia: 'linea' },
   { id: 'a-medias', nombre: 'Douglas Rangel', cargo: 'Vigilante', familia: 'seguridad' },
+  // Llega al turno del certificado de la lección 8 sin certificado todavía: es la
+  // lección la que tiene que emitirlo al abrirse ese turno.
+  { id: 'leccion-8', nombre: 'Maryori Castillo', cargo: 'COCINERA DE PRUEBAS', familia: 'cocina' },
 ]
 
 const problemas = []
@@ -71,6 +80,15 @@ async function limpiar() {
   const { data } = await admin.auth.admin.listUsers({ perPage: 200 })
   const usuarios = (data?.users ?? []).filter((u) => (u.email ?? '').startsWith(PREFIJO))
   const { data: fichas } = await admin.from('empleados').select('id').like('cedula', `${CEDULA}%`)
+  // Lo que publicaron en el canal: la fila y la imagen de su carpeta. La ficha se
+  // lleva en cascada lo demás, pero no los archivos.
+  for (const f of fichas ?? []) {
+    await admin.from('publicaciones').delete().eq('autor_id', f.id)
+    const { data: archivos } = await admin.storage.from('canal').list(`certificados/${f.id}`)
+    if (archivos?.length) {
+      await admin.storage.from('canal').remove(archivos.map((a) => `certificados/${f.id}/${a.name}`))
+    }
+  }
   for (const f of fichas ?? []) await admin.from('empleados').delete().eq('id', f.id)
   for (const u of usuarios) await admin.auth.admin.deleteUser(u.id)
 }
@@ -177,7 +195,8 @@ try {
 
     // Yorgelis termina las nueve; Douglas solo las tres primeras. Los avances se
     // escriben con la sesión de cada quien, como los escribiría la aplicación.
-    const cuantas = persona.id === 'termina' ? lecciones.length : 3
+    const cuantas =
+      persona.id === 'termina' ? lecciones.length : persona.id === 'leccion-8' ? lecciones.length - 1 : 3
     await suyo.from('avances').insert(
       lecciones.slice(0, cuantas).map((l) => ({
         matricula_id: matricula.id,
@@ -186,12 +205,24 @@ try {
         completada_en: new Date().toISOString(),
       }))
     )
+    // La de la lección 8 va por el final de la última, con el audio del
+    // certificado ya oído: lo que falta es que la lección lo emita.
+    if (persona.id === 'leccion-8') {
+      await suyo.from('avances').insert({
+        matricula_id: matricula.id,
+        leccion_id: lecciones[lecciones.length - 1].id,
+        estado: 'en_curso',
+        paso: 99,
+        oidos: ['5'],
+      })
+    }
 
     montadas[persona.id] = { ...persona, ficha, matricula, sesion: sesion.session, suyo }
   }
 
   const termina = montadas['termina']
   const aMedias = montadas['a-medias']
+  const enLeccion = montadas['leccion-8']
 
   // --- las guardas de la función --------------------------------------------
   console.log('Quién puede emitirlo')
@@ -271,7 +302,7 @@ try {
   // --- la vista --------------------------------------------------------------
   console.log('\nLa vista')
 
-  for (const persona of [termina, aMedias]) {
+  for (const persona of [termina, aMedias, enLeccion]) {
     const contexto = await navegador.newContext({ ...devices['iPhone 14'], locale: 'es-VE' })
     await contexto.addCookies(
       cookiesDeSesion(persona.sesion).map((c) => ({
@@ -289,12 +320,41 @@ try {
       if (m.type() === 'error') problemas.push(`[consola] ${persona.id}: ${m.text()}`)
     })
 
-    await pagina.goto(`${BASE}/canal/adiestramiento/certificado`, { waitUntil: 'networkidle' })
+    const destino =
+      persona.id === 'leccion-8'
+        ? `/canal/adiestramiento/${lecciones[lecciones.length - 1].numero}`
+        : '/canal/adiestramiento/certificado'
+    await pagina.goto(`${BASE}${destino}`, { waitUntil: 'networkidle' })
 
     const tarjeta = pagina.locator('[data-certificado]')
     const tiene = (await tarjeta.count()) > 0
 
-    if (persona.id === 'termina') {
+    if (persona.id === 'leccion-8') {
+      comprobar('la lección 8 enseña el certificado en su turno', tiene)
+      if (tiene) {
+        const texto = await tarjeta.innerText()
+        comprobar('con su nombre', texto.includes(persona.nombre))
+        comprobar('con el cargo escrito como se lee', texto.includes('Cocinera de pruebas'), texto.slice(0, 200))
+        comprobar(
+          'con sus tres botones',
+          (await pagina.locator('[data-certificado-acciones]').count()) === 1 &&
+            (await pagina.getByText('Publicarlo en el canal').count()) === 1
+        )
+      }
+      const { data: emitido } = await admin
+        .from('certificados')
+        .select('codigo')
+        .eq('matricula_id', persona.matricula.id)
+        .maybeSingle()
+      comprobar('y lo emitió al abrirse el turno', Boolean(emitido), 'no hay fila')
+      const { data: av } = await admin
+        .from('avances')
+        .select('estado')
+        .eq('matricula_id', persona.matricula.id)
+        .eq('leccion_id', lecciones[lecciones.length - 1].id)
+        .single()
+      comprobar('la lección 8 queda terminada ahí', av.estado === 'completada', av.estado)
+    } else if (persona.id === 'termina') {
       comprobar('quien terminó ve su certificado', tiene)
       if (tiene) {
         const texto = await tarjeta.innerText()
@@ -302,10 +362,58 @@ try {
         comprobar('sale su cargo', texto.includes(persona.cargo))
         comprobar('sale el código', /IB-AJITO-\d{4}-\d{4}/.test(texto))
       }
+
+      // La imagen: la que se guarda y se manda, con cédula.
+      const imagen = await pagina.request.get(`${BASE}/canal/adiestramiento/certificado/imagen`)
+      const tipo = imagen.headers()['content-type'] ?? ''
+      comprobar('la imagen sale en PNG', imagen.ok() && tipo.startsWith('image/png'), `${imagen.status()} ${tipo}`)
+      if (imagen.ok()) {
+        const { writeFile } = await import('node:fs/promises')
+        await writeFile(join(SALIDA, 'imagen.png'), await imagen.body())
+      }
+      const bajada = await pagina.request.get(`${BASE}/canal/adiestramiento/certificado/imagen?descargar`)
+      comprobar(
+        '«Guardarlo» la baja como archivo',
+        /attachment/.test(bajada.headers()['content-disposition'] ?? ''),
+        bajada.headers()['content-disposition'] ?? 'sin cabecera'
+      )
+
+      // Publicarla en el canal: una publicación, con la imagen sin cédula.
+      await pagina.getByRole('button', { name: 'Publicarlo en el canal' }).click()
+      await pagina.locator('[data-publicado]').waitFor({ timeout: 30_000 }).catch(() => {})
+      comprobar('publicarlo deja el enlace al canal', (await pagina.locator('[data-publicado]').count()) === 1)
+      const { data: publicadas } = await admin
+        .from('publicaciones')
+        .select('id, titulo, imagen_ruta, certificado_id')
+        .eq('autor_id', persona.ficha.id)
+      comprobar('una sola publicación, con su certificado', publicadas?.length === 1 && Boolean(publicadas[0].certificado_id), JSON.stringify(publicadas))
+      if (publicadas?.[0]?.imagen_ruta) {
+        comprobar(
+          'la imagen del canal va en su carpeta',
+          publicadas[0].imagen_ruta.startsWith(`certificados/${persona.ficha.id}/`),
+          publicadas[0].imagen_ruta
+        )
+        const { data: archivo } = await admin.storage.from('canal').download(publicadas[0].imagen_ruta)
+        if (archivo) {
+          const { writeFile } = await import('node:fs/promises')
+          await writeFile(join(SALIDA, 'imagen-canal.png'), Buffer.from(await archivo.arrayBuffer()))
+        }
+      }
+      // Darle otra vez no publica dos veces.
+      const otra = await persona.suyo.rpc('publicar_mi_certificado', {
+        p_imagen_ruta: publicadas?.[0]?.imagen_ruta ?? '',
+      })
+      comprobar('publicarlo dos veces devuelve la misma', otra.data === publicadas?.[0]?.id, otra.error?.message ?? '')
     } else {
       comprobar('quien no terminó no ve certificado', !tiene)
       const cuerpo = await pagina.locator('body').innerText()
       comprobar('y se le dice qué le falta', /nueve lecciones/i.test(cuerpo))
+      const imagen = await pagina.request.get(`${BASE}/canal/adiestramiento/certificado/imagen`)
+      comprobar('ni imagen', imagen.status() === 404, String(imagen.status()))
+      const { error } = await persona.suyo.rpc('publicar_mi_certificado', {
+        p_imagen_ruta: `certificados/${persona.ficha.id}/x.png`,
+      })
+      comprobar('ni puede publicar uno', /todavía no tienes/i.test(error?.message ?? ''), error?.message ?? 'publicó')
     }
 
     // Lo que una captura no enseña: desborde horizontal.
