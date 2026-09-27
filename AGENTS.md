@@ -661,10 +661,16 @@ Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).
   y el proceso hijo que Next lanza por cada ruta dinámica (`/informe/[slug]`,
   `/canal/adiestramiento/[numero]`) hereda esa salida rota y muere al arrancar. En el navegador
   sale un 500 con «Jest worker encountered 2 child process exceptions»; las rutas fijas cargan
-  bien, y eso despista. Pasó el 27 de septiembre de 2026. Se arregla cerrando esos procesos y
-  levantando el servidor con la salida a un archivo
-  (`npm run dev -- -p 3001 > capturas/servidor-3001.log 2>&1`), que no se rompe si la terminal
-  cae.
+  bien, y eso despista. Pasó dos veces el 27 de septiembre de 2026. ⚠️ **Redirigir la salida a un
+  archivo desde la terminal de Claude Code no alcanza** —fue el primer arreglo, y volvió a pasar—:
+  `npm` y `scripts/servidor.mjs` siguen colgando de esa terminal, el sistema los mata con ella, y
+  Next queda escribiéndole a un proceso muerto. Se cierran los procesos de Node de Iberia y se
+  levanta **desligado de la terminal**, como proceso propio de Windows que escribe directo a su
+  archivo:
+
+  ```
+  Start-Process cmd.exe -ArgumentList '/c','npm run dev -- -p 3001 > capturasservidor-3001.log 2>&1' -WindowStyle Hidden
+  ```
 - **Git Bash convierte en ruta de Windows cualquier argumento que empiece por `/`**:
   `/dashboard/roles` llega al script como `C:/Program Files/Git/dashboard/roles`. Para
   pasarle rutas de la app a un script, `MSYS_NO_PATHCONV=1`.

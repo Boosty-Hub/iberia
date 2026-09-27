@@ -200,7 +200,9 @@ publicar en el feed, pasa por una función propia que publica solo el escudo de 
 ⚠️ **El 27, el informe daba 500 en local y no en producción.** Era el servidor de desarrollo de
 la noche anterior: el sistema le cortó la terminal por falta de memoria, él siguió vivo con la
 salida rota, y cada ruta con parámetro moría al lanzar su proceso hijo. Se cerró y se levantó con
-la salida a un archivo; la trampa quedó en `AGENTS.md`.
+la salida a un archivo; la trampa quedó en `AGENTS.md`. *(Corregido: esa tarde volvió a pasar. La
+salida a un archivo no alcanza mientras el servidor cuelgue de la terminal; hay que levantarlo
+desligado de ella, con `Start-Process`.)*
 
 ---
 
