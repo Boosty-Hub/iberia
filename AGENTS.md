@@ -17,14 +17,20 @@ pendiente. **Añade una entrada al cerrarla**, arriba del todo: qué se construy
 decidió, qué se corrigió y dónde quedamos. Sin eso, cada sesión reconstruye contexto
 desde cero.
 
-⚠️ **Antes de escribir en la bitácora hay que leerla completa**, y al escribir:
+⚠️ **Antes de escribir en la bitácora hay que leerla completa** y revisar si ya tiene
+contradicciones, duplicados o errores; solo después se escribe. Es una regla. Y al escribir:
 
+- 🔴 **Nunca más de 800 líneas.** Si lo nuevo la pasa, se compacta lo viejo primero —las
+  sesiones antiguas se resumen en lo decidido y lo roto—. La versión larga queda en git; la
+  bitácora dice con qué comando se ve. El 27 de septiembre de 2026 tenía 3.308 líneas y se
+  compactó a 243.
 - **Comprobar que lo nuevo no repita ni contradiga lo que ya está.** Una decisión que
   cambia no se añade abajo: se corrige donde estaba, con una nota de que cambió. Ya pasó
   —la voz quedó «cerrada» en una sección y «pendiente de elegir» tres párrafos después—
   y una bitácora que se contradice es peor que no tenerla.
 - **Mantenerla corta y precisa.** Cuando es muy larga, el agente que la lee no llega al
-  final, y lo que no se lee no es memoria de nada. Al añadir, mirar si hay que recortar.
+  final, y lo que no se lee no es memoria de nada. Al añadir, mirar si hay que recortar, y
+  que el estado de arriba no se quede con fechas vencidas.
 - **Cómo funciona el sistema va aquí, en `AGENTS.md`, no en la bitácora.** Allá va lo que
   pasó, lo que se decidió y por qué, y lo que se rompió. Si algo se puede explicar una vez
   y consultarse, no se repite en cada entrada.
@@ -783,6 +789,35 @@ Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).
   `npx next typegen` antes de `tsc --noEmit`.
 - Regenerar tipos de base tras cada migración:
   `supabase gen types typescript --project-id <ref> --schema public > lib/database.types.ts`
+
+### Trampas al editar y al verificar
+
+Salieron de romperse, una por una, y vivían en la bitácora. Cada una costó al menos una corrida.
+
+- ⚠️ **En una plantilla de JavaScript, un escape que el lenguaje no reconoce pierde la barra**:
+  `\d`, `\b` y `\p{L}` llegan al regex como `d`, `b` y `p{L}`, y fallan en silencio. En una
+  plantilla, la barra se escribe doble o no está. Y **la terminal de esta máquina también se come
+  barras** en heredocs y en `node -e`: un script con regex se escribe con la herramienta de
+  escritura, no pegado en la terminal.
+- **`\w` y la frontera `\b` son ASCII en JavaScript**: fallan en la primera tilde, y aquí todo
+  lleva tildes. Se usa `\p{L}` con la bandera `u`.
+- **No correr `npx prettier` sobre los archivos**: el repositorio no tiene configuración, y
+  prettier aplica la suya —comillas dobles y punto y coma—, que es lo contrario del estilo.
+- **En GNU sed, `` \` `` es el ancla de inicio del texto, no una comilla**: un `sed` sobre
+  markdown con comillas invertidas le puso una a cada línea de la bitácora. Para markdown, la
+  herramienta de edición o un script de Node.
+- **Delimitar un reemplazo por «lo siguiente que reconozco» es frágil**: así se fueron 939 líneas
+  del generador del informe. Se acota por el cierre real, y **se commitea antes de una cirugía
+  grande**.
+- **`Intl.DateTimeFormat` sin `timeZone`** lee el primero del mes a medianoche UTC como el mes
+  anterior visto desde Venezuela. Siempre `America/Caracas`.
+- **Las esperas fijas mienten** en las pruebas (`waitForTimeout`): una página lenta pasa por rota.
+  Se espera a lo que se busca —`waitForURL`, un selector—.
+- **Las suites apuntan al 3000 por defecto, y en esta máquina el 3000 es otra aplicación**: se les
+  pasa `--base` o `BASE_URL`, o prueban la aplicación equivocada.
+- **Una comprobación que se salta en silencio es peor que no tenerla**: `probar:adiestramiento`
+  pasó de 16 a 9 comprobaciones y siguió diciendo «sin fallos». Si falta lo que la prueba
+  necesita, la prueba lo crea o falla.
 
 ## Verificación visual — obligatoria
 

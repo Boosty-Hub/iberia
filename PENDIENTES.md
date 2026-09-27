@@ -11,7 +11,7 @@ del contrato **CONT-2026-08-0002**. Los dos documentos están en el módulo de a
 > la firma del **6 de agosto de 2026**. Lo que no aparezca aquí abajo no lo estamos
 > entregando — por bueno que sea.
 
-**Hoy es 25 de septiembre: día 50 de 153.** El mes 2 se cierra en 5 días.
+**Hoy es 27 de septiembre: día 52 de 153.** El mes 2 se cierra en 3 días.
 
 | | Entregable | Vence | Cómo va |
 |---|---|---|---|
@@ -179,6 +179,7 @@ puede citarse en ningún entregable hasta que se resuelva.
 | **Hablar con Milagro Salas** y acordar qué se hace: borrar y volver a levantar con su consentimiento, o que autorice por escrito lo que ya está | Gabriel |
 | **Decidir si se borra la transcripción de la base.** Es una decisión suya, no del repositorio | Gabriel |
 | **Poner el aviso de grabación al inicio del guion** de las ~16 que faltan, y que quede dicho en el audio | Gabriel y Ruth |
+| **Decidir si se quitan del mapa los dos procesos que solo ella sostiene.** Siguen como fila —nombre y área, sin observación— porque que un proceso exista es un hecho de la empresa, no algo que ella contara, y quitarlos falsearía el inventario de 142. Si el criterio debe ser más estricto, salen. Y la observación de «Gestión de Quejas y Reclamos» identifica a la Gerente de Calidad por su cargo | Gabriel |
 
 ### Qué falta, medido contra el mapa de macroprocesos
 
@@ -496,8 +497,8 @@ repositorio público.)*
 | 🔴 **Revisar el registro de horas y corregirlo.** Ya está cargado y itemizado en `/dashboard/programa`: **38 partidas**, cada una con la base de su número. Revisadas con Gabriel el 31 de agosto: el mes 1 cierra en **137 h contra 107**. Lo que falta es la última pasada antes del corte, que es en seis días | Gabriel | **Primer corte: 6 de septiembre** |
 | 🔴 **Revisar las 24 partidas de septiembre.** Cargadas el 25 con la base de cada una y el peso en Jesús Planas, como pidió Gabriel: **119 h**, procesos +51 sobre su cuota. Solo las 9 h por persona del entrenamiento del 23 salen de un dato; el resto son estimaciones, como las de agosto antes de su revisión. **Si se corrigen desde el panel, pasar la corrección a `scripts/sembrar-horas.mjs`**: el script ya no escribe si la base tiene partidas que él no conoce | Gabriel | Antes del reporte de septiembre |
 | 🔴 **Redactar el reporte mensual de consumo**, que es obligación de la cláusula 8 y nunca se ha entregado uno. **`/dashboard/programa` ya está escrito para que lo lea Iberia** —qué horas, quién las dedicó y cómo va el calendario—, así que el reporte se apoya en la página en vez de repetirla: lo que aporta es la lectura, no la tabla | **Boosty** | **6 de septiembre** |
-| **Dar de alta a Iberia en el dashboard.** El módulo del programa ya se puede leer con el rol **Lector Iberia**, pero no consta que exista ninguna cuenta de Iberia. Sin eso, la decisión de abrirlo no cambia nada | **Boosty** crea · Alberto decide quiénes | |
-| **Revisar con Gabriel la matriz de «Lector Iberia» antes de dar la primera cuenta.** *(El 25 de septiembre ya estaba ajustada desde el panel: no ve entrevistas, archivos ni hallazgos. Queda confirmar que así se da.)* Hoy reproduce lo que el nivel lector veía antes del 25 de septiembre: panel, entrevistas, archivos, el programa, el adiestramiento, el canal y las once secciones (solo las publicadas). *(Hallazgos y el editor del informe salieron del panel el 25; el mapa se ve ahora con la casilla de su sección.)* Es mucho más que el informe y el programa: conviene decidir si la dirección de Iberia ve las transcripciones y los hallazgos crudos | Gabriel decide · **Boosty** marca en `/dashboard/roles` | Antes del alta de Iberia |
+| ~~**Dar de alta a Iberia en el dashboard**~~ ✅ **Hecho el 27 de septiembre**: Alberto (Administrador), Martha Fuentes (Lector Iberia) y Martha Álvarez (Marketing), cada una enlazada a su ficha. Las que sigan las decide Alberto | — | |
+| **Revisar con Gabriel la matriz de «Lector Iberia»**, que ya tiene una cuenta (Martha Fuentes). *(Ver también, arriba, que no tiene ninguna sección del informe marcada.)* *(El 25 de septiembre ya estaba ajustada desde el panel: no ve entrevistas, archivos ni hallazgos. Queda confirmar que así se da.)* Hoy reproduce lo que el nivel lector veía antes del 25 de septiembre: panel, entrevistas, archivos, el programa, el adiestramiento, el canal y las once secciones (solo las publicadas). *(Hallazgos y el editor del informe salieron del panel el 25; el mapa se ve ahora con la casilla de su sección.)* Es mucho más que el informe y el programa: conviene decidir si la dirección de Iberia ve las transcripciones y los hallazgos crudos | Gabriel decide · **Boosty** marca en `/dashboard/roles` | Antes del alta de Iberia |
 | ~~La barra lateral le ofrece al lector páginas que no puede abrir~~ ✅ **Resuelto el 25 de septiembre**: cada destino sale solo si el rol puede abrirlo | ✅ | |
 | ⚠️ **El certificado con lecciones apagadas.** Si a un rol se le apagan lecciones en la matriz, el índice del curso ofrece el certificado al terminar las que ve, pero el certificado solo se emite con las nueve completadas. Los cuatro roles de fábrica ven las nueve, así que hoy no pasa; si alguien arma un rol con menos, hay que decidir qué certifica | **Boosty** | Si se arma un rol así |
 | ~~¿El dashboard del levantamiento consume bolsa?~~ **Sí**, decidido. Sus 40 h quedan dentro | ✅ |
@@ -511,6 +512,9 @@ repositorio público.)*
 | **La cuenta de Netlify deja el login de equipo como valor de fábrica.** Un sitio nuevo en esa cuenta nace cerrado a quien no sea miembro. Es buen valor por defecto; se deja dicho para que un 401 en un sitio nuevo no se busque en el código | — | |
 | **Apagar los JWT legacy en Supabase.** El código no los usa; falta apagarlos en el panel. Antes, comprobar que nada fuera de este repositorio los use | **Boosty** | |
 | **Registrar los certificados en Capital Humano** cuando llegue la Fase 2 | Gustavo Carballo | |
+| 🔴 **Cerrar el repositorio.** `Boosty-Hub/iberia` es **público** y su historia lleva material bajo NDA —versiones viejas de la bitácora con nombres, citas y el detalle del ataque—. Desde el 27 de septiembre la sesión de GitHub de esta máquina tiene permiso de administrador: `gh repo edit Boosty-Hub/iberia --visibility private --accept-visibility-change-consequences`. Antes, confirmar que Netlify sigue desplegando con el repositorio privado | **Gabriel** decide | Ya |
+| 🔴 **`RowerConsultoria` tiene permiso de escritura** en el repositorio y no se sabe de quién es: cuenta personal creada el 17 de julio, sin organización. Comprobado el 27 de septiembre: sigue ahí | **Gabriel** | Ya |
+| **Seis alertas de Dependabot** abiertas (4 críticas, 2 altas) en las dependencias, comprobadas el 27 de septiembre. Actualizar con la verificación visual completa después: puede romper el render | **Boosty** | Después de la reunión del 29 |
 
 ### El mes 1 cierra en 137 horas contra una bolsa de 107
 
