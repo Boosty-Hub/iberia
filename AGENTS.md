@@ -669,7 +669,7 @@ Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).
   archivo:
 
   ```
-  Start-Process cmd.exe -ArgumentList '/c','npm run dev -- -p 3001 > capturasservidor-3001.log 2>&1' -WindowStyle Hidden
+  Start-Process cmd.exe -ArgumentList '/c','npm run dev -- -p 3001 > capturas\servidor-3001.log 2>&1' -WindowStyle Hidden
   ```
 - **Git Bash convierte en ruta de Windows cualquier argumento que empiece por `/`**:
   `/dashboard/roles` llega al script como `C:/Program Files/Git/dashboard/roles`. Para
