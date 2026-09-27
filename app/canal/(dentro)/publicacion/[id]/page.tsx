@@ -12,6 +12,7 @@ import {
   type TipoPublicacion,
 } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
+import { legible } from '@/lib/certificado'
 
 export async function generateMetadata({
   params,
@@ -106,7 +107,7 @@ export default async function PublicacionPage({
                 {publicacion.empleados?.nombre_completo ?? 'Industrias Iberia'}
               </p>
               <p className="truncate text-xs text-marca-500">
-                {publicacion.empleados?.cargo ?? 'Comunicación interna'}
+                {publicacion.empleados?.cargo ? legible(publicacion.empleados.cargo) : 'Comunicación interna'}
               </p>
             </div>
             <span className="shrink-0 text-xs text-marca-400">

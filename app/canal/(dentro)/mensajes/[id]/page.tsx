@@ -6,6 +6,7 @@ import { haceCuanto, iniciales, requerirEmpleado } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
 import { enviarMensaje, marcarVisto } from './acciones'
+import { legible } from '@/lib/certificado'
 
 export const metadata: Metadata = { title: 'Conversación' }
 
@@ -65,7 +66,7 @@ export default async function ConversacionPage({
         <div className="min-w-0 flex-1">
           <p className="truncate text-[16px] font-semibold text-marca-900">{titulo}</p>
           <p className="truncate text-[12px] text-marca-500">
-            {conversacion.tipo === 'grupo' ? 'Grupo de trabajo' : (otro?.cargo ?? '')}
+            {conversacion.tipo === 'grupo' ? 'Grupo de trabajo' : (otro?.cargo ? legible(otro.cargo) : '')}
           </p>
         </div>
       </header>

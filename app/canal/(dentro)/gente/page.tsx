@@ -10,6 +10,7 @@ import {
 } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
 import { abrirConversacion, responderConexion, solicitarConexion } from './acciones'
+import { legible } from '@/lib/certificado'
 
 export const metadata: Metadata = { title: 'Gente' }
 
@@ -157,7 +158,7 @@ function FilaPersona({
           {persona.nombre_completo}
         </p>
         <p className="truncate text-[13px] text-marca-500">
-          {persona.cargo ?? 'Industrias Iberia'}
+          {persona.cargo ? legible(persona.cargo) : 'Industrias Iberia'}
         </p>
         {(persona.areas?.nombre || persona.sede) && (
           <p className="truncate text-[11px] text-marca-400">

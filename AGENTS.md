@@ -518,6 +518,14 @@ Eso obliga a tratarlo como lo que es —una contraseña—, y de ahí las reglas
   - La búsqueda del padrón no distingue tildes: con `ilike`, «alvarez» no encontraba «Álvarez».
   `scripts/mirar-padron-cuentas.mjs` arma el caso con gente de prueba y lo recorre hasta la
   lección 0.
+- **El cargo se escribe como se lee en el canal** (`legible()` de `lib/certificado.ts`): llega del
+  listado de Capital Humano en mayúsculas, y el perfil, la gente, los mensajes y el feed decían
+  «GERENTE GENERAL». Y el importador pone mayúscula también después de un guion: «García-ramos»
+  salía así.
+- **Para ver lo que ve alguien sin entrar con su cuenta**: `scripts/mirar-puertas.mjs --rol <clave>
+  --como <ficha>` crea una cuenta de prueba con ese rol y los datos de esa ficha —nombre, cargo,
+  nivel, área— y recorre el canal, el curso y el panel. Nunca se acuña sesión con la cuenta de un
+  cliente.
 - `/entrar` y `/canal/entrar` son las únicas rutas públicas nuevas en `lib/supabase/sesion.ts`.
   Tienen que serlo: quien llega con su enlace **todavía no tiene sesión**.
 

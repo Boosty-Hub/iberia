@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { IconoChat, IconoUsuarios } from '@/components/iconos'
 import { haceCuanto, iniciales, requerirEmpleado } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
+import { legible } from '@/lib/certificado'
 
 export const metadata: Metadata = { title: 'Mensajes' }
 
@@ -61,7 +62,7 @@ export default async function MensajesPage() {
         titulo: esGrupo
           ? (conv?.grupos?.nombre ?? 'Grupo')
           : (otro?.nombre_completo ?? 'Conversación'),
-        subtitulo: esGrupo ? 'Grupo de trabajo' : (otro?.cargo ?? ''),
+        subtitulo: esGrupo ? 'Grupo de trabajo' : (otro?.cargo ? legible(otro.cargo) : ''),
         mensaje: msg?.texto ?? null,
         mio: msg?.autor_id === yo.id,
         cuando: msg?.created_at ?? null,

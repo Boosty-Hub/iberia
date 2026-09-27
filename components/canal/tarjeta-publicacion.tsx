@@ -7,6 +7,7 @@ import {
   type TipoPublicacion,
 } from '@/lib/canal'
 import { cn } from '@/lib/utils'
+import { legible } from '@/lib/certificado'
 
 export type PublicacionFeed = {
   id: string
@@ -116,7 +117,7 @@ export function TarjetaPublicacion({
                 {publicacion.empleados?.nombre_completo ?? 'Industrias Iberia'}
               </p>
               <p className="truncate text-[11px] text-marca-400">
-                {publicacion.empleados?.cargo ?? 'Comunicación interna'}
+                {publicacion.empleados?.cargo ? legible(publicacion.empleados.cargo) : 'Comunicación interna'}
               </p>
             </div>
             <span className="shrink-0 text-[11px] text-marca-400">

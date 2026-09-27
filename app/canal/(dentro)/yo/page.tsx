@@ -14,6 +14,7 @@ import {
   type NivelEmpleado,
 } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
+import { legible } from '@/lib/certificado'
 
 export const metadata: Metadata = { title: 'Mi perfil' }
 
@@ -51,7 +52,7 @@ export default async function YoPage() {
         <h1 className="mt-3 text-[20px] leading-tight font-bold text-marca-900">
           {yo.nombre_completo}
         </h1>
-        <p className="mt-1 text-[15px] text-marca-600">{yo.cargo ?? 'Industrias Iberia'}</p>
+        <p className="mt-1 text-[15px] text-marca-600">{yo.cargo ? legible(yo.cargo) : 'Industrias Iberia'}</p>
 
         <div className="mt-3 flex flex-wrap justify-center gap-1.5">
           <span className="chip bg-marca-100 text-marca-600">

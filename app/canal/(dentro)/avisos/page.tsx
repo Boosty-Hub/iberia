@@ -4,6 +4,7 @@ import { IconoCampana, IconoCheck, IconoOficial } from '@/components/iconos'
 import { responderConexion } from '@/app/canal/(dentro)/gente/acciones'
 import { haceCuanto, iniciales, requerirEmpleado } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
+import { legible } from '@/lib/certificado'
 
 export const metadata: Metadata = { title: 'Avisos' }
 
@@ -82,7 +83,7 @@ export default async function AvisosPage() {
                       {s.empleados?.nombre_completo}
                     </p>
                     <p className="truncate text-[13px] text-marca-500">
-                      {s.empleados?.cargo}
+                      {s.empleados?.cargo && legible(s.empleados.cargo)}
                     </p>
                   </div>
                   <span className="shrink-0 text-[11px] text-marca-400">

@@ -127,9 +127,11 @@ function nombreLegible(crudo) {
   const partes = limpio.split(',')
   const texto =
     partes.length === 2 ? `${partes[1].trim()} ${partes[0].trim()}` : limpio
+  // También después de un guion: «GARCÍA-RAMOS» salía «García-ramos», y era el
+  // apellido del Gerente General (27 de septiembre de 2026).
   return texto
     .toLowerCase()
-    .replace(/(^|\s|\.)([a-záéíóúñ])/g, (_, antes, letra) => antes + letra.toUpperCase())
+    .replace(/(^|\s|\.|-)([a-záéíóúñ])/g, (_, antes, letra) => antes + letra.toUpperCase())
 }
 
 // --- Del cargo a la familia de oficio. Mismas reglas que sembrar:adiestramiento.

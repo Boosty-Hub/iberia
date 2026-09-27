@@ -110,6 +110,15 @@ de cada fila, marca la de muestra repetida y no deja marcarla, ofrece enlazar la
 y no le acuña otra**. La búsqueda dejó de distinguir tildes. Verificado con `mirar-padron-cuentas`
 (11 de 11) y `probar:padron` (25 de 25).
 
+**Y Alberto, enlazado.** Su cuenta quedó con su ficha de Capital Humano, la 4774 (Gerente General),
+desde Usuarios. Al revisar lo que iba a ver: su apellido salía «García-ramos» —el importador no ponía
+mayúscula después de un guion; corregido en el importador y en su ficha—, su ficha no traía cédula y
+la de muestra sí —se le pasó la V-6912626, y la de muestra volvió a `PADRON-001`—, y en el canal su
+cargo salía «GERENTE GENERAL», como el de las 276 personas —ahora se escribe como se lee—. Publicar le
+viene del rol de administrador. Recorrido con una cuenta de prueba de su rol y los datos de su ficha
+(`mirar-puertas --rol administrador --como 4774`, 43 de 43): el canal, el curso, el panel entero, la
+administración y el informe.
+
 Martha ya se matriculó así. De paso, `probar:adiestramiento` y `probar:certificado` creaban a sus
 trabajadores con el rol de la dirección, que ahora lee el tablero y los certificados: pasan a
 Personal de planta. **Verificado** con `mirar-puertas` (25 de 25, con el rol de Martha y uno sin
