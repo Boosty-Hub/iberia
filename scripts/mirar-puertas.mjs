@@ -86,6 +86,24 @@ try {
 
     await p.goto(`${BASE}/canal`, { waitUntil: 'networkidle' })
     ver(new URL(p.url()).pathname === '/canal', 'entra al canal', p.url())
+
+    // Lo de Ajito, con las casillas de su rol (27 de septiembre de 2026: Martha
+    // tenía las nueve lecciones y el curso le decía «no es para tu nivel»).
+    const conLecciones = [...tiene].some((r) => r.startsWith('leccion:'))
+    if (conLecciones && nombre === 'telefono') {
+      ver((await p.locator('a[href="/canal/adiestramiento"]').count()) >= 1, 'el feed trae la tarjeta de Ajito')
+      await p.goto(`${BASE}/canal/adiestramiento`, { waitUntil: 'networkidle' })
+      const recorrer = p.getByRole('button', { name: 'Recorrer el curso' })
+      ver((await recorrer.count()) === 1, 'sin matrícula, el curso ofrece «Recorrer el curso»')
+      await p.screenshot({ path: `${SALIDA}/${nombre}-recorrer.png` })
+      await recorrer.click()
+      await p.locator('a[href="/canal/adiestramiento/0"]').first().waitFor({ timeout: 20000 }).catch(() => {})
+      ver((await p.locator('a[href^="/canal/adiestramiento/"]').count()) >= 9, 'y al tocarlo salen las lecciones')
+      await p.goto(`${BASE}/canal/adiestramiento/0`, { waitUntil: 'networkidle' })
+      ver((await p.getByText(/Lección 0/).count()) >= 1, 'la lección 0 abre')
+      await p.goto(`${BASE}/canal`, { waitUntil: 'networkidle' })
+    }
+
     const alPanel = p.getByRole('link', { name: 'Panel' })
     ver((await alPanel.count()) === 1, 'el canal tiene el botón «Panel»')
     await p.screenshot({ path: `${SALIDA}/${nombre}-canal.png` })
@@ -102,6 +120,23 @@ try {
     ver(!(await p.getByText('No tienes permiso').count()), 'sin aviso de permiso')
     await p.screenshot({ path: `${SALIDA}/${nombre}-panel.png` })
 
+    // Lo que su rol abre del curso en el panel tiene que traer datos, no ceros.
+    if (nombre === 'escritorio' && tiene.has('modulo:adiestramiento')) {
+      await p.goto(`${BASE}/dashboard/adiestramiento`, { waitUntil: 'networkidle' })
+      const matriculados = await p.evaluate(() => {
+        const rotulo = [...document.querySelectorAll('*')].find((e) => e.textContent?.trim() === 'Con matrícula')
+        return Number(rotulo?.parentElement?.textContent?.match(/\d+/)?.[0] ?? 0)
+      })
+      ver(matriculados > 0, `el tablero de Adiestramiento trae cifras (${matriculados} con matrícula)`)
+      ver((await p.getByRole('link', { name: /El curso de Ajito/ }).count()) >= 1, 'la barra trae «El curso de Ajito»')
+      await p.screenshot({ path: `${SALIDA}/${nombre}-adiestramiento.png` })
+    }
+    if (nombre === 'escritorio' && tiene.has('modulo:certificados')) {
+      await p.goto(`${BASE}/dashboard/adiestramiento/certificados`, { waitUntil: 'networkidle' })
+      const hojas = await p.locator('[data-certificado]').count()
+      ver(hojas >= 1, `Certificados trae los emitidos (${hojas})`)
+    }
+
     // La portada, pedida a mano: si no la tiene, lo manda a su primera pantalla.
     await p.goto(`${BASE}/dashboard`, { waitUntil: 'networkidle' })
     ver(new URL(p.url()).pathname.startsWith('/dashboard'), 'la portada que no le toca lo deja en el panel', p.url())
@@ -115,6 +150,30 @@ try {
     const ancho = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
     ver(ancho <= 1, 'sin desborde horizontal en el canal', `${ancho}px`)
     await ctx.close()
+  }
+
+  // Y al revés: sin esas casillas, la base no lo abre. El personal de planta no
+  // tiene Adiestramiento ni Certificados en su rol.
+  console.log('\nSin las casillas')
+  const correoPlanta = 'prueba-puertas-planta@iberia.invalid'
+  const { data: planta } = await admin.auth.admin.createUser({
+    email: correoPlanta,
+    email_confirm: true,
+    user_metadata: { nombre_completo: 'Prueba Planta', organizacion: 'iberia', rol: 'lector', rol_clave: 'personal-planta' },
+  })
+  try {
+    const { data: e2 } = await admin.auth.admin.generateLink({ type: 'magiclink', email: correoPlanta })
+    const { data: s2 } = await anon.auth.verifyOtp({ token_hash: e2.properties.hashed_token, type: 'magiclink' })
+    const suyo = createClient(URL_SUPA, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
+      auth: { persistSession: false },
+      global: { headers: { Authorization: `Bearer ${s2.session.access_token}` } },
+    })
+    const { data: tablero } = await suyo.from('adiestramiento_avance').select('matriculados')
+    ver((tablero ?? []).length === 0, 'el tablero del curso no le responde')
+    const { data: certs } = await suyo.from('certificados').select('codigo')
+    ver((certs ?? []).length === 0, 'ni los certificados de otros')
+  } finally {
+    await admin.auth.admin.deleteUser(planta.user.id)
   }
 } finally {
   await nav.close()

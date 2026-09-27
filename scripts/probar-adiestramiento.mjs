@@ -268,7 +268,9 @@ try {
     const { data: creadoAuth, error: errAuth } = await admin.auth.admin.createUser({
       email: correoPrueba,
       email_confirm: true,
-      user_metadata: { nombre_completo: 'Prueba de RLS', organizacion: 'iberia', rol: 'lector' },
+      // El rol de un trabajador. Con el de Lector Iberia —la dirección, con la casilla
+      // de Adiestramiento— leería el tablero entero, y está bien que lo lea.
+      user_metadata: { nombre_completo: 'Prueba de RLS', organizacion: 'iberia', rol: 'lector', rol_clave: 'personal-planta' },
     })
 
     if (errAuth) {
@@ -316,9 +318,12 @@ try {
       const { data: tableroEmpleado } = await comoEmpleado
         .from('adiestramiento_avance')
         .select('*')
+      // El tablero es del panel: lo lee el equipo y quien tiene la casilla de
+      // Adiestramiento. Un trabajador no tiene esa casilla, así que no le responde
+      // —ni lo suyo: lo suyo lo ve en el índice del curso—.
       comprobar(
-        'el tablero de un empleado solo cuenta lo suyo',
-        (tableroEmpleado ?? []).reduce((t, f) => t + (f.matriculados ?? 0), 0) === 1,
+        'el tablero del curso no le responde a un trabajador',
+        (tableroEmpleado ?? []).length === 0,
         JSON.stringify(tableroEmpleado)
       )
 

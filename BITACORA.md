@@ -88,8 +88,22 @@ llegar a ellos. Ahora el canal lleva un botón «Panel» que cae en la primera p
 abre, la portada que no le toca la manda ahí, y en el panel «El canal» la devuelve. Recorrido con
 una cuenta de prueba de su rol, en teléfono y escritorio (`mirar-puertas`).
 
-⚠️ **Con nivel de lectura, Adiestramiento se ve vacío**: «0 con matrícula», porque la base solo le
-deja leer matrículas y avances al equipo. Queda para decidir (`PENDIENTES.md`).
+**Y lo de Ajito no se le abría, con las casillas bien puestas.** Gabriel pidió revisarlo: el rol
+Marketing —«ve lo relacionado con Ajito»— tiene las nueve lecciones, Adiestramiento y Certificados,
+y ninguna le abría nada. La base no las oía:
+
+- **El tablero del curso salía en cero** para cualquiera que no fuera del equipo. Se escribió en
+  agosto para las gerencias, pero corría con los permisos de quien lo pide. Ahora corre como su
+  dueña y se cierra con la casilla de Adiestramiento; sigue sin nombres ni respuestas.
+- **Certificados salía vacío**: se leía el propio y los del equipo. Ahora, también con la casilla.
+- **Las lecciones pedían matrícula**, que pone el equipo desde el padrón. Ahora quien tiene
+  lecciones en su rol toca «Recorrer el curso» y queda matriculado; el feed le muestra la tarjeta
+  de Ajito y el panel le pone «El curso de Ajito» en la barra.
+
+Martha ya se matriculó así. De paso, `probar:adiestramiento` y `probar:certificado` creaban a sus
+trabajadores con el rol de la dirección, que ahora lee el tablero y los certificados: pasan a
+Personal de planta. **Verificado** con `mirar-puertas` (25 de 25, con el rol de Martha y uno sin
+las casillas), `probar:adiestramiento` 25 de 25 y `probar:certificado` 32 de 32.
 
 **Verificado** en local: la pantalla propone bien las tres, el botón enlaza, y una cuenta de prueba
 con el rol de Martha llega a la puerta sin ficha y entra al canal con ella.

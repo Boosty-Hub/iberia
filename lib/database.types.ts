@@ -2611,6 +2611,7 @@ export type Database = {
       }
       matricula_mia: { Args: { matricula: string }; Returns: boolean }
       matricular_pendientes: { Args: { curso_clave: string }; Returns: number }
+      matricularme: { Args: { p_curso: string }; Returns: string }
       mensajes_sin_leer: { Args: never; Returns: number }
       mi_empleado: { Args: never; Returns: string }
       mi_matricula: { Args: { curso: string }; Returns: string }

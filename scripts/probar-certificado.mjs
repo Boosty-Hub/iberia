@@ -148,7 +148,9 @@ try {
     const { data: creado } = await admin.auth.admin.createUser({
       email: correo,
       email_confirm: true,
-      user_metadata: { nombre_completo: persona.nombre, organizacion: 'iberia', rol: 'lector' },
+      // El rol de un trabajador: con el de Lector Iberia, que tiene la casilla de
+      // Certificados, leería los de todos, y está bien que los lea.
+      user_metadata: { nombre_completo: persona.nombre, organizacion: 'iberia', rol: 'lector', rol_clave: 'personal-planta' },
     })
 
     const { data: ficha } = await admin

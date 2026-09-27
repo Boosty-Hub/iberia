@@ -21,7 +21,14 @@ function destinosPermitidos(sesion: Sesion): ClaveNav[] {
     ['programa', puede(sesion, 'modulo:programa')],
     ['usuarios', puede(sesion, 'modulo:usuarios')],
     ['roles', puede(sesion, 'modulo:roles')],
-    ['curso', puede(sesion, 'modulo:adiestramiento', 'editar') && puede(sesion, 'modulo:canal')],
+    // El curso tal como lo abre un operador: al equipo, para oír lo que se regraba,
+    // y a quien su rol le trae lecciones —el de Marketing—, que para eso las tiene.
+    [
+      'curso',
+      puede(sesion, 'modulo:canal') &&
+        (puede(sesion, 'modulo:adiestramiento', 'editar') ||
+          Object.entries(sesion.permisos).some(([r, p]) => r.startsWith('leccion:') && p.ver)),
+    ],
     [
       'ver-informe',
       Object.entries(sesion.permisos).some(([r, p]) => r.startsWith('informe:') && p.ver) ||

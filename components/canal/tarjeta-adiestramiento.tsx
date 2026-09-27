@@ -13,6 +13,8 @@ import { createClient } from '@/lib/supabase/server'
  *
  * No se dibuja nada si esta persona no tiene matrícula —las gerencias y
  * jefaturas van a las formaciones presenciales— ni si el curso sigue cerrado.
+ * Salvo que su rol le traiga lecciones: entonces sale igual, y se matricula al
+ * entrar («Recorrer el curso»). Sin eso, esas casillas no le abrían nada.
  */
 export async function TarjetaAdiestramiento({ empleadoId }: { empleadoId: string }) {
   const supabase = await createClient()
@@ -32,24 +34,26 @@ export async function TarjetaAdiestramiento({ empleadoId }: { empleadoId: string
     .eq('empleado_id', empleadoId)
     .maybeSingle()
 
-  if (!matricula) return null
+  // Las lecciones llegan filtradas por la RLS según el rol.
+  const { count: total } = await supabase
+    .from('lecciones')
+    .select('id', { count: 'exact', head: true })
+    .eq('curso_id', curso.id)
+    .eq('activa', true)
 
-  const [{ count: total }, { count: hechas }] = await Promise.all([
-    supabase
-      .from('lecciones')
-      .select('id', { count: 'exact', head: true })
-      .eq('curso_id', curso.id)
-      .eq('activa', true),
-    supabase
-      .from('avances')
-      .select('id', { count: 'exact', head: true })
-      .eq('matricula_id', matricula.id)
-      .eq('estado', 'completada'),
-  ])
+  if (!matricula && !total) return null
+
+  const { count: hechas } = matricula
+    ? await supabase
+        .from('avances')
+        .select('id', { count: 'exact', head: true })
+        .eq('matricula_id', matricula.id)
+        .eq('estado', 'completada')
+    : { count: 0 }
 
   const listas = hechas ?? 0
   const todas = total ?? 0
-  const terminado = matricula.estado === 'completado'
+  const terminado = matricula?.estado === 'completado'
   const porcentaje = todas ? Math.round((listas / todas) * 100) : 0
 
   return (

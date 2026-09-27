@@ -1004,8 +1004,26 @@ asignan a cada usuario en `/dashboard/usuarios`. Tablas `roles` y `rol_permisos`
 - **Dónde cierra la base y dónde la app.** La casilla entra en la RLS del informe
   (`informe_secciones`), del mapa (`macroprocesos` y `procesos`, con la casilla del mapa de
   procesos o la de las fichas, que marcan «No documentado» con ellas) y de las lecciones, que es lo que
-  se abre a gente que no es del equipo. En el resto de módulos la matriz la aplica
-  el servidor de la app, con el nivel como techo en la base.
+  se abre a gente que no es del equipo. **Y en lo que Adiestramiento y Certificados leen**: el
+  tablero `adiestramiento_avance` corre como su dueña y se cierra por dentro con la casilla de
+  Adiestramiento —cuentas por área y por oficio, sin nombres ni respuestas—, y `certificados` se
+  lee con la de Certificados. En el resto de módulos la matriz la aplica el servidor de la app,
+  con el nivel como techo en la base.
+- ⚠️ **Una casilla que la base no oye es una casilla que miente.** El 27 de septiembre de 2026
+  el rol Marketing tenía Adiestramiento, Certificados y las nueve lecciones, y Martha Álvarez veía
+  el tablero en cero, Certificados vacío y «este curso no es para tu nivel». El tablero corría con
+  `security_invoker` —la RLS de `matriculas` solo le deja ver la suya a quien no es del
+  equipo—, la política de certificados no miraba la casilla, y las lecciones pedían una matrícula
+  que solo pone el equipo. **Al dar una casilla de lectura a un rol que no es del equipo, hay que
+  comprobar con una cuenta de ese rol que la pantalla traiga datos**: `scripts/mirar-puertas.mjs
+  --rol <clave>` lo hace con lo de Ajito.
+- **Quien tiene lecciones en su rol se matricula solo**, con «Recorrer el curso» en el índice del
+  curso (`matricularme()`, que comprueba la casilla en la base). La matrícula del padrón sigue
+  siendo la de planta y administrativo; esta es para el resto —una gerente que revisa el curso—.
+  El feed le muestra la tarjeta de Ajito, y el panel, «El curso de Ajito» en la barra.
+- ⚠️ **Las pruebas crean a los trabajadores con el rol de un trabajador, Personal de planta**
+  (`rol_clave: 'personal-planta'`). Con Lector Iberia —la dirección, que tiene Adiestramiento y
+  Certificados— leen el tablero y los certificados de todos, y está bien que los lean.
 - **Cuatro roles de fábrica**, que reproducen el acceso de antes: Administrador, Consultor
   Boosty, Lector Iberia y **Personal de planta** —el canal y las nueve lecciones, nada
   más—, que es el que se le da a quien entra con su enlace (`rol_clave` en los metadatos

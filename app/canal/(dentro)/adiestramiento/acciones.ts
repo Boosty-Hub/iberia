@@ -52,6 +52,25 @@ async function contexto(numero: number) {
 }
 
 /**
+ * «Recorrer el curso»: matricula a quien su rol le trae lecciones.
+ *
+ * La matrícula la pone el equipo desde el padrón, a planta y administrativo. Pero
+ * un rol puede traer las lecciones a alguien de otro nivel —el de Marketing, para
+ * Martha Álvarez, el 27 de septiembre de 2026—, y sin matrícula se encontraba
+ * con «este curso no es para tu nivel»: la casilla no le abría nada. La función
+ * comprueba en la base que su rol tenga alguna lección; aquí no se decide nada.
+ */
+export async function recorrerCurso() {
+  await requerirEmpleado()
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('matricularme', { p_curso: CURSO })
+  if (error) console.error('[adiestramiento] no se pudo matricular:', error.message)
+  revalidatePath('/canal')
+  revalidatePath('/canal/adiestramiento')
+  redirect('/canal/adiestramiento')
+}
+
+/**
  * Con qué voz oye a Ajito. Vale para toda la clase y para lo que Ajito le
  * contesta, y la cambia cuando quiera. Ver `VOCES` en `lib/voz.ts`.
  */

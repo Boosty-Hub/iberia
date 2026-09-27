@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
+import { BotonSigue } from '@/components/canal/boton-sigue'
 import { ReiniciarCurso } from '@/components/canal/reiniciar-curso'
 import { IconoCheck, IconoReloj } from '@/components/iconos'
 import {
@@ -15,7 +16,7 @@ import { requerirEmpleado } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
 import { CLAVES_VOZ, VOCES, vozDe } from '@/lib/voz'
-import { elegirVoz } from './acciones'
+import { elegirVoz, recorrerCurso } from './acciones'
 
 export const metadata: Metadata = { title: 'Conoce a Ajito' }
 
@@ -51,6 +52,30 @@ export default async function AdiestramientoPage() {
   // Sin matrícula no es un error: es que a esta persona todavía no le toca.
   // Las gerencias y jefaturas van a las formaciones presenciales.
   if (!matricula) {
+    // Pero si su rol le trae lecciones, el curso es para esta persona aunque el
+    // padrón no la haya matriculado: la casilla es la decisión. Las lecciones ya
+    // llegan filtradas por la RLS según el rol.
+    if ((lecciones ?? []).length && curso.abierto) {
+      return (
+        <div className="tarjeta-canal px-5 py-8 text-center" data-recorrer>
+          <Image
+            src="/marca/ajito.png"
+            alt=""
+            width={200}
+            height={200}
+            className="mx-auto mb-4 h-20 w-20 object-contain"
+          />
+          <h1 className="text-lg font-bold text-marca-900">{curso.nombre}</h1>
+          <p className="mx-auto mt-2 max-w-xs text-[14px] leading-relaxed text-marca-500">
+            Tu rol trae {(lecciones ?? []).length === 1 ? 'una lección' : `${(lecciones ?? []).length} lecciones`} del curso de
+            Ajito. Al empezar se abre tu cupo, y tu avance se guarda como el de cualquiera.
+          </p>
+          <form action={recorrerCurso} className="mx-auto mt-5 max-w-xs">
+            <BotonSigue>Recorrer el curso</BotonSigue>
+          </form>
+        </div>
+      )
+    }
     return (
       <Aviso
         titulo="Este curso no es para tu nivel"
