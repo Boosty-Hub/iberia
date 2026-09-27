@@ -134,6 +134,11 @@ ese ejercicio, el modelo chico saca solo el apodo —de «Yorge, así me dicen t
 «Yorge»; de «como tú quieras», nada— y queda en la matrícula antes de que se pinte la consigna
 siguiente. Probado con nueve respuestas, una de ellas un intento de colarle una instrucción.
 
+⚠️ **El 27, el informe daba 500 en local y no en producción.** Era el servidor de desarrollo de
+la noche anterior: el sistema le cortó la terminal por falta de memoria, él siguió vivo con la
+salida rota, y cada ruta con parámetro moría al lanzar su proceso hijo. Se cerró y se levantó con
+la salida a un archivo; la trampa quedó en `AGENTS.md`.
+
 ---
 
 ## 26 de septiembre de 2026 · Sesión 44 — Ajito, con dos voces

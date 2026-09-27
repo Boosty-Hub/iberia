@@ -570,6 +570,16 @@ Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).
 - ⚠️ **En una inserción de varias filas, supabase-js pone NULL en la columna que una fila
   no trae** —no el valor por defecto de la tabla—. Con columnas `not null` la inserción
   entera falla. Cada fila lleva todas las columnas.
+- ⚠️ **Un `next dev` cuya terminal murió sigue vivo, y rompe todas las rutas con parámetro.**
+  Cuando Claude Code corta una tarea en segundo plano por falta de memoria, en Windows cae la
+  terminal y no el árbol de Node: el servidor sigue escuchando, pero su salida da `write EPIPE`,
+  y el proceso hijo que Next lanza por cada ruta dinámica (`/informe/[slug]`,
+  `/canal/adiestramiento/[numero]`) hereda esa salida rota y muere al arrancar. En el navegador
+  sale un 500 con «Jest worker encountered 2 child process exceptions»; las rutas fijas cargan
+  bien, y eso despista. Pasó el 27 de septiembre de 2026. Se arregla cerrando esos procesos y
+  levantando el servidor con la salida a un archivo
+  (`npm run dev -- -p 3001 > capturas/servidor-3001.log 2>&1`), que no se rompe si la terminal
+  cae.
 - **Git Bash convierte en ruta de Windows cualquier argumento que empiece por `/`**:
   `/dashboard/roles` llega al script como `C:/Program Files/Git/dashboard/roles`. Para
   pasarle rutas de la app a un script, `MSYS_NO_PATHCONV=1`.
