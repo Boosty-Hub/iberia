@@ -113,6 +113,24 @@ export async function avanzarPaso(datos: FormData) {
 }
 
 /**
+ * Anota que oyó un audio de la lección hasta el final, para que su ✓ siga ahí al
+ * recargar o al volver otro día. Las piezas son las del guion y las devoluciones
+ * van como `devolucion-<clave>`. No refresca la página: el ✓ ya está puesto.
+ */
+export async function marcarOido(numero: number, pieza: string): Promise<void> {
+  if (!Number.isInteger(numero) || !/^[\w-]{1,60}$/.test(pieza)) return
+  const ctx = await contexto(numero)
+  if (!ctx) return
+
+  const { error } = await ctx.supabase.rpc('marcar_oido', {
+    p_matricula: ctx.matricula.id,
+    p_leccion: ctx.leccion.id,
+    p_pieza: pieza,
+  })
+  if (error) console.error('[adiestramiento] no se anotó el audio oído:', error.message)
+}
+
+/**
  * Deja el avance en el turno que sigue a `desde`.
  *
  * El turno viene del navegador, pero solo puede empujar el avance de esta

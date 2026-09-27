@@ -60,6 +60,8 @@ export function AudioAjito({
   etiqueta,
   segundos,
   orden,
+  oido = false,
+  alOir,
 }: {
   src: string
   etiqueta: string
@@ -67,12 +69,18 @@ export function AudioAjito({
   segundos: number | null
   /** Cuál es dentro de la lección. Las devoluciones no llevan: no son de la clase. */
   orden?: { numero: number; total: number }
+  /** Si ya lo oyó hasta el final otro día: arranca con su ✓. */
+  oido?: boolean
+  /** Se llama la primera vez que termina, para que el ✓ se guarde. */
+  alOir?: () => void | Promise<void>
 }) {
   const ref = useRef<HTMLAudioElement>(null)
   // Un arrastre antes de que el archivo cargue: se aplica en `loadedmetadata`.
   const saltoPendiente = useRef<number | null>(null)
-  const [estado, setEstado] = useState<Estado>('quieto')
-  const [yaOido, setYaOido] = useState(false)
+  // ⚠️ El ✓ arranca de lo guardado, no en blanco: hasta el 27 de septiembre de
+  // 2026 vivía solo en la página y al recargar la lección entera salía sin oír.
+  const [estado, setEstado] = useState<Estado>(oido ? 'oido' : 'quieto')
+  const [yaOido, setYaOido] = useState(oido)
   const [posicion, setPosicion] = useState(0)
   const [duracion, setDuracion] = useState<number | null>(segundos)
 
@@ -94,6 +102,7 @@ export function AudioAjito({
     const alEsperar = () => setEstado((e) => (e === 'sonando' ? 'cargando' : e))
     const alPausar = () => setEstado((e) => (e === 'error' ? e : yaOido ? 'oido' : 'quieto'))
     const alTerminar = () => {
+      if (!yaOido) void alOir?.()
       setYaOido(true)
       setEstado('oido')
       setPosicion(0)
@@ -117,7 +126,7 @@ export function AudioAjito({
       audio.removeEventListener('ended', alTerminar)
       audio.removeEventListener('error', alFallar)
     }
-  }, [yaOido])
+  }, [yaOido, alOir])
 
   async function alternar() {
     const audio = ref.current
@@ -172,6 +181,8 @@ export function AudioAjito({
 
   return (
     <div
+      // `data-estado` no pinta nada: lo leen las verificaciones.
+      data-estado={estado}
       className={cn(
         'flex items-center gap-3 rounded-2xl border px-3 py-3 transition-colors',
         estado === 'sonando'

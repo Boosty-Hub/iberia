@@ -164,6 +164,11 @@ y una ruedita en vez de piernas.
   primer toque y mover `currentTime` no hace nada: el arrastre se guarda y se aplica en
   `loadedmetadata`. Y **cada audio de la clase dice cuál es** —«3 de 8»—, contando solo los
   que suenan (de los dos cierres de la lección 8 suena uno); las devoluciones no llevan.
+- **El ✓ de «ya oído» se guarda** en `avances.oidos` (27 de septiembre de 2026): al terminar un
+  audio, `marcarOido` lo anota con `marcar_oido()` —una sola sentencia, para que dos audios que
+  terminan juntos no se pisen— y la página arranca cada reproductor desde ahí. Antes vivía solo en
+  la página, y al recargar la lección entera salía sin oír. Las devoluciones van como
+  `devolucion-<clave>`. `capturas/mirar-oidos.mjs` lo recorre: oye, recarga y mira.
 - **El botón que hace avanzar late** (`BotonSigue`, `.btn-canal-sigue`): un halo rojo que se
   abre y se apaga, apagado con `prefers-reduced-motion`. Al terminar un audio la pantalla se
   quedaba quieta y no decía qué tocar. Y **gira mientras la acción va y vuelve**: en una

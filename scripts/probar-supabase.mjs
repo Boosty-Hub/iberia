@@ -142,8 +142,9 @@ console.log('\nLas tablas y vistas del adiestramiento\n')
 const RELACIONES = {
   cursos: 'id, clave, abierto, asistente_libre_activo',
   lecciones: 'id, numero, titulo, forma, activa',
-  matriculas: 'id, curso_id, empleado_id, familia_oficio, nombre_corto, estado, ultimo_toque',
-  avances: 'id, matricula_id, leccion_id, estado, paso',
+  matriculas: 'id, curso_id, empleado_id, familia_oficio, nombre_corto, estado, ultimo_toque, voz',
+  avances: 'id, matricula_id, leccion_id, estado, paso, oidos',
+  correcciones_padron: 'id, empleado_id, nombre, area, nombre_padron, resuelta_en',
   respuestas:
     'id, clave_paso, texto, media_url, entrada, devolucion, devolucion_audio, devolucion_en',
   certificados: 'id, codigo, nombre_completo, cedula, cargo, area_nombre, emitido_en, entregado_en',

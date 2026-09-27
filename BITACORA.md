@@ -143,6 +143,10 @@ como foto, la foto que no se abre también guarda su respuesta, y si una devoluc
 después de doce segundos sale el botón de reintentar. `probar:ajito` no lo cazaba porque metía las
 respuestas de voz sin archivo; ahora una lleva su `.wav`.
 
+**Y el ✓ de «Ya lo oíste» se pierde al recargar** —lo vio Gabriel el 27—: vivía solo en la
+página. Ahora queda en el avance de la lección (`avances.oidos`), así que sigue ahí al volver otro
+día o desde otro teléfono.
+
 ⚠️ **El 27, el informe daba 500 en local y no en producción.** Era el servidor de desarrollo de
 la noche anterior: el sistema le cortó la terminal por falta de memoria, él siguió vivo con la
 salida rota, y cada ruta con parámetro moría al lanzar su proceso hijo. Se cerró y se levantó con

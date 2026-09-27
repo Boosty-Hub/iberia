@@ -259,6 +259,7 @@ export type Database = {
           iniciada_en: string
           leccion_id: string
           matricula_id: string
+          oidos: string[]
           paso: number
         }
         Insert: {
@@ -268,6 +269,7 @@ export type Database = {
           iniciada_en?: string
           leccion_id: string
           matricula_id: string
+          oidos?: string[]
           paso?: number
         }
         Update: {
@@ -277,6 +279,7 @@ export type Database = {
           iniciada_en?: string
           leccion_id?: string
           matricula_id?: string
+          oidos?: string[]
           paso?: number
         }
         Relationships: [
@@ -2453,6 +2456,10 @@ export type Database = {
       }
       es_admin: { Args: never; Returns: boolean }
       es_editor: { Args: never; Returns: boolean }
+      marcar_oido: {
+        Args: { p_leccion: string; p_matricula: string; p_pieza: string }
+        Returns: undefined
+      }
       matricula_mia: { Args: { matricula: string }; Returns: boolean }
       matricular_pendientes: { Args: { curso_clave: string }; Returns: number }
       mensajes_sin_leer: { Args: never; Returns: number }

@@ -26,6 +26,8 @@ export function DevolucionAjito({
   tieneAudio,
   autoPedir,
   intentada,
+  oida = false,
+  alOir,
 }: {
   numero: number
   clave: string
@@ -51,6 +53,9 @@ export function DevolucionAjito({
    * lección— y enseña su botón, sin pedir nada por su cuenta.
    */
   intentada: boolean
+  /** Si ya la oyó hasta el final: su ✓ sigue al recargar. */
+  oida?: boolean
+  alOir?: () => void | Promise<void>
 }) {
   const router = useRouter()
   const [estado, setEstado] = useState<'pensando' | 'fallo' | 'quieto'>(
@@ -142,6 +147,8 @@ export function DevolucionAjito({
           src={`/canal/adiestramiento/${numero}/devolucion/${clave}`}
           etiqueta="Ajito te contesta"
           segundos={null}
+          oido={oida}
+          alOir={alOir}
         />
       ) : (
         /* Hay texto pero no salió la voz — Azure falló en su momento. La clase de

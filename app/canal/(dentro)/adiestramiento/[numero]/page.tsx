@@ -22,7 +22,7 @@ import {
 import { requerirEmpleado } from '@/lib/canal'
 import { esSalida, segunInterruptor, turnosDe, type LeccionGuion, type Turno } from '@/lib/guion'
 import { createClient } from '@/lib/supabase/server'
-import { avanzarPaso, empezarLeccion, terminarLeccion } from '../acciones'
+import { avanzarPaso, empezarLeccion, marcarOido, terminarLeccion } from '../acciones'
 
 export const metadata: Metadata = { title: 'Lección' }
 
@@ -101,6 +101,8 @@ export default async function LeccionPage({
   ])
 
   const contestadas = new Map((respuestas ?? []).map((r) => [r.clave_paso, r]))
+  // Los audios que ya oyó hasta el final: su ✓ sigue ahí al recargar.
+  const oidos = new Set(avance?.oidos ?? [])
 
   // A cuál le toca pedirle la devolución a Ajito. Solo una a la vez: quien abre
   // una lección con varias respuestas viejas sin contestar no puede disparar
@@ -227,6 +229,7 @@ export default async function LeccionPage({
               contestadas={contestadas}
               siguienteSinDevolucion={siguienteSinDevolucion}
               ordenAudio={ordenAudio}
+              oidos={oidos}
               padron={{
                 nombre: empleado.nombre_completo,
                 cargo: empleado.cargo,
@@ -271,6 +274,7 @@ function TurnoVista({
   contestadas,
   siguienteSinDevolucion,
   ordenAudio,
+  oidos,
   padron,
 }: {
   turno: Turno
@@ -288,6 +292,8 @@ function TurnoVista({
   siguienteSinDevolucion: string | null
   /** Cuál es cada audio dentro de la lección, para el «3 de 8». */
   ordenAudio: Map<string, number>
+  /** Los audios que ya oyó hasta el final. */
+  oidos: Set<string>
   /** Lo que dice Capital Humano de quien oye, para la tarjeta de la lección 0. */
   padron: Padron
 }) {
@@ -315,6 +321,8 @@ function TurnoVista({
               // seguidos se leen como un error.
               etiqueta={i === primerAudio && !turno.continuacion ? turno.titulo : 'Ajito sigue'}
               segundos={bloque.segundos}
+              oido={oidos.has(bloque.id)}
+              alOir={marcarOido.bind(null, numero, bloque.id)}
               orden={
                 ordenAudio.has(bloque.id)
                   ? { numero: ordenAudio.get(bloque.id) ?? 0, total: ordenAudio.size }
@@ -407,6 +415,7 @@ function TurnoVista({
           pregunta={pregunta}
           respuesta={contestadas.get(turno.espera.clave) ?? null}
           leToca={turno.espera.clave === siguienteSinDevolucion}
+          oida={oidos.has(`devolucion-${turno.espera.clave}`)}
         />
       )}
     </section>
@@ -504,6 +513,7 @@ function EjercicioVista({
   pregunta,
   respuesta,
   leToca,
+  oida,
 }: {
   numero: number
   nombre: string
@@ -513,6 +523,8 @@ function EjercicioVista({
   respuesta: Contestada | null
   /** Si es a este ejercicio al que le toca pedirle la devolución a Ajito. */
   leToca: boolean
+  /** Si ya oyó la devolución de Ajito hasta el final. */
+  oida: boolean
 }) {
   const esCampo = clave === 'campo'
   const delCatalogo = catalogo.get(clave)
@@ -562,6 +574,8 @@ function EjercicioVista({
             tieneAudio={Boolean(respuesta.devolucion_audio)}
             autoPedir={leToca}
             intentada={Boolean(respuesta.devolucion_en)}
+            oida={oida}
+            alOir={marcarOido.bind(null, numero, `devolucion-${clave}`)}
           />
         </>
       ) : (
