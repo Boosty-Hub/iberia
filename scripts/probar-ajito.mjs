@@ -76,6 +76,8 @@ const CASOS = [
     cargo: 'Operadora de Envasado',
     entrada: 'texto',
     respuesta: 'Yorge, asi me dicen todos aqui',
+    // Y queda guardado: las consignas que siguen tienen que decir «Yorge».
+    apodo: 'Yorge',
   },
   {
     // «Mándame lo que sea» y lo primero que se le ocurre a la gente es esto. Antes
@@ -465,6 +467,14 @@ try {
       problemas.push(`${caso.caso}: ${fallo}`)
     }
     if (!audio) problemas.push(`${caso.caso}: no se generó el audio`)
+    if (caso.apodo) {
+      const { data: guardada } = await admin.from('matriculas').select('nombre_corto').eq('id', matricula.id).single()
+      if (guardada?.nombre_corto === caso.apodo) console.log(`  ✓ el apodo quedó guardado: ${guardada.nombre_corto}`)
+      else {
+        console.log(`  ✖ el apodo no quedó guardado: ${guardada?.nombre_corto}`)
+        problemas.push(`${caso.caso}: el apodo no quedó guardado (${guardada?.nombre_corto})`)
+      }
+    }
     console.log('')
   }
 } finally {

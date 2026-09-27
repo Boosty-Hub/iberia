@@ -126,9 +126,13 @@ al mandarlos la lección sigue y Ajito la llama por el nombre que escribió.
 la corrección; `probar:supabase` 68 de 68; y el recorrido en el teléfono y en el panel, en
 producción.
 
-**Dónde quedamos.** El apodo que la persona le dice a Ajito en la lección 0 no se guarda: Ajito
-promete «así te digo de aquí en adelante» y las consignas siguen con el primer nombre del padrón
-(en `PENDIENTES.md`).
+### El apodo, guardado
+
+Ajito promete en la lección 0 «así te digo de aquí en adelante», y el apodo no se guardaba en
+ninguna parte: las consignas seguían con el primer nombre del padrón. Ahora, cuando Ajito contesta
+ese ejercicio, el modelo chico saca solo el apodo —de «Yorge, así me dicen todos aquí» sale
+«Yorge»; de «como tú quieras», nada— y queda en la matrícula antes de que se pinte la consigna
+siguiente. Probado con nueve respuestas, una de ellas un intento de colarle una instrucción.
 
 ---
 

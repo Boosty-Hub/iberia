@@ -228,6 +228,13 @@ y una ruedita en vez de piernas.
   lo único que cambia en el acto es `matriculas.nombre_corto`: Ajito deja de llamarla por el
   nombre que estaba mal. `probar:adiestramiento` comprueba que solo su dueño la escribe, que
   no se la da por resuelta y que otra persona no la lee.
+- **El apodo de la lección 0 se guarda** en `matriculas.nombre_corto`, que es lo que dicen
+  todas las consignas y lo que Ajito recibe como «a quien le contestas se le dice…». Lo saca
+  `sacarApodo()` con el modelo chico y salida estructurada, en paralelo con la devolución, y
+  se guarda antes de responder: el refresco que sigue pinta la consigna siguiente. Si la
+  persona no dio ninguno —«como quieras»— se queda el que había. `apodoValido()` solo deja
+  pasar letras y espacios, hasta 30: eso entra en cada petición al modelo. Reiniciar el curso
+  lo devuelve al primer nombre del padrón.
 - **Se contesta hablando, con foto o escrito, y ninguna vía está cerrada.** El guion
   dice cuál sale por defecto; el resto está a un toque — **la nota de voz, siempre**, también
   debajo de la caja de los ejercicios que se proponen escritos. Al tocar «Mandárselo a

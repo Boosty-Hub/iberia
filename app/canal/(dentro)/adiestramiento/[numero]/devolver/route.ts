@@ -6,7 +6,7 @@ import {
   type FamiliaOficio,
   type FormaIA,
 } from '@/lib/adiestramiento'
-import { devolver, type Contexto } from '@/lib/ajito'
+import { devolver, sacarApodo, type Contexto } from '@/lib/ajito'
 import { empleadoActual } from '@/lib/canal'
 import { hablar } from '@/lib/hablar'
 import { vozDe, type VozAjito } from '@/lib/voz'
@@ -161,18 +161,29 @@ export async function POST(
 
   // --- Ajito -----------------------------------------------------------------
 
-  const dicho = await devolver({
-    nombre: matricula.nombre_corto ?? empleado.nombre_completo.split(' ')[0],
-    familia,
-    leccion: leccion.numero,
-    tituloLeccion: leccion.titulo,
-    clave: clavePaso,
-    esCampo,
-    consigna,
-    texto: respuesta.texto,
-    entrada: respuesta.entrada as Contexto['entrada'],
-    imagen,
-  })
+  // En el ejercicio del apodo, además de contestar, se saca el apodo y se guarda:
+  // Ajito acaba de prometer «así te digo de aquí en adelante». Corre en paralelo
+  // con la devolución, y se guarda **antes** de responder, porque el refresco que
+  // viene después pinta la consigna siguiente, y esa ya tiene que decirlo.
+  const [dicho, apodo] = await Promise.all([
+    devolver({
+      nombre: matricula.nombre_corto ?? empleado.nombre_completo.split(' ')[0],
+      familia,
+      leccion: leccion.numero,
+      tituloLeccion: leccion.titulo,
+      clave: clavePaso,
+      esCampo,
+      consigna,
+      texto: respuesta.texto,
+      entrada: respuesta.entrada as Contexto['entrada'],
+      imagen,
+    }),
+    clavePaso === 'apodo' && !esCampo ? sacarApodo(respuesta.texto) : Promise.resolve(null),
+  ])
+
+  if (apodo) {
+    await supabase.from('matriculas').update({ nombre_corto: apodo }).eq('id', matricula.id)
+  }
 
   if (!dicho.ok) {
     console.error(`[ajito] ${dicho.motivo} · ${clavePaso}:`, dicho.detalle ?? '')

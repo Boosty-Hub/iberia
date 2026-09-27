@@ -422,6 +422,9 @@ export async function reiniciarMiCurso() {
       iniciado_en: null,
       completado_en: null,
       ultimo_toque: null,
+      // El apodo de la lección 0 también se va: vuelve el primer nombre del
+      // padrón, que es con el que se matriculó.
+      nombre_corto: empleado.nombre_completo.split(' ')[0],
     })
     .eq('id', matricula.id)
   if (errMatricula) return { error: `No se pudo reiniciar la matrícula: ${errMatricula.message}` }

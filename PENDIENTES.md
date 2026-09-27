@@ -374,10 +374,8 @@ todo de Fase 2 y no bloquea nada de la Fase 1:
 - «Guardarlo» y «mandárselo a alguien» bajo el certificado — es una decisión, no un olvido
 - ~~«No soy yo» en la lección 0~~ ✅ **Hecho el 26 de septiembre**: recoge nombre y área, deja el
   aviso en el padrón del panel y la lección sigue
-- **El apodo de la lección 0 no se guarda.** Ajito promete «así te digo de aquí en adelante» y
-  las consignas siguen diciendo el primer nombre del padrón. Hay que sacar el apodo de lo que la
-  persona escribió —viene en frases como «Yorge, así me dicen»— y guardarlo en
-  `matriculas.nombre_corto` — **Boosty**
+- ~~El apodo de la lección 0 no se guarda~~ ✅ **Hecho el 27 de septiembre**: se saca de lo que
+  la persona contestó y las consignas lo dicen desde la siguiente
 
 ---
 
