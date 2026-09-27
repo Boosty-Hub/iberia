@@ -374,6 +374,10 @@ todo de Fase 2 y no bloquea nada de la Fase 1:
 - «Guardarlo» y «mandárselo a alguien» bajo el certificado — es una decisión, no un olvido
 - ~~«No soy yo» en la lección 0~~ ✅ **Hecho el 26 de septiembre**: recoge nombre y área, deja el
   aviso en el padrón del panel y la lección sigue
+- **Ajito dibuja de verdad (lección 4).** La clave de OpenAI está en `.env.local` y funciona, y
+  `gpt-image-1-mini` es el recomendado (12 s, ver `herramientas.md`). Falta: **aprobar los dos
+  textos de «no va»** del guion — **Gabriel** —, y después construirlo y subir la clave a
+  Netlify — **Boosty**
 - ~~El apodo de la lección 0 no se guarda~~ ✅ **Hecho el 27 de septiembre**: se saca de lo que
   la persona contestó y las consignas lo dicen desde la siguiente
 

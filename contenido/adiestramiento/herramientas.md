@@ -251,9 +251,19 @@ la clave, `npm run probar:ajito` dice en un minuto si Ajito habla como Ajito.
 
 | Candidato | Estado |
 |---|---|
-| Generador de imágenes de OpenAI | `?` |
-| Nano Banana (Google) | `?` |
-| Flux | `?` |
+| **OpenAI `gpt-image-1-mini`** | ✅ **Recomendado.** 12,3 s a calidad media y 1024×1024, y respeta el estilo que se le pide |
+| OpenAI `gpt-image-2.5-flare` | 12,5 s, pero sale casi foto aunque se pida ilustración, y agrega lo que nadie pidió: una bandera y un letrero con texto |
+| OpenAI `gpt-image-2.5-sunburst` | 17 s, mismo comportamiento que `flare` |
+| OpenAI `gpt-image-2` | 41 s: descartado |
+| Nano Banana (Google) | Sin probar. La alternativa si OpenAI resulta lento con carga |
+| Flux | Sin probar |
+
+*Medido el 27 de septiembre de 2026, una imagen por modelo con la misma descripción,
+desde la cuenta de OpenAI de Iberia. El precio de cada modelo se confirma en la página
+de precios de OpenAI: aquí no se anota lo que no se leyó ahí.*
+
+**Qué hace Ajito cuando le piden algo que no va**: está escrito en el guion de la
+lección 4, en «Pídelo tú», con la lista de lo que no se dibuja.
 
 ---
 

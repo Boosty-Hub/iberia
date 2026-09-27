@@ -60,10 +60,40 @@ es para pasarla bien.*
 
 ↩️ 🔊 corto, sobre lo que hizo y por qué salió así.
 
-> ⚠️ **Falta escribir la respuesta de Ajito cuando le pidan algo que no va.**
-> Doscientas personas pidiendo dibujos sin nadie mirando. Tiene que ser una
-> respuesta que no regañe, no avergüence y no invite a insistir. Va en
-> `herramientas.md`, punto 4, y hay que redactarla antes de abrir.
+**Cuando le piden algo que no va.** Doscientas personas pidiendo dibujos sin nadie
+mirando. La respuesta no regaña, no avergüenza y no invita a insistir: no dice qué
+regla se rompió —eso abre la negociación— y lleva de una vez a otra cosa. Texto fijo,
+dicho con la voz de la clase; no se genera. *(Redactada el 27 de septiembre de 2026,
+pendiente de aprobación de Gabriel.)*
+
+↩️ 🔊 **No va** — lo general
+
+> Ese dibujo no te lo voy a hacer. No es por ti: hay cosas que no dibujo, para
+> nadie, y esa es una de ellas. Pídeme otra cosa, la que quieras: un paisaje, un
+> animal, tu equipo de béisbol.
+
+↩️ 🔊 **No va · una persona de verdad** — el caso más probable: «dibuja a mi
+supervisor»
+
+> A las personas de verdad no las dibujo: ni a compañeros, ni a jefes, ni a
+> famosos. Lo que sí puedo es dibujarme a mí haciendo eso mismo. Pídemelo así, o
+> pídeme otra cosa.
+
+*Qué no va, y lo decide el modelo chico antes de dibujar —si el filtro del
+generador lo rechaza igual, sale la respuesta general—:*
+
+- *Personas de verdad que se puedan reconocer: compañeros, jefes, famosos, políticos.
+  Ajito sí, y gente inventada también.*
+- *Política: partidos, gobierno, elecciones, protestas.*
+- *Violencia, armas, sangre.*
+- *Desnudos o cualquier cosa sexual.*
+- *Burlas de alguien, de un grupo o de una religión.*
+- *Lo que parezca una foto real de la planta, de un accidente, de un producto dañado o
+  de un documento de Iberia. Es lo que la sección 4.6 enseña: una imagen puede estar
+  hecha y parecer de verdad, y una así de la planta circula por WhatsApp como noticia.*
+
+*Después de un «no va», la persona puede pedir otro dibujo: el ejercicio no se cierra
+con la negativa.*
 
 ---
 
