@@ -82,6 +82,15 @@ el botón «Ir al panel del programa» la devolvía a la misma pantalla, porque 
   veces en el padrón, y al proponer gana la que trae número de ficha.
 - Quedan dos cuentas de Iberia sin ficha, Alberto y Martha Fuentes (en `PENDIENTES.md`).
 
+**Y no llegaba a los módulos del panel que su rol tiene.** El rol Marketing abre Adiestramiento y
+Certificados, pero no la portada del panel, y `/dashboard` la devolvía al canal: no había cómo
+llegar a ellos. Ahora el canal lleva un botón «Panel» que cae en la primera pantalla que su rol
+abre, la portada que no le toca la manda ahí, y en el panel «El canal» la devuelve. Recorrido con
+una cuenta de prueba de su rol, en teléfono y escritorio (`mirar-puertas`).
+
+⚠️ **Con nivel de lectura, Adiestramiento se ve vacío**: «0 con matrícula», porque la base solo le
+deja leer matrículas y avances al equipo. Queda para decidir (`PENDIENTES.md`).
+
 **Verificado** en local: la pantalla propone bien las tres, el botón enlaza, y una cuenta de prueba
 con el rol de Martha llega a la puerta sin ficha y entra al canal con ella.
 

@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { IconoCampana } from '@/components/iconos'
+import { IconoCampana, IconoPanel } from '@/components/iconos'
 import { NavInferior } from '@/components/canal/nav-inferior'
-import { destinoInicial, obtenerSesion, puede } from '@/lib/auth'
+import { destinoInicial, inicioDelPanel, obtenerSesion, puede } from '@/lib/auth'
 import { iniciales, requerirEmpleado } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
@@ -34,6 +34,7 @@ export default async function CanalLayout({ children }: LayoutProps<'/canal'>) {
     const destino = sesion ? destinoInicial(sesion) : '/canal/entrar'
     redirect(destino === '/canal' ? '/sin-acceso' : destino)
   }
+  const panel = inicioDelPanel(sesion)
   const supabase = await createClient()
 
   // Los dos contadores de la cabecera y del pie. Se preguntan aquí una vez y
@@ -66,6 +67,18 @@ export default async function CanalLayout({ children }: LayoutProps<'/canal'>) {
           </Link>
 
           <div className="flex items-center gap-1">
+            {/* La puerta al panel, para quien tiene algún módulo de allá: sin esto
+                se entraba al canal y no había cómo llegar a ellos. Lleva a la
+                primera pantalla que su rol abre, que no siempre es la portada. */}
+            {panel && (
+              <Link
+                href={panel}
+                className="toque gap-1.5 rounded-full px-3 text-[13px] font-semibold text-marca-600 active:bg-marca-100"
+              >
+                <IconoPanel className="h-5 w-5" />
+                Panel
+              </Link>
+            )}
             <Link
               href="/canal/avisos"
               aria-label="Avisos"

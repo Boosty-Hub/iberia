@@ -82,20 +82,56 @@ export function puede(sesion: Sesion | null | undefined, recurso: string, accion
 export function destinoInicial(sesion: Sesion): string {
   if (puede(sesion, 'modulo:panel')) return '/dashboard'
   if (puede(sesion, 'modulo:canal')) return '/canal'
+  const panel = inicioDelPanel(sesion)
+  if (panel) return panel
   if (Object.entries(sesion.permisos).some(([r, p]) => r.startsWith('informe:') && p.ver)) return '/informe'
   return '/sin-acceso'
 }
 
 /**
- * Exige un permiso. Sin él, de vuelta al panel con el aviso — o, si tampoco
- * tiene panel, a su destino inicial. Sirve igual en páginas y en acciones de
- * servidor: la acción no confía en que el botón estuviera escondido.
+ * Las pantallas del panel, en el orden de la barra, con lo que exige cada una: lo
+ * mismo que pide su página con `requerirPermiso`. Si no dijeran lo mismo, la
+ * puerta al panel llevaría a una pantalla que la devuelve.
+ */
+const PANTALLAS_PANEL: [ruta: string, recurso: string, accion: Accion][] = [
+  ['/dashboard', 'modulo:panel', 'ver'],
+  ['/dashboard/entrevistas', 'modulo:entrevistas', 'ver'],
+  ['/dashboard/archivos', 'modulo:archivos', 'ver'],
+  ['/dashboard/programa', 'modulo:programa', 'ver'],
+  ['/dashboard/adiestramiento', 'modulo:adiestramiento', 'ver'],
+  ['/dashboard/adiestramiento/certificados', 'modulo:certificados', 'ver'],
+  ['/dashboard/adiestramiento/recordatorios', 'modulo:recordatorios', 'editar'],
+  ['/dashboard/empleados', 'modulo:empleados', 'editar'],
+  ['/dashboard/usuarios', 'modulo:usuarios', 'ver'],
+  ['/dashboard/roles', 'modulo:roles', 'ver'],
+]
+
+/**
+ * La puerta al panel: la primera pantalla que esta sesión puede abrir, o `null` si
+ * no tiene ninguna.
+ *
+ * ⚠️ **Tener módulos del panel no es tener su portada.** Un rol puede abrir
+ * Adiestramiento sin tener «Panel» —el de Marketing, el 27 de septiembre de
+ * 2026—, y hasta ese día `/dashboard` lo mandaba de vuelta al canal: los módulos
+ * que su rol tenía no se podían abrir desde ninguna parte. Ahora el canal lleva
+ * un botón a esta pantalla, y la portada que no le toca lo manda aquí.
+ */
+export function inicioDelPanel(sesion: Sesion | null | undefined): string | null {
+  if (!sesion) return null
+  return PANTALLAS_PANEL.find(([, recurso, accion]) => puede(sesion, recurso, accion))?.[0] ?? null
+}
+
+/**
+ * Exige un permiso. Sin él, a la primera pantalla del panel que sí puede abrir
+ * —a la portada con el aviso, si la tiene—, o si no tiene panel, a su destino
+ * inicial. Sirve igual en páginas y en acciones de servidor: la acción no confía
+ * en que el botón estuviera escondido.
  */
 export async function requerirPermiso(recurso: string, accion: Accion = 'ver'): Promise<Sesion> {
   const sesion = await requerirSesion()
   if (!puede(sesion, recurso, accion)) {
-    const destino = destinoInicial(sesion)
-    redirect(destino === '/dashboard' ? '/dashboard?aviso=sin-permiso' : destino)
+    const panel = inicioDelPanel(sesion)
+    redirect(panel === '/dashboard' ? '/dashboard?aviso=sin-permiso' : (panel ?? destinoInicial(sesion)))
   }
   return sesion
 }

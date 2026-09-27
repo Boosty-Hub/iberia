@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { obtenerSesion, puede } from '@/lib/auth'
+import { inicioDelPanel, obtenerSesion } from '@/lib/auth'
 import { empleadoActual } from '@/lib/canal'
 import { redirect } from 'next/navigation'
 
@@ -51,8 +51,8 @@ export default async function EntrarCanalPage() {
                 minuto, desde Usuarios.
               </p>
               {/* El panel solo si lo tiene: sin él, el botón la devolvía aquí mismo. */}
-              {puede(sesion, 'modulo:panel') && (
-                <Link href="/dashboard" className="btn-canal btn-canal-suave mt-5 w-full">
+              {inicioDelPanel(sesion) && (
+                <Link href={inicioDelPanel(sesion) ?? '/dashboard'} className="btn-canal btn-canal-suave mt-5 w-full">
                   Ir al panel del programa
                 </Link>
               )}

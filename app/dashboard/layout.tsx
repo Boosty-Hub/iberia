@@ -1,11 +1,12 @@
 import { cerrarSesion } from '@/app/login/actions'
-import { IconoNuevaPestana, IconoSalir, IconoVerInforme } from '@/components/iconos'
+import { IconoChat, IconoNuevaPestana, IconoSalir, IconoVerInforme } from '@/components/iconos'
 import Link from 'next/link'
 import { Marca } from '@/components/marca'
 import { MenuMovil } from '@/components/menu-movil'
 import { NavLateral, type ClaveNav } from '@/components/nav-lateral'
 import { Insignia } from '@/components/ui'
 import { puede, requerirSesion, type Sesion } from '@/lib/auth'
+import { empleadoActual } from '@/lib/canal'
 import { ORGANIZACIONES, type Organizacion } from '@/lib/types'
 
 /** Qué destinos de la barra puede abrir esta sesión: el mismo permiso que exige cada página. */
@@ -34,6 +35,7 @@ export default async function DashboardLayout({ children }: LayoutProps<'/dashbo
   const sesion = await requerirSesion()
   const { perfil, email, rol } = sesion
   const permitidos = destinosPermitidos(sesion)
+  const conCanal = puede(sesion, 'modulo:canal') && Boolean(await empleadoActual())
 
   return (
     <div className="flex min-h-full flex-1">
@@ -69,6 +71,16 @@ export default async function DashboardLayout({ children }: LayoutProps<'/dashbo
           </div>
 
           <div className="ml-auto flex items-center gap-3">
+            {/* El canal, para quien entra a él: el panel es la parte de atrás y el
+                canal la de adelante, y se pasa de una a otra sin volver a entrar.
+                En la misma pestaña, porque del canal se vuelve con «Panel». Sin
+                ficha del padrón el canal no abre, así que ahí no se ofrece. */}
+            {conCanal && (
+              <Link href="/canal" className="btn-neutro h-10 px-3" aria-label="Ir al canal">
+                <IconoChat className="h-4 w-4" />
+                <span className="hidden md:inline">El canal</span>
+              </Link>
+            )}
             {/* El informe, en la cabecera y no en la barra: es el destino de todo
                 el panel, y abajo del menú no se encontraba. Abre en otra pestaña,
                 porque es otra aplicación y volver al panel no puede costar el sitio. */}

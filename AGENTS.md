@@ -964,6 +964,8 @@ es `/dashboard/programa`), **Cursos** (adiestramiento, el padrón y el curso de 
 en otra pestaña) y **Administración** (usuarios, roles). Cada destino sale solo si la sesión
 tiene su permiso (`destinosPermitidos()` en `app/dashboard/layout.tsx`).
 
+- **«El canal» va en la cabecera**, a su izquierda, para quien tiene canal y ficha: ver «Roles y
+  permisos».
 - **«Ver el informe» va en la cabecera, no en la barra**: es el destino de todo el panel, y
   abajo del menú no se encontraba. Abre en otra pestaña, como el curso.
 - ⚠️ **El panel no tiene módulo de hallazgos ni editor del informe** desde el 25 de septiembre
@@ -1009,8 +1011,18 @@ asignan a cada usuario en `/dashboard/usuarios`. Tablas `roles` y `rol_permisos`
   más—, que es el que se le da a quien entra con su enlace (`rol_clave` en los metadatos
   del alta). No se borran ni cambian de nivel.
 - **A dónde va cada quien al entrar** lo decide `destinoInicial()`: el panel si lo tiene,
-  si no el canal, si no el informe, y si no `/sin-acceso`, que existe para que el panel
-  no se redirija a sí mismo en bucle.
+  si no el canal, si no su primera pantalla del panel, si no el informe, y si no
+  `/sin-acceso`, que existe para que el panel no se redirija a sí mismo en bucle.
+- ⚠️ **Tener módulos del panel no es tener su portada** (`modulo:panel`). El rol Marketing
+  abre Adiestramiento y Certificados sin portada, y hasta el 27 de septiembre de 2026
+  `/dashboard` lo devolvía al canal: sus módulos no se abrían desde ninguna parte.
+  **`inicioDelPanel()`** da la primera pantalla que la sesión puede abrir —la lista
+  `PANTALLAS_PANEL` de `lib/auth.ts`, con el mismo permiso que pide cada página: una pantalla
+  nueva del panel se añade ahí el mismo día—; el canal lleva un botón «Panel» a ella, y
+  `requerirPermiso` manda ahí a quien pide lo que no tiene. Del panel se vuelve con «El
+  canal», en la cabecera, que sale a quien tiene canal y ficha del padrón. Los dos van en la
+  misma pestaña: es una sola aplicación con dos caras. `scripts/mirar-puertas.mjs` recorre la
+  ida y la vuelta con el rol que se le pida.
 
 ## El informe (`/informe`)
 
