@@ -214,12 +214,16 @@ const DESTAPE: Record<string, string> = {
   erp: 'Conectar o configurar lo que ya existe', regla: 'Escribir una regla', captura: 'Capturar donde ocurre', ia: 'IA que propone, la persona decide',
   espejo: 'Construir en el sistema Iberia',
 }
-const FASE: Record<string, [string, string]> = { '2': ['Fase 2 propuesta', 'f2'], '3': ['Fase 3 · planta', 'f3'], sin: ['Sin fase asignada', 'sin'] }
+// ⚠️ Las claves son las de antes del 9 de octubre de 2026, cuando la construcción iba
+// por «olas»: la base las restringe (`fase in ('2','3','sin')`, `ola in ('base','1','2','3')`)
+// y cambiarlas pedía una migración a días de la entrega. Lo que cambió son los rótulos:
+// planta (clave '3') es la Fase 4 y distribución (clave 'sin') la Fase 3.
+const FASE: Record<string, [string, string]> = { '2': ['Fase 2', 'f2'], sin: ['Fase 3 · distribución', 'sin'], '3': ['Fase 4 · planta', 'f3'] }
 const TIPO: Record<string, string> = {
   duplicacion: 'Se escribe más de una vez', doble_esfuerzo: 'Se rehace a mano', choque: 'Versiones que chocan',
   puente_roto: 'Puente roto', dato_fuera: 'Vive fuera del sistema', punto_unico: 'Depende de una persona',
 }
-const OLA: Record<string, [string, string]> = { base: ['Base · antes de todo', 'sin'], '1': ['Ola 1 · Fase 2', 'f2'], '2': ['Ola 2', 'sin'], '3': ['Ola 3 · Fase 3', 'f3'] }
+const OLA: Record<string, [string, string]> = { base: ['Fase 2 · la base', 'sin'], '1': ['Fase 2', 'f2'], '2': ['Fase 3', 'sin'], '3': ['Fase 4', 'f3'] }
 
 // ============================== Geometría ==============================
 const TOPX = [180, 283, 386, 489, 591, 694, 797, 900]
@@ -431,7 +435,7 @@ export function CircuitosDelNegocio({
   const opciones: [string, string, string?][] = porNivel
     ? [['todos', `Los ${lista.length} puntos`], ['critico', `Con críticos · ${cuenta((p) => hallazgosDe(p).some((h) => h.nivel === 'critico'))}`, 'rojo'], ['atencion', `Con atención · ${cuenta((p) => hallazgosDe(p).some((h) => h.nivel === 'atencion'))}`]]
     : vista === 'flujo'
-    ? [['todos', `Los ${lista.length}`], ['2', `Fase 2 propuesta · ${cuenta((p) => p.fase === '2')}`, 'dorado'], ['3', `Fase 3 · planta · ${cuenta((p) => p.fase === '3')}`], ['sin', `Sin fase todavía · ${cuenta((p) => p.fase === 'sin')}`]]
+    ? [['todos', `Los ${lista.length}`], ['2', `Fase 2 · ${cuenta((p) => p.fase === '2')}`, 'dorado'], ['sin', `Fase 3 · distribución · ${cuenta((p) => p.fase === 'sin')}`], ['3', `Fase 4 · planta · ${cuenta((p) => p.fase === '3')}`]]
     : [['todos', `Los ${lista.length}`], ['dos', `Se escribe más de una vez · ${cuenta((p) => ['duplicacion', 'doble_esfuerzo'].includes(p.tipo ?? ''))}`], ['fuera', `Fuera o en una persona · ${cuenta((p) => ['dato_fuera', 'punto_unico'].includes(p.tipo ?? ''))}`], ['roto', `Puente roto · ${cuenta((p) => p.tipo === 'puente_roto')}`], ['choque', `Chocan · ${cuenta((p) => p.tipo === 'choque')}`]]
 
   const tf = textos.flujo
@@ -628,8 +632,8 @@ export function EspejoIberia({ modulos, puntos, textos, inicial }: { modulos: Mo
     setFiltro(v)
     if (elegido && !(v === 'todos' || elegido.ola === v)) { const primero = ordenados.find((m) => v === 'todos' || m.ola === v); if (primero) setSel(primero.id) }
   }
-  const cuenta = (o: string) => ordenados.filter((m) => m.ola === o).length
-  const opciones: [string, string, string?][] = [['todos', `Los ${ordenados.length}`], ['1', `Ola 1 · Fase 2 · ${cuenta('1')}`, 'dorado'], ['2', `Ola 2 · ${cuenta('2')}`], ['3', `Ola 3 · Fase 3 · ${cuenta('3')}`], ['base', `Base · ${cuenta('base')}`]]
+  // Sin la cuenta al lado: «Fase 3 · 2» se leía como dos números de fase.
+  const opciones: [string, string, string?][] = [['todos', `Los ${ordenados.length}`], ['base', 'Fase 2 · la base'], ['1', 'Fase 2', 'dorado'], ['2', 'Fase 3'], ['3', 'Fase 4']]
   const porId = Object.fromEntries(puntos.map((p) => [p.id, p]))
   const ia = elegido ? elegido.cubre.filter((c) => c.ia).length : 0
 
@@ -702,10 +706,10 @@ export function EspejoIberia({ modulos, puntos, textos, inicial }: { modulos: Mo
           </svg>
         </Lienzo>
         <div className="circ-leyenda" aria-hidden="true">
-          <span><span className="circ-badge mod base">·</span>base: una sola fuente</span>
-          <span><span className="circ-badge mod ola1">·</span>ola 1 · Fase 2: comercial, compras y finanzas</span>
-          <span><span className="circ-badge mod ola2">·</span>ola 2 · distribución y personas</span>
-          <span><span className="circ-badge mod ola3">·</span>ola 3 · planta, Fase 3</span>
+          <span><span className="circ-badge mod base">·</span>Fase 2 · la base: una sola fuente</span>
+          <span><span className="circ-badge mod ola1">·</span>Fase 2: comercial, compras y finanzas</span>
+          <span><span className="circ-badge mod ola2">·</span>Fase 3: distribución y personas</span>
+          <span><span className="circ-badge mod ola3">·</span>Fase 4: calidad, planta y mantenimiento</span>
         </div>
       </figure>
 

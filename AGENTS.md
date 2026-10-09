@@ -887,6 +887,8 @@ npm run sembrar:procesos -- --revisar       # dice qué sembraría, sin escribir
 npm run sembrar:circuitos                   # los circuitos, el espejo y los hallazgos en su punto, del taller
 npm run sembrar:circuitos -- --revisar      # dice qué sembraría, sin escribir
 npm run respaldar:informe                   # el informe, sus talleres y los circuitos a disco
+npm run secciones -- --bajar                # las secciones del informe a disco, para corregirlas
+npm run secciones -- --subir                # y de vuelta a la base, solo las que cambiaron
 npm run generar:guias                       # las 3 guías de entrevista adaptadas a Iberia
 ```
 
@@ -1220,13 +1222,24 @@ septiembre de 2026, y cada fusión tiene su razón:
   `{cap:slug}` y el generador **avisa y falla** si una apunta a un capítulo que ya no existe —
   lo cazó tres veces ese mismo día.
 
-- **Lo que está en `GENERADAS` se regenera siempre** desde el taller y la base: si alguien lo
-  edita a mano, la próxima corrida lo pisa, y así debe ser. **Solo quedan ahí tres: inicio,
-  mapa y fichas.** Las otras ocho se escriben en Supabase, en las sesiones de trabajo, y el
-  script no las toca. *(Las oportunidades salieron el 25 de septiembre, reordenadas por ola y
-  por módulo del sistema Iberia, con cada `H-NN` enlazado a su tarjeta en los hallazgos.)*
-- **Todo entra sin publicar.** Un lector de Iberia solo ve lo publicado, y no se publica
-  nada mientras los hallazgos que lo sostienen sigan en `propuesto`.
+- ⚠️ **Desde el 9 de octubre de 2026 ninguna sección se genera: las once se escriben en
+  Supabase.** `GENERADAS` quedó vacío. Inicio, mapa y fichas salían del taller de Jesús Planas,
+  que no quedó en esta máquina, y Gabriel decidió terminar el informe aquí. El generador solo
+  pone título, número y orden. Para corregir una sección:
+
+  ```
+  npm run respaldar:informe              # antes de nada: subir pisa la base
+  npm run secciones -- --bajar           # la base → contenido/informe/secciones/<slug>.md
+  # editar el archivo
+  npm run secciones -- --subir --revisar # cuáles cambiaron
+  npm run secciones -- --subir
+  ```
+
+  `contenido/` está fuera de git: el texto del informe vive en la base y en sus respaldos.
+- **El informe está publicado** desde el 9 de octubre de 2026, por decisión de Gabriel, para la
+  entrega del 21. *(Hasta ese día la regla era no publicar nada mientras los hallazgos que lo
+  sostienen siguieran en `propuesto`: se publicó con 2 de 394 validados.)* Lo ve quien tenga la
+  casilla de cada sección: hoy, el nivel administrador y el equipo de Boosty.
 - 🔴 **El informe va sin citas, sin códigos de sesión y sin nombres.** Decisión del cliente
   del 18 de septiembre de 2026, hablada con Gabriel. *(Sustituye a la norma anterior —«se cita
   por nombre, el informe nombra a quien lo dijo»—, que estuvo vigente hasta ese día.)* El
@@ -1289,8 +1302,18 @@ oportunidades → 10 La arquitectura de IA: el sistema Iberia → 11 La ruta de 
   septiembre; las tres que esperan un dato lo dicen en la nota del módulo.)* Vender como
   IA un formulario bien hecho es lo que cuesta la credibilidad el día de la demostración.
 - **Qué aprueba el comité** vive en «La ruta de construcción»: la cláusula 7 hace de este
-  documento la condición para pasar a Fase 2. La Fase 2 que se recomienda es **el paso 0 y la
-  ola 1** (Compras, Comercial y Finanzas); la ruta va por olas y dependencias, sin fechas.
+  documento la condición para pasar a Fase 2. La Fase 2 que se recomienda es **el paso 0 y los
+  módulos de Compras, Comercial y Finanzas**; la ruta va por fases y dependencias, sin fechas.
+- ⚠️ **Se construye por fases, no por olas** (9 de octubre de 2026, Gabriel): lo que era la ola
+  1 es la **Fase 2**, la ola 2 la **Fase 3** y la ola 3 la **Fase 4** —el plan de fases 2 a 4
+  que pide el contrato—. El paso 0 es el primer paso de la Fase 2. **Las claves en la base
+  siguen siendo las viejas** —`informe_modulos.ola` en `base/1/2/3` y
+  `informe_circuito_puntos.fase` en `2/3/sin`, con planta en `3` y distribución en `sin`— porque
+  las restringe un `check`; los rótulos que se ven salen de `FASE` y `OLA` en
+  `components/circuitos-informe.tsx`.
+- **«La Fase 2, por dentro»**, en la arquitectura: para Compras, Comercial y Finanzas, qué lee de
+  JD (con los objetos estándar de JD Edwards, que Tecnología confirma en el paso 0), qué postea
+  por el Orchestrator, dónde va la IA y los cinco documentos que deja cada módulo.
 - ⚠️ **`arquitectura-ia` y `hoja-de-ruta` se escriben en Supabase, no en el
   generador.** No están en `GENERADAS`: el script solo les pone título, número y orden. Su
   prosa se redactó en `contenido/circuitos/secciones/*.md` y se cargó una vez; desde ahí se

@@ -2824,14 +2824,16 @@ async function cuadroDeFriccion() {
   return l.join('\n')
 }
 
+// ⚠️ **Vacío desde el 9 de octubre de 2026**: las once secciones se escriben en
+// Supabase y se corrigen con `npm run secciones` (bajar, editar, subir). Inicio, mapa
+// y fichas salían del taller de Jesús Planas, que no quedó en esta máquina; sin él la
+// generadora no tiene con qué y, si se reconectara con otro taller, pisaría lo que se
+// corrigió en la base. Este script ya solo pone título, número y orden.
 const GENERADAS = {
-  inicio: laPortada,
-  // Reconectadas paso a paso, a medida que se revisa cada una. El resto sigue
-  // desconectado: sus generadoras están escritas arriba y esperan su turno.
-  // ⚠️ `mapa-procesos` ya no se pinta —la sección abre el mapa interactivo—,
-  // pero se sigue generando: sin texto, el lector no la ve y con ella se iría el mapa.
-  'mapa-procesos': mapaDeProcesos,
-  'fichas-procesos': fichasDeProceso,
+  // Lo que había hasta el 9 de octubre, por si vuelve el taller:
+  //   inicio: laPortada, 'mapa-procesos': mapaDeProcesos, 'fichas-procesos': fichasDeProceso,
+  // `mapa-procesos` ya no se pinta —la sección abre el mapa interactivo—, pero su fila
+  // necesita texto: sin texto el lector no la ve y con ella se iría el mapa.
   // `arquitectura-ia` y `hoja-de-ruta` salieron el 24/9, y el 25/9 salieron
   // `hallazgos`, `sistemas-datos`, `inventario-sistemas`, `riesgo-continuidad`,
   // `trabas` y `oportunidades`: se reescribieron en tarjetas con nivel —las

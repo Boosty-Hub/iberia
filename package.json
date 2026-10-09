@@ -48,6 +48,7 @@
     "importar:padron": "node --env-file=.env.local scripts/importar-padron.mjs",
     "generar:guias": "node scripts/generar-guias.mjs",
     "respaldar:informe": "node --env-file=.env.local scripts/respaldar-informe.mjs",
+    "secciones": "node --env-file=.env.local scripts/secciones-informe.mjs",
     "generar:ejemplos": "node --env-file=.env.local --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=ExperimentalWarning scripts/generar-ejemplos.mjs"
   },
   "dependencies": {

@@ -29,24 +29,34 @@ Fase 1 es el miércoles 21 de octubre, y ya está agendada.**
 
 ## 🔴 El camino al 21 de octubre
 
-*Armado el 9 de octubre revisando la base. **El informe no se toca desde el 25 de septiembre**:
-11 secciones, ninguna publicada, y 2 de 394 hallazgos validados. Lo de abajo junta lo que está
-repartido en el resto del archivo; el detalle de cada cosa sigue en su sección.*
+*Armado el 9 de octubre revisando la base, y trabajado ese mismo día: **el informe quedó
+terminado y publicado**. Lo de abajo junta lo que está repartido en el resto del archivo; el
+detalle de cada cosa sigue en su sección.*
 
-**El informe**
+**El informe** · ✅ hecho el 9 de octubre, con Gabriel punto por punto
+
+| Qué | Cómo quedó |
+|---|---|
+| ~~Corregir las fechas~~ | ✅ Inicio y la Ruta dicen 21 de octubre; «Lo que se aprueba en diciembre» pasó a «Lo que se aprueba con este documento» |
+| ~~Inicio, mapa y fichas sin taller~~ | ✅ **Ya no se genera ninguna sección**: las once se corrigen en la base con `npm run secciones` (bajar, editar, subir). El taller de Jesús ya no hace falta |
+| ~~La cifra de entrevistas~~ | ✅ Cuentan sin documentarse: 45 sesiones, 37 entrevistas de proceso, 28 en Cagua y 16 en Caracas. «Personas escuchadas» quedó en «más de 50», y «Áreas con sesión propia» sigue en 28 sin recontar |
+| ~~Lo que salió el 29~~ | ✅ En las fichas: el peso de cada canal en la venta, la política de crédito que no está escrita, Tesote y la facturación digital. Y en la arquitectura, la multimoneda |
+| ~~El 15% de merma y la regla de rotar proveedores~~ | ✅ **Ninguna de las dos sale de las entrevistas** —se buscó en las 42 sesiones— y ninguna estaba en el informe. Lo que hay: un 1% de merma de etiquetas en producción y un 10% de seguridad que Planificación suma a los productos de mucha merma. Contabilidad llegó a dispensar las tres cotizaciones con proveedores conocidos, que es lo contrario de rotar |
+| ~~Profundidad a la Fase 2~~ | ✅ «La Fase 2, por dentro», en la arquitectura: para cada módulo, qué lee de JD, qué postea por el Orchestrator, la cola de posteo, el cuadre, la IA y los cinco documentos que deja |
+| ~~Rotular las fases~~ | ✅ Fases, no olas: Compras, Comercial y Finanzas son la Fase 2; Distribución y Personas, la 3; Calidad, Planta y Mantenimiento, la 4. También en los dibujos |
+| ~~El filtro de Alberto~~ | ✅ H-32, la ficha de producción, la de Calidad y el punto 4 del circuito cuentan el problema de sistema y de tiempos, sin insinuar nada de las personas |
+| ~~La prosa, formal y sin «quién lo dijo»~~ | ✅ Las once secciones, sin atribuciones. El título de H-23 dejó de decir la edad de una persona |
+| ~~Publicar~~ | ✅ Publicadas las once. Las ven el nivel administrador (Alberto) y el equipo de Boosty; Lector Iberia y Marketing no tienen secciones marcadas |
+
+Lo que queda del informe, para leerlo antes del 21:
 
 | Qué | De quién |
 |---|---|
-| **Corregir las fechas.** Inicio dice que el comité decide «hacia final de año», y la Ruta tiene «Lo que falta antes de diciembre», «Lo que se aprueba en diciembre» y «la decisión de diciembre». Ahora es el 21 de octubre | Boosty, en la base |
-| **Inicio, mapa y fichas no se pueden regenerar en esta máquina**: el generador dice «sin inventario de procesos» porque el taller de Jesús no está aquí. O los regenera Jesús —después de `git pull`—, o se corrigen a mano en la base, sabiendo que la próxima corrida los pisa | Jesús |
-| **La cifra de entrevistas.** Inicio dice 34 de proceso; con Alberto, Flaviano y Gustavo son más, pero no están en la base. Decidir si cuentan en el informe aunque no tengan transcripción | Gabriel |
-| **Meter lo que salió el 29.** El reparto de la venta (cuentas clave 25–30%, independientes ~30%, distribuidores ~30%) en la ficha comercial. La falta de una política de cobranza escrita, como hallazgo. **Tesote ya contratado** en el módulo de Finanzas: hoy no aparece en el informe. La facturación digital contratada, en el trombo de las facturas. Y la multimoneda | Boosty |
-| **Verificar el 15% de merma y la regla de rotar proveedores** en el expediente. Alberto lo pidió y lo va a preguntar | Boosty |
-| **Darle profundidad a la ola 1**: sistema, conexión, API y documentación de cada módulo (Compras, Comercial y Finanzas). Se le prometió a Alberto el 29 | Gabriel |
-| **Rotular las fases.** Hoy dice «Ola 1 · Fase 2» y «Ola 3 · Fase 3», y la ola 2 no tiene fase. El 2 de octubre se habló de un programa de 12 a 18 meses | Gabriel |
-| **Pasar el filtro de Alberto**: lo que deja mal parada a un área no va delante de los directores. Él nombró dos casos, y los dos están en el informe: **la orden que se iguala a lo producido y la merma que no deja rastro** (H-32 y la ficha de producción) y **el material que se usa antes del resultado de microbiología** (la ficha de Calidad) | Gabriel con el señor Carlos |
-| **Leer la prosa de las ocho secciones** que reescribieron agentes el 25, y **revisar los niveles** (14 en crítico) | Gabriel y Jesús |
-| **Decidir qué se publica y para quién.** La regla es no publicar sin validar, y validados hay 2. Alberto es administrador y lo ve todo sin publicar; los directores no tienen cuenta. Opciones: presentarlo en la sala sin publicar, o publicarlo como borrador sujeto a validación | Gabriel |
+| **Leer el informe entero una vez**, sobre todo «La Fase 2, por dentro», que es nueva, y los cambios de los revisores | Gabriel |
+| **Los objetos de JD** que nombra la Fase 2 (F3002, F4311, P4310, P03B102, P43070…) son la referencia estándar de JD Edwards: Tecnología confirma cuáles usa Iberia | Gabriel con la Gerencia de TI |
+| **Tres cosas delicadas que los revisores dejaron**: H-30 dice que la certificación ISO se ha dado por existente en comunicaciones internas; la ficha 1.1 dice que la Presidencia lleva contabilidad paralela; y H-07 dice que el equipo de Compras es nuevo, rota y no recibió entrenamiento. Decidir si van delante de los directores | Gabriel |
+| **Los niveles** (14 hallazgos en crítico) no se revisaron | Gabriel |
+| **Si los directores van a leer el informe**, darles cuenta con un rol que tenga las secciones marcadas | Gabriel con Alberto |
 
 **La sesión del 21**
 
@@ -479,9 +489,9 @@ el comité antes de continuar con las fases siguientes»*.
 | **Contrastar la arquitectura con la Gerencia de Tecnología antes del comité**: el usuario de solo lectura en DB2, qué operaciones expone el Orchestrator y con qué usuario de servicio, qué tablas necesitan tiempo real. Si Tecnología no la hace suya, el paso 0 no arranca | Gabriel con la Gerencia de TI |
 | 🔴 **Decidir dónde vive el espejo: en la planta o en la nube.** Es la única decisión técnica que la ruta pide antes de diciembre, porque sin ella el paso 0 no puede empezar el día que se apruebe | **Iberia** · la Gerencia de TI |
 | ~~Cosechar la ronda 2~~ **Hecho el 16 de septiembre: 394 hallazgos, 37 de 42 sesiones.** Quedan fuera ENT-005 (sin consentimiento), ENT-029 (sin hacer) y las dos formaciones más la reunión con la agencia, que no contienen hallazgos de proceso | ✅ |
-| 🔴 **Validar los hallazgos con Iberia. Es el paso que bloquea publicar.** De los 394, **solo 2 están validados**: nada se publica mientras los que sostienen una sección sigan en «propuesto», y validar lo hace quien estuvo en la entrevista, no nosotros. Si no arranca ya, es el cuello de botella de diciembre. ⚠️ **Desde el 25 de septiembre no hay pantalla para marcarlo**: se lleva el expediente a la mesa y el resultado se carga en sesión | **Iberia**, con Gabriel |
+| 🔴 **Validar los hallazgos con Iberia.** De los 394, **solo 2 están validados**, y validar lo hace quien estuvo en la entrevista, no nosotros. *(Hasta el 9 de octubre esto bloqueaba publicar; ese día Gabriel decidió publicar el informe igual, para la entrega del 21. La validación sigue siendo lo primero de «Lo que queda por cerrar» en la Ruta.)* ⚠️ **Desde el 25 de septiembre no hay pantalla para marcarlo**: se lleva el expediente a la mesa y el resultado se carga en sesión | **Iberia**, con Gabriel |
 | ⚠️ **Identificar a los hablantes de `SES-002`** (siete sin nombre) y parte de `SES-005`. De ahí salen hallazgos de gobierno cuya cita es literal pero que no se pueden atribuir por nombre. Quien estuvo en la sala los reconoce de una | Gabriel o Martha |
-| **Nada publicado, y así se queda** hasta que los hallazgos que lo sostienen estén validados. Un lector de Iberia hoy no ve el informe; un editor ve el armazón con su marca «Por escribir». **Publicar se hace en sesión**, sección por sección: el panel ya no tiene el botón | **Boosty** |
+| ~~Nada publicado~~ ✅ **Publicadas las once el 9 de octubre**, por decisión de Gabriel. Se publica y se corrige en sesión, con `npm run secciones` | ✅ |
 | **Fijar la fecha del comité de aprobación** — primera semana de diciembre, por lo del aviso de renovación | Gabriel con Alberto |
 | ⚠️ **Decidir si el entregable lleva partida de horas propia.** Hoy marca **cero** en `/dashboard/programa` con 28 secciones escritas: al revisar el registro con Gabriel, esas horas no fueron a `arquitectura`. Es honesto —no hay ninguna cargada ahí— pero el entregable principal aparece en blanco para el cliente, y en diciembre alguien va a preguntar cuántas horas costó el documento que sostiene la Fase 2 | Gabriel decide · **Boosty** carga |
 

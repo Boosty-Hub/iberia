@@ -27,7 +27,7 @@ que está en línea.
 | **Dashboard** | En línea desde el 25/9 en `iberiavenezuela.netlify.app` (Netlify de Iberia). Roles y permisos configurables. **Tres cuentas de Iberia desde el 27/9**, cada una enlazada a su ficha: Alberto (Administrador), Martha Fuentes (Lector Iberia) y Martha Álvarez (Marketing) |
 | **Levantamiento** | 42 sesiones grabadas · 27.951 turnos · **36 entrevistas de ~25**: a las 33 se suman la de Alberto (29/9) y las de Flaviano y Gustavo (7/10), las tres sin cargar a propósito · ENT-029 sin hacer · los 20 macroprocesos cubiertos |
 | **Hallazgos** | 394, todos con cita textual · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
-| **Informe** | 11 secciones, hallazgos primero, **sin citas, códigos ni nombres**. Ninguna publicada. Ocho se escriben en Supabase; el generador lleva inicio, mapa y fichas |
+| **Informe** | 11 secciones, **terminado y publicado el 9/10**, formal y sin atribuciones. Construcción por **fases 2, 3 y 4**. Ninguna sección se genera: se corrigen con `npm run secciones` |
 | **Horas** | Agosto **137 h** (revisadas con Gabriel) · septiembre **119 h** (estimadas, por revisar) · octubre **43 h** cargadas: el 7 en Cagua y las reuniones con Alberto · bolsa de 107 al mes. Aparte: 111 h de la etapa anterior y 104 h del curso de planta (Fase 2) |
 | **Comunicación** | El comunicado salió. Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | 276 personas de Capital Humano, **sin cédula, celular ni correo**, y 17 fichas cargadas a mano en agosto que repiten a gente real (marcadas en el padrón desde el 27/9) |
@@ -44,7 +44,7 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
   par de días antes, las dos vías del Proyecto New con su costo para Alberto.
 - 🔴 **Cosechar los hallazgos de la ronda 2** (6.605 turnos): el informe está construido sobre la
   cadena física, que era lo único que había.
-- 🔴 **Validar los hallazgos**: 2 de 394. Sin eso no se publica nada.
+- 🔴 **Validar los hallazgos**: 2 de 394. El informe se publicó igual, por decisión de Gabriel.
 - 🔴 **ENT-005**: Milagro Salas fue grabada sin avisarle; sus hallazgos están retenidos.
 - 🔴 **El reporte mensual de consumo** (cláusula 8): no se ha entregado ninguno.
 - **Depurar las 17 fichas de muestra**, ahora que hay cuentas de Iberia que las ven.
@@ -99,6 +99,8 @@ anotó nada de ella.
 **El repositorio es privado.** El primer intento falló: los 6 asientos del plan Team estaban
 ocupados y el colaborador externo `RowerConsultoria` necesitaba uno. Gabriel decidió quitarle
 el acceso, y con eso cerró.
+
+**El informe quedó terminado y publicado** (Gabriel, punto por punto): fechas al 21 de octubre, fases en vez de olas, «La Fase 2, por dentro» en la arquitectura, lo del 29 en las fichas, el filtro de Alberto y una pasada formal sin atribuciones en las once secciones —cuatro revisores en paralelo—. El generador ya no regenera nada. El 15% de merma y la regla de rotar proveedores no salen de ninguna entrevista. Respaldo previo en `Insumos/Respaldo_Informe_2026-10-09`.
 
 **Lo que no va aquí**: lo que se habló de personas del cliente y de política. Está en las
 grabaciones, y este archivo vive en git. La lista completa de lo que falta está
