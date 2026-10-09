@@ -596,7 +596,7 @@ procesos y estructura**. El nombre lo puso Alberto.
 | **Registrar los certificados en Capital Humano** cuando llegue la Fase 2 | Gustavo Carballo | |
 | ~~Cerrar el repositorio~~ ✅ **Privado desde el 9 de octubre.** Fue público del 11 de agosto al 9 de octubre, con material bajo NDA en la historia. El primer intento falló: el plan Team tiene 6 asientos, los 6 ocupados, y un repositorio privado le exige asiento a cada colaborador externo | ✅ | |
 | ~~`RowerConsultoria` tenía permiso de escritura~~ ✅ **Se le quitó el acceso el 9 de octubre**, por decisión de Gabriel: era el colaborador externo que no dejaba cerrar el repositorio. Si resulta ser de alguien del equipo, se le invita otra vez —y necesita asiento— | ✅ | |
-| **Confirmar que Netlify sigue desplegando** ahora que el repositorio es privado | Boosty | Con el próximo push |
+| ~~Confirmar que Netlify sigue desplegando~~ ✅ **Sí**: el push del 9 de octubre salió en producción con el repositorio ya privado | ✅ | |
 | **Seis alertas de Dependabot** abiertas (4 críticas, 2 altas) en las dependencias, comprobadas el 27 de septiembre. Actualizar con la verificación visual completa después: puede romper el render | **Boosty** | Después de la reunión del 29 |
 
 ### El mes 1 cierra en 137 horas contra una bolsa de 107
