@@ -27,6 +27,57 @@ Fase 1 es el miércoles 21 de octubre, y ya está agendada.**
 
 ---
 
+## 🔴 El camino al 21 de octubre
+
+*Armado el 9 de octubre revisando la base. **El informe no se toca desde el 25 de septiembre**:
+11 secciones, ninguna publicada, y 2 de 394 hallazgos validados. Lo de abajo junta lo que está
+repartido en el resto del archivo; el detalle de cada cosa sigue en su sección.*
+
+**El informe**
+
+| Qué | De quién |
+|---|---|
+| **Corregir las fechas.** Inicio dice que el comité decide «hacia final de año», y la Ruta tiene «Lo que falta antes de diciembre», «Lo que se aprueba en diciembre» y «la decisión de diciembre». Ahora es el 21 de octubre | Boosty, en la base |
+| **Inicio, mapa y fichas no se pueden regenerar en esta máquina**: el generador dice «sin inventario de procesos» porque el taller de Jesús no está aquí. O los regenera Jesús —después de `git pull`—, o se corrigen a mano en la base, sabiendo que la próxima corrida los pisa | Jesús |
+| **La cifra de entrevistas.** Inicio dice 34 de proceso; con Alberto, Flaviano y Gustavo son más, pero no están en la base. Decidir si cuentan en el informe aunque no tengan transcripción | Gabriel |
+| **Meter lo que salió el 29.** El reparto de la venta (cuentas clave 25–30%, independientes ~30%, distribuidores ~30%) en la ficha comercial. La falta de una política de cobranza escrita, como hallazgo. **Tesote ya contratado** en el módulo de Finanzas: hoy no aparece en el informe. La facturación digital contratada, en el trombo de las facturas. Y la multimoneda | Boosty |
+| **Verificar el 15% de merma y la regla de rotar proveedores** en el expediente. Alberto lo pidió y lo va a preguntar | Boosty |
+| **Darle profundidad a la ola 1**: sistema, conexión, API y documentación de cada módulo (Compras, Comercial y Finanzas). Se le prometió a Alberto el 29 | Gabriel |
+| **Rotular las fases.** Hoy dice «Ola 1 · Fase 2» y «Ola 3 · Fase 3», y la ola 2 no tiene fase. El 2 de octubre se habló de un programa de 12 a 18 meses | Gabriel |
+| **Pasar el filtro de Alberto**: lo que deja mal parada a un área no va delante de los directores. Él nombró dos casos, y los dos están en el informe: **la orden que se iguala a lo producido y la merma que no deja rastro** (H-32 y la ficha de producción) y **el material que se usa antes del resultado de microbiología** (la ficha de Calidad) | Gabriel con el señor Carlos |
+| **Leer la prosa de las ocho secciones** que reescribieron agentes el 25, y **revisar los niveles** (14 en crítico) | Gabriel y Jesús |
+| **Decidir qué se publica y para quién.** La regla es no publicar sin validar, y validados hay 2. Alberto es administrador y lo ve todo sin publicar; los directores no tienen cuenta. Opciones: presentarlo en la sala sin publicar, o publicarlo como borrador sujeto a validación | Gabriel |
+
+**La sesión del 21**
+
+| Qué | De quién |
+|---|---|
+| **La presentación**: circuito, trombos, alivios y plan de trabajo de la Fase 2. La abre Alberto; el señor Carlos introduce la confianza; quedan claros los papeles de Martha Fuentes y de Milagro | Gabriel con el señor Carlos |
+| **Las dos vías del Proyecto New**, con alcance, tiempo y costo, a Alberto un par de días antes. Antes, el Gantt de Milagro | Gabriel · Milagro manda el Gantt |
+| **El componente económico de la Fase 2.** Y cómo empalma con lo que queda del contrato: la Fase 1 cierra el 21, pero el plazo mínimo y el fee corren hasta el 6 de enero, y la Fase 2 arrancaría a fines de octubre. **Hay que dejarlo por escrito**, junto con qué es «el período en curso» para el aviso de renovación | Gabriel con Alberto |
+| **La aprobación del documento** (cláusula 7): que la sesión termine con una aprobación que conste, no solo con el visto bueno de la sala | Gabriel |
+| **Dónde vive el espejo, en la planta o en la nube**, y la conversación con TI. La Ruta lo pone como la única decisión técnica antes de aprobar | Iberia · Gabriel prepara a TI |
+
+**El cierre de los otros entregables**
+
+| # | Qué falta | De quién |
+|---|---|---|
+| 1 | **Plan de comunicación**: el plan con fecha y el vocero (vencido el 6 de septiembre), la nota del boletín y el dato duro del comunicado | Fuguet · Alberto |
+| 2 | **App**: la revisión con Mercadeo (vencida el 30 de septiembre), depurar las 17 fichas de muestra, el dominio definitivo y dejar por escrito lo de las encuestas de pulso | Gabriel · Martha Álvarez |
+| 3 | **Formación de líderes**, reprogramada antes del 31 de octubre y con la conexión de Cagua probada antes | Gabriel · Martha Fuentes |
+| 4 | **Levantamiento**: decir por escrito que el informe por área va en las fichas de proceso, y decidir qué pasa con ENT-029 (programada desde septiembre) | Gabriel |
+| 6 | **Formación de planta**: entregarla como diseño. Vence el 30 de noviembre, pero se puede mostrar el 21 | Gabriel |
+
+**Lo administrativo**
+
+| Qué | De quién |
+|---|---|
+| 🔴 **El reporte mensual de consumo** (cláusula 8): no se ha entregado ninguno. Faltan agosto y septiembre, y octubre al cerrar | Gabriel |
+| **Revisar las horas de septiembre** (125 h estimadas) y **cargar las de octubre** que faltan: el informe y la preparación de la entrega | Gabriel dice · Boosty carga |
+| **ENT-005**: sigue sin resolver y sus 38 hallazgos, fuera. Milagro ya trabaja con el proyecto | Gabriel |
+
+---
+
 ## ⚠️ Por qué el calendario se adelantó un mes
 
 **El aviso de no renovación vence antes que el entregable que sirve para decidir.**
