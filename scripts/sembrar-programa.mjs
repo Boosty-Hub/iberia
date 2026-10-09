@@ -172,30 +172,31 @@ const HITOS = [
     descripcion:
       'Directiva, gerentes y líderes, con las licencias corporativas a nombre de Iberia. ' +
       'Van dos: la directiva, el 26 de agosto en Caracas, y los gerentes, el 23 de septiembre ' +
-      'en Cagua. Falta la tercera, con los líderes que escojan los gerentes, y su fecha.',
+      'en Cagua. La tercera, con los líderes, se intentó en Cagua el 7 de octubre y no se pudo ' +
+      'dictar por la conexión de la planta: se reprograma.',
     tipo: 'entregable',
     entregable: 'formacion',
     estado: 'previsto',
   },
   {
-    fecha: '2026-11-07',
+    fecha: '2026-10-21',
     titulo: 'Las ~25 entrevistas cerradas, con su informe por área',
     descripcion:
-      'Las entrevistas ya están: 33 hechas y una programada, en tres rodajes —dos en Cagua y uno ' +
-      'repartido entre Cagua y Caracas—, con los veinte macroprocesos cubiertos. Lo que cierra el entregable es el ' +
-      'informe de levantamiento por área, que sale de los hallazgos validados.',
+      'Las entrevistas ya están: 36, en tres rodajes —dos en Cagua y uno repartido entre Cagua ' +
+      'y Caracas— y las de la dirección, con los veinte macroprocesos cubiertos. El informe por ' +
+      'área va dentro del Documento de Arquitectura, en las fichas de proceso, y se entrega con él.',
     tipo: 'entregable',
     entregable: 'levantamiento',
     estado: 'previsto',
   },
   {
-    fecha: '2026-11-14',
+    fecha: '2026-10-21',
     titulo: 'Inventario de sistemas, datos, equipos y conectividad',
     descripcion:
       'Armado con los sistemas, archivos y equipos que la propia gente nombró en las ' +
       'entrevistas, y cerrado con la sesión de Tecnología de la Información del 10 de ' +
-      'septiembre: 27 sistemas en ocho capas, cada uno con su dueño y su estado, dentro del ' +
-      'informe. Falta confirmarlo con las áreas.',
+      'septiembre: 27 sistemas en ocho capas, cada uno con su dueño y su estado. Va dentro del ' +
+      'Documento de Arquitectura y se entrega con él.',
     tipo: 'entregable',
     entregable: 'inventario',
     estado: 'previsto',
@@ -212,12 +213,12 @@ const HITOS = [
     estado: 'previsto',
   },
   {
-    fecha: '2026-12-06',
-    titulo: 'Documento de Arquitectura de IA al comité',
+    fecha: '2026-10-21',
+    titulo: 'Documento de Arquitectura de IA, entregado a la dirección',
     descripcion:
-      'El único entregable en firme de la Fase 1. La cláusula 7 lo hace condición para ' +
-      'pasar a la Fase 2: el comité tiene que aprobarlo antes de continuar. Está completo en ' +
-      'borrador desde el 24 de septiembre; lo que falta es validarlo con las áreas.',
+      'El único entregable en firme de la Fase 1, y el cierre de la fase: se presenta en ' +
+      'Caracas a la Gerencia General y a los directores, con el plan de trabajo de la Fase 2. ' +
+      'La cláusula 7 lo hace condición para pasar a la Fase 2.',
     tipo: 'entregable',
     entregable: 'arquitectura',
     estado: 'previsto',
@@ -227,7 +228,7 @@ const HITOS = [
     titulo: 'Vence el aviso de no renovación',
     descripcion:
       'Treinta días antes del cierre del plazo mínimo. Es la fecha que manda sobre todo el ' +
-      'calendario: por eso la arquitectura se entrega en diciembre y no en enero.',
+      'calendario: por eso la arquitectura se entrega antes, el 21 de octubre.',
     tipo: 'contrato',
     entregable: null,
     estado: 'previsto',

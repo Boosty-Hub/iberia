@@ -723,6 +723,172 @@ const HORAS = [
       'con su matriz, con el cierre de la escalada de privilegios; y el informe rediseñado ' +
       'para escritorio y teléfono.',
   },
+
+  // 29 de septiembre · la reunión con Alberto en la oficina de Gabriel, que hizo de su
+  // entrevista. La grabación dura 2 h 47 min.
+  {
+    fecha: '2026-09-29',
+    perfil: 'director_arquitecto',
+    horas: 3,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'arquitectura',
+    descripcion:
+      'Reunión con la Gerencia General: el diagnóstico, el circuito con sus trombos, la vista ' +
+      'de sistemas y el sistema Iberia con sus olas. Hizo de entrevista de la Gerencia General. 3 h.',
+  },
+  {
+    fecha: '2026-09-29',
+    perfil: 'consultor_senior',
+    horas: 3,
+    persona: 'Carlos Quintana',
+    entregable: 'arquitectura',
+    descripcion:
+      'Reunión con la Gerencia General sobre el diagnóstico y la entrega a los directores. 3 h.',
+  },
+
+  // ===========================================================================
+  // OCTUBRE · mes 3
+  // ===========================================================================
+
+  // 2 de octubre · con Alberto, en Caracas, sobre lo que sigue: la Fase 2 y el levantamiento
+  // de procesos y estructura que se suma al programa. La grabación dura 1 h 47 min.
+  {
+    fecha: '2026-10-02',
+    perfil: 'director_arquitecto',
+    horas: 2,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'arquitectura',
+    descripcion:
+      'Reunión con la Gerencia General sobre la Fase 2 y el levantamiento de procesos y ' +
+      'estructura organizativa que se suma al programa. 2 h.',
+  },
+  {
+    fecha: '2026-10-02',
+    perfil: 'consultor_senior',
+    horas: 2,
+    persona: 'Josué Bonilla',
+    entregable: 'arquitectura',
+    descripcion:
+      'Reunión con la Gerencia General: el método para levantar procesos y estructura ' +
+      'organizativa sobre una base de conocimiento. 2 h.',
+  },
+
+  // 7 de octubre, Cagua · la formación de líderes, la tercera. **No se pudo dictar**:
+  // la conexión de la planta no dejó entrar. El equipo fue y estuvo de 7:00 a 14:00, y
+  // Gabriel decidió que se cuenta. Sala y traslado, partidos como el 23 de septiembre.
+  {
+    fecha: '2026-10-07',
+    perfil: 'director_arquitecto',
+    horas: 4,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'formacion',
+    descripcion:
+      'Formación de líderes en Cagua, la tercera. Se fue y se montó, pero no se pudo dictar: ' +
+      'la conexión de la planta no dejó entrar. 4 h en planta.',
+  },
+  {
+    fecha: '2026-10-07',
+    perfil: 'director_arquitecto',
+    horas: VIA,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'gestion',
+    descripcion: `Traslado Caracas–Cagua para la formación de líderes. ${VIA} h.`,
+  },
+  {
+    fecha: '2026-10-07',
+    perfil: 'consultor_procesos',
+    horas: 4,
+    persona: 'Amanda Leañez',
+    entregable: 'formacion',
+    descripcion:
+      'Acompañamiento de la formación de líderes en Cagua, que no se pudo dictar por la ' +
+      'conexión de la planta. 4 h en planta.',
+  },
+  {
+    fecha: '2026-10-07',
+    perfil: 'consultor_procesos',
+    horas: VIA,
+    persona: 'Amanda Leañez',
+    entregable: 'gestion',
+    descripcion: `Traslado para el acompañamiento de la formación de líderes en Cagua. ${VIA} h.`,
+  },
+  {
+    fecha: '2026-10-07',
+    perfil: 'consultor_procesos',
+    horas: 4,
+    persona: 'Melanieth Aponte',
+    entregable: 'formacion',
+    descripcion:
+      'Apoyo de Melanieth en la formación de líderes en Cagua, que no se pudo dictar por la ' +
+      'conexión de la planta. 4 h en planta.',
+  },
+  {
+    fecha: '2026-10-07',
+    perfil: 'consultor_procesos',
+    horas: VIA,
+    persona: 'Melanieth Aponte',
+    entregable: 'gestion',
+    descripcion: `Traslado de Melanieth para el apoyo de la formación de líderes en Cagua. ${VIA} h.`,
+  },
+  {
+    fecha: '2026-10-07',
+    perfil: 'consultor_procesos',
+    horas: 4,
+    persona: 'Carolina Ortiz',
+    entregable: 'formacion',
+    descripcion:
+      'Apoyo de Carolina en la formación de líderes en Cagua, que no se pudo dictar por la ' +
+      'conexión de la planta. 4 h en planta.',
+  },
+  {
+    fecha: '2026-10-07',
+    perfil: 'consultor_procesos',
+    horas: VIA,
+    persona: 'Carolina Ortiz',
+    entregable: 'gestion',
+    descripcion: `Traslado de Carolina para el apoyo de la formación de líderes en Cagua. ${VIA} h.`,
+  },
+  {
+    fecha: '2026-10-07',
+    perfil: 'consultor_senior',
+    horas: 4,
+    persona: 'Carlos Quintana',
+    entregable: 'levantamiento',
+    descripcion:
+      'Entrevistas de Flaviano Tucci y Gustavo Carballo en Cagua, en sesión particular como ' +
+      'la de Alberto. Quedan privadas: sin grabación cargada. 4 h en planta.',
+  },
+  {
+    fecha: '2026-10-07',
+    perfil: 'consultor_senior',
+    horas: VIA,
+    persona: 'Carlos Quintana',
+    entregable: 'gestion',
+    descripcion: `Traslado Caracas–Cagua para las entrevistas de Flaviano y Gustavo. ${VIA} h.`,
+  },
+
+  // 8 de octubre · en línea, con Alberto y Milagro Salas: el «Proyecto New», con Milagro
+  // como líder de procesos, y la fecha de la entrega. La grabación dura 1 h 41 min.
+  {
+    fecha: '2026-10-08',
+    perfil: 'director_arquitecto',
+    horas: 2,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'arquitectura',
+    descripcion:
+      'Reunión con la Gerencia General y Calidad sobre el levantamiento de procesos y ' +
+      'estructura, y la fecha de entrega del 21 de octubre. 2 h.',
+  },
+  {
+    fecha: '2026-10-08',
+    perfil: 'consultor_senior',
+    horas: 2,
+    persona: 'Josué Bonilla',
+    entregable: 'arquitectura',
+    descripcion:
+      'Reunión con la Gerencia General y Calidad: el método de la base de conocimiento ' +
+      'frente al sistema de gestión de calidad que ya existe. 2 h.',
+  },
 ]
 
 // -----------------------------------------------------------------------------

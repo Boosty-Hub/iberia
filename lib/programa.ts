@@ -153,15 +153,20 @@ export const ENTREGABLE_NOTA: Partial<Record<Entregable, string>> = {
  * de diciembre**, un mes antes de recibir el instrumento que existe para que
  * decida. Todo el calendario se adelantó para que el comité apruebe con el
  * documento en la mano y no de memoria.
+ *
+ * Y se adelantó otra vez: **la entrega es el 21 de octubre**, acordada con Alberto y
+ * agendada (9 de octubre de 2026). El levantamiento y el inventario van dentro del
+ * Documento de Arquitectura —las fichas de proceso y «Sistemas y estado del dato»—, así
+ * que se entregan con él. La formación sigue al 31: falta la de los líderes.
  */
 export const VENCE: Record<Entregable, string | null> = {
   comunicacion: '2026-09-06',
   app: '2026-09-30',
   formacion: '2026-10-31',
-  levantamiento: '2026-11-07',
-  inventario: '2026-11-14',
+  levantamiento: '2026-10-21',
+  inventario: '2026-10-21',
   planta: '2026-11-30',
-  arquitectura: '2026-12-06',
+  arquitectura: '2026-10-21',
   gestion: null,
 }
 

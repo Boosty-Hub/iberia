@@ -904,6 +904,10 @@ de consumo**. Este módulo es de donde sale ese reporte.
   días sobre un plazo que vence el 6 de enero: **Iberia decide si sigue el 6 de diciembre**,
   un mes antes de recibir el instrumento para decidir. Todas las fechas de `VENCE` en
   `lib/programa.ts` están corridas para que el comité apruebe con el documento en la mano.
+  **Y se corrieron otra vez: la entrega es el 21 de octubre de 2026**, acordada con Alberto.
+  Levantamiento e inventario van dentro del documento y vencen con él. Al mover una fecha se
+  cambian `VENCE` **y** el hito de `sembrar-programa.mjs`; como la idempotencia es por (fecha,
+  título), la fila vieja queda viva y se borra con `sembrar:programa -- --limpiar`.
 - **Los perfiles y las tarifas son términos firmados, no configuración.** Viven en
   `lib/programa.ts`, no en una tabla de ajustes. `BOLSA_MENSUAL` y `FEE_MENSUAL` se calculan
   de las cuotas: si cambia una, cambia el total, y nadie tiene que acordarse de dos sitios.

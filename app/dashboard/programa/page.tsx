@@ -270,7 +270,8 @@ export default async function ProgramaPage() {
   // Lo que viene, de más cerca a más lejos; lo hecho, de lo último a lo primero.
   // Con dos entradas el mismo día, el vencimiento de contrato va de último: leer
   // «vence el aviso de renovación» antes que «se entrega la arquitectura»
-  // invierte la historia, y las dos caen el 6 de diciembre.
+  // invierte la historia. Cayeron el mismo día —el 6 de diciembre— hasta que la entrega
+  // se adelantó al 21 de octubre.
   const orden = (e: Evento) => `${e.fecha}-${e.tipo === 'contrato' ? '1' : '0'}`
   // ⚠️ **Lo que viene es lo que no se ha hecho, no lo que tiene fecha futura.**
   // Separando por fecha, una sesión programada que no ocurrió y un entregable con
@@ -426,11 +427,10 @@ export default async function ProgramaPage() {
             ))}
         </ul>
         <p className="mt-3">
-          De aquí a diciembre el peso se mueve hacia la validación con las áreas y la entrega
-          del <strong>Documento de Arquitectura de IA</strong>, el{' '}
-          {formatFecha(VENCE.arquitectura)}: el calendario se adelantó un mes respecto de la
-          propuesta para que el comité pueda decidir la continuidad con el documento en la mano y
-          no de memoria.
+          Lo que sigue es la entrega del <strong>Documento de Arquitectura de IA</strong> a la
+          dirección, el {formatFecha(VENCE.arquitectura)}: el calendario se adelantó respecto de
+          la propuesta para que la continuidad se decida con el documento en la mano y no de
+          memoria.
         </p>
       </div>
 
@@ -643,7 +643,7 @@ export default async function ProgramaPage() {
       <section>
         <h2 className="mb-1 text-lg font-semibold text-marca-900">Lo que viene</h2>
         <p className="mb-4 text-sm text-marca-600">
-          El calendario se adelantó un mes respecto de la propuesta, para que el Documento de
+          El calendario se adelantó respecto de la propuesta, para que el Documento de
           Arquitectura esté sobre la mesa cuando Iberia decida la continuidad.
         </p>
         <Hilo eventos={porVenir} marcarRiesgo={verRiesgo} />

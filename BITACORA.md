@@ -18,31 +18,30 @@ que está en línea.
 
 ---
 
-## Estado actual · 27 de septiembre de 2026
+## Estado actual · 9 de octubre de 2026
 
 | | |
 |---|---|
-| **Fase** | 1 · Entender · **día 52 de 153**. Contrato `CONT-2026-08-0002`, firmado el 6/7 de agosto |
-| **Calendario** | Adelantado: **nada se entrega después del 6 de diciembre**, porque el aviso de no renovación vence antes que el entregable que sirve para decidir |
+| **Fase** | 1 · Entender · **día 64 de 153**. Contrato `CONT-2026-08-0002`, firmado el 6/7 de agosto |
+| **Calendario** | **La entrega y cierre de la Fase 1 es el miércoles 21 de octubre**, con los directores, y está agendada. `/dashboard/programa` ya lo dice: levantamiento, inventario y arquitectura vencen el 21 (los hitos, en la base; `VENCE`, al desplegar) |
 | **Dashboard** | En línea desde el 25/9 en `iberiavenezuela.netlify.app` (Netlify de Iberia). Roles y permisos configurables. **Tres cuentas de Iberia desde el 27/9**, cada una enlazada a su ficha: Alberto (Administrador), Martha Fuentes (Lector Iberia) y Martha Álvarez (Marketing) |
-| **Levantamiento** | 42 sesiones grabadas · 27.951 turnos · **33 entrevistas de ~25** y una programada (ENT-029) · los 20 macroprocesos cubiertos |
+| **Levantamiento** | 42 sesiones grabadas · 27.951 turnos · **36 entrevistas de ~25**: a las 33 se suman la de Alberto (29/9) y las de Flaviano y Gustavo (7/10), las tres sin cargar a propósito · ENT-029 sin hacer · los 20 macroprocesos cubiertos |
 | **Hallazgos** | 394, todos con cita textual · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
 | **Informe** | 11 secciones, hallazgos primero, **sin citas, códigos ni nombres**. Ninguna publicada. Ocho se escriben en Supabase; el generador lleva inicio, mapa y fichas |
-| **Horas** | Agosto **137 h** (revisadas con Gabriel) · septiembre **119 h** (estimadas, por revisar) · bolsa de 107 al mes. Aparte: 111 h de la etapa anterior y 104 h del curso de planta (Fase 2) |
+| **Horas** | Agosto **137 h** (revisadas con Gabriel) · septiembre **119 h** (estimadas, por revisar) · octubre **43 h** cargadas: el 7 en Cagua y las reuniones con Alberto · bolsa de 107 al mes. Aparte: 111 h de la etapa anterior y 104 h del curso de planta (Fase 2) |
 | **Comunicación** | El comunicado salió. Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | 276 personas de Capital Humano, **sin cédula, celular ni correo**, y 17 fichas cargadas a mano en agosto que repiten a gente real (marcadas en el padrón desde el 27/9) |
 | **Canal** | En línea. **Martha Álvarez tiene acceso desde el 27/9** para revisarlo con Mercadeo |
-| **Formación dirigente** | Alberto (17/8), Petit Comité (26/8) y gerentes (23/9, Cagua). Falta la de los líderes |
+| **Formación dirigente** | Alberto (17/8), Petit Comité (26/8) y gerentes (23/9, Cagua). **La de líderes no se pudo dictar el 7/10** por la VPN de Cagua: hay que reprogramarla |
 | **Adiestramiento** | Completo y **de Fase 2**: nueve lecciones, 70 audios por voz (mujer y hombre), Ajito contesta hablando y dibuja, certificado en la lección 8 (con la ficha cuando no hay cédula), chat con Ajito **apagado** (solo lo ve el equipo) |
-| **Repositorio** | `Boosty-Hub/iberia` — 🔴 **público**, con `RowerConsultoria` con escritura y 6 alertas de Dependabot. La sesión de GitHub de esta máquina ya tiene permiso de administrador para cerrarlo |
+| **Repositorio** | `Boosty-Hub/iberia` — **privado desde el 9/10** (fue público dos meses), sin `RowerConsultoria`. Quedan 6 alertas de Dependabot |
 
 ### Lo que aprieta
 
 Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 
-- 🔴 **La reunión con Alberto, martes 29 de 11:00 a 13:00.** Abre la Fase 2: los tres dibujos y
-  los alivios.
-- 🔴 **Cerrar el repositorio**: es público y lleva material bajo NDA en la historia.
+- 🔴 **El 21 de octubre, la entrega a los directores**: el informe terminado, la presentación, y un
+  par de días antes, las dos vías del Proyecto New con su costo para Alberto.
 - 🔴 **Cosechar los hallazgos de la ronda 2** (6.605 turnos): el informe está construido sobre la
   cadena física, que era lo único que había.
 - 🔴 **Validar los hallazgos**: 2 de 394. Sin eso no se publica nada.
@@ -51,6 +50,59 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 - **Depurar las 17 fichas de muestra**, ahora que hay cuentas de Iberia que las ven.
 - **Pedirle a Capital Humano cédula y celular por ficha**: sin celular no hay enlace personal.
 - **Decidir si se prende el asistente libre** (el chat con Ajito).
+
+---
+
+## 9 de octubre · Sesión 48 — Alberto, el Proyecto New y la fecha de entrega
+
+Gabriel pasó tres transcripciones —29 de septiembre, 2 y 8 de octubre— y se leyeron enteras.
+**Ninguna se cargó a la base.** La del 29 da por hecha la entrevista de Alberto, por decisión de
+Gabriel.
+
+**El 29 de septiembre**, en la oficina de Gabriel, con el señor Carlos, casi tres horas:
+
+- **Lo que se mostró**: los tres hallazgos de fondo —departamentos desarticulados sostenidos por
+  personas clave; un control que no controla, porque la data nace en Excel y papel y JD es el
+  tránsito para facturar; y la resistencia al cambio que eso produce—, el circuito con sus trombos,
+  la vista de sistemas (357 traspasos, 302 a mano) y el espejo con sus olas.
+- **Lo que dijo Alberto**: da por bueno el circuito y la ola 1 —Compras, Comercial y Finanzas—, con
+  Distribución detrás. Pidió verificar el 15% de merma y no reconoce la regla de rotar proveedores.
+  Dio el reparto de la venta (cuentas clave 25–30%, independientes ~30%, distribuidores ~30%) y
+  confirmó que ya firmó con Tesote y la facturación digital.
+- **Lo que se acordó**: una jornada con los directores que abre Alberto asumiendo la
+  responsabilidad, centrada en los trombos y los alivios y sin lo que señale a un área.
+
+**El 30 de septiembre** Alberto les mostró el diagnóstico a sus cuatro directores, en capturas y sin
+detalle. Según contó el 2, lo recibieron bien.
+
+**El 2 de octubre** (Gabriel y Josué Bonilla con Alberto, en Caracas) y **el 8** (en línea, con
+Milagro Salas) nació el **Proyecto New · Modelo organizativo: procesos y estructura**:
+
+- Es terminar el levantamiento de procesos con la base de conocimiento de Josué, y sacar de ahí la
+  estructura y los cargos. Lo lleva Milagro como líder de procesos.
+- Martha Fuentes sigue como coordinadora, con los datos, la infraestructura y el ERP. *(Corrige lo
+  del 29, cuando Gabriel había propuesto a Ana para coordinar.)*
+- Alberto pide que el alivio vaya primero y que los procesos no amarren a la empresa.
+- Gabriel le entrega dos vías, con alcance, tiempo y costo, un par de días antes del 21.
+
+**El 7 de octubre**, en Cagua, la formación de líderes **no se pudo dictar** por la VPN. Fueron
+Gabriel, Amanda, Melanieth Aponte y Carolina Ortiz, y se cuenta. El señor Carlos entrevistó a
+Flaviano y a Gustavo; esas entrevistas quedan privadas. **Se cargaron sus 35 h, y las de las tres
+reuniones con Alberto** (`sembrar:horas`): octubre va en 43 h.
+
+**La entrega y cierre de la Fase 1 es el 21 de octubre**, agendada. El calendario de
+`/dashboard/programa` se corrió a esa fecha: levantamiento, inventario y arquitectura.
+
+Una cuarta transcripción del 2 de octubre en la mañana **resultó ser de otro cliente**: no se
+anotó nada de ella.
+
+**El repositorio es privado.** El primer intento falló: los 6 asientos del plan Team estaban
+ocupados y el colaborador externo `RowerConsultoria` necesitaba uno. Gabriel decidió quitarle
+el acceso, y con eso cerró.
+
+**Lo que no va aquí**: lo que se habló de personas del cliente y de política. Está en las
+grabaciones, y este archivo vive en git. La lista completa de lo que falta está
+en `PENDIENTES.md`.
 
 ---
 

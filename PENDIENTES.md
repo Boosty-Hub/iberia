@@ -11,17 +11,19 @@ del contrato **CONT-2026-08-0002**. Los dos documentos están en el módulo de a
 > la firma del **6 de agosto de 2026**. Lo que no aparezca aquí abajo no lo estamos
 > entregando — por bueno que sea.
 
-**Hoy es 27 de septiembre: día 52 de 153.** El mes 2 se cierra en 3 días.
+**Revisado el 9 de octubre: día 64 de 153.** Se pasaron la reunión con Alberto del 29 de
+septiembre, las del 2 y el 8 de octubre y la jornada del 7 en Cagua. **La entrega y cierre de la
+Fase 1 es el miércoles 21 de octubre, y ya está agendada.**
 
 | | Entregable | Vence | Cómo va |
 |---|---|---|---|
 | 1 | Plan de comunicación y comunicado oficial | **6 sep** | 🟡 **El comunicado salió**; falta el plan con fecha y el vocero |
 | 2 | App de comunicación interna (v1) **desplegada** | 30 sep | 🟡 **Desplegada el 25 de septiembre** en `iberiavenezuela.netlify.app`, con el resto del panel. Falta la revisión con mercadeo y limpiar las fichas de muestra antes de dar cuentas |
-| 3 | Las tres formaciones y el chat de Claude andando | 31 oct | 🟡 **Dos dictadas**: la directiva el 26 de agosto y los gerentes el 23 de septiembre. Falta la de los líderes y su fecha |
-| 4 | Entrevistas y levantamiento (informes por área) | 7 nov | 🟡 **33 de ~25** y una programada · 394 hallazgos, 42 desarrollados · **0 informes por área** |
+| 3 | Las tres formaciones y el chat de Claude andando | 31 oct | 🟡 **Dos dictadas**: la directiva el 26 de agosto y los gerentes el 23 de septiembre. **La de líderes no se pudo dictar el 7 de octubre** por la VPN de Cagua: hay que reprogramarla |
+| 4 | Entrevistas y levantamiento (informes por área) | 7 nov | 🟡 **36 de ~25**: con Alberto (29 sep) y Flaviano y Gustavo (7 oct), las tres sin transcripción cargada · ENT-029 sin hacer · 394 hallazgos, 42 desarrollados · **0 informes por área** |
 | 5 | Inventario de sistemas, datos, equipos y conectividad | 14 nov | 🟠 Sale de las entrevistas y ya está saliendo |
 | 6 | Programa de formación de planta **diseñado** | 30 nov | ✅ Hecho, y muy por encima |
-| 7 | **Documento de Arquitectura de IA** + plan fases 2–4 | **6 dic** | 🟠 **11 secciones, completo en borrador**, hallazgos primero · 🔴 solo 2 hallazgos validados |
+| 7 | **Documento de Arquitectura de IA** + plan fases 2–4 | **6 dic** · se entrega el **21 oct** | 🟠 **11 secciones, completo en borrador**, hallazgos primero · 🔴 solo 2 hallazgos validados · la reunión de entrega con los directores está agendada |
 
 ---
 
@@ -97,7 +99,7 @@ el 12 de agosto —«el primer entregable que se puede tocar»—.
 | 🔴 **El padrón está cargado, pero sin teléfonos.** Las **276 personas** ya están en `/dashboard/empleados` con su ficha, cargo, departamento, nivel y familia de oficio. Pero el archivo **no trae cédula, ni celular, ni correo, ni sede**: sin celular no hay enlace personal y sin cédula no hay correo interno derivado. Hace falta un segundo archivo con **ficha + cédula + celular** | Gustavo Carballo | Bloquea el enlace personal y el empujón, que son de Fase 2 |
 | **Depurar las 17 fichas de muestra.** Son las que se sembraron en agosto para poder ver el canal, y ahora **duplican a gente real** —«Alberto García-Ramos» aparece dos veces— y llevan cédulas inventadas tipo `PADRON-002`. No las borré: de ellas cuelgan las 5 publicaciones del feed y 6 matrículas de prueba, y el canal todavía no se ha revisado con mercadeo. **Hay que limpiarlas antes de dar la primera cuenta del canal.** *(El sitio se desplegó el 25 de septiembre. ⚠️ **Desde el 27 ya hay tres cuentas de Iberia** —Alberto, Martha Fuentes y Martha Álvarez—, así que ya las ven. Y confunden al enlazar: «Martha E. Álvarez» de muestra y «Martha Elena Alvarez Trejo», ficha 5034, son la misma persona. Desde el 27 el padrón las marca como repetidas y no deja matricularlas. ⚠️ Al depurarlas, **pasar antes lo que traen y la de Capital Humano no**: la cédula de Alberto, V-6912626, ya se pasó a la 4774 el 27 —la de muestra volvió a `PADRON-001`—, y las publicaciones del feed siguen a nombre de las de muestra)* | **Boosty** | |
 | ~~**Decidir qué ve un rol de lectura en Adiestramiento.**~~ ✅ **Hecho el 27 de septiembre**: con la casilla de Adiestramiento se lee el tablero —cuentas por área y por oficio, sin nombres ni respuestas—, con la de Certificados, los certificados, y con las lecciones en el rol se recorre el curso | — | |
-| **Lector Iberia no tiene ninguna sección del informe marcada**, y `probar:permisos` falla dos veces porque espera que lea el mapa y la portada. Si fue a propósito, se ajusta la prueba; si no, se vuelven a marcar en Roles y permisos | **Gabriel** | |
+| **Lector Iberia no tiene ninguna sección del informe marcada**, y `probar:permisos` falla dos veces porque espera que lea el mapa y la portada. Si fue a propósito, se ajusta la prueba; si no, se vuelven a marcar en Roles y permisos. *(El 29 Gabriel le dijo a Alberto que Martha Fuentes «solo ve consumo», así que todo apunta a que fue a propósito: confirmarlo y ajustar la prueba)* | **Gabriel** | |
 | ~~**Enlazar las cuentas de Alberto, Martha Fuentes y Martha Álvarez con su ficha**~~ ✅ **Hecho el 27 de septiembre**: Alberto con la 4774, Martha Fuentes con la 4837 y Martha Álvarez con la 5034 | — | |
 | **Confirmar la sede de cada quien.** El archivo no la trae. Por centro de costo se intuye ~163 en planta y ~69 en administración, pero hay **35 en territorios de venta** repartidos por todo el país que no son ni Caracas ni Cagua | Gustavo Carballo | |
 | **Avatares de planta** — operadora de envasado, montacarguista, técnico, despachador. Los 18 que mandaron son de oficina | Martha E. Álvarez y la agencia | |
@@ -116,7 +118,7 @@ Las tres, en orden:
 |---|---|---|
 | 1 | **La directiva** — Sesión IA Petit Comité, sala de reuniones en Caracas | ✅ **dictada el miércoles 26 de agosto** · `FOR-002` |
 | 2 | **Los gerentes** — en Cagua, con Ruth y Humberto de apoyo | ✅ **dictada el miércoles 23 de septiembre**, de 7:00 a 16:00 con el traslado · `FOR-003`, sin grabación cargada |
-| 3 | **Los líderes que decidan los gerentes** | Sin fecha, y sin padrón |
+| 3 | **Los líderes que decidan los gerentes** | **No se pudo dictar el miércoles 7 de octubre**: la VPN de Cagua no dejó entrar. Fueron Gabriel, Amanda, Melanieth y Carolina, de 7:00 a 14:00, y se cuenta. **Falta la fecha nueva**, y que la conexión esté resuelta antes (ver abajo) |
 
 Aparte, y fuera de agenda: la **formación uno a uno con Alberto García-Ramos** del lunes
 17 de agosto, en su oficina. Se pidió hora y media y quedaron grabadas **3 h 05 min**.
@@ -255,8 +257,11 @@ los 60 planificados, y ninguna se quedó a medias. Las cuatro cortas —38, 36, 
 | 5 | ✅ ~~Yelitza Pérez~~ · Crédito y Cobranza | Lo que faltaba de **S1** · `ENT-023`, 10 sep |
 
 *(Actualizado el 24 de septiembre: la tabla seguía dando por pendientes cuatro sesiones
-hechas entre el 10 y el 15.)* **Queda Alberto**, y `ENT-029` —el Coordinador de
-Distribuidores— está programada y sin hacer. El levantamiento vence el 7 de noviembre y
+hechas entre el 10 y el 15.)* **La reunión del 29 de septiembre hizo de entrevista de Alberto**
+—Gabriel se lo dijo así en la sala— y **se da por hecha con esa transcripción, que no se carga**
+(decisión de Gabriel del 9 de octubre). **Flaviano Tucci y Gustavo Carballo** los entrevistó el
+señor Carlos en Cagua el 7 de octubre, y **quedan privadas**. Queda `ENT-029` —el Coordinador de
+Distribuidores—, programada y sin hacer. El levantamiento vence el 7 de noviembre y
 alimenta el Documento de Arquitectura, que vence el 6 de diciembre.
 
 ⚠️ **Y hay dos personas de la lista original que conviene no perder de vista**: Vasco De
@@ -434,27 +439,103 @@ el comité antes de continuar con las fases siguientes»*.
 La reunión con Alberto es el **martes 29, de 11:00 a 13:00**, en la oficina de Gabriel y no en la
 de Alberto; antes, café con el señor Carlos a las 10:30. Muestra tres dibujos —el circuito, el
 mismo circuito visto desde los sistemas, y los alivios de la Fase 2—, y hace de entrevista de
-Alberto. *(Lo que la reunión habló de personas del cliente no va aquí: este archivo está en un
-repositorio público.)*
+Alberto. *(Lo que la reunión habló de personas del cliente no va aquí: este archivo vive en git,
+y el repositorio fue público hasta el 9 de octubre.)*
 
 | Qué falta | De quién | Cuándo |
 |---|---|---|
 | ~~Numeración 9 y 10 del circuito, «se factura», el área de cada estación, «No documentado» y «Propuesto», de dónde salen las fichas, H-18, el trombo 4, el hallazgo de la operación no escrita~~ ✅ Hecho el 25, en la base y en el generador | ✅ | |
 | **Decidir cómo se rotulan las fases**: la ola 1 es la Fase 2; ¿la ola 2 es la Fase 3 y la ola 3 la Fase 4? Hoy el informe dice «Ola 3 · Fase 3» y deja la ola 2 sin fase | Gabriel | Antes del martes |
-| **Preparar la respuesta a la objeción de seguridad**: hoy casi todo nace en Excel, y si JD se cae la operación sigue. La evidencia está en «Riesgo y continuidad» | Gabriel y el señor Carlos | Antes del martes |
-| **El estimado de la Fase 2**, con la documentación y la capacitación de quien use los módulos adentro. Alberto lo va a pedir; la ruta del informe va sin fechas a propósito, el estimado va aparte | Gabriel | Antes del martes |
+| ~~Preparar la respuesta a la objeción de seguridad~~ ✅ **Salió el 29 y se respondió**: Alberto preguntó si entrar a JD tumba el espejo; la respuesta fue la nube, los respaldos diarios y que el espejo permite, más adelante, salir de JD. Lo que queda es la misma conversación con Tecnología (ver abajo) | ✅ | |
+| **El estimado de la Fase 2**, con la documentación y la capacitación de quien use los módulos adentro. **No salió el 29**: Alberto preguntó «¿qué viene?» y la respuesta fue terminar el informe y después TI y el espejo, sin cifra | Gabriel | Antes de la entrega |
 | **Detallar la arquitectura de la ola 1**: sistema, conexión, API y documentación de cada módulo | Gabriel | Antes de la entrega |
-| **El peso de cuentas clave frente a bodegas en la facturación** no está en ninguna transcripción: solo «un 10% en numérica» de los puntos de venta (ENT-034). Pedirlo | Boosty | Antes del martes, si se puede |
-| **La política de cobranza por la fuerza de venta** no la dijo nadie. Preguntarla | Gabriel | En la reunión del 29 |
+| ~~El peso de cuentas clave frente a bodegas en la facturación~~ ✅ **Lo dijo Alberto el 29**: cuentas clave, 25–30% de la venta; independientes y cadenas regionales, ~30%; distribuidores, ~30%. Falta pasarlo al informe | Boosty pasa el dato | |
+| ~~La política de cobranza por la fuerza de venta~~ **Se preguntó el 29: no hay política escrita** entre Finanzas y Comercial. La única regla dicha es que **a las cuentas clave Crédito no les para el pedido**; lo demás lo arbitra Alberto caso por caso, y él mismo dijo que esa política debería existir. Va al informe como hallazgo, no como dato que falta | Boosty | |
 | **Pedir el Excel de la explosión** (Almacén de Materia Prima) **y la sábana de compras** (Compras) | Boosty | Pronto |
-| **Acordar con Alberto el formato de la entrega a la directiva**: quiénes, separada o no, qué se muestra. Y no circular material antes | Gabriel | En la reunión del 29 |
-| **Pasar el calendario del programa a la entrega de fines de octubre.** Se deja para después del martes a propósito: la fecha la acuerda Alberto, y `/dashboard/programa` lo lee Iberia | Boosty | Después del 29 |
-| **La entrevista de Flaviano**, con una sesión particular como la de Alberto | El señor Carlos | En el viaje de la formación de líderes |
+| ~~Acordar con Alberto el formato de la entrega a la directiva~~ ✅ **Acordado el 29**: ver «De la reunión con Alberto», abajo | ✅ | |
+| ~~Pasar el calendario del programa a la entrega del 21 de octubre~~ ✅ **Hecho el 9 de octubre**: levantamiento, inventario y arquitectura vencen el 21 (`VENCE` y los hitos de la base); la formación sigue al 31 y la planta al 30 de noviembre. Lo de `VENCE` y el texto de la página se ven en producción cuando se despliegue | ✅ | |
+| ~~Las entrevistas de Flaviano y de Gustavo Carballo~~ ✅ **Hechas el 7 de octubre en Cagua** por el señor Carlos. Quedan privadas | ✅ | |
 | **La tercera formación**, la de los líderes: los gerentes mandan la lista | Gabriel | En ~semana y media |
 | **El reporte de consumo de horas**, que ya pidieron desde Iberia y es de la cláusula 8 (ver «Lo transversal») | Gabriel | Ya |
 | **Quién administra la organización de Claude Team** y cómo se piden los accesos | Gabriel | Pronto |
-| **El proveedor de integración bancaria** para el módulo de Finanzas: «Tesote» sale en SES-002, sin nada cerrado. Confirmar nombre y estado | Boosty | Antes de detallar Finanzas |
+| ~~El proveedor de integración bancaria~~ ✅ **Alberto confirmó el 29 que ya firmó con Tesote.** Gabriel le había recomendado a Dora usar solo su tablero por ahora y no conectarlo a JD: la conciliación va en el espejo. Falta el nombre exacto del proveedor y si tiene API | Boosty | Antes de detallar Finanzas |
 | **El portal de sell-out con incentivo** para los distribuidores, que salió como alivio de Comercial: validarlo con el área | Gabriel | Para la propuesta de Fase 2 |
+
+### De la reunión con Alberto del 29 de septiembre
+
+Fueron casi tres horas en la oficina de Gabriel, con el señor Carlos. Se recorrieron el panel, el
+circuito con sus trombos, la vista de sistemas y el espejo con sus olas. **Alberto dio por bueno
+el circuito y el orden de la ola 1** —Compras, Comercial y Finanzas: «está bien pensado esas tres
+áreas»—, con Distribución pegada detrás, y cerró con «me tranquiliza». *(Lo que se habló de
+personas del cliente no va aquí: este archivo vive en git.)*
+
+**Lo que quedó acordado para la entrega:**
+
+- **Una jornada con los directores** —y Martha Fuentes—, encerrados en Caracas, como la del
+  Petit Comité. Alberto convoca cuando Gabriel le diga que el informe está listo.
+- **La abre Alberto**, asumiendo la responsabilidad: «se trata de arreglar, no de reclamar».
+  Después, el señor Carlos introduce el tema de la confianza y del control que no controla.
+- **Se presenta el circuito y sus trombos y se va directo a los alivios.** Cada trombo se cuenta
+  como ayuda a la gente que lo sufre —las facturas que se despegan a mano, conciliar banco por
+  banco—, sin señalar a nadie.
+- **Lo que deja a un área mal parada se queda fuera de esa sala**: Alberto nombró dos casos, y
+  están en la transcripción. Revisar las tarjetas del informe con ese criterio antes de la
+  jornada.
+
+| Qué falta | De quién | Cuándo |
+|---|---|---|
+| **Terminar el informe**: dar profundidad a la arquitectura de la ola 1 y terminar los macroprocesos | Gabriel y Jesús | **Antes del 21 de octubre** |
+| **Armar la presentación para los directores** con el criterio de arriba: circuito, trombos, alivios. No es el informe entero. Alberto ya les mostró capturas del sistema y los trombos el 30 de septiembre, sin entrar en detalle | Gabriel con el señor Carlos | **21 de octubre** |
+| ~~Decidir si la transcripción del 29 entra a la base~~ ✅ **No entra** (Gabriel, 9 de octubre): la entrevista de Alberto se da por hecha con ella, sin cargarla | ✅ | |
+| **Verificar el 15% de merma** que alguien dijo en una entrevista. Alberto lo pidió explícitamente: dijo que el sistema no le deja ver la merma real | Boosty, sobre el expediente | Antes de la entrega |
+| **Verificar de dónde sale la regla de no comprarle seguido al mismo proveedor**, la que Contabilidad aplica al cotejar las órdenes. Alberto no la reconoce («tenemos proveedores que tenemos 40 años comprándole») | Boosty, sobre el expediente | Antes de la entrega |
+| **Qué se hace con las transcripciones en el panel.** Gabriel le dijo a Alberto que son suyas y que él decide: dejarlas solo para él, documentarlas o borrarlas. Y le ofreció **un chat sobre ellas** («dime qué está pasando en Compras») para la entrega | Alberto decide · Gabriel construye el chat si se sigue | En la entrega |
+| **La conversación con la Gerencia de TI sobre el espejo**: dónde va el servidor, la nube, los respaldos, la VPN y qué pasa si JD se cae. En la Fase 2 TI va a estar dedicada a conectar JD, y hay una **brecha de formación técnica** que cubrir antes | Gabriel con el señor Carlos | Antes del comité |
+| **Quién coordina la Fase 2 por Iberia.** *(Cambió el 2 de octubre.)* El 29 Gabriel había propuesto a Ana, de Contabilidad. El 2 de octubre **Alberto dejó a Martha Fuentes como coordinadora del proyecto**, con la gobernanza de datos, la infraestructura y el ERP, y **a Milagro Salas con los procesos** (ver abajo). Lo que queda es **un perfil de apoyo a la coordinación**, que Gabriel busca entre la gente que conoció en las formaciones. Ana sigue como candidata para el gobierno de IA | Gabriel propone · Alberto decide | Antes de arrancar la Fase 2 |
+| **Teléfonos de trabajo en la recepción de materia prima y en todo Distribución**: equipos corporativos con todo bloqueado menos el sistema Iberia. Es condición de los alivios: la recepción con foto, las devoluciones y las fotos del despacho | Iberia decide | Para la propuesta de Fase 2 |
+| **Decidir si sin liberación de Calidad el almacén no despacha a la línea.** Alberto dijo que en teoría no debería, pero teme volverlo burocrático; con el espejo, el bloqueo se configura en horas. Es política, no sistema | Alberto | Para la ola 1 |
+| **Los alivios piden multimoneda**: bolívares y dólares con la brecha del día, y el flujo de caja a 13 semanas. Viene un esquema bimonetario por la dolarización | Gabriel, al detallar Finanzas | |
+| **Facturación digital**: Alberto ya firmó un contrato. Saber con quién y qué cubre, porque alivia el trombo de las facturas desglosadas a mano y toca Distribución | Boosty pregunta | Antes de detallar Distribución |
+| **La formación de líderes**: se intentó el 7 de octubre y no se pudo dictar por la VPN de Cagua. **Reprogramarla**, con la conexión probada antes —es el mismo problema de la primera formación— | Gabriel · la conexión, Martha Fuentes | Antes del 31 de octubre |
+| **«La transferencia de la cuenta»**: Alberto la sacó al final y quedó para otra conversación en línea. No se dijo cuál cuenta; probablemente la organización de Claude Team | Gabriel | |
+| **La clave temporal de Alberto se dijo en voz alta y quedó en la grabación.** Comprobar que la cambió | Gabriel | Ya |
+| **Lo que Alberto armó con Claude**: su cuadro de indicadores por área —ventas, producción, flujo de caja, impuestos, nómina—, alimentado con lo que le llega por correo. Es un artefacto por área, y la pregunta que dejó abierta —que se alimente solo a medida que llegan los correos del cierre— es un caso para la Fase 2 | Gabriel | |
+
+### De las reuniones del 2 y el 8 de octubre · el «Proyecto New»
+
+**El 2 de octubre** Gabriel y **Josué Bonilla** se reunieron con Alberto en Caracas. Josué es
+consultor organizacional, socio de Glocal e Instapago; estuvo en la sesión de lanzamiento. **El 8
+de octubre** fue en línea, con Alberto y **Milagro Salas**. De las dos salió un proyecto nuevo
+que se suma al programa, todavía sin propuesta: el **«Proyecto New» · Modelo organizativo:
+procesos y estructura**. El nombre lo puso Alberto.
+
+- **Qué es.** Terminar el levantamiento de procesos —Gabriel calcula que el de la arquitectura ya
+  recorrió un 30–35%—, documentar el cómo se hace hoy y el cómo debería hacerse, y sacar de ahí la
+  estructura organizativa y los cargos.
+- **Cómo.** Con la metodología de Josué: una **base de conocimiento** de la que el manual de
+  procesos, la estructura y los cargos salen como reportes. Los dueños de proceso la actualizan
+  con IA, y un comité valida los cambios.
+- **Quién lo lleva por Iberia.** Milagro Salas, Gerente de Calidad y Desarrollo, como líder de
+  procesos. Alberto la va a presentar así el 21.
+- **La prioridad de Alberto sigue siendo el alivio.** Los trombos van primero, porque quiere la
+  empresa lista para arrancar 2027. Los procesos van en paralelo y **no pueden volverse una camisa
+  de fuerza**: tiene que haber excepciones y niveles de autoridad claros para cambiar un proceso.
+- **Lo que trae Milagro.** Un sistema de gestión de calidad levantado hacia 2013 bajo ISO 9000,
+  que nunca se actualizó ni se certificó, rescatado en SharePoint. Con Claude ya actualizó más de
+  200 especificaciones de materia prima contra COVENIN y Fondonorma, con su lista maestra y su
+  gestión de cambio. También tiene un plan propio por trimestres.
+
+| Qué falta | De quién | Cuándo |
+|---|---|---|
+| **Que Milagro le mande a Gabriel su Gantt** del plan que armó al entrar | Milagro Salas | Ya |
+| **Armar las dos vías del Proyecto New** contra ese Gantt y el levantamiento: una **parcial** (la cadena de valor —calidad, producción, compras— con los procesos de la ola 1) y una **completa** (cadena de valor y staff, con la construcción). Cada una con **alcance, tiempo y costo**: Alberto decide con eso si sigue. Josué prefería empezar por un piloto en el área de Milagro; Gabriel lo descartó porque obliga a montar el equipo dos veces | Gabriel con Josué y el señor Carlos | **Un par de días antes del 21** |
+| **El componente económico de la Fase 2 y del Proyecto New.** Gabriel lo dijo el 2: la Fase 1 terminó antes de lo económico. Pensó en una cuota especial para la entrada | Gabriel | Con las dos vías |
+| **La reunión del 21 de octubre**, en Caracas y fuera de la oficina, con los cuatro directores que le reportan a Alberto, Martha Fuentes y Milagro Salas. Ahí se presentan el sistema, los trombos y las tres áreas por donde se entra, y sale el plan de trabajo de la Fase 2. Alberto quiere repartir las dos vías a los directores | Gabriel presenta · Alberto convoca | **21 de octubre** |
+| **Que el 21 quede claro qué hace cada una**: Martha Fuentes, la coordinación, la gobernanza de datos, la infraestructura y el ERP; Milagro, los procesos. El Proyecto New se presenta como algo nuevo que entra al programa, no como algo que se le quita a nadie | Alberto, con Gabriel | 21 de octubre |
+| **El gobierno de IA**: quiénes lo forman adentro —Milagro y Ana son candidatas— y si hace falta una cabeza de afuera. Mientras tanto, el equipo de proyecto hace sus veces | Gabriel propone | Para la Fase 2 |
+| **Dora pidió un entrenamiento individual con Gabriel**, con urgencia | Gabriel | Ya |
+| ~~Las horas de Josué~~ ✅ **A la bolsa**, como consultor senior (Gabriel, 9 de octubre): 2 h el 2 y 2 h el 8 | ✅ | |
+| ⚠️ **ENT-005, otra vez.** Milagro ya trabaja codo a codo con el proyecto, y su entrevista sigue grabada sin su consentimiento, con 38 hallazgos retenidos (ver arriba). Es el momento natural para hablarlo con ella | Gabriel | Antes del 21 |
 
 > ⚠️ **Lo que más va a costar defender.** De los 236 hallazgos, buena parte no se arregla
 > con IA: se arregla parametrizando JD Edwards, dando un permiso o capturando un dato que
@@ -496,6 +577,7 @@ repositorio público.)*
 |---|---|---|
 | 🔴 **Revisar el registro de horas y corregirlo.** Ya está cargado y itemizado en `/dashboard/programa`: **38 partidas**, cada una con la base de su número. Revisadas con Gabriel el 31 de agosto: el mes 1 cierra en **137 h contra 107**. Lo que falta es la última pasada antes del corte, que es en seis días | Gabriel | **Primer corte: 6 de septiembre** |
 | 🔴 **Revisar las 24 partidas de septiembre.** Cargadas el 25 con la base de cada una y el peso en Jesús Planas, como pidió Gabriel: **119 h**, procesos +51 sobre su cuota. Solo las 9 h por persona del entrenamiento del 23 salen de un dato; el resto son estimaciones, como las de agosto antes de su revisión. **Si se corrigen desde el panel, pasar la corrección a `scripts/sembrar-horas.mjs`**: el script ya no escribe si la base tiene partidas que él no conoce | Gabriel | Antes del reporte de septiembre |
+| **Octubre, a medio cargar.** Entraron el 9: las 35 h del 7 de octubre en Cagua —la formación de líderes que no se pudo dictar (Gabriel, Amanda, Melanieth Aponte y Carolina Ortiz, que son personal de apoyo y van como consultoras de procesos) y las entrevistas del señor Carlos—, y en la bolsa, por decisión de Gabriel, las reuniones con Alberto: la del 29 de septiembre (3 h Gabriel, 3 h el señor Carlos) y las del 2 y el 8 de octubre (2 h Gabriel y 2 h Josué Bonilla cada una, Josué como consultor senior). Octubre va en 43 h. **Falta** el trabajo del informe y de la entrega, y al cerrar el mes, su línea en `LO_QUE_TRAJO_EL_MES` | Gabriel dice · Boosty carga | Al cerrar octubre |
 | 🔴 **Redactar el reporte mensual de consumo**, que es obligación de la cláusula 8 y nunca se ha entregado uno. **`/dashboard/programa` ya está escrito para que lo lea Iberia** —qué horas, quién las dedicó y cómo va el calendario—, así que el reporte se apoya en la página en vez de repetirla: lo que aporta es la lectura, no la tabla | **Boosty** | **6 de septiembre** |
 | ~~**Dar de alta a Iberia en el dashboard**~~ ✅ **Hecho el 27 de septiembre**: Alberto (Administrador), Martha Fuentes (Lector Iberia) y Martha Álvarez (Marketing), cada una enlazada a su ficha. Las que sigan las decide Alberto | — | |
 | **Revisar con Gabriel la matriz de «Lector Iberia»**, que ya tiene una cuenta (Martha Fuentes). *(Ver también, arriba, que no tiene ninguna sección del informe marcada.)* *(El 25 de septiembre ya estaba ajustada desde el panel: no ve entrevistas, archivos ni hallazgos. Queda confirmar que así se da.)* Hoy reproduce lo que el nivel lector veía antes del 25 de septiembre: panel, entrevistas, archivos, el programa, el adiestramiento, el canal y las once secciones (solo las publicadas). *(Hallazgos y el editor del informe salieron del panel el 25; el mapa se ve ahora con la casilla de su sección.)* Es mucho más que el informe y el programa: conviene decidir si la dirección de Iberia ve las transcripciones y los hallazgos crudos | Gabriel decide · **Boosty** marca en `/dashboard/roles` | Antes del alta de Iberia |
@@ -506,14 +588,15 @@ repositorio público.)*
 | **Designación del liderazgo interno del proyecto** (cláusula 7). Martha Fuentes fue nombrada «coordinadora»; hay que verificar si eso lo cierra o si falta la figura transversal | Alberto García-Ramos | |
 | **Responsable interno de comunicación** (cláusula 10) | Alberto García-Ramos | |
 | ~~Reactivar la suscripción de Azure~~ ✅ **Hecho el 26 de septiembre**: pasó a pago por uso y la clave de siempre volvió a servir. Ya están la voz de hombre (70 audios), las devoluciones habladas y la transcripción, también en producción. Queda opcional **regenerar la clave**, que quedó visible en una captura | Gabriel, si decide regenerarla | |
-| 🔴 **Elegir el dominio definitivo antes de mandar el primer enlace personal.** Hoy es `iberiavenezuela.netlify.app`, y los ~200 enlaces llevan el dominio dentro: cambiarlo después obliga a acuñarlos y mandarlos otra vez. Al cambiarlo: `NEXT_PUBLIC_SITE_URL` en Netlify, *Site URL* y *Redirect URLs* en Supabase, y desplegar | Gabriel con Iberia | Antes del primer envío |
+| 🔴 **Elegir el dominio definitivo antes de mandar el primer enlace personal.** Hoy es `iberiavenezuela.netlify.app`, y los ~200 enlaces llevan el dominio dentro: cambiarlo después obliga a acuñarlos y mandarlos otra vez. Al cambiarlo: `NEXT_PUBLIC_SITE_URL` en Netlify, *Site URL* y *Redirect URLs* en Supabase, y desplegar. *(El 29 Gabriel le habló a Alberto de un «Portal Iberia Venezuela» con los activos de Iberia; el nombre no está cerrado)* | Gabriel con Iberia | Antes del primer envío |
 | **Probar `/entrar` de punta a punta en producción** con una persona de prueba y un teléfono de verdad: acuñar su enlace en el padrón, abrirlo y entrar sin clave. Es la puerta de las 200 personas | **Boosty** | Antes del primer envío |
 | ⚠️ **Que `handle_new_user` deje de fiarse de los metadatos del alta.** Hoy toma el rol de `raw_user_meta_data`, que en un registro lo pone quien se registra. Con el registro cerrado —desde el 25 de septiembre— no hay por dónde, pero si alguien lo reabre vuelve la escalada. Lo sólido es pasar el rol a `app_metadata`, que solo escribe la clave de servicio, en las tres altas del código y en el trigger | **Boosty** | |
 | **La cuenta de Netlify deja el login de equipo como valor de fábrica.** Un sitio nuevo en esa cuenta nace cerrado a quien no sea miembro. Es buen valor por defecto; se deja dicho para que un 401 en un sitio nuevo no se busque en el código | — | |
 | **Apagar los JWT legacy en Supabase.** El código no los usa; falta apagarlos en el panel. Antes, comprobar que nada fuera de este repositorio los use | **Boosty** | |
 | **Registrar los certificados en Capital Humano** cuando llegue la Fase 2 | Gustavo Carballo | |
-| 🔴 **Cerrar el repositorio.** `Boosty-Hub/iberia` es **público** y su historia lleva material bajo NDA —versiones viejas de la bitácora con nombres, citas y el detalle del ataque—. Desde el 27 de septiembre la sesión de GitHub de esta máquina tiene permiso de administrador: `gh repo edit Boosty-Hub/iberia --visibility private --accept-visibility-change-consequences`. Antes, confirmar que Netlify sigue desplegando con el repositorio privado | **Gabriel** decide | Ya |
-| 🔴 **`RowerConsultoria` tiene permiso de escritura** en el repositorio y no se sabe de quién es: cuenta personal creada el 17 de julio, sin organización. Comprobado el 27 de septiembre: sigue ahí | **Gabriel** | Ya |
+| ~~Cerrar el repositorio~~ ✅ **Privado desde el 9 de octubre.** Fue público del 11 de agosto al 9 de octubre, con material bajo NDA en la historia. El primer intento falló: el plan Team tiene 6 asientos, los 6 ocupados, y un repositorio privado le exige asiento a cada colaborador externo | ✅ | |
+| ~~`RowerConsultoria` tenía permiso de escritura~~ ✅ **Se le quitó el acceso el 9 de octubre**, por decisión de Gabriel: era el colaborador externo que no dejaba cerrar el repositorio. Si resulta ser de alguien del equipo, se le invita otra vez —y necesita asiento— | ✅ | |
+| **Confirmar que Netlify sigue desplegando** ahora que el repositorio es privado | Boosty | Con el próximo push |
 | **Seis alertas de Dependabot** abiertas (4 críticas, 2 altas) en las dependencias, comprobadas el 27 de septiembre. Actualizar con la verificación visual completa después: puede romper el render | **Boosty** | Después de la reunión del 29 |
 
 ### El mes 1 cierra en 137 horas contra una bolsa de 107
