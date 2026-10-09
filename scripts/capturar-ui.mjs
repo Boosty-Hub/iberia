@@ -67,6 +67,12 @@ const PAGINAS = [
   { nombre: '11b-informe-hallazgos', ruta: '/informe/hallazgos' },
   { nombre: '11c-informe-mapa', ruta: '/informe/mapa-interactivo' },
   { nombre: '11d-informe-arquitectura', ruta: '/informe/arquitectura-ia' },
+  // El triángulo de la plataforma, desde el 9 de octubre de 2026.
+  { nombre: '11e-informe-plataforma', ruta: '/informe/plataforma' },
+  { nombre: '11f-informe-seguridad', ruta: '/informe/seguridad-operacion' },
+  { nombre: '11g-informe-ia', ruta: '/informe/ia-en-el-sistema' },
+  { nombre: '11h-informe-fichas-tecnicas', ruta: '/informe/fichas-tecnicas' },
+  { nombre: '11i-informe-politica', ruta: '/informe/politica-ia' },
   { nombre: '12-programa', ruta: '/dashboard/programa' },
   { nombre: '13-empleados', ruta: '/dashboard/empleados' },
 ]

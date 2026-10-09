@@ -1311,6 +1311,19 @@ oportunidades → 10 La arquitectura de IA: el sistema Iberia → 11 La ruta de 
   `informe_circuito_puntos.fase` en `2/3/sin`, con planta en `3` y distribución en `sin`— porque
   las restringe un `check`; los rótulos que se ven salen de `FASE` y `OLA` en
   `components/circuitos-informe.tsx`.
+- **El documento técnico va dentro del informe** (9 de octubre de 2026, Gabriel), en «Qué
+  proponemos», entre la arquitectura y la ruta: `plataforma` (abre con el triángulo,
+  `components/plataforma-iberia.tsx`, que la página pinta por slug), `seguridad-operacion`,
+  `ia-en-el-sistema` y `fichas-tecnicas`. Al final va `politica-ia`, la política de adopción de
+  IA en borrador, escrita desde Iberia. El brief con las decisiones está en
+  `contenido/informe/BRIEF-TECNICO.md`.
+  - 🔴 **Todo vive en la nube.** El espejo es un proyecto de Supabase a nombre de Iberia; no se
+    ofrece la variante en servidores de la planta. Dentro de la planta solo va **el conector**,
+    que lee DB2, postea por el Orchestrator y **solo abre conexiones hacia afuera**: empuja lo
+    leído y va a buscar la cola de posteo.
+  - **El informe lo leen los directivos.** El rol «Dirección Iberia» (`direccion-iberia`, nivel
+    lector) lee las dieciséis secciones y nada más; las cuentas se crean cuando Alberto diga
+    quiénes. Una sección nueva le entra apagada: hay que marcarla en Roles y permisos.
 - **«La Fase 2, por dentro»**, en la arquitectura: para Compras, Comercial y Finanzas, qué lee de
   JD (con los objetos estándar de JD Edwards, que Tecnología confirma en el paso 0), qué postea
   por el Orchestrator, dónde va la IA y los cinco documentos que deja cada módulo.

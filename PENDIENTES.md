@@ -48,6 +48,17 @@ detalle de cada cosa sigue en su sección.*
 | ~~La prosa, formal y sin «quién lo dijo»~~ | ✅ Las once secciones, sin atribuciones. El título de H-23 dejó de decir la edad de una persona |
 | ~~Publicar~~ | ✅ Publicadas las once. Las ven el nivel administrador (Alberto) y el equipo de Boosty; Lector Iberia y Marketing no tienen secciones marcadas |
 
+**El documento técnico y la política** · ✅ escritos y publicados el 9 de octubre: cinco secciones nuevas en «Qué proponemos» —la plataforma con su triángulo, seguridad y operación, la IA dentro del sistema, las fichas técnicas de los nueve módulos y la política de adopción de IA en borrador—. El espejo vive en la nube. Lo que dejaron abierto:
+
+| Qué | De quién |
+|---|---|
+| **Leer las cinco secciones nuevas**: las redactaron cuatro agentes con un brief común y se revisaron por muestreo, no línea por línea | Gabriel |
+| **Las cifras de diseño son propuestas nuestras**, no datos de Iberia: rotación de claves a 90 y 180 días, volver en 4 horas, 14 días de recuperación, alertas a 5 y 15 minutos, el centenar de casos para medir cada capacidad de IA, y la convención `IB_<módulo>_<operación>` para las orquestaciones | Gabriel con Tecnología |
+| **Lo que Tecnología tiene que confirmar**: si el doble factor ya está activo en Microsoft 365, si la planta tiene un segundo enlace a internet, que exista el ambiente de pruebas de JD, los objetos de JD que se nombran, y dónde va la copia externa de los respaldos | Gerencia de TI |
+| **Lo que decide Finanzas y Comercial**: de qué fuente sale la tasa paralela, y qué se queda en EXA y qué pasa al módulo Comercial | Dirección de Finanzas · Dirección de Comercialización |
+| **La política tiene nueve puntos marcados *por decidir*** para la Gerencia, Capital Humano y la asesoría legal: cómo entra a los contratos con terceros, los plazos de respuesta, quién integra el comité, la retención del registro, el teléfono propio, entre otros | Gerencia General · Capital Humano · asesoría legal |
+| **Cuentas para los directores** con el rol «Dirección Iberia», que ya lee las dieciséis secciones y nada más del panel | Gabriel con Alberto |
+
 Lo que queda del informe, para leerlo antes del 21:
 
 | Qué | De quién |
@@ -66,7 +77,7 @@ Lo que queda del informe, para leerlo antes del 21:
 | **Las dos vías del Proyecto New**, con alcance, tiempo y costo, a Alberto un par de días antes. Antes, el Gantt de Milagro | Gabriel · Milagro manda el Gantt |
 | **El componente económico de la Fase 2.** Y cómo empalma con lo que queda del contrato: la Fase 1 cierra el 21, pero el plazo mínimo y el fee corren hasta el 6 de enero, y la Fase 2 arrancaría a fines de octubre. **Hay que dejarlo por escrito**, junto con qué es «el período en curso» para el aviso de renovación | Gabriel con Alberto |
 | **La aprobación del documento** (cláusula 7): que la sesión termine con una aprobación que conste, no solo con el visto bueno de la sala | Gabriel |
-| **Dónde vive el espejo, en la planta o en la nube**, y la conversación con TI. La Ruta lo pone como la única decisión técnica antes de aprobar | Iberia · Gabriel prepara a TI |
+| ~~Dónde vive el espejo~~ ✅ **En la nube** (Gabriel, 9 de octubre): dentro de la planta solo va el conector, que solo abre conexiones hacia afuera. Queda **la conversación con TI**: la máquina del conector, la cuenta de solo lectura, el AIS y las reglas de salida (en «La plataforma») | Gabriel prepara a TI |
 
 **El cierre de los otros entregables**
 
@@ -487,7 +498,7 @@ el comité antes de continuar con las fases siguientes»*.
 | **Leer y ajustar la prosa de las secciones reescritas** antes de publicar: 02 hallazgos, 05 a 08 (sistemas, inventario, riesgo y trabas), 09 oportunidades, 10 arquitectura y 11 ruta. En las oportunidades, mirar sobre todo **dónde cayó cada una**: 25 en un módulo, 4 fuera del sistema Iberia —ninguna de IA— con el módulo más cercano nombrado, y la etiqueta de dato de cada tarjeta. Las correcciones se hacen en sesión, no en el panel. Las seis del 25 las reescribieron agentes sobre el texto que había, sin inventar datos; los respaldos están en `contenido/informe-v2/` y en `Insumos/Respaldo_Informe_2026-09-25` | Gabriel y Jesús |
 | **Revisar los niveles de criticidad.** Hay 14 hallazgos en crítico, 24 en atención y 4 en funciona, y en las otras secciones cada tarjeta lleva el suyo. Decisiones de criterio para mirar: JD Edwards va en verde aunque su configuración a medias sea el problema central; los cinco sistemas perdidos, en rojo; H-08 —los 16 días— en ámbar y H-09 —la firma que falta— en rojo. Un nivel se cambia editando la etiqueta de la tarjeta; el del anillo, en el taller de circuitos | Gabriel y Jesús |
 | **Contrastar la arquitectura con la Gerencia de Tecnología antes del comité**: el usuario de solo lectura en DB2, qué operaciones expone el Orchestrator y con qué usuario de servicio, qué tablas necesitan tiempo real. Si Tecnología no la hace suya, el paso 0 no arranca | Gabriel con la Gerencia de TI |
-| 🔴 **Decidir dónde vive el espejo: en la planta o en la nube.** Es la única decisión técnica que la ruta pide antes de diciembre, porque sin ella el paso 0 no puede empezar el día que se apruebe | **Iberia** · la Gerencia de TI |
+| ~~Decidir dónde vive el espejo~~ ✅ **En la nube, decidido el 9 de octubre** por Gabriel. Lo que Tecnología prepara para el paso 0 está al final de «La plataforma» | ✅ |
 | ~~Cosechar la ronda 2~~ **Hecho el 16 de septiembre: 394 hallazgos, 37 de 42 sesiones.** Quedan fuera ENT-005 (sin consentimiento), ENT-029 (sin hacer) y las dos formaciones más la reunión con la agencia, que no contienen hallazgos de proceso | ✅ |
 | 🔴 **Validar los hallazgos con Iberia.** De los 394, **solo 2 están validados**, y validar lo hace quien estuvo en la entrevista, no nosotros. *(Hasta el 9 de octubre esto bloqueaba publicar; ese día Gabriel decidió publicar el informe igual, para la entrega del 21. La validación sigue siendo lo primero de «Lo que queda por cerrar» en la Ruta.)* ⚠️ **Desde el 25 de septiembre no hay pantalla para marcarlo**: se lleva el expediente a la mesa y el resultado se carga en sesión | **Iberia**, con Gabriel |
 | ⚠️ **Identificar a los hablantes de `SES-002`** (siete sin nombre) y parte de `SES-005`. De ahí salen hallazgos de gobierno cuya cita es literal pero que no se pueden atribuir por nombre. Quien estuvo en la sala los reconoce de una | Gabriel o Martha |

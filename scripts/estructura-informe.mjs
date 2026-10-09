@@ -117,9 +117,18 @@ const SECCIONES = [
   // «Dónde no va la IA» salió como sección: lo que prometía —decir dónde
   // interviene la IA y dónde no— ahora lo dice cada módulo del sistema Iberia,
   // capacidad por capacidad.
-  ['arquitectura', 'oportunidades', 'Las oportunidades, priorizadas', 'Por ola y por módulo del sistema Iberia: qué destraba cada una y si su dato ya existe'],
+  ['arquitectura', 'oportunidades', 'Las oportunidades, priorizadas', 'Por fase y por módulo del sistema Iberia: qué destraba cada una y si su dato ya existe'],
   ['arquitectura', 'arquitectura-ia', 'La arquitectura de IA: el sistema Iberia', 'El espejo de JD, sus módulos, dónde opera la IA y la tecnología que lo sostiene'],
-  ['arquitectura', 'hoja-de-ruta', 'La ruta de construcción', 'Paso a paso y por olas: qué necesita cada paso y cómo se sabe que funcionó'],
+  // El documento técnico, desde el 9 de octubre de 2026 (Gabriel): va dentro del
+  // informe, en esta parte, porque el informe lo leen solo los directivos. El
+  // espejo vive en la nube; dentro de la planta solo va el conector con JD.
+  ['arquitectura', 'plataforma', 'La plataforma: componentes y conexión con JD', 'Cada pieza del sistema Iberia, cómo se habla con JD y cómo se organiza el dato'],
+  ['arquitectura', 'seguridad-operacion', 'Seguridad, continuidad y operación', 'El perímetro, la identidad, los permisos, los respaldos y qué pasa cuando algo se cae'],
+  ['arquitectura', 'ia-en-el-sistema', 'La IA dentro del sistema', 'Cómo trabaja, qué no hace, cómo se mide antes de encenderla y quién la gobierna'],
+  ['arquitectura', 'fichas-tecnicas', 'Los nueve módulos, ficha técnica', 'Qué lee, qué crea, qué postea y cómo se acepta cada módulo'],
+  ['arquitectura', 'hoja-de-ruta', 'La ruta de construcción', 'Paso a paso y por fases: qué necesita cada paso y cómo se sabe que funcionó'],
+  // La política es de Iberia, no de la consultoría: va en borrador, al final.
+  ['arquitectura', 'politica-ia', 'Política de adopción de IA · borrador', 'Cómo adoptamos la IA en Iberia: principios, herramientas, información y gobierno'],
 ]
 
 /**

@@ -13,6 +13,7 @@ import {
 import { IndiceSeccion } from '@/components/informe/indice-seccion'
 import { Markdown } from '@/components/markdown'
 import { MarkdownPlegable } from '@/components/markdown-plegable'
+import { PlataformaIberia } from '@/components/plataforma-iberia'
 import { Insignia } from '@/components/ui'
 import { esEditor, puede, requerirSesion } from '@/lib/auth'
 import { encabezadosDe, minutosDeLectura } from '@/lib/encabezados'
@@ -267,6 +268,9 @@ export default async function SeccionInformePage({ params, searchParams }: PageP
               inicial={pedido('modulo')}
             />
           )}
+          {/* La plataforma abre con su triángulo: la aplicación, el espejo y el
+              código en la nube, y el conector como única pieza dentro de la planta. */}
+          {seccion.slug === 'plataforma' && <PlataformaIberia />}
 
           {conLateral && (
             <div className={cn('mt-6', plegadoOculto)}>
