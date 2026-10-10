@@ -152,6 +152,17 @@ export function IndiceInforme({ secciones }: { secciones: EntradaIndice[] }) {
       return siguiente
     })
 
+  // Las partes se pliegan (9 de octubre de 2026, pedido de Gabriel): con dieciséis
+  // secciones la columna ya no cabía en una pantalla. **Por defecto va abierta la
+  // parte donde está el lector**, y lo que se toque a mano manda sobre eso. Se
+  // deriva en vez de abrirla con un efecto: al cambiar de sección, la parte nueva
+  // se abre sola sin cerrar las que el lector abrió.
+  const parteActiva = secciones.find((s) => ruta === rutaDeSeccion(s.slug))?.parte
+  const [partesTocadas, setPartesTocadas] = useState<Map<string, boolean>>(() => new Map())
+  const parteAbierta = (parte: string) => partesTocadas.get(parte) ?? parte === parteActiva
+  const alternarParte = (parte: string) =>
+    setPartesTocadas((previas) => new Map(previas).set(parte, !parteAbierta(parte)))
+
   return (
     <nav aria-label="Índice del informe" className="px-3 py-4">
       <Link
@@ -170,12 +181,46 @@ export function IndiceInforme({ secciones }: { secciones: EntradaIndice[] }) {
         const delParte = secciones.filter((s) => s.parte === parte)
         if (delParte.length === 0) return null
 
+        // La apertura es una sola sección: plegarla esconde un enlace detrás de otro.
+        const plegable = parte !== 'portada'
+        const abierta = !plegable || parteAbierta(parte)
+        const rotulo = PARTES_INFORME[parte as ParteInforme]
+
         return (
           <div key={parte} className="mt-4">
-            <p className="mb-1 px-3 text-[11px] font-semibold tracking-[0.12em] text-marca-400 uppercase">
-              {PARTES_INFORME[parte as ParteInforme]}
-            </p>
-            <ol className="space-y-0.5">
+            {plegable ? (
+              <button
+                type="button"
+                onClick={() => alternarParte(parte)}
+                aria-expanded={abierta}
+                aria-controls={`parte-${parte}`}
+                className={cn(
+                  'mb-1 flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-left text-[11px] font-semibold tracking-[0.12em] uppercase transition-colors hover:bg-[var(--fondo)] hover:text-acento-700',
+                  parte === parteActiva ? 'text-marca-600' : 'text-marca-400'
+                )}
+              >
+                <span className="flex-1">{rotulo}</span>
+                {/* Plegada, dice cuántas secciones guarda: sin eso, una parte
+                    cerrada no dice si adentro hay una o seis. */}
+                {!abierta && (
+                  <span className="font-mono text-[10px] tracking-normal text-marca-400">
+                    {delParte.length}
+                  </span>
+                )}
+                <span
+                  aria-hidden
+                  className={cn(
+                    'h-1.5 w-1.5 border-r-2 border-b-2 border-current transition-transform duration-150',
+                    abierta ? 'rotate-45' : '-rotate-45'
+                  )}
+                />
+              </button>
+            ) : (
+              <p className="mb-1 px-3 text-[11px] font-semibold tracking-[0.12em] text-marca-400 uppercase">
+                {rotulo}
+              </p>
+            )}
+            <ol id={`parte-${parte}`} hidden={!abierta} className="space-y-0.5">
               {delParte.map((s) => {
                 const activa = ruta === rutaDeSeccion(s.slug)
                 return (

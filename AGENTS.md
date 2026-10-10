@@ -1129,6 +1129,9 @@ mismo del panel). Antes la hoja iba pegada a la izquierda y a 1920 px dejaba 736
   `GithubSlugger` para todo el documento y en orden (`lib/encabezados.ts`). Uno por
   encabezado da el mismo id a dos títulos iguales. La auditoría comprueba que cada enlace
   encuentre su destino: 750 revisados, 0 rotos.
+- **Las partes del índice se pliegan** (9 de octubre de 2026): «Lo que encontramos», «Cómo
+  funciona hoy» y «Qué proponemos»; la apertura, no. Arranca abierta la parte donde está el
+  lector, y lo que se toque a mano manda (`IndiceInforme`).
 - Las anclas se corren lo que mide la cabecera fija (`scroll-margin-top` en `.prosa`), y
   las tablas avisan con una sombra en el borde cuando se deslizan.
 
