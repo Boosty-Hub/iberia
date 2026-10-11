@@ -80,6 +80,23 @@ recalculados, anécdotas fuera y niveles recalibrados.
 - ⚠️ En desarrollo, un enlace con ancla a una ficha da un aviso de hidratación: Chrome abre el
   `<details>` antes de que React hidrate. Es de antes del repaso y no se ve.
 
+**Los ajustes de Gabriel, el mismo día:**
+
+- **El inventario tecnológico no es reservado: se nombra todo.** Salió de los perímetros.
+- **Los perímetros sensibles, conciliados.** Eran tres en «La IA dentro del sistema», cinco en
+  «Seguridad» y seis en la política, con tres autoridades distintas para abrirlos. Del
+  levantamiento salieron las investigaciones de Prevención y Control de Pérdidas y el servicio
+  médico (el inventario venía de un supuesto de Tecnología); la nómina y las fórmulas, del diseño.
+  Quedan **cuatro** en todas partes, y abrir uno lo pide el dueño, lo evalúa Tecnología y lo
+  aprueba el comité, como dice la política.
+- **«Contabilidad paralela» se queda** en la ficha 1.1.
+- **La ruta ya no tiene «Lo que queda por cerrar».**
+- **El propósito de la política distingue**: en lo administrativo y de soporte, liberar tiempo de
+  las tareas repetitivas; en producción, más control y trazabilidad. Es el criterio de Carlos
+  Quintana (`CONTEXTO_IBERIA.md`, 13.2): para la nómina diaria su trabajo *es* la tarea
+  repetitiva, y «la quitamos» se lee como amenaza. Las reuniones del 29 de septiembre y del 2 de
+  octubre dicen lo mismo de la línea: paradas y trazabilidad por cámara, sin celulares.
+
 ---
 
 ## 9 de octubre · Sesión 48 — Alberto, el Proyecto New y la fecha de entrega

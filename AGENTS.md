@@ -1178,6 +1178,11 @@ ejemplos, está en `contenido/informe/GUIA-TONO.md`. Lo esencial:
   tiene es base que se aprovecha, no un error.
 - **`[Crítico]` es para pocos**: 9 de 42 desde el repaso; una historia o un riesgo de
   información sin efecto en la operación va en atención.
+- **En la planta no se «quitan tareas repetitivas»**: para la nómina diaria su trabajo *es* la
+  tarea repetitiva, y la frase se lee como amenaza (Carlos Quintana, `CONTEXTO_IBERIA.md` 13.2).
+  Lo administrativo y de soporte libera tiempo; la producción gana **control y trazabilidad**.
+- **El inventario tecnológico se nombra entero** —marcas, equipos, versiones—: no es reservado
+  (Gabriel, 11 de octubre de 2026).
 - ⚠️ **Seis secciones más salieron del generador** —hallazgos, sistemas y estado del dato,
   inventario, riesgo, trabas y oportunidades— y se escriben en Supabase, como la arquitectura y
   la ruta. Se
@@ -1344,6 +1349,12 @@ oportunidades → 10 La arquitectura de IA: el sistema Iberia → 11 La ruta de 
   `ia-en-el-sistema` y `fichas-tecnicas`. Al final va `politica-ia`, la política de adopción de
   IA en borrador, escrita desde Iberia. El brief con las decisiones está en
   `contenido/informe/BRIEF-TECNICO.md`.
+  - **Los perímetros sensibles son cuatro**, y los mismos en «Seguridad», «La IA dentro del
+    sistema», la arquitectura y la política: investigaciones de Prevención y Control de
+    Pérdidas, servicio médico, nómina y fórmulas. Abrir uno lo pide su dueño, lo evalúa
+    Tecnología y lo aprueba el comité. Los datos personales y las credenciales son restringidos
+    en la política, pero no son perímetros. Hasta el 11 de octubre de 2026 eran tres, cinco o
+    seis según la sección.
   - 🔴 **Todo vive en la nube.** El espejo es un proyecto de Supabase a nombre de Iberia; no se
     ofrece la variante en servidores de la planta. Dentro de la planta solo va **el conector**,
     que lee DB2, postea por el Orchestrator y **solo abre conexiones hacia afuera**: empuja lo
