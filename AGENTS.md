@@ -1134,6 +1134,10 @@ mismo del panel). Antes la hoja iba pegada a la izquierda y a 1920 px dejaba 736
   lector, y lo que se toque a mano manda (`IndiceInforme`).
 - Las anclas se corren lo que mide la cabecera fija (`scroll-margin-top` en `.prosa`), y
   las tablas avisan con una sombra en el borde cuando se deslizan.
+- **El índice marca con un icono las secciones con dibujo** (11 de octubre de 2026, Gabriel):
+  `CON_DIBUJO` en `lib/informe-rutas.ts`. Una sección que estrene dibujo se añade ahí el mismo
+  día; la página decide qué pinta con `CON_CIRCUITOS` y la plataforma aparte, y las dos listas
+  tienen que decir lo mismo.
 
 ### El orden: primero lo que se encontró
 

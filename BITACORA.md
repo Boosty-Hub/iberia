@@ -96,6 +96,11 @@ recalculados, anécdotas fuera y niveles recalibrados.
   Quintana (`CONTEXTO_IBERIA.md`, 13.2): para la nómina diaria su trabajo *es* la tarea
   repetitiva, y «la quitamos» se lee como amenaza. Las reuniones del 29 de septiembre y del 2 de
   octubre dicen lo mismo de la línea: paradas y trazabilidad por cámara, sin celulares.
+- **La política ya no dice «nuestra gente»**, que separa a quien escribe de su gente (Carlos
+  Quintana, 13.3): dice «todos los que trabajamos en Iberia» y «nosotros».
+- **El índice marca con un icono las secciones con dibujo** —02, 03, 05, 10 y 11— y lleva su
+  leyenda al pie, porque en el teléfono no hay tooltip. Gabriel pidió 02, 05, 10 y 11; la 03 entró
+  porque es el mapa interactivo.
 
 ---
 

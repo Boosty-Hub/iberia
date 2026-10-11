@@ -265,6 +265,14 @@ export const IconoCandado = (p: Props) => (
   </Base>
 )
 
+/** Un marco con un trazo: la sección trae un dibujo interactivo. */
+export const IconoGrafico = (p: Props) => (
+  <Base {...p}>
+    <rect x="3" y="4" width="18" height="16" rx="2.5" />
+    <path d="M7 15.5l3.5-4 3 2.5L17 9" />
+  </Base>
+)
+
 /** Lista con viñetas: el índice de la sección. */
 export const IconoLista = (p: Props) => (
   <Base {...p}>

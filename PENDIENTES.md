@@ -69,7 +69,7 @@ Lo que queda del informe, para leerlo antes del 21:
 | ~~Los niveles~~ ✅ **Revisados el 11 de octubre** con la regla escrita: H-01, H-21, H-24, H-25 y H-30 pasaron a atención. Quedan 9 críticos de 42 | Gabriel |
 | ~~Los perímetros sensibles y el inventario tecnológico~~ ✅ **Conciliados el 11 de octubre** (Gabriel): el inventario tecnológico deja de ser reservado y se nombra todo, y los perímetros son **cuatro** en todo el informe —investigaciones de Prevención y Control de Pérdidas, servicio médico, nómina y fórmulas—, con un solo camino para abrirlos: lo pide el dueño, lo evalúa Tecnología y lo aprueba el comité. Los datos personales y las credenciales siguen restringidos en la política, sin ser perímetros | ✅ |
 | **La ficha 1.2 dice que el presupuesto de venta se carga al ERP, y la 2.1 y H-03 dicen que no.** Encontrado en el repaso de tono; es un dato, hay que confirmarlo | Gabriel |
-| **La política dice «nuestra gente»** en el alcance, en el registro de uso y en varias reglas, y va escrita desde Iberia. Carlos Quintana lo pidió al revés (`CONTEXTO_IBERIA.md`, 13.3): «nuestra gente» separa a quien escribe de su gente. Decidir si se cambia | Gabriel |
+| ~~«Nuestra gente» en la política~~ ✅ **Cambiado el 11 de octubre** (Gabriel), con el criterio de Carlos Quintana (`CONTEXTO_IBERIA.md`, 13.3): «todos los que trabajamos en Iberia», «nuestra privacidad», «todos nosotros». La sección 10 se llama ahora «Registro de uso y nuestra privacidad» | ✅ |
 | **Si los directores van a leer el informe**, darles cuenta con un rol que tenga las secciones marcadas | Gabriel con Alberto |
 
 **La sesión del 21**

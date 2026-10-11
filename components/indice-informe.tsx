@@ -3,9 +3,10 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
+import { IconoGrafico } from '@/components/iconos'
 import { IndicadorEnlace } from '@/components/indicador-enlace'
 import { revelarAncla } from '@/components/markdown-plegable'
-import { rutaDeSeccion } from '@/lib/informe-rutas'
+import { CON_DIBUJO, rutaDeSeccion } from '@/lib/informe-rutas'
 import { PARTES_INFORME, PARTES_INFORME_ORDEN, type ParteInforme } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
@@ -254,6 +255,16 @@ export function IndiceInforme({ secciones }: { secciones: EntradaIndice[] }) {
                         >
                           {s.titulo}
                         </span>
+                        {/* Dónde están los gráficos (11 de octubre de 2026): el icono
+                            va al borde derecho, en columna, para leerse de un vistazo. */}
+                        {CON_DIBUJO.has(s.slug) && (
+                          <span className="ml-auto flex shrink-0 pt-0.5" title="Con gráfico interactivo">
+                            <IconoGrafico
+                              className={cn('h-4 w-4', activa ? 'text-acento-600' : 'text-marca-400')}
+                            />
+                            <span className="sr-only">, con gráfico interactivo</span>
+                          </span>
+                        )}
                         <IndicadorEnlace className="mt-1" />
                       </Link>
 
@@ -280,6 +291,14 @@ export function IndiceInforme({ secciones }: { secciones: EntradaIndice[] }) {
           </div>
         )
       })}
+
+      {/* La leyenda del icono: en el teléfono no hay «title» que la diga al pasar. */}
+      {secciones.some((s) => CON_DIBUJO.has(s.slug)) && (
+        <p className="mt-6 flex items-center gap-2 px-3 text-[11px] text-marca-400">
+          <IconoGrafico className="h-3.5 w-3.5 shrink-0" />
+          Con gráfico interactivo
+        </p>
+      )}
     </nav>
   )
 }
