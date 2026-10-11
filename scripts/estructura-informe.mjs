@@ -74,9 +74,10 @@ const SECCIONES = [
   // ordenadas, en tarjetas y con nivel de criticidad, y se escriben en Supabase.
   // Este script solo les pone título, número y orden. Por eso salieron de
   // `GENERADAS`. ⚠️ Los hallazgos conservan su numeración —H-01 a H-42— y sus
-  // títulos: las fichas de proceso los enlazan por número, y ese número lo
+  // títulos (reescritos el 11/10/2026, con las anclas recalculadas en todo el
+  // informe): las fichas de proceso los enlazan por número, y ese número lo
   // calcula `enlacesAHallazgos()` sobre el taller. **No renumerar el taller.**
-  ['hallazgos', 'hallazgos', 'Los hallazgos, en el circuito del negocio', 'Dónde se traba el negocio, punto por punto: los siete patrones y los cuarenta y dos hallazgos que los sostienen'],
+  ['hallazgos', 'hallazgos', 'Los hallazgos, en el circuito del negocio', 'Dónde espera el flujo, punto por punto: los siete patrones y los cuarenta y dos hallazgos que los sostienen'],
 
   // --- Cómo funciona hoy -----------------------------------------------------
   // El orden es el del argumento, y va por pares: una sección afirma y la
@@ -86,21 +87,21 @@ const SECCIONES = [
   // Absorbe el informe de levantamiento por área: la ficha corta por proceso y
   // lleva dentro «Quién lo contó». Dos cortes del mismo material se
   // desincronizan en cuanto alguien edita uno.
-  ['levantamiento', 'fichas-procesos', 'Las fichas de proceso', 'Una por macroproceso: qué hace, quién lo ejecuta, con qué sistemas y qué le falta'],
-  ['levantamiento', 'sistemas-datos', 'Sistemas y estado del dato', 'Qué vive en el ERP, qué vive fuera y qué dato es confiable'],
+  ['levantamiento', 'fichas-procesos', 'Las fichas de proceso', 'Una por macroproceso: cómo se ejecuta hoy, quién lo hace, con qué sistemas y con qué dato'],
+  ['levantamiento', 'sistemas-datos', 'Sistemas y estado del dato', 'Qué se registra en el ERP, qué se lleva fuera y qué dato es confiable'],
   ['levantamiento', 'inventario-sistemas', 'Inventario de sistemas', 'Sistema por sistema, con su dueño, su estado y cuánto se apoya la operación en él'],
   // ⚠️ El subtítulo **no lleva el número de sesiones**, y es a propósito: lo
   // llevaba —decía «treinta y cuatro», cuando son diecisiete— y un subtítulo es
   // texto fijo que nadie recuerda corregir cuando el conteo cambia. La cifra
   // auditada vive en la primera línea del capítulo, que la calcula el generador.
-  ['levantamiento', 'riesgo-continuidad', 'Riesgo y continuidad', 'El incidente de febrero: qué se perdió, qué volvió y qué sigue abierto'],
-  // Dónde se traba el trabajo y su inventario. Entran en pareja, como manda la
+  ['levantamiento', 'riesgo-continuidad', 'Riesgo y continuidad', 'El incidente de febrero: qué se afectó, qué se recuperó y qué sigue pendiente'],
+  // Dónde espera el flujo (hasta el 11/10/2026, «Dónde se traba el trabajo») y su inventario. Entran en pareja, como manda la
   // regla: el primero afirma los patrones y el segundo los enseña uno por uno.
   // ⚠️ Existieron en el armazón de 32 como «Cuellos de botella y trabajo
   // manual» y se cortaron el 16 de septiembre. Vuelven porque entre «esto está
   // mal» y «hagamos esto» faltaba cuantificar el dolor, que es lo que un comité
   // pregunta antes de aprobar un presupuesto.
-  ['levantamiento', 'trabas', 'Dónde se traba el trabajo', 'Los patrones que se repiten, con su costo en tiempo y margen'],
+  ['levantamiento', 'trabas', 'Dónde espera el flujo', 'Los patrones que se repiten, con su efecto en tiempo y margen'],
 
   // --- Qué proponemos --------------------------------------------------------
   // Rehecha el 24 de septiembre de 2026, con Gabriel: qué se puede hacer, y el

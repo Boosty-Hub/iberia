@@ -220,8 +220,8 @@ const DESTAPE: Record<string, string> = {
 // planta (clave '3') es la Fase 4 y distribución (clave 'sin') la Fase 3.
 const FASE: Record<string, [string, string]> = { '2': ['Fase 2', 'f2'], sin: ['Fase 3 · distribución', 'sin'], '3': ['Fase 4 · planta', 'f3'] }
 const TIPO: Record<string, string> = {
-  duplicacion: 'Se escribe más de una vez', doble_esfuerzo: 'Se rehace a mano', choque: 'Versiones que chocan',
-  puente_roto: 'Puente roto', dato_fuera: 'Vive fuera del sistema', punto_unico: 'Depende de una persona',
+  duplicacion: 'Se escribe más de una vez', doble_esfuerzo: 'Se rehace a mano', choque: 'Versiones que no coinciden',
+  puente_roto: 'Enlace interrumpido', dato_fuera: 'Se lleva fuera del sistema', punto_unico: 'Depende de una persona',
 }
 const OLA: Record<string, [string, string]> = { base: ['Fase 2 · la base', 'sin'], '1': ['Fase 2', 'f2'], '2': ['Fase 3', 'sin'], '3': ['Fase 4', 'f3'] }
 
@@ -596,7 +596,7 @@ export function CircuitosDelNegocio({
       {transversales.length > 0 && (
         <section className="circ-transversales" aria-label="Hallazgos transversales">
           <h3 className="circ-h3">Los que no caen en un solo punto · {transversales.length}</h3>
-          <p className="circ-nota-transversal">Recorren el circuito entero: el ataque, el gobierno, el conocimiento que vive en una persona.</p>
+          <p className="circ-nota-transversal">Recorren el circuito entero: la continuidad, el gobierno y el conocimiento de la operación.</p>
           <ListaHallazgos hallazgos={transversales} base={hallazgosEn} />
         </section>
       )}

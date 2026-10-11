@@ -65,8 +65,9 @@ Lo que queda del informe, para leerlo antes del 21:
 |---|---|
 | **Leer el informe entero una vez**, sobre todo «La Fase 2, por dentro», que es nueva, y los cambios de los revisores | Gabriel |
 | **Los objetos de JD** que nombra la Fase 2 (F3002, F4311, P4310, P03B102, P43070…) son la referencia estándar de JD Edwards: Tecnología confirma cuáles usa Iberia | Gabriel con la Gerencia de TI |
-| **Tres cosas delicadas que los revisores dejaron**: H-30 dice que la certificación ISO se ha dado por existente en comunicaciones internas; la ficha 1.1 dice que la Presidencia lleva contabilidad paralela; y H-07 dice que el equipo de Compras es nuevo, rota y no recibió entrenamiento. Decidir si van delante de los directores | Gabriel |
-| **Los niveles** (14 hallazgos en crítico) no se revisaron | Gabriel |
+| ~~Tres cosas delicadas que los revisores dejaron~~ ✅ **Resueltas en el repaso de tono del 11 de octubre**: H-30 ya no dice que la certificación ISO se haya comunicado como existente, y H-07 dice que el módulo se aprende en el puesto, sin inducción. Queda **confirmar la ficha 1.1**: «contabilidad paralela» pasó a «su propio control contable en paralelo» | Gabriel |
+| ~~Los niveles~~ ✅ **Revisados el 11 de octubre** con la regla escrita: H-01, H-21, H-24, H-25 y H-30 pasaron a atención. Quedan 9 críticos de 42 | Gabriel |
+| **Tres datos que no cuadran entre secciones**, encontrados en el repaso de tono y sin tocar porque son sustancia: (1) los perímetros sensibles fuera del alcance de la IA son tres en «La IA dentro del sistema», cinco en «Seguridad» y seis en la política; (2) la ficha 1.2 dice que el presupuesto de venta se carga al ERP, y la 2.1 y H-03 dicen que no; (3) la ficha 3.4 nombra marcas y equipos de seguridad (Fortinet, Kaspersky, TrueNAS) mientras el informe trata el inventario tecnológico como dato sensible | Gabriel |
 | **Si los directores van a leer el informe**, darles cuenta con un rol que tenga las secciones marcadas | Gabriel con Alberto |
 
 **La sesión del 21**

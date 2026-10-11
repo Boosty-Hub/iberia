@@ -18,16 +18,16 @@ que está en línea.
 
 ---
 
-## Estado actual · 9 de octubre de 2026
+## Estado actual · 11 de octubre de 2026
 
 | | |
 |---|---|
-| **Fase** | 1 · Entender · **día 64 de 153**. Contrato `CONT-2026-08-0002`, firmado el 6/7 de agosto |
+| **Fase** | 1 · Entender · **día 66 de 153**. Contrato `CONT-2026-08-0002`, firmado el 6/7 de agosto |
 | **Calendario** | **La entrega y cierre de la Fase 1 es el miércoles 21 de octubre**, con los directores, y está agendada. `/dashboard/programa` ya lo dice: levantamiento, inventario y arquitectura vencen el 21 (los hitos, en la base; `VENCE`, al desplegar) |
 | **Dashboard** | En línea desde el 25/9 en `iberiavenezuela.netlify.app` (Netlify de Iberia). Roles y permisos configurables. **Tres cuentas de Iberia desde el 27/9**, cada una enlazada a su ficha: Alberto (Administrador), Martha Fuentes (Lector Iberia) y Martha Álvarez (Marketing) |
 | **Levantamiento** | 42 sesiones grabadas · 27.951 turnos · **36 entrevistas de ~25**: a las 33 se suman la de Alberto (29/9) y las de Flaviano y Gustavo (7/10), las tres sin cargar a propósito · ENT-029 sin hacer · los 20 macroprocesos cubiertos |
 | **Hallazgos** | 394, todos con cita textual · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
-| **Informe** | 16 secciones con el documento técnico y la política de IA en borrador, **terminado y publicado el 9/10**, formal y sin atribuciones. Construcción por **fases 2, 3 y 4**. Ninguna sección se genera: se corrigen con `npm run secciones` |
+| **Informe** | 16 secciones con el documento técnico y la política de IA en borrador, **terminado y publicado el 9/10**, formal y sin atribuciones. **Repasado el 11/10 para que documente el flujo y no suene a chisme**: 9 hallazgos críticos de 42. Construcción por **fases 2, 3 y 4**. Ninguna sección se genera: se corrigen con `npm run secciones` |
 | **Horas** | Agosto **137 h** (revisadas con Gabriel) · septiembre **119 h** (estimadas, por revisar) · octubre **43 h** cargadas: el 7 en Cagua y las reuniones con Alberto · bolsa de 107 al mes. Aparte: 111 h de la etapa anterior y 104 h del curso de planta (Fase 2) |
 | **Comunicación** | El comunicado salió. Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | 276 personas de Capital Humano, **sin cédula, celular ni correo**, y 17 fichas cargadas a mano en agosto que repiten a gente real (marcadas en el padrón desde el 27/9) |
@@ -50,6 +50,35 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 - **Depurar las 17 fichas de muestra**, ahora que hay cuentas de Iberia que las ven.
 - **Pedirle a Capital Humano cédula y celular por ficha**: sin celular no hay enlace personal.
 - **Decidir si se prende el asistente libre** (el chat con Ajito).
+
+---
+
+## 11 de octubre · Sesión 49 — el informe, sin chisme
+
+Gabriel pidió repasar el informe entero —cada página, cada proceso y cada hallazgo— para que la
+redacción **documente cómo se da el flujo** en vez de sonar a «cuento de que todo anda mal».
+Escogió las cuatro opciones recomendadas: todo el informe, títulos reescritos con los enlaces
+recalculados, anécdotas fuera y niveles recalibrados.
+
+- **Las dieciséis secciones, el circuito y el título de la 08** (que pasa a «Dónde espera el
+  flujo»). Yo reescribí los hallazgos, «Inicio», el mapa y el taller del circuito; seis agentes,
+  con una guía común (`contenido/informe/GUIA-TONO.md`), el resto. Los hallazgos van ahora con
+  «Cómo se da / En el circuito / Efecto», y las fichas describen el flujo: su introducción decía
+  «si una línea solo describe, sobra».
+- **Unas 120 anécdotas fuera**: la fiscalización que no se enteró, los gerentes que pagan de su
+  bolsillo, «por impago», quién se fue de la empresa, «los foros de atacantes», «no se tomó
+  ninguna medida», la infestación. «El ataque» pasó a ser «el incidente de febrero de 2026».
+- **Niveles**: H-01, H-21, H-24, H-25 y H-30 bajaron a atención, con el visto bueno de Gabriel.
+  Quedan 9 críticos.
+- Los siete patrones y treinta títulos de hallazgos cambiaron: **44 anclas recalculadas** en
+  hallazgos, fichas y oportunidades. En la página quedaron 0 enlaces rotos: 42 destinos desde las
+  fichas y 19 desde el circuito.
+- De paso: «dos ataques en diez meses» eran nueve, y la ficha 2.4 tenía vacío «Lo que hoy no se
+  ejecuta».
+- Respaldo previo en `Insumos/Respaldo_Informe_2026-10-11`. Tres datos que no cuadran entre
+  secciones quedaron en `PENDIENTES.md`.
+- ⚠️ En desarrollo, un enlace con ancla a una ficha da un aviso de hidratación: Chrome abre el
+  `<details>` antes de que React hidrate. Es de antes del repaso y no se ve.
 
 ---
 

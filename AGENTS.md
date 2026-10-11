@@ -1152,9 +1152,32 @@ negocio» dejó de ser sección: su vista del flujo abre los hallazgos y la de s
   siembra con `sembrar:circuitos` desde el arreglo `hallazgos` del taller
   `contenido/circuitos/circuitos.json`. En el anillo cada punto lleva su cuenta —en rojo si
   alguno es crítico— y su ficha los lista con enlace a su tarjeta.
-- ⚠️ **Los 42 hallazgos conservan su número y su título**: `### H-NN · Título`. Las fichas de
-  proceso los enlazan 64 veces por ancla, y la portada enlaza a los siete `##` de patrón.
-  Cambiar un título rompe el enlace sin error visible.
+- ⚠️ **Los 42 hallazgos conservan su número**: `### H-NN · Título`. Las fichas de proceso los
+  enlazan 64 veces por ancla, la portada enlaza a los siete `##` de patrón, y el circuito
+  calcula el ancla de `informe_hallazgos.titulo`. **Cambiar un título rompe el enlace sin error
+  visible**: se cambia en la sección, en el taller de los circuitos y en cada enlace que lo
+  apunta, y se comprueba que ninguno quede roto. Los títulos y los patrones se reescribieron
+  así el 11 de octubre de 2026.
+
+### El tono: se documenta cómo se da el flujo
+
+Desde el 11 de octubre de 2026, por pedido de Gabriel, **el informe se lee como la constancia
+de un levantamiento, no como un relato de lo que anda mal**. Sin chisme. La guía completa, con
+ejemplos, está en `contenido/informe/GUIA-TONO.md`. Lo esencial:
+
+- **Se describe el flujo**: quién hace qué, con qué, en qué orden y qué efecto tiene en el
+  paso siguiente. El efecto va como consecuencia observable, no como juicio. Los hallazgos
+  se escriben con «Cómo se da», «En el circuito» y «Efecto».
+- **Fuera los absolutos que no son un dato contado** («nunca», «nadie», «todo»), los remates
+  y los coloquialismos («en la cabeza de», «a ojo»).
+- **Anécdotas fuera**: un episodio que solo cuenta algo de personas —quién se fue, quién paga
+  de su bolsillo, quién no se enteró, por qué se dio de baja algo— no va. La evidencia queda en
+  el expediente. Lo de 2025 y 2026 es «el incidente de mayo de 2025» y «el de febrero de 2026»,
+  con fecha y efecto, sin «entraron por donde avisó el primero».
+- **Sin culpa**: se nombra el paso, no al área ni al proveedor responsable. Lo que Iberia ya
+  tiene es base que se aprovecha, no un error.
+- **`[Crítico]` es para pocos**: 9 de 42 desde el repaso; una historia o un riesgo de
+  información sin efecto en la operación va en atención.
 - ⚠️ **Seis secciones más salieron del generador** —hallazgos, sistemas y estado del dato,
   inventario, riesgo, trabas y oportunidades— y se escriben en Supabase, como la arquitectura y
   la ruta. Se
@@ -1218,7 +1241,8 @@ septiembre de 2026, y cada fusión tiene su razón:
   una ficha: comparan dos áreas dando números distintos, y la comparación *es* el hallazgo.
   ⚠️ El destino de cada grupo se **escribe** en el taller (`macro`, `sueltos`), no se deduce
   del texto: adivinarlo pondría cifras en la ficha equivocada.
-- **«Inventario de trabas» se fundió en «Dónde se traba el trabajo»**, condensado: quedan el
+- **«Inventario de trabas» se fundió en «Dónde se traba el trabajo»** —que desde el 11 de
+  octubre de 2026 se llama «Dónde espera el flujo», con el slug `trabas` de siempre—, condensado: quedan el
   cuadro de carga por área y el reparto por tipo, y se fueron las 25 tablas con las 149 trabas
   una por una. El detalle ya vive en la ficha del proceso, que es donde se busca.
 - ⚠️ **Quitar una sección renumera todas las de abajo.** Por eso las referencias van como
