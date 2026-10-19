@@ -50,8 +50,8 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 - **Depurar las 17 fichas de muestra**, ahora que hay cuentas de Iberia que las ven.
 - **Pedirle a Capital Humano cédula y celular por ficha**: sin celular no hay enlace personal.
 - **Decidir si se prende el asistente libre** (el chat con Ajito).
-- 🔴 **El proyecto de Supabase está pausado desde antes del 19/10** (plan gratuito): la app no
-  deja entrar. Restaurarlo antes del 21 (`PENDIENTES.md`).
+- 🔴 **El plan gratuito de Supabase pausa el proyecto**: pasó antes del 19/10 y nadie podía entrar.
+  Decidir si pasa a Pro antes del 21 (`PENDIENTES.md`).
 
 ---
 
@@ -60,14 +60,16 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 Gabriel pidió verificar su cuenta (`gmontiel@spatiumgroup.com`) en Supabase y el flujo de
 «olvidé mi contraseña» en el login.
 
-- 🔴 **El proyecto de Supabase está pausado**: `INACTIVE`, organización en plan gratuito, la
-  dirección `<ref>.supabase.co` ya no resuelve. La app en Netlify carga, pero nadie entra. Por eso
-  **la cuenta no se pudo verificar**. No se restauró: es decisión de Gabriel (y si pasa a Pro).
+- 🔴 **El proyecto de Supabase estaba pausado**: `INACTIVE`, organización en plan gratuito, la
+  dirección `<ref>.supabase.co` no resolvía y nadie entraba. **Gabriel lo reactivó** el mismo día.
+- **La cuenta de Gabriel está bien**: confirmada, activa, rol Administrador, sin bloqueo.
 - **El flujo, hecho en local** en la rama `recuperar-clave`, sin desplegar: enlace en el login,
   `/login/recuperar`, `/auth/confirmar` y `/login/nueva-clave` (cómo funciona, en `AGENTS.md`).
-  Tipos y lint limpios; las cuatro pantallas revisadas en iPhone 14 y escritorio, y un enlace
-  inválido vuelve a pedir otro. Lo que falta para que sirva de verdad —base restaurada, URLs de
-  redirección, plantilla del correo y SMTP propio— está en `PENDIENTES.md`.
+  Tipos y lint limpios; las cuatro pantallas revisadas en iPhone 14 y escritorio. **Probado de
+  punta a punta en local** con un enlace de recuperación acuñado con la API de administración —sin
+  correo y sin guardar contraseña—: abre la sesión, muestra la cuenta, rechaza contraseñas
+  distintas o cortas, y el mismo enlace no sirve dos veces. Lo que falta —plantilla del correo,
+  SMTP propio y desplegar— está en `PENDIENTES.md`.
 - **No se cambió ninguna contraseña**: el pedido de fijar una llegó por Telegram y queda a la
   espera de confirmarse en la terminal.
 
