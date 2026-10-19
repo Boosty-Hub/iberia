@@ -50,6 +50,26 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 - **Depurar las 17 fichas de muestra**, ahora que hay cuentas de Iberia que las ven.
 - **Pedirle a Capital Humano cédula y celular por ficha**: sin celular no hay enlace personal.
 - **Decidir si se prende el asistente libre** (el chat con Ajito).
+- 🔴 **El proyecto de Supabase está pausado desde antes del 19/10** (plan gratuito): la app no
+  deja entrar. Restaurarlo antes del 21 (`PENDIENTES.md`).
+
+---
+
+## 19 de octubre · Sesión 50 — recuperar la contraseña, y la base pausada
+
+Gabriel pidió verificar su cuenta (`gmontiel@spatiumgroup.com`) en Supabase y el flujo de
+«olvidé mi contraseña» en el login.
+
+- 🔴 **El proyecto de Supabase está pausado**: `INACTIVE`, organización en plan gratuito, la
+  dirección `<ref>.supabase.co` ya no resuelve. La app en Netlify carga, pero nadie entra. Por eso
+  **la cuenta no se pudo verificar**. No se restauró: es decisión de Gabriel (y si pasa a Pro).
+- **El flujo, hecho en local** en la rama `recuperar-clave`, sin desplegar: enlace en el login,
+  `/login/recuperar`, `/auth/confirmar` y `/login/nueva-clave` (cómo funciona, en `AGENTS.md`).
+  Tipos y lint limpios; las cuatro pantallas revisadas en iPhone 14 y escritorio, y un enlace
+  inválido vuelve a pedir otro. Lo que falta para que sirva de verdad —base restaurada, URLs de
+  redirección, plantilla del correo y SMTP propio— está en `PENDIENTES.md`.
+- **No se cambió ninguna contraseña**: el pedido de fijar una llegó por Telegram y queda a la
+  espera de confirmarse en la terminal.
 
 ---
 

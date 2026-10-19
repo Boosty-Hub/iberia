@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useActionState } from 'react'
 import { useFormStatus } from 'react-dom'
 import { iniciarSesion, type EstadoLogin } from './actions'
@@ -37,9 +38,17 @@ export function FormularioLogin({ destino }: { destino: string }) {
       </div>
 
       <div>
-        <label htmlFor="password" className="etiqueta">
-          Contraseña
-        </label>
+        <div className="flex items-baseline justify-between">
+          <label htmlFor="password" className="etiqueta">
+            Contraseña
+          </label>
+          <Link
+            href="/login/recuperar"
+            className="text-xs font-medium text-acento-600 underline-offset-2 hover:underline"
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </div>
         <input
           id="password"
           name="password"

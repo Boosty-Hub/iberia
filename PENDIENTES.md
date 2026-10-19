@@ -29,6 +29,19 @@ Fase 1 es el miércoles 21 de octubre, y ya está agendada.**
 
 ## 🔴 El camino al 21 de octubre
 
+- 🔴 **El proyecto de Supabase está pausado** (visto el 19 de octubre): estado `INACTIVE`, la
+  organización «Iberia Org» está en plan **gratuito**, que pausa tras días sin actividad, y su
+  dirección ya no resuelve. La app carga pero nadie entra ni lee nada. **Gabriel**: restaurarlo
+  (panel de Supabase o `POST /v1/projects/<ref>/restore`) y decidir si pasa a Pro para que no se
+  vuelva a pausar antes del 21.
+- **Recuperar la contraseña** (rama `recuperar-clave`, sin desplegar): con la base de vuelta,
+  1) añadir `https://iberiavenezuela.netlify.app/**` y `http://localhost:3001/**` a las URLs de
+  redirección de Auth; 2) que la plantilla «Reset password» apunte a
+  `{{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=recovery&siguiente=/login/nueva-clave`
+  (así sirve aunque el correo se abra en otro equipo); 3) **SMTP propio**: el correo de fábrica
+  de Supabase solo le llega al equipo de la organización y con un tope de pocos por hora;
+  4) probarlo de punta a punta y verificar la cuenta `gmontiel@spatiumgroup.com`; 5) unir a `main`.
+
 *Armado el 9 de octubre revisando la base, y trabajado ese mismo día: **el informe quedó
 terminado y publicado**. Lo de abajo junta lo que está repartido en el resto del archivo; el
 detalle de cada cosa sigue en su sección.*

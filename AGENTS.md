@@ -720,6 +720,12 @@ Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).
   su trigger**: la RLS decide qué filas, no qué columnas.
 - **`SUPABASE_SECRET_KEY` bypasea RLS.** Solo en `createAdminClient()`, y solo para
   provisionar usuarios. Nunca para leer datos por cuenta de un usuario.
+- **Recuperar la contraseña** (19 de octubre de 2026): «¿Olvidaste tu contraseña?» en el login
+  → `/login/recuperar` pide el correo y **contesta siempre lo mismo**, exista o no la cuenta →
+  Supabase manda el enlace → `/auth/confirmar` abre la sesión de recuperación (acepta `code` de
+  PKCE y `token_hash`) → `/login/nueva-clave` la cambia con `updateUser`. El enlace vuelve al
+  origen de la petición, que tiene que estar en las URLs de redirección de Auth. ⚠️ **Sin SMTP
+  propio el correo solo le llega al equipo de la organización de Supabase**, no a Iberia.
 - **Sin registro abierto**: las cuentas se crean desde `/dashboard/usuarios`, desde el
   padrón al acuñar un enlace, o con `npm run crear:usuario` — las tres por la API de
   administrador. 🔴 **Y el registro de Supabase está cerrado (`disable_signup`)**, que es lo
