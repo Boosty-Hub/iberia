@@ -724,6 +724,80 @@ const HORAS = [
       'para escritorio y teléfono.',
   },
 
+  // Agregadas el 20 de octubre, cuando Gabriel pidió equiparar septiembre con
+  // octubre: el informe se construyó en el aplicativo del 16 al 25 de septiembre y
+  // el desarrollo de esos días casi no estaba cargado.
+  {
+    fecha: '2026-09-17',
+    perfil: 'desarrollador_ia',
+    horas: 12,
+    persona: 'Boosty',
+    entregable: 'arquitectura',
+    descripcion:
+      'El informe dentro del aplicativo: las secciones generadas desde el levantamiento, las ' +
+      'tarjetas, los niveles y los avisos, y el índice de lectura. 12 h.',
+  },
+  {
+    fecha: '2026-09-18',
+    perfil: 'desarrollador_ia',
+    horas: 8,
+    persona: 'Boosty',
+    entregable: 'arquitectura',
+    descripcion:
+      'El mapa interactivo de procesos: el inventario en la base, el enlace de cada proceso a ' +
+      'su ficha y el mapa como sección del informe. 8 h.',
+  },
+  {
+    fecha: '2026-09-18',
+    perfil: 'director_arquitecto',
+    horas: 6,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'arquitectura',
+    descripcion:
+      'Revisión de la estructura del informe: de quince secciones a doce, sin citas, códigos ni ' +
+      'nombres, y la portada con los siete patrones. 6 h.',
+  },
+  {
+    fecha: '2026-09-19',
+    perfil: 'consultor_procesos',
+    horas: 10,
+    persona: 'Equipo de procesos',
+    entregable: 'levantamiento',
+    descripcion:
+      'Cotejo de las fichas de proceso y del inventario contra las transcripciones del tercer ' +
+      'rodaje: las áreas, los sistemas y los traspasos de cada proceso. 10 h.',
+  },
+  {
+    fecha: '2026-09-24',
+    perfil: 'consultor_procesos',
+    horas: 4,
+    persona: 'Equipo de procesos',
+    entregable: 'arquitectura',
+    descripcion:
+      'Los circuitos del negocio desde el levantamiento: los doce puntos del flujo y los quince ' +
+      'de sistemas, con cada hallazgo en su punto. 4 h.',
+  },
+  {
+    fecha: '2026-09-25',
+    perfil: 'desarrollador_ia',
+    horas: 6,
+    persona: 'Boosty',
+    entregable: 'arquitectura',
+    descripcion:
+      'El informe reordenado en cuatro partes —primero lo que se encontró— con los hallazgos ' +
+      'ubicados en el circuito, y el panel en línea. 6 h.',
+  },
+  {
+    fecha: '2026-09-25',
+    perfil: 'director_arquitecto',
+    horas: 4,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'arquitectura',
+    descripcion:
+      'Revisión del informe reordenado: lo que se encontró, cómo funciona hoy y qué se propone, ' +
+      'con las oportunidades, la arquitectura y la ruta. 4 h.',
+  },
+
   // 29 de septiembre · la reunión con Alberto en la oficina de Gabriel, que hizo de su
   // entrevista. La grabación dura 2 h 47 min.
   {
@@ -896,9 +970,10 @@ const HORAS = [
   // Del 1 al 21 de octubre · el cierre de la Fase 1 (20 de octubre, Gabriel)
   //
   // La fase se cierra el 21 de octubre y no en enero: **noviembre y diciembre no se
-  // dan**, así que octubre lleva el trabajo que quedaba para los cinco meses. La meta es
-  // la bolsa entera de la fase, 5 × 107 = 535 h: agosto y septiembre suman 262, y
-  // octubre, 273. El peso va donde estuvo el trabajo —Gabriel—: **el levantamiento de
+  // dan**, así que octubre lleva el trabajo que quedaba para los cinco meses. La meta,
+  // de Gabriel: la bolsa entera de la fase, 5 × 107 = 535 h, **más 19**, y septiembre y
+  // octubre más parejos: agosto 137, septiembre 175 y octubre 242, en total 554 h.
+  // El peso va donde estuvo el trabajo —Gabriel—: **el levantamiento de
   // procesos y su documentación** y **la arquitectura**. Como siempre, se tarifa el
   // perfil y no la persona: reescribir una ficha de proceso es trabajo de procesos
   // aunque lo haga otro.
@@ -908,13 +983,13 @@ const HORAS = [
   {
     fecha: '2026-10-05',
     perfil: 'consultor_procesos',
-    horas: 20,
+    horas: 14,
     persona: 'Equipo de procesos',
     entregable: 'levantamiento',
     descripcion:
       'Las fichas de proceso de los veinte macroprocesos, completadas con lo que dejó la ' +
       'reunión con la Gerencia General del 29 de septiembre: el flujo de cada proceso, las ' +
-      'áreas que lo ejecutan, los sistemas que usa y lo que hoy no se ejecuta. 20 h.',
+      'áreas que lo ejecutan, los sistemas que usa y lo que hoy no se ejecuta. 14 h.',
   },
   {
     fecha: '2026-10-06',
@@ -941,13 +1016,13 @@ const HORAS = [
   {
     fecha: '2026-10-11',
     perfil: 'consultor_procesos',
-    horas: 16,
+    horas: 10,
     persona: 'Equipo de procesos',
     entregable: 'levantamiento',
     descripcion:
       'Repaso del levantamiento en el informe para que documente cómo se da el flujo: los 42 ' +
       'hallazgos con su forma de darse, su punto en el circuito y su efecto; las fichas de ' +
-      'proceso y el circuito, con sus enlaces recalculados. 16 h.',
+      'proceso y el circuito, con sus enlaces recalculados. 10 h.',
   },
   {
     fecha: '2026-10-19',
@@ -976,13 +1051,13 @@ const HORAS = [
   {
     fecha: '2026-10-05',
     perfil: 'director_arquitecto',
-    horas: 10,
+    horas: 6,
     persona: 'Gabriel Montiel Toro',
     entregable: 'arquitectura',
     descripcion:
       'La Fase 2, por dentro: para Compras, Comercial y Finanzas, qué se lee de JD, qué se ' +
       'postea por el Orchestrator, dónde va la IA y los documentos que deja cada módulo; y la ' +
-      'construcción por fases 2, 3 y 4. 10 h.',
+      'construcción por fases 2, 3 y 4. 6 h.',
   },
   {
     fecha: '2026-10-08',
@@ -998,13 +1073,13 @@ const HORAS = [
   {
     fecha: '2026-10-09',
     perfil: 'director_arquitecto',
-    horas: 8,
+    horas: 6,
     persona: 'Gabriel Montiel Toro',
     entregable: 'arquitectura',
     descripcion:
       'Cierre del Documento de Arquitectura con lo de las reuniones del 29 de septiembre y del 2 ' +
       'y 8 de octubre: las fechas al 21 de octubre, el criterio de la Gerencia General y la ' +
-      'revisión formal de las secciones. Publicado ese día. 8 h.',
+      'revisión formal de las secciones. Publicado ese día. 6 h.',
   },
   {
     fecha: '2026-10-11',
@@ -1078,16 +1153,6 @@ const HORAS = [
   },
 
   // Desarrollo · el documento dentro del aplicativo.
-  {
-    fecha: '2026-10-05',
-    perfil: 'desarrollador_ia',
-    horas: 13,
-    persona: 'Boosty',
-    entregable: 'arquitectura',
-    descripcion:
-      'La Fase 2, por dentro, y las fases 2, 3 y 4 en los dibujos: los rótulos del circuito y ' +
-      'del espejo, y la arquitectura actualizada en la base. 13 h.',
-  },
   {
     fecha: '2026-10-08',
     perfil: 'desarrollador_ia',
