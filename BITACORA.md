@@ -87,6 +87,10 @@ Gabriel pasó la transcripción de su conversación del 19 con el señor Carlos 
   Iberia (`components/presentacion-operar-conducir.tsx`, sobre «IBERIA De operar a conducir.pptx»; un
   primer envío con dos láminas fue un error de archivo): flechas, toque o deslizar, y Escape para salir.
   ⚠️ El diálogo va por portal al `body`: dentro de `.prosa`, `.prosa p` pintaba de gris el texto blanco.
+- **La 09 ya no trae las 33 tarjetas** (Gabriel, por Telegram): se quitó de «Las fases, de un vistazo»
+  hacia abajo. Queda «Tecnología» con su párrafo de puente, el de las 33 y el aviso clave. Nada de otras
+  secciones enlazaba a esas anclas. Respaldo previo en `Insumos/Respaldo_Informe_2026-10-20_1622`: ahí
+  está el texto entero si hay que devolverlo.
 
 ---
 
