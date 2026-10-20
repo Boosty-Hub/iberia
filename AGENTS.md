@@ -1326,7 +1326,11 @@ septiembre de 2026, y cada fusión tiene su razón:
 ### La parte de arquitectura: el sistema Iberia
 
 Rehecha el 24 de septiembre de 2026, con Gabriel, y desde el 25 es «Qué proponemos»: **09 Las
-oportunidades → 10 La arquitectura de IA: el sistema Iberia → 11 La ruta de construcción.**
+oportunidades → 10 La arquitectura de IA: el sistema Iberia → 11 La ruta de construcción.** Desde el
+20 de octubre la 09 se llama «Lo que proponemos: tres líneas de intervención» y abre con
+`TresLineasIberia` —desarrollo organizacional, procesos y marcos de referencia, y el dibujo del proceso
+hoy y con la IA—; sus encabezados entran al índice antes que los del markdown
+(`ENCABEZADOS_TRES_LINEAS`), y las 33 oportunidades siguen debajo, bajo «Tecnología».
 *(Hasta el 25 la abría «Los circuitos del negocio», que se fundió en los hallazgos y en
 «Sistemas y estado del dato».)*
 

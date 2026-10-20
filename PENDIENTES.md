@@ -33,13 +33,15 @@ Fase 1 es el miércoles 21 de octubre, y ya está agendada.**
   la organización «Iberia Org» está en plan **gratuito**, que pausa tras días sin actividad, y
   pausado nadie entra. **Gabriel**: decidir si pasa a Pro para que no se vuelva a pausar antes
   del 21.
-- **Recuperar la contraseña** (rama `recuperar-clave`, sin desplegar; probada de punta a punta
-  en local el 19/10). Las URLs de redirección ya estaban. Falta: 1) unir a `main`, que despliega;
-  2) que la plantilla «Reset password» —hoy `{{ .ConfirmationURL }}`, que solo sirve en el mismo
+- **Recuperar la contraseña** · ✅ en producción (`/login/recuperar` responde). Falta: 1) que la
+  plantilla «Reset password» —hoy `{{ .ConfirmationURL }}`, en inglés y que solo sirve en el mismo
   navegador donde se pidió— apunte a
   `{{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=recovery&siguiente=/login/nueva-clave`
-  (así sirve aunque el correo se abra en otro equipo); 3) **SMTP propio**: el correo de fábrica
-  de Supabase solo le llega al equipo de la organización, con un tope de 2 por hora.
+  (así sirve aunque el correo se abra en otro equipo). ⚠️ **Supabase no deja cambiarla en plan
+  gratuito con su correo de fábrica** (lo rechazó el 20/10): sale sola con el punto de arriba o con
+  el SMTP; la versión en español está lista para aplicarla. 2) **SMTP propio**: el correo de fábrica
+  de Supabase solo le llega al equipo de la organización, con un tope de 2 por hora. **Gabriel**:
+  Pro o un proveedor de correo con sus credenciales.
 
 *Armado el 9 de octubre revisando la base, y trabajado ese mismo día: **el informe quedó
 terminado y publicado**. Lo de abajo junta lo que está repartido en el resto del archivo; el

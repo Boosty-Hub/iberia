@@ -14,6 +14,7 @@ import { IndiceSeccion } from '@/components/informe/indice-seccion'
 import { Markdown } from '@/components/markdown'
 import { MarkdownPlegable } from '@/components/markdown-plegable'
 import { PlataformaIberia } from '@/components/plataforma-iberia'
+import { ENCABEZADOS_TRES_LINEAS, TresLineasIberia } from '@/components/tres-lineas-iberia'
 import { Insignia } from '@/components/ui'
 import { esEditor, puede, requerirSesion } from '@/lib/auth'
 import { encabezadosDe, minutosDeLectura } from '@/lib/encabezados'
@@ -162,7 +163,10 @@ export default async function SeccionInformePage({ params, searchParams }: PageP
   ])
   // Las fichas ya tienen su subíndice en la columna izquierda, por nivel y por
   // ficha: un segundo índice con los mismos niveles a la derecha sería ruido.
-  const indice = plegable ? [] : encabezadosDe(seccion.contenido_md)
+  // «Qué proponemos» abre con las tres líneas, que no son markdown: sus encabezados van primero.
+  const indice = plegable
+    ? []
+    : [...(seccion.slug === 'oportunidades' ? ENCABEZADOS_TRES_LINEAS : []), ...encabezadosDe(seccion.contenido_md)]
   const minutos = minutosDeLectura(seccion.contenido_md)
   const pedido = (clave: string) => {
     const v = consulta[clave]
@@ -280,6 +284,9 @@ export default async function SeccionInformePage({ params, searchParams }: PageP
 
           {/* Solo el dibujo va ancho: la prosa vuelve a la medida de lectura. */}
           <div className={cn('py-8', conCircuitos && 'mx-auto max-w-[760px]')}>
+            {/* Las oportunidades abren con las tres líneas de intervención; la tecnología y las
+                33 oportunidades siguen en el markdown. */}
+            {seccion.slug === 'oportunidades' && <div className="mb-12"><TresLineasIberia /></div>}
             {escrita ? (
               plegable ? (
                 <MarkdownPlegable contenido={seccion.contenido_md!} nuevos={nuevos?.nuevos} propuestos={nuevos?.propuestos} />

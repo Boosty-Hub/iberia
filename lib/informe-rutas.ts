@@ -12,12 +12,13 @@ export const RUTA_MAPA = '/informe/mapa-interactivo'
 
 /**
  * Las secciones que traen un dibujo interactivo: los dos circuitos (02 y 05), el
- * mapa de procesos (03), el espejo (10) y el triángulo de la plataforma (11). El
+ * mapa de procesos (03), el proceso hoy y con la IA (09), el espejo (10) y el triángulo de la
+ * plataforma (11). El
  * índice las marca con un icono para que se sepa dónde están los gráficos
  * (pedido de Gabriel, 11 de octubre de 2026). ⚠️ Una sección que estrene dibujo
  * se añade aquí el mismo día, o el índice no lo dice.
  */
-export const CON_DIBUJO = new Set(['hallazgos', 'mapa-procesos', 'sistemas-datos', 'arquitectura-ia', 'plataforma'])
+export const CON_DIBUJO = new Set(['hallazgos', 'mapa-procesos', 'sistemas-datos', 'oportunidades', 'arquitectura-ia', 'plataforma'])
 
 export function rutaDeSeccion(slug: string): string {
   return slug === 'mapa-procesos' ? RUTA_MAPA : `/informe/${slug}`

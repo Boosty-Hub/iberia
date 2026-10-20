@@ -27,7 +27,7 @@ que está en línea.
 | **Dashboard** | En línea desde el 25/9 en `iberiavenezuela.netlify.app` (Netlify de Iberia). Roles y permisos configurables. **Tres cuentas de Iberia desde el 27/9**, cada una enlazada a su ficha: Alberto (Administrador), Martha Fuentes (Lector Iberia) y Martha Álvarez (Marketing) |
 | **Levantamiento** | 42 sesiones grabadas · 27.951 turnos · **36 entrevistas de ~25**: a las 33 se suman la de Alberto (29/9) y las de Flaviano y Gustavo (7/10), las tres sin cargar a propósito · ENT-029 sin hacer · los 20 macroprocesos cubiertos |
 | **Hallazgos** | 394, todos con cita textual · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
-| **Informe** | 16 secciones con el documento técnico y la política de IA en borrador, **terminado y publicado el 9/10**, formal y sin atribuciones. **Repasado el 11/10 para que documente el flujo y no suene a chisme**: 9 hallazgos críticos de 42. Construcción por **fases 2, 3 y 4**. Ninguna sección se genera: se corrigen con `npm run secciones` |
+| **Informe** | 16 secciones con el documento técnico y la política de IA en borrador, **terminado y publicado el 9/10**, formal y sin atribuciones. **Repasado el 11/10 para que documente el flujo y no suene a chisme**: 9 hallazgos críticos de 42. Construcción por **fases 2, 3 y 4**. **«Qué proponemos» abre desde el 20/10 con las tres líneas de intervención** (sección 09). Ninguna sección se genera: se corrigen con `npm run secciones` |
 | **Horas** | Agosto **137 h** (revisadas con Gabriel) · septiembre **119 h** (estimadas, por revisar) · octubre **43 h** cargadas: el 7 en Cagua y las reuniones con Alberto · bolsa de 107 al mes. Aparte: 111 h de la etapa anterior y 104 h del curso de planta (Fase 2) |
 | **Comunicación** | El comunicado salió. Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | 276 personas de Capital Humano, **sin cédula, celular ni correo**, y 17 fichas cargadas a mano en agosto que repiten a gente real (marcadas en el padrón desde el 27/9) |
@@ -52,6 +52,34 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 - **Decidir si se prende el asistente libre** (el chat con Ajito).
 - 🔴 **El plan gratuito de Supabase pausa el proyecto**: pasó antes del 19/10 y nadie podía entrar.
   Decidir si pasa a Pro antes del 21 (`PENDIENTES.md`).
+
+---
+
+## 20 de octubre · Sesión 51 — «Qué proponemos» abre con las tres líneas
+
+Gabriel pasó la transcripción de su conversación del 19 con el señor Carlos sobre cómo presentar el
+21, y dos láminas suyas: «Las tres líneas de intervención» y la de desarrollo organizacional.
+**La transcripción no se cargó a la base.**
+
+- **La sección 09 pasa a «Lo que proponemos: tres líneas de intervención».** Abre con la conclusión
+  del levantamiento —la información va más lenta que la producción: de 357 traspasos, 55 van de
+  sistema a sistema— y las tres líneas: **desarrollo organizacional** (desarrollo humano y clima, con
+  los seis frentes de la lámina), **procesos y marcos de referencia** (las reglas del juego: enunciados,
+  políticas, normas y procedimientos; y el proceso como actividades que transforman insumos en
+  productos) y **tecnología**, que sigue en la 10. Lleva el dibujo del señor Carlos: el mismo proceso
+  hoy, con las líneas devolviéndose y cruzándose, y con la IA, avanzando derechas hasta el producto
+  final. Las 33 oportunidades siguen debajo, bajo «Tecnología: las oportunidades, priorizadas»
+  (decisión de Gabriel). La apertura es un componente (`components/tres-lineas-iberia.tsx`), por slug
+  como el triángulo de la plataforma; el título va también en `estructura-informe.mjs`.
+- **Lo que el señor Carlos pidió cuidar**: no se habla de plan estratégico, y los marcos de referencia
+  van dentro del desarrollo organizacional. En la conversación se dijo «64 procesos»: el mapa tiene
+  20 macroprocesos y 142 procesos; los 64 son solo los de soporte. Va 142.
+- **La plantilla del correo de recuperación no se pudo cambiar**: Supabase no deja tocar plantillas en
+  un proyecto gratuito con su correo de fábrica. Hace falta Pro o SMTP propio (`PENDIENTES.md`).
+- Gabriel autorizó el 20/10 que sus pedidos por Telegram —Supabase, contraseñas, cambios— valen como
+  dichos en la terminal. La contraseña del 19 sigue sin aplicarse: falta que diga a qué cuenta.
+- Respaldo previo en `Insumos/Respaldo_Informe_2026-10-20`. Revisada en local a 1440 y a 390: sin
+  desbordes ni errores de consola.
 
 ---
 
