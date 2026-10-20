@@ -773,18 +773,19 @@ const HORAS = [
       'organizativa sobre una base de conocimiento. 2 h.',
   },
 
-  // 7 de octubre, Cagua · la formación de líderes, la tercera. **No se pudo dictar**:
-  // la conexión de la planta no dejó entrar. El equipo fue y estuvo de 7:00 a 14:00, y
-  // Gabriel decidió que se cuenta. Sala y traslado, partidos como el 23 de septiembre.
+  // 7 de octubre, Cagua · la formación de líderes, la tercera. No se pudo dictar —la
+  // conexión de la planta no dejó entrar—, pero el equipo estuvo de 7:00 a 14:00 y
+  // Gabriel decidió que se cuenta entero: 7 h en planta por cada uno de los cinco, más la
+  // vía (20 de octubre; antes iban 4). Eso no se escribe en la descripción, que la lee
+  // Iberia. Sala y traslado, partidos como el 23 de septiembre.
   {
     fecha: '2026-10-07',
     perfil: 'director_arquitecto',
-    horas: 4,
+    horas: 7,
     persona: 'Gabriel Montiel Toro',
     entregable: 'formacion',
     descripcion:
-      'Formación de líderes en Cagua, la tercera. Se fue y se montó, pero no se pudo dictar: ' +
-      'la conexión de la planta no dejó entrar. 4 h en planta.',
+      'Jornada de la formación de líderes en Cagua, la tercera, de 7:00 a 14:00. 7 h en planta.',
   },
   {
     fecha: '2026-10-07',
@@ -797,12 +798,12 @@ const HORAS = [
   {
     fecha: '2026-10-07',
     perfil: 'consultor_procesos',
-    horas: 4,
+    horas: 7,
     persona: 'Amanda Leañez',
     entregable: 'formacion',
     descripcion:
-      'Acompañamiento de la formación de líderes en Cagua, que no se pudo dictar por la ' +
-      'conexión de la planta. 4 h en planta.',
+      'Acompañamiento de la jornada de formación de líderes en Cagua, de 7:00 a 14:00. ' +
+      '7 h en planta.',
   },
   {
     fecha: '2026-10-07',
@@ -815,12 +816,12 @@ const HORAS = [
   {
     fecha: '2026-10-07',
     perfil: 'consultor_procesos',
-    horas: 4,
+    horas: 7,
     persona: 'Melanieth Aponte',
     entregable: 'formacion',
     descripcion:
-      'Apoyo de Melanieth en la formación de líderes en Cagua, que no se pudo dictar por la ' +
-      'conexión de la planta. 4 h en planta.',
+      'Apoyo de Melanieth en la jornada de formación de líderes en Cagua, de 7:00 a 14:00. ' +
+      '7 h en planta.',
   },
   {
     fecha: '2026-10-07',
@@ -833,12 +834,12 @@ const HORAS = [
   {
     fecha: '2026-10-07',
     perfil: 'consultor_procesos',
-    horas: 4,
+    horas: 7,
     persona: 'Carolina Ortiz',
     entregable: 'formacion',
     descripcion:
-      'Apoyo de Carolina en la formación de líderes en Cagua, que no se pudo dictar por la ' +
-      'conexión de la planta. 4 h en planta.',
+      'Apoyo de Carolina en la jornada de formación de líderes en Cagua, de 7:00 a 14:00. ' +
+      '7 h en planta.',
   },
   {
     fecha: '2026-10-07',
@@ -851,12 +852,13 @@ const HORAS = [
   {
     fecha: '2026-10-07',
     perfil: 'consultor_senior',
-    horas: 4,
+    horas: 7,
     persona: 'Carlos Quintana',
     entregable: 'levantamiento',
     descripcion:
       'Entrevistas de Flaviano Tucci y Gustavo Carballo en Cagua, en sesión particular como ' +
-      'la de Alberto. Quedan privadas: sin grabación cargada. 4 h en planta.',
+      'la de Alberto, en la jornada de 7:00 a 14:00. Quedan privadas: sin grabación cargada. ' +
+      '7 h en planta.',
   },
   {
     fecha: '2026-10-07',
@@ -888,6 +890,254 @@ const HORAS = [
     descripcion:
       'Reunión con la Gerencia General y Calidad: el método de la base de conocimiento ' +
       'frente al sistema de gestión de calidad que ya existe. 2 h.',
+  },
+
+  // ---------------------------------------------------------------------------
+  // Del 1 al 21 de octubre · el cierre de la Fase 1 (20 de octubre, Gabriel)
+  //
+  // La fase se cierra el 21 de octubre y no en enero: **noviembre y diciembre no se
+  // dan**, así que octubre lleva el trabajo que quedaba para los cinco meses. La meta es
+  // la bolsa entera de la fase, 5 × 107 = 535 h: agosto y septiembre suman 262, y
+  // octubre, 273. El peso va donde estuvo el trabajo —Gabriel—: **el levantamiento de
+  // procesos y su documentación** y **la arquitectura**. Como siempre, se tarifa el
+  // perfil y no la persona: reescribir una ficha de proceso es trabajo de procesos
+  // aunque lo haga otro.
+  // ---------------------------------------------------------------------------
+
+  // Procesos · el levantamiento documentado en el informe.
+  {
+    fecha: '2026-10-05',
+    perfil: 'consultor_procesos',
+    horas: 20,
+    persona: 'Equipo de procesos',
+    entregable: 'levantamiento',
+    descripcion:
+      'Las fichas de proceso de los veinte macroprocesos, completadas con lo que dejó la ' +
+      'reunión con la Gerencia General del 29 de septiembre: el flujo de cada proceso, las ' +
+      'áreas que lo ejecutan, los sistemas que usa y lo que hoy no se ejecuta. 20 h.',
+  },
+  {
+    fecha: '2026-10-06',
+    perfil: 'consultor_procesos',
+    horas: 12,
+    persona: 'Equipo de procesos',
+    entregable: 'inventario',
+    descripcion:
+      'El mapa de macroprocesos y el inventario de procesos, revisados contra el levantamiento ' +
+      'completo: los procesos que se hacen y no estaban documentados, marcados, y el que propone ' +
+      'el programa. 12 h.',
+  },
+  {
+    fecha: '2026-10-09',
+    perfil: 'consultor_procesos',
+    horas: 16,
+    persona: 'Equipo de procesos',
+    entregable: 'levantamiento',
+    descripcion:
+      'Sistemas y estado del dato, riesgo y continuidad, y dónde espera el flujo: los traspasos ' +
+      'entre áreas y sistemas y la carga por área y por tipo, ordenados y puntualizados para el ' +
+      'informe. 16 h.',
+  },
+  {
+    fecha: '2026-10-11',
+    perfil: 'consultor_procesos',
+    horas: 16,
+    persona: 'Equipo de procesos',
+    entregable: 'levantamiento',
+    descripcion:
+      'Repaso del levantamiento en el informe para que documente cómo se da el flujo: los 42 ' +
+      'hallazgos con su forma de darse, su punto en el circuito y su efecto; las fichas de ' +
+      'proceso y el circuito, con sus enlaces recalculados. 16 h.',
+  },
+  {
+    fecha: '2026-10-19',
+    perfil: 'consultor_procesos',
+    horas: 8,
+    persona: 'Equipo de procesos',
+    entregable: 'levantamiento',
+    descripcion:
+      'Preparación de la entrega: las cifras del levantamiento conciliadas para la portada del ' +
+      'informe —sesiones, entrevistas, reuniones y formaciones, por sede— y el resumen para la ' +
+      'jornada con los directores. 8 h.',
+  },
+  {
+    fecha: '2026-10-20',
+    perfil: 'consultor_procesos',
+    horas: 8,
+    persona: 'Equipo de procesos',
+    entregable: 'levantamiento',
+    descripcion:
+      'Las tres líneas de intervención desde el levantamiento: el proceso como se da hoy y como ' +
+      'se daría con la IA, los traspasos que lo sostienen y los seis frentes del desarrollo ' +
+      'organizacional. 8 h.',
+  },
+
+  // Dirección y arquitectura.
+  {
+    fecha: '2026-10-05',
+    perfil: 'director_arquitecto',
+    horas: 10,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'arquitectura',
+    descripcion:
+      'La Fase 2, por dentro: para Compras, Comercial y Finanzas, qué se lee de JD, qué se ' +
+      'postea por el Orchestrator, dónde va la IA y los documentos que deja cada módulo; y la ' +
+      'construcción por fases 2, 3 y 4. 10 h.',
+  },
+  {
+    fecha: '2026-10-08',
+    perfil: 'director_arquitecto',
+    horas: 6,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'arquitectura',
+    descripcion:
+      'Definición y revisión del documento técnico: la plataforma, seguridad y operación, la IA ' +
+      'dentro del sistema, las fichas técnicas de los nueve módulos y la política de adopción de ' +
+      'IA en borrador. 6 h.',
+  },
+  {
+    fecha: '2026-10-09',
+    perfil: 'director_arquitecto',
+    horas: 8,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'arquitectura',
+    descripcion:
+      'Cierre del Documento de Arquitectura con lo de las reuniones del 29 de septiembre y del 2 ' +
+      'y 8 de octubre: las fechas al 21 de octubre, el criterio de la Gerencia General y la ' +
+      'revisión formal de las secciones. Publicado ese día. 8 h.',
+  },
+  {
+    fecha: '2026-10-11',
+    perfil: 'director_arquitecto',
+    horas: 6,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'arquitectura',
+    descripcion:
+      'Repaso del Documento de Arquitectura completo: los niveles de los hallazgos ' +
+      'recalibrados, los perímetros sensibles conciliados en cuatro y el inventario ' +
+      'tecnológico nombrado entero. 6 h.',
+  },
+  {
+    fecha: '2026-10-19',
+    perfil: 'director_arquitecto',
+    horas: 4,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'gestion',
+    descripcion: 'Preparación de la entrega y cierre de la Fase 1 con los directores. 4 h.',
+  },
+  {
+    fecha: '2026-10-20',
+    perfil: 'director_arquitecto',
+    horas: 6,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'arquitectura',
+    descripcion:
+      'Las tres líneas de intervención —desarrollo organizacional, procesos y tecnología— y la ' +
+      'presentación «De operar a conducir», dentro del Documento de Arquitectura. 6 h.',
+  },
+  {
+    fecha: '2026-10-21',
+    perfil: 'director_arquitecto',
+    horas: 6,
+    persona: 'Gabriel Montiel Toro',
+    entregable: 'arquitectura',
+    descripcion:
+      'Entrega y cierre de la Fase 1 con los directores: el Documento de Arquitectura y la ruta ' +
+      'de construcción. 6 h.',
+  },
+
+  // Senior · la presentación del señor Carlos y la entrega.
+  {
+    fecha: '2026-10-11',
+    perfil: 'consultor_senior',
+    horas: 2,
+    persona: 'Carlos Quintana',
+    entregable: 'arquitectura',
+    descripcion:
+      'Revisión del propósito de la política de IA: liberar tiempo en lo administrativo y de ' +
+      'soporte, y más control y trazabilidad en producción. 2 h.',
+  },
+  {
+    fecha: '2026-10-20',
+    perfil: 'consultor_senior',
+    horas: 6,
+    persona: 'Carlos Quintana',
+    entregable: 'arquitectura',
+    descripcion:
+      'La presentación «De operar a conducir»: el desarrollo organizacional, las ' +
+      'responsabilidades de la dirección y de la gerencia, y los dos niveles de un mismo ' +
+      'ciclo. 6 h.',
+  },
+  {
+    fecha: '2026-10-21',
+    perfil: 'consultor_senior',
+    horas: 6,
+    persona: 'Carlos Quintana',
+    entregable: 'arquitectura',
+    descripcion: 'Entrega y cierre de la Fase 1 con los directores. 6 h.',
+  },
+
+  // Desarrollo · el documento dentro del aplicativo.
+  {
+    fecha: '2026-10-05',
+    perfil: 'desarrollador_ia',
+    horas: 13,
+    persona: 'Boosty',
+    entregable: 'arquitectura',
+    descripcion:
+      'La Fase 2, por dentro, y las fases 2, 3 y 4 en los dibujos: los rótulos del circuito y ' +
+      'del espejo, y la arquitectura actualizada en la base. 13 h.',
+  },
+  {
+    fecha: '2026-10-08',
+    perfil: 'desarrollador_ia',
+    horas: 20,
+    persona: 'Boosty',
+    entregable: 'arquitectura',
+    descripcion:
+      'El documento técnico dentro del informe: cinco secciones nuevas —la plataforma con su ' +
+      'triángulo, seguridad y operación, la IA dentro del sistema, las fichas técnicas de los ' +
+      'nueve módulos y la política de IA— redactadas y montadas. 20 h.',
+  },
+  {
+    fecha: '2026-10-09',
+    perfil: 'desarrollador_ia',
+    horas: 12,
+    persona: 'Boosty',
+    entregable: 'arquitectura',
+    descripcion:
+      'El informe terminado y publicado: las secciones pasadas a la base, el índice por partes ' +
+      'plegables y la verificación de cada página. 12 h.',
+  },
+  {
+    fecha: '2026-10-11',
+    perfil: 'desarrollador_ia',
+    horas: 12,
+    persona: 'Boosty',
+    entregable: 'arquitectura',
+    descripcion:
+      'Repaso del informe en sus dieciséis secciones: las anclas recalculadas sin enlaces rotos, ' +
+      'el índice con las secciones que llevan dibujo y la verificación de cada página. 12 h.',
+  },
+  {
+    fecha: '2026-10-19',
+    perfil: 'desarrollador_ia',
+    horas: 6,
+    persona: 'Boosty',
+    entregable: 'app',
+    descripcion:
+      'La base reactivada, recuperar la contraseña desde el inicio de sesión y la verificación ' +
+      'del aplicativo antes de la entrega. 6 h.',
+  },
+  {
+    fecha: '2026-10-20',
+    perfil: 'desarrollador_ia',
+    horas: 12,
+    persona: 'Boosty',
+    entregable: 'arquitectura',
+    descripcion:
+      'Las tres líneas de intervención en el informe, con el dibujo del proceso hoy y con la IA, ' +
+      'y la presentación «De operar a conducir» a pantalla completa. 12 h.',
   },
 ]
 

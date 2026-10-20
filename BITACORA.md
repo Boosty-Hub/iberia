@@ -28,7 +28,7 @@ que está en línea.
 | **Levantamiento** | 42 sesiones grabadas · 27.951 turnos · **36 entrevistas de ~25**: a las 33 se suman la de Alberto (29/9) y las de Flaviano y Gustavo (7/10), las tres sin cargar a propósito · ENT-029 sin hacer · los 20 macroprocesos cubiertos |
 | **Hallazgos** | 394, todos con cita textual · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
 | **Informe** | 16 secciones con el documento técnico y la política de IA en borrador, **terminado y publicado el 9/10**, formal y sin atribuciones. **Repasado el 11/10 para que documente el flujo y no suene a chisme**: 9 hallazgos críticos de 42. Construcción por **fases 2, 3 y 4**. **«Qué proponemos» abre desde el 20/10 con las tres líneas de intervención** (sección 09). Ninguna sección se genera: se corrigen con `npm run secciones` |
-| **Horas** | Agosto **137 h** (revisadas con Gabriel) · septiembre **119 h** (estimadas, por revisar) · octubre **43 h** cargadas: el 7 en Cagua y las reuniones con Alberto · bolsa de 107 al mes. Aparte: 111 h de la etapa anterior y 104 h del curso de planta (Fase 2) |
+| **Horas** | Agosto **137 h** · septiembre **125 h** · octubre **273 h**: la fase cierra el 21/10 y octubre lleva lo de noviembre y diciembre, así que la fase suma **535 h = 5 × 107** (20/10, Gabriel) · bolsa de 107 al mes. Aparte: 111 h de la etapa anterior y 104 h del curso de planta (Fase 2) |
 | **Comunicación** | El comunicado salió. Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | 276 personas de Capital Humano, **sin cédula, celular ni correo**, y 17 fichas cargadas a mano en agosto que repiten a gente real (marcadas en el padrón desde el 27/9) |
 | **Canal** | En línea. **Martha Álvarez tiene acceso desde el 27/9** para revisarlo con Mercadeo |
@@ -91,6 +91,17 @@ Gabriel pasó la transcripción de su conversación del 19 con el señor Carlos 
   «Desarrollo organizacional, procesos y tecnología, a la vez». Nada de otras
   secciones enlazaba a esas anclas. Respaldo previo en `Insumos/Respaldo_Informe_2026-10-20_1622`: ahí
   está el texto entero si hay que devolverlo.
+- **Inicio, al día** (nota de voz de Gabriel): **47 sesiones** —36 entrevistas, 8 reuniones y
+  recorridos, 3 formaciones—, 29 en Cagua, 16 en Caracas y 2 en remoto, y una línea nueva con las
+  tres reuniones con la Gerencia General (29/9, 2/10 y 8/10). Respaldo previo en
+  `Insumos/Respaldo_Informe_2026-10-20_1818`.
+- **Las horas de octubre, a 273** (segunda nota de voz): noviembre y diciembre no se dan, así que
+  octubre lleva el trabajo de los meses que faltaban, hasta la bolsa entera de la fase, 535 h. El peso,
+  donde lo puso Gabriel: Procesos 110 —el levantamiento documentado, cargado como «Equipo de
+  procesos»—, Dirección 60, Desarrollo 75 y Senior 28. **El 7 en Cagua cuenta entero**: los cinco
+  estuvieron de 7:00 a 14:00, 7 h en planta cada uno más la vía (antes iban 4), y la descripción ya
+  no dice que la formación no se dictó: la lee Iberia. Incluye la entrega del 21 para Gabriel y el
+  señor Carlos. `LO_QUE_TRAJO_EL_MES` tiene su línea de octubre.
 
 ---
 

@@ -187,6 +187,11 @@ export const LO_QUE_TRAJO_EL_MES: Record<string, string> = {
     'el levantamiento y su estructura: el tercer rodaje, entre Cagua y Caracas, con el que se ' +
     'pasó la meta de entrevistas; el mapa de procesos validado contra lo que contó la gente; la ' +
     'formación de los gerentes, y el Documento de Arquitectura completo en borrador',
+  '2026-10':
+    'el cierre de la fase, que se adelantó al 21 de octubre y reúne el trabajo previsto para ' +
+    'noviembre y diciembre: las últimas entrevistas y las reuniones con la Gerencia General, el ' +
+    'levantamiento documentado proceso por proceso, el Documento de Arquitectura terminado con ' +
+    'su documento técnico, las tres líneas de intervención y la entrega a los directores',
 }
 
 /** El orden en que se leen: por fecha de vencimiento, no por importancia. */
