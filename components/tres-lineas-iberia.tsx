@@ -1,5 +1,5 @@
 import type { Encabezado } from '@/lib/encabezados'
-import { PresentacionTresLineas } from '@/components/presentacion-tres-lineas'
+import { PresentacionOperarConducir } from '@/components/presentacion-operar-conducir'
 
 /**
  * La apertura de «Qué proponemos»: las tres líneas de intervención, el desarrollo
@@ -185,8 +185,8 @@ export function TresLineasIberia() {
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <PresentacionTresLineas />
-        <span className="text-sm text-marca-500">Las láminas de esta propuesta, para mostrarlas en pantalla.</span>
+        <PresentacionOperarConducir />
+        <span className="text-sm text-marca-500">La presentación del desarrollo organizacional, para mostrarla en pantalla.</span>
       </div>
       <aside className="aviso-md aviso-clave">
         <p className="aviso-rotulo">Por qué las tres</p>

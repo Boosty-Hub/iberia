@@ -82,9 +82,11 @@ Gabriel pasó la transcripción de su conversación del 19 con el señor Carlos 
   desbordes ni errores de consola.
 - **Ajustes de Gabriel, el mismo día**: el paso siguiente de los procesos queda en «documentarlo a
   fondo, validarlo con cada área y difundirlo» (sin «derivar de él sus políticas, normas y
-  procedimientos»), y **«Presentar las láminas»**, debajo de las tres líneas, abre a pantalla completa
-  las dos láminas del señor Carlos con el diseño de Iberia (`components/presentacion-tres-lineas.tsx`,
-  sobre su «Láminas para presentación Iberia.pptx»): flechas, toque o deslizar, y Escape para salir.
+  procedimientos»), y **«Presentar «De operar a conducir»»**, debajo de las tres líneas, abre a
+  pantalla completa la presentación del señor Carlos —ocho láminas, el texto tal cual— con el diseño de
+  Iberia (`components/presentacion-operar-conducir.tsx`, sobre «IBERIA De operar a conducir.pptx»; un
+  primer envío con dos láminas fue un error de archivo): flechas, toque o deslizar, y Escape para salir.
+  ⚠️ El diálogo va por portal al `body`: dentro de `.prosa`, `.prosa p` pintaba de gris el texto blanco.
 
 ---
 
