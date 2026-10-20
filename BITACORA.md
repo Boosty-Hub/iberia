@@ -80,6 +80,11 @@ Gabriel pasó la transcripción de su conversación del 19 con el señor Carlos 
   dichos en la terminal. La contraseña del 19 sigue sin aplicarse: falta que diga a qué cuenta.
 - Respaldo previo en `Insumos/Respaldo_Informe_2026-10-20`. Revisada en local a 1440 y a 390: sin
   desbordes ni errores de consola.
+- **Ajustes de Gabriel, el mismo día**: el paso siguiente de los procesos queda en «documentarlo a
+  fondo, validarlo con cada área y difundirlo» (sin «derivar de él sus políticas, normas y
+  procedimientos»), y **«Presentar las láminas»**, debajo de las tres líneas, abre a pantalla completa
+  las dos láminas del señor Carlos con el diseño de Iberia (`components/presentacion-tres-lineas.tsx`,
+  sobre su «Láminas para presentación Iberia.pptx»): flechas, toque o deslizar, y Escape para salir.
 
 ---
 
