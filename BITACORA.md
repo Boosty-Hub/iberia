@@ -68,8 +68,7 @@ Gabriel pasó la transcripción de su conversación del 19 con el señor Carlos 
   políticas, normas y procedimientos; y el proceso como actividades que transforman insumos en
   productos) y **tecnología**, que sigue en la 10. Lleva el dibujo del señor Carlos: el mismo proceso
   hoy, con las líneas devolviéndose y cruzándose, y con la IA, avanzando derechas hasta el producto
-  final. Las 33 oportunidades siguen debajo, bajo «Tecnología: las oportunidades, priorizadas»
-  (decisión de Gabriel). La apertura es un componente (`components/tres-lineas-iberia.tsx`), por slug
+  final. Las 33 oportunidades quedaron debajo en un primer momento y después se quitaron (ver abajo). La apertura es un componente (`components/tres-lineas-iberia.tsx`), por slug
   como el triángulo de la plataforma; el título va también en `estructura-informe.mjs`.
 - **Lo que el señor Carlos pidió cuidar**: no se habla de plan estratégico, y los marcos de referencia
   van dentro del desarrollo organizacional. En la conversación se dijo «64 procesos»: el mapa tiene
@@ -88,7 +87,8 @@ Gabriel pasó la transcripción de su conversación del 19 con el señor Carlos 
   primer envío con dos láminas fue un error de archivo): flechas, toque o deslizar, y Escape para salir.
   ⚠️ El diálogo va por portal al `body`: dentro de `.prosa`, `.prosa p` pintaba de gris el texto blanco.
 - **La 09 ya no trae las 33 tarjetas** (Gabriel, por Telegram): se quitó de «Las fases, de un vistazo»
-  hacia abajo. Queda «Tecnología» con su párrafo de puente, el de las 33 y el aviso clave. Nada de otras
+  hacia abajo, y la sección cierra con «Tecnología» y un párrafo que lleva a la 10; el subtítulo pasó a
+  «Desarrollo organizacional, procesos y tecnología, a la vez». Nada de otras
   secciones enlazaba a esas anclas. Respaldo previo en `Insumos/Respaldo_Informe_2026-10-20_1622`: ahí
   está el texto entero si hay que devolverlo.
 

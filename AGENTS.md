@@ -1330,7 +1330,8 @@ oportunidades → 10 La arquitectura de IA: el sistema Iberia → 11 La ruta de 
 20 de octubre la 09 se llama «Lo que proponemos: tres líneas de intervención» y abre con
 `TresLineasIberia` —desarrollo organizacional, procesos y marcos de referencia, y el dibujo del proceso
 hoy y con la IA—; sus encabezados entran al índice antes que los del markdown
-(`ENCABEZADOS_TRES_LINEAS`), y las 33 oportunidades siguen debajo, bajo «Tecnología».
+(`ENCABEZADOS_TRES_LINEAS`). El markdown solo trae «Tecnología», que lleva a la 10: las 33 tarjetas
+de oportunidades se quitaron el mismo 20 de octubre (quedan en el respaldo de ese día).
 *(Hasta el 25 la abría «Los circuitos del negocio», que se fundió en los hallazgos y en
 «Sistemas y estado del dato».)*
 

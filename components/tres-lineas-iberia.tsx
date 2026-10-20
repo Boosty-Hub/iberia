@@ -4,8 +4,8 @@ import { PresentacionOperarConducir } from '@/components/presentacion-operar-con
 /**
  * La apertura de «Qué proponemos»: las tres líneas de intervención, el desarrollo
  * organizacional y los procesos con sus marcos de referencia, con el dibujo del mismo
- * proceso hoy y con la IA. Debajo, en el markdown de la sección, siguen la tecnología y
- * las 33 oportunidades priorizadas, sin cambios.
+ * proceso hoy y con la IA. Debajo, en el markdown de la sección, va la tecnología, que
+ * lleva a la arquitectura (sección 10).
  *
  * Lo pidió Gabriel el 20 de octubre de 2026, para la entrega del 21, sobre las láminas
  * del señor Carlos («Las tres líneas de intervención» y la de desarrollo organizacional)

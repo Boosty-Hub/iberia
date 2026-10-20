@@ -118,7 +118,7 @@ const SECCIONES = [
   // «Dónde no va la IA» salió como sección: lo que prometía —decir dónde
   // interviene la IA y dónde no— ahora lo dice cada módulo del sistema Iberia,
   // capacidad por capacidad.
-  ['arquitectura', 'oportunidades', 'Lo que proponemos: tres líneas de intervención', 'Desarrollo organizacional, procesos y tecnología a la vez, y las oportunidades priorizadas por fase y por módulo'],
+  ['arquitectura', 'oportunidades', 'Lo que proponemos: tres líneas de intervención', 'Desarrollo organizacional, procesos y tecnología, a la vez'],
   ['arquitectura', 'arquitectura-ia', 'La arquitectura de IA: el sistema Iberia', 'El espejo de JD, sus módulos, dónde opera la IA y la tecnología que lo sostiene'],
   // El documento técnico, desde el 9 de octubre de 2026 (Gabriel): va dentro del
   // informe, en esta parte, porque el informe lo leen solo los directivos. El
