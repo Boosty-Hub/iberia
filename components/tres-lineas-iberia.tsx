@@ -235,8 +235,7 @@ export function TresLineasIberia() {
       </p>
       <p>
         En esta fase se documentó cómo funciona hoy cada proceso, lo necesario para diseñar la arquitectura. El paso
-        siguiente es documentarlo a fondo, validarlo con cada área, difundirlo y derivar de él sus políticas, normas y
-        procedimientos. Al hacerlo, en cada proceso se propone también por dónde puede ir mejor con la IA dentro. Las
+        siguiente es documentarlo a fondo, validarlo con cada área y difundirlo. Al hacerlo, en cada proceso se propone también por dónde puede ir mejor con la IA dentro. Las
         decisiones las toma Iberia.
       </p>
       <ProcesoHoyYConIA />
