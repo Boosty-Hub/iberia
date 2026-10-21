@@ -15,6 +15,8 @@ import { Markdown } from '@/components/markdown'
 import { MarkdownPlegable } from '@/components/markdown-plegable'
 import { PlataformaIberia } from '@/components/plataforma-iberia'
 import { ENCABEZADOS_TRES_LINEAS, TresLineasIberia } from '@/components/tres-lineas-iberia'
+import { GanttNuevaIberia } from '@/components/gantt-nueva-iberia'
+import { ENCABEZADOS_GANTT } from '@/lib/nueva-iberia'
 import { Insignia } from '@/components/ui'
 import { esEditor, puede, requerirSesion } from '@/lib/auth'
 import { encabezadosDe, minutosDeLectura } from '@/lib/encabezados'
@@ -163,10 +165,16 @@ export default async function SeccionInformePage({ params, searchParams }: PageP
   ])
   // Las fichas ya tienen su subíndice en la columna izquierda, por nivel y por
   // ficha: un segundo índice con los mismos niveles a la derecha sería ruido.
-  // «Qué proponemos» abre con las tres líneas, que no son markdown: sus encabezados van primero.
+  // «Qué proponemos» abre con las tres líneas y cierra con el cronograma, que no son
+  // markdown: sus encabezados van antes y después de los del texto.
+  const oportunidades = seccion.slug === 'oportunidades'
   const indice = plegable
     ? []
-    : [...(seccion.slug === 'oportunidades' ? ENCABEZADOS_TRES_LINEAS : []), ...encabezadosDe(seccion.contenido_md)]
+    : [
+        ...(oportunidades ? ENCABEZADOS_TRES_LINEAS : []),
+        ...encabezadosDe(seccion.contenido_md),
+        ...(oportunidades ? ENCABEZADOS_GANTT : []),
+      ]
   const minutos = minutosDeLectura(seccion.contenido_md)
   const pedido = (clave: string) => {
     const v = consulta[clave]
@@ -305,6 +313,8 @@ export default async function SeccionInformePage({ params, searchParams }: PageP
                 <p className="text-sm text-marca-400">Esta sección está por escribir.</p>
               </div>
             )}
+            {/* Y cierra con el cronograma de las tres vías, que es el final de la presentación. */}
+            {oportunidades && <GanttNuevaIberia />}
           </div>
 
           <nav aria-label="Secciones contiguas" className="grid gap-3 border-t border-[var(--borde)] pt-6 sm:grid-cols-2">

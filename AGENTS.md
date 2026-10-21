@@ -1331,7 +1331,12 @@ oportunidades → 10 La arquitectura de IA: el sistema Iberia → 11 La ruta de 
 `TresLineasIberia` —desarrollo organizacional, procesos y marcos de referencia, y el dibujo del proceso
 hoy y con la IA—; sus encabezados entran al índice antes que los del markdown
 (`ENCABEZADOS_TRES_LINEAS`). El markdown solo trae «Tecnología», que lleva a la 10: las 33 tarjetas
-de oportunidades se quitaron el mismo 20 de octubre (quedan en el respaldo de ese día).
+de oportunidades se quitaron el mismo 20 de octubre (quedan en el respaldo de ese día). Y la 09 **cierra
+con el cronograma de la Nueva Iberia** (`components/gantt-nueva-iberia.tsx`): las tres vías de octubre de
+2026 a octubre de 2027, la tecnología primero, con un botón para verlo en pantalla. Sus fechas salen de
+las propuestas de octubre (Fase 2 · Aliviar y New Iberia) y se dicen tentativas. ⚠️ No va en la 11, que
+dice que la ruta no lleva fechas. Su encabezado para el índice vive en `lib/nueva-iberia.ts`: lo que
+exporta un módulo `'use client'` le llega a la página del servidor como referencia, no como arreglo.
 *(Hasta el 25 la abría «Los circuitos del negocio», que se fundió en los hallazgos y en
 «Sistemas y estado del dato».)*
 

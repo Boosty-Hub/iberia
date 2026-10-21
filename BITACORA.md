@@ -105,6 +105,14 @@ Gabriel pasó la transcripción de su conversación del 19 con el señor Carlos 
   estuvieron de 7:00 a 14:00, 7 h en planta cada uno más la vía (antes iban 4), y la descripción ya
   no dice que la formación no se dictó: la lee Iberia. Incluye la entrega del 21 para Gabriel y el
   señor Carlos. `LO_QUE_TRAJO_EL_MES` tiene su línea de octubre.
+- **El cronograma con el que se cierra la mañana del 21** (Gabriel, tras su reunión de coordinación
+  de ese día con Alberto y el señor Carlos; la transcripción no se cargó a la base): «La Nueva Iberia,
+  en el tiempo», al final de la 09. Tres vías —la tecnología primero y más detallada: el paso 0 con TI
+  en noviembre y diciembre, el canal de comunicación interna y los tres módulos de enero a abril con el
+  punto de control—, y debajo el desarrollo organizacional y los procesos, con las fechas de las
+  propuestas de octubre. Sin montos, y con la nota de que es tentativo. El orden de la mañana quedó así:
+  Alberto abre, Gabriel presenta los hallazgos y la arquitectura, el señor Carlos explica el desarrollo
+  organizacional y los procesos, y Gabriel cierra con los alivios y el cronograma.
 
 ---
 
