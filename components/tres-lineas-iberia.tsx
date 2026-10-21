@@ -154,14 +154,10 @@ function ProcesoHoyYConIA() {
 export function TresLineasIberia() {
   return (
     <div className="prosa">
+      {/* El párrafo de la conclusión del levantamiento —357 traspasos, 55 de sistema a sistema—
+          se quitó el 20 de octubre de 2026, por pedido de Gabriel. */}
       <p>
-        El levantamiento —45 sesiones, el circuito del negocio y el mapa de 20 macroprocesos y 142 procesos— deja una
-        conclusión que ordena todo lo que sigue: <strong>la información va más lenta que la producción.</strong> De
-        357 traspasos de dato, 55 van de sistema a sistema; el resto viaja por correo, se vuelve a teclear, va en
-        papel o de palabra.
-      </p>
-      <p>
-        Una herramienta nueva, por sí sola, no cambia eso. Para que la implementación de la IA funcione como tiene
+        Una herramienta nueva, por sí sola, no cambia la forma de trabajar. Para que la implementación de la IA funcione como tiene
         que funcionar, la propuesta avanza en tres líneas al mismo tiempo.
       </p>
 

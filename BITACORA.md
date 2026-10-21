@@ -63,7 +63,7 @@ Gabriel pasó la transcripción de su conversación del 19 con el señor Carlos 
 
 - **La sección 09 pasa a «Lo que proponemos: tres líneas de intervención».** Abre con la conclusión
   del levantamiento —la información va más lenta que la producción: de 357 traspasos, 55 van de
-  sistema a sistema— y las tres líneas: **desarrollo organizacional** (desarrollo humano y clima, con
+  sistema a sistema; ese párrafo lo quitó Gabriel el mismo día— y las tres líneas: **desarrollo organizacional** (desarrollo humano y clima, con
   los seis frentes de la lámina), **procesos y marcos de referencia** (las reglas del juego: enunciados,
   políticas, normas y procedimientos; y el proceso como actividades que transforman insumos en
   productos) y **tecnología**, que sigue en la 10. Lleva el dibujo del señor Carlos: el mismo proceso
