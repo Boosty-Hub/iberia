@@ -113,6 +113,15 @@ Gabriel pasó la transcripción de su conversación del 19 con el señor Carlos 
   propuestas de octubre. Sin montos, y con la nota de que es tentativo. El orden de la mañana quedó así:
   Alberto abre, Gabriel presenta los hallazgos y la arquitectura, el señor Carlos explica el desarrollo
   organizacional y los procesos, y Gabriel cierra con los alivios y el cronograma.
+- **Dos cosas de esa reunión, al informe** (Gabriel escogió dos de siete propuestas):
+  - En la 10, **«Tecnología cuida la base; cada área arma lo suyo»**: TI se queda con el resguardo de JD,
+    la conexión y el gobierno del dato, y cada área saca sus reportes en un espacio que TI controla, con
+    un *champion* por área. Es lo que Gabriel le va a decir a Tecnología para quitarle presión.
+  - En la 05, al abrir, **el reconocimiento que pidió Alberto**: lo que el capítulo documenta no es una
+    falla de las personas ni de un área, sino el trabajo que la operación hizo fuera del ERP para seguir.
+  - Respaldo previo en `Insumos/Respaldo_Informe_2026-10-21`. Quedan sin hacer, a la espera de Gabriel:
+    la ficha técnica de Planta dice «el teléfono no se usa en las líneas» y él habló de teléfonos de
+    Iberia con solo la app para los operadores; los accesos de Milagro y los directores.
 
 ---
 
