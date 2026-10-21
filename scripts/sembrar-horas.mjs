@@ -726,7 +726,28 @@ const HORAS = [
 
   // Agregadas el 20 de octubre, cuando Gabriel pidió equiparar septiembre con
   // octubre: el informe se construyó en el aplicativo del 16 al 25 de septiembre y
-  // el desarrollo de esos días casi no estaba cargado.
+  // el desarrollo de esos días casi no estaba cargado. Y el senior, parejo entre los
+  // dos meses (Gabriel, el mismo día): el acompañamiento directivo de septiembre.
+  {
+    fecha: '2026-09-19',
+    perfil: 'consultor_senior',
+    horas: 5,
+    persona: 'Carlos Quintana',
+    entregable: 'gestion',
+    descripcion:
+      'Acompañamiento directivo: la preparación con la dirección del programa del ' +
+      'entrenamiento de gerentes y de la reunión con la Gerencia General. 5 h.',
+  },
+  {
+    fecha: '2026-09-26',
+    perfil: 'consultor_senior',
+    horas: 6,
+    persona: 'Carlos Quintana',
+    entregable: 'arquitectura',
+    descripcion:
+      'Revisión del borrador del Documento de Arquitectura desde la gestión del cambio: cómo ' +
+      'se presenta a las áreas y a los directores. 6 h.',
+  },
   {
     fecha: '2026-09-17',
     perfil: 'desarrollador_ia',
@@ -972,7 +993,8 @@ const HORAS = [
   // La fase se cierra el 21 de octubre y no en enero: **noviembre y diciembre no se
   // dan**, así que octubre lleva el trabajo que quedaba para los cinco meses. La meta,
   // de Gabriel: la bolsa entera de la fase, 5 × 107 = 535 h, **más 19**, y septiembre y
-  // octubre más parejos: agosto 137, septiembre 175 y octubre 242, en total 554 h.
+  // octubre más parejos: agosto 137, septiembre 186 y octubre 231, en total 554 h. El
+  // senior, parejo entre los dos meses, y en octubre menos dirección y más procesos.
   // El peso va donde estuvo el trabajo —Gabriel—: **el levantamiento de
   // procesos y su documentación** y **la arquitectura**. Como siempre, se tarifa el
   // perfil y no la persona: reescribir una ficha de proceso es trabajo de procesos
@@ -1047,28 +1069,39 @@ const HORAS = [
       'organizacional. 8 h.',
   },
 
+  {
+    fecha: '2026-10-08',
+    perfil: 'consultor_procesos',
+    horas: 11,
+    persona: 'Equipo de procesos',
+    entregable: 'arquitectura',
+    descripcion:
+      'Los procesos en el documento técnico: qué procesos atiende cada uno de los nueve módulos ' +
+      'del espejo, qué traspasos destapa y qué documentos deja. 11 h.',
+  },
+
   // Dirección y arquitectura.
   {
     fecha: '2026-10-05',
     perfil: 'director_arquitecto',
-    horas: 6,
+    horas: 3,
     persona: 'Gabriel Montiel Toro',
     entregable: 'arquitectura',
     descripcion:
       'La Fase 2, por dentro: para Compras, Comercial y Finanzas, qué se lee de JD, qué se ' +
       'postea por el Orchestrator, dónde va la IA y los documentos que deja cada módulo; y la ' +
-      'construcción por fases 2, 3 y 4. 6 h.',
+      'construcción por fases 2, 3 y 4. 3 h.',
   },
   {
     fecha: '2026-10-08',
     perfil: 'director_arquitecto',
-    horas: 6,
+    horas: 3,
     persona: 'Gabriel Montiel Toro',
     entregable: 'arquitectura',
     descripcion:
       'Definición y revisión del documento técnico: la plataforma, seguridad y operación, la IA ' +
       'dentro del sistema, las fichas técnicas de los nueve módulos y la política de adopción de ' +
-      'IA en borrador. 6 h.',
+      'IA en borrador. 3 h.',
   },
   {
     fecha: '2026-10-09',
@@ -1084,31 +1117,31 @@ const HORAS = [
   {
     fecha: '2026-10-11',
     perfil: 'director_arquitecto',
-    horas: 6,
+    horas: 3,
     persona: 'Gabriel Montiel Toro',
     entregable: 'arquitectura',
     descripcion:
       'Repaso del Documento de Arquitectura completo: los niveles de los hallazgos ' +
       'recalibrados, los perímetros sensibles conciliados en cuatro y el inventario ' +
-      'tecnológico nombrado entero. 6 h.',
+      'tecnológico nombrado entero. 3 h.',
   },
   {
     fecha: '2026-10-19',
     perfil: 'director_arquitecto',
-    horas: 4,
+    horas: 2,
     persona: 'Gabriel Montiel Toro',
     entregable: 'gestion',
-    descripcion: 'Preparación de la entrega y cierre de la Fase 1 con los directores. 4 h.',
+    descripcion: 'Preparación de la entrega y cierre de la Fase 1 con los directores. 2 h.',
   },
   {
     fecha: '2026-10-20',
     perfil: 'director_arquitecto',
-    horas: 6,
+    horas: 3,
     persona: 'Gabriel Montiel Toro',
     entregable: 'arquitectura',
     descripcion:
       'Las tres líneas de intervención —desarrollo organizacional, procesos y tecnología— y la ' +
-      'presentación «De operar a conducir», dentro del Documento de Arquitectura. 6 h.',
+      'presentación «De operar a conducir», dentro del Documento de Arquitectura. 3 h.',
   },
   {
     fecha: '2026-10-21',
@@ -1123,33 +1156,23 @@ const HORAS = [
 
   // Senior · la presentación del señor Carlos y la entrega.
   {
-    fecha: '2026-10-11',
+    fecha: '2026-10-20',
     perfil: 'consultor_senior',
     horas: 2,
     persona: 'Carlos Quintana',
     entregable: 'arquitectura',
     descripcion:
-      'Revisión del propósito de la política de IA: liberar tiempo en lo administrativo y de ' +
-      'soporte, y más control y trazabilidad en producción. 2 h.',
-  },
-  {
-    fecha: '2026-10-20',
-    perfil: 'consultor_senior',
-    horas: 6,
-    persona: 'Carlos Quintana',
-    entregable: 'arquitectura',
-    descripcion:
       'La presentación «De operar a conducir»: el desarrollo organizacional, las ' +
       'responsabilidades de la dirección y de la gerencia, y los dos niveles de un mismo ' +
-      'ciclo. 6 h.',
+      'ciclo. 2 h.',
   },
   {
     fecha: '2026-10-21',
     perfil: 'consultor_senior',
-    horas: 6,
+    horas: 4,
     persona: 'Carlos Quintana',
     entregable: 'arquitectura',
-    descripcion: 'Entrega y cierre de la Fase 1 con los directores. 6 h.',
+    descripcion: 'Entrega y cierre de la Fase 1 con los directores. 4 h.',
   },
 
   // Desarrollo · el documento dentro del aplicativo.
