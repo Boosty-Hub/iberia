@@ -29,6 +29,12 @@ jobs:
       # "iPhone Distribution" como en Boosty Desk, cuyo certificado es otro.
       # Tiene que decir lo mismo que CODE_SIGN_IDENTITY en project.pbxproj.
       SIGN_IDENTITY: "Apple Distribution"
+      # El número de compilación (CFBundleVersion) es el número de la corrida:
+      # App Store Connect no acepta dos compilaciones con el mismo número en una
+      # versión, y la 1 ya se usó a mano. La versión (MARKETING_VERSION, 1.0.0)
+      # sigue saliendo de project.pbxproj. ⚠️ «Re-run» repite el número: para
+      # volver a subir, una corrida nueva.
+      BUILD_NUMBER: ${{ github.run_number }}
 
     steps:
       - uses: actions/checkout@v4
@@ -107,19 +113,27 @@ jobs:
             exit 1
           fi
 
-          # Que el perfil sea el que se espera, y con push, antes de instalarlo.
+          # Que el perfil sea el que se espera, con push y con Associated Domains,
+          # antes de instalarlo: si al perfil le falta un permiso que piden los
+          # entitlements de la app, codesign falla a mitad del archivo.
           security cms -D -i "$PERFIL" > "$RUNNER_TEMP/profile.plist"
           PERFIL_UUID="$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$RUNNER_TEMP/profile.plist")"
           PERFIL_NOMBRE="$(/usr/libexec/PlistBuddy -c 'Print :Name' "$RUNNER_TEMP/profile.plist")"
           PERFIL_APS="$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:aps-environment' "$RUNNER_TEMP/profile.plist" 2>/dev/null || true)"
+          # En un perfil de distribución vale «*»: cualquier dominio que declare la app.
+          PERFIL_DOMINIOS="$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:com.apple.developer.associated-domains' "$RUNNER_TEMP/profile.plist" 2>/dev/null || true)"
           PERFIL_VENCE="$(/usr/libexec/PlistBuddy -c 'Print :ExpirationDate' "$RUNNER_TEMP/profile.plist")"
-          echo "Perfil: '$PERFIL_NOMBRE' ($PERFIL_UUID), aps-environment=$PERFIL_APS, vence $PERFIL_VENCE"
+          echo "Perfil: '$PERFIL_NOMBRE' ($PERFIL_UUID), aps-environment=$PERFIL_APS, associated-domains=$PERFIL_DOMINIOS, vence $PERFIL_VENCE"
           if [ "$PERFIL_NOMBRE" != "$PROFILE_NAME" ]; then
             echo "::error::El perfil se llama '$PERFIL_NOMBRE' y se esperaba '$PROFILE_NAME'."
             exit 1
           fi
           if [ "$PERFIL_APS" != "production" ]; then
             echo "::error::El perfil no trae aps-environment=production: ¿se creó antes de activar Push en el App ID?"
+            exit 1
+          fi
+          if [ -z "$PERFIL_DOMINIOS" ]; then
+            echo "::error::El perfil no trae com.apple.developer.associated-domains: ¿se creó antes de activar Associated Domains en el App ID?"
             exit 1
           fi
 
@@ -136,6 +150,7 @@ jobs:
 
       - name: Archivar
         run: |
+          echo "Compilación número $BUILD_NUMBER"
           xcodebuild \
             -project ios/App/App.xcodeproj \
             -scheme App \
@@ -147,6 +162,7 @@ jobs:
             PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
             DEVELOPMENT_TEAM="$TEAM_ID" \
             OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN" \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
             archive
 
       - name: Exportar el .ipa

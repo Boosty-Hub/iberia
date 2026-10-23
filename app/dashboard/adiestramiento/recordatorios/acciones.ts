@@ -1,8 +1,10 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { after } from 'next/server'
 import { CURSO } from '@/lib/adiestramiento'
 import { requerirAdmin, requerirPermiso } from '@/lib/auth'
+import { avisarRecordatorios } from '@/lib/notificaciones'
 import { escalonQueToca, redactar } from '@/lib/recordatorios'
 import { createClient } from '@/lib/supabase/server'
 import { estaLista, mandarPlantilla, probarConexion, type Conexion } from '@/lib/whatsapp'
@@ -148,6 +150,10 @@ export async function prepararRecordatorios() {
  * Es el camino de hoy, y no un apaño temporal que se tira cuando llegue la
  * integración: una supervisora con el teléfono en la mano va a seguir siendo la
  * mejor vía para quien no contesta mensajes de un número desconocido.
+ *
+ * Si la persona tiene la app, le llega además un aviso de Ajito, con `after()`:
+ * marcarlo no espera a Apple. Uno ya mandado no se vuelve a marcar —conserva su
+ * fecha—, así que un doble toque no manda dos avisos.
  */
 export async function marcarAMano(datos: FormData) {
   await requerirPermiso('modulo:recordatorios', 'editar')
@@ -155,12 +161,17 @@ export async function marcarAMano(datos: FormData) {
   if (!id) return
 
   const supabase = await createClient()
-  await supabase
+  const { data: marcados } = await supabase
     .from('recordatorios')
     .update({ estado: 'enviado', via: 'a_mano', enviado_en: new Date().toISOString() })
     .eq('id', id)
+    .neq('estado', 'enviado')
+    .select('id')
 
   revalidatePath(RUTA)
+
+  const ids = (marcados ?? []).map((m) => m.id)
+  if (ids.length) after(() => avisarRecordatorios(supabase, ids))
 }
 
 /**
@@ -170,6 +181,9 @@ export async function marcarAMano(datos: FormData) {
  * anteriores ya salieron y quedan marcados. Un lote que se deshace entero porque
  * uno tenía mal el teléfono obliga a mandarlos todos otra vez, y a la gente le
  * llega dos veces.
+ *
+ * A los que salieron, si tienen la app, les llega además un aviso de Ajito, con
+ * `after()` y todos por una sola conexión: el lote no espera a Apple.
  */
 export async function mandarPorWhatsapp() {
   await requerirPermiso('modulo:recordatorios', 'editar')
@@ -189,6 +203,8 @@ export async function mandarPorWhatsapp() {
     .eq('estado', 'preparado')
     .limit(200)
 
+  const enviados: string[] = []
+
   for (const fila of preparados ?? []) {
     const empleado = (fila.matriculas as { empleados?: { telefono: string | null } } | null)
       ?.empleados
@@ -204,9 +220,13 @@ export async function mandarPorWhatsapp() {
           : { estado: 'fallido', via: 'whatsapp', detalle: `${envio.motivo}${envio.detalle ? ` · ${envio.detalle}` : ''}` }
       )
       .eq('id', fila.id)
+
+    if (envio.ok) enviados.push(fila.id)
   }
 
   revalidatePath(RUTA)
+
+  if (enviados.length) after(() => avisarRecordatorios(supabase, enviados))
 }
 
 function limpio(valor: FormDataEntryValue | null): string | null {

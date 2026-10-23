@@ -174,8 +174,70 @@ con `@capacitor/android`. Lo que falta para publicarla está en `PENDIENTES.md`.
   porque Apple rechaza el alfa; el arranque, el logo sobre el fondo del canal.
 - **`/privacidad` es pública** (`RUTAS_PUBLICAS` de `lib/supabase/sesion.ts`): Apple exige una
   política de privacidad que se abra sin cuenta.
-- ⚠️ **El enlace de WhatsApp abre Safari, no la app**: dentro de la app, quien no tiene clave cae
-  en el login. Los Universal Links de `/entrar` están por hacer.
+- **El número de compilación es el de la corrida** (`github.run_number`, como
+  `CURRENT_PROJECT_VERSION` del archivo); la versión, 1.0.0, sigue en `project.pbxproj`. La 1 se
+  subió a mano. ⚠️ «Re-run» repite el número y App Store Connect lo rechaza: corrida nueva.
+
+### Lo nativo: avisos y enlaces (la guía 4.2)
+
+Desde el 23 de octubre de 2026. **Un sitio envuelto en una app se rechaza** (guía 4.2 de la App
+Store): Boosty Desk pasó por sus funciones nativas de verdad, y estas son las de Iberia —avisos en
+el teléfono y enlaces del sitio que abren la app—.
+
+- **Avisan dos cosas, y nada más** (`lib/notificaciones.ts`):
+  - **Un mensaje nuevo** del canal, a los demás participantes —nunca a quien escribe, ni a quien
+    silenció la conversación—. Título: quien escribe; en un grupo, el grupo debajo; cuerpo: el
+    comienzo del mensaje. El toque abre la conversación.
+  - **Un recordatorio del empujón**, cuando se marca mandado a mano o sale por WhatsApp. Título
+    «Ajito»; cuerpo: el texto del recordatorio —el de `recordatorios.md`— sin el enlace. El toque
+    abre la primera lección que le falta, que retoma donde se quedó.
+- 🔴 **Un aviso que falla no tumba ni demora lo que lo disparó.** Las acciones lo mandan dentro de
+  `after()` de `next/server`, con la respuesta ya fuera, y `lib/notificaciones.ts` se traga sus
+  errores: el mensaje sale igual con APNs caído o sin las variables. En Netlify, `after()` se
+  sostiene con el `waitUntil` del adaptador de Next.
+- **Los teléfonos están en `dispositivos`** (migración `20261103120000_dispositivos.sql`): el token
+  de cada instalación con la cuenta que la usa. **Único por token, no por persona**: el token es
+  del aparato, y si en ese teléfono entra otra cuenta, el token se pasa a ella —por eso el alta va
+  por `registrar_dispositivo()`, `security definer`—. La RLS deja a cada quien solo lo suyo.
+  - **Quien manda no lee la tabla**: pide los tokens a `dispositivos_de_conversacion()` —si
+    participa— o a `dispositivos_de_recordatorios()` —si es del equipo y tiene la casilla—, con su
+    sesión. La clave de servicio no entra en esto.
+  - Lo que APNs contesta con 410, `Unregistered` o `BadDeviceToken` se borra con
+    `descartar_dispositivo()`, que solo deja borrar lo que quien llama pudo recibir.
+    `DeviceTokenNotForTopic` no borra: lo da también un `APNS_BUNDLE_ID` mal puesto, y borraría
+    los de todo el mundo.
+  - **Cerrar sesión desliga el teléfono**: el alta deja la cookie `iberia_dispositivo` y
+    `cerrarSesion` borra esa fila antes de salir. En un teléfono compartido, los mensajes de uno le
+    saldrían en la pantalla bloqueada al siguiente.
+- **El permiso se pide dentro del canal, no en el login** (`NotificacionesNativas`, en el layout
+  del canal): dos segundos después de entrar con sesión. Con el permiso dado, se registra en
+  silencio cada vez que se entra; negado, no se insiste. Solo iOS: en Android `register()` cierra la
+  app sin Firebase, y la de Android no existe todavía.
+- **El emisor es `lib/apns.ts`**: `node:http2` —APNs no habla HTTP/1.1, que es lo del `fetch` de
+  Node— a `api.push.apple.com`, siempre producción (TestFlight y la tienda lo son), con un JWT ES256
+  que se reusa 50 minutos y `apns-topic` = el bundle. No importa `server-only` para que
+  `probar:apns` lo cargue: comprueba la clave contra Apple con el mismo código, mandando a un token
+  inventado. **400 `BadDeviceToken` es el éxito** —la clave, el equipo y el topic autentican—; 403
+  es que no.
+- **Cuatro variables en Netlify** (`DESPLIEGUE.md`): `APNS_KEY_P8` (el `.p8` en base64, una
+  línea), `APNS_KEY_ID`, `APNS_TEAM_ID` y `APNS_BUNDLE_ID`. Sin alguna, se avisa una vez en el
+  registro y no se manda nada. **La clave es la de APNs del equipo `45TRWF6998`**
+  —`AuthKey_9QWXFT269C.p8`, id `9QWXFT269C`, en la máquina de Santiago; nunca en el repositorio—:
+  una clave de APNs sirve para todas las apps del equipo.
+- **Universal Links**: `/.well-known/apple-app-site-association` (una ruta de Next, pública en
+  `lib/supabase/sesion.ts`: Apple la baja sin sesión y no acepta redirecciones) declara `/entrar/*`,
+  `/canal` y `/canal/*` para la app; `App.entitlements` lleva
+  `applinks:iberiavenezuela.netlify.app`. **El enlace personal de WhatsApp abre la app**, y la
+  sesión que acuña `/entrar/[token]` queda en su WebView; quien no tiene la app lo abre en Safari,
+  igual que antes.
+- **`PuenteNativo` (en el layout raíz) mueve la WebView**: el aviso tocado (`ruta` del aviso) y el
+  enlace abierto (`appUrlOpen`). **Solo rutas del mismo origen**; lo demás se ignora. Va en la raíz
+  y no en el canal porque las dos cosas llegan también sin sesión —el enlace de `/entrar` es la
+  forma de entrar de quien no tiene clave— y la app arranca en el login. Capacitor guarda los dos
+  eventos hasta que alguien los oye, así que lo que abrió la app en frío se atiende al montar.
+  `/entrar` va con `location.assign`, no con el router: pone la cookie y redirige.
+- **El flujo comprueba que el perfil traiga push y Associated Domains** antes de archivar: un perfil
+  creado antes de activar alguno en el App ID hace fallar `codesign` a mitad del archivo.
 
 ## El adiestramiento (`/canal/adiestramiento`) — el curso de Ajito
 
@@ -910,6 +972,7 @@ npm run probar:paginas      -- --password "<clave admin>"   # render con sesión
 npm run probar:canal        -- --password "<clave>"         # RLS del canal
 npm run capturar:canal      -- --password "<clave>" --flujo # el canal en teléfono
 npm run crear:usuario       -- --email … --password … --rol …
+npm run probar:apns         -- <ruta>\AuthKey_<id>.p8   # la clave de APNs contra Apple · 400 BadDeviceToken = bien
 npm run probar:adiestramiento               # RLS del curso de Ajito, sin clave
 npm run capturar:adiestramiento             # el curso en teléfono y el panel
 npm run sembrar:adiestramiento -- --abrir   # oficios, matrículas y apertura

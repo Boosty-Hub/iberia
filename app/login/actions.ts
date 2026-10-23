@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { olvidarEsteTelefono } from '@/lib/notificaciones'
 import { createClient } from '@/lib/supabase/server'
 
 export type EstadoLogin = { error?: string }
@@ -135,6 +136,9 @@ export async function cambiarClave(
 
 export async function cerrarSesion() {
   const supabase = await createClient()
+  // En la app de iOS, el teléfono deja de recibir los avisos de esta cuenta. Va
+  // antes de salir: después ya no hay sesión con la que borrar lo propio.
+  await olvidarEsteTelefono(supabase)
   await supabase.auth.signOut()
   revalidatePath('/', 'layout')
   redirect('/login')

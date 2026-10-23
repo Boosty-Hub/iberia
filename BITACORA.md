@@ -33,7 +33,7 @@ que está en línea.
 | **Padrón** | 276 personas de Capital Humano, **sin cédula, celular ni correo**, y 17 fichas cargadas a mano en agosto que repiten a gente real (marcadas en el padrón desde el 27/9) |
 | **Canal** | En línea. **Martha Álvarez tiene acceso desde el 27/9** para revisarlo con Mercadeo |
 | **Fase 2 · New Iberia** | **Calendario en el panel desde el 28/10** (`/dashboard/calendario`): 78 actividades de noviembre de 2026 a octubre de 2027, en la base. Lo actualiza Amanda (administradora). **Desde el 29/10 la línea de tiempo se despliega por frente y el calendario sale en PDF** para Alberto |
-| **App móvil** | **La de iPhone está armada desde el 23/10** (PEN-14661): Capacitor sobre el sitio en línea, en la cuenta de Apple de Boosty Desk; se compila y se sube solo desde GitHub Actions. **Todavía no se ha compilado.** Google Play (PEN-14662), después |
+| **App móvil** | **La de iPhone está armada desde el 23/10** (PEN-14661): Capacitor sobre el sitio en línea, en la cuenta de Apple de Boosty Desk; se compila y se sube solo desde GitHub Actions. **La versión 1.0.0 (build 1) está en App Store Connect**, procesada y sin mandar a revisión. `/privacidad` en línea desde el deploy del 28/10. **El 3/11 se aplican los avisos push y los enlaces universales** (migración, variables APNS_* y build 2). Google Play (PEN-14662), después |
 | **Formación dirigente** | Alberto (17/8), Petit Comité (26/8) y gerentes (23/9, Cagua). **La de líderes no se pudo dictar el 7/10** por la VPN de Cagua: hay que reprogramarla |
 | **Adiestramiento** | Completo y **de Fase 2**: nueve lecciones, 70 audios por voz (mujer y hombre), Ajito contesta hablando y dibuja, certificado en la lección 8 (con la ficha cuando no hay cédula), chat con Ajito **apagado** (solo lo ve el equipo) |
 | **Repositorio** | `Boosty-Hub/iberia` — **privado desde el 9/10** (fue público dos meses; consultada sin sesión, la API de GitHub responde 404 el 23/10), sin `RowerConsultoria`. Quedan 6 alertas de Dependabot, y 🔴 **`next` 16.3.0, el de producción, tiene avisos críticos** (23/10) |
@@ -44,8 +44,8 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 
 - 🔴 **Subir `next` a 16.4.3**: la versión en producción tiene avisos críticos de ejecución remota
   de código sin sesión, uno de ellos en `next/og`, que dibuja el certificado. Va en su propio cambio.
-- 🔴 **`gh auth login` en la máquina de Santiago**: sin sesión de GitHub no hay `git pull` ni push,
-  y lo del 23 está sin subir.
+- 🔴 **Netlify no publicó `e9090f7`** (23/10): `/privacidad` sigue redirigiendo al login, y Apple la
+  necesita como URL de la política de privacidad. Revisar «Deploys» en app.netlify.com.
 - **Pasar aquí cómo salió la entrega del 21** a los directores.
 - 🔴 **Validar los hallazgos**: 2 de 394. El informe se publicó igual, por decisión de Gabriel.
 - 🔴 **ENT-005**: Milagro Salas fue grabada sin avisarle; sus hallazgos están retenidos.
@@ -116,7 +116,8 @@ y revisado en línea con sesión. La migración ya estaba aplicada en Supabase.
 ## 23 de octubre · Sesión 52 — la app de Iberia para iPhone
 
 Dos tickets: **«Publicar la app de Iberia en Apple» (PEN-14661)** primero, y Google Play
-(PEN-14662) después. Nada se ha compilado todavía, y Supabase no se tocó.
+(PEN-14662) después. **La versión 1.0.0 (build 1) llegó a App Store Connect** y todavía no va a
+revisión. Supabase no se tocó.
 
 **Lo que se armó** (cómo funciona, en `AGENTS.md`, «La app de Iberia»):
 
@@ -142,6 +143,35 @@ Dos tickets: **«Publicar la app de Iberia en Apple» (PEN-14661)** primero, y G
 - **Capacitor 8.5.3**, por el aviso crítico de `@capacitor/ios` 8.5.0 (GHSA-rvm3-566m-v7fv).
   Boosty Desk estaba en 8.5.0, y a su sesión se le avisó.
 
+**Lo que se hizo después:**
+
+- **El commit `e9090f7`** («feat(app): la app de Iberia para iPhone con Capacitor»), revisado con
+  cuatro lentes y sin bloqueos, **subido a `main`**. Esta máquina no tiene identidad de git: el
+  commit va como Santiago Marín <api@boosty.digital>.
+- **Los seis secretos, cargados en GitHub.**
+- **El flujo «App de iOS» compiló y firmó** en una corrida sin subir, y en la siguiente **subió la
+  versión 1.0.0 (build 1) a App Store Connect**: «UPLOAD SUCCEEDED».
+
+⚠️ **Lo que no salió: Netlify no publicó `e9090f7`.** Más de 25 minutos después,
+`https://iberiavenezuela.netlify.app/privacidad` seguía redirigiendo al login (307). La causa no
+se pudo ver: esta máquina no tiene `.env.local` —ni el token de Netlify ni el acceso a Supabase—,
+y Netlify no reporta el estado del despliegue en GitHub.
+
+**La segunda parte, la que pasa la guía 4.2 de Apple** — en código y sin commit:
+
+- **Avisos push nativos** de dos cosas: un mensaje nuevo en una conversación y un recordatorio del
+  curso. Salen con `after()` y nunca hacen fallar la acción que los dispara.
+- **La tabla `dispositivos`**, con sus funciones `security definer`, en la migración
+  `20261103120000_dispositivos.sql`, **sin aplicar**.
+- **Enlaces universales** (`/.well-known/apple-app-site-association`), para que el enlace personal
+  de WhatsApp abra la app.
+- El número de build sale de `github.run_number`.
+- `npm run probar:apns` confirmó que la clave de APNs del equipo autentica con el bundle id: Apple
+  contestó 400 `BadDeviceToken` a un token inventado, que es lo esperado.
+- **Decidido**: avisan solo esos dos eventos, que era lo recomendado (Santiago no eligió otros). Y
+  **al cerrar sesión se desvincula el teléfono**, para que en un teléfono compartido no le lleguen
+  a otra persona los mensajes de la anterior.
+
 **Lo que se rompió o se encontró:**
 
 - 🔴 **`next` 16.3.0, el que está en producción, tiene avisos críticos** (`npm audit`): ejecución
@@ -149,15 +179,17 @@ Dos tickets: **«Publicar la app de Iberia en Apple» (PEN-14661)** primero, y G
   el que se dibuja el certificado—, en `use cache` y en servidores sobre Windows, más SSRF y
   envenenamiento de caché. Se arregla con 16.4.3, sin salto de versión mayor, y va en su propio
   cambio.
-- ⚠️ **GitHub CLI no tiene sesión en la máquina de Santiago**: sin `gh auth login` no hay
-  `git pull` ni push, ni se pueden cargar los secretos de la app.
+- ⚠️ **GitHub CLI no tenía sesión en la máquina de Santiago**, y sin ella no había push ni se
+  cargaban los secretos. Santiago inició sesión ese mismo día. Para subir el flujo hizo falta
+  además `gh auth refresh -s workflow`: GitHub no deja crear archivos de `.github/workflows/` con
+  un token sin ese permiso.
 - ⚠️ **La API de App Store Connect registra identificadores y crea perfiles, pero no crea la ficha
   de la app**: responde «does not allow 'CREATE'». Se hizo a mano.
 
-**Dónde quedamos**: el commit, pendiente de revisión; el push y los seis secretos, cuando `gh`
-tenga sesión; después la primera compilación —sin subir, para probar la firma, y luego subiendo—,
-y la segunda parte, que es la que pasa la guía 4.2 de Apple: notificaciones nativas, Universal
-Links para `/entrar` y una cuenta de demostración. Todo, con dueño, en `PENDIENTES.md`.
+**Dónde quedamos**: aplicar la migración y regenerar los tipos; cargar las cuatro variables
+`APNS_*` en Netlify; aclarar por qué Netlify no publicó. Recién entonces, commit y push de la
+segunda parte, la build 2 y la prueba en un iPhone con TestFlight; después, la cuenta de
+demostración para la revisión de Apple. Todo, con dueño, en `PENDIENTES.md`.
 
 ---
 

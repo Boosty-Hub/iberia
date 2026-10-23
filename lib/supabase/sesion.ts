@@ -16,8 +16,19 @@ import { NextResponse, type NextRequest } from 'next/server'
  *
  * `/privacidad` es la política de privacidad de la app de iOS: Apple exige una
  * dirección que se abra sin cuenta, y la revisa antes de aprobar la app.
+ *
+ * `/.well-known/apple-app-site-association` es lo que iOS le pide al sitio para
+ * saber qué enlaces abren la app (Universal Links). Lo baja Apple, sin sesión, y
+ * no acepta una redirección: mandado al login, los enlaces abrirían Safari.
  */
-const RUTAS_PUBLICAS = ['/login', '/auth', '/entrar', '/canal/entrar', '/privacidad']
+const RUTAS_PUBLICAS = [
+  '/login',
+  '/auth',
+  '/entrar',
+  '/canal/entrar',
+  '/privacidad',
+  '/.well-known/apple-app-site-association',
+]
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request })

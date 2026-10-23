@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { DM_Sans, Geist_Mono } from 'next/font/google'
+import { PuenteNativo } from '@/components/puente-nativo'
 import './globals.css'
 
 const geistMono = Geist_Mono({
@@ -38,7 +39,12 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       lang="es"
       className={`${dmSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        {children}
+        {/* Los avisos tocados y los enlaces que abren la app de iOS. Fuera de la
+            app no hace nada. */}
+        <PuenteNativo />
+      </body>
     </html>
   )
 }

@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { IconoCampana, IconoPanel } from '@/components/iconos'
 import { NavInferior } from '@/components/canal/nav-inferior'
+import { NotificacionesNativas } from '@/components/canal/notificaciones-nativas'
 import { destinoInicial, inicioDelPanel, obtenerSesion, puede } from '@/lib/auth'
 import { iniciales, requerirEmpleado } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
@@ -103,6 +104,10 @@ export default async function CanalLayout({ children }: LayoutProps<'/canal'>) {
       <main className="mx-auto w-full max-w-lg flex-1 px-4 pt-4 pb-20">{children}</main>
 
       <NavInferior mensajesSinLeer={sinLeer ?? 0} />
+
+      {/* Dentro de la app de iOS: el permiso de avisos y el registro del
+          teléfono, ya con sesión. En el navegador no hace nada. */}
+      <NotificacionesNativas />
     </div>
   )
 }

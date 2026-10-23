@@ -877,6 +877,41 @@ export type Database = {
         }
         Relationships: []
       }
+      dispositivos: {
+        Row: {
+          created_at: string
+          id: string
+          perfil_id: string
+          plataforma: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          perfil_id: string
+          plataforma?: string
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          perfil_id?: string
+          plataforma?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dispositivos_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       empleados: {
         Row: {
           activo: boolean
@@ -2641,6 +2676,23 @@ export type Database = {
     Functions: {
       cabe_otro_participante: { Args: { conv: string }; Returns: boolean }
       coordino_grupo: { Args: { grupo: string }; Returns: boolean }
+      descartar_dispositivo: { Args: { p_token: string }; Returns: undefined }
+      dispositivos_de_conversacion: {
+        Args: { p_conversacion: string }
+        Returns: {
+          plataforma: string
+          token: string
+        }[]
+      }
+      dispositivos_de_recordatorios: {
+        Args: { p_recordatorios: string[] }
+        Returns: {
+          leccion: number
+          plataforma: string
+          recordatorio_id: string
+          token: string
+        }[]
+      }
       emitir_mi_certificado: {
         Args: { p_matricula: string }
         Returns: {
@@ -2697,6 +2749,10 @@ export type Database = {
       }
       puede: { Args: { p_accion: string; p_recurso: string }; Returns: boolean }
       puede_publicar: { Args: never; Returns: boolean }
+      registrar_dispositivo: {
+        Args: { p_plataforma: string; p_token: string }
+        Returns: undefined
+      }
       renombrar_hablante: {
         Args: { p_entrevista: string; p_etiqueta: string; p_nombre: string }
         Returns: number

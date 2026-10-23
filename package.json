@@ -37,6 +37,7 @@
     "probar:padron": "node --env-file=.env.local --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=ExperimentalWarning scripts/probar-padron.mjs",
     "probar:supabase": "node --env-file=.env.local scripts/probar-supabase.mjs",
     "probar:permisos": "node --env-file=.env.local scripts/probar-permisos.mjs",
+    "probar:apns": "node --env-file-if-exists=.env.local --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=ExperimentalWarning scripts/probar-apns.mjs",
     "importar:transcripciones": "node --env-file=.env.local --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=ExperimentalWarning scripts/importar-transcripciones.mjs",
     "subir:documentos": "node --env-file=.env.local scripts/subir-documentos.mjs",
     "sembrar:programa": "node --env-file=.env.local scripts/sembrar-programa.mjs",

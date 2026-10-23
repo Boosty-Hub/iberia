@@ -169,6 +169,8 @@ const RELACIONES = {
   // El calendario de la Fase 2 y New Iberia (28 de octubre de 2026).
   calendario_actividades:
     'id, titulo, detalle, frente, tipo, estado, inicio, fin, fecha_confirmada, responsable, participantes, nota, orden',
+  // Los teléfonos de la app de iOS, para los avisos (`lib/notificaciones.ts`).
+  dispositivos: 'id, perfil_id, token, plataforma, updated_at',
 }
 
 for (const [relacion, columnas] of Object.entries(RELACIONES)) {
@@ -208,6 +210,18 @@ console.log('\nLa función de emisión\n')
   const mensaje = error?.message ?? ''
   comprobar('publicar_mi_certificado existe', !/could not find|does not exist/i.test(mensaje), mensaje)
   comprobar('y no publica nada sin ficha', /padr[óo]n/i.test(mensaje), mensaje || 'devolvió algo')
+}
+
+{
+  // El alta del teléfono para los avisos: la clave de servicio no tiene sesión,
+  // así que tiene que negarse sin registrar nada.
+  const { error } = await admin.rpc('registrar_dispositivo', {
+    p_token: '0'.repeat(64),
+    p_plataforma: 'ios',
+  })
+  const mensaje = error?.message ?? ''
+  comprobar('registrar_dispositivo existe', !/could not find|does not exist/i.test(mensaje), mensaje)
+  comprobar('y no registra nada sin sesión', /sesi[óo]n/i.test(mensaje), mensaje || 'registró algo')
 }
 
 {
@@ -263,6 +277,8 @@ const NUEVAS = [
   'rol_permisos',
   // Las agendas con cada área de Iberia: con la casilla del calendario.
   'calendario_actividades',
+  // El token de cada teléfono: solo lo lee su dueño.
+  'dispositivos',
 ]
 
 {

@@ -31,6 +31,24 @@ un PR de afuera.
 | `OPENAI_API_KEY` | producción · secreta | Los dibujos de Ajito en la lección 4 (`gpt-image-2.5-flare`) y los ejemplos que dibuja `generar:ejemplos`. De la cuenta de OpenAI de Iberia, con la organización verificada —sin eso los modelos de imagen no responden—. Subida el 27 de septiembre. Sin ella, los dos ejercicios de dibujo no dibujan y sale el botón de reintentar |
 | `AZURE_SPEECH_KEY` | producción · secreta | La voz de Ajito, las devoluciones habladas y la transcripción de las notas de voz. Subida el 26 de septiembre, cuando la suscripción de Azure pasó a pago por uso: devolvía 401 porque la prueba gratuita había vencido, no por la clave. Quedó visible en una captura: regenerarla es opcional, y si se hace, va en `.env.local` y en Netlify y se vuelve a desplegar |
 
+### Los avisos de la app de iOS — ⚠️ todavía sin cargar
+
+Las cuatro van **solo en producción**: una vista previa usa la misma base, y con ellas les
+mandaría avisos de verdad a los teléfonos de verdad. Sin ellas la app funciona igual y no avisa:
+el registro dice una vez cuáles faltan. Cómo funcionan los avisos, en `AGENTS.md` («Lo nativo:
+avisos y enlaces»).
+
+| Variable | Contexto | Para qué |
+|---|---|---|
+| `APNS_KEY_P8` | producción · secreta | La clave de APNs del equipo de Apple, `AuthKey_9QWXFT269C.p8` (en la máquina de Santiago), **en base64 y en una sola línea**. En PowerShell: `[Convert]::ToBase64String([IO.File]::ReadAllBytes('<ruta>\AuthKey_9QWXFT269C.p8'))` |
+| `APNS_KEY_ID` | producción | `9QWXFT269C`, el id de esa clave |
+| `APNS_TEAM_ID` | producción | `45TRWF6998` |
+| `APNS_BUNDLE_ID` | producción | `com.industriasiberia.canal`. ⚠️ Si no es el de la app, Apple contesta `DeviceTokenNotForTopic` y no llega nada |
+
+Antes de cargarlas, `npm run probar:apns -- <ruta>\AuthKey_9QWXFT269C.p8` comprueba la clave
+contra Apple sin avisarle a nadie: tiene que contestar **400 `BadDeviceToken`**. El 23 de octubre
+contestó eso.
+
 **Lo que no se sube**: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_ORG_ID`,
 `SUPABASE_PROJECT_REF`, `AZURE_SPEECH_RESOURCE` y `TOKEN_ACCESS_NETLIFY` son de las
 herramientas, no de la app.
@@ -50,6 +68,12 @@ nada hasta el próximo despliegue.
   JavaScript del sitio— cualquiera se creaba una cuenta de administrador. Se cerró antes de
   abrir el sitio; no había ninguna cuenta ajena. Las altas del código pasan todas por la API
   de administrador, que no depende del registro. `probar:supabase` falla si se vuelve a abrir.
+- ⚠️ **La migración `20261103120000_dispositivos.sql` está sin aplicar** (23 de octubre): la
+  tabla de los teléfonos y las funciones de los avisos de la app. Se aplica con
+  `npx supabase db push` desde una máquina con el CLI enlazado, y después se regeneran los tipos
+  (`lib/database.types.ts` se escribió a mano para que cuadre). El código desplegado antes de
+  aplicarla no se rompe: el alta del teléfono falla en silencio y no sale ningún aviso.
+  `probar:supabase` la busca.
 
 ---
 
