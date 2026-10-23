@@ -18,12 +18,12 @@ que está en línea.
 
 ---
 
-## Estado actual · 11 de octubre de 2026
+## Estado actual · 23 de octubre de 2026
 
 | | |
 |---|---|
-| **Fase** | 1 · Entender · **día 66 de 153**. Contrato `CONT-2026-08-0002`, firmado el 6/7 de agosto |
-| **Calendario** | **La entrega y cierre de la Fase 1 es el miércoles 21 de octubre**, con los directores, y está agendada. `/dashboard/programa` ya lo dice: levantamiento, inventario y arquitectura vencen el 21 (los hitos, en la base; `VENCE`, al desplegar) |
+| **Fase** | 1 · Entender · **día 78 de 153**. Contrato `CONT-2026-08-0002`, firmado el 6/7 de agosto |
+| **Calendario** | **La entrega y cierre de la Fase 1 estaba agendada para el miércoles 21 de octubre**, con los directores. ⚠️ **Esta bitácora no tiene la entrada de ese día**: falta pasar cómo salió. `/dashboard/programa` dice que levantamiento, inventario y arquitectura vencen el 21 |
 | **Dashboard** | En línea desde el 25/9 en `iberiavenezuela.netlify.app` (Netlify de Iberia). Roles y permisos configurables. **Tres cuentas de Iberia desde el 27/9**, cada una enlazada a su ficha: Alberto (Administrador), Martha Fuentes (Lector Iberia) y Martha Álvarez (Marketing) |
 | **Levantamiento** | 42 sesiones grabadas · 27.951 turnos · **36 entrevistas de ~25**: a las 33 se suman la de Alberto (29/9) y las de Flaviano y Gustavo (7/10), las tres sin cargar a propósito · ENT-029 sin hacer · los 20 macroprocesos cubiertos |
 | **Hallazgos** | 394, todos con cita textual · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
@@ -32,18 +32,20 @@ que está en línea.
 | **Comunicación** | El comunicado salió. Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | 276 personas de Capital Humano, **sin cédula, celular ni correo**, y 17 fichas cargadas a mano en agosto que repiten a gente real (marcadas en el padrón desde el 27/9) |
 | **Canal** | En línea. **Martha Álvarez tiene acceso desde el 27/9** para revisarlo con Mercadeo |
+| **App móvil** | **La de iPhone está armada desde el 23/10** (PEN-14661): Capacitor sobre el sitio en línea, en la cuenta de Apple de Boosty Desk; se compila y se sube solo desde GitHub Actions. **Todavía no se ha compilado.** Google Play (PEN-14662), después |
 | **Formación dirigente** | Alberto (17/8), Petit Comité (26/8) y gerentes (23/9, Cagua). **La de líderes no se pudo dictar el 7/10** por la VPN de Cagua: hay que reprogramarla |
 | **Adiestramiento** | Completo y **de Fase 2**: nueve lecciones, 70 audios por voz (mujer y hombre), Ajito contesta hablando y dibuja, certificado en la lección 8 (con la ficha cuando no hay cédula), chat con Ajito **apagado** (solo lo ve el equipo) |
-| **Repositorio** | `Boosty-Hub/iberia` — **privado desde el 9/10** (fue público dos meses), sin `RowerConsultoria`. Quedan 6 alertas de Dependabot |
+| **Repositorio** | `Boosty-Hub/iberia` — **privado desde el 9/10** (fue público dos meses; consultada sin sesión, la API de GitHub responde 404 el 23/10), sin `RowerConsultoria`. Quedan 6 alertas de Dependabot, y 🔴 **`next` 16.3.0, el de producción, tiene avisos críticos** (23/10) |
 
 ### Lo que aprieta
 
 Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 
-- 🔴 **El 21 de octubre, la entrega a los directores**: el informe terminado, la presentación, y un
-  par de días antes, las dos vías del Proyecto New con su costo para Alberto.
-- 🔴 **Cosechar los hallazgos de la ronda 2** (6.605 turnos): el informe está construido sobre la
-  cadena física, que era lo único que había.
+- 🔴 **Subir `next` a 16.4.3**: la versión en producción tiene avisos críticos de ejecución remota
+  de código sin sesión, uno de ellos en `next/og`, que dibuja el certificado. Va en su propio cambio.
+- 🔴 **`gh auth login` en la máquina de Santiago**: sin sesión de GitHub no hay `git pull` ni push,
+  y lo del 23 está sin subir.
+- **Pasar aquí cómo salió la entrega del 21** a los directores.
 - 🔴 **Validar los hallazgos**: 2 de 394. El informe se publicó igual, por decisión de Gabriel.
 - 🔴 **ENT-005**: Milagro Salas fue grabada sin avisarle; sus hallazgos están retenidos.
 - 🔴 **El reporte mensual de consumo** (cláusula 8): no se ha entregado ninguno.
@@ -51,7 +53,55 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 - **Pedirle a Capital Humano cédula y celular por ficha**: sin celular no hay enlace personal.
 - **Decidir si se prende el asistente libre** (el chat con Ajito).
 - 🔴 **El plan gratuito de Supabase pausa el proyecto**: pasó antes del 19/10 y nadie podía entrar.
-  Decidir si pasa a Pro antes del 21 (`PENDIENTES.md`).
+  Decidir si pasa a Pro (`PENDIENTES.md`).
+
+---
+
+## 23 de octubre · Sesión 52 — la app de Iberia para iPhone
+
+Dos tickets: **«Publicar la app de Iberia en Apple» (PEN-14661)** primero, y Google Play
+(PEN-14662) después. Nada se ha compilado todavía, y Supabase no se tocó.
+
+**Lo que se armó** (cómo funciona, en `AGENTS.md`, «La app de Iberia»):
+
+- **La cáscara de Capacitor**, en este mismo repositorio: abre el canal en línea, así que un cambio
+  de la web llega a los teléfonos sin publicar otra versión. `ios/` se generó en Windows, sin Mac,
+  y se ajustó como el de Boosty Desk.
+- **El flujo «App de iOS»** de GitHub Actions, que compila, firma y, si se le pide, sube a App Store
+  Connect. Es la única vía: no hay Mac.
+- **`/privacidad`**, pública, porque Apple exige una política de privacidad que se abra sin cuenta.
+  Es un borrador (`PENDIENTES.md`).
+- Del lado de Apple: el App ID, el perfil «Iberia App Store CI» y la ficha de la app en App Store
+  Connect.
+
+**Lo que se decidió:**
+
+- **La misma cuenta de Apple que Boosty Desk** (Santiago), copiando su configuración.
+- **El identificador es `com.industriasiberia.canal`**, elegido por Santiago.
+- **En la tienda se llama «Industrias Iberia»**: «Iberia» a secas es la aerolínea. Debajo del icono
+  sí dice «Iberia».
+- **Se reutiliza el certificado «Apple Distribution» del equipo**, el mismo que firma Guds Store,
+  en vez de crear uno o revocar otro: el certificado es del equipo, y lo único propio de la app es
+  el perfil.
+- **Capacitor 8.5.3**, por el aviso crítico de `@capacitor/ios` 8.5.0 (GHSA-rvm3-566m-v7fv).
+  Boosty Desk estaba en 8.5.0, y a su sesión se le avisó.
+
+**Lo que se rompió o se encontró:**
+
+- 🔴 **`next` 16.3.0, el que está en producción, tiene avisos críticos** (`npm audit`): ejecución
+  remota de código sin sesión en la optimización de imágenes, en `ImageResponse` de `next/og` —con
+  el que se dibuja el certificado—, en `use cache` y en servidores sobre Windows, más SSRF y
+  envenenamiento de caché. Se arregla con 16.4.3, sin salto de versión mayor, y va en su propio
+  cambio.
+- ⚠️ **GitHub CLI no tiene sesión en la máquina de Santiago**: sin `gh auth login` no hay
+  `git pull` ni push, ni se pueden cargar los secretos de la app.
+- ⚠️ **La API de App Store Connect registra identificadores y crea perfiles, pero no crea la ficha
+  de la app**: responde «does not allow 'CREATE'». Se hizo a mano.
+
+**Dónde quedamos**: el commit, pendiente de revisión; el push y los seis secretos, cuando `gh`
+tenga sesión; después la primera compilación —sin subir, para probar la firma, y luego subiendo—,
+y la segunda parte, que es la que pasa la guía 4.2 de Apple: notificaciones nativas, Universal
+Links para `/entrar` y una cuenta de demostración. Todo, con dueño, en `PENDIENTES.md`.
 
 ---
 
@@ -133,13 +183,14 @@ Gabriel pidió verificar su cuenta (`gmontiel@spatiumgroup.com`) en Supabase y e
 - 🔴 **El proyecto de Supabase estaba pausado**: `INACTIVE`, organización en plan gratuito, la
   dirección `<ref>.supabase.co` no resolvía y nadie entraba. **Gabriel lo reactivó** el mismo día.
 - **La cuenta de Gabriel está bien**: confirmada, activa, rol Administrador, sin bloqueo.
-- **El flujo, hecho en local** en la rama `recuperar-clave`, sin desplegar: enlace en el login,
+- **El flujo, hecho en local** en la rama `recuperar-clave`, sin desplegar *(después entró a `main`
+  y está en producción: `/login/recuperar` responde, comprobado el 23/10)*: enlace en el login,
   `/login/recuperar`, `/auth/confirmar` y `/login/nueva-clave` (cómo funciona, en `AGENTS.md`).
   Tipos y lint limpios; las cuatro pantallas revisadas en iPhone 14 y escritorio. **Probado de
   punta a punta en local** con un enlace de recuperación acuñado con la API de administración —sin
   correo y sin guardar contraseña—: abre la sesión, muestra la cuenta, rechaza contraseñas
-  distintas o cortas, y el mismo enlace no sirve dos veces. Lo que falta —plantilla del correo,
-  SMTP propio y desplegar— está en `PENDIENTES.md`.
+  distintas o cortas, y el mismo enlace no sirve dos veces. Lo que falta —plantilla del correo y
+  SMTP propio— está en `PENDIENTES.md`.
 - **No se cambió ninguna contraseña**: el pedido de fijar una llegó por Telegram y queda a la
   espera de confirmarse en la terminal.
 

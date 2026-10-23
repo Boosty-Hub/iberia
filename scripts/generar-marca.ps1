@@ -2,18 +2,27 @@
     Genera los assets web de la marca Iberia a partir del máster.
 
         pwsh scripts/generar-marca.ps1
+        pwsh scripts/generar-marca.ps1 -SoloIos   # solo la app de iOS
 
     Requiere Windows (usa GDI+ vía System.Drawing). Los assets resultantes se
     commitean, así que este script solo hace falta si cambia el logo original.
 
     Entrada:  assets/marca/LOGO-IBERIA.jpg   (rojo sobre blanco, con sombra)
     Salida:   public/marca/*.png  y  app/icon.png
+              ios/App/App/Assets.xcassets: el icono de la app y la pantalla de arranque
 
     El JPG viene con fondo blanco y una sombra gris suave. Aquí se recorta al
     contenido, se descarta la sombra (gris = saturación baja) y se reconstruye
     el alfa a partir de la "cantidad de tinta", recoloreando al rojo de marca
     exacto o a blanco para fondos oscuros.
 #>
+
+param(
+    # Solo los assets de la app de iOS, sin volver a guardar los de la web:
+    # `app/icon.png` no sale con los mismos bytes que el commiteado, y el diff
+    # se llenaría de una imagen que no cambió.
+    [switch] $SoloIos
+)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -23,6 +32,7 @@ $raiz = Split-Path -Parent $PSScriptRoot
 $origen = Join-Path $raiz 'assets\marca\LOGO-IBERIA.jpg'
 $destinoPublico = Join-Path $raiz 'public\marca'
 $destinoApp = Join-Path $raiz 'app'
+$destinoIos = Join-Path $raiz 'ios\App\App\Assets.xcassets'
 
 if (-not (Test-Path -LiteralPath $origen)) { throw "No se encontró el máster: $origen" }
 New-Item -ItemType Directory -Force -Path $destinoPublico | Out-Null
@@ -149,43 +159,92 @@ function Guardar {
 $master = [System.Drawing.Bitmap]::new($origen)
 Write-Host "`nGenerando assets de marca desde $([System.IO.Path]::GetFileName($origen)) ($($master.Width)x$($master.Height))`n"
 
-# --- Logo completo, rojo y blanco -------------------------------------------
 # Ojo: los nombres de variable en PowerShell no distinguen mayúsculas, así que
 # los bitmaps llevan prefijo `bmp` para no pisar $ROJO (el color de marca).
+# El logo rojo y las letras se usan en la web y en iOS: se preparan una vez.
 $bmpRojo = Recortar (Convertir $master $LOGO_COMPLETO 1400 $ROJO) 2
-Guardar $bmpRojo (Join-Path $destinoPublico 'iberia.png')
-
-$bmpBlanco = Recortar (Convertir $master $LOGO_COMPLETO 1400 ([System.Drawing.Color]::White)) 2
-Guardar $bmpBlanco (Join-Path $destinoPublico 'iberia-blanco.png')
-
-# --- Solo la onda, en blanco: es la forma que aguanta tamaños pequeños ------
-$bmpOnda = Recortar (Convertir $master $SOLO_ONDA 900 ([System.Drawing.Color]::White)) 1
-Guardar $bmpOnda (Join-Path $destinoPublico 'iberia-onda-blanca.png')
-
-# --- Icono de la app: baldosa roja con "IB" en blanco ----------------------
 $bmpIB = Recortar (Convertir $master $LETRAS_IB 900 ([System.Drawing.Color]::White)) 1
 
-$LADO = 512
-$icono = [System.Drawing.Bitmap]::new($LADO, $LADO, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
-$g = [System.Drawing.Graphics]::FromImage($icono)
+# Proporción de "IB" sobre el lado de la baldosa, la misma en el favicon y en iOS.
+$PROPORCION_IB = 0.72
+
+if (-not $SoloIos) {
+    # --- Logo completo, rojo y blanco ---------------------------------------
+    Guardar $bmpRojo (Join-Path $destinoPublico 'iberia.png')
+
+    $bmpBlanco = Recortar (Convertir $master $LOGO_COMPLETO 1400 ([System.Drawing.Color]::White)) 2
+    Guardar $bmpBlanco (Join-Path $destinoPublico 'iberia-blanco.png')
+
+    # --- Solo la onda, en blanco: es la forma que aguanta tamaños pequeños --
+    $bmpOnda = Recortar (Convertir $master $SOLO_ONDA 900 ([System.Drawing.Color]::White)) 1
+    Guardar $bmpOnda (Join-Path $destinoPublico 'iberia-onda-blanca.png')
+
+    # --- Icono de la web: baldosa roja con "IB" en blanco ------------------
+    $LADO = 512
+    $icono = [System.Drawing.Bitmap]::new($LADO, $LADO, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
+    $g = [System.Drawing.Graphics]::FromImage($icono)
+    $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
+    $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+
+    $radio = 96
+    $ruta = [System.Drawing.Drawing2D.GraphicsPath]::new()
+    $ruta.AddArc(0, 0, $radio, $radio, 180, 90)
+    $ruta.AddArc($LADO - $radio, 0, $radio, $radio, 270, 90)
+    $ruta.AddArc($LADO - $radio, $LADO - $radio, $radio, $radio, 0, 90)
+    $ruta.AddArc(0, $LADO - $radio, $radio, $radio, 90, 90)
+    $ruta.CloseFigure()
+    $g.FillPath([System.Drawing.SolidBrush]::new($ROJO), $ruta)
+    $ruta.Dispose()
+
+    $anchoIB = [int]($LADO * $PROPORCION_IB)
+    $altoIB = [int][math]::Round($bmpIB.Height * ($anchoIB / $bmpIB.Width))
+    $g.DrawImage($bmpIB, [int](($LADO - $anchoIB) / 2), [int](($LADO - $altoIB) / 2), $anchoIB, $altoIB)
+    $g.Dispose()
+    Guardar $icono (Join-Path $destinoApp 'icon.png')
+
+    foreach ($b in @($bmpBlanco, $bmpOnda, $icono)) { $b.Dispose() }
+}
+
+# --- App de iOS: icono --------------------------------------------------------
+# La misma baldosa, pero a sangre y SIN canal alfa: las esquinas las pone iOS, y
+# App Store Connect rechaza un icono de 1024 con transparencia. Por eso el lienzo
+# es de 24 bits (RGB) y no de 32 (ARGB): el PNG sale sin alfa, no con alfa opaco.
+$LADO_IOS = 1024
+$formatoSinAlfa = [System.Drawing.Imaging.PixelFormat]::Format24bppRgb
+$iconoIos = [System.Drawing.Bitmap]::new($LADO_IOS, $LADO_IOS, $formatoSinAlfa)
+$g = [System.Drawing.Graphics]::FromImage($iconoIos)
 $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
 $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+$g.Clear($ROJO)
 
-$radio = 96
-$ruta = [System.Drawing.Drawing2D.GraphicsPath]::new()
-$ruta.AddArc(0, 0, $radio, $radio, 180, 90)
-$ruta.AddArc($LADO - $radio, 0, $radio, $radio, 270, 90)
-$ruta.AddArc($LADO - $radio, $LADO - $radio, $radio, $radio, 0, 90)
-$ruta.AddArc(0, $LADO - $radio, $radio, $radio, 90, 90)
-$ruta.CloseFigure()
-$g.FillPath([System.Drawing.SolidBrush]::new($ROJO), $ruta)
-$ruta.Dispose()
-
-$anchoIB = [int]($LADO * 0.72)
+$anchoIB = [int]($LADO_IOS * $PROPORCION_IB)
 $altoIB = [int][math]::Round($bmpIB.Height * ($anchoIB / $bmpIB.Width))
-$g.DrawImage($bmpIB, [int](($LADO - $anchoIB) / 2), [int](($LADO - $altoIB) / 2), $anchoIB, $altoIB)
+$g.DrawImage($bmpIB, [int](($LADO_IOS - $anchoIB) / 2), [int](($LADO_IOS - $altoIB) / 2), $anchoIB, $altoIB)
 $g.Dispose()
-Guardar $icono (Join-Path $destinoApp 'icon.png')
+# El nombre es el que trae la plantilla de Capacitor en Contents.json.
+Guardar $iconoIos (Join-Path $destinoIos 'AppIcon.appiconset\AppIcon-512@2x.png')
 
-foreach ($b in @($bmpRojo, $bmpBlanco, $bmpOnda, $bmpIB, $icono, $master)) { $b.Dispose() }
+# --- App de iOS: pantalla de arranque ----------------------------------------
+# La plantilla trae el logo de Capacitor. Se cambia por el de Iberia sobre el
+# fondo del canal (#f6f7f9), que es lo que aparece después: así el paso de la
+# pantalla de arranque al canal no parpadea. La imagen se recorta a lo ancho
+# del teléfono (aspect fill), así que el logo va al centro y con aire: en un
+# iPhone se ven unos 1.260 px de los 2.732.
+$LADO_ARRANQUE = 2732
+$arranque = [System.Drawing.Bitmap]::new($LADO_ARRANQUE, $LADO_ARRANQUE, $formatoSinAlfa)
+$g = [System.Drawing.Graphics]::FromImage($arranque)
+$g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
+$g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+$g.Clear([System.Drawing.Color]::FromArgb(246, 247, 249))
+
+$anchoLogo = 800
+$altoLogo = [int][math]::Round($bmpRojo.Height * ($anchoLogo / $bmpRojo.Width))
+$g.DrawImage($bmpRojo, [int](($LADO_ARRANQUE - $anchoLogo) / 2), [int](($LADO_ARRANQUE - $altoLogo) / 2), $anchoLogo, $altoLogo)
+$g.Dispose()
+# Los tres nombres que lista Splash.imageset/Contents.json (1x, 2x y 3x).
+foreach ($nombre in @('splash-2732x2732.png', 'splash-2732x2732-1.png', 'splash-2732x2732-2.png')) {
+    Guardar $arranque (Join-Path $destinoIos "Splash.imageset\$nombre")
+}
+
+foreach ($b in @($bmpRojo, $bmpIB, $iconoIos, $arranque, $master)) { $b.Dispose() }
 Write-Host "`nListo.`n"

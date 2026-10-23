@@ -13,8 +13,11 @@ import { NextResponse, type NextRequest } from 'next/server'
  * `/canal/entrar` es la pantalla donde cae quien llegó con un enlace muerto: si
  * exigiera sesión, el aviso de «este enlace ya no sirve» sería inalcanzable
  * justo para quien necesita leerlo.
+ *
+ * `/privacidad` es la política de privacidad de la app de iOS: Apple exige una
+ * dirección que se abra sin cuenta, y la revisa antes de aprobar la app.
  */
-const RUTAS_PUBLICAS = ['/login', '/auth', '/entrar', '/canal/entrar']
+const RUTAS_PUBLICAS = ['/login', '/auth', '/entrar', '/canal/entrar', '/privacidad']
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request })

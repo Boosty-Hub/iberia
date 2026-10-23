@@ -91,12 +91,14 @@ La app va con la identidad de **Industrias Iberia**, no la de Boosty.
   Los PNG que consume la web se generan — no se editan a mano:
 
   ```
-  pwsh scripts/generar-marca.ps1     # requiere Windows (GDI+)
+  pwsh scripts/generar-marca.ps1            # requiere Windows (GDI+)
+  pwsh scripts/generar-marca.ps1 -SoloIos   # solo el icono y el arranque de la app de iOS
   ```
 
   Produce `public/marca/iberia.png` (rojo), `iberia-blanco.png` (para el carbón),
-  `iberia-onda-blanca.png` y `app/icon.png` (baldosa roja con "IB"). El script
-  recorta al trazo, descarta la sombra gris del JPG y reconstruye el alfa.
+  `iberia-onda-blanca.png` y `app/icon.png` (baldosa roja con "IB"), y el icono y la
+  pantalla de arranque de la app de iOS (ver «La app de Iberia»). El script recorta al
+  trazo, descarta la sombra gris del JPG y reconstruye el alfa.
 - El favicon usa **"IB"**, no la onda: la onda tiene relación 8.7:1 y a 16 px se
   convierte en un borrón.
 
@@ -125,6 +127,55 @@ escritorio de un consultor.
 npm run probar:canal   -- --password "<clave>"   # 21 comprobaciones de RLS reales
 npm run capturar:canal -- --password "<clave>" --flujo   # iPhone 14 + flujo de mensaje
 ```
+
+## La app de Iberia (`ios/`) — el canal en el App Store
+
+El canal empaquetado para el iPhone (PEN-14661), desde el 23 de octubre de 2026. Va en la misma
+cuenta de Apple que Boosty Desk y copia su configuración. Google Play (PEN-14662) viene después,
+con `@capacitor/android`. Lo que falta para publicarla está en `PENDIENTES.md`.
+
+- **Es una cáscara de Capacitor 8.5.3 en este mismo repositorio.** `capacitor.config.ts` (appId
+  `com.industriasiberia.canal`, appName `Iberia`) pone `server.url` en
+  `https://iberiavenezuela.netlify.app/canal`: la app carga el sitio en línea, así que **un cambio
+  de la web llega a los teléfonos sin compilar otra versión**. Abre en el canal, que sin sesión
+  manda al login, y nunca en una página de presentación. `movil/www/index.html` es solo la carpeta
+  que Capacitor exige. `appendUserAgent: 'IberiaApp'` es la marca para el código web que necesite
+  saber que corre dentro de la app.
+  - ⚠️ **El dominio va compilado en la app.** Cambiarlo es publicar otra versión en la tienda,
+    además de volver a acuñar los enlaces personales (`DESPLIEGUE.md`).
+- **`ios/` se generó con `npx cap add ios` en Windows, sin Mac**, y se ajustó como el de Boosty
+  Desk: `Info.plist` con los textos de permiso en español e `ITSAppUsesNonExemptEncryption` en
+  `false`, `aps-environment = production` en los entitlements y los dos métodos de APNs en
+  `AppDelegate`. Firma manual, equipo `45TRWF6998`.
+- **Se compila y se sube solo desde GitHub Actions**: el flujo «App de iOS»
+  (`.github/workflows/ios.yml`), en un runner de macOS, se lanza a mano y trae un interruptor para
+  subir o no a App Store Connect. Usa seis secretos, con los mismos nombres que en Boosty Desk:
+  `IOS_CERT_P12`, `IOS_CERT_PASSWORD`, `IOS_PROVISIONING_PROFILE`, `ASC_API_KEY_P8`, `ASC_KEY_ID`
+  y `ASC_ISSUER_ID`.
+  - **De dónde sale cada secreto no está en el repositorio**: el mapa vive en
+    `C:\Users\santi\Desktop\iberia-secretos\README.txt`, en la máquina de Santiago. En el
+    repositorio no se escribe ningún valor.
+- **Del lado de Apple**: el App ID `com.industriasiberia.canal`, con Push y Associated Domains; el
+  perfil «Iberia App Store CI» (App Store, vence el 14 de octubre de 2027); y la ficha «Industrias
+  Iberia» en App Store Connect (SKU `iberia-canal`, Español (México)). Debajo del icono dice
+  «Iberia»; el nombre de la tienda es otro porque «Iberia» a secas es la aerolínea.
+- ⚠️ **La identidad de firma es «Apple Distribution», no «iPhone Distribution».** El perfil usa el
+  certificado Apple Distribution del equipo —el mismo que firma Guds Store, vence el 14 de octubre
+  de 2027—. Boosty Desk dice «iPhone Distribution» porque su certificado es del otro tipo. Con la
+  identidad que no corresponde, `codesign` falla. El certificado es del equipo; lo único de cada
+  app es el perfil.
+- ⚠️ **La API de App Store Connect registra identificadores y crea perfiles, pero no crea la ficha
+  de la app**: responde «does not allow 'CREATE'». Eso se hace a mano.
+- 🔴 **Nunca por debajo de `@capacitor/ios` 8.5.1.** La 8.5.0 tiene un aviso crítico,
+  GHSA-rvm3-566m-v7fv: contenido remoto puede cargarse con el origen de la app a través del proxy
+  interno.
+- **El icono y el arranque se generan, no se editan a mano**: `pwsh scripts/generar-marca.ps1
+  -SoloIos`. El icono es la misma baldosa «IB» del favicon, a 1024 px y **sin canal alfa**,
+  porque Apple rechaza el alfa; el arranque, el logo sobre el fondo del canal.
+- **`/privacidad` es pública** (`RUTAS_PUBLICAS` de `lib/supabase/sesion.ts`): Apple exige una
+  política de privacidad que se abra sin cuenta.
+- ⚠️ **El enlace de WhatsApp abre Safari, no la app**: dentro de la app, quien no tiene clave cae
+  en el login. Los Universal Links de `/entrar` están por hacer.
 
 ## El adiestramiento (`/canal/adiestramiento`) — el curso de Ajito
 
@@ -532,8 +583,9 @@ Eso obliga a tratarlo como lo que es —una contraseña—, y de ahí las reglas
   --como <ficha>` crea una cuenta de prueba con ese rol y los datos de esa ficha —nombre, cargo,
   nivel, área— y recorre el canal, el curso y el panel. Nunca se acuña sesión con la cuenta de un
   cliente.
-- `/entrar` y `/canal/entrar` son las únicas rutas públicas nuevas en `lib/supabase/sesion.ts`.
-  Tienen que serlo: quien llega con su enlace **todavía no tiene sesión**.
+- `/entrar` y `/canal/entrar` son las rutas públicas del enlace en `lib/supabase/sesion.ts`.
+  Tienen que serlo: quien llega con su enlace **todavía no tiene sesión**. *(La otra pública
+  nueva, desde el 23 de octubre de 2026, es `/privacidad`, para la app de iOS.)*
 
 ## El padrón real
 

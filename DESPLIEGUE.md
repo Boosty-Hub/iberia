@@ -10,7 +10,7 @@ migraciones aplicadas y los buckets con los audios y las fichas.
 | **Sitio** | `iberiavenezuela`, conectado a `Boosty-Hub/iberia`, rama `main`. **Cada push a `main` despliega solo**, con `@netlify/plugin-nextjs` |
 | **Región de las funciones** | **`us-east-1`, la misma de Supabase.** Venía en `us-east-2`. Cada página encadena de 4 a 8 consultas a la base; en otra región la app es lenta por geografía y no por código |
 | **Acceso** | **Público.** El sitio tenía el login de equipo de Netlify activo y respondía 401 a cualquiera que no fuera miembro de la cuenta; se quitó. La app pide su propio inicio de sesión y la RLS cierra la base. ⚠️ La cuenta sigue con ese login como valor de fábrica para los sitios **nuevos** |
-| **Dominio** | Todavía el de Netlify. ⚠️ **Los ~200 enlaces personales llevan el dominio dentro**: cambiarlo después obliga a volver a acuñarlos y mandarlos. Elegir el definitivo antes del primer envío, y al cambiarlo, cambiar `NEXT_PUBLIC_SITE_URL` y las URLs de Supabase |
+| **Dominio** | Todavía el de Netlify. ⚠️ **Los ~200 enlaces personales llevan el dominio dentro**: cambiarlo después obliga a volver a acuñarlos y mandarlos. Elegir el definitivo antes del primer envío, y al cambiarlo, cambiar `NEXT_PUBLIC_SITE_URL` y las URLs de Supabase. ⚠️ **Y la app de iPhone lo lleva compilado** (`server.url` de `capacitor.config.ts`, desde el 23 de octubre de 2026): cambiarlo es publicar otra versión de la app |
 
 ---
 

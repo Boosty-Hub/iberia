@@ -15,15 +15,27 @@ del contrato **CONT-2026-08-0002**. Los dos documentos están en el módulo de a
 septiembre, las del 2 y el 8 de octubre y la jornada del 7 en Cagua. **La entrega y cierre de la
 Fase 1 es el miércoles 21 de octubre, y ya está agendada.**
 
+*El 23 de octubre (día 78) solo se sumó lo que bloquea desde ese día y la app de iPhone, en el
+entregable 2. El resto no se ha vuelto a revisar desde el 9, y lo que salió el 21 está por pasarse.*
+
 | | Entregable | Vence | Cómo va |
 |---|---|---|---|
 | 1 | Plan de comunicación y comunicado oficial | **6 sep** | 🟡 **El comunicado salió**; falta el plan con fecha y el vocero |
-| 2 | App de comunicación interna (v1) **desplegada** | 30 sep | 🟡 **Desplegada el 25 de septiembre** en `iberiavenezuela.netlify.app`, con el resto del panel. Falta la revisión con mercadeo y limpiar las fichas de muestra antes de dar cuentas |
+| 2 | App de comunicación interna (v1) **desplegada** | 30 sep | 🟡 **Desplegada el 25 de septiembre** en `iberiavenezuela.netlify.app`, con el resto del panel. Falta la revisión con mercadeo y limpiar las fichas de muestra antes de dar cuentas · **La app de iPhone** (PEN-14661) está armada y sin compilar: ver «La app en las tiendas» |
 | 3 | Las tres formaciones y el chat de Claude andando | 31 oct | 🟡 **Dos dictadas**: la directiva el 26 de agosto y los gerentes el 23 de septiembre. **La de líderes no se pudo dictar el 7 de octubre** por la VPN de Cagua: hay que reprogramarla |
 | 4 | Entrevistas y levantamiento (informes por área) | 7 nov | 🟡 **36 de ~25**: con Alberto (29 sep) y Flaviano y Gustavo (7 oct), las tres sin transcripción cargada · ENT-029 sin hacer · 394 hallazgos, 42 desarrollados · **0 informes por área** |
 | 5 | Inventario de sistemas, datos, equipos y conectividad | 14 nov | 🟠 Sale de las entrevistas y ya está saliendo |
 | 6 | Programa de formación de planta **diseñado** | 30 nov | ✅ Hecho, y muy por encima |
 | 7 | **Documento de Arquitectura de IA** + plan fases 2–4 | **6 dic** · se entrega el **21 oct** | 🟠 **11 secciones, completo en borrador**, hallazgos primero · 🔴 solo 2 hallazgos validados · la reunión de entrega con los directores está agendada |
+
+---
+
+## 🔴 Lo que bloquea desde el 23 de octubre
+
+| Qué | De quién | Por qué bloquea |
+|---|---|---|
+| 🔴 **Subir `next` de 16.3.0 a 16.4.3.** `npm audit` marca avisos críticos en la versión que está en producción: ejecución remota de código sin sesión en la optimización de imágenes, en `ImageResponse` de `next/og` —el que dibuja el certificado—, en `use cache` y en servidores sobre Windows, más SSRF y envenenamiento de caché. Es una versión menor, no un salto de mayor. **Va en su propio cambio**, no mezclado con la app, y con la verificación visual completa | Equipo Boosty · Santiago | Es producción, y lo peor no pide sesión |
+| 🔴 **`gh auth login` en la máquina de Santiago.** GitHub CLI no tiene sesión válida: sin ella no hay `git pull` ni push, ni se cargan los secretos de la app | Santiago | Lo del 23 está sin subir, y la app no se puede compilar |
 
 ---
 
@@ -192,6 +204,28 @@ el 12 de agosto —«el primer entregable que se puede tocar»—.
 | ~~**Enlazar las cuentas de Alberto, Martha Fuentes y Martha Álvarez con su ficha**~~ ✅ **Hecho el 27 de septiembre**: Alberto con la 4774, Martha Fuentes con la 4837 y Martha Álvarez con la 5034 | — | |
 | **Confirmar la sede de cada quien.** El archivo no la trae. Por centro de costo se intuye ~163 en planta y ~69 en administración, pero hay **35 en territorios de venta** repartidos por todo el país que no son ni Caracas ni Cagua | Gustavo Carballo | |
 | **Avatares de planta** — operadora de envasado, montacarguista, técnico, despachador. Los 18 que mandaron son de oficina | Martha E. Álvarez y la agencia | |
+
+### La app en las tiendas · PEN-14661 (Apple) y PEN-14662 (Google Play)
+
+**Armada el 23 de octubre para iPhone**, en la cuenta de Apple de Boosty Desk: la cáscara de
+Capacitor, el flujo «App de iOS» de GitHub Actions y `/privacidad`. **No se ha compilado
+todavía.** Cómo funciona, en `AGENTS.md` («La app de Iberia»).
+
+Las filas 4 a 6 son **la segunda parte, la que pasa la guía 4.2 de Apple**: un sitio envuelto en
+una app se rechaza, y Boosty Desk pasó por sus funciones nativas de verdad.
+
+| | Qué falta | De quién | Por qué bloquea |
+|---|---|---|---|
+| 1 | **Revisar el cambio y hacer el commit**; el push, cuando `gh` tenga sesión (ver «Lo que bloquea desde el 23 de octubre») | Santiago | El flujo corre sobre lo que está en GitHub |
+| 2 | **Cargar los seis secretos en `Boosty-Hub/iberia`**: `IOS_CERT_P12`, `IOS_CERT_PASSWORD`, `IOS_PROVISIONING_PROFILE`, `ASC_API_KEY_P8`, `ASC_KEY_ID` y `ASC_ISSUER_ID`. De dónde sale cada uno está fuera del repositorio, en la máquina de Santiago | Santiago | Sin ellos el flujo no firma |
+| 3 | **Correr «App de iOS» con la subida apagada**, para probar la firma, y después con la subida encendida | Santiago | Es la primera compilación |
+| 4 | **Notificaciones nativas**: registrar el token de cada teléfono, mandarlas por APNs y que tocar una abra la pantalla que corresponde. El App ID ya tiene Push, y `AppDelegate`, los dos métodos de APNs | Equipo Boosty | Sin funciones nativas, Apple la rechaza |
+| 5 | **Universal Links para `/entrar`.** El personal de planta entra con el enlace de WhatsApp, que hoy abre Safari y no la app: dentro de la app caería en un login para el que no tiene clave. El App ID ya tiene Associated Domains | Equipo Boosty | La puerta de las 200 personas no pasa por la app |
+| 6 | 🔴 **Una cuenta de demostración para la revisión de Apple.** Choca con la regla de que en el padrón de producción no quedan fichas ni cuentas de prueba —`probar:supabase` falla si queda alguna—, así que hay que decidir cómo se hace | Santiago con Gabriel | La revisión de Apple necesita entrar |
+| 7 | **Revisar `/privacidad`, que es un borrador.** Dice que las respuestas del curso las leen «el equipo de Boosty Digital y la persona que lo administra por Iberia», porque la cuenta de Alberto es de nivel Administrador y la base le deja leer todas las respuestas a ese nivel. `AGENTS.md` dice «solo su autor y los editores de Boosty», y hoy eso no es exacto: **decidir si se queda esa redacción o se le baja el nivel a la cuenta de Alberto**. Y la retención y el contacto —«pídeselo a Capital Humano», sin correo— no están verificados | Santiago y Gabriel | Apple revisa la política antes de aprobar la app |
+| 8 | **Antes de mandarla a revisión, en App Store Connect**: la URL de la política de privacidad (`/privacidad`, cuando esté desplegada), el cuestionario *App Privacy*, la URL de soporte, las capturas de iPhone, la categoría y la clasificación por edad | Santiago | Sin eso no se puede enviar |
+| 9 | **Decidir si se publica abierta o como distribución no listada (*Unlisted*)**: es una app interna de empleados | Santiago con Gabriel | |
+| 10 | **Después, Google Play (PEN-14662)**, con `@capacitor/android` | Santiago | |
 
 ---
 
@@ -677,7 +711,7 @@ procesos y estructura**. El nombre lo puso Alberto.
 | **Designación del liderazgo interno del proyecto** (cláusula 7). Martha Fuentes fue nombrada «coordinadora»; hay que verificar si eso lo cierra o si falta la figura transversal | Alberto García-Ramos | |
 | **Responsable interno de comunicación** (cláusula 10) | Alberto García-Ramos | |
 | ~~Reactivar la suscripción de Azure~~ ✅ **Hecho el 26 de septiembre**: pasó a pago por uso y la clave de siempre volvió a servir. Ya están la voz de hombre (70 audios), las devoluciones habladas y la transcripción, también en producción. Queda opcional **regenerar la clave**, que quedó visible en una captura | Gabriel, si decide regenerarla | |
-| 🔴 **Elegir el dominio definitivo antes de mandar el primer enlace personal.** Hoy es `iberiavenezuela.netlify.app`, y los ~200 enlaces llevan el dominio dentro: cambiarlo después obliga a acuñarlos y mandarlos otra vez. Al cambiarlo: `NEXT_PUBLIC_SITE_URL` en Netlify, *Site URL* y *Redirect URLs* en Supabase, y desplegar. *(El 29 Gabriel le habló a Alberto de un «Portal Iberia Venezuela» con los activos de Iberia; el nombre no está cerrado)* | Gabriel con Iberia | Antes del primer envío |
+| 🔴 **Elegir el dominio definitivo antes de mandar el primer enlace personal.** Hoy es `iberiavenezuela.netlify.app`, y los ~200 enlaces llevan el dominio dentro: cambiarlo después obliga a acuñarlos y mandarlos otra vez. Al cambiarlo: `NEXT_PUBLIC_SITE_URL` en Netlify, *Site URL* y *Redirect URLs* en Supabase, y desplegar. *(El 29 Gabriel le habló a Alberto de un «Portal Iberia Venezuela» con los activos de Iberia; el nombre no está cerrado)* ⚠️ **Y desde el 23 de octubre la app de iPhone lo lleva compilado**: cambiarlo es, además, publicar otra versión de la app | Gabriel con Iberia | Antes del primer envío |
 | **Probar `/entrar` de punta a punta en producción** con una persona de prueba y un teléfono de verdad: acuñar su enlace en el padrón, abrirlo y entrar sin clave. Es la puerta de las 200 personas | **Boosty** | Antes del primer envío |
 | ⚠️ **Que `handle_new_user` deje de fiarse de los metadatos del alta.** Hoy toma el rol de `raw_user_meta_data`, que en un registro lo pone quien se registra. Con el registro cerrado —desde el 25 de septiembre— no hay por dónde, pero si alguien lo reabre vuelve la escalada. Lo sólido es pasar el rol a `app_metadata`, que solo escribe la clave de servicio, en las tres altas del código y en el trigger | **Boosty** | |
 | **La cuenta de Netlify deja el login de equipo como valor de fábrica.** Un sitio nuevo en esa cuenta nace cerrado a quien no sea miembro. Es buen valor por defecto; se deja dicho para que un 401 en un sitio nuevo no se busque en el código | — | |
@@ -686,7 +720,7 @@ procesos y estructura**. El nombre lo puso Alberto.
 | ~~Cerrar el repositorio~~ ✅ **Privado desde el 9 de octubre.** Fue público del 11 de agosto al 9 de octubre, con material bajo NDA en la historia. El primer intento falló: el plan Team tiene 6 asientos, los 6 ocupados, y un repositorio privado le exige asiento a cada colaborador externo | ✅ | |
 | ~~`RowerConsultoria` tenía permiso de escritura~~ ✅ **Se le quitó el acceso el 9 de octubre**, por decisión de Gabriel: era el colaborador externo que no dejaba cerrar el repositorio. Si resulta ser de alguien del equipo, se le invita otra vez —y necesita asiento— | ✅ | |
 | ~~Confirmar que Netlify sigue desplegando~~ ✅ **Sí**: el push del 9 de octubre salió en producción con el repositorio ya privado | ✅ | |
-| **Seis alertas de Dependabot** abiertas (4 críticas, 2 altas) en las dependencias, comprobadas el 27 de septiembre. Actualizar con la verificación visual completa después: puede romper el render | **Boosty** | Después de la reunión del 29 |
+| **Seis alertas de Dependabot** abiertas (4 críticas, 2 altas) en las dependencias, comprobadas el 27 de septiembre. Actualizar con la verificación visual completa después: puede romper el render. *(El 23 de octubre `npm audit` dio avisos críticos en `next` 16.3.0: ver «Lo que bloquea desde el 23 de octubre», arriba)* | **Boosty** | Después de la reunión del 29 |
 
 ### El mes 1 cierra en 137 horas contra una bolsa de 107
 
