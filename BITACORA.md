@@ -87,8 +87,8 @@ Santiago (`e9090f7`) y hubo que correr `npm ci` por las dependencias de Capacito
 - **Sin montos**, como Consumos: las dos propuestas los traen, y Alberto lee esta página. Tampoco va
   lo personal de la conversación —los pagos al señor Carlos, la llamada a Benjamín Gómez—.
 
-**Dónde quedamos**: el commit, local; el push a `main` despliega, y espera el visto bueno de Gabriel.
-La migración ya está aplicada en Supabase.
+**Dónde quedamos**: publicado en producción el mismo día con el visto bueno de Gabriel (`53158ba`),
+y revisado en línea con sesión. La migración ya estaba aplicada en Supabase.
 
 ---
 
