@@ -98,6 +98,7 @@ const PANTALLAS_PANEL: [ruta: string, recurso: string, accion: Accion][] = [
   ['/dashboard/entrevistas', 'modulo:entrevistas', 'ver'],
   ['/dashboard/archivos', 'modulo:archivos', 'ver'],
   ['/dashboard/programa', 'modulo:programa', 'ver'],
+  ['/dashboard/calendario', 'modulo:calendario', 'ver'],
   ['/dashboard/adiestramiento', 'modulo:adiestramiento', 'ver'],
   ['/dashboard/adiestramiento/certificados', 'modulo:certificados', 'ver'],
   ['/dashboard/adiestramiento/recordatorios', 'modulo:recordatorios', 'editar'],

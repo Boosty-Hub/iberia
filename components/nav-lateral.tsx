@@ -6,6 +6,7 @@ import { IndicadorEnlace } from '@/components/indicador-enlace'
 import { cn } from '@/lib/utils'
 import {
   IconoArchivos,
+  IconoCalendario,
   IconoChat,
   IconoEntrevistas,
   IconoEscudo,
@@ -33,6 +34,7 @@ export type ClaveNav =
   | 'entrevistas'
   | 'archivos'
   | 'programa'
+  | 'calendario'
   | 'adiestramiento'
   | 'empleados'
   | 'curso'
@@ -57,6 +59,14 @@ const GRUPOS: { titulo: string; items: Item[] }[] = [
       { clave: 'entrevistas', href: '/dashboard/entrevistas', etiqueta: 'Entrevistas', Icono: IconoEntrevistas },
       { clave: 'archivos', href: '/dashboard/archivos', etiqueta: 'Archivos', Icono: IconoArchivos },
       { clave: 'programa', href: '/dashboard/programa', etiqueta: 'Consumos', Icono: IconoReloj },
+    ],
+  },
+  {
+    // Lo que viene después de la Fase 1: la línea tecnológica y el desarrollo
+    // organizacional con el señor Carlos, en un solo calendario (28 de octubre de 2026).
+    titulo: 'Fase 2 · New Iberia',
+    items: [
+      { clave: 'calendario', href: '/dashboard/calendario', etiqueta: 'Calendario', Icono: IconoCalendario },
     ],
   },
   {

@@ -74,6 +74,8 @@ const PAGINAS = [
   { nombre: '11h-informe-fichas-tecnicas', ruta: '/informe/fichas-tecnicas' },
   { nombre: '11i-informe-politica', ruta: '/informe/politica-ia' },
   { nombre: '12-programa', ruta: '/dashboard/programa' },
+  // La Fase 2 y New Iberia, desde el 28 de octubre de 2026.
+  { nombre: '12b-calendario', ruta: '/dashboard/calendario' },
   { nombre: '13-empleados', ruta: '/dashboard/empleados' },
 ]
 

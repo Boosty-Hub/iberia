@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.15"
   }
   public: {
     Tables: {
@@ -312,6 +312,60 @@ export type Database = {
             referencedColumns: ["matricula_id"]
           },
         ]
+      }
+      calendario_actividades: {
+        Row: {
+          detalle: string
+          estado: string
+          fecha_confirmada: string | null
+          fin: string | null
+          frente: string
+          id: string
+          inicio: string
+          nota: string
+          orden: number
+          participantes: string
+          responsable: string
+          tipo: string
+          titulo: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          detalle?: string
+          estado?: string
+          fecha_confirmada?: string | null
+          fin?: string | null
+          frente: string
+          id: string
+          inicio: string
+          nota?: string
+          orden?: number
+          participantes?: string
+          responsable?: string
+          tipo?: string
+          titulo: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          detalle?: string
+          estado?: string
+          fecha_confirmada?: string | null
+          fin?: string | null
+          frente?: string
+          id?: string
+          inicio?: string
+          nota?: string
+          orden?: number
+          participantes?: string
+          responsable?: string
+          tipo?: string
+          titulo?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       certificados: {
         Row: {

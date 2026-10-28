@@ -1046,6 +1046,33 @@ de consumo**. Este módulo es de donde sale ese reporte.
   una fila mensual que mezclara horas que cuentan con horas que no, no se podría leer.
   El script y la pantalla tienen que usar el mismo corte o el reporte dice dos cosas.
 
+## El calendario (`/dashboard/calendario`)
+
+Lo que viene después de la Fase 1, en un solo calendario: la **Fase 2 · Aliviar** (la línea
+tecnológica, noviembre de 2026 a abril de 2027) y **New Iberia** (desarrollo organizacional y
+procesos con el señor Carlos, hasta octubre de 2027). Desde el 28 de octubre de 2026.
+
+- **Las actividades viven en `calendario_actividades`**, no en el código: Amanda coordina las
+  agendas con cada área y las va marcando —estado, fecha confirmada y nota— sin pasar por un
+  despliegue. El título, las fechas previstas y el responsable no se editan desde la página: son lo
+  acordado con Iberia y con el señor Carlos, y se cambian en la base. Las 78 de partida salieron del
+  HTML de Gabriel y están sembradas en la migración `calendario`.
+- **El vocabulario está en `lib/calendario.ts`**: ocho frentes con su color —categorías, no la
+  marca—, cuatro tipos y cinco estados. Las claves espejan los `CHECK` de la tabla. Los entregables y
+  los hitos son los rombos de la línea de tiempo.
+- **La casilla es `modulo:calendario`**, con ver y editar, y la RLS la oye: leer pide ver y
+  actualizar pide editar. De fábrica la tiene el rol Consultor; los roles de Iberia, si se les marca.
+- ⚠️ **Lo lee Alberto**, que es administrador: las reglas de Consumos valen aquí. Nada de dinero en
+  pantalla, aunque las propuestas lo traigan, y lo interno va en `PENDIENTES.md`.
+- «Hoy» se calcula en `America/Caracas` en el servidor y se le pasa a la vista.
+
+```
+node --env-file=.env.local scripts/mirar-calendario.mjs --base http://localhost:3001
+```
+
+Actualiza una actividad desde la agenda, recarga y mira, la devuelve a como estaba —escribe en
+producción, y la devuelve también si algo falla— y mide que en un iPhone 14 la página no se desborde.
+
 ## Los documentos para el cliente
 
 Van en `documentos/`, en HTML con la identidad de Iberia, y el PDF sale con
@@ -1085,9 +1112,10 @@ cambia `scripts/generar-guias.mjs` y se regeneran, igual que la marca y las fich
 
 ## El panel (`/dashboard`)
 
-La barra tiene tres grupos: **Levantamiento** (panel, entrevistas, archivos y «Consumos», que
-es `/dashboard/programa`), **Cursos** (adiestramiento, el padrón y el curso de Ajito, que abre
-en otra pestaña) y **Administración** (usuarios, roles). Cada destino sale solo si la sesión
+La barra tiene cuatro grupos: **Levantamiento** (panel, entrevistas, archivos y «Consumos», que
+es `/dashboard/programa`), **Fase 2 · New Iberia** (el calendario, desde el 28 de octubre de
+2026), **Cursos** (adiestramiento, el padrón y el curso de Ajito, que abre en otra pestaña) y
+**Administración** (usuarios, roles). Cada destino sale solo si la sesión
 tiene su permiso (`destinosPermitidos()` en `app/dashboard/layout.tsx`).
 
 - **«El canal» va en la cabecera**, a su izquierda, para quien tiene canal y ficha: ver «Roles y

@@ -166,6 +166,9 @@ const RELACIONES = {
   roles: 'id, clave, nombre, nivel, sistema',
   rol_permisos: 'rol_id, recurso, ver, crear, editar, eliminar',
   profiles: 'id, rol, rol_id, activo',
+  // El calendario de la Fase 2 y New Iberia (28 de octubre de 2026).
+  calendario_actividades:
+    'id, titulo, detalle, frente, tipo, estado, inicio, fin, fecha_confirmada, responsable, participantes, nota, orden',
 }
 
 for (const [relacion, columnas] of Object.entries(RELACIONES)) {
@@ -258,6 +261,8 @@ const NUEVAS = [
   'informe_hallazgos',
   'roles',
   'rol_permisos',
+  // Las agendas con cada área de Iberia: con la casilla del calendario.
+  'calendario_actividades',
 ]
 
 {

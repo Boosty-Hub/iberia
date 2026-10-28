@@ -32,6 +32,7 @@ que está en línea.
 | **Comunicación** | El comunicado salió. Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | 276 personas de Capital Humano, **sin cédula, celular ni correo**, y 17 fichas cargadas a mano en agosto que repiten a gente real (marcadas en el padrón desde el 27/9) |
 | **Canal** | En línea. **Martha Álvarez tiene acceso desde el 27/9** para revisarlo con Mercadeo |
+| **Fase 2 · New Iberia** | **Calendario en el panel desde el 28/10** (`/dashboard/calendario`): 78 actividades de noviembre de 2026 a octubre de 2027, en la base. Lo actualiza Amanda (administradora) |
 | **App móvil** | **La de iPhone está armada desde el 23/10** (PEN-14661): Capacitor sobre el sitio en línea, en la cuenta de Apple de Boosty Desk; se compila y se sube solo desde GitHub Actions. **Todavía no se ha compilado.** Google Play (PEN-14662), después |
 | **Formación dirigente** | Alberto (17/8), Petit Comité (26/8) y gerentes (23/9, Cagua). **La de líderes no se pudo dictar el 7/10** por la VPN de Cagua: hay que reprogramarla |
 | **Adiestramiento** | Completo y **de Fase 2**: nueve lecciones, 70 audios por voz (mujer y hombre), Ajito contesta hablando y dibuja, certificado en la lección 8 (con la ficha cuando no hay cédula), chat con Ajito **apagado** (solo lo ve el equipo) |
@@ -54,6 +55,40 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 - **Decidir si se prende el asistente libre** (el chat con Ajito).
 - 🔴 **El plan gratuito de Supabase pausa el proyecto**: pasó antes del 19/10 y nadie podía entrar.
   Decidir si pasa a Pro (`PENDIENTES.md`).
+
+---
+
+## 28 de octubre · Sesión 53 — el calendario de la Fase 2 y New Iberia
+
+Gabriel pidió, por Telegram, una página en el panel con el calendario de todo lo que viene. Pasó un
+HTML que ya traía las actividades, las dos propuestas de octubre (New Iberia y Fase 2 · Aliviar) y la
+transcripción de su conversación del 27 con el señor Carlos, en la que ordenaron quién hace qué y
+cuándo. **La transcripción no se cargó a la base.** Antes, `git pull` trajo la app de iPhone de
+Santiago (`e9090f7`) y hubo que correr `npm ci` por las dependencias de Capacitor.
+
+**Lo que se construyó** (cómo funciona, en `AGENTS.md`, «El calendario»):
+
+- **`/dashboard/calendario`**, en un grupo nuevo de la barra, «Fase 2 · New Iberia»: lo de los
+  próximos 14 días, los ocho frentes en la línea de tiempo y la agenda mes a mes, que se filtra por
+  frente y por responsable.
+- **La tabla `calendario_actividades`**, con las 78 actividades del HTML sembradas en la migración, y
+  la casilla `modulo:calendario` (ver y editar). Quien puede editar marca estado, fecha confirmada y
+  nota desde la fila.
+- `scripts/mirar-calendario.mjs` lo recorre: actualiza una fila, recarga, mira, la devuelve a como
+  estaba y mide el iPhone 14. Seis comprobaciones, sin fallos. `probar:supabase` mira la tabla nueva:
+  80.
+
+**Lo que se decidió:**
+
+- **En la base y no en el código**, porque Amanda coordina las agendas y va fijando cada fecha con
+  un área; el HTML ya preveía «editable por fila».
+- **La casilla, de fábrica, solo al equipo de Boosty** (rol Consultor). Amanda, Gabriel y Alberto son
+  administradores y la tienen sola; los roles de Iberia, si se les marca.
+- **Sin montos**, como Consumos: las dos propuestas los traen, y Alberto lee esta página. Tampoco va
+  lo personal de la conversación —los pagos al señor Carlos, la llamada a Benjamín Gómez—.
+
+**Dónde quedamos**: el commit, local; el push a `main` despliega, y espera el visto bueno de Gabriel.
+La migración ya está aplicada en Supabase.
 
 ---
 

@@ -125,6 +125,14 @@ export const IconoAtras = (p: Props) => (
   </Base>
 )
 
+export const IconoCalendario = (p: Props) => (
+  <Base {...p}>
+    <rect x="3.5" y="5" width="17" height="15.5" rx="2" />
+    <path d="M3.5 9.5h17M8 3v4M16 3v4" />
+    <path d="M7.5 13.5h2M11 13.5h2M14.5 13.5h2M7.5 17h2M11 17h2" />
+  </Base>
+)
+
 export const IconoReloj = (p: Props) => (
   <Base {...p}>
     <circle cx="12" cy="12" r="8.5" />

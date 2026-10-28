@@ -101,6 +101,13 @@ export const MODULOS: Recurso[] = [
     detalle: { crear: 'Cargar horas e hitos', eliminar: 'Borrar horas' },
   },
   {
+    clave: 'modulo:calendario',
+    nombre: 'Calendario · Fase 2 y New Iberia',
+    grupo: 'panel',
+    acciones: ['ver', 'editar'],
+    detalle: { editar: 'Marcar estado, fecha confirmada y nota' },
+  },
+  {
     clave: 'modulo:adiestramiento',
     nombre: 'Adiestramiento',
     grupo: 'panel',
