@@ -1065,13 +1065,22 @@ procesos con el señor Carlos, hasta octubre de 2027). Desde el 28 de octubre de
 - ⚠️ **Lo lee Alberto**, que es administrador: las reglas de Consumos valen aquí. Nada de dinero en
   pantalla, aunque las propuestas lo traigan, y lo interno va en `PENDIENTES.md`.
 - «Hoy» se calcula en `America/Caracas` en el servidor y se le pasa a la vista.
+- **La línea de tiempo se despliega por frente** (29 de octubre de 2026, Gabriel): tocar un frente abre
+  debajo una pista por actividad, con su fecha, su estado y su responsable; pueden ir varios abiertos, y
+  «Ver todos en detalle» los abre todos. La barra y el rombo son la misma pieza (`Marca`) en la fila del
+  frente y en el detalle.
+- **El calendario como documento para Iberia**: `npm run documento:calendario` lo lee de la base y deja
+  el HTML en `documentos/`, y el PDF sale con `npm run documento -- <archivo> --vista`. Se genera, no se
+  edita a mano: lo que cambie en el calendario cambia en la base y se vuelve a sacar. **La `nota` de cada
+  actividad no sale**: es la coordinación interna de Amanda.
 
 ```
 node --env-file=.env.local scripts/mirar-calendario.mjs --base http://localhost:3001
 ```
 
 Actualiza una actividad desde la agenda, recarga y mira, la devuelve a como estaba —escribe en
-producción, y la devuelve también si algo falla— y mide que en un iPhone 14 la página no se desborde.
+producción, y la devuelve también si algo falla—, despliega la línea de tiempo por frente y entera, y
+mide que en un iPhone 14 la página no se desborde, tampoco con un frente abierto.
 
 ## Los documentos para el cliente
 

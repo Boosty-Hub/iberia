@@ -1,0 +1,1744 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Calendario de la Fase 2 y New Iberia · Industrias Iberia</title>
+    <style>
+      :root {
+        --rojo: #d4332c; --carbon: #1e1c1b; --carbon-medio: #474342; --gris: #6d6765;
+        --gris-claro: #b8b3b1; --borde: #e4e1e0; --fondo-suave: #f8f7f7; --pista: #f1efee;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; font-size: 10pt;
+             line-height: 1.5; color: var(--carbon-medio); }
+      h1, h2, h3 { color: var(--carbon); margin: 0; }
+      .portada { border-bottom: 3px solid var(--rojo); padding-bottom: 18px; margin-bottom: 18px; }
+      .portada img { height: 34px; width: auto; display: block; margin-bottom: 22px; }
+      .rotulo { font-size: 8pt; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+                color: var(--rojo); margin-bottom: 8px; }
+      .portada h1 { font-size: 21pt; line-height: 1.2; letter-spacing: -0.01em; }
+      .portada .bajada { font-size: 11pt; color: var(--gris); margin-top: 10px; }
+      .cifras { display: flex; gap: 10px; margin: 0 0 24px; }
+      .cifras div { flex: 1; border: 1px solid var(--borde); border-radius: 8px; padding: 9px 12px; }
+      .cifras b { display: block; font-size: 16pt; color: var(--carbon); line-height: 1.1; }
+      .cifras span { font-size: 8.5pt; color: var(--gris); }
+      section { margin-bottom: 24px; }
+      section > h2 { font-size: 13pt; margin-bottom: 4px; padding-bottom: 6px; border-bottom: 1px solid var(--borde); }
+      .num { color: var(--rojo); font-family: ui-monospace, monospace; font-size: 10pt; margin-right: 8px; }
+      section > .intro { color: var(--gris); margin: 10px 0 12px; }
+      h3 { font-size: 10.5pt; margin: 16px 0 6px; display: flex; align-items: center; gap: 7px; }
+      .h3-dato { font-weight: 400; font-size: 8.5pt; color: var(--gris); margin-left: auto; }
+      p { margin: 0 0 8px; }
+      strong { color: var(--carbon); font-weight: 600; }
+      .cuadro { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; flex-shrink: 0; vertical-align: 0; }
+      .leyenda { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 8.5pt; color: var(--gris); margin-top: 8px; }
+      .leyenda span { display: inline-flex; align-items: center; gap: 5px; }
+      .leyenda .l-hoy { width: 0; height: 11px; border-left: 2px dashed var(--rojo); }
+      .leyenda .l-rombo { width: 8px; height: 8px; transform: rotate(45deg); background: var(--gris-claro); border-radius: 1px; }
+      .leyenda i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+
+      /* La línea de tiempo: la misma geometría que la del panel. */
+      .gantt { font-size: 8.5pt; }
+      .g-fila { display: grid; grid-template-columns: 168px 1fr; gap: 10px; align-items: center; padding: 3px 0; break-inside: avoid; }
+      .g-cabeza { padding-bottom: 2px; }
+      .g-meses { position: relative; height: 16px; border-bottom: 1px solid var(--borde); }
+      .g-meses span { position: absolute; bottom: 2px; font-size: 7.5pt; color: var(--gris); }
+      .g-nombre { display: flex; align-items: center; color: var(--carbon); font-weight: 600; min-width: 0; }
+      .cuenta { color: var(--gris-claro); font-weight: 400; margin-left: 5px; }
+      .g-pista { position: relative; height: 20px; background: var(--pista); border-radius: 4px; }
+      .g-mes { position: absolute; top: 0; bottom: 0; width: 1px; background: #fff; }
+      .g-hoy { position: absolute; top: -3px; bottom: -3px; border-left: 1.5px dashed var(--rojo); }
+      .g-barra { position: absolute; top: 50%; height: 9px; margin-top: -4.5px; border-radius: 5px; opacity: 0.85; }
+      .g-rombo { position: absolute; top: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; transform: rotate(45deg);
+                 border-radius: 1.5px; box-shadow: 0 0 0 1.5px #fff; }
+      .detalle .g-fila { grid-template-columns: 215px 1fr; padding: 2px 0; }
+      .detalle .g-pista { height: 15px; }
+      .detalle .g-nombre { display: block; font-weight: 400; }
+      .g-titulo { margin: 0; font-size: 8pt; font-weight: 600; line-height: 1.25; color: var(--carbon); }
+      .g-meta { margin: 0; font-size: 7.3pt; color: var(--gris); line-height: 1.25; }
+      .frente { break-inside: avoid; margin-bottom: 6px; }
+
+      table { width: 100%; border-collapse: collapse; font-size: 8.8pt; margin: 6px 0 12px; }
+      thead { background: var(--carbon); color: #fff; display: table-header-group; }
+      th { text-align: left; padding: 6px 8px; font-weight: 600; font-size: 8.3pt; }
+      td { padding: 6px 8px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+      tr { break-inside: avoid; }
+      tbody tr:nth-child(even) { background: var(--fondo-suave); }
+      .fecha { font-family: ui-monospace, monospace; font-size: 8pt; white-space: nowrap; color: var(--carbon); }
+      .confirmada { display: block; font-family: 'Segoe UI', system-ui, sans-serif; color: #3d8b4a; font-weight: 600; margin-top: 2px; }
+      .detalle { margin: 3px 0 0; font-size: 8.3pt; color: var(--gris); }
+      td .detalle { display: block; }
+      .tipo { display: inline-block; font-size: 7pt; font-weight: 700; padding: 0 5px; border-radius: 8px;
+              background: #ece9e8; color: var(--carbon-medio); vertical-align: 1px; }
+      .tipo-hito { background: #fdf3f2; color: #a8261f; }
+      .estado { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; font-size: 8.3pt; }
+      .estado i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+      .mes { break-inside: auto; }
+      .mes-titulo { text-transform: none; }
+      .mes-titulo::first-letter { text-transform: uppercase; }
+      .salto { break-before: page; }
+      footer.cierre { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--borde); font-size: 8.5pt; color: var(--gris); }
+    </style>
+  </head>
+  <body>
+    <div class="portada">
+      <img src="../public/marca/iberia.png" alt="Industrias Iberia" />
+      <p class="rotulo">Fase 2 · Aliviar y New Iberia</p>
+      <h1>Calendario de actividades<br />noviembre de 2026 a octubre de 2027</h1>
+      <p class="bajada">
+        Cómo se van a dar en el tiempo la línea tecnológica de la Fase 2 y el desarrollo organizacional
+        y de procesos de New Iberia: qué se hace, cuándo y con quién. Estado al 29 de octubre de 2026.
+      </p>
+    </div>
+
+    <div class="cifras">
+      <div><b>78</b><span>actividades</span></div>
+      <div><b>8</b><span>frentes de trabajo</span></div>
+      <div><b>31</b><span>entregables e hitos</span></div>
+      <div><b>2</b><span>ya hechas</span></div>
+    </div>
+
+    <section>
+      <h2><span class="num">01</span>Los frentes en el tiempo</h2>
+      <p class="intro">
+        Cada franja es un frente de trabajo; cada barra, una actividad de inicio a fin, y cada rombo, un
+        entregable o un hito. Las fechas «por agendar» son la semana o el rango previsto: el día exacto se
+        fija con cada área. Amanda (Boosty) coordina las agendas con Martha Fuentes, Milagro Salas y Luz.
+      </p>
+      
+  <div class="gantt">
+    
+  <div class="g-fila g-cabeza">
+    <div></div>
+    <div class="g-meses">
+      <span style="left:0.00%">oct 26</span><span style="left:7.83%">nov</span><span style="left:15.40%">dic</span><span style="left:23.23%">ene 27</span><span style="left:31.06%">feb</span><span style="left:38.13%">mar</span><span style="left:45.96%">abr</span><span style="left:53.54%">may</span><span style="left:61.36%">jun</span><span style="left:68.94%">jul</span><span style="left:76.77%">ago</span><span style="left:84.60%">sep</span><span style="left:92.17%">oct</span>
+    </div>
+  </div>
+    
+      <div class="g-fila">
+        <div class="g-nombre"><span class="cuadro" style="background:#8A96A3"></span>Coordinación <span class="cuenta">23</span></div>
+        <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:7.32%;background:#8A96A3"></b><b class="g-barra" style="left:6.82%;width:0.80%;background:#8A96A3"></b><b class="g-barra" style="left:13.38%;width:1.26%;background:#8A96A3"></b><b class="g-rombo" style="left:15.15%;background:#8A96A3"></b><b class="g-barra" style="left:20.45%;width:4.80%;background:#8A96A3"></b><b class="g-rombo" style="left:22.98%;background:#8A96A3"></b><b class="g-barra" style="left:25.76%;width:1.26%;background:#8A96A3"></b><b class="g-rombo" style="left:30.81%;background:#8A96A3"></b><b class="g-barra" style="left:36.36%;width:1.26%;background:#8A96A3"></b><b class="g-rombo" style="left:37.88%;background:#8A96A3"></b><b class="g-rombo" style="left:45.71%;background:#8A96A3"></b><b class="g-barra" style="left:46.97%;width:1.26%;background:#8A96A3"></b><b class="g-rombo" style="left:53.28%;background:#8A96A3"></b><b class="g-barra" style="left:57.58%;width:1.26%;background:#8A96A3"></b><b class="g-rombo" style="left:61.11%;background:#8A96A3"></b><b class="g-rombo" style="left:68.69%;background:#8A96A3"></b><b class="g-barra" style="left:68.18%;width:1.26%;background:#8A96A3"></b><b class="g-rombo" style="left:76.52%;background:#8A96A3"></b><b class="g-barra" style="left:78.79%;width:1.26%;background:#8A96A3"></b><b class="g-rombo" style="left:84.34%;background:#8A96A3"></b><b class="g-barra" style="left:89.39%;width:1.26%;background:#8A96A3"></b><b class="g-rombo" style="left:91.92%;background:#8A96A3"></b><b class="g-rombo" style="left:99.24%;background:#8A96A3"></b></div>
+      </div>
+      <div class="g-fila">
+        <div class="g-nombre"><span class="cuadro" style="background:#2E8B85"></span>Activación <span class="cuenta">9</span></div>
+        <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:8.33%;background:#2E8B85"></b><b class="g-barra" style="left:7.32%;width:1.01%;background:#2E8B85"></b><b class="g-barra" style="left:8.59%;width:0.80%;background:#2E8B85"></b><b class="g-barra" style="left:9.85%;width:1.26%;background:#2E8B85"></b><b class="g-barra" style="left:9.85%;width:4.80%;background:#2E8B85"></b><b class="g-rombo" style="left:15.15%;background:#2E8B85"></b><b class="g-barra" style="left:16.92%;width:1.26%;background:#2E8B85"></b><b class="g-rombo" style="left:19.19%;background:#2E8B85"></b><b class="g-rombo" style="left:37.37%;background:#2E8B85"></b></div>
+      </div>
+      <div class="g-fila">
+        <div class="g-nombre"><span class="cuadro" style="background:#2D4868"></span>Acompañamiento <span class="cuenta">8</span></div>
+        <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:8.08%;width:91.41%;background:#2D4868"></b><b class="g-barra" style="left:8.59%;width:0.80%;background:#2D4868"></b><b class="g-barra" style="left:27.53%;width:1.26%;background:#2D4868"></b><b class="g-barra" style="left:34.60%;width:1.26%;background:#2D4868"></b><b class="g-barra" style="left:41.67%;width:1.26%;background:#2D4868"></b><b class="g-barra" style="left:48.74%;width:1.26%;background:#2D4868"></b><b class="g-barra" style="left:57.58%;width:1.26%;background:#2D4868"></b><b class="g-barra" style="left:64.65%;width:1.26%;background:#2D4868"></b></div>
+      </div>
+      <div class="g-fila">
+        <div class="g-nombre"><span class="cuadro" style="background:#5BA9A3"></span>Procesos <span class="cuenta">10</span></div>
+        <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:8.59%;width:0.80%;background:#5BA9A3"></b><b class="g-rombo" style="left:10.86%;background:#5BA9A3"></b><b class="g-barra" style="left:9.85%;width:10.10%;background:#5BA9A3"></b><b class="g-barra" style="left:11.62%;width:6.57%;background:#5BA9A3"></b><b class="g-barra" style="left:16.92%;width:1.26%;background:#5BA9A3"></b><b class="g-rombo" style="left:19.70%;background:#5BA9A3"></b><b class="g-barra" style="left:25.76%;width:18.94%;background:#5BA9A3"></b><b class="g-rombo" style="left:45.71%;background:#5BA9A3"></b><b class="g-barra" style="left:46.97%;width:20.71%;background:#5BA9A3"></b><b class="g-rombo" style="left:68.69%;background:#5BA9A3"></b></div>
+      </div>
+      <div class="g-fila">
+        <div class="g-nombre"><span class="cuadro" style="background:#7A6CC0"></span>Desempeño <span class="cuenta">3</span></div>
+        <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:8.08%;width:6.57%;background:#7A6CC0"></b><b class="g-rombo" style="left:19.70%;background:#7A6CC0"></b><b class="g-barra" style="left:25.76%;width:20.20%;background:#7A6CC0"></b></div>
+      </div>
+      <div class="g-fila">
+        <div class="g-nombre"><span class="cuadro" style="background:#B5648A"></span>Gestión Organizacional <span class="cuenta">3</span></div>
+        <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:15.15%;background:#B5648A"></b><b class="g-barra" style="left:15.40%;width:2.78%;background:#B5648A"></b><b class="g-rombo" style="left:37.37%;background:#B5648A"></b></div>
+      </div>
+      <div class="g-fila">
+        <div class="g-nombre"><span class="cuadro" style="background:#9DB21F"></span>Estructura <span class="cuenta">5</span></div>
+        <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:31.06%;width:22.47%;background:#9DB21F"></b><b class="g-barra" style="left:38.13%;width:27.78%;background:#9DB21F"></b><b class="g-rombo" style="left:40.91%;background:#9DB21F"></b><b class="g-rombo" style="left:67.42%;background:#9DB21F"></b><b class="g-rombo" style="left:84.34%;background:#9DB21F"></b></div>
+      </div>
+      <div class="g-fila">
+        <div class="g-nombre"><span class="cuadro" style="background:#2F6FB3"></span>Tecnología <span class="cuenta">17</span></div>
+        <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:6.82%;width:0.80%;background:#2F6FB3"></b><b class="g-rombo" style="left:10.86%;background:#2F6FB3"></b><b class="g-rombo" style="left:10.86%;background:#2F6FB3"></b><b class="g-barra" style="left:8.59%;width:0.80%;background:#2F6FB3"></b><b class="g-barra" style="left:8.59%;width:6.06%;background:#2F6FB3"></b><b class="g-barra" style="left:9.85%;width:3.03%;background:#2F6FB3"></b><b class="g-barra" style="left:11.62%;width:8.33%;background:#2F6FB3"></b><b class="g-rombo" style="left:19.70%;background:#2F6FB3"></b><b class="g-barra" style="left:15.40%;width:1.01%;background:#2F6FB3"></b><b class="g-barra" style="left:23.99%;width:1.26%;background:#2F6FB3"></b><b class="g-barra" style="left:25.76%;width:8.33%;background:#2F6FB3"></b><b class="g-barra" style="left:31.06%;width:1.26%;background:#2F6FB3"></b><b class="g-barra" style="left:34.60%;width:6.57%;background:#2F6FB3"></b><b class="g-barra" style="left:38.13%;width:1.26%;background:#2F6FB3"></b><b class="g-barra" style="left:41.67%;width:8.33%;background:#2F6FB3"></b><b class="g-barra" style="left:46.97%;width:1.26%;background:#2F6FB3"></b><b class="g-rombo" style="left:53.28%;background:#2F6FB3"></b></div>
+      </div>
+  </div>
+      <div class="leyenda">
+        <span><span class="l-hoy"></span>Hoy</span>
+        <span><span class="l-rombo"></span>Entregable o hito</span>
+        <span><i style="background:#8A96A3"></i>Por agendar</span><span><i style="background:#C98A12"></i>Por confirmar</span><span><i style="background:#2F6FB3"></i>Agendado</span><span><i style="background:#2E8B85"></i>En curso</span><span><i style="background:#3D8B4A"></i>Hecho</span>
+      </div>
+    </section>
+
+    <section class="salto">
+      <h2><span class="num">02</span>Cada frente, actividad por actividad</h2>
+      <p class="intro">El mismo calendario abierto frente por frente, con la fecha y el responsable de cada actividad.</p>
+      
+    <div class="frente">
+      <h3><span class="cuadro" style="background:#8A96A3"></span>Coordinación
+        <span class="h3-dato">23 actividades · 28 oct 26 a 29 oct 27</span></h3>
+      <div class="gantt detalle">
+        
+  <div class="g-fila g-cabeza">
+    <div></div>
+    <div class="g-meses">
+      <span style="left:0.00%">oct 26</span><span style="left:7.83%">nov</span><span style="left:15.40%">dic</span><span style="left:23.23%">ene 27</span><span style="left:31.06%">feb</span><span style="left:38.13%">mar</span><span style="left:45.96%">abr</span><span style="left:53.54%">may</span><span style="left:61.36%">jun</span><span style="left:68.94%">jul</span><span style="left:76.77%">ago</span><span style="left:84.60%">sep</span><span style="left:92.17%">oct</span>
+    </div>
+  </div>
+        
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Firma del Adendum N.º 1</p>
+            <p class="g-meta">28 oct – 30 oct · Alberto García-Ramos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:7.32%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Confirmar con Alberto el día en planta del miércoles 4 de noviembre</p>
+            <p class="g-meta">28 oct – 30 oct · Amanda</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:6.82%;width:0.80%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Reunión de seguimiento con Alberto</p>
+            <p class="g-meta">23 nov – 27 nov · Gabriel y Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:13.38%;width:1.26%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Informe mensual de avance · noviembre 2026</p>
+            <p class="g-meta">26 nov – 30 nov · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:15.15%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Vacaciones colectivas de Iberia</p>
+            <p class="g-meta">21 dic 26 – 8 ene 27 · Amanda</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:20.45%;width:4.80%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Informe mensual de avance · diciembre 2026</p>
+            <p class="g-meta">27 dic – 31 dic · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:22.98%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Reunión de seguimiento con Alberto</p>
+            <p class="g-meta">11 ene – 15 ene · Gabriel y Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:25.76%;width:1.26%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Informe mensual de avance · enero 2027</p>
+            <p class="g-meta">27 ene – 31 ene · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:30.81%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Reunión de seguimiento con Alberto</p>
+            <p class="g-meta">22 feb – 26 feb · Gabriel y Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:36.36%;width:1.26%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Informe mensual de avance · febrero 2027</p>
+            <p class="g-meta">24 feb – 28 feb · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:37.88%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Informe mensual de avance · marzo 2027</p>
+            <p class="g-meta">27 mar – 31 mar · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:45.71%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Reunión de seguimiento con Alberto</p>
+            <p class="g-meta">5 abr – 9 abr · Gabriel y Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:46.97%;width:1.26%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Informe mensual de avance · abril 2027</p>
+            <p class="g-meta">26 abr – 30 abr · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:53.28%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Reunión de seguimiento con Alberto</p>
+            <p class="g-meta">17 may – 21 may · Gabriel y Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:57.58%;width:1.26%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Informe mensual de avance · mayo 2027</p>
+            <p class="g-meta">27 may – 31 may · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:61.11%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Informe mensual de avance · junio 2027</p>
+            <p class="g-meta">26 jun – 30 jun · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:68.69%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Reunión de seguimiento con Alberto</p>
+            <p class="g-meta">28 jun – 2 jul · Gabriel y Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:68.18%;width:1.26%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Informe mensual de avance · julio 2027</p>
+            <p class="g-meta">27 jul – 31 jul · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:76.52%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Reunión de seguimiento con Alberto</p>
+            <p class="g-meta">9 ago – 13 ago · Gabriel y Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:78.79%;width:1.26%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Informe mensual de avance · agosto 2027</p>
+            <p class="g-meta">27 ago – 31 ago · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:84.34%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Reunión de seguimiento con Alberto</p>
+            <p class="g-meta">20 sep – 24 sep · Gabriel y Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:89.39%;width:1.26%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Informe mensual de avance · septiembre 2027</p>
+            <p class="g-meta">26 sep – 30 sep · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:91.92%;background:#8A96A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Informe final y transferencia de la base de conocimiento a Calidad</p>
+            <p class="g-meta">18 oct – 29 oct · Gabriel y Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:99.24%;background:#8A96A3"></b></div>
+        </div>
+      </div>
+    </div>
+    <div class="frente">
+      <h3><span class="cuadro" style="background:#2E8B85"></span>Activación
+        <span class="h3-dato">9 actividades · 29 oct 26 a 26 feb 27</span></h3>
+      <div class="gantt detalle">
+        
+  <div class="g-fila g-cabeza">
+    <div></div>
+    <div class="g-meses">
+      <span style="left:0.00%">oct 26</span><span style="left:7.83%">nov</span><span style="left:15.40%">dic</span><span style="left:23.23%">ene 27</span><span style="left:31.06%">feb</span><span style="left:38.13%">mar</span><span style="left:45.96%">abr</span><span style="left:53.54%">may</span><span style="left:61.36%">jun</span><span style="left:68.94%">jul</span><span style="left:76.77%">ago</span><span style="left:84.60%">sep</span><span style="left:92.17%">oct</span>
+    </div>
+  </div>
+        
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Preparar la presentación filtrada para gerentes</p>
+            <p class="g-meta">29 oct – 3 nov · Carlos y Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:8.33%;background:#2E8B85"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Alberto revisa el plan 2027 con Antonio Sorrentino</p>
+            <p class="g-meta">30 oct – 2 nov · Alberto García-Ramos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:7.32%;width:1.01%;background:#2E8B85"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Presentación a gerentes (9:00 a 11:00)</p>
+            <p class="g-meta">4 nov · Carlos y Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:8.59%;width:0.80%;background:#2E8B85"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Reunión con directores sobre el plan 2027</p>
+            <p class="g-meta">9 nov – 13 nov · Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:9.85%;width:1.26%;background:#2E8B85"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Sesiones de dirección (unas 3)</p>
+            <p class="g-meta">9 nov – 27 nov · Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:9.85%;width:4.80%;background:#2E8B85"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Acuerdos de funcionamiento y mapa de asuntos operativos</p>
+            <p class="g-meta">30 nov · Carlos y Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:15.15%;background:#2E8B85"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Reunión de dirección de diciembre</p>
+            <p class="g-meta">7 dic – 11 dic · Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:16.92%;width:1.26%;background:#2E8B85"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Sesión de inicio con gerentes: plan 2027 y mapa de asuntos</p>
+            <p class="g-meta">9 dic – 16 dic · Carlos y Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:19.19%;background:#2E8B85"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Niveles de autoridad y decisión: definición y notificación a gerentes</p>
+            <p class="g-meta">11 ene – 26 feb · Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:37.37%;background:#2E8B85"></b></div>
+        </div>
+      </div>
+    </div>
+    <div class="frente">
+      <h3><span class="cuadro" style="background:#2D4868"></span>Acompañamiento
+        <span class="h3-dato">8 actividades · 2 nov 26 a 29 oct 27</span></h3>
+      <div class="gantt detalle">
+        
+  <div class="g-fila g-cabeza">
+    <div></div>
+    <div class="g-meses">
+      <span style="left:0.00%">oct 26</span><span style="left:7.83%">nov</span><span style="left:15.40%">dic</span><span style="left:23.23%">ene 27</span><span style="left:31.06%">feb</span><span style="left:38.13%">mar</span><span style="left:45.96%">abr</span><span style="left:53.54%">may</span><span style="left:61.36%">jun</span><span style="left:68.94%">jul</span><span style="left:76.77%">ago</span><span style="left:84.60%">sep</span><span style="left:92.17%">oct</span>
+    </div>
+  </div>
+        
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Acompañamiento individual a directores y gerentes</p>
+            <p class="g-meta">2 nov 26 – 29 oct 27 · Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:8.08%;width:91.41%;background:#2D4868"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Primeras conversaciones de acompañamiento con directores</p>
+            <p class="g-meta">4 nov · Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:8.59%;width:0.80%;background:#2D4868"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Día de gerentes en planta · enero</p>
+            <p class="g-meta">18 ene – 22 ene · Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:27.53%;width:1.26%;background:#2D4868"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Día de gerentes en planta · febrero</p>
+            <p class="g-meta">15 feb – 19 feb · Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:34.60%;width:1.26%;background:#2D4868"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Día de gerentes en planta · marzo</p>
+            <p class="g-meta">15 mar – 19 mar · Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:41.67%;width:1.26%;background:#2D4868"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Día de gerentes en planta · abril</p>
+            <p class="g-meta">12 abr – 16 abr · Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:48.74%;width:1.26%;background:#2D4868"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Día de gerentes en planta · mayo</p>
+            <p class="g-meta">17 may – 21 may · Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:57.58%;width:1.26%;background:#2D4868"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Día de gerentes en planta · junio</p>
+            <p class="g-meta">14 jun – 18 jun · Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:64.65%;width:1.26%;background:#2D4868"></b></div>
+        </div>
+      </div>
+    </div>
+    <div class="frente">
+      <h3><span class="cuadro" style="background:#5BA9A3"></span>Procesos
+        <span class="h3-dato">10 actividades · 4 nov 26 a 30 jun 27</span></h3>
+      <div class="gantt detalle">
+        
+  <div class="g-fila g-cabeza">
+    <div></div>
+    <div class="g-meses">
+      <span style="left:0.00%">oct 26</span><span style="left:7.83%">nov</span><span style="left:15.40%">dic</span><span style="left:23.23%">ene 27</span><span style="left:31.06%">feb</span><span style="left:38.13%">mar</span><span style="left:45.96%">abr</span><span style="left:53.54%">may</span><span style="left:61.36%">jun</span><span style="left:68.94%">jul</span><span style="left:76.77%">ago</span><span style="left:84.60%">sep</span><span style="left:92.17%">oct</span>
+    </div>
+  </div>
+        
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Hoja de ruta de procesos con Milagro Salas</p>
+            <p class="g-meta">4 nov · Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:8.59%;width:0.80%;background:#5BA9A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Milagro entrega la documentación de procesos de 2013</p>
+            <p class="g-meta">4 nov – 13 nov · Milagro Salas</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:10.86%;background:#5BA9A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Base de conocimiento «cómo es hoy»</p>
+            <p class="g-meta">9 nov – 18 dic · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:9.85%;width:10.10%;background:#5BA9A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Entrevistas complementarias si aparecen vacíos</p>
+            <p class="g-meta">16 nov – 11 dic · Ruth</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:11.62%;width:6.57%;background:#5BA9A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Sesión de diciembre con Milagro</p>
+            <p class="g-meta">7 dic – 11 dic · Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:16.92%;width:1.26%;background:#5BA9A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Base de conocimiento operando</p>
+            <p class="g-meta">18 dic · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:19.70%;background:#5BA9A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Validación de procesos departamento por departamento</p>
+            <p class="g-meta">11 ene – 26 mar · Ruth y Milagro Salas</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:25.76%;width:18.94%;background:#5BA9A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Manual de procesos y políticas: compras, comercial y finanzas</p>
+            <p class="g-meta">31 mar · Ruth</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:45.71%;background:#5BA9A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Documentación y validación del resto de la organización</p>
+            <p class="g-meta">5 abr – 25 jun · Ruth y Milagro Salas</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:46.97%;width:20.71%;background:#5BA9A3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Manual de procesos y políticas de toda la organización</p>
+            <p class="g-meta">30 jun · Ruth</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:68.69%;background:#5BA9A3"></b></div>
+        </div>
+      </div>
+    </div>
+    <div class="frente">
+      <h3><span class="cuadro" style="background:#7A6CC0"></span>Desempeño
+        <span class="h3-dato">3 actividades · 2 nov 26 a 31 mar 27</span></h3>
+      <div class="gantt detalle">
+        
+  <div class="g-fila g-cabeza">
+    <div></div>
+    <div class="g-meses">
+      <span style="left:0.00%">oct 26</span><span style="left:7.83%">nov</span><span style="left:15.40%">dic</span><span style="left:23.23%">ene 27</span><span style="left:31.06%">feb</span><span style="left:38.13%">mar</span><span style="left:45.96%">abr</span><span style="left:53.54%">may</span><span style="left:61.36%">jun</span><span style="left:68.94%">jul</span><span style="left:76.77%">ago</span><span style="left:84.60%">sep</span><span style="left:92.17%">oct</span>
+    </div>
+  </div>
+        
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Diseño de la compensación variable de directores</p>
+            <p class="g-meta">2 nov – 27 nov · Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:8.08%;width:6.57%;background:#7A6CC0"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Entrega de la compensación variable de directores</p>
+            <p class="g-meta">1 dic – 18 dic · Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:19.70%;background:#7A6CC0"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Gestión del desempeño atada a los indicadores del plan</p>
+            <p class="g-meta">11 ene – 31 mar · Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:25.76%;width:20.20%;background:#7A6CC0"></b></div>
+        </div>
+      </div>
+    </div>
+    <div class="frente">
+      <h3><span class="cuadro" style="background:#B5648A"></span>Gestión Organizacional
+        <span class="h3-dato">3 actividades · 30 nov 26 a 26 feb 27</span></h3>
+      <div class="gantt detalle">
+        
+  <div class="g-fila g-cabeza">
+    <div></div>
+    <div class="g-meses">
+      <span style="left:0.00%">oct 26</span><span style="left:7.83%">nov</span><span style="left:15.40%">dic</span><span style="left:23.23%">ene 27</span><span style="left:31.06%">feb</span><span style="left:38.13%">mar</span><span style="left:45.96%">abr</span><span style="left:53.54%">may</span><span style="left:61.36%">jun</span><span style="left:68.94%">jul</span><span style="left:76.77%">ago</span><span style="left:84.60%">sep</span><span style="left:92.17%">oct</span>
+    </div>
+  </div>
+        
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Llega Luz a Gestión Organizacional</p>
+            <p class="g-meta">30 nov · Alberto García-Ramos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:15.15%;background:#B5648A"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Sesión de arranque con Luz</p>
+            <p class="g-meta">1 dic – 11 dic · Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:15.40%;width:2.78%;background:#B5648A"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Hoja de ruta de Gestión Organizacional</p>
+            <p class="g-meta">11 ene – 26 feb · Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:37.37%;background:#B5648A"></b></div>
+        </div>
+      </div>
+    </div>
+    <div class="frente">
+      <h3><span class="cuadro" style="background:#9DB21F"></span>Estructura
+        <span class="h3-dato">5 actividades · 1 feb 27 a 31 ago 27</span></h3>
+      <div class="gantt detalle">
+        
+  <div class="g-fila g-cabeza">
+    <div></div>
+    <div class="g-meses">
+      <span style="left:0.00%">oct 26</span><span style="left:7.83%">nov</span><span style="left:15.40%">dic</span><span style="left:23.23%">ene 27</span><span style="left:31.06%">feb</span><span style="left:38.13%">mar</span><span style="left:45.96%">abr</span><span style="left:53.54%">may</span><span style="left:61.36%">jun</span><span style="left:68.94%">jul</span><span style="left:76.77%">ago</span><span style="left:84.60%">sep</span><span style="left:92.17%">oct</span>
+    </div>
+  </div>
+        
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Trabajo interno de estructura</p>
+            <p class="g-meta">1 feb – 30 abr · Josué</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:31.06%;width:22.47%;background:#9DB21F"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Diseño de estructura con comité de Luz y Milagro</p>
+            <p class="g-meta">1 mar – 18 jun · Josué y Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:38.13%;width:27.78%;background:#9DB21F"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Avance de estructura con dirección</p>
+            <p class="g-meta">8 mar – 12 mar · Josué</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:40.91%;background:#9DB21F"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Presentación de la estructura a Alberto y directores</p>
+            <p class="g-meta">21 jun – 25 jun · Josué y Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:67.42%;background:#9DB21F"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Guía de responsabilidades</p>
+            <p class="g-meta">1 jul – 31 ago · Josué y Carlos</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:84.34%;background:#9DB21F"></b></div>
+        </div>
+      </div>
+    </div>
+    <div class="frente">
+      <h3><span class="cuadro" style="background:#2F6FB3"></span>Tecnología
+        <span class="h3-dato">17 actividades · 28 oct 26 a 30 abr 27</span></h3>
+      <div class="gantt detalle">
+        
+  <div class="g-fila g-cabeza">
+    <div></div>
+    <div class="g-meses">
+      <span style="left:0.00%">oct 26</span><span style="left:7.83%">nov</span><span style="left:15.40%">dic</span><span style="left:23.23%">ene 27</span><span style="left:31.06%">feb</span><span style="left:38.13%">mar</span><span style="left:45.96%">abr</span><span style="left:53.54%">may</span><span style="left:61.36%">jun</span><span style="left:68.94%">jul</span><span style="left:76.77%">ago</span><span style="left:84.60%">sep</span><span style="left:92.17%">oct</span>
+    </div>
+  </div>
+        
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Escribir a Martha Álvarez sobre sus comentarios a la app de comunicaciones</p>
+            <p class="g-meta">28 oct – 29 oct · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:6.82%;width:0.80%;background:#2F6FB3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Iberia habilita la tarjeta de pago para servicios de terceros</p>
+            <p class="g-meta">2 nov – 13 nov · Gerencia General Iberia</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:10.86%;background:#2F6FB3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Designar al dueño interno del roadmap</p>
+            <p class="g-meta">2 nov – 13 nov · Gerencia General Iberia</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:10.86%;background:#2F6FB3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Plan de conexión a JD Edwards con Martha Fuentes y TI</p>
+            <p class="g-meta">4 nov · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:8.59%;width:0.80%;background:#2F6FB3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Plan del conector a JD Edwards acordado con TI</p>
+            <p class="g-meta">4 nov – 27 nov · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:8.59%;width:6.06%;background:#2F6FB3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Revisión de la app de comunicaciones con Fuguet</p>
+            <p class="g-meta">9 nov – 20 nov · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:9.85%;width:3.03%;background:#2F6FB3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Licencia de formación en planta</p>
+            <p class="g-meta">16 nov – 18 dic · Amanda</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:11.62%;width:8.33%;background:#2F6FB3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Espejo de JD Edwards conciliando (Paso 0)</p>
+            <p class="g-meta">30 nov – 18 dic · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:19.70%;background:#2F6FB3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Reunión mensual de roadmap · diciembre</p>
+            <p class="g-meta">1 dic – 4 dic · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:15.40%;width:1.01%;background:#2F6FB3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Reunión mensual de roadmap · enero</p>
+            <p class="g-meta">4 ene – 8 ene · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:23.99%;width:1.26%;background:#2F6FB3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Módulo comercial y formación del equipo comercial</p>
+            <p class="g-meta">11 ene – 12 feb · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:25.76%;width:8.33%;background:#2F6FB3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Reunión mensual de roadmap · febrero</p>
+            <p class="g-meta">1 feb – 5 feb · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:31.06%;width:1.26%;background:#2F6FB3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Segundo módulo (compras o finanzas, por confirmar)</p>
+            <p class="g-meta">15 feb – 12 mar · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:34.60%;width:6.57%;background:#2F6FB3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Reunión mensual de roadmap · marzo</p>
+            <p class="g-meta">1 mar – 5 mar · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:38.13%;width:1.26%;background:#2F6FB3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Tercer módulo</p>
+            <p class="g-meta">15 mar – 16 abr · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:41.67%;width:8.33%;background:#2F6FB3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Reunión mensual de roadmap · abril</p>
+            <p class="g-meta">5 abr – 9 abr · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-barra" style="left:46.97%;width:1.26%;background:#2F6FB3"></b></div>
+        </div>
+        <div class="g-fila">
+          <div class="g-nombre">
+            <p class="g-titulo">Punto de control de la Fase 2</p>
+            <p class="g-meta">26 abr – 30 abr · Gabriel</p>
+          </div>
+          <div class="g-pista"><i class="g-mes" style="left:7.83%"></i><i class="g-mes" style="left:15.40%"></i><i class="g-mes" style="left:23.23%"></i><i class="g-mes" style="left:31.06%"></i><i class="g-mes" style="left:38.13%"></i><i class="g-mes" style="left:45.96%"></i><i class="g-mes" style="left:53.54%"></i><i class="g-mes" style="left:61.36%"></i><i class="g-mes" style="left:68.94%"></i><i class="g-mes" style="left:76.77%"></i><i class="g-mes" style="left:84.60%"></i><i class="g-mes" style="left:92.17%"></i><i class="g-hoy" style="left:7.07%"></i><b class="g-rombo" style="left:53.28%;background:#2F6FB3"></b></div>
+        </div>
+      </div>
+    </div>
+    </section>
+
+    <section class="salto">
+      <h2><span class="num">03</span>Los entregables y los hitos</h2>
+      <p class="intro">Lo que se entrega o marca un antes y un después, en orden de fecha.</p>
+      
+  <table>
+    <thead><tr><th style="width:17%">Fecha</th><th>Entregable o hito</th><th style="width:19%">Frente</th><th style="width:22%">Responsable</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="fecha">28 oct – 30 oct</td>
+        <td><strong>Firma del Adendum N.º 1</strong> <span class="tipo">Hito</span></td>
+        <td><span class="cuadro" style="background:#8A96A3"></span>Coordinación</td>
+        <td>Alberto García-Ramos</td>
+      </tr><tr>
+        <td class="fecha">29 oct – 3 nov</td>
+        <td><strong>Preparar la presentación filtrada para gerentes</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#2E8B85"></span>Activación</td>
+        <td>Carlos y Gabriel</td>
+      </tr><tr>
+        <td class="fecha">2 nov – 13 nov</td>
+        <td><strong>Iberia habilita la tarjeta de pago para servicios de terceros</strong> <span class="tipo">Hito</span></td>
+        <td><span class="cuadro" style="background:#2F6FB3"></span>Tecnología</td>
+        <td>Gerencia General Iberia</td>
+      </tr><tr>
+        <td class="fecha">2 nov – 13 nov</td>
+        <td><strong>Designar al dueño interno del roadmap</strong> <span class="tipo">Hito</span></td>
+        <td><span class="cuadro" style="background:#2F6FB3"></span>Tecnología</td>
+        <td>Gerencia General Iberia</td>
+      </tr><tr>
+        <td class="fecha">4 nov – 13 nov</td>
+        <td><strong>Milagro entrega la documentación de procesos de 2013</strong> <span class="tipo">Hito</span></td>
+        <td><span class="cuadro" style="background:#5BA9A3"></span>Procesos</td>
+        <td>Milagro Salas</td>
+      </tr><tr>
+        <td class="fecha">26 nov – 30 nov</td>
+        <td><strong>Informe mensual de avance · noviembre 2026</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#8A96A3"></span>Coordinación</td>
+        <td>Gabriel</td>
+      </tr><tr>
+        <td class="fecha">30 nov</td>
+        <td><strong>Acuerdos de funcionamiento y mapa de asuntos operativos</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#2E8B85"></span>Activación</td>
+        <td>Carlos y Gabriel</td>
+      </tr><tr>
+        <td class="fecha">30 nov</td>
+        <td><strong>Llega Luz a Gestión Organizacional</strong> <span class="tipo">Hito</span></td>
+        <td><span class="cuadro" style="background:#B5648A"></span>Gestión Organizacional</td>
+        <td>Alberto García-Ramos</td>
+      </tr><tr>
+        <td class="fecha">30 nov – 18 dic</td>
+        <td><strong>Espejo de JD Edwards conciliando (Paso 0)</strong> <span class="tipo">Hito</span></td>
+        <td><span class="cuadro" style="background:#2F6FB3"></span>Tecnología</td>
+        <td>Gabriel</td>
+      </tr><tr>
+        <td class="fecha">1 dic – 18 dic</td>
+        <td><strong>Entrega de la compensación variable de directores</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#7A6CC0"></span>Desempeño</td>
+        <td>Carlos</td>
+      </tr><tr>
+        <td class="fecha">9 dic – 16 dic</td>
+        <td><strong>Sesión de inicio con gerentes: plan 2027 y mapa de asuntos</strong> <span class="tipo">Hito</span></td>
+        <td><span class="cuadro" style="background:#2E8B85"></span>Activación</td>
+        <td>Carlos y Gabriel</td>
+      </tr><tr>
+        <td class="fecha">18 dic</td>
+        <td><strong>Base de conocimiento operando</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#5BA9A3"></span>Procesos</td>
+        <td>Gabriel</td>
+      </tr><tr>
+        <td class="fecha">27 dic – 31 dic</td>
+        <td><strong>Informe mensual de avance · diciembre 2026</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#8A96A3"></span>Coordinación</td>
+        <td>Gabriel</td>
+      </tr><tr>
+        <td class="fecha">11 ene – 26 feb</td>
+        <td><strong>Hoja de ruta de Gestión Organizacional</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#B5648A"></span>Gestión Organizacional</td>
+        <td>Carlos</td>
+      </tr><tr>
+        <td class="fecha">11 ene – 26 feb</td>
+        <td><strong>Niveles de autoridad y decisión: definición y notificación a gerentes</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#2E8B85"></span>Activación</td>
+        <td>Carlos</td>
+      </tr><tr>
+        <td class="fecha">27 ene – 31 ene</td>
+        <td><strong>Informe mensual de avance · enero 2027</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#8A96A3"></span>Coordinación</td>
+        <td>Gabriel</td>
+      </tr><tr>
+        <td class="fecha">24 feb – 28 feb</td>
+        <td><strong>Informe mensual de avance · febrero 2027</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#8A96A3"></span>Coordinación</td>
+        <td>Gabriel</td>
+      </tr><tr>
+        <td class="fecha">8 mar – 12 mar</td>
+        <td><strong>Avance de estructura con dirección</strong> <span class="tipo">Hito</span></td>
+        <td><span class="cuadro" style="background:#9DB21F"></span>Estructura</td>
+        <td>Josué</td>
+      </tr><tr>
+        <td class="fecha">27 mar – 31 mar</td>
+        <td><strong>Informe mensual de avance · marzo 2027</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#8A96A3"></span>Coordinación</td>
+        <td>Gabriel</td>
+      </tr><tr>
+        <td class="fecha">31 mar</td>
+        <td><strong>Manual de procesos y políticas: compras, comercial y finanzas</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#5BA9A3"></span>Procesos</td>
+        <td>Ruth</td>
+      </tr><tr>
+        <td class="fecha">26 abr – 30 abr</td>
+        <td><strong>Informe mensual de avance · abril 2027</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#8A96A3"></span>Coordinación</td>
+        <td>Gabriel</td>
+      </tr><tr>
+        <td class="fecha">26 abr – 30 abr</td>
+        <td><strong>Punto de control de la Fase 2</strong> <span class="tipo">Hito</span></td>
+        <td><span class="cuadro" style="background:#2F6FB3"></span>Tecnología</td>
+        <td>Gabriel</td>
+      </tr><tr>
+        <td class="fecha">27 may – 31 may</td>
+        <td><strong>Informe mensual de avance · mayo 2027</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#8A96A3"></span>Coordinación</td>
+        <td>Gabriel</td>
+      </tr><tr>
+        <td class="fecha">21 jun – 25 jun</td>
+        <td><strong>Presentación de la estructura a Alberto y directores</strong> <span class="tipo">Hito</span></td>
+        <td><span class="cuadro" style="background:#9DB21F"></span>Estructura</td>
+        <td>Josué y Carlos</td>
+      </tr><tr>
+        <td class="fecha">26 jun – 30 jun</td>
+        <td><strong>Informe mensual de avance · junio 2027</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#8A96A3"></span>Coordinación</td>
+        <td>Gabriel</td>
+      </tr><tr>
+        <td class="fecha">30 jun</td>
+        <td><strong>Manual de procesos y políticas de toda la organización</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#5BA9A3"></span>Procesos</td>
+        <td>Ruth</td>
+      </tr><tr>
+        <td class="fecha">1 jul – 31 ago</td>
+        <td><strong>Guía de responsabilidades</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#9DB21F"></span>Estructura</td>
+        <td>Josué y Carlos</td>
+      </tr><tr>
+        <td class="fecha">27 jul – 31 jul</td>
+        <td><strong>Informe mensual de avance · julio 2027</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#8A96A3"></span>Coordinación</td>
+        <td>Gabriel</td>
+      </tr><tr>
+        <td class="fecha">27 ago – 31 ago</td>
+        <td><strong>Informe mensual de avance · agosto 2027</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#8A96A3"></span>Coordinación</td>
+        <td>Gabriel</td>
+      </tr><tr>
+        <td class="fecha">26 sep – 30 sep</td>
+        <td><strong>Informe mensual de avance · septiembre 2027</strong> <span class="tipo">Entregable</span></td>
+        <td><span class="cuadro" style="background:#8A96A3"></span>Coordinación</td>
+        <td>Gabriel</td>
+      </tr><tr>
+        <td class="fecha">18 oct – 29 oct</td>
+        <td><strong>Informe final y transferencia de la base de conocimiento a Calidad</strong> <span class="tipo">Hito</span></td>
+        <td><span class="cuadro" style="background:#8A96A3"></span>Coordinación</td>
+        <td>Gabriel y Carlos</td>
+      </tr>
+    </tbody>
+  </table>
+    </section>
+
+    <section class="salto">
+      <h2><span class="num">04</span>La agenda mes a mes</h2>
+      <p class="intro">
+        Todas las actividades por el mes en que arrancan, con el detalle de cada una.
+        6 están por confirmar.
+      </p>
+      
+    <div class="mes">
+      <h3 class="mes-titulo">octubre 2026<span class="h3-dato">5 actividades</span></h3>
+      <table>
+        <thead><tr><th style="width:15%">Fecha</th><th>Actividad</th><th style="width:26%">Responsable y con quién</th><th style="width:13%">Estado</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="fecha">28 oct – 30 oct<span class="confirmada">Confirmada: 22 oct</span></td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Firma del Adendum N.º 1</strong> <span class="tipo tipo-hito">Hito</span>
+              <p class="detalle">Formaliza el cierre de la Fase 1, la Fase 2 y New Iberia.</p>
+            </td>
+            <td><strong>Alberto García-Ramos</strong><p class="detalle">Gabriel</p></td>
+            <td><span class="estado"><i style="background:#3D8B4A"></i>Hecho</span></td>
+          </tr><tr>
+            <td class="fecha">28 oct – 29 oct</td>
+            <td>
+              <span class="cuadro" style="background:#2F6FB3"></span><strong>Escribir a Martha Álvarez sobre sus comentarios a la app de comunicaciones</strong>
+              <p class="detalle">Recoger sus observaciones antes de alinear con Alberto y agendar la revisión con Fuguet.</p>
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Martha Álvarez (Mercadeo)</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">28 oct – 30 oct<span class="confirmada">Confirmada: 28 oct</span></td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Confirmar con Alberto el día en planta del miércoles 4 de noviembre</strong>
+              <p class="detalle">Confirmar también traslado a Cagua y salas para la presentación y las reuniones de la tarde.</p>
+            </td>
+            <td><strong>Amanda</strong><p class="detalle">Alberto García-Ramos</p></td>
+            <td><span class="estado"><i style="background:#3D8B4A"></i>Hecho</span></td>
+          </tr><tr>
+            <td class="fecha">29 oct – 3 nov</td>
+            <td>
+              <span class="cuadro" style="background:#2E8B85"></span><strong>Preparar la presentación filtrada para gerentes</strong> <span class="tipo tipo-hito">Entregable</span>
+              <p class="detalle">Carlos: desarrollo organizacional. Gabriel: tecnología. Versión resumida de hallazgos, el rol de los gerentes y el anuncio del plan 2027.</p>
+            </td>
+            <td><strong>Carlos y Gabriel</strong></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">30 oct – 2 nov</td>
+            <td>
+              <span class="cuadro" style="background:#2E8B85"></span><strong>Alberto revisa el plan 2027 con Antonio Sorrentino</strong>
+              <p class="detalle">Revisión previa a la reunión con directores.</p>
+            </td>
+            <td><strong>Alberto García-Ramos</strong><p class="detalle">Antonio Sorrentino</p></td>
+            <td><span class="estado"><i style="background:#C98A12"></i>Por confirmar</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mes">
+      <h3 class="mes-titulo">noviembre 2026<span class="h3-dato">21 actividades</span></h3>
+      <table>
+        <thead><tr><th style="width:15%">Fecha</th><th>Actividad</th><th style="width:26%">Responsable y con quién</th><th style="width:13%">Estado</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="fecha">2 nov – 27 nov</td>
+            <td>
+              <span class="cuadro" style="background:#7A6CC0"></span><strong>Diseño de la compensación variable de directores</strong>
+              
+            </td>
+            <td><strong>Carlos</strong><p class="detalle">Alberto García-Ramos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">2 nov 26 – 29 oct 27</td>
+            <td>
+              <span class="cuadro" style="background:#2D4868"></span><strong>Acompañamiento individual a directores y gerentes</strong>
+              <p class="detalle">Continuo, según lo pida cada persona.</p>
+            </td>
+            <td><strong>Carlos</strong><p class="detalle">Directores y gerentes, a demanda</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">2 nov – 13 nov</td>
+            <td>
+              <span class="cuadro" style="background:#2F6FB3"></span><strong>Iberia habilita la tarjeta de pago para servicios de terceros</strong> <span class="tipo tipo-hito">Hito</span>
+              <p class="detalle">Dependencia de la Fase 2: sin la tarjeta no se pueden activar los servicios de terceros.</p>
+            </td>
+            <td><strong>Gerencia General Iberia</strong><p class="detalle">Gabriel</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">2 nov – 13 nov</td>
+            <td>
+              <span class="cuadro" style="background:#2F6FB3"></span><strong>Designar al dueño interno del roadmap</strong> <span class="tipo tipo-hito">Hito</span>
+              
+            </td>
+            <td><strong>Gerencia General Iberia</strong><p class="detalle">Gabriel</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">4 nov</td>
+            <td>
+              <span class="cuadro" style="background:#2E8B85"></span><strong>Presentación a gerentes (9:00 a 11:00)</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">En planta Cagua. Resumen de hallazgos, su rol en el proceso y el plan 2027 que viene. Regreso previsto hacia las 15:00.</p>
+            </td>
+            <td><strong>Carlos y Gabriel</strong><p class="detalle">Alberto García-Ramos, gerentes</p></td>
+            <td><span class="estado"><i style="background:#C98A12"></i>Por confirmar</span></td>
+          </tr><tr>
+            <td class="fecha">4 nov<span class="confirmada">Confirmada: 29 oct</span></td>
+            <td>
+              <span class="cuadro" style="background:#5BA9A3"></span><strong>Hoja de ruta de procesos con Milagro Salas</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Noviembre y diciembre: documentación. Milagro entrega los documentos de 2013. Las validaciones arrancan en enero.</p>
+            </td>
+            <td><strong>Carlos</strong><p class="detalle">Milagro Salas (Calidad)</p></td>
+            <td><span class="estado"><i style="background:#2E8B85"></i>En curso</span></td>
+          </tr><tr>
+            <td class="fecha">4 nov</td>
+            <td>
+              <span class="cuadro" style="background:#2D4868"></span><strong>Primeras conversaciones de acompañamiento con directores</strong> <span class="tipo">Reunión</span>
+              
+            </td>
+            <td><strong>Carlos</strong><p class="detalle">Directores</p></td>
+            <td><span class="estado"><i style="background:#C98A12"></i>Por confirmar</span></td>
+          </tr><tr>
+            <td class="fecha">4 nov</td>
+            <td>
+              <span class="cuadro" style="background:#2F6FB3"></span><strong>Plan de conexión a JD Edwards con Martha Fuentes y TI</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">En la tarde.</p>
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Martha Fuentes (TI), equipo de TI</p></td>
+            <td><span class="estado"><i style="background:#C98A12"></i>Por confirmar</span></td>
+          </tr><tr>
+            <td class="fecha">4 nov – 13 nov</td>
+            <td>
+              <span class="cuadro" style="background:#5BA9A3"></span><strong>Milagro entrega la documentación de procesos de 2013</strong> <span class="tipo tipo-hito">Hito</span>
+              
+            </td>
+            <td><strong>Milagro Salas</strong><p class="detalle">Carlos, Gabriel</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">4 nov – 27 nov</td>
+            <td>
+              <span class="cuadro" style="background:#2F6FB3"></span><strong>Plan del conector a JD Edwards acordado con TI</strong>
+              
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Martha Fuentes (TI)</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">9 nov – 13 nov</td>
+            <td>
+              <span class="cuadro" style="background:#2E8B85"></span><strong>Reunión con directores sobre el plan 2027</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Después de la revisión de Alberto con Antonio. Semana objetivo: 9 al 13 de noviembre.</p>
+            </td>
+            <td><strong>Carlos</strong><p class="detalle">Alberto García-Ramos, Antonio Sorrentino, Dora, Flaviano, Gustavo Carballo, Gabriel</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">9 nov – 27 nov</td>
+            <td>
+              <span class="cuadro" style="background:#2E8B85"></span><strong>Sesiones de dirección (unas 3)</strong>
+              <p class="detalle">Carlos manda notas de voz después de cada sesión y Gabriel las documenta.</p>
+            </td>
+            <td><strong>Carlos</strong><p class="detalle">Directores, Alberto García-Ramos, Gabriel (documenta)</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">9 nov – 20 nov</td>
+            <td>
+              <span class="cuadro" style="background:#2F6FB3"></span><strong>Revisión de la app de comunicaciones con Fuguet</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Después de los comentarios de Martha Álvarez y de alinear con Alberto. La app quedó como pendiente de Fase 1 bajo soporte, sin costo.</p>
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Amado Fuguet, Marcela Ojeda, Carlos, Martha Álvarez</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">9 nov – 18 dic</td>
+            <td>
+              <span class="cuadro" style="background:#5BA9A3"></span><strong>Base de conocimiento «cómo es hoy»</strong>
+              
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Milagro Salas</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">16 nov – 11 dic</td>
+            <td>
+              <span class="cuadro" style="background:#5BA9A3"></span><strong>Entrevistas complementarias si aparecen vacíos</strong>
+              
+            </td>
+            <td><strong>Ruth</strong><p class="detalle">Dueños de proceso</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">16 nov – 18 dic</td>
+            <td>
+              <span class="cuadro" style="background:#2F6FB3"></span><strong>Licencia de formación en planta</strong>
+              <p class="detalle">Fecha por definir con Iberia.</p>
+            </td>
+            <td><strong>Amanda</strong><p class="detalle">Gabriel, Martha Fuentes (TI)</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">23 nov – 27 nov</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Reunión de seguimiento con Alberto</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Cadencia mensual o cada 6 semanas: confirmar con Alberto cuál prefiere.</p>
+            </td>
+            <td><strong>Gabriel y Carlos</strong><p class="detalle">Alberto García-Ramos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">26 nov – 30 nov</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Informe mensual de avance · noviembre 2026</strong> <span class="tipo tipo-hito">Entregable</span>
+              
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Carlos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">30 nov</td>
+            <td>
+              <span class="cuadro" style="background:#2E8B85"></span><strong>Acuerdos de funcionamiento y mapa de asuntos operativos</strong> <span class="tipo tipo-hito">Entregable</span>
+              
+            </td>
+            <td><strong>Carlos y Gabriel</strong><p class="detalle">Directores</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">30 nov</td>
+            <td>
+              <span class="cuadro" style="background:#B5648A"></span><strong>Llega Luz a Gestión Organizacional</strong> <span class="tipo tipo-hito">Hito</span>
+              
+            </td>
+            <td><strong>Alberto García-Ramos</strong><p class="detalle">Luz</p></td>
+            <td><span class="estado"><i style="background:#C98A12"></i>Por confirmar</span></td>
+          </tr><tr>
+            <td class="fecha">30 nov – 18 dic</td>
+            <td>
+              <span class="cuadro" style="background:#2F6FB3"></span><strong>Espejo de JD Edwards conciliando (Paso 0)</strong> <span class="tipo tipo-hito">Hito</span>
+              
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Martha Fuentes (TI)</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mes">
+      <h3 class="mes-titulo">diciembre 2026<span class="h3-dato">9 actividades</span></h3>
+      <table>
+        <thead><tr><th style="width:15%">Fecha</th><th>Actividad</th><th style="width:26%">Responsable y con quién</th><th style="width:13%">Estado</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="fecha">1 dic – 18 dic</td>
+            <td>
+              <span class="cuadro" style="background:#7A6CC0"></span><strong>Entrega de la compensación variable de directores</strong> <span class="tipo tipo-hito">Entregable</span>
+              
+            </td>
+            <td><strong>Carlos</strong><p class="detalle">Alberto García-Ramos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">1 dic – 11 dic</td>
+            <td>
+              <span class="cuadro" style="background:#B5648A"></span><strong>Sesión de arranque con Luz</strong> <span class="tipo">Reunión</span>
+              
+            </td>
+            <td><strong>Carlos</strong><p class="detalle">Luz, Gabriel</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">1 dic – 4 dic</td>
+            <td>
+              <span class="cuadro" style="background:#2F6FB3"></span><strong>Reunión mensual de roadmap · diciembre</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Primera semana del mes.</p>
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Dueño del roadmap, Martha Fuentes (TI)</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">7 dic – 11 dic</td>
+            <td>
+              <span class="cuadro" style="background:#2E8B85"></span><strong>Reunión de dirección de diciembre</strong> <span class="tipo">Reunión</span>
+              
+            </td>
+            <td><strong>Carlos</strong><p class="detalle">Directores, Alberto García-Ramos, Gabriel</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">7 dic – 11 dic</td>
+            <td>
+              <span class="cuadro" style="background:#5BA9A3"></span><strong>Sesión de diciembre con Milagro</strong> <span class="tipo">Reunión</span>
+              
+            </td>
+            <td><strong>Carlos</strong><p class="detalle">Milagro Salas, Gabriel</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">9 dic – 16 dic</td>
+            <td>
+              <span class="cuadro" style="background:#2E8B85"></span><strong>Sesión de inicio con gerentes: plan 2027 y mapa de asuntos</strong> <span class="tipo tipo-hito">Hito</span>
+              <p class="detalle">Antes de las vacaciones colectivas. Arranque de New Iberia desde el desarrollo organizacional.</p>
+            </td>
+            <td><strong>Carlos y Gabriel</strong><p class="detalle">Alberto García-Ramos, directores, gerentes</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">18 dic</td>
+            <td>
+              <span class="cuadro" style="background:#5BA9A3"></span><strong>Base de conocimiento operando</strong> <span class="tipo tipo-hito">Entregable</span>
+              
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Milagro Salas</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">21 dic 26 – 8 ene 27</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Vacaciones colectivas de Iberia</strong>
+              <p class="detalle">Fechas por confirmar con Iberia. No agendar sesiones en este rango.</p>
+            </td>
+            <td><strong>Amanda</strong></td>
+            <td><span class="estado"><i style="background:#C98A12"></i>Por confirmar</span></td>
+          </tr><tr>
+            <td class="fecha">27 dic – 31 dic</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Informe mensual de avance · diciembre 2026</strong> <span class="tipo tipo-hito">Entregable</span>
+              
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Carlos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mes">
+      <h3 class="mes-titulo">enero 2027<span class="h3-dato">9 actividades</span></h3>
+      <table>
+        <thead><tr><th style="width:15%">Fecha</th><th>Actividad</th><th style="width:26%">Responsable y con quién</th><th style="width:13%">Estado</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="fecha">4 ene – 8 ene</td>
+            <td>
+              <span class="cuadro" style="background:#2F6FB3"></span><strong>Reunión mensual de roadmap · enero</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Primera semana del mes.</p>
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Dueño del roadmap, Martha Fuentes (TI)</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">11 ene – 26 feb</td>
+            <td>
+              <span class="cuadro" style="background:#B5648A"></span><strong>Hoja de ruta de Gestión Organizacional</strong> <span class="tipo tipo-hito">Entregable</span>
+              <p class="detalle">Incluye la línea nueva de fortalecimiento del rol supervisorio (encuesta de Amado Fuguet), el empoderamiento de gerentes y la gestión del desempeño.</p>
+            </td>
+            <td><strong>Carlos</strong><p class="detalle">Luz</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">11 ene – 26 feb</td>
+            <td>
+              <span class="cuadro" style="background:#2E8B85"></span><strong>Niveles de autoridad y decisión: definición y notificación a gerentes</strong> <span class="tipo tipo-hito">Entregable</span>
+              <p class="detalle">Se definen con directores, atados al plan y al presupuesto, y se notifican a gerentes.</p>
+            </td>
+            <td><strong>Carlos</strong><p class="detalle">Directores, Alberto García-Ramos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">11 ene – 31 mar</td>
+            <td>
+              <span class="cuadro" style="background:#7A6CC0"></span><strong>Gestión del desempeño atada a los indicadores del plan</strong>
+              
+            </td>
+            <td><strong>Carlos</strong><p class="detalle">Luz</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">11 ene – 15 ene</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Reunión de seguimiento con Alberto</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Cadencia mensual o cada 6 semanas: confirmar con Alberto cuál prefiere.</p>
+            </td>
+            <td><strong>Gabriel y Carlos</strong><p class="detalle">Alberto García-Ramos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">11 ene – 26 mar</td>
+            <td>
+              <span class="cuadro" style="background:#5BA9A3"></span><strong>Validación de procesos departamento por departamento</strong>
+              <p class="detalle">Secuencia por área: cómo es → mejoras → revisión con IA (equipo de Gabriel) → proceso optimizado y proceso meta. Jesús apoya de enero a marzo.</p>
+            </td>
+            <td><strong>Ruth y Milagro Salas</strong><p class="detalle">Dueño de cada proceso, Jesús, equipo de Gabriel</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">11 ene – 12 feb</td>
+            <td>
+              <span class="cuadro" style="background:#2F6FB3"></span><strong>Módulo comercial y formación del equipo comercial</strong>
+              <p class="detalle">Primero en la secuencia.</p>
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Gerencia Comercial, dueño del roadmap</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">18 ene – 22 ene</td>
+            <td>
+              <span class="cuadro" style="background:#2D4868"></span><strong>Día de gerentes en planta · enero</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Un día completo: reunión de gerentes, sesión con Luz (desarrollo organizacional) y sesión presencial con Milagro (procesos). Día exacto por fijar dentro de la semana.</p>
+            </td>
+            <td><strong>Carlos</strong><p class="detalle">Gerentes, Luz, Milagro Salas</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">27 ene – 31 ene</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Informe mensual de avance · enero 2027</strong> <span class="tipo tipo-hito">Entregable</span>
+              
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Carlos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mes">
+      <h3 class="mes-titulo">febrero 2027<span class="h3-dato">6 actividades</span></h3>
+      <table>
+        <thead><tr><th style="width:15%">Fecha</th><th>Actividad</th><th style="width:26%">Responsable y con quién</th><th style="width:13%">Estado</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="fecha">1 feb – 30 abr</td>
+            <td>
+              <span class="cuadro" style="background:#9DB21F"></span><strong>Trabajo interno de estructura</strong>
+              <p class="detalle">Borradores desde marzo.</p>
+            </td>
+            <td><strong>Josué</strong><p class="detalle">Carlos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">1 feb – 5 feb</td>
+            <td>
+              <span class="cuadro" style="background:#2F6FB3"></span><strong>Reunión mensual de roadmap · febrero</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Primera semana del mes.</p>
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Dueño del roadmap, Martha Fuentes (TI)</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">15 feb – 19 feb</td>
+            <td>
+              <span class="cuadro" style="background:#2D4868"></span><strong>Día de gerentes en planta · febrero</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Un día completo: reunión de gerentes, sesión con Luz (desarrollo organizacional) y sesión presencial con Milagro (procesos). Día exacto por fijar dentro de la semana.</p>
+            </td>
+            <td><strong>Carlos</strong><p class="detalle">Gerentes, Luz, Milagro Salas</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">15 feb – 12 mar</td>
+            <td>
+              <span class="cuadro" style="background:#2F6FB3"></span><strong>Segundo módulo (compras o finanzas, por confirmar)</strong>
+              
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Dueño del roadmap</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">22 feb – 26 feb</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Reunión de seguimiento con Alberto</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Cadencia mensual o cada 6 semanas: confirmar con Alberto cuál prefiere.</p>
+            </td>
+            <td><strong>Gabriel y Carlos</strong><p class="detalle">Alberto García-Ramos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">24 feb – 28 feb</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Informe mensual de avance · febrero 2027</strong> <span class="tipo tipo-hito">Entregable</span>
+              
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Carlos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mes">
+      <h3 class="mes-titulo">marzo 2027<span class="h3-dato">7 actividades</span></h3>
+      <table>
+        <thead><tr><th style="width:15%">Fecha</th><th>Actividad</th><th style="width:26%">Responsable y con quién</th><th style="width:13%">Estado</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="fecha">1 mar – 18 jun</td>
+            <td>
+              <span class="cuadro" style="background:#9DB21F"></span><strong>Diseño de estructura con comité de Luz y Milagro</strong>
+              <p class="detalle">Se valida con dirección.</p>
+            </td>
+            <td><strong>Josué y Carlos</strong><p class="detalle">Luz, Milagro Salas, directores</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">1 mar – 5 mar</td>
+            <td>
+              <span class="cuadro" style="background:#2F6FB3"></span><strong>Reunión mensual de roadmap · marzo</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Primera semana del mes.</p>
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Dueño del roadmap, Martha Fuentes (TI)</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">8 mar – 12 mar</td>
+            <td>
+              <span class="cuadro" style="background:#9DB21F"></span><strong>Avance de estructura con dirección</strong> <span class="tipo tipo-hito">Hito</span>
+              <p class="detalle">Antes de Semana Santa (22 al 28 de marzo).</p>
+            </td>
+            <td><strong>Josué</strong><p class="detalle">Carlos, Alberto García-Ramos, directores</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">15 mar – 19 mar</td>
+            <td>
+              <span class="cuadro" style="background:#2D4868"></span><strong>Día de gerentes en planta · marzo</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Un día completo: reunión de gerentes, sesión con Luz (desarrollo organizacional) y sesión presencial con Milagro (procesos). Día exacto por fijar dentro de la semana.</p>
+            </td>
+            <td><strong>Carlos</strong><p class="detalle">Gerentes, Luz, Milagro Salas</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">15 mar – 16 abr</td>
+            <td>
+              <span class="cuadro" style="background:#2F6FB3"></span><strong>Tercer módulo</strong>
+              <p class="detalle">Semana Santa del 22 al 28 de marzo en el medio.</p>
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Dueño del roadmap</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">27 mar – 31 mar</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Informe mensual de avance · marzo 2027</strong> <span class="tipo tipo-hito">Entregable</span>
+              
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Carlos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">31 mar</td>
+            <td>
+              <span class="cuadro" style="background:#5BA9A3"></span><strong>Manual de procesos y políticas: compras, comercial y finanzas</strong> <span class="tipo tipo-hito">Entregable</span>
+              
+            </td>
+            <td><strong>Ruth</strong><p class="detalle">Milagro Salas, Jesús, Gabriel</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mes">
+      <h3 class="mes-titulo">abril 2027<span class="h3-dato">6 actividades</span></h3>
+      <table>
+        <thead><tr><th style="width:15%">Fecha</th><th>Actividad</th><th style="width:26%">Responsable y con quién</th><th style="width:13%">Estado</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="fecha">5 abr – 9 abr</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Reunión de seguimiento con Alberto</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Cadencia mensual o cada 6 semanas: confirmar con Alberto cuál prefiere.</p>
+            </td>
+            <td><strong>Gabriel y Carlos</strong><p class="detalle">Alberto García-Ramos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">5 abr – 25 jun</td>
+            <td>
+              <span class="cuadro" style="background:#5BA9A3"></span><strong>Documentación y validación del resto de la organización</strong>
+              
+            </td>
+            <td><strong>Ruth y Milagro Salas</strong><p class="detalle">Dueños de proceso, Gabriel</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">5 abr – 9 abr</td>
+            <td>
+              <span class="cuadro" style="background:#2F6FB3"></span><strong>Reunión mensual de roadmap · abril</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Primera semana del mes.</p>
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Dueño del roadmap, Martha Fuentes (TI)</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">12 abr – 16 abr</td>
+            <td>
+              <span class="cuadro" style="background:#2D4868"></span><strong>Día de gerentes en planta · abril</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Un día completo: reunión de gerentes, sesión con Luz (desarrollo organizacional) y sesión presencial con Milagro (procesos). Día exacto por fijar dentro de la semana.</p>
+            </td>
+            <td><strong>Carlos</strong><p class="detalle">Gerentes, Luz, Milagro Salas</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">26 abr – 30 abr</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Informe mensual de avance · abril 2027</strong> <span class="tipo tipo-hito">Entregable</span>
+              
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Carlos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">26 abr – 30 abr</td>
+            <td>
+              <span class="cuadro" style="background:#2F6FB3"></span><strong>Punto de control de la Fase 2</strong> <span class="tipo tipo-hito">Hito</span>
+              
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Alberto García-Ramos, dueño del roadmap</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mes">
+      <h3 class="mes-titulo">mayo 2027<span class="h3-dato">3 actividades</span></h3>
+      <table>
+        <thead><tr><th style="width:15%">Fecha</th><th>Actividad</th><th style="width:26%">Responsable y con quién</th><th style="width:13%">Estado</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="fecha">17 may – 21 may</td>
+            <td>
+              <span class="cuadro" style="background:#2D4868"></span><strong>Día de gerentes en planta · mayo</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Un día completo: reunión de gerentes, sesión con Luz (desarrollo organizacional) y sesión presencial con Milagro (procesos). Día exacto por fijar dentro de la semana.</p>
+            </td>
+            <td><strong>Carlos</strong><p class="detalle">Gerentes, Luz, Milagro Salas</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">17 may – 21 may</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Reunión de seguimiento con Alberto</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Cadencia mensual o cada 6 semanas: confirmar con Alberto cuál prefiere.</p>
+            </td>
+            <td><strong>Gabriel y Carlos</strong><p class="detalle">Alberto García-Ramos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">27 may – 31 may</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Informe mensual de avance · mayo 2027</strong> <span class="tipo tipo-hito">Entregable</span>
+              
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Carlos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mes">
+      <h3 class="mes-titulo">junio 2027<span class="h3-dato">5 actividades</span></h3>
+      <table>
+        <thead><tr><th style="width:15%">Fecha</th><th>Actividad</th><th style="width:26%">Responsable y con quién</th><th style="width:13%">Estado</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="fecha">14 jun – 18 jun</td>
+            <td>
+              <span class="cuadro" style="background:#2D4868"></span><strong>Día de gerentes en planta · junio</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Un día completo: reunión de gerentes, sesión con Luz (desarrollo organizacional) y sesión presencial con Milagro (procesos). Día exacto por fijar dentro de la semana.</p>
+            </td>
+            <td><strong>Carlos</strong><p class="detalle">Gerentes, Luz, Milagro Salas</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">21 jun – 25 jun</td>
+            <td>
+              <span class="cuadro" style="background:#9DB21F"></span><strong>Presentación de la estructura a Alberto y directores</strong> <span class="tipo tipo-hito">Hito</span>
+              
+            </td>
+            <td><strong>Josué y Carlos</strong><p class="detalle">Alberto García-Ramos, directores</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">26 jun – 30 jun</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Informe mensual de avance · junio 2027</strong> <span class="tipo tipo-hito">Entregable</span>
+              
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Carlos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">28 jun – 2 jul</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Reunión de seguimiento con Alberto</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Cadencia mensual o cada 6 semanas: confirmar con Alberto cuál prefiere.</p>
+            </td>
+            <td><strong>Gabriel y Carlos</strong><p class="detalle">Alberto García-Ramos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">30 jun</td>
+            <td>
+              <span class="cuadro" style="background:#5BA9A3"></span><strong>Manual de procesos y políticas de toda la organización</strong> <span class="tipo tipo-hito">Entregable</span>
+              <p class="detalle">Fecha del adendum.</p>
+            </td>
+            <td><strong>Ruth</strong><p class="detalle">Milagro Salas, Gabriel</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mes">
+      <h3 class="mes-titulo">julio 2027<span class="h3-dato">2 actividades</span></h3>
+      <table>
+        <thead><tr><th style="width:15%">Fecha</th><th>Actividad</th><th style="width:26%">Responsable y con quién</th><th style="width:13%">Estado</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="fecha">1 jul – 31 ago</td>
+            <td>
+              <span class="cuadro" style="background:#9DB21F"></span><strong>Guía de responsabilidades</strong> <span class="tipo tipo-hito">Entregable</span>
+              
+            </td>
+            <td><strong>Josué y Carlos</strong><p class="detalle">Luz</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">27 jul – 31 jul</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Informe mensual de avance · julio 2027</strong> <span class="tipo tipo-hito">Entregable</span>
+              
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Carlos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mes">
+      <h3 class="mes-titulo">agosto 2027<span class="h3-dato">2 actividades</span></h3>
+      <table>
+        <thead><tr><th style="width:15%">Fecha</th><th>Actividad</th><th style="width:26%">Responsable y con quién</th><th style="width:13%">Estado</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="fecha">9 ago – 13 ago</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Reunión de seguimiento con Alberto</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Cadencia mensual o cada 6 semanas: confirmar con Alberto cuál prefiere.</p>
+            </td>
+            <td><strong>Gabriel y Carlos</strong><p class="detalle">Alberto García-Ramos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">27 ago – 31 ago</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Informe mensual de avance · agosto 2027</strong> <span class="tipo tipo-hito">Entregable</span>
+              
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Carlos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mes">
+      <h3 class="mes-titulo">septiembre 2027<span class="h3-dato">2 actividades</span></h3>
+      <table>
+        <thead><tr><th style="width:15%">Fecha</th><th>Actividad</th><th style="width:26%">Responsable y con quién</th><th style="width:13%">Estado</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="fecha">20 sep – 24 sep</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Reunión de seguimiento con Alberto</strong> <span class="tipo">Reunión</span>
+              <p class="detalle">Cadencia mensual o cada 6 semanas: confirmar con Alberto cuál prefiere.</p>
+            </td>
+            <td><strong>Gabriel y Carlos</strong><p class="detalle">Alberto García-Ramos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr><tr>
+            <td class="fecha">26 sep – 30 sep</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Informe mensual de avance · septiembre 2027</strong> <span class="tipo tipo-hito">Entregable</span>
+              
+            </td>
+            <td><strong>Gabriel</strong><p class="detalle">Carlos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mes">
+      <h3 class="mes-titulo">octubre 2027<span class="h3-dato">1 actividad</span></h3>
+      <table>
+        <thead><tr><th style="width:15%">Fecha</th><th>Actividad</th><th style="width:26%">Responsable y con quién</th><th style="width:13%">Estado</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="fecha">18 oct – 29 oct</td>
+            <td>
+              <span class="cuadro" style="background:#8A96A3"></span><strong>Informe final y transferencia de la base de conocimiento a Calidad</strong> <span class="tipo tipo-hito">Hito</span>
+              
+            </td>
+            <td><strong>Gabriel y Carlos</strong><p class="detalle">Milagro Salas, Alberto García-Ramos</p></td>
+            <td><span class="estado"><i style="background:#8A96A3"></i>Por agendar</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    </section>
+
+    <footer class="cierre">
+      Estado al 29 de octubre de 2026. Las fechas se van fijando con cada área y el calendario al día está en el
+      panel del programa, en «Calendario». Programa de Adopción de IA · Industrias Iberia · Boosty Digital.
+    </footer>
+  </body>
+</html>

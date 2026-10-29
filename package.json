@@ -15,6 +15,7 @@
     "probar:paginas": "node --env-file=.env.local scripts/probar-paginas.mjs",
     "capturar": "node --env-file=.env.local scripts/capturar-ui.mjs",
     "documento": "node scripts/generar-pdf.mjs",
+    "documento:calendario": "node --env-file=.env.local scripts/documento-calendario.mjs",
     "crear:usuario": "node --env-file=.env.local scripts/crear-usuario.mjs",
     "cambiar:clave": "node --env-file=.env.local scripts/cambiar-clave.mjs",
     "probar:canal": "node --env-file=.env.local scripts/probar-canal.mjs",

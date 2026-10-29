@@ -32,7 +32,7 @@ que está en línea.
 | **Comunicación** | El comunicado salió. Falta el plan con fecha, el vocero y la nota del boletín |
 | **Padrón** | 276 personas de Capital Humano, **sin cédula, celular ni correo**, y 17 fichas cargadas a mano en agosto que repiten a gente real (marcadas en el padrón desde el 27/9) |
 | **Canal** | En línea. **Martha Álvarez tiene acceso desde el 27/9** para revisarlo con Mercadeo |
-| **Fase 2 · New Iberia** | **Calendario en el panel desde el 28/10** (`/dashboard/calendario`): 78 actividades de noviembre de 2026 a octubre de 2027, en la base. Lo actualiza Amanda (administradora) |
+| **Fase 2 · New Iberia** | **Calendario en el panel desde el 28/10** (`/dashboard/calendario`): 78 actividades de noviembre de 2026 a octubre de 2027, en la base. Lo actualiza Amanda (administradora). **Desde el 29/10 la línea de tiempo se despliega por frente y el calendario sale en PDF** para Alberto |
 | **App móvil** | **La de iPhone está armada desde el 23/10** (PEN-14661): Capacitor sobre el sitio en línea, en la cuenta de Apple de Boosty Desk; se compila y se sube solo desde GitHub Actions. **Todavía no se ha compilado.** Google Play (PEN-14662), después |
 | **Formación dirigente** | Alberto (17/8), Petit Comité (26/8) y gerentes (23/9, Cagua). **La de líderes no se pudo dictar el 7/10** por la VPN de Cagua: hay que reprogramarla |
 | **Adiestramiento** | Completo y **de Fase 2**: nueve lecciones, 70 audios por voz (mujer y hombre), Ajito contesta hablando y dibuja, certificado en la lección 8 (con la ficha cuando no hay cédula), chat con Ajito **apagado** (solo lo ve el equipo) |
@@ -55,6 +55,27 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 - **Decidir si se prende el asistente libre** (el chat con Ajito).
 - 🔴 **El plan gratuito de Supabase pausa el proyecto**: pasó antes del 19/10 y nadie podía entrar.
   Decidir si pasa a Pro (`PENDIENTES.md`).
+
+---
+
+## 29 de octubre · Sesión 54 — el calendario, frente por frente y en PDF
+
+Dos pedidos de Gabriel por Telegram: que en «Los frentes en el tiempo» tocar un frente —Coordinación,
+Activación…— lo despliegue con el detalle de todo lo que tiene, y un PDF del calendario completo para
+mandárselo a Alberto por correo.
+
+- **La línea de tiempo se despliega por frente**: una pista por actividad con su fecha, estado y
+  responsable; varios abiertos a la vez y «Ver todos en detalle». Las columnas se ensancharon (230 px
+  de rótulo, 820 px mínimo) para que el título se lea.
+- **El PDF sale de la base** (`scripts/documento-calendario.mjs`): portada, la línea de tiempo, cada
+  frente actividad por actividad, los 31 entregables e hitos, y la agenda mes a mes con el detalle de
+  cada una. 14 páginas: `documentos/2026-10-calendario-fase-2-y-new-iberia.pdf`. **Sin montos y sin la
+  `nota`** de las actividades, que es coordinación interna.
+- `mirar-calendario` comprueba ahora el despliegue (23 de 23 en Coordinación, 78 de 78 abiertos) y el
+  iPhone con un frente abierto: 11 comprobaciones, sin fallos.
+
+**Dónde quedamos**: en local, revisado a 1440 y en iPhone 14; el push a `main`, con el visto bueno de
+Gabriel.
 
 ---
 

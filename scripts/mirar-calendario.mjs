@@ -104,6 +104,25 @@ try {
   const publico = createClient(URL_SUPA, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, { auth: { persistSession: false } })
   const { data: sinSesion, error: errSinSesion } = await publico.from('calendario_actividades').select('id').limit(1)
   comprobar(Boolean(errSinSesion) || !sinSesion?.length, 'sin sesión, el calendario no se lee')
+
+  // --- 1b) la línea de tiempo se despliega por frente ---------------------------
+  const { data: todas } = await admin.from('calendario_actividades').select('frente')
+  const deCoordinacion = todas.filter((a) => a.frente === 'coordinacion').length
+  const linea = p.locator('section[aria-labelledby="cal-linea"]')
+  const coordinacion = linea.getByRole('button', { name: /^Coordinación/ })
+  await coordinacion.click()
+  comprobar((await coordinacion.getAttribute('aria-expanded')) === 'true', 'tocar «Coordinación» la despliega')
+  const filasCoord = await linea.locator('#cal-frente-coordinacion > li').count()
+  comprobar(filasCoord === deCoordinacion, `y sale una pista por actividad (${filasCoord} de ${deCoordinacion})`)
+  await linea.screenshot({ path: 'capturas/calendario-linea-coordinacion.png' })
+  await coordinacion.click()
+  comprobar((await linea.locator('#cal-frente-coordinacion').count()) === 0, 'tocarla otra vez la contrae')
+
+  await linea.getByRole('button', { name: 'Ver todos en detalle' }).click()
+  const filasTodas = await linea.locator('ul[id^="cal-frente-"] > li').count()
+  comprobar(filasTodas === todas.length, `«Ver todos en detalle» abre los ocho frentes (${filasTodas} de ${todas.length})`)
+  await linea.screenshot({ path: 'capturas/calendario-linea-todos.png' })
+  await linea.getByRole('button', { name: 'Contraer todos' }).click()
   await escritorio.close()
 
   // --- 2) el teléfono -----------------------------------------------------------
@@ -117,6 +136,10 @@ try {
   await t.screenshot({ path: 'capturas/calendario-iphone.png' })
   await t.locator('#cal-linea').scrollIntoViewIfNeeded()
   await t.screenshot({ path: 'capturas/calendario-iphone-linea.png' })
+  await t.locator('section[aria-labelledby="cal-linea"]').getByRole('button', { name: /^Tecnología/ }).click()
+  const desbordeAbierto = await t.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
+  comprobar(desbordeAbierto <= 0, `con un frente abierto tampoco se desborda (${desbordeAbierto} px)`)
+  await t.screenshot({ path: 'capturas/calendario-iphone-linea-abierta.png' })
   await telefono.close()
 } finally {
   await admin.from('calendario_actividades').update(original).eq('id', ID)

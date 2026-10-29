@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useMemo, useState } from 'react'
+import { useActionState, useMemo, useState, type ReactNode } from 'react'
 import { useFormStatus } from 'react-dom'
 import { actualizarActividad, type EstadoActualizacion } from '@/app/dashboard/calendario/acciones'
 import {
@@ -126,19 +126,96 @@ function Proximos({ actividades, hoy }: { actividades: Actividad[]; hoy: string 
 
 // --- La línea de tiempo --------------------------------------------------------------
 
+/**
+ * Las marcas de una actividad sobre su pista: una barra de inicio a fin, o un rombo
+ * en la fecha de cierre si es entregable o hito. La usan la fila del frente —todas
+ * sus actividades en una pista— y el detalle, una pista por actividad.
+ */
+function Marca({ actividad: a, color }: { actividad: Actividad; color: string }) {
+  const desde = dia(a.inicio)
+  const hasta = dia(a.fin ?? a.inicio)
+  const titulo = `${a.titulo} · ${rango(a)}`
+  if (esHito(a.tipo)) {
+    return (
+      <span
+        title={titulo}
+        className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-[2px] ring-2 ring-white"
+        style={{ left: `${posicion(hasta)}%`, background: color }}
+      />
+    )
+  }
+  return (
+    <span
+      title={titulo}
+      className="absolute top-1/2 h-3 -translate-y-1/2 rounded-full opacity-80"
+      style={{
+        left: `${posicion(desde)}%`,
+        width: `${Math.max(0.8, posicion(hasta + 1) - posicion(desde))}%`,
+        background: color,
+      }}
+    />
+  )
+}
+
+/** El fondo de una pista: la división de los meses y la raya de hoy. */
+function Pista({ alto, tHoy, children }: { alto: string; tHoy: number | null; children: ReactNode }) {
+  return (
+    <div className={cn('relative rounded-md bg-marca-50', alto)}>
+      {MESES_VENTANA.slice(1).map((m) => (
+        <span
+          key={m.iso}
+          aria-hidden="true"
+          className="absolute inset-y-0 w-px bg-white"
+          style={{ left: `${posicion(dia(m.iso))}%` }}
+        />
+      ))}
+      {children}
+      {tHoy !== null && (
+        <span
+          aria-hidden="true"
+          className="absolute -inset-y-1 border-l-2 border-dashed border-acento-500"
+          style={{ left: `${posicion(tHoy)}%` }}
+        />
+      )}
+    </div>
+  )
+}
+
 function LineaDeTiempo({ actividades, hoy }: { actividades: Actividad[]; hoy: string }) {
   const tHoy = dia(hoy)
-  const hoyVisible = tHoy >= DESDE && tHoy < DESDE + LARGO
+  const hoyEnVentana = tHoy >= DESDE && tHoy < DESDE + LARGO ? tHoy : null
+  // Los frentes abiertos: tocar uno lo despliega en una pista por actividad. Pueden
+  // ir varios abiertos a la vez, para comparar dos frentes en el mismo mes.
+  const [abiertos, setAbiertos] = useState<Set<Frente>>(new Set())
+  const conActividades = FRENTES.filter((f) => actividades.some((a) => a.frente === f.clave))
+  const todosAbiertos = conActividades.every((f) => abiertos.has(f.clave))
+
+  const alternar = (f: Frente) =>
+    setAbiertos((antes) => {
+      const nuevo = new Set(antes)
+      if (nuevo.has(f)) nuevo.delete(f)
+      else nuevo.add(f)
+      return nuevo
+    })
 
   return (
     <section className="tarjeta p-5" aria-labelledby="cal-linea">
-      <h2 id="cal-linea" className="rotulo mb-3">
-        Los frentes en el tiempo
-      </h2>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h2 id="cal-linea" className="rotulo">
+          Los frentes en el tiempo
+        </h2>
+        <button
+          type="button"
+          className="text-xs font-medium text-acento-700 hover:underline"
+          onClick={() => setAbiertos(todosAbiertos ? new Set() : new Set(conActividades.map((f) => f.clave)))}
+        >
+          {todosAbiertos ? 'Contraer todos' : 'Ver todos en detalle'}
+        </button>
+      </div>
       {/* En teléfono la línea se desliza de lado: a 360 px, trece meses no se leen. */}
       <div className="-mx-5 overflow-x-auto px-5">
-        <div className="min-w-[760px]">
-          <div className="grid grid-cols-[170px_1fr] items-end gap-3">
+        <div className="min-w-[820px]">
+          <div className="grid grid-cols-[230px_1fr] items-end gap-3">
             <span />
             <div className="relative h-6 border-b border-[var(--borde)]">
               {MESES_VENTANA.map((m, i) => (
@@ -154,59 +231,63 @@ function LineaDeTiempo({ actividades, hoy }: { actividades: Actividad[]; hoy: st
             </div>
           </div>
 
-          {FRENTES.map((f) => {
+          {conActividades.map((f) => {
             const filas = actividades.filter((a) => a.frente === f.clave)
-            if (!filas.length) return null
+            const abierto = abiertos.has(f.clave)
+            const idDetalle = `cal-frente-${f.clave}`
             return (
-              <div key={f.clave} className="grid grid-cols-[170px_1fr] items-center gap-3 py-1.5">
-                <p className="flex items-center gap-2 text-xs font-medium text-marca-700">
-                  <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: f.color }} />
-                  {f.nombre}
-                </p>
-                <div className="relative h-7 rounded-md bg-marca-50">
-                  {MESES_VENTANA.slice(1).map((m) => (
-                    <span
-                      key={m.iso}
+              <div key={f.clave} className={cn('rounded-lg', abierto && 'my-1 bg-marca-50/40 pb-2')}>
+                <div className="grid grid-cols-[230px_1fr] items-center gap-3 py-1">
+                  <button
+                    type="button"
+                    aria-expanded={abierto}
+                    aria-controls={idDetalle}
+                    onClick={() => alternar(f.clave)}
+                    className="flex min-h-9 items-center gap-2 rounded-md px-1 text-left text-xs font-medium text-marca-700 hover:bg-marca-50"
+                  >
+                    <svg
                       aria-hidden="true"
-                      className="absolute inset-y-0 w-px bg-white"
-                      style={{ left: `${posicion(dia(m.iso))}%` }}
-                    />
-                  ))}
-                  {filas.map((a) => {
-                    const desde = dia(a.inicio)
-                    const hasta = dia(a.fin ?? a.inicio)
-                    const titulo = `${a.titulo} · ${rango(a)}`
-                    if (esHito(a.tipo)) {
-                      return (
-                        <span
-                          key={a.id}
-                          title={titulo}
-                          className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-[2px] ring-2 ring-white"
-                          style={{ left: `${posicion(hasta)}%`, background: f.color }}
-                        />
-                      )
-                    }
-                    return (
-                      <span
-                        key={a.id}
-                        title={titulo}
-                        className="absolute top-1/2 h-3 -translate-y-1/2 rounded-full opacity-80"
-                        style={{
-                          left: `${posicion(desde)}%`,
-                          width: `${Math.max(0.8, posicion(hasta + 1) - posicion(desde))}%`,
-                          background: f.color,
-                        }}
-                      />
-                    )
-                  })}
-                  {hoyVisible && (
-                    <span
-                      aria-hidden="true"
-                      className="absolute -inset-y-1 border-l-2 border-dashed border-acento-500"
-                      style={{ left: `${posicion(tHoy)}%` }}
-                    />
-                  )}
+                      viewBox="0 0 16 16"
+                      className={cn('h-3.5 w-3.5 shrink-0 text-marca-400 transition-transform', abierto && 'rotate-90')}
+                    >
+                      <path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-sm" style={{ background: f.color }} />
+                    <span className={cn(abierto && 'font-semibold text-marca-900')}>{f.nombre}</span>
+                    <span className="text-marca-400 tabular-nums">{filas.length}</span>
+                  </button>
+                  <Pista alto="h-7" tHoy={hoyEnVentana}>
+                    {filas.map((a) => (
+                      <Marca key={a.id} actividad={a} color={f.color} />
+                    ))}
+                  </Pista>
                 </div>
+
+                {abierto && (
+                  <ul id={idDetalle} aria-label={`Actividades de ${f.nombre}`}>
+                    {filas.map((a) => (
+                      <li key={a.id} className="grid grid-cols-[230px_1fr] items-center gap-3 py-0.5">
+                        <div className="min-w-0 pl-6">
+                          <p className="truncate text-[11px] font-medium leading-tight text-marca-800" title={a.titulo}>
+                            {a.titulo}
+                          </p>
+                          <p className="flex items-center gap-1.5 text-[10px] leading-tight text-marca-500 tabular-nums">
+                            <span
+                              aria-hidden="true"
+                              className="inline-block h-1.5 w-1.5 shrink-0 rounded-full"
+                              style={{ background: ESTADOS_ACTIVIDAD[a.estado].color }}
+                            />
+                            {rango(a)} · {ESTADOS_ACTIVIDAD[a.estado].nombre}
+                            {a.responsable ? ` · ${a.responsable}` : ''}
+                          </p>
+                        </div>
+                        <Pista alto="h-5" tHoy={hoyEnVentana}>
+                          <Marca actividad={a} color={f.color} />
+                        </Pista>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             )
           })}
@@ -219,7 +300,7 @@ function LineaDeTiempo({ actividades, hoy }: { actividades: Actividad[]; hoy: st
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-2.5 rotate-45 rounded-[2px] bg-marca-400" /> Entregable o hito
         </span>
-        <span>Pasa el cursor por una barra para ver qué es.</span>
+        <span>Toca un frente para verlo actividad por actividad.</span>
       </p>
     </section>
   )
