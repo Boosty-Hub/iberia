@@ -18,11 +18,11 @@ que está en línea.
 
 ---
 
-## Estado actual · 23 de octubre de 2026
+## Estado actual · 6 de noviembre de 2026
 
 | | |
 |---|---|
-| **Fase** | 1 · Entender · **día 78 de 153**. Contrato `CONT-2026-08-0002`, firmado el 6/7 de agosto |
+| **Fase** | 1 · Entender · **día 92 de 153**. Contrato `CONT-2026-08-0002`, firmado el 6/7 de agosto |
 | **Calendario** | **La entrega y cierre de la Fase 1 estaba agendada para el miércoles 21 de octubre**, con los directores. ⚠️ **Esta bitácora no tiene la entrada de ese día**: falta pasar cómo salió. `/dashboard/programa` dice que levantamiento, inventario y arquitectura vencen el 21 |
 | **Dashboard** | En línea desde el 25/9 en `iberiavenezuela.netlify.app` (Netlify de Iberia). Roles y permisos configurables. **Tres cuentas de Iberia desde el 27/9**, cada una enlazada a su ficha: Alberto (Administrador), Martha Fuentes (Lector Iberia) y Martha Álvarez (Marketing) |
 | **Levantamiento** | 42 sesiones grabadas · 27.951 turnos · **36 entrevistas de ~25**: a las 33 se suman la de Alberto (29/9) y las de Flaviano y Gustavo (7/10), las tres sin cargar a propósito · ENT-029 sin hacer · los 20 macroprocesos cubiertos |
@@ -33,7 +33,7 @@ que está en línea.
 | **Padrón** | 276 personas de Capital Humano, **sin cédula, celular ni correo**, y 17 fichas cargadas a mano en agosto que repiten a gente real (marcadas en el padrón desde el 27/9) |
 | **Canal** | En línea. **Martha Álvarez tiene acceso desde el 27/9** para revisarlo con Mercadeo |
 | **Fase 2 · New Iberia** | **Calendario en el panel desde el 28/10** (`/dashboard/calendario`): 78 actividades de noviembre de 2026 a octubre de 2027, en la base. Lo actualiza Amanda (administradora). **Desde el 29/10 la línea de tiempo se despliega por frente y el calendario sale en PDF** para Alberto |
-| **App móvil** | **La de iPhone está armada desde el 23/10** (PEN-14661): Capacitor sobre el sitio en línea, en la cuenta de Apple de Boosty Desk; se compila y se sube solo desde GitHub Actions. **La versión 1.0.0 (build 1) está en App Store Connect**, procesada y sin mandar a revisión. `/privacidad` en línea desde el deploy del 28/10. **El 3/11 se aplican los avisos push y los enlaces universales** (migración, variables APNS_* y build 2). Google Play (PEN-14662), después |
+| **App móvil** | **La de iPhone** (PEN-14661): Capacitor sobre el sitio en línea, en la cuenta de Apple de Boosty Desk; se compila y se sube desde GitHub Actions. En producción: `/privacidad`, avisos push, enlaces universales, y reportar y bloquear. **La build 3 se mandó a revisión el 4/11, y el 5/11 Apple la devolvió pidiendo información (guía 2.1)**: falta el video en un iPhone físico y un correo de soporte para volver a enviarla. Google Play (PEN-14662), después |
 | **Formación dirigente** | Alberto (17/8), Petit Comité (26/8) y gerentes (23/9, Cagua). **La de líderes no se pudo dictar el 7/10** por la VPN de Cagua: hay que reprogramarla |
 | **Adiestramiento** | Completo y **de Fase 2**: nueve lecciones, 70 audios por voz (mujer y hombre), Ajito contesta hablando y dibuja, certificado en la lección 8 (con la ficha cuando no hay cédula), chat con Ajito **apagado** (solo lo ve el equipo) |
 | **Repositorio** | `Boosty-Hub/iberia` — **privado desde el 9/10** (fue público dos meses; consultada sin sesión, la API de GitHub responde 404 el 23/10), sin `RowerConsultoria`. Quedan 6 alertas de Dependabot, y 🔴 **`next` 16.3.0, el de producción, tiene avisos críticos** (23/10) |
@@ -44,8 +44,10 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 
 - 🔴 **Subir `next` a 16.4.3**: la versión en producción tiene avisos críticos de ejecución remota
   de código sin sesión, uno de ellos en `next/og`, que dibuja el certificado. Va en su propio cambio.
-- 🔴 **Netlify no publicó `e9090f7`** (23/10): `/privacidad` sigue redirigiendo al login, y Apple la
-  necesita como URL de la política de privacidad. Revisar «Deploys» en app.netlify.com.
+- 🔴 **La respuesta a Apple**: grabar el video desde TestFlight, publicar un correo de soporte y volver
+  a enviar la build 3.
+- 🔴 **Los push de `Smarin19` no se despliegan solos en Netlify**: quedan «pending review». Un dueño
+  del equipo tiene que invitar a ese usuario o activar las aprobaciones automáticas.
 - **Pasar aquí cómo salió la entrega del 21** a los directores.
 - 🔴 **Validar los hallazgos**: 2 de 394. El informe se publicó igual, por decisión de Gabriel.
 - 🔴 **ENT-005**: Milagro Salas fue grabada sin avisarle; sus hallazgos están retenidos.
@@ -55,6 +57,46 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 - **Decidir si se prende el asistente libre** (el chat con Ajito).
 - 🔴 **El plan gratuito de Supabase pausa el proyecto**: pasó antes del 19/10 y nadie podía entrar.
   Decidir si pasa a Pro (`PENDIENTES.md`).
+
+---
+
+## 3 al 6 de noviembre · Sesión 55 — la app va a revisión, y Apple pregunta
+
+**Lo que salió a producción:**
+
+- **Avisos nativos y enlaces universales** (`7a83549`): migración `dispositivos` aplicada, variables
+  `APNS_*` en Netlify y el archivo de asociación de Apple en línea.
+- **Reportar contenido y bloquear personas** (`a273da4`, `f04f10c`, `17d75f3`): migración
+  `20261106120000_reportes_y_bloqueos` aplicada y pantalla del equipo en `/dashboard/reportes`.
+  `probar:bloqueos` pasó sus 68 comprobaciones contra producción. Cómo funciona, en `AGENTS.md`.
+
+**Apple:**
+
+- La ficha de App Store Connect se llenó por la API, con capturas nuevas y notas para la revisión.
+- **La build 3 se mandó a revisión el 4/11, y el 5/11 Apple la devolvió por la guía 2.1**: pide una
+  grabación de pantalla en un dispositivo físico que muestre el login y cómo se reporta y se bloquea,
+  más el propósito de la app, cómo acceder, los servicios externos y las diferencias regionales.
+  Advierte además sobre la 2.3.3 (una captura del login no sirve) y la 3.2 (apps para una sola
+  organización).
+- **Decidido: pedir distribución no listada después de volver a enviarla**
+  (<https://developer.apple.com/contact/request/unlisted-app/>). Apple exige que la app ya esté
+  enviada.
+- **Dos cuentas de ejemplo en producción para la revisión**, con las fichas `REVISION-APPLE` y
+  `REVISION-APPLE-2`. ⚠️ **Salen en el directorio real** y se borran cuando Apple apruebe. Las
+  credenciales están en la carpeta de secretos, fuera del repositorio.
+
+**Lo que se rompió o se encontró:**
+
+- ⚠️ **Netlify no despliega solo los push del usuario de GitHub `Smarin19`**: quedan «pending review»
+  porque no es miembro del equipo de Netlify. Los builds se lanzaron por la API
+  (`POST /sites/{id}/builds`, rama `main`). Sigue sin resolverse (`PENDIENTES.md`). Es probable que
+  esto explique lo de `e9090f7` el 23/10, pero no se comprobó.
+- ⚠️ **La compuerta de `pre-push` no quedó satisfecha.** El push salió con resultado «invalidated»:
+  primero por una falla de credenciales, y luego porque tres commits iban bajo tres linajes revisados.
+  Cada uno de los tres se revisó y se aprobó por separado.
+
+**Dónde quedamos**: el video, el correo de soporte y el nuevo envío, y después la distribución no
+listada. Todo, con dueño, en `PENDIENTES.md`.
 
 ---
 
@@ -155,9 +197,11 @@ revisión. Supabase no se tocó.
 ⚠️ **Lo que no salió: Netlify no publicó `e9090f7`.** Más de 25 minutos después,
 `https://iberiavenezuela.netlify.app/privacidad` seguía redirigiendo al login (307). La causa no
 se pudo ver: esta máquina no tiene `.env.local` —ni el token de Netlify ni el acceso a Supabase—,
-y Netlify no reporta el estado del despliegue en GitHub.
+y Netlify no reporta el estado del despliegue en GitHub. *(Resuelto: `/privacidad` salió con el
+deploy del 28/10. Ver la sesión 55.)*
 
-**La segunda parte, la que pasa la guía 4.2 de Apple** — en código y sin commit:
+**La segunda parte, la que pasa la guía 4.2 de Apple** — ese día en código y sin commit *(en
+producción desde la sesión 55)*:
 
 - **Avisos push nativos** de dos cosas: un mensaje nuevo en una conversación y un recordatorio del
   curso. Salen con `after()` y nunca hacen fallar la acción que los dispara.
