@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { IconoAtras, IconoEnviar } from '@/components/iconos'
+import { BotonDesbloquear } from '@/components/canal/boton-desbloquear'
+import { MenuModeracion } from '@/components/canal/menu-moderacion'
 import { haceCuanto, iniciales, requerirEmpleado } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
@@ -12,9 +14,11 @@ export const metadata: Metadata = { title: 'Conversación' }
 
 export default async function ConversacionPage({
   params,
+  searchParams,
 }: PageProps<'/canal/mensajes/[id]'>) {
-  const [yo, { id }] = await Promise.all([requerirEmpleado(), params])
+  const [yo, { id }, busqueda] = await Promise.all([requerirEmpleado(), params, searchParams])
   const supabase = await createClient()
+  const falloEnvio = busqueda.aviso === 'envio'
   const ahora = new Date()
 
   // RLS solo devuelve la conversación si participo en ella; si no, es un 404
@@ -27,10 +31,10 @@ export default async function ConversacionPage({
 
   if (!conversacion) notFound()
 
-  const [{ data: otros }, { data: mensajes }] = await Promise.all([
+  const [{ data: otros }, { data: mensajes }, { data: bloqueados }] = await Promise.all([
     supabase
       .from('conversacion_participantes')
-      .select('empleados(nombre_completo, cargo)')
+      .select('empleados(id, nombre_completo, cargo)')
       .eq('conversacion_id', id)
       .neq('empleado_id', yo.id),
     supabase
@@ -40,9 +44,15 @@ export default async function ConversacionPage({
       .eq('estado', 'visible')
       .order('created_at', { ascending: true })
       .limit(200),
+    // Solo devuelve los míos: la RLS no deja leer los bloqueos de nadie más.
+    supabase.from('bloqueos').select('bloqueado_id'),
   ])
 
   const otro = otros?.[0]?.empleados ?? null
+  const esDirecta = conversacion.tipo !== 'grupo'
+  // En un hilo directo, ¿bloqueé yo a la otra persona? (Si me bloqueó ella, no lo
+  // sé ni se me dice: lo único que pasa es que mis mensajes no salen.)
+  const loBloquee = esDirecta && !!otro && (bloqueados ?? []).some((b) => b.bloqueado_id === otro.id)
   const titulo =
     conversacion.tipo === 'grupo'
       ? (conversacion.grupos?.nombre ?? 'Grupo')
@@ -69,6 +79,15 @@ export default async function ConversacionPage({
             {conversacion.tipo === 'grupo' ? 'Grupo de trabajo' : (otro?.cargo ? legible(otro.cargo) : '')}
           </p>
         </div>
+        {/* Bloquear a la otra persona del hilo directo, o deshacerlo. En un grupo
+            se bloquea desde un mensaje suyo. */}
+        {esDirecta && otro && (
+          <MenuModeracion
+            etiqueta={`Opciones de la conversación con ${otro.nombre_completo}`}
+            persona={{ id: otro.id, nombre: otro.nombre_completo, bloqueada: loBloquee }}
+            className="-mr-2.5"
+          />
+        )}
       </header>
 
       <div className="flex-1 space-y-2 pb-4">
@@ -82,7 +101,7 @@ export default async function ConversacionPage({
             return (
               <div
                 key={m.id}
-                className={cn('flex', mio ? 'justify-end' : 'justify-start')}
+                className={cn('flex items-center gap-0.5', mio ? 'justify-end' : 'justify-start')}
               >
                 <div
                   className={cn(
@@ -109,13 +128,46 @@ export default async function ConversacionPage({
                     {haceCuanto(m.created_at, ahora)}
                   </p>
                 </div>
+                {/* Reportar el mensaje, o bloquear a quien lo escribió. Solo en los
+                    ajenos. */}
+                {!mio && (
+                  <MenuModeracion
+                    etiqueta="Opciones del mensaje"
+                    contenido={{ tipo: 'mensaje', id: m.id }}
+                    persona={
+                      m.empleados
+                        ? { id: m.autor_id, nombre: m.empleados.nombre_completo, bloqueada: false }
+                        : undefined
+                    }
+                  />
+                )}
               </div>
             )
           })
         )}
       </div>
 
-      {/* Pegado al pie, justo encima de la navegación: el pulgar llega ahí. */}
+      {falloEnvio && !loBloquee && (
+        <p
+          role="alert"
+          className="mb-2 rounded-xl bg-acento-50 px-3.5 py-2.5 text-[13px] text-acento-800"
+        >
+          No se pudo enviar el mensaje. Inténtalo de nuevo más tarde.
+        </p>
+      )}
+
+      {/* Si bloqueé a la otra persona, no se escribe en este hilo hasta deshacerlo. */}
+      {loBloquee && otro ? (
+        <div className="sticky bottom-16 -mx-4 border-t border-marca-200/70 bg-white/95 px-4 py-3 backdrop-blur">
+          <p className="text-[14px] leading-relaxed text-marca-600">
+            Bloqueaste a {otro.nombre_completo}. No ves sus mensajes y no te puede escribir.
+          </p>
+          <div className="mt-2">
+            <BotonDesbloquear empleadoId={otro.id} className="w-full" />
+          </div>
+        </div>
+      ) : (
+      /* Pegado al pie, justo encima de la navegación: el pulgar llega ahí. */
       <form
         action={enviarMensaje}
         className="sticky bottom-16 -mx-4 flex items-end gap-2 border-t border-marca-200/70 bg-white/95 px-4 py-2.5 backdrop-blur"
@@ -139,6 +191,7 @@ export default async function ConversacionPage({
           <IconoEnviar className="h-5 w-5" />
         </button>
       </form>
+      )}
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { IconoBuscar, IconoChat, IconoCheck, IconoMas } from '@/components/iconos'
+import { MenuModeracion } from '@/components/canal/menu-moderacion'
 import {
   NIVELES_EMPLEADO,
   ORDEN_NIVEL,
@@ -41,13 +42,16 @@ export default async function GentePage({ searchParams }: PageProps<'/canal/gent
     consulta = consulta.or(`nombre_completo.ilike.${patron},cargo.ilike.${patron}`)
   }
 
-  const [{ data: personas }, { data: conexiones }] = await Promise.all([
+  const [{ data: personas }, { data: conexiones }, { data: bloqueos }] = await Promise.all([
     consulta,
     supabase
       .from('conexiones')
       .select('id, solicita_id, recibe_id, estado')
       .or(`solicita_id.eq.${yo.id},recibe_id.eq.${yo.id}`),
+    // Solo los míos: la RLS no deja leer los bloqueos de nadie más.
+    supabase.from('bloqueos').select('bloqueado_id'),
   ])
+  const bloqueados = new Set((bloqueos ?? []).map((b) => b.bloqueado_id))
 
   // Lo que hay entre yo y cada quien, resuelto de una vez para no consultar
   // por fila.
@@ -83,6 +87,15 @@ export default async function GentePage({ searchParams }: PageProps<'/canal/gent
         </p>
       </header>
 
+      {params.aviso === 'conversacion' && (
+        <p
+          role="alert"
+          className="mb-4 rounded-xl bg-acento-50 px-3.5 py-2.5 text-[13px] text-acento-800"
+        >
+          No se pudo abrir la conversación. Inténtalo de nuevo más tarde.
+        </p>
+      )}
+
       <form className="relative mb-4">
         <IconoBuscar className="pointer-events-none absolute top-1/2 left-3.5 h-5 w-5 -translate-y-1/2 text-marca-400" />
         <input
@@ -117,6 +130,7 @@ export default async function GentePage({ searchParams }: PageProps<'/canal/gent
                       persona={persona}
                       miNivel={yo.nivel as NivelEmpleado}
                       vinculo={vinculo.get(persona.id)}
+                      bloqueada={bloqueados.has(persona.id)}
                     />
                   ))}
               </ul>
@@ -132,10 +146,12 @@ function FilaPersona({
   persona,
   miNivel,
   vinculo,
+  bloqueada,
 }: {
   persona: Persona
   miNivel: NivelEmpleado
   vinculo?: { id: string; estado: string; laPediYo: boolean }
+  bloqueada: boolean
 }) {
   const nivel = persona.nivel as NivelEmpleado
   const pideSolicitud = requiereSolicitud(miNivel, nivel)
@@ -169,7 +185,9 @@ function FilaPersona({
         )}
       </div>
 
-      {puedeEscribir ? (
+      {bloqueada ? (
+        <span className="chip shrink-0 bg-marca-100 text-marca-500">Bloqueada</span>
+      ) : puedeEscribir ? (
         <form action={abrirConversacion}>
           <input type="hidden" name="empleado_id" value={persona.id} />
           <button type="submit" className="btn-canal btn-canal-suave px-3 text-[13px]">
@@ -199,6 +217,13 @@ function FilaPersona({
           </button>
         </form>
       )}
+
+      {/* Bloquear (o desbloquear) desde el directorio. */}
+      <MenuModeracion
+        etiqueta={`Opciones de ${persona.nombre_completo}`}
+        persona={{ id: persona.id, nombre: persona.nombre_completo, bloqueada }}
+        className="-mr-2"
+      />
     </li>
   )
 }

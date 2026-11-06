@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { IconoAtras, IconoOficial } from '@/components/iconos'
 import { Markdown } from '@/components/markdown'
+import { MenuModeracion } from '@/components/canal/menu-moderacion'
 import { RegistrarLectura } from '@/components/canal/registrar-lectura'
 import {
   TIPOS_PUBLICACION,
@@ -113,6 +114,24 @@ export default async function PublicacionPage({
             <span className="shrink-0 text-xs text-marca-400">
               {haceCuanto(publicacion.publicado_en, ahora)}
             </span>
+            {/* Reportar, y bloquear a quien la escribió. Un comunicado oficial se
+                reporta pero no se bloquea: se sigue viendo siempre. */}
+            {publicacion.autor_id !== empleado.id && (
+              <MenuModeracion
+                etiqueta="Opciones de la publicación"
+                contenido={{ tipo: 'publicacion', id: publicacion.id }}
+                persona={
+                  publicacion.autor_id && publicacion.empleados && !publicacion.oficial
+                    ? {
+                        id: publicacion.autor_id,
+                        nombre: publicacion.empleados.nombre_completo,
+                        bloqueada: false,
+                      }
+                    : undefined
+                }
+                className="-mr-2"
+              />
+            )}
           </div>
 
           {publicacion.cuerpo_md && (

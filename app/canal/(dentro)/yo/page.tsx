@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { cerrarSesion } from '@/app/login/actions'
 import {
+  IconoBloquear,
   IconoCampana,
   IconoPanel,
   IconoSalir,
@@ -28,7 +29,7 @@ export default async function YoPage() {
   const yo = await requerirEmpleado()
   const supabase = await createClient()
 
-  const [{ count: conexiones }, { count: pendientes }] = await Promise.all([
+  const [{ count: conexiones }, { count: pendientes }, { count: bloqueadas }] = await Promise.all([
     supabase
       .from('conexiones')
       .select('id', { count: 'exact', head: true })
@@ -39,6 +40,8 @@ export default async function YoPage() {
       .select('id', { count: 'exact', head: true })
       .eq('estado', 'pendiente')
       .eq('recibe_id', yo.id),
+    // Solo los míos: la RLS no deja contar los de nadie más.
+    supabase.from('bloqueos').select('id', { count: 'exact', head: true }),
   ])
 
   const puedePublicar = yo.puede_publicar || yo.es_moderador
@@ -93,6 +96,18 @@ export default async function YoPage() {
               <span className="grid h-5 min-w-5 place-items-center rounded-full bg-acento-600 px-1.5 text-[11px] font-bold text-white">
                 {pendientes}
               </span>
+            )}
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/canal/bloqueados"
+            className="flex items-center gap-3 px-4 py-3.5 active:bg-marca-50"
+          >
+            <IconoBloquear className="h-5 w-5 text-marca-400" />
+            <span className="flex-1 text-[15px] text-marca-800">Personas bloqueadas</span>
+            {(bloqueadas ?? 0) > 0 && (
+              <span className="text-[15px] font-semibold text-marca-500">{bloqueadas}</span>
             )}
           </Link>
         </li>

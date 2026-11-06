@@ -21,7 +21,7 @@ export default async function MensajesPage() {
 
   // Con quién es cada hilo directo, y qué fue lo último que se dijo. Dos
   // consultas en lugar de dos por conversación.
-  const [{ data: otros }, { data: mensajes }] = ids.length
+  const [{ data: otros }, { data: mensajes }, { data: bloqueos }] = ids.length
     ? await Promise.all([
         supabase
           .from('conversacion_participantes')
@@ -35,10 +35,17 @@ export default async function MensajesPage() {
           .eq('estado', 'visible')
           .order('created_at', { ascending: false })
           .limit(300),
+        // Solo los míos: la RLS no deja leer los bloqueos de nadie más.
+        supabase.from('bloqueos').select('bloqueado_id'),
       ])
-    : [{ data: null }, { data: null }]
+    : [{ data: null }, { data: null }, { data: null }]
 
-  const acompanante = new Map<string, { nombre_completo: string; cargo: string | null }>()
+  const bloqueados = new Set((bloqueos ?? []).map((b) => b.bloqueado_id))
+
+  const acompanante = new Map<
+    string,
+    { id: string; nombre_completo: string; cargo: string | null }
+  >()
   for (const o of otros ?? []) {
     if (o.empleados && !acompanante.has(o.conversacion_id)) {
       acompanante.set(o.conversacion_id, o.empleados)
@@ -59,6 +66,7 @@ export default async function MensajesPage() {
       return {
         id: p.conversacion_id,
         esGrupo,
+        conQuien: esGrupo ? null : (otro?.id ?? null),
         titulo: esGrupo
           ? (conv?.grupos?.nombre ?? 'Grupo')
           : (otro?.nombre_completo ?? 'Conversación'),
@@ -70,6 +78,9 @@ export default async function MensajesPage() {
           !!msg && msg.autor_id !== yo.id && (!p.visto_en || msg.created_at > p.visto_en),
       }
     })
+    // Un hilo directo con alguien que bloqueé no se lista: se reabre desde la lista
+    // de «Personas bloqueadas», al desbloquear.
+    .filter((h) => h.esGrupo || !h.conQuien || !bloqueados.has(h.conQuien))
     // Los hilos con actividad reciente arriba; los vacíos, al final.
     .sort((a, b) => (b.cuando ?? '').localeCompare(a.cuando ?? ''))
 

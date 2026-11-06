@@ -1,9 +1,11 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { after } from 'next/server'
 import { requerirEmpleado } from '@/lib/canal'
 import { avisarMensaje } from '@/lib/notificaciones'
+import { UUID } from '@/lib/reportes'
 import { createClient } from '@/lib/supabase/server'
 
 /**
@@ -15,7 +17,7 @@ import { createClient } from '@/lib/supabase/server'
 export async function enviarMensaje(datos: FormData) {
   const conversacionId = String(datos.get('conversacion_id') ?? '')
   const texto = String(datos.get('texto') ?? '').trim().slice(0, 4000)
-  if (!conversacionId || !texto) return
+  if (!UUID.test(conversacionId) || !texto) return
 
   const yo = await requerirEmpleado()
   const supabase = await createClient()
@@ -29,11 +31,16 @@ export async function enviarMensaje(datos: FormData) {
   revalidatePath(`/canal/mensajes/${conversacionId}`)
   revalidatePath('/canal/mensajes')
 
-  if (!error) {
-    after(() =>
-      avisarMensaje(supabase, { conversacionId, autor: yo.nombre_completo, texto })
-    )
+  if (error) {
+    // La base rechaza también el mensaje a quien te bloqueó (ver la migración
+    // `reportes_y_bloqueos`). El aviso es el mismo para cualquier fallo y no dice
+    // por qué: a la persona bloqueada no se le cuenta.
+    redirect(`/canal/mensajes/${conversacionId}?aviso=envio`)
   }
+
+  after(() =>
+    avisarMensaje(supabase, { conversacionId, autor: yo.nombre_completo, texto })
+  )
 }
 
 /** Deja constancia de hasta dónde leí, para el punto rojo de la lista. */

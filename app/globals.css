@@ -892,6 +892,46 @@ body {
   .btn-canal-suave {
     @apply border border-marca-200 bg-white text-marca-800 active:bg-marca-50;
   }
+
+  /* Destructiva: el mismo rojo, perfilado sobre blanco y con icono, nunca sólido
+     (el rojo sólido es la acción principal). */
+  .btn-canal-peligro {
+    @apply border border-acento-200 bg-white text-acento-700 active:bg-acento-100;
+  }
+}
+
+/* La hoja de abajo de «Reportar» y «Bloquear»: un <dialog> modal pegado al pie,
+   como las hojas de acciones del teléfono, para que el pulgar llegue. */
+.hoja-canal {
+  position: fixed;
+  inset: auto 0 0 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 32rem;
+  max-height: 90dvh;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+}
+.hoja-canal::backdrop {
+  background: rgb(38 33 30 / 0.4);
+}
+.hoja-canal-panel {
+  @apply max-h-[90dvh] overflow-y-auto rounded-t-2xl bg-white px-4 pt-4;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  box-shadow: 0 -10px 40px rgb(38 33 30 / 0.25);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hoja-canal[open] .hoja-canal-panel {
+    animation: hoja-entra 180ms ease-out;
+  }
+}
+@keyframes hoja-entra {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
 }
 
 /* El botón que hace avanzar la lección late: un halo rojo que se abre y se

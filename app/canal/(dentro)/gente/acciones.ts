@@ -79,6 +79,12 @@ export async function abrirConversacion(datos: FormData) {
 
   const supabase = await createClient()
 
+  // Con un bloqueo de por medio, de cualquiera de los dos lados, no se abre el
+  // hilo. La base lo rechazaría igual (y dejaría una conversación huérfana); esto
+  // lo evita. ⚠️ El aviso es genérico: a quien fue bloqueado no se le dice.
+  const { data: hayBloqueo } = await supabase.rpc('hay_bloqueo', { p_otro: otroId })
+  if (hayBloqueo) redirect('/canal/gente?aviso=conversacion')
+
   const { data: mias } = await supabase
     .from('conversacion_participantes')
     .select('conversacion_id, conversaciones!inner(tipo)')
@@ -118,9 +124,10 @@ export async function abrirConversacion(datos: FormData) {
     await supabase
       .from('conversacion_participantes')
       .insert({ conversacion_id: conversacionId, empleado_id: yo.id })
-    await supabase
+    const { error: errorOtro } = await supabase
       .from('conversacion_participantes')
       .insert({ conversacion_id: conversacionId, empleado_id: otroId })
+    if (errorOtro) redirect('/canal/gente?aviso=conversacion')
   }
 
   redirect(`/canal/mensajes/${conversacionId}`)

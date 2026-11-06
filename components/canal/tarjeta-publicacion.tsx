@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { IconoChat, IconoOficial } from '@/components/iconos'
+import { MenuModeracion } from '@/components/canal/menu-moderacion'
 import {
   TIPOS_PUBLICACION,
   haceCuanto,
@@ -22,6 +23,8 @@ export type PublicacionFeed = {
   oficial: boolean
   fijado: boolean
   publicado_en: string | null
+  /** Quién la escribió; nulo si la firma la empresa. */
+  autor_id: string | null
   empleados: { nombre_completo: string; cargo: string | null } | null
   comentarios?: { count: number }[]
   reacciones?: { count: number }[]
@@ -40,18 +43,22 @@ const TONO_TIPO: Record<TipoPublicacion, string> = {
 export function TarjetaPublicacion({
   publicacion,
   ahora,
+  yoId,
 }: {
   publicacion: PublicacionFeed
   ahora: Date
+  /** El empleado que mira: lo suyo no se reporta. */
+  yoId: string
 }) {
   const tipo = publicacion.tipo as TipoPublicacion
   const comentarios = publicacion.comentarios?.[0]?.count ?? 0
   const reacciones = publicacion.reacciones?.[0]?.count ?? 0
+  const esMia = publicacion.autor_id === yoId
 
   return (
     <article
       className={cn(
-        'tarjeta-canal overflow-hidden',
+        'tarjeta-canal relative overflow-hidden',
         // Un comunicado oficial se distingue por una banda dorada al borde:
         // es la voz de la empresa, no una publicación más del feed.
         publicacion.oficial && 'border-l-[3px] border-l-oro-300'
@@ -138,6 +145,26 @@ export function TarjetaPublicacion({
           )}
         </div>
       </Link>
+
+      {/* Reportar (y bloquear a quien la escribió), sobre lo que no es mío. Fuera del
+          enlace: un botón dentro de otro no se toca. Un comunicado oficial se
+          reporta pero no se bloquea: se sigue viendo, es la voz de la empresa. */}
+      {!esMia && (
+        <MenuModeracion
+          etiqueta="Opciones de la publicación"
+          contenido={{ tipo: 'publicacion', id: publicacion.id }}
+          persona={
+            publicacion.autor_id && publicacion.empleados && !publicacion.oficial
+              ? {
+                  id: publicacion.autor_id,
+                  nombre: publicacion.empleados.nombre_completo,
+                  bloqueada: false,
+                }
+              : undefined
+          }
+          className="absolute top-0.5 right-0.5 z-10 bg-white/90 shadow-sm"
+        />
+      )}
     </article>
   )
 }

@@ -239,6 +239,62 @@ el teléfono y enlaces del sitio que abren la app—.
 - **El flujo comprueba que el perfil traiga push y Associated Domains** antes de archivar: un perfil
   creado antes de activar alguno en el App ID hace fallar `codesign` a mitad del archivo.
 
+## Reportar y bloquear (guía 1.2 de la App Store)
+
+Desde el 6 de noviembre de 2026. La app deja que la gente se escriba, y Apple exige para eso poder
+**reportar** lo que se lee, **bloquear** a quien molesta y que alguien reciba los reportes.
+Migración `20261106120000_reportes_y_bloqueos.sql`.
+
+- **Reportar** (`MenuModeracion`, los tres puntos de `components/canal/`): en una publicación (el
+  feed y su página), en un mensaje —directo o de grupo— y en un comentario. Lo ajeno, nunca lo
+  propio. Una hoja con siete motivos fijos (`MOTIVOS_REPORTE` en `lib/reportes.ts`, espejo del
+  `CHECK`), unas líneas opcionales y la confirmación. ⚠️ **Los comentarios no tienen pantalla
+  todavía** («se habilitan en la próxima versión»): el reporte y la ocultación ya los soportan en la
+  base, pero hoy no hay dónde tocarlos. El día que se pinten, llevan `MenuModeracion` con
+  `tipo: 'comentario'`.
+- **Solo se escribe por `reportar_contenido()`**, `security definer`: comprueba que quien reporta
+  puede leer lo reportado y que no es suyo, y **congela un extracto** en el reporte. Así el equipo lee
+  el reporte sin entrar a las conversaciones —de un mensaje directo reportado solo se lee ese
+  mensaje— y el reporte no cambia si el autor lo borra. Único por (quien reporta, qué reporta):
+  reportar dos veces no abre dos y la respuesta es la misma.
+- **Quien fue reportado no ve quién lo reportó**: `reportes` solo se lee con la casilla
+  `modulo:reportes`, y el reporte no cambia nada visible para el autor. Quien reporta tampoco lee
+  la tabla: se le confirma y ya.
+- **El equipo los ve en `/dashboard/reportes`** («El canal» en la barra): `modulo:reportes` con ver y
+  editar, de fábrica para Consultor. Por cada uno: qué decía, quién lo escribió, quién lo reportó,
+  motivo y fecha. **Marcar revisado** y **Ocultar lo reportado**, que no destruye nada: mensaje y
+  comentario pasan a `oculto`, una publicación a `archivado`, y «Restaurar» lo devuelve. Ocultar da
+  por revisados todos los reportes de esa cosa. Las acciones van por `revisar_reporte()` y
+  `ocultar_contenido_reportado()`, que piden la casilla otra vez en la base.
+- **Bloquear**, desde el directorio (`/canal/gente`), una conversación directa, un mensaje y una
+  publicación; se deshace en `/canal/bloqueados` («Personas bloqueadas» en Mi perfil), en la fila del
+  directorio y en el aviso de la conversación. Mientras A bloquea a B:
+  - A no ve de B publicaciones, comentarios ni mensajes (en un grupo, los de B se ocultan **solo
+    para A**: el grupo sigue). Ni el contador de no leídos los cuenta, y el hilo directo con B no
+    se lista.
+  - B no puede abrir un hilo directo con A, ni escribirle en el que ya había, ni pedirle conexión.
+    En un grupo, B escribe igual y A no lo lee. **A tampoco escribe a B** mientras dure el bloqueo.
+  - A no recibe el aviso al teléfono de lo que B escriba (`dispositivos_de_conversacion()`).
+  - **A B no se le dice.** `bloqueos` solo la lee quien bloqueó; lo único que B nota es que su
+    mensaje no sale, y el aviso es genérico («No se pudo enviar…»). ⚠️ Una escritura rechazada la puede
+    sondear a propósito quien llame a la API; es el precio de rechazar en vez de aceptar y descartar.
+- **Todo lo hace la base, no la pantalla.** Las preguntas viven en funciones `security definer`
+  (`he_bloqueado`, `me_bloqueo`, `hay_bloqueo`, `conversacion_bloqueada`, `bloqueo_al_sumar`) y no
+  en la política: «¿A bloqueó a B?» lee una fila que B no puede leer, y una política que se
+  pregunta por una tabla cerrada vuelve vacía en silencio (la misma salida que `participo_en`).
+- ⚠️ **Los comunicados `oficial` se ven siempre**, hayas bloqueado a quien los firma o no: son la
+  comunicación obligatoria de la empresa. En esas publicaciones el menú solo ofrece reportar. Lo
+  demás del feed sí se oculta.
+- ⚠️ **«publican los autorizados» era `for all`, y las políticas se suman con OR**: autorizaba
+  también el SELECT de cualquier publicación a quien puede publicar, y filtrar solo «feed publicado»
+  no habría escondido nada a esas personas. La migración la parte en insert, update y delete; el
+  SELECT queda en una sola política. Al tocar la RLS de un recurso con una política `for all`,
+  mirar qué lee de más.
+- ⚠️ **Los mensajes ocultos dejaron de leerse a nivel de base**: «leo mis mensajes» pasó de
+  `estado <> 'eliminado'` a `estado = 'visible'`. Antes solo la pantalla filtraba el `oculto`.
+- `probar:supabase` comprueba que las dos tablas existan y estén cerradas sin sesión, y que las
+  funciones existan y se nieguen sin ficha o sin permiso.
+
 ## El adiestramiento (`/canal/adiestramiento`) — el curso de Ajito
 
 Nueve lecciones por el teléfono para las ~200 personas que **no** van a las tres
@@ -1184,10 +1240,11 @@ cambia `scripts/generar-guias.mjs` y se regeneran, igual que la marca y las fich
 
 ## El panel (`/dashboard`)
 
-La barra tiene cuatro grupos: **Levantamiento** (panel, entrevistas, archivos y «Consumos», que
+La barra tiene cinco grupos: **Levantamiento** (panel, entrevistas, archivos y «Consumos», que
 es `/dashboard/programa`), **Fase 2 · New Iberia** (el calendario, desde el 28 de octubre de
-2026), **Cursos** (adiestramiento, el padrón y el curso de Ajito, que abre en otra pestaña) y
-**Administración** (usuarios, roles). Cada destino sale solo si la sesión
+2026), **Cursos** (adiestramiento, el padrón y el curso de Ajito, que abre en otra pestaña),
+**El canal** (los reportes, desde el 6 de noviembre de 2026) y **Administración** (usuarios,
+roles). Cada destino sale solo si la sesión
 tiene su permiso (`destinosPermitidos()` en `app/dashboard/layout.tsx`).
 
 - **«El canal» va en la cabecera**, a su izquierda, para quien tiene canal y ficha: ver «Roles y

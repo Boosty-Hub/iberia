@@ -6,6 +6,7 @@ import { IndicadorEnlace } from '@/components/indicador-enlace'
 import { cn } from '@/lib/utils'
 import {
   IconoArchivos,
+  IconoBandera,
   IconoCalendario,
   IconoChat,
   IconoEntrevistas,
@@ -35,6 +36,7 @@ export type ClaveNav =
   | 'archivos'
   | 'programa'
   | 'calendario'
+  | 'reportes'
   | 'adiestramiento'
   | 'empleados'
   | 'curso'
@@ -77,6 +79,13 @@ const GRUPOS: { titulo: string; items: Item[] }[] = [
       // El curso visto por dentro, tal como lo abre un operador en su teléfono:
       // es la única forma de oír un audio después de regrabarlo.
       { clave: 'curso', href: '/canal/adiestramiento', etiqueta: 'El curso de Ajito', Icono: IconoChat, externo: true },
+    ],
+  },
+  {
+    // La moderación del canal: lo que la gente reporta (guía 1.2 de la App Store).
+    titulo: 'El canal',
+    items: [
+      { clave: 'reportes', href: '/dashboard/reportes', etiqueta: 'Reportes', Icono: IconoBandera },
     ],
   },
   {

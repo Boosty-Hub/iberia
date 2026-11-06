@@ -20,6 +20,7 @@ function destinosPermitidos(sesion: Sesion): ClaveNav[] {
     ['empleados', puede(sesion, 'modulo:empleados', 'editar')],
     ['programa', puede(sesion, 'modulo:programa')],
     ['calendario', puede(sesion, 'modulo:calendario')],
+    ['reportes', puede(sesion, 'modulo:reportes')],
     ['usuarios', puede(sesion, 'modulo:usuarios')],
     ['roles', puede(sesion, 'modulo:roles')],
     // El curso tal como lo abre un operador: al equipo, para oír lo que se regraba,

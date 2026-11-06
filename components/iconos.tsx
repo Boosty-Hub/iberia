@@ -281,6 +281,31 @@ export const IconoGrafico = (p: Props) => (
   </Base>
 )
 
+/** Una bandera: reportar. */
+export const IconoBandera = (p: Props) => (
+  <Base {...p}>
+    <path d="M5.5 21V4" />
+    <path d="M5.5 4.5h11l-2 4 2 4h-11" />
+  </Base>
+)
+
+/** Un círculo tachado: bloquear. */
+export const IconoBloquear = (p: Props) => (
+  <Base {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M6 6l12 12" />
+  </Base>
+)
+
+/** Tres puntos: más opciones. */
+export const IconoOpciones = (p: Props) => (
+  <Base {...p}>
+    <circle cx="5.5" cy="12" r="1.3" fill="currentColor" />
+    <circle cx="12" cy="12" r="1.3" fill="currentColor" />
+    <circle cx="18.5" cy="12" r="1.3" fill="currentColor" />
+  </Base>
+)
+
 /** Lista con viñetas: el índice de la sección. */
 export const IconoLista = (p: Props) => (
   <Base {...p}>

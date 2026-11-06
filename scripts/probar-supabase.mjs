@@ -171,6 +171,10 @@ const RELACIONES = {
     'id, titulo, detalle, frente, tipo, estado, inicio, fin, fecha_confirmada, responsable, participantes, nota, orden',
   // Los teléfonos de la app de iOS, para los avisos (`lib/notificaciones.ts`).
   dispositivos: 'id, perfil_id, token, plataforma, updated_at',
+  // Reportar y bloquear en el canal (guía 1.2 de la App Store, 6 de noviembre de 2026).
+  bloqueos: 'id, bloqueador_id, bloqueado_id, created_at',
+  reportes:
+    'id, tipo, contenido_id, reportante_id, autor_id, motivo, detalle, extracto, contexto, estado, oculto, revisado_por, revisado_en, created_at',
 }
 
 for (const [relacion, columnas] of Object.entries(RELACIONES)) {
@@ -222,6 +226,42 @@ console.log('\nLa función de emisión\n')
   const mensaje = error?.message ?? ''
   comprobar('registrar_dispositivo existe', !/could not find|does not exist/i.test(mensaje), mensaje)
   comprobar('y no registra nada sin sesión', /sesi[óo]n/i.test(mensaje), mensaje || 'registró algo')
+}
+
+{
+  // Reportar y moderar: la clave de servicio no tiene sesión, así que las tres
+  // funciones tienen que negarse sin tocar nada. (Se llaman con ids inventados.)
+  const NADIE = '00000000-0000-0000-0000-000000000000'
+  const reportar = await admin.rpc('reportar_contenido', {
+    p_tipo: 'mensaje',
+    p_contenido: NADIE,
+    p_motivo: 'otro',
+  })
+  const m1 = reportar.error?.message ?? ''
+  comprobar('reportar_contenido existe', !/could not find|does not exist/i.test(m1), m1)
+  comprobar('y no reporta nada sin ficha', /padr[óo]n/i.test(m1), m1 || 'devolvió algo')
+
+  const revisar = await admin.rpc('revisar_reporte', { p_reporte: NADIE, p_revisado: true })
+  const m2 = revisar.error?.message ?? ''
+  comprobar('revisar_reporte existe', !/could not find|does not exist/i.test(m2), m2)
+  comprobar('y no revisa nada sin permiso', /permiso/i.test(m2), m2 || 'devolvió algo')
+
+  const ocultar = await admin.rpc('ocultar_contenido_reportado', { p_reporte: NADIE, p_ocultar: true })
+  const m3 = ocultar.error?.message ?? ''
+  comprobar('ocultar_contenido_reportado existe', !/could not find|does not exist/i.test(m3), m3)
+  comprobar('y no oculta nada sin permiso', /permiso/i.test(m3), m3 || 'devolvió algo')
+
+  // Las preguntas de los bloqueos, las que las políticas llaman.
+  for (const [funcion, args] of [
+    ['he_bloqueado', { p_otro: NADIE }],
+    ['me_bloqueo', { p_otro: NADIE }],
+    ['hay_bloqueo', { p_otro: NADIE }],
+    ['conversacion_bloqueada', { p_conversacion: NADIE }],
+    ['bloqueo_al_sumar', { p_conversacion: NADIE, p_otro: NADIE }],
+  ]) {
+    const { data, error } = await admin.rpc(funcion, args)
+    comprobar(`${funcion} existe y contesta que no`, !error && data === false, error?.message ?? String(data))
+  }
 }
 
 {
@@ -279,6 +319,10 @@ const NUEVAS = [
   'calendario_actividades',
   // El token de cada teléfono: solo lo lee su dueño.
   'dispositivos',
+  // A quién bloqueó cada quien: solo lo lee quien bloqueó, nunca el bloqueado.
+  'bloqueos',
+  // Lo reportado en el canal, con quién lo reportó: solo con la casilla de reportes.
+  'reportes',
 ]
 
 {

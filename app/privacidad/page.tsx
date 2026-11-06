@@ -33,7 +33,7 @@ export default function PrivacidadPage() {
         <h1 className="mt-3 text-[26px] leading-tight font-bold tracking-tight text-balance text-marca-900 sm:text-3xl">
           Tus datos en la app de Iberia
         </h1>
-        <p className="mt-3 text-sm text-marca-500">Vigente desde el 23 de octubre de 2026</p>
+        <p className="mt-3 text-sm text-marca-500">Vigente desde el 6 de noviembre de 2026</p>
 
         <p className="mt-6 text-[15px] leading-relaxed text-marca-700 sm:text-base">
           La app de Iberia es la herramienta de comunicación interna de Industrias Iberia: trae
@@ -59,6 +59,11 @@ export default function PrivacidadPage() {
             <li className="flex gap-3">
               <Punto />
               Lo que le respondes a Ajito no lo ven tu supervisor ni tus compañeros.
+            </li>
+            <li className="flex gap-3">
+              <Punto />
+              Puedes reportar lo que te incomode y bloquear a quien quieras. A la otra persona no
+              se le dice quién la reportó ni que la bloqueaste.
             </li>
             <li className="flex gap-3">
               <Punto />
@@ -88,6 +93,14 @@ export default function PrivacidadPage() {
             Las publicaciones, los comentarios y las reacciones que dejas; los mensajes que
             mandas en conversaciones y grupos; las conexiones que solicitas o aceptas, y qué
             comunicados abriste.
+          </p>
+
+          <h3>Reportes y bloqueos</h3>
+          <p>
+            Cuando reportas una publicación, un comentario o un mensaje, se guarda el reporte:
+            qué reportaste, quién lo escribió, quién lo reportó, el motivo que escogiste, lo que
+            hayas querido añadir, la fecha y una copia del texto reportado tal como estaba. Y
+            cuando bloqueas a una persona, se guarda a quién bloqueaste.
           </p>
 
           <h3>Lo que haces en el curso de Ajito</h3>
@@ -151,6 +164,10 @@ export default function PrivacidadPage() {
             <li>
               Para recordarte el curso por WhatsApp y, si las aceptas, mandarte notificaciones.
             </li>
+            <li>
+              Para cuidar el canal: revisar lo que la gente reporta y, si hace falta, ocultarlo.
+              Y para que lo que bloqueas deje de aparecerte y de avisarte.
+            </li>
           </ul>
 
           <h2>Quién ve qué</h2>
@@ -170,6 +187,17 @@ export default function PrivacidadPage() {
             <li>
               <strong>Qué comunicados abriste</strong>: el equipo que publica los comunicados,
               para saber si llegaron.
+            </li>
+            <li>
+              <strong>Tus reportes</strong>: quienes administran el programa, que son el equipo de
+              Boosty Digital y la persona que lo administra por Iberia, y nadie más. La persona
+              que reportaste no sabe que fuiste tú. De un mensaje privado que reportes, el equipo
+              solo lee ese mensaje, no el resto de la conversación.
+            </li>
+            <li>
+              <strong>A quién bloqueaste</strong>: solo tú. La persona bloqueada no lo ve ni se
+              entera; lo único que nota es que ya no puede escribirte. Los comunicados oficiales
+              de la empresa se siguen viendo aunque hayas bloqueado a quien los firma.
             </li>
             <li>
               <strong>Tus respuestas del curso, tus notas de voz, tus fotos, tus dibujos y tus
@@ -222,7 +250,9 @@ export default function PrivacidadPage() {
           <h2>Cuánto tiempo se guardan</h2>
           <p>
             Mientras dure el programa y estés en el listado de personal de Iberia. El enlace
-            personal deja de funcionar a los 120 días o cuando sales del listado. El certificado
+            personal deja de funcionar a los 120 días o cuando sales del listado. Un bloqueo dura
+            hasta que lo deshaces, en Mi perfil, en «Personas bloqueadas». Los reportes se
+            conservan mientras dure el programa, para poder revisarlos. El certificado
             se conserva, porque queda registrado en Capital Humano. Al cierre del programa,
             Industrias Iberia decide qué se archiva y qué se borra.
           </p>

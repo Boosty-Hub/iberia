@@ -140,6 +140,14 @@ export const MODULOS: Recurso[] = [
     subtitulo: 'La app del teléfono; sin esto tampoco se abre el curso',
   },
   {
+    clave: 'modulo:reportes',
+    nombre: 'Reportes del canal',
+    grupo: 'panel',
+    acciones: ['ver', 'editar'],
+    detalle: { editar: 'Marcar como revisado y ocultar o restaurar lo reportado' },
+    subtitulo: 'Lo que la gente reporta en el canal',
+  },
+  {
     clave: 'modulo:usuarios',
     nombre: 'Usuarios',
     grupo: 'administracion',
