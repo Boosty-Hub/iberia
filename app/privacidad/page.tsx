@@ -195,8 +195,8 @@ export default function PrivacidadPage() {
               solo lee ese mensaje, no el resto de la conversación.
             </li>
             <li>
-              <strong>A quién bloqueaste</strong>: solo tú. La persona bloqueada no lo ve ni se
-              entera; lo único que nota es que ya no puede escribirte. Los comunicados oficiales
+              <strong>A quién bloqueaste</strong>: solo tú. La aplicación no se lo muestra ni se lo
+              avisa a la persona bloqueada; lo único que nota es que ya no puede escribirte. Los comunicados oficiales
               de la empresa se siguen viendo aunque hayas bloqueado a quien los firma.
             </li>
             <li>

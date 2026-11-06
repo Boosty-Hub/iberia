@@ -23,12 +23,24 @@
 --
 -- Todo eso lo hace la base, no la pantalla. Y **a B nunca se le dice**: B no puede
 -- leer `bloqueos` (cada quien lee solo los suyos), y lo único que ve es que su
--- mensaje no sale. ⚠️ Una escritura rechazada es observable por quien la prueba a
--- propósito contra la API; es el precio de rechazar en vez de aceptar y descartar.
+-- mensaje no sale. ⚠️ Residual aceptado: una escritura rechazada es observable por
+-- quien la prueba a propósito contra la API (intentar escribirle a A y ver que la
+-- base lo rechaza); es el precio de rechazar en vez de aceptar y descartar. Lo que
+-- sí está cerrado es preguntárselo a la base directamente (ver abajo).
 --
 -- ⚠️ Las preguntas viven en funciones `security definer` y no en la política
 -- misma: «¿A bloqueó a B?» lee `bloqueos`, y B no tiene permiso de leer esa fila.
 -- Es la misma salida que `participo_en` (AGENTS.md, «Trampas conocidas»).
+--
+-- 🔴 Pero una función `security definer` con EXECUTE para `authenticated` en el
+-- esquema `public` es una función que PostgREST expone: cualquier empleado podría
+-- llamar `me_bloqueo(a)` por la API y averiguar, sin efectos, quién lo bloqueó. Las
+-- políticas necesitan que el rol que consulta pueda ejecutar la función, así que
+-- revocar no alcanza. Por eso toda función que responde «¿esa persona me bloqueó?»
+-- vive en el esquema `privado`, que **no está entre los esquemas expuestos de la
+-- API** (los de Supabase son `public` y `graphql_public`): desde la API no se puede
+-- llamar, y desde una política sí. Solo `he_bloqueado` («¿yo la bloqueé?») queda en
+-- `public`: contesta únicamente sobre los bloqueos propios, que ya se leen.
 --
 -- ── Reportar ─────────────────────────────────────────────────────────────────
 --
@@ -95,10 +107,17 @@ as $$
   );
 $$;
 
--- ¿Esa persona me bloqueó a mí? Es lo que le impide escribirme. Se usa solo
--- dentro de las políticas y de las acciones del servidor, que no repiten la
--- respuesta a quien la pidió.
-create or replace function public.me_bloqueo(p_otro uuid)
+-- --- El esquema que la API no expone ------------------------------------------
+create schema if not exists privado;
+revoke all on schema privado from public, anon;
+grant usage on schema privado to authenticated;
+
+comment on schema privado is
+  'Funciones que las políticas RLS necesitan y que PostgREST no debe exponer. No añadirlo a los esquemas expuestos de la API.';
+
+-- ¿Esa persona me bloqueó a mí? Es lo que le impide escribirme. Solo se llama
+-- desde las políticas y las funciones de abajo: nunca desde la API.
+create or replace function privado.me_bloqueo(p_otro uuid)
 returns boolean
 language sql
 stable
@@ -113,19 +132,19 @@ as $$
 $$;
 
 -- Hay un bloqueo entre las dos, en el sentido que sea.
-create or replace function public.hay_bloqueo(p_otro uuid)
+create or replace function privado.hay_bloqueo(p_otro uuid)
 returns boolean
 language sql
 stable
 security definer
 set search_path = public
 as $$
-  select public.he_bloqueado(p_otro) or public.me_bloqueo(p_otro);
+  select public.he_bloqueado(p_otro) or privado.me_bloqueo(p_otro);
 $$;
 
 -- ¿Este hilo directo tiene un bloqueo entre quien pregunta y la otra persona?
 -- Un grupo nunca se cierra por un bloqueo: sigue funcionando para los demás.
-create or replace function public.conversacion_bloqueada(p_conversacion uuid)
+create or replace function privado.conversacion_bloqueada(p_conversacion uuid)
 returns boolean
 language sql
 stable
@@ -139,13 +158,13 @@ as $$
      where c.id = p_conversacion
        and c.tipo = 'directa'
        and p.empleado_id is distinct from public.mi_empleado()
-       and public.hay_bloqueo(p.empleado_id)
+       and privado.hay_bloqueo(p.empleado_id)
   );
 $$;
 
 -- ¿Sumar a `p_otro` a este hilo cruzaría un bloqueo? Solo cuenta en hilos
 -- directos: abrirle a alguien una conversación que esa persona bloqueó.
-create or replace function public.bloqueo_al_sumar(p_conversacion uuid, p_otro uuid)
+create or replace function privado.bloqueo_al_sumar(p_conversacion uuid, p_otro uuid)
 returns boolean
 language sql
 stable
@@ -156,20 +175,21 @@ as $$
     select 1 from public.conversaciones c
      where c.id = p_conversacion
        and c.tipo = 'directa'
-       and public.hay_bloqueo(p_otro)
+       and privado.hay_bloqueo(p_otro)
   );
 $$;
 
 revoke execute on function public.he_bloqueado(uuid) from public, anon;
-revoke execute on function public.me_bloqueo(uuid) from public, anon;
-revoke execute on function public.hay_bloqueo(uuid) from public, anon;
-revoke execute on function public.conversacion_bloqueada(uuid) from public, anon;
-revoke execute on function public.bloqueo_al_sumar(uuid, uuid) from public, anon;
 grant execute on function public.he_bloqueado(uuid) to authenticated;
-grant execute on function public.me_bloqueo(uuid) to authenticated;
-grant execute on function public.hay_bloqueo(uuid) to authenticated;
-grant execute on function public.conversacion_bloqueada(uuid) to authenticated;
-grant execute on function public.bloqueo_al_sumar(uuid, uuid) to authenticated;
+
+revoke execute on function privado.me_bloqueo(uuid) from public, anon;
+revoke execute on function privado.hay_bloqueo(uuid) from public, anon;
+revoke execute on function privado.conversacion_bloqueada(uuid) from public, anon;
+revoke execute on function privado.bloqueo_al_sumar(uuid, uuid) from public, anon;
+grant execute on function privado.me_bloqueo(uuid) to authenticated;
+grant execute on function privado.hay_bloqueo(uuid) to authenticated;
+grant execute on function privado.conversacion_bloqueada(uuid) to authenticated;
+grant execute on function privado.bloqueo_al_sumar(uuid, uuid) to authenticated;
 
 -- --- Mensajes -------------------------------------------------------------------
 -- Leer: no los de quien bloqueé, y solo los visibles (un mensaje que el equipo
@@ -191,7 +211,7 @@ create policy "escribo donde participo" on public.mensajes
   with check (
     autor_id = public.mi_empleado()
     and public.participo_en(conversacion_id)
-    and not public.conversacion_bloqueada(conversacion_id)
+    and not privado.conversacion_bloqueada(conversacion_id)
   );
 
 -- --- Abrir una conversación -------------------------------------------------------
@@ -205,7 +225,7 @@ create policy "armo la conversacion" on public.conversacion_participantes
     or (
       public.participo_en(conversacion_id)
       and public.cabe_otro_participante(conversacion_id)
-      and not public.bloqueo_al_sumar(conversacion_id, empleado_id)
+      and not privado.bloqueo_al_sumar(conversacion_id, empleado_id)
     )
   );
 
@@ -291,12 +311,14 @@ create policy "solicito conexion" on public.conexiones
   for insert to authenticated
   with check (
     solicita_id = public.mi_empleado()
-    and not public.hay_bloqueo(recibe_id)
+    and not privado.hay_bloqueo(recibe_id)
   );
 
 -- --- Los avisos al teléfono ---------------------------------------------------------------
 -- La misma función de `dispositivos`, con una condición más: quien bloqueó a
 -- quien escribe no recibe el aviso. Quien llama es quien escribió (`mi_empleado()`).
+-- ⚠️ Residual aceptado: quien escribe puede notar que a una persona del hilo no le
+-- salen teléfonos. Es el mismo sondeo de una escritura rechazada, y no más.
 
 create or replace function public.dispositivos_de_conversacion(p_conversacion uuid)
 returns table (token text, plataforma text)

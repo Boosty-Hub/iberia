@@ -2783,12 +2783,7 @@ export type Database = {
       }
     }
     Functions: {
-      bloqueo_al_sumar: {
-        Args: { p_conversacion: string; p_otro: string }
-        Returns: boolean
-      }
       cabe_otro_participante: { Args: { conv: string }; Returns: boolean }
-      conversacion_bloqueada: { Args: { p_conversacion: string }; Returns: boolean }
       coordino_grupo: { Args: { grupo: string }; Returns: boolean }
       descartar_dispositivo: { Args: { p_token: string }; Returns: undefined }
       dispositivos_de_conversacion: {
@@ -2831,7 +2826,6 @@ export type Database = {
       }
       es_admin: { Args: never; Returns: boolean }
       es_editor: { Args: never; Returns: boolean }
-      hay_bloqueo: { Args: { p_otro: string }; Returns: boolean }
       he_bloqueado: { Args: { p_otro: string }; Returns: boolean }
       marcar_oido: {
         Args: { p_leccion: string; p_matricula: string; p_pieza: string }
@@ -2840,7 +2834,6 @@ export type Database = {
       matricula_mia: { Args: { matricula: string }; Returns: boolean }
       matricular_pendientes: { Args: { curso_clave: string }; Returns: number }
       matricularme: { Args: { p_curso: string }; Returns: string }
-      me_bloqueo: { Args: { p_otro: string }; Returns: boolean }
       mensajes_sin_leer: { Args: never; Returns: number }
       mi_empleado: { Args: never; Returns: string }
       mi_matricula: { Args: { curso: string }; Returns: string }

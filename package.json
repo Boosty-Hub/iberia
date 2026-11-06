@@ -19,6 +19,7 @@
     "crear:usuario": "node --env-file=.env.local scripts/crear-usuario.mjs",
     "cambiar:clave": "node --env-file=.env.local scripts/cambiar-clave.mjs",
     "probar:canal": "node --env-file=.env.local scripts/probar-canal.mjs",
+    "probar:bloqueos": "node --env-file-if-exists=.env.local scripts/probar-bloqueos.mjs",
     "capturar:canal": "node --env-file=.env.local scripts/capturar-canal.mjs",
     "probar:adiestramiento": "node --env-file=.env.local scripts/probar-adiestramiento.mjs",
     "capturar:adiestramiento": "node --env-file=.env.local scripts/capturar-adiestramiento.mjs",

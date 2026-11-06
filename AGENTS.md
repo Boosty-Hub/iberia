@@ -275,13 +275,25 @@ Migración `20261106120000_reportes_y_bloqueos.sql`.
   - B no puede abrir un hilo directo con A, ni escribirle en el que ya había, ni pedirle conexión.
     En un grupo, B escribe igual y A no lo lee. **A tampoco escribe a B** mientras dure el bloqueo.
   - A no recibe el aviso al teléfono de lo que B escriba (`dispositivos_de_conversacion()`).
-  - **A B no se le dice.** `bloqueos` solo la lee quien bloqueó; lo único que B nota es que su
-    mensaje no sale, y el aviso es genérico («No se pudo enviar…»). ⚠️ Una escritura rechazada la puede
-    sondear a propósito quien llame a la API; es el precio de rechazar en vez de aceptar y descartar.
-- **Todo lo hace la base, no la pantalla.** Las preguntas viven en funciones `security definer`
-  (`he_bloqueado`, `me_bloqueo`, `hay_bloqueo`, `conversacion_bloqueada`, `bloqueo_al_sumar`) y no
+  - **A B no se le avisa.** `bloqueos` solo la lee quien bloqueó; lo único que B nota es que su
+    mensaje no sale, y el aviso es genérico («No se pudo enviar…»). ⚠️ **Residual aceptado:** quien
+    llame a la API a propósito puede sondear una escritura rechazada (escribirle a A y ver que la
+    base dice que no, o ver que a A no le salen teléfonos en `dispositivos_de_conversacion`); es el
+    precio de rechazar en vez de aceptar y descartar. Lo que sí está cerrado es preguntárselo a la
+    base directamente.
+- **Todo lo hace la base, no la pantalla.** Las preguntas viven en funciones `security definer` y no
   en la política: «¿A bloqueó a B?» lee una fila que B no puede leer, y una política que se
   pregunta por una tabla cerrada vuelve vacía en silencio (la misma salida que `participo_en`).
+- 🔴 **Las que responden «¿esa persona me bloqueó?» viven en el esquema `privado`**
+  (`privado.me_bloqueo`, `hay_bloqueo`, `conversacion_bloqueada`, `bloqueo_al_sumar`), no en `public`.
+  Una función `security definer` con EXECUTE para `authenticated` en un esquema expuesto la llama
+  cualquiera por PostgREST y, sin efectos, averigua quién lo bloqueó. Las políticas necesitan que el
+  rol pueda ejecutarla, así que revocar no alcanza: se saca del esquema que la API sirve.
+  **`privado` no puede añadirse a los esquemas expuestos de la API** (Settings > API; los de
+  Supabase son `public` y `graphql_public`). Solo `he_bloqueado` («¿yo la bloqueé?») sigue en
+  `public`: contesta sobre los bloqueos propios. La app no pregunta por el bloqueo ajeno: lo único
+  que consulta es `he_bloqueado`, y lo demás lo rechaza la política. `probar:bloqueos` lo prueba
+  con sesiones reales.
 - ⚠️ **Los comunicados `oficial` se ven siempre**, hayas bloqueado a quien los firma o no: son la
   comunicación obligatoria de la empresa. En esas publicaciones el menú solo ofrece reportar. Lo
   demás del feed sí se oculta.
@@ -1026,6 +1038,7 @@ npm run probar:fireflies    # 50 verificaciones del parser (sin red)
 npm run probar:acceso       -- --password "<clave admin>"   # políticas RLS reales
 npm run probar:paginas      -- --password "<clave admin>"   # render con sesión real
 npm run probar:canal        -- --password "<clave>"         # RLS del canal
+npm run probar:bloqueos                                     # reportes y bloqueos con sesiones reales · sin clave
 npm run capturar:canal      -- --password "<clave>" --flujo # el canal en teléfono
 npm run crear:usuario       -- --email … --password … --rol …
 npm run probar:apns         -- <ruta>\AuthKey_<id>.p8   # la clave de APNs contra Apple · 400 BadDeviceToken = bien

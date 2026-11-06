@@ -17,6 +17,8 @@ import { createClient } from '@/lib/supabase/server'
 export async function enviarMensaje(datos: FormData) {
   const conversacionId = String(datos.get('conversacion_id') ?? '')
   const texto = String(datos.get('texto') ?? '').trim().slice(0, 4000)
+  // La página marca el formulario cuando viene de un envío fallido (`?aviso=envio`).
+  const veniaFallido = datos.get('reintento') === '1'
   if (!UUID.test(conversacionId) || !texto) return
 
   const yo = await requerirEmpleado()
@@ -41,6 +43,11 @@ export async function enviarMensaje(datos: FormData) {
   after(() =>
     avisarMensaje(supabase, { conversacionId, autor: yo.nombre_completo, texto })
   )
+
+  // El aviso de error vive en la URL y revalidar no la cambia: tras un envío bueno
+  // se vuelve a la dirección limpia, o el aviso seguiría pegado. `after()` ya quedó
+  // registrado arriba y corre igual con la redirección.
+  if (veniaFallido) redirect(`/canal/mensajes/${conversacionId}`)
 }
 
 /** Deja constancia de hasta dónde leí, para el punto rojo de la lista. */

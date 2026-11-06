@@ -79,11 +79,13 @@ export async function abrirConversacion(datos: FormData) {
 
   const supabase = await createClient()
 
-  // Con un bloqueo de por medio, de cualquiera de los dos lados, no se abre el
-  // hilo. La base lo rechazaría igual (y dejaría una conversación huérfana); esto
-  // lo evita. ⚠️ El aviso es genérico: a quien fue bloqueado no se le dice.
-  const { data: hayBloqueo } = await supabase.rpc('hay_bloqueo', { p_otro: otroId })
-  if (hayBloqueo) redirect('/canal/gente?aviso=conversacion')
+  // Si YO la bloqueé, no se abre el hilo: es un dato mío y evita dejar una
+  // conversación vacía. ⚠️ Si fue ella quien me bloqueó, la app no lo pregunta —la
+  // base no se lo contesta a nadie—: los inserts de abajo los rechaza la política y
+  // sale el mismo aviso genérico. A quien fue bloqueado no se le dice; el intento
+  // rechazado sí deja una conversación vacía (residual aceptado).
+  const { data: loBloquee } = await supabase.rpc('he_bloqueado', { p_otro: otroId })
+  if (loBloquee) redirect('/canal/gente?aviso=conversacion')
 
   const { data: mias } = await supabase
     .from('conversacion_participantes')

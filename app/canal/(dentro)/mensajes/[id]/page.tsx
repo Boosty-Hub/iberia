@@ -173,6 +173,7 @@ export default async function ConversacionPage({
         className="sticky bottom-16 -mx-4 flex items-end gap-2 border-t border-marca-200/70 bg-white/95 px-4 py-2.5 backdrop-blur"
       >
         <input type="hidden" name="conversacion_id" value={id} />
+        {falloEnvio && <input type="hidden" name="reintento" value="1" />}
         <input
           type="text"
           name="texto"

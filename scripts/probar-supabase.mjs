@@ -251,16 +251,29 @@ console.log('\nLa función de emisión\n')
   comprobar('ocultar_contenido_reportado existe', !/could not find|does not exist/i.test(m3), m3)
   comprobar('y no oculta nada sin permiso', /permiso/i.test(m3), m3 || 'devolvió algo')
 
-  // Las preguntas de los bloqueos, las que las políticas llaman.
+  // Mis propios bloqueos: la única pregunta de bloqueos que la API contesta.
+  {
+    const { data, error } = await admin.rpc('he_bloqueado', { p_otro: NADIE })
+    comprobar('he_bloqueado existe y contesta que no', !error && data === false, error?.message ?? String(data))
+  }
+
+  // Las que revelan el bloqueo de otra persona hacia quien pregunta viven en
+  // `privado`, que la API no expone: ni por `public` ni pidiendo ese esquema.
+  // `probar:bloqueos` lo comprueba con sesiones reales de empleado.
   for (const [funcion, args] of [
-    ['he_bloqueado', { p_otro: NADIE }],
     ['me_bloqueo', { p_otro: NADIE }],
     ['hay_bloqueo', { p_otro: NADIE }],
     ['conversacion_bloqueada', { p_conversacion: NADIE }],
     ['bloqueo_al_sumar', { p_conversacion: NADIE, p_otro: NADIE }],
   ]) {
-    const { data, error } = await admin.rpc(funcion, args)
-    comprobar(`${funcion} existe y contesta que no`, !error && data === false, error?.message ?? String(data))
+    const enPublic = await admin.rpc(funcion, args)
+    comprobar(`${funcion} ya no se puede llamar por la API (public)`, !!enPublic.error, 'sigue expuesta')
+    const enPrivado = await admin.schema('privado').rpc(funcion, args)
+    comprobar(
+      `${funcion} no se puede llamar por la API (privado)`,
+      enPrivado.error?.code === 'PGRST106',
+      enPrivado.error?.message ?? 'el esquema privado está expuesto'
+    )
   }
 }
 
