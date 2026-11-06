@@ -237,7 +237,8 @@ try {
   const pubB = crypto.randomUUID() // de B, normal
   const pubBOficial = crypto.randomUUID() // de B, comunicado oficial
   const pubC = crypto.randomUUID() // de C, normal: donde se comenta
-  const base = { estado: 'publicado', audiencia: 'todos', tipo: 'noticia' }
+  // audiencia 'area' sin área: la RLS la deja leer, pero el feed de la gente real no la pinta.
+  const base = { estado: 'publicado', audiencia: 'area', audiencia_area_id: null, tipo: 'noticia' }
   ok(
     await admin.from('publicaciones').insert([
       { ...base, id: pubB, titulo: `${NOMBRE} de B`, autor_id: B.id, oficial: false },
