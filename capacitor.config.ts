@@ -16,8 +16,13 @@ const config: CapacitorConfig = {
   // Abre en el canal, que sin sesión manda al login: nunca una página de
   // presentación, que es la causa de rechazo 4.2 de la App Store. Si el dominio
   // cambia, cambia aquí y hay que publicar otra versión de la app.
+  //
+  // `allowNavigation` no es opcional: Capacitor solo da por propias las direcciones
+  // que empiezan por `url`, con su `/canal`, y todo lo demás —el login, `/entrar`—
+  // lo abre en Safari.
   server: {
     url: 'https://iberiavenezuela.netlify.app/canal',
+    allowNavigation: ['iberiavenezuela.netlify.app'],
     cleartext: false,
   },
 

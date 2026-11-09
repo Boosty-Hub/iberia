@@ -141,6 +141,9 @@ con `@capacitor/android`. Lo que falta para publicarla está en `PENDIENTES.md`.
   manda al login, y nunca en una página de presentación. `movil/www/index.html` es solo la carpeta
   que Capacitor exige. `appendUserAgent: 'IberiaApp'` es la marca para el código web que necesite
   saber que corre dentro de la app.
+  - 🔴 **`server.allowNavigation` lleva el dominio, y no se quita.** Capacitor solo da por propias las
+    direcciones que empiezan por `server.url`, que termina en `/canal`; lo demás —el login, `/entrar`— lo
+    abría en Safari. Le pasó al build 3, y solo se ve en un iPhone: Chromium no tiene esa regla.
   - ⚠️ **El dominio va compilado en la app.** Cambiarlo es publicar otra versión en la tienda,
     además de volver a acuñar los enlaces personales (`DESPLIEGUE.md`).
 - **`ios/` se generó con `npx cap add ios` en Windows, sin Mac**, y se ajustó como el de Boosty
