@@ -7,7 +7,7 @@ import { pedirRecuperacion, type EstadoRecuperacion } from '../actions'
 function BotonEnviar() {
   const { pending } = useFormStatus()
   return (
-    <button type="submit" className="btn-acento w-full" disabled={pending}>
+    <button type="submit" className="btn-acento min-h-11 w-full" disabled={pending}>
       {pending ? 'Enviando…' : 'Mandarme el enlace'}
     </button>
   )
@@ -43,7 +43,7 @@ export function FormularioRecuperar() {
           required
           autoFocus
           placeholder="nombre@empresa.com"
-          className="campo"
+          className="campo min-h-11"
         />
       </div>
 

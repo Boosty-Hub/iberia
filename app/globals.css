@@ -69,6 +69,18 @@
   --borde: #e7e5e4;
   /* La sombra de tarjeta: una sola, muy tenue. La jerarquía la da la forma. */
   --sombra-tarjeta: 0 1px 3px rgba(30, 28, 27, 0.06);
+
+  /* Las zonas seguras del teléfono (notch, isla dinámica, barra de gestos). La
+     app de iOS carga el sitio en una WebView con `viewport-fit=cover`, así que
+     la página llega hasta el borde y es ella quien las respeta. Se definen una
+     sola vez aquí y todo lo demás las usa: una prueba las sobrescribe para
+     simular un iPhone, cosa que Chromium no hace. */
+  --seguro-arriba: env(safe-area-inset-top, 0px);
+  --seguro-abajo: env(safe-area-inset-bottom, 0px);
+  --seguro-izq: env(safe-area-inset-left, 0px);
+  --seguro-der: env(safe-area-inset-right, 0px);
+  /* Alto de la navegación inferior del canal, sin la zona segura. */
+  --nav-alto: calc(3.5rem + 1px);
 }
 
 body {
@@ -93,8 +105,13 @@ body {
     @apply mb-1.5 block text-sm font-medium text-marca-700;
   }
 
+  /* 16 px en el teléfono: por debajo, iOS hace zoom al enfocar; desde `sm`
+     vuelve a lo denso del panel. El alto de 44 px NO va aquí: el panel tiene
+     campos y botones de 36 a 40 px a propósito. Donde se toca con el pulgar
+     (login, canal) se añade `min-h-11`. */
   .campo {
-    @apply w-full rounded-xl border border-marca-200 bg-white px-3.5 py-2.5 text-sm text-marca-900
+    @apply w-full rounded-xl border border-marca-200 bg-white px-3.5 py-2.5 text-base text-marca-900
+           sm:text-sm
            placeholder:text-marca-400
            focus:border-acento-400 focus:ring-2 focus:ring-acento-100 focus:outline-none
            disabled:cursor-not-allowed disabled:bg-marca-50 disabled:text-marca-500;
@@ -102,7 +119,8 @@ body {
 
   /* Base compartida de los botones. Tailwind 4 no permite `@apply` de una clase
      definida en este mismo layer, así que las variantes la heredan por selector
-     agrupado en lugar de por composición. */
+     agrupado en lugar de por composición. Sin alto mínimo: el panel tiene botones
+     `h-9`/`h-10`, y un `min-h-11` global los habría agrandado a la fuerza. */
   .btn,
   .btn-primario,
   .btn-acento,
@@ -524,6 +542,10 @@ body {
    igual en los cuatro. */
 .mapa-marco.ampliado {
   @apply fixed inset-0 z-50 gap-0 bg-[var(--fondo)] p-3 lg:p-4;
+  padding-top: max(0.75rem, var(--seguro-arriba));
+  padding-bottom: max(0.75rem, var(--seguro-abajo));
+  padding-left: max(0.75rem, var(--seguro-izq));
+  padding-right: max(0.75rem, var(--seguro-der));
 }
 .mapa-marco.ampliado .mapa-lienzo {
   @apply h-full flex-1 rounded-xl;
@@ -856,8 +878,43 @@ body {
 .canal {
   background: var(--fondo);
   color: var(--texto);
-  /* Respeta la barra de gestos y el notch del teléfono. */
-  padding-bottom: env(safe-area-inset-bottom);
+  /* Las zonas seguras no se rellenan aquí: la cabecera y la navegación fija
+     cubren la de arriba y la de abajo con su propio fondo, y el contenido deja
+     sitio a la navegación en `.canal-principal`. Un padding en este contenedor
+     duplicaba el hueco bajo la navegación. */
+}
+
+/* El contenido deja sitio a la navegación fija del pie: su alto, más la zona
+   segura de abajo, más un respiro. */
+.canal-principal {
+  padding-bottom: calc(var(--nav-alto) + var(--seguro-abajo) + 1rem);
+}
+
+/* Lo que se queda pegado encima de la navegación (el cuadro de escribir). */
+.sobre-nav {
+  bottom: calc(var(--nav-alto) + var(--seguro-abajo));
+  /* Sale del margen de `.canal-principal` hasta el borde y vuelve a entrar con
+     su propio relleno, que también respeta el notch en horizontal. */
+  margin-left: calc(-1 * max(1rem, var(--seguro-izq)));
+  margin-right: calc(-1 * max(1rem, var(--seguro-der)));
+  padding-left: max(1rem, var(--seguro-izq));
+  padding-right: max(1rem, var(--seguro-der));
+}
+
+/* 16 px en todo campo de texto del canal en el teléfono: por debajo, iOS hace
+   zoom al enfocarlo. Va fuera de los layers a propósito, para ganarle a las
+   clases `text-[15px]` de cada pantalla. */
+@media (max-width: 639px) {
+  .canal
+    :is(input, textarea, select):not(
+      [type='checkbox'],
+      [type='radio'],
+      [type='range'],
+      [type='file'],
+      [type='hidden']
+    ) {
+    font-size: 16px;
+  }
 }
 
 @layer components {
@@ -918,9 +975,36 @@ body {
   background: rgb(38 33 30 / 0.4);
 }
 .hoja-canal-panel {
-  @apply max-h-[90dvh] overflow-y-auto rounded-t-2xl bg-white px-4 pt-4;
-  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  @apply overflow-y-auto rounded-t-2xl bg-white px-4 pt-4;
+  /* Nunca más alta que la pantalla menos la zona segura de arriba. */
+  max-height: min(90dvh, calc(100dvh - var(--seguro-arriba) - 1rem));
+  padding-bottom: calc(1rem + var(--seguro-abajo));
+  padding-left: calc(1rem + var(--seguro-izq));
+  padding-right: calc(1rem + var(--seguro-der));
   box-shadow: 0 -10px 40px rgb(38 33 30 / 0.25);
+}
+/* Variante con pie fijo: el panel no se desplaza, su cuerpo sí, y los botones de
+   acción quedan siempre a la vista, sobre blanco y por encima de la barra de
+   gestos. */
+.hoja-canal-panel.con-pie {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+.hoja-canal-cuerpo {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1rem max(1rem, var(--seguro-der)) 0.5rem max(1rem, var(--seguro-izq));
+}
+.hoja-canal-pie {
+  flex: none;
+  background: #fff;
+  border-top: 1px solid rgb(219 216 215 / 0.7);
+  padding: 0.75rem max(1rem, var(--seguro-der)) calc(0.75rem + var(--seguro-abajo))
+    max(1rem, var(--seguro-izq));
 }
 @media (prefers-reduced-motion: no-preference) {
   .hoja-canal[open] .hoja-canal-panel {
@@ -1417,6 +1501,9 @@ body {
 }
 .menu-movil-panel {
   @apply flex h-full flex-col bg-white;
+  padding-top: var(--seguro-arriba);
+  padding-bottom: var(--seguro-abajo);
+  padding-left: var(--seguro-izq);
   box-shadow: 0 10px 40px rgb(38 33 30 / 0.25);
 }
 @media (prefers-reduced-motion: no-preference) {

@@ -228,14 +228,24 @@ export default async function AdiestramientoPage() {
                   <span className="block text-[15px] leading-snug font-semibold text-balance text-marca-900">
                     {leccion.titulo}
                   </span>
-                  <span className="mt-0.5 block truncate text-[13px] text-marca-500">
+                  {/* Envuelve hasta dos líneas: a 320 px, `truncate` dejaba
+                      unos 15 caracteres del resumen. */}
+                  <span className="mt-0.5 line-clamp-2 block text-[13px] leading-snug text-marca-500">
                     {FORMA_GANCHO[leccion.forma as FormaIA] ??
                       FORMAS_IA[leccion.forma as FormaIA]}
                   </span>
+                  {/* En pantalla angosta la duración baja debajo del título, para
+                      no quitarle ancho. */}
+                  {!completada && (
+                    <span className="mt-1 flex items-center gap-1 text-[12px] text-marca-400 min-[400px]:hidden">
+                      <IconoReloj className="h-4 w-4" />
+                      {minutosTexto(leccion.minutos)}
+                    </span>
+                  )}
                 </span>
 
                 {!completada && (
-                  <span className="flex shrink-0 items-center gap-1 text-[12px] text-marca-400">
+                  <span className="hidden shrink-0 items-center gap-1 text-[12px] text-marca-400 min-[400px]:flex">
                     <IconoReloj className="h-4 w-4" />
                     {minutosTexto(leccion.minutos)}
                   </span>

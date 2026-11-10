@@ -61,7 +61,7 @@ export default async function ConversacionPage({
   await marcarVisto(id)
 
   return (
-    <div className="flex min-h-[calc(100dvh-9.5rem)] flex-col">
+    <div className="flex min-h-[calc(100dvh-9.5rem-var(--seguro-arriba)-var(--seguro-abajo))] flex-col">
       <header className="mb-3 flex items-center gap-3">
         <Link
           href="/canal/mensajes"
@@ -74,7 +74,7 @@ export default async function ConversacionPage({
           {iniciales(titulo)}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[16px] font-semibold text-marca-900">{titulo}</p>
+          <p className="line-clamp-2 text-[16px] leading-snug font-semibold text-marca-900">{titulo}</p>
           <p className="truncate text-[12px] text-marca-500">
             {conversacion.tipo === 'grupo' ? 'Grupo de trabajo' : (otro?.cargo ? legible(otro.cargo) : '')}
           </p>
@@ -158,7 +158,7 @@ export default async function ConversacionPage({
 
       {/* Si bloqueé a la otra persona, no se escribe en este hilo hasta deshacerlo. */}
       {loBloquee && otro ? (
-        <div className="sticky bottom-16 -mx-4 border-t border-marca-200/70 bg-white/95 px-4 py-3 backdrop-blur">
+        <div className="sobre-nav sticky border-t border-marca-200/70 bg-white/95 py-3 backdrop-blur">
           <p className="text-[14px] leading-relaxed text-marca-600">
             Bloqueaste a {otro.nombre_completo}. No ves sus mensajes y no te puede escribir.
           </p>
@@ -170,7 +170,7 @@ export default async function ConversacionPage({
       /* Pegado al pie, justo encima de la navegación: el pulgar llega ahí. */
       <form
         action={enviarMensaje}
-        className="sticky bottom-16 -mx-4 flex items-end gap-2 border-t border-marca-200/70 bg-white/95 px-4 py-2.5 backdrop-blur"
+        className="sobre-nav sticky flex items-end gap-2 border-t border-marca-200/70 bg-white/95 py-2.5 backdrop-blur"
       >
         <input type="hidden" name="conversacion_id" value={id} />
         {falloEnvio && <input type="hidden" name="reintento" value="1" />}

@@ -19,7 +19,7 @@ export default async function SinAccesoPage() {
   if (destino !== '/sin-acceso') redirect(destino)
 
   return (
-    <main className="flex min-h-full flex-1 items-center justify-center px-4 py-16">
+    <main className="flex min-h-full flex-1 items-center justify-center pt-[max(4rem,var(--seguro-arriba))] pr-[max(1rem,var(--seguro-der))] pb-[max(4rem,var(--seguro-abajo))] pl-[max(1rem,var(--seguro-izq))]">
       <div className="tarjeta w-full max-w-md px-6 py-10 text-center">
         <div className="flex justify-center">
           <Marca />

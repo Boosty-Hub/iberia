@@ -17,11 +17,14 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: '#D4332C',
-  // Sin zoom: en un feed táctil el pinch estorba más de lo que ayuda, y el
-  // tamaño de letra ya está pensado para leerse a pulso.
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
+  // Hasta el borde de la pantalla: las zonas seguras las respetan la cabecera
+  // y la navegación (variables `--seguro-*`). Sin tope de zoom: iOS ya no
+  // acerca solo al enfocar un campo porque todos miden 16 px en el teléfono
+  // (`.campo` y la regla de `.canal` en globals.css), y quien necesite
+  // agrandar algo puede hacerlo con los dedos.
+  viewportFit: 'cover',
 }
 
 export default async function CanalLayout({ children }: LayoutProps<'/canal'>) {
@@ -52,7 +55,9 @@ export default async function CanalLayout({ children }: LayoutProps<'/canal'>) {
   return (
     <div className="canal flex min-h-full flex-1 flex-col">
       {/* Cabecera. Discreta a propósito: lo que importa es el contenido. */}
-      <header className="sticky top-0 z-30 border-b border-marca-200/60 bg-white/95 backdrop-blur">
+      {/* El fondo llena también la franja del notch: el relleno de arriba es de
+          la propia cabecera, no un margen. */}
+      <header className="sticky top-0 z-30 border-b border-marca-200/60 bg-white/95 pt-[var(--seguro-arriba)] pr-[var(--seguro-der)] pl-[var(--seguro-izq)] backdrop-blur">
         <div className="mx-auto flex max-w-lg items-center justify-between gap-3 px-4 py-3">
           {/* El margen negativo agranda el área táctil a 44 px sin engordar
               la cabecera. */}
@@ -100,8 +105,11 @@ export default async function CanalLayout({ children }: LayoutProps<'/canal'>) {
         </div>
       </header>
 
-      {/* pb-20 deja sitio a la navegación fija del pie. */}
-      <main className="mx-auto w-full max-w-lg flex-1 px-4 pt-4 pb-20">{children}</main>
+      {/* `canal-principal` deja sitio a la navegación fija del pie y a su zona
+          segura. Los lados respetan el notch en horizontal. */}
+      <main className="canal-principal mx-auto w-full max-w-lg flex-1 pt-4 pr-[max(1rem,var(--seguro-der))] pl-[max(1rem,var(--seguro-izq))]">
+        {children}
+      </main>
 
       <NavInferior mensajesSinLeer={sinLeer ?? 0} />
 

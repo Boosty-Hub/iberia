@@ -15,7 +15,7 @@ export default async function RecuperarPage({ searchParams }: PageProps<'/login/
   const vencido = params.aviso === 'vencido'
 
   return (
-    <main className="flex flex-1 items-center justify-center px-4 py-12">
+    <main className="flex flex-1 items-center justify-center pt-[max(3rem,var(--seguro-arriba))] pr-[max(1rem,var(--seguro-der))] pb-[max(3rem,var(--seguro-abajo))] pl-[max(1rem,var(--seguro-izq))]">
       <div className="w-full max-w-sm">
         <div className="mb-8">
           <Marca alto={42} />
@@ -40,8 +40,11 @@ export default async function RecuperarPage({ searchParams }: PageProps<'/login/
           <FormularioRecuperar />
         </div>
 
-        <p className="mt-6 text-center text-sm">
-          <Link href="/login" className="font-medium text-marca-600 underline-offset-2 hover:underline">
+        <p className="mt-3 text-center text-sm">
+          <Link
+            href="/login"
+            className="inline-flex min-h-11 items-center px-3 font-medium text-marca-600 underline-offset-2 hover:underline"
+          >
             Volver a entrar
           </Link>
         </p>

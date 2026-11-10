@@ -205,7 +205,7 @@ export function CharlaAjito({
   const vacia = mensajes.length === 0
 
   return (
-    <div className="flex min-h-[calc(100dvh-9.5rem)] flex-col" data-charla={charla ?? 'nueva'}>
+    <div className="flex min-h-[calc(100dvh-9.5rem-var(--seguro-arriba)-var(--seguro-abajo))] flex-col" data-charla={charla ?? 'nueva'}>
       <header className="mb-3 flex items-center gap-2">
         <Link
           href="/canal/adiestramiento"
@@ -353,7 +353,7 @@ export function CharlaAjito({
       </div>
 
       {/* Pegado al pie, justo encima de la navegación: el pulgar llega ahí. */}
-      <div className="sticky bottom-16 -mx-4 border-t border-marca-200/70 bg-white/95 px-3 py-2.5 backdrop-blur">
+      <div className="sobre-nav sticky border-t border-marca-200/70 bg-white/95 py-2.5 backdrop-blur">
         {aviso && (
           <p className="mb-2 rounded-xl bg-oro-300/25 px-3 py-2 text-[13px] leading-relaxed text-marca-700">{aviso}</p>
         )}

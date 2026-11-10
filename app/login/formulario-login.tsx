@@ -8,7 +8,7 @@ import { iniciarSesion, type EstadoLogin } from './actions'
 function BotonEnviar() {
   const { pending } = useFormStatus()
   return (
-    <button type="submit" className="btn-acento w-full" disabled={pending}>
+    <button type="submit" className="btn-acento min-h-11 w-full" disabled={pending}>
       {pending ? 'Verificando…' : 'Entrar'}
     </button>
   )
@@ -33,18 +33,19 @@ export function FormularioLogin({ destino }: { destino: string }) {
           required
           autoFocus
           placeholder="nombre@empresa.com"
-          className="campo"
+          className="campo min-h-11"
         />
       </div>
 
       <div>
-        <div className="flex items-baseline justify-between">
-          <label htmlFor="password" className="etiqueta">
+        <div className="flex items-center justify-between">
+          <label htmlFor="password" className="etiqueta mb-0">
             Contraseña
           </label>
+          {/* 44 px de alto táctil; el margen negativo no engorda la fila. */}
           <Link
             href="/login/recuperar"
-            className="text-xs font-medium text-acento-600 underline-offset-2 hover:underline"
+            className="-mr-2 inline-flex min-h-11 items-center px-2 text-xs font-medium text-acento-600 underline-offset-2 hover:underline"
           >
             ¿Olvidaste tu contraseña?
           </Link>
@@ -56,7 +57,7 @@ export function FormularioLogin({ destino }: { destino: string }) {
           autoComplete="current-password"
           required
           placeholder="••••••••"
-          className="campo"
+          className="campo min-h-11"
         />
       </div>
 

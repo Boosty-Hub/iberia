@@ -6,7 +6,12 @@ import { empleadoActual } from '@/lib/canal'
 import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = { title: 'Entrar' }
-export const viewport: Viewport = { themeColor: '#D4332C', width: 'device-width', initialScale: 1 }
+export const viewport: Viewport = {
+  themeColor: '#D4332C',
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+}
 
 /**
  * Fuera del layout del canal a propósito: si heredara el que exige empleado,
@@ -19,7 +24,7 @@ export default async function EntrarCanalPage() {
   const sesion = await obtenerSesion()
 
   return (
-    <main className="canal flex min-h-full flex-1 flex-col justify-center px-6 py-12">
+    <main className="canal flex min-h-full flex-1 flex-col justify-center pt-[max(3rem,var(--seguro-arriba))] pr-[max(1.5rem,var(--seguro-der))] pb-[max(3rem,var(--seguro-abajo))] pl-[max(1.5rem,var(--seguro-izq))]">
       <div className="mx-auto w-full max-w-sm">
         <Image
           src="/marca/iberia.png"

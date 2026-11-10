@@ -38,9 +38,10 @@ export function NavInferior({ mensajesSinLeer = 0 }: { mensajesSinLeer?: number 
   return (
     <nav
       aria-label="Navegación principal"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-marca-200/70 bg-white/95 backdrop-blur"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-marca-200/70 bg-white pr-[var(--seguro-der)] pb-[var(--seguro-abajo)] pl-[var(--seguro-izq)] backdrop-blur"
     >
+      {/* El alto de las filas es `--nav-alto` (globals.css): lo que se pega
+          encima de la navegación suma ese valor y la zona segura. */}
       <ul className="mx-auto flex max-w-lg">
         {ITEMS.map(({ href, etiqueta, Icono }) => {
           const esActivo = activo(href)

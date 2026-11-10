@@ -18,7 +18,7 @@ export const metadata: Metadata = {
  */
 export default function PrivacidadPage() {
   return (
-    <main className="canal flex min-h-full flex-1 flex-col px-4 py-10 sm:py-14">
+    <main className="canal flex min-h-full flex-1 flex-col pt-[max(2.5rem,var(--seguro-arriba))] pr-[max(1rem,var(--seguro-der))] pb-[max(2.5rem,var(--seguro-abajo))] pl-[max(1rem,var(--seguro-izq))] sm:pt-[max(3.5rem,var(--seguro-arriba))] sm:pb-[max(3.5rem,var(--seguro-abajo))]">
       <div className="mx-auto w-full max-w-2xl">
         <Image
           src="/marca/iberia.png"

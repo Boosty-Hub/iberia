@@ -7,7 +7,7 @@ import { cambiarClave, type EstadoNuevaClave } from '../actions'
 function BotonGuardar() {
   const { pending } = useFormStatus()
   return (
-    <button type="submit" className="btn-acento w-full" disabled={pending}>
+    <button type="submit" className="btn-acento min-h-11 w-full" disabled={pending}>
       {pending ? 'Guardando…' : 'Guardar y entrar'}
     </button>
   )
@@ -31,7 +31,7 @@ export function FormularioNuevaClave() {
           minLength={8}
           autoFocus
           placeholder="Al menos 8 caracteres"
-          className="campo"
+          className="campo min-h-11"
         />
       </div>
 
@@ -46,7 +46,7 @@ export function FormularioNuevaClave() {
           autoComplete="new-password"
           required
           minLength={8}
-          className="campo"
+          className="campo min-h-11"
         />
       </div>
 

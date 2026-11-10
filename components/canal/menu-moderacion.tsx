@@ -129,7 +129,9 @@ export function MenuModeracion({
           if (ev.target === dialogo.current) cerrar()
         }}
       >
-        <div className="hoja-canal-panel">
+        {/* En «reportar» la hoja es alta: el cuerpo se desplaza y el pie con los
+            botones queda fijo abajo, a la vista aun en un teléfono de 320 px. */}
+        <div className={cn('hoja-canal-panel', vista === 'reportar' && 'con-pie')}>
           {vista === 'menu' && (
             <>
               <Cabecera titulo="Opciones" onCerrar={cerrar} />
@@ -175,6 +177,7 @@ export function MenuModeracion({
 
           {vista === 'reportar' && contenido && (
             <>
+              <div className="hoja-canal-cuerpo">
               <Cabecera
                 titulo={`Reportar ${este}`}
                 onAtras={() => {
@@ -225,16 +228,19 @@ export function MenuModeracion({
               />
 
               {error && <Aviso texto={error} />}
+              </div>
 
-              <button
-                type="button"
-                onClick={enviarReporte}
-                disabled={!motivo || enCurso}
-                className="btn-canal btn-canal-rojo mt-3 w-full"
-              >
-                <IconoBandera className="h-4 w-4" />
-                {enCurso ? 'Enviando…' : 'Enviar reporte'}
-              </button>
+              <div className="hoja-canal-pie">
+                <button
+                  type="button"
+                  onClick={enviarReporte}
+                  disabled={!motivo || enCurso}
+                  className="btn-canal btn-canal-rojo w-full"
+                >
+                  <IconoBandera className="h-4 w-4" />
+                  {enCurso ? 'Enviando…' : 'Enviar reporte'}
+                </button>
+              </div>
             </>
           )}
 

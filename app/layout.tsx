@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { DM_Sans, Geist_Mono } from 'next/font/google'
 import { PuenteNativo } from '@/components/puente-nativo'
 import './globals.css'
@@ -31,6 +31,19 @@ export const metadata: Metadata = {
     'Levantamiento, diagnóstico y arquitectura de IA para Industrias Iberia. Boosty Digital.',
   // Material bajo NDA: no debe aparecer en buscadores.
   robots: { index: false, follow: false, nocache: true },
+}
+
+/**
+ * `viewport-fit=cover` hace que la página llegue hasta los bordes físicos del
+ * teléfono, bajo el notch y la barra de gestos. Sin él, `env(safe-area-inset-*)`
+ * vale cero y la app de iOS (una WebView sin `contentInset`) pinta la cabecera
+ * debajo de la hora y la navegación sobre la barra de gestos. Las zonas seguras
+ * se respetan con las variables `--seguro-*` de globals.css.
+ */
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {

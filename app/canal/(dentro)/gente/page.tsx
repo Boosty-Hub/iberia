@@ -161,23 +161,27 @@ function FilaPersona({
   // dirección le rechace una solicitud dentro de su propia empresa.
   const puedeEscribir = conectados || !pideSolicitud
 
+  // Por debajo de 360 px la fila no da para nombre, botón y menú: las acciones pasan
+  // a su propia línea en vez de apretar el texto a unas pocas letras.
   return (
-    <li className="flex items-center gap-3 px-4 py-3">
+    <li className="flex items-center gap-3 px-4 py-3 max-[359px]:flex-wrap">
       <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-marca-100 text-sm font-bold text-marca-700">
         {iniciales(persona.nombre_completo)}
       </span>
 
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 max-[359px]:min-w-[9rem]">
         {/* El nombre no se recorta: «Alberto García-Ra…» no le sirve a nadie.
             Lo que cede es el cargo, que sí se puede leer a medias. */}
         <p className="text-[15px] leading-snug font-semibold text-marca-900">
           {persona.nombre_completo}
         </p>
-        <p className="truncate text-[13px] text-marca-500">
+        <p className="line-clamp-2 text-[13px] leading-snug text-marca-500">
           {persona.cargo ? legible(persona.cargo) : 'Industrias Iberia'}
         </p>
+        {/* El área en su propia línea y sin recortar: con `truncate` se perdía
+            justo lo que distingue a dos personas con el mismo cargo. */}
         {(persona.areas?.nombre || persona.sede) && (
-          <p className="truncate text-[11px] text-marca-400">
+          <p className="line-clamp-2 text-[11px] leading-snug text-marca-400">
             {[persona.areas?.nombre, persona.sede === 'cagua' ? 'Cagua' : persona.sede === 'caracas' ? 'Caracas' : null]
               .filter(Boolean)
               .join(' · ')}
@@ -185,6 +189,7 @@ function FilaPersona({
         )}
       </div>
 
+      <div className="flex shrink-0 items-center gap-3 max-[359px]:ml-auto">
       {bloqueada ? (
         <span className="chip shrink-0 bg-marca-100 text-marca-500">Bloqueada</span>
       ) : puedeEscribir ? (
@@ -224,6 +229,7 @@ function FilaPersona({
         persona={{ id: persona.id, nombre: persona.nombre_completo, bloqueada }}
         className="-mr-2"
       />
+      </div>
     </li>
   )
 }

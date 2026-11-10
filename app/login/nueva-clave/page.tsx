@@ -17,7 +17,7 @@ export default async function NuevaClavePage() {
   } = await supabase.auth.getUser()
 
   return (
-    <main className="flex flex-1 items-center justify-center px-4 py-12">
+    <main className="flex flex-1 items-center justify-center pt-[max(3rem,var(--seguro-arriba))] pr-[max(1rem,var(--seguro-der))] pb-[max(3rem,var(--seguro-abajo))] pl-[max(1rem,var(--seguro-izq))]">
       <div className="w-full max-w-sm">
         <div className="mb-8">
           <Marca alto={42} />
@@ -40,7 +40,7 @@ export default async function NuevaClavePage() {
               <p className="mb-6 text-sm text-marca-600">
                 El enlace ya venció o ya se usó. Pide uno nuevo y ábrelo apenas te llegue.
               </p>
-              <Link href="/login/recuperar" className="btn-acento w-full">
+              <Link href="/login/recuperar" className="btn-acento min-h-11 w-full">
                 Pedir otro enlace
               </Link>
             </>
