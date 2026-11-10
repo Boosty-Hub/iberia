@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { versionAceptada } from '@/lib/normas'
 import { permite, type Accion, type MapaPermisos, type Nivel } from '@/lib/permisos'
 import type { Profile, Rol } from '@/lib/types'
 
@@ -13,6 +14,8 @@ export type Sesion = {
   rol: RolAsignado
   /** La matriz de su rol. El nivel administrador no la necesita: puede todo. */
   permisos: MapaPermisos
+  /** La versión de las normas del canal que aceptó (0 si ninguna). Ver `lib/normas.ts`. */
+  normasAceptadas: number
 }
 
 const ROLES_EDITORES: Rol[] = ['admin', 'consultor']
@@ -59,6 +62,7 @@ export const obtenerSesion = cache(async (): Promise<Sesion | null> => {
       nivel: perfil.rol as Nivel,
     },
     permisos,
+    normasAceptadas: versionAceptada(user.user_metadata),
   }
 })
 

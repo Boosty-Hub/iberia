@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
+import Link from 'next/link'
+import { CORREO_SOPORTE } from '@/lib/normas'
 
 export const metadata: Metadata = {
   title: { absolute: 'Política de privacidad · Iberia' },
@@ -260,7 +262,8 @@ export default function PrivacidadPage() {
           <h2>Tus derechos</h2>
           <p>
             Puedes pedir una copia de tus datos, que se corrijan o que se borre lo que dejaste en
-            el canal o en el curso. Pídeselo a Capital Humano de Industrias Iberia. Lo que viene
+            el canal o en el curso. Pídeselo a Capital Humano de Industrias Iberia o escríbenos
+            a <a href={`mailto:${CORREO_SOPORTE}`}>{CORREO_SOPORTE}</a>. Lo que viene
             del listado de personal se corrige ahí mismo, y borrar el avance del curso borra
             también tu certificado.
           </p>
@@ -273,9 +276,24 @@ export default function PrivacidadPage() {
             Si esta política cambia, se avisará en el canal y se actualizará la fecha de
             vigencia de arriba.
           </p>
+
+          <h2>Contacto</h2>
+          <p>
+            Para cualquier pregunta sobre esta política o sobre tus datos, escríbenos a{' '}
+            <a href={`mailto:${CORREO_SOPORTE}`}>{CORREO_SOPORTE}</a>.
+          </p>
         </article>
 
-        <p className="mt-8 text-center text-xs leading-relaxed text-marca-400">
+        <nav className="mt-8 flex flex-wrap justify-center gap-x-2 text-sm">
+          <Link href="/soporte" className="toque px-2 font-medium text-acento-600">
+            Soporte
+          </Link>
+          <Link href="/normas" className="toque px-2 font-medium text-acento-600">
+            Normas de uso
+          </Link>
+        </nav>
+
+        <p className="mt-4 text-center text-xs leading-relaxed text-marca-400">
           Industrias Iberia · App operada por Boosty Digital
         </p>
       </div>

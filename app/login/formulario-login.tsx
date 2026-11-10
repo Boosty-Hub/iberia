@@ -1,21 +1,27 @@
 'use client'
 
 import Link from 'next/link'
-import { useActionState } from 'react'
+import { useActionState, useEffect } from 'react'
 import { useFormStatus } from 'react-dom'
 import { iniciarSesion, type EstadoLogin } from './actions'
 
-function BotonEnviar() {
+function BotonEnviar({ entrando }: { entrando: boolean }) {
   const { pending } = useFormStatus()
   return (
-    <button type="submit" className="btn-acento min-h-11 w-full" disabled={pending}>
-      {pending ? 'Verificando…' : 'Entrar'}
+    <button type="submit" className="btn-acento min-h-11 w-full" disabled={pending || entrando}>
+      {entrando ? 'Entrando…' : pending ? 'Verificando…' : 'Entrar'}
     </button>
   )
 }
 
 export function FormularioLogin({ destino }: { destino: string }) {
   const [estado, accion] = useActionState<EstadoLogin, FormData>(iniciarSesion, {})
+
+  // La acción ya no redirige: devuelve a dónde ir y aquí se navega con una carga
+  // completa (ver `iniciarSesion`). `replace` para que «atrás» no vuelva al login.
+  useEffect(() => {
+    if (estado.destino) window.location.replace(estado.destino)
+  }, [estado.destino])
 
   return (
     <form action={accion} className="space-y-4">
@@ -70,7 +76,7 @@ export function FormularioLogin({ destino }: { destino: string }) {
         </p>
       )}
 
-      <BotonEnviar />
+      <BotonEnviar entrando={Boolean(estado.destino)} />
     </form>
   )
 }

@@ -1,7 +1,24 @@
 'use client'
 
 import { useEffect } from 'react'
-import { registrarDispositivo } from '@/app/canal/(dentro)/acciones'
+
+/**
+ * Manda el token a `/canal/dispositivo`, que lo guarda y deja la cookie. Es una
+ * ruta y no una acción de servidor para que la página no se vuelva a pintar (ver
+ * la ruta). Un fallo no se reintenta: la próxima entrada al canal lo registra.
+ */
+async function registrarDispositivo(token: string, plataforma: 'ios' | 'android') {
+  try {
+    await fetch('/canal/dispositivo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, plataforma }),
+      credentials: 'same-origin',
+    })
+  } catch {
+    // Sin red no hay registro; los avisos no pueden romper la página.
+  }
+}
 
 /**
  * Cuánto se espera antes de pedir el permiso de avisos: que la persona vea el
@@ -51,7 +68,7 @@ export function NotificacionesNativas() {
         // registra primero, se pierde.
         guardar(
           await PushNotifications.addListener('registration', ({ value }) => {
-            void registrarDispositivo(value, 'ios').catch(() => {})
+            void registrarDispositivo(value, 'ios')
           })
         )
         guardar(

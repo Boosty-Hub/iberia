@@ -4,6 +4,8 @@ import { cerrarSesion } from '@/app/login/actions'
 import {
   IconoBloquear,
   IconoCampana,
+  IconoChat,
+  IconoEscudo,
   IconoPanel,
   IconoSalir,
   IconoUsuarios,
@@ -109,6 +111,24 @@ export default async function YoPage() {
             {(bloqueadas ?? 0) > 0 && (
               <span className="text-[15px] font-semibold text-marca-500">{bloqueadas}</span>
             )}
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/normas"
+            className="flex items-center gap-3 px-4 py-3.5 active:bg-marca-50"
+          >
+            <IconoEscudo className="h-5 w-5 text-marca-400" />
+            <span className="flex-1 text-[15px] text-marca-800">Normas de uso</span>
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/soporte"
+            className="flex items-center gap-3 px-4 py-3.5 active:bg-marca-50"
+          >
+            <IconoChat className="h-5 w-5 text-marca-400" />
+            <span className="flex-1 text-[15px] text-marca-800">Ayuda y soporte</span>
           </Link>
         </li>
         {puedePublicar && (

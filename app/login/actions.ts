@@ -3,10 +3,12 @@
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { destinoInicial, obtenerSesion } from '@/lib/auth'
 import { olvidarEsteTelefono } from '@/lib/notificaciones'
 import { createClient } from '@/lib/supabase/server'
 
-export type EstadoLogin = { error?: string }
+/** `destino` sale solo cuando entró: la página navega ahí con una carga completa. */
+export type EstadoLogin = { error?: string; destino?: string }
 
 /** Traduce los mensajes de Supabase Auth a algo que el usuario entienda. */
 function traducirError(mensaje: string): string {
@@ -21,10 +23,13 @@ function traducirError(mensaje: string): string {
 
 /** Solo rutas internas: evita que ?destino= se use para redirigir fuera del sitio. */
 function destinoSeguro(valor: string | null): string {
-  if (!valor) return '/dashboard'
-  if (!valor.startsWith('/') || valor.startsWith('//')) return '/dashboard'
+  if (!valor) return DESTINO_POR_DEFECTO
+  if (!valor.startsWith('/') || valor.startsWith('//')) return DESTINO_POR_DEFECTO
   return valor
 }
+
+/** El que pone la página del login cuando no llega `?destino=`. */
+const DESTINO_POR_DEFECTO = '/dashboard'
 
 export async function iniciarSesion(
   _anterior: EstadoLogin,
@@ -47,9 +52,20 @@ export async function iniciarSesion(
     return { error: traducirError(error.message) }
   }
 
-  // El perfil se valida en obtenerSesion(): si está inactivo, no pasa del login.
-  revalidatePath('/', 'layout')
-  redirect(destino)
+  // ⚠️ No se redirige desde aquí (10 de noviembre de 2026). Con `redirect()`, Next
+  // pinta el destino entero —el canal, con sus consultas— y lo manda dentro de la
+  // respuesta de la acción; en la WebView del iPhone, con la red de planta, esa
+  // respuesta larga se cortaba y salía «TypeError: Load failed». La acción solo
+  // dice a dónde ir y el formulario navega con una carga normal de la página.
+  //
+  // Sin destino pedido, se ahorra el salto por `/dashboard`: el mismo
+  // `destinoInicial()` al que esa página manda a quien no tiene panel. El perfil
+  // se valida en obtenerSesion(): si está inactivo, el destino lo devuelve al login.
+  if (destino === DESTINO_POR_DEFECTO) {
+    const sesion = await obtenerSesion().catch(() => null)
+    if (sesion) return { destino: destinoInicial(sesion) }
+  }
+  return { destino }
 }
 
 // ── Recuperar la contraseña ─────────────────────────────────────────────────

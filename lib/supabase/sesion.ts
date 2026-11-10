@@ -15,7 +15,9 @@ import { NextResponse, type NextRequest } from 'next/server'
  * justo para quien necesita leerlo.
  *
  * `/privacidad` es la política de privacidad de la app de iOS: Apple exige una
- * dirección que se abra sin cuenta, y la revisa antes de aprobar la app.
+ * dirección que se abra sin cuenta, y la revisa antes de aprobar la app. Por lo
+ * mismo `/soporte` (la URL de soporte de la ficha) y `/normas` (las normas de uso
+ * del canal, guía 1.2).
  *
  * `/.well-known/apple-app-site-association` es lo que iOS le pide al sitio para
  * saber qué enlaces abren la app (Universal Links). Lo baja Apple, sin sesión, y
@@ -27,6 +29,8 @@ const RUTAS_PUBLICAS = [
   '/entrar',
   '/canal/entrar',
   '/privacidad',
+  '/soporte',
+  '/normas',
   '/.well-known/apple-app-site-association',
 ]
 

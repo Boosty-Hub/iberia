@@ -2,7 +2,10 @@ import type { Metadata, Viewport } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { IconoCampana, IconoPanel } from '@/components/iconos'
+import { AceptarNormas } from '@/components/canal/aceptar-normas'
 import { NavInferior } from '@/components/canal/nav-inferior'
+import { NormasDeUso } from '@/components/normas-de-uso'
+import { VERSION_NORMAS } from '@/lib/normas'
 import { NotificacionesNativas } from '@/components/canal/notificaciones-nativas'
 import { destinoInicial, inicioDelPanel, obtenerSesion, puede } from '@/lib/auth'
 import { iniciales, requerirEmpleado } from '@/lib/canal'
@@ -38,6 +41,13 @@ export default async function CanalLayout({ children }: LayoutProps<'/canal'>) {
     const destino = sesion ? destinoInicial(sesion) : '/canal/entrar'
     redirect(destino === '/canal' ? '/sin-acceso' : destino)
   }
+  // Las normas de uso se aceptan una vez antes de entrar (guía 1.2 de la App
+  // Store). Sin aceptarlas, en lugar del canal sale la pantalla que las pide; la
+  // acción que las acepta no pasa por aquí, y `/normas` es pública aparte.
+  if ((sesion?.normasAceptadas ?? 0) < VERSION_NORMAS) {
+    return <PantallaNormas />
+  }
+
   const panel = inicioDelPanel(sesion)
   const supabase = await createClient()
 
@@ -116,6 +126,36 @@ export default async function CanalLayout({ children }: LayoutProps<'/canal'>) {
       {/* Dentro de la app de iOS: el permiso de avisos y el registro del
           teléfono, ya con sesión. En el navegador no hace nada. */}
       <NotificacionesNativas />
+    </div>
+  )
+}
+
+/** Las normas con su botón de aceptar, sin la navegación del canal. */
+function PantallaNormas() {
+  return (
+    <div className="canal flex min-h-full flex-1 flex-col">
+      <main className="mx-auto w-full max-w-lg flex-1 pt-[max(1.5rem,var(--seguro-arriba))] pr-[max(1rem,var(--seguro-der))] pb-[max(1.5rem,var(--seguro-abajo))] pl-[max(1rem,var(--seguro-izq))]">
+        <Image
+          src="/marca/iberia.png"
+          alt="Industrias Iberia"
+          width={1400}
+          height={362}
+          priority
+          style={{ height: 28, width: 'auto' }}
+        />
+        <p className="rotulo mt-8">Antes de entrar</p>
+        <h1 className="mt-2 text-[24px] leading-tight font-bold tracking-tight text-balance text-marca-900">
+          Normas de uso del canal
+        </h1>
+
+        <article className="tarjeta-canal mt-5 px-5 py-6">
+          <NormasDeUso />
+        </article>
+
+        <div className="mt-5">
+          <AceptarNormas />
+        </div>
+      </main>
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { Marca } from '@/components/marca'
 import { FormularioLogin } from './formulario-login'
 
@@ -35,6 +36,18 @@ export default async function LoginPage({ searchParams }: PageProps<'/login'>) {
           <br />
           Boosty International LLC · Anthropic Partner
         </p>
+
+        <nav className="mt-2 flex flex-wrap justify-center gap-x-1 text-xs">
+          <Link href="/privacidad" className="toque px-2 font-medium text-marca-500">
+            Privacidad
+          </Link>
+          <Link href="/normas" className="toque px-2 font-medium text-marca-500">
+            Normas de uso
+          </Link>
+          <Link href="/soporte" className="toque px-2 font-medium text-marca-500">
+            Soporte
+          </Link>
+        </nav>
       </div>
     </main>
   )

@@ -23,6 +23,31 @@ export default function ErrorDeLaApp({
   return <PantallaDeError error={error} retry={retry} />
 }
 
+/** Los errores de red del navegador: Safari dice «Load failed»; Chromium y Firefox, lo demás. */
+const ERROR_DE_RED = /Load failed|Failed to fetch|NetworkError/i
+const CLAVE_RECARGA = 'iberia:recarga-por-red'
+/** Una recarga automática como mucho cada tanto: si la red sigue caída, no hay bucle. */
+const ESPERA_RECARGA_MS = 30_000
+
+/**
+ * Un corte de red en el teléfono —la respuesta de una acción o de una navegación
+ * que no terminó de llegar— no es un fallo de la pantalla: se recarga sola una
+ * vez. Si ya se recargó hace menos de 30 s, se deja la pantalla de error. Sin
+ * `sessionStorage` (navegación privada, bloqueado), no se recarga sola.
+ */
+function recargarSiFueLaRed(error: Error): boolean {
+  if (error.name !== 'TypeError' || !ERROR_DE_RED.test(error.message)) return false
+  try {
+    const ultima = Number(window.sessionStorage.getItem(CLAVE_RECARGA) ?? 0)
+    if (Date.now() - ultima < ESPERA_RECARGA_MS) return false
+    window.sessionStorage.setItem(CLAVE_RECARGA, String(Date.now()))
+  } catch {
+    return false
+  }
+  window.location.reload()
+  return true
+}
+
 export function PantallaDeError({
   error,
   retry,
@@ -30,6 +55,10 @@ export function PantallaDeError({
   error: Error & { digest?: string }
   retry: () => void
 }) {
+  useEffect(() => {
+    recargarSiFueLaRed(error)
+  }, [error])
+
   const detalle = [error.name, error.message, error.digest && `digest ${error.digest}`]
     .filter(Boolean)
     .join(' · ')

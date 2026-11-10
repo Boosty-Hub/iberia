@@ -1,47 +1,34 @@
 'use server'
 
-import { cookies } from 'next/headers'
-import { COOKIE_DISPOSITIVO, tokenValido } from '@/lib/notificaciones'
+import { VERSION_NORMAS } from '@/lib/normas'
 import { createClient } from '@/lib/supabase/server'
 
 /**
- * Registra el teléfono de quien está en el canal, para mandarle avisos.
+ * Deja constancia de que quien está en el canal aceptó las normas de uso, en los
+ * metadatos de su cuenta (`lib/normas.ts`). La llama `AceptarNormas`.
  *
- * La llama `NotificacionesNativas` dentro de la app cada vez que iOS le entrega
- * el token —al entrar al canal con permiso de avisos—, así que la fila queda al
- * día si Apple lo cambia. Si el token estaba en otra cuenta, pasa a esta: el
- * token es del aparato (ver la migración de `dispositivos`).
+ * No revalida ni redirige: eso haría que Next mandara el canal entero pintado
+ * dentro de la respuesta de la acción, que es lo que se cae en una conexión de
+ * planta. La pantalla recarga sola al recibir `ok`, y el layout lee la versión
+ * aceptada con `getUser()`, que la trae fresca del servidor de Auth.
  *
- * Deja además la cookie con el token, que es lo que el cierre de sesión usa para
- * desligar el teléfono. Va `httpOnly`: el código de la página no la necesita.
- * ⚠️ Solo se escribe si cambió: poner una cookie desde una acción hace que Next
- * vuelva a pintar en el servidor la página y sus layouts, y esto corre cada vez
- * que se entra al canal.
+ * Los metadatos los escribe la propia persona —es lo que permite guardar esto
+ * sin migración—, así que solo sirven para lo que son: una constancia de que
+ * aceptó, no un permiso. `handle_new_user` lee los metadatos solo al crear la
+ * cuenta, no al cambiarlos.
  */
-export async function registrarDispositivo(
-  token: string,
-  plataforma: string
-): Promise<{ ok: boolean }> {
-  if (plataforma !== 'ios' && plataforma !== 'android') return { ok: false }
-  if (!tokenValido(token)) return { ok: false }
-
+export async function aceptarNormas(): Promise<{ ok: boolean }> {
   const supabase = await createClient()
-  const { error } = await supabase.rpc('registrar_dispositivo', {
-    p_token: token,
-    p_plataforma: plataforma,
-  })
-  if (error) return { ok: false }
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false }
 
-  const almacen = await cookies()
-  if (almacen.get(COOKIE_DISPOSITIVO)?.value !== token) {
-    almacen.set(COOKIE_DISPOSITIVO, token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      // Lo más que deja un navegador.
-      maxAge: 60 * 60 * 24 * 400,
-    })
-  }
-  return { ok: true }
+  const { error } = await supabase.auth.updateUser({
+    data: {
+      normas_aceptadas_version: VERSION_NORMAS,
+      normas_aceptadas_en: new Date().toISOString(),
+    },
+  })
+  return { ok: !error }
 }
