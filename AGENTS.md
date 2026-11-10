@@ -150,6 +150,15 @@ con `@capacitor/android`. Lo que falta para publicarla está en `PENDIENTES.md`.
   Desk: `Info.plist` con los textos de permiso en español e `ITSAppUsesNonExemptEncryption` en
   `false`, `aps-environment = production` en los entitlements y los dos métodos de APNs en
   `AppDelegate`. Firma manual, equipo `45TRWF6998`.
+- **El arranque no se ve negro** (10 de noviembre de 2026). `backgroundColor: '#f6f7f9'` en
+  `capacitor.config.ts` (el fondo del canal; sin él la WebView usa el color del sistema, negro en
+  modo oscuro) y el mismo color en `LaunchScreen.storyboard`. Con `@capacitor/splash-screen` 8.0.2
+  el arranque **se queda hasta que la página pinta**: `PuenteNativo` llama `SplashScreen.hide()` (en
+  el layout raíz, así que también en `/login`). `launchAutoHide: true` con `launchShowDuration: 10000`
+  es solo el tope de seguridad —sin red, el arranque se quita a los 10 s—; un `hide()` antes lo
+  quita en el acto. No se apaga el autoocultado: sin él el plugin no tiene tope, y
+  `launchShowDuration: 0` no muestra el arranque. ⚠️ **Todo esto vive en el binario**:
+  cambiarlo es compilar y publicar otra versión.
 - **Se compila y se sube solo desde GitHub Actions**: el flujo «App de iOS»
   (`.github/workflows/ios.yml`), en un runner de macOS, se lanza a mano y trae un interruptor para
   subir o no a App Store Connect. Usa seis secretos, con los mismos nombres que en Boosty Desk:

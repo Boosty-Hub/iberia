@@ -30,7 +30,22 @@ const config: CapacitorConfig = {
   // el iPad se presenta como un Mac, así que el agente de usuario solo no basta.
   appendUserAgent: 'IberiaApp',
 
+  // Fondo del canal. Sin esto la WebView se pinta con el color del sistema, que en
+  // modo oscuro es negro, mientras baja la página remota.
+  backgroundColor: '#f6f7f9',
+
   plugins: {
+    // El arranque se queda hasta que la página pinta: lo quita `PuenteNativo`
+    // con `SplashScreen.hide()`. `launchShowDuration` es solo el tope de
+    // seguridad: si la página nunca llega —sin red, servidor caído—, el plugin lo
+    // quita a los 10 s. Un `hide()` antes lo quita en el acto y el tope ya no hace
+    // nada. OJO: `launchShowDuration: 0` NO lo apaga, hace que ni se muestre.
+    SplashScreen: {
+      launchAutoHide: true,
+      launchShowDuration: 10000,
+      backgroundColor: '#f6f7f9',
+      showSpinner: false,
+    },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
     },

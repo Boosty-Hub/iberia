@@ -39,6 +39,22 @@ export function PuenteNativo() {
       else router.push(ruta)
     }
 
+    // Quita el arranque nativo, que se queda hasta que la página pinta. Va aparte
+    // de los oyentes: si ellos fallan, el arranque se quita igual.
+    void (async () => {
+      try {
+        if (!('Capacitor' in window)) return
+        const { Capacitor } = await import('@capacitor/core')
+        if (!Capacitor.isNativePlatform()) return
+        // Dos cuadros después del montaje: ya hay una pintura de la página.
+        await new Promise<void>((listo) => requestAnimationFrame(() => requestAnimationFrame(() => listo())))
+        const { SplashScreen } = await import('@capacitor/splash-screen')
+        await SplashScreen.hide({ fadeOutDuration: 250 })
+      } catch (error) {
+        console.warn('La app no pudo quitar el arranque:', error)
+      }
+    })()
+
     void (async () => {
       try {
         // La app inyecta su puente antes que la página: sin él es un navegador,
