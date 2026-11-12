@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Rojo Iberia (#D4332C), el fondo del icono adaptativo. -->
+    <color name="ic_launcher_background">#D4332C</color>
+</resources>

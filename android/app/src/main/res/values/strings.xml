@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Iberia</string>
+    <string name="title_activity_main">Iberia</string>
+    <string name="package_name">com.industriasiberia.canal</string>
+    <string name="custom_url_scheme">com.industriasiberia.canal</string>
+</resources>

@@ -7,8 +7,9 @@ type Manija = { remove: () => Promise<void> }
 
 /**
  * Lo que llega a la app desde afuera y la mueve de página: un aviso tocado y un
- * enlace del sitio abierto en el teléfono (Universal Links). Solo hace algo
- * dentro de la app de iOS; en un navegador no carga ni el plugin.
+ * enlace del sitio abierto en el teléfono (Universal Links en iOS, App Links en
+ * Android), y en Android el botón de «atrás». Solo hace algo dentro de la app;
+ * en un navegador no carga ni el plugin.
  *
  * Va en el layout raíz y no en el del canal porque las dos cosas pueden llegar
  * **sin sesión**: el enlace personal de WhatsApp (`/entrar/<token>`) es justo la
@@ -71,6 +72,24 @@ export function PuenteNativo() {
 
         // Un enlace del sitio abierto desde WhatsApp, el correo o Safari.
         guardar(await App.addListener('appUrlOpen', ({ url }) => ir(rutaPropia(url))))
+
+        // El botón o el gesto de «atrás» de Android. Sin oyente, Capacitor solo
+        // retrocede la WebView y, en la primera página, no hace nada: el botón
+        // quedaba muerto. Con oyente: primero cierra la hoja o el menú abierto
+        // (`<dialog>`), si no retrocede en el historial, y en la primera página
+        // manda la app al fondo —como cualquier app de Android— sin cerrarla, para
+        // no perder lo que estaba en pantalla.
+        if (Capacitor.getPlatform() === 'android') {
+          guardar(
+            await App.addListener('backButton', ({ canGoBack }) => {
+              const abiertos = document.querySelectorAll<HTMLDialogElement>('dialog[open]')
+              const ultimo = abiertos[abiertos.length - 1]
+              if (ultimo) ultimo.close()
+              else if (canGoBack) window.history.back()
+              else void App.minimizeApp()
+            })
+          )
+        }
 
         // Un aviso tocado: `ruta` la pone `lib/notificaciones.ts`.
         guardar(

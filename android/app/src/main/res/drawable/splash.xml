@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- El arranque de respaldo (Android 11 o menos, o si falla el del sistema): el logo
+     centrado sobre el fondo del canal, sin estirarlo. `splash_logo` lo genera
+     `pwsh scripts/generar-marca.ps1 -SoloAndroid`. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/fondo_canal" />
+    <item>
+        <bitmap android:gravity="center" android:src="@drawable/splash_logo" />
+    </item>
+</layer-list>

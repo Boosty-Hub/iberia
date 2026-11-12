@@ -22,6 +22,7 @@ import { NextResponse, type NextRequest } from 'next/server'
  * `/.well-known/apple-app-site-association` es lo que iOS le pide al sitio para
  * saber qué enlaces abren la app (Universal Links). Lo baja Apple, sin sesión, y
  * no acepta una redirección: mandado al login, los enlaces abrirían Safari.
+ * `/.well-known/assetlinks.json` es lo mismo para Android (App Links).
  */
 const RUTAS_PUBLICAS = [
   '/login',
@@ -32,6 +33,7 @@ const RUTAS_PUBLICAS = [
   '/soporte',
   '/normas',
   '/.well-known/apple-app-site-association',
+  '/.well-known/assetlinks.json',
 ]
 
 export async function updateSession(request: NextRequest) {

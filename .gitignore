@@ -77,3 +77,17 @@ desktop.ini
 # `notas-entrevistas/` está además ENT-005, que se grabó sin consentimiento y no
 # puede citarse en ninguna parte.
 /Insumos/
+
+# Firma de las apps: el almacén de la clave de subida de Android y lo que salga de
+# compilar. El almacén vive en C:\Users\santi\Desktop\iberia-secretos\android, y en
+# el runner sale de los secretos de GitHub. Nunca en el repositorio.
+*.jks
+*.keystore
+*.p12
+*.p8
+*.mobileprovision
+/android/**/build/
+/android/.gradle/
+/android/local.properties
+*.aab
+*.apk

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- El fondo del canal: lo que se ve mientras baja la página y detrás de las
+         barras del sistema. Es el mismo de `backgroundColor` en capacitor.config.ts. -->
+    <color name="fondo_canal">#F6F7F9</color>
+    <color name="colorPrimary">#D4332C</color>
+    <color name="colorPrimaryDark">#F6F7F9</color>
+    <color name="colorAccent">#D4332C</color>
+</resources>

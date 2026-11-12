@@ -58,7 +58,7 @@ export function NotificacionesNativas() {
         if (!('Capacitor' in window)) return
         const { Capacitor } = await import('@capacitor/core')
         // Solo iOS: en Android, `register()` cierra la app si no hay Firebase, y
-        // la app de Android (PEN-14662) todavía no existe.
+        // la app de Android (PEN-14662) todavía no lo tiene.
         if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'ios') return
 
         const { PushNotifications } = await import('@capacitor/push-notifications')

@@ -252,7 +252,13 @@ se rechaza), son las filas 4 a 6:
 | 7 | **Revisar `/privacidad`, que es un borrador.** Dice que las respuestas del curso las leen «el equipo de Boosty Digital y la persona que lo administra por Iberia», porque la cuenta de Alberto es de nivel Administrador y la base le deja leer todas las respuestas a ese nivel. `AGENTS.md` dice «solo su autor y los editores de Boosty», y hoy eso no es exacto: **decidir si se queda esa redacción o se le baja el nivel a la cuenta de Alberto**. Y la retención y el contacto —«pídeselo a Capital Humano», sin correo— no están verificados | Santiago y Gabriel | Apple revisa la política antes de aprobar la app |
 | 8 | ~~**La ficha en App Store Connect**~~ ✅ Llenada por la API, con capturas nuevas y notas para la revisión | — | |
 | 9 | ~~**Abierta o no listada**~~ ✅ **No listada**, pedida después de volver a enviar (fila D) | — | |
-| 10 | **Después, Google Play (PEN-14662)**, con `@capacitor/android` | Santiago | |
+| 10 | **Google Play (PEN-14662)**: ~~la app de Android~~ ✅ **armada el 12 de noviembre** (`android/`, flujo «App de Android», `assetlinks.json`, clave de subida en la carpeta de secretos; ver «La app de Android» en `AGENTS.md`). Compila en local: `.aab` firmado y `.apk` de depuración. Falta lo de abajo, 10a a 10f | Santiago | |
+| 10a | **Revisar el cambio y hacer el commit** | Santiago | Sin él no hay `assetlinks.json` en línea ni flujo |
+| 10b | **Cargar los cuatro secretos `ANDROID_*` en `Boosty-Hub/iberia`** (el mapa está en el `README.txt` de la carpeta de secretos) y **correr «App de Android»** | Santiago | Sin ellos el flujo falla en la firma |
+| 10c | **Crear la app en Play Console** («Industrias Iberia», paquete `com.industriasiberia.canal`), con Play App Signing, y subir el `.aab` a prueba interna. Ficha, política de privacidad (`/privacidad`), clasificación de contenido, seguridad de los datos y acceso para la revisión (las cuentas de ejemplo) | Santiago | Google no publica sin la ficha completa |
+| 10d | **Agregar la huella SHA-256 de Play App Signing** a `HUELLAS` en `app/.well-known/assetlinks.json/route.ts` y desplegar. Sale de Play Console después de la primera subida | Santiago | Sin ella, los enlaces del sitio abren Chrome y no la app |
+| 10e | **Probarla en un teléfono Android de verdad**: que las barras no tapen nada (con modo oscuro también), el botón de atrás, el arranque, el login sin salir a Chrome, y el enlace personal de WhatsApp abriendo la app con la sesión | Santiago | Nada de eso se pudo probar sin teléfono |
+| 10f | **Avisos al teléfono en Android**: piden Firebase (FCM) y que `lib/notificaciones.ts` mande también a Android. Diferido | Santiago | |
 
 ---
 

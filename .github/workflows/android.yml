@@ -1,0 +1,110 @@
+name: App de Android
+
+# Manual a propósito, como «App de iOS»: compilar una versión para la tienda nunca
+# puede ser un efecto secundario de hacer push a una rama. Este flujo no sube nada
+# a Google Play: deja el .aab firmado como artefacto de la corrida y se sube a mano
+# en Play Console.
+on:
+  workflow_dispatch:
+
+# El trabajo solo necesita leer el código.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # El número de versión (versionCode) es el número de la corrida: Google Play
+      # no acepta dos subidas con el mismo. La versión que se ve (versionName,
+      # 1.0.0) sale de android/app/build.gradle. ⚠️ «Re-run» repite el número:
+      # para volver a subir, una corrida nueva.
+      ANDROID_VERSION_CODE: ${{ github.run_number }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      # El plugin de Android para Gradle 8.13 que trae Capacitor 8 pide JDK 17 o
+      # más; va el 21, el que usa Android Studio.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+          cache: "gradle"
+
+      # Sin `next build`: la app carga el sitio en línea (`server.url` en
+      # capacitor.config.ts) y lo único que copia al binario es `movil/www`,
+      # que es estático y está en el repositorio.
+      - run: npm ci
+
+      # `cap sync` genera lo que no está en git (android/.gitignore): la carpeta
+      # web, capacitor.config.json, los plugins y el proyecto de Cordova.
+      - run: npx cap sync android
+
+      - name: Preparar la firma de subida
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          for nombre in KEYSTORE_B64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            if [ -z "${!nombre}" ]; then echo "::error::Falta el secreto ANDROID_$nombre."; exit 1; fi
+          done
+
+          ALMACEN="$RUNNER_TEMP/iberia-subida.jks"
+          # printf y no echo: echo le agrega un salto de línea al base64.
+          printf '%s' "$KEYSTORE_B64" | base64 --decode > "$ALMACEN"
+          chmod 600 "$ALMACEN"
+
+          # Que el almacén abra con esa contraseña y traiga ese alias: si no, falla
+          # aquí y no a mitad de Gradle.
+          if ! keytool -list -keystore "$ALMACEN" -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" > /dev/null; then
+            echo "::error::El almacén no abre con esa contraseña o no trae el alias $KEY_ALIAS."
+            exit 1
+          fi
+
+          # Solo la ruta pasa a los pasos que siguen; las contraseñas van en el
+          # paso de Gradle y en ningún otro.
+          echo "ANDROID_KEYSTORE_PATH=$ALMACEN" >> "$GITHUB_ENV"
+
+      # build.gradle firma solo si están las cuatro variables.
+      - name: Compilar el .aab firmado
+        working-directory: android
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "Versión número $ANDROID_VERSION_CODE"
+          chmod +x gradlew
+          ./gradlew --no-daemon bundleRelease
+
+      # Que salga firmado con la clave de subida y no sin firmar: Play Console
+      # rechaza un .aab sin firma, y es mejor saberlo aquí.
+      - name: Comprobar la firma
+        run: |
+          AAB="android/app/build/outputs/bundle/release/app-release.aab"
+          jarsigner -verify "$AAB" | tee "$RUNNER_TEMP/verificacion.txt"
+          grep -q "jar verified" "$RUNNER_TEMP/verificacion.txt"
+          keytool -printcert -jarfile "$AAB" | grep -E "Owner|SHA256:"
+
+      - name: Guardar el .aab
+        uses: actions/upload-artifact@v4
+        with:
+          name: Iberia-aab-${{ github.run_number }}
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          # De uso interno: no se queda los 90 días por defecto.
+          retention-days: 14
+
+      # Pase lo que pase: el almacén no se queda en el runner.
+      - name: Limpiar la firma
+        if: always()
+        run: rm -f "$RUNNER_TEMP/iberia-subida.jks" "$RUNNER_TEMP/verificacion.txt"

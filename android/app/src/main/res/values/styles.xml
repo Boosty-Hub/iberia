@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base application theme. Claro siempre: el canal no tiene tema oscuro. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <!-- El tema con el que corre la WebView. `windowBackground` es lo que pinta
+         Capacitor detrás de las barras del sistema cuando aparta la WebView de ellas:
+         el fondo del canal, para que no se vea una franja de otro color. -->
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:background">@null</item>
+        <item name="android:windowBackground">@color/fondo_canal</item>
+    </style>
+
+    <!-- El arranque. En Android 12+ lo dibuja el sistema: el fondo del canal y el
+         icono al centro. Se queda hasta que la página pinta: lo quita `PuenteNativo`
+         con `SplashScreen.hide()`, con el tope de 10 s de capacitor.config.ts. -->
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/fondo_canal</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
+        <item name="android:background">@drawable/splash</item>
+    </style>
+</resources>

@@ -92,7 +92,8 @@ La app va con la identidad de **Industrias Iberia**, no la de Boosty.
 
   ```
   pwsh scripts/generar-marca.ps1            # requiere Windows (GDI+)
-  pwsh scripts/generar-marca.ps1 -SoloIos   # solo el icono y el arranque de la app de iOS
+  pwsh scripts/generar-marca.ps1 -SoloIos       # solo el icono y el arranque de la app de iOS
+  pwsh scripts/generar-marca.ps1 -SoloAndroid   # solo los iconos y el arranque de la de Android
   ```
 
   Produce `public/marca/iberia.png` (rojo), `iberia-blanco.png` (para el carbón),
@@ -131,8 +132,8 @@ npm run capturar:canal -- --password "<clave>" --flujo   # iPhone 14 + flujo de 
 ## La app de Iberia (`ios/`) — el canal en el App Store
 
 El canal empaquetado para el iPhone (PEN-14661), desde el 23 de octubre de 2026. Va en la misma
-cuenta de Apple que Boosty Desk y copia su configuración. Google Play (PEN-14662) viene después,
-con `@capacitor/android`. Lo que falta para publicarla está en `PENDIENTES.md`.
+cuenta de Apple que Boosty Desk y copia su configuración. La de Google Play (PEN-14662) es la misma
+cáscara: ver «La app de Android», abajo. Lo que falta para publicarlas está en `PENDIENTES.md`.
 
 - **Es una cáscara de Capacitor 8.5.3 en este mismo repositorio.** `capacitor.config.ts` (appId
   `com.industriasiberia.canal`, appName `Iberia`) pone `server.url` en
@@ -224,7 +225,7 @@ el teléfono y enlaces del sitio que abren la app—.
 - **El permiso se pide dentro del canal, no en el login** (`NotificacionesNativas`, en el layout
   del canal): dos segundos después de entrar con sesión. Con el permiso dado, se registra en
   silencio cada vez que se entra; negado, no se insiste. Solo iOS: en Android `register()` cierra la
-  app sin Firebase, y la de Android no existe todavía.
+  app sin Firebase, y la de Android todavía no lo tiene.
 - **El emisor es `lib/apns.ts`**: `node:http2` —APNs no habla HTTP/1.1, que es lo del `fetch` de
   Node— a `api.push.apple.com`, siempre producción (TestFlight y la tienda lo son), con un JWT ES256
   que se reusa 50 minutos y `apns-topic` = el bundle. No importa `server-only` para que
@@ -250,6 +251,55 @@ el teléfono y enlaces del sitio que abren la app—.
   `/entrar` va con `location.assign`, no con el router: pone la cookie y redirige.
 - **El flujo comprueba que el perfil traiga push y Associated Domains** antes de archivar: un perfil
   creado antes de activar alguno en el App ID hace fallar `codesign` a mitad del archivo.
+
+## La app de Android (`android/`) — el canal en Google Play
+
+La misma cáscara que la de iOS, para Google Play (PEN-14662), desde el 12 de noviembre de 2026. Lo
+que falta para publicarla está en `PENDIENTES.md`.
+
+- **`@capacitor/android` 8.5.3, fijo y a la par de `@capacitor/core`.** `android/` salió de
+  `npx cap add android`: paquete `com.industriasiberia.canal`, nombre «Iberia», versión 1.0.0,
+  `minSdk` 24 y `targetSdk`/`compileSdk` 36, los de Capacitor 8 (Google Play exige al menos 35).
+  Lee el mismo `capacitor.config.ts`: `server.url`, `allowNavigation`, el agente de usuario y el
+  arranque valen para las dos.
+- **Las barras del sistema no tapan nada.** La página llega de borde a borde y se aparta con las
+  `--seguro-*` de `globals.css`, como en el iPhone: el plugin SystemBars de Capacitor pasa a la
+  WebView las medidas reales en `env(safe-area-inset-*)` (WebView 140 o más) o, con una más vieja,
+  aparta la WebView de las barras y `env()` da 0. No hizo falta tocar el CSS. `MainActivity` deja la
+  app siempre en modo claro —con el teléfono en modo oscuro, los iconos de la barra de estado salían
+  blancos sobre el fondo claro— y activa el borde a borde también antes de Android 15.
+  ⚠️ `SystemBars.style` en `capacitor.config.ts` no sirve para eso: también lo lee iOS.
+- **El botón de «atrás»** lo atiende `PuenteNativo`, solo en Android: cierra la hoja o el menú
+  abierto (`<dialog>`), si no retrocede, y en la primera página manda la app al fondo
+  (`App.minimizeApp()`), sin cerrarla. Sin oyente, en la primera página no hacía nada.
+- **Sin avisos al teléfono todavía**: `NotificacionesNativas` sigue siendo solo de iOS, porque en
+  Android `register()` cierra la app si no hay Firebase.
+- **App Links**: el `intent-filter` con `autoVerify` de `AndroidManifest.xml` declara `/entrar/*`,
+  `/canal` y `/canal/*`, los mismos del archivo de Apple, y Android lo verifica contra
+  `/.well-known/assetlinks.json` (una ruta de Next, pública en `lib/supabase/sesion.ts`). Ahí van
+  el paquete y las huellas SHA-256 de los certificados, que son públicas. 🔴 **Falta la huella de
+  Play App Signing**: Google vuelve a firmar lo que baja la gente con su clave, así que, después de
+  la primera subida, se copia de Play Console y se agrega a `HUELLAS`; sin ella, los enlaces abren
+  Chrome.
+- **La clave de subida** es `iberia-subida` (RSA 4096, vence en 2059), en
+  `C:\Users\santi\Desktop\iberia-secretos\android\`, con sus contraseñas en el `README.txt` de esa
+  carpeta. Nunca en el repositorio: `.gitignore` excluye `*.jks` y `*.keystore`. Si se pierde, se
+  pide en Play Console un reinicio de la clave de subida.
+- **Se compila solo desde GitHub Actions**: el flujo «App de Android»
+  (`.github/workflows/android.yml`), manual, en Ubuntu con JDK 21. Hace `cap sync`, decodifica el
+  almacén, compila el `.aab` firmado (`bundleRelease`), comprueba la firma y lo deja como artefacto
+  de la corrida. **No sube a Google Play**: el `.aab` se sube a mano en Play Console. Cuatro
+  secretos: `ANDROID_KEYSTORE_B64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` y
+  `ANDROID_KEY_PASSWORD`.
+  - `android/app/build.gradle` firma solo si están las cuatro variables (`ANDROID_KEYSTORE_PATH` y
+    las tres de arriba): sin ellas, la compilación de depuración funciona igual.
+  - **El `versionCode` es el número de la corrida** (`ANDROID_VERSION_CODE`, o `-PversionCode=N`;
+    en local, 1). ⚠️ «Re-run» lo repite y Play lo rechaza: corrida nueva.
+- **El icono y el arranque se generan**: `pwsh scripts/generar-marca.ps1 -SoloAndroid`. El icono es
+  adaptativo —el rojo de fondo y «IB» en blanco al frente, que sirve también de icono temático—, con
+  su versión clásica y redonda para Android 7. En Android 12+ el arranque lo dibuja el sistema: el
+  fondo del canal con el icono al centro (`styles.xml`); `drawable/splash.xml` es el de respaldo, el
+  logo sobre el fondo del canal. Se queda hasta que la página pinta, igual que en iOS.
 
 ## Reportar y bloquear (guía 1.2 de la App Store)
 

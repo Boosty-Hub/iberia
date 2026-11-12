@@ -1,9 +1,10 @@
 import type { CapacitorConfig } from '@capacitor/cli'
 
 /**
- * La app nativa de iOS es una cáscara: carga el sitio en línea, así que un
- * cambio de la web llega a los teléfonos sin publicar otra versión en la App
- * Store. Se compila y se sube solo desde GitHub Actions (`.github/workflows/ios.yml`).
+ * La app nativa —iOS y Android— es una cáscara: carga el sitio en línea, así que
+ * un cambio de la web llega a los teléfonos sin publicar otra versión en la
+ * tienda. Se compila solo desde GitHub Actions (`.github/workflows/ios.yml` y
+ * `.github/workflows/android.yml`).
  */
 const config: CapacitorConfig = {
   appId: 'com.industriasiberia.canal',
@@ -45,6 +46,16 @@ const config: CapacitorConfig = {
       launchShowDuration: 10000,
       backgroundColor: '#f6f7f9',
       showSpinner: false,
+    },
+    // Solo lo lee Android. La página declara `viewport-fit=cover` (app/layout.tsx):
+    // decírselo de entrada evita que la WebView salte al detectarlo. Con WebView
+    // 140 o más, la página llega hasta los bordes y `env(safe-area-inset-*)` trae
+    // la medida real, que es lo que ya respetan las `--seguro-*` de globals.css;
+    // con una más vieja, Capacitor aparta la WebView de las barras y `env()` da 0.
+    // El color de los iconos (oscuros sobre el fondo claro) no va aquí: `style`
+    // también lo lee iOS. Lo fija `MainActivity` en Android.
+    SystemBars: {
+      initialViewportFitValueHint: 'cover',
     },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert'],
