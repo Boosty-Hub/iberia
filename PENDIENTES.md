@@ -710,7 +710,9 @@ Rama `plataforma/etapa-1`, Supabase de pruebas `wsqhsjbwkjlqrdxnyadq`. El plan e
 
 | Qué | De quién | Nota |
 |---|---|---|
-| **OK de Gabriel para el commit y, después, para producción** | Gabriel | En producción: aplicar las once migraciones `20261120*`, exponer `org,sgc,flujo,control` en la API, correr `scripts/plataforma/importar-base.mjs` e `importar-semillas.mjs --destino produccion --confirmo`, y regenerar los tipos. **No antes de pasar Supabase a Pro** (G-06) |
+| **OK de Gabriel para producción** (los commits van en la rama desde el 20/11) | Gabriel | En producción hay que:<br>1. aplicar todas las migraciones `20261120*`;<br>2. exponer `org,sgc,flujo,control,ui,nucleo` en la API;<br>3. **comprobar que el registro público siga cerrado**;<br>4. correr `importar-base.mjs` e `importar-semillas.mjs --destino produccion --confirmo` y `capturar-tasas.mjs --historico 45`;<br>5. regenerar los tipos;<br>6. cargar `TASAS_SECRETO` en Netlify y programar `/api/tasas/capturar` (BCV a las 4:50 p. m. con reintentos; paralelo a las 9, 13 y 17 h).<br>**No antes de pasar Supabase a Pro** (G-06) |
+| Rediseño: R4 (IA visible), R5 (Mi día por rol y Ctrl K completo), R6 (endurecer: rendimiento de `ui.procesos`, que tarda 0,7 s; una sola definición por métrica; accesibilidad; pellizco en teléfono real; PDF del subárbol en servidor) | Equipo Boosty | Anexo E §10 |
+| ¿El historial de cambios de un objeto lo ve todo el que ve el objeto, o solo quien tiene permiso de auditoría? (R3 lo abrió a quien ve el objeto; los montos de costos siguen restringidos) | Gabriel | Hoy: quien ve el objeto |
 | **Base de conocimiento operando al 18 de diciembre** (New Iberia) | Equipo Boosty | Los bloques 1 a 4 del Anexo D, ya en producción |
 | Organigramas 2026 que faltan: Gerencia General, Operaciones, Distribución, Oficina Caracas y Capital Humano | Capital Humano | Hoy van los de 2023, marcados |
 | Tipo de nómina, sede, dirección y centro de costo por ficha | Capital Humano | El importador del padrón los perdió (confidencial y ventas quedaron como «mensual»; el 94 % sin sede) |

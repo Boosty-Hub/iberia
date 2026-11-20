@@ -133,10 +133,46 @@ de personal). El plan de la etapa es el Anexo D:
   migración. La usa `scripts/sembrar-contexto.mjs`.
 - ⚠️ El Supabase de producción sigue en el plan gratuito (G-06).
 
-**Dónde quedamos**: todo en la rama, sin commit. Las 16 pantallas responden en escritorio y en
-teléfono, y tipos y lint están limpios. Para llegar a producción hace falta el OK de Gabriel, aplicar
-las once migraciones y exponer los esquemas. Lo que falta, en `PENDIENTES.md`, «Plataforma Iberia ·
-Etapa 1».
+**El rediseño, el mismo día.**
+- **Qué pidió Gabriel:** que la Etapa 1 «no priorizó el dato» y que se rehiciera la interfaz desde cero.
+- **Lo que se le entregó para decidir:**
+  - el plan, en el Anexo E;
+  - dos modelos navegables, en `plataforma/diseno/`.
+- **Lo que pidió encima:**
+  - mapas y organigrama como lienzo que se mueve con el mouse y despliega cajas con un clic;
+  - dónde se ve la IA operando;
+  - tasas BCV dólar y euro y paralelo, con la brecha diaria.
+- **Lo que decidió:**
+  - la tasa oficial se toma de bcv.org.ve y se verifica contra DolarApi;
+  - el paralelo sale de DolarApi;
+  - se rehace todo el sistema con el diseño nuevo;
+  - las mejoras se aplican sobre la marcha, sin preguntar.
+
+**Lo que se construyó, en commits de la rama `plataforma/etapa-1` (sin push):**
+- `56d8532` · la Etapa 1, como base.
+- `5abd12f` · R0.
+  - **Armazón:**
+    - barra con fecha, escenario, Bs/USD, tasas, campana y Ctrl K;
+    - riel de dominios con nombres;
+    - TablaDatos con vistas guardadas, FichaObjeto, Kpi con sello de fuente.
+  - **Lienzo:** React Flow 12.12.1, que rinde igual que la 13 con 1.000 nodos.
+  - **Tasas:**
+    - `control.tasa_cambio` es de solo inserción;
+    - el BCV se lee con el intermedio de Sectigo, porque el sitio manda una cadena rota y Node falla;
+    - la ruta `/api/tasas/capturar` exige secreto.
+- `982912d` · R1, R2 y R3.
+  - **Organización** y **Procesos y Documentos** con el diseño nuevo.
+  - **Trabajo en equipo** (esquema `nucleo`): línea de tiempo con comentarios y @menciones, seguir un objeto, notificaciones, tareas y la bandeja rehecha.
+  - Las pruebas de punta a punta de requisición, escenario y ficha de proceso pasan sobre las pantallas nuevas.
+
+**Lo que se rompió o se encontró:**
+- 🔴 **El Supabase de pruebas nació con el registro público abierto.** Con el alta que toma el rol de los metadatos, cualquiera se hacía administrador. Se cerró el 20/11; solo había cuentas de prueba. Desde ahora `importar-base` falla si está abierto.
+- La auditoría dejaba leer montos de nómina a quien tenía permiso de auditoría. Corregido en la `200000`.
+- `publicar_escenario` fallaba con versiones del mismo día o programadas. Corregido.
+- Un `db push --include-all` de un agente le quitó el permiso de ejecución a las funciones de bloqueos del canal en pruebas. R3 lo restituyó, y `probar:bloqueos` da 68/68 en pruebas.
+- **Inconsistencia de cifras:** «procesos con ficha» da 48/205 en Mi día y 46/185 en el resumen de Procesos. Hay que definir cada métrica una sola vez.
+
+**Dónde quedamos**: R0 a R3 en la rama. Faltan R4 (IA visible), R5 (Mi día por rol y Ctrl K completo) y R6 (endurecer). Para producción hacen falta el OK de Gabriel, Supabase en plan pago, las migraciones `20261120*`, exponer `org, sgc, flujo, control, ui, nucleo` y el programador de tasas. Lo que falta está en `PENDIENTES.md`, «Plataforma Iberia · Etapa 1».
 
 ---
 
