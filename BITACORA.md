@@ -58,9 +58,8 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 - 🔴 **El plan gratuito de Supabase pausa el proyecto**: pasó antes del 19/10 y nadie podía entrar.
   Decidir si pasa a Pro (`PENDIENTES.md`).
 
-> **Plataforma Iberia (20/11):** la plataforma entera (Etapa 1, el rediseño y la integración del panel y
-> del canal) está en la rama `plataforma/etapa-1`, probada contra un Supabase de pruebas, **sin push**. En
-> producción solo entró el hotfix de lecturas. Ver la sesión 56.
+> **Plataforma Iberia (20/11):** **en producción** desde el 20/11. Contiene la Etapa 1, el rediseño y la
+> integración del panel y del canal, en `/sistema`; el informe queda aparte. Ver la sesión 56.
 
 ---
 
@@ -123,11 +122,26 @@ excluidos en `.git/info/exclude`. Lo que se encontró:
 - Deriva en producción: `renombrar_hablante` existe sin migración.
 - `db push --include-all` empuja también las migraciones de otros; en pruebas se aplica por la Management API (`scripts/plataforma/sql-pruebas.mjs`).
 
-**Dónde quedamos.** La plataforma está completa en la rama, salvo el seguimiento en curso: privacidad del padrón, portada del informe, comentarios en el programa y Ctrl K para sesiones. Faltan:
-- **Producción:** Supabase en plan pago, cuentas de los aprobadores enlazadas a sus fichas, el OK de Gabriel y correr `pasar-a-produccion.mjs`.
-- **Comercial:** espera las tablas de ventas.
-- **El espejo de JD:** espera de Iberia la VM, la cuenta de DB2 y la tarjeta.
-- **Fecha fija:** la base de conocimiento tiene que estar operando el 18-dic.
+**En producción desde el 20/11 a las 5:35 p. m.** Gabriel escribió «publica todo en main y continúa».
+- **Respaldo previo:** `scripts/plataforma/respaldar-produccion.mjs`, con 46 tablas y 29.568 filas, guardado en `plataforma/respaldos/` (fuera de git), porque el plan gratis no tiene PITR.
+- **Paso a producción:** `pasar-a-produccion.mjs --ejecutar --confirmo --acepto-plan-free`, con dos tropiezos:
+  - la `211000` necesita `control.modulo` cargado antes;
+  - los esquemas hay que exponerlos antes de importar.
+- **Ajustes posteriores:**
+  - los parámetros de costo se cargan por clave;
+  - `TASAS_SECRETO` se cargó en Netlify y en el repo;
+  - las tasas se capturan solas con GitHub Actions (`tasas.yml`), probado contra producción;
+  - `next` pasó a 16.4.6 y `npm audit` da 0.
+- **Comprobaciones:** `probar:supabase` en producción 103/103; recorrido con la cuenta de Gabriel y con la cuenta de revisión de Apple en el canal.
+- Hubo unos 5 minutos con la base nueva y el código viejo, de noche.
+
+**Dónde quedamos.** La plataforma está en producción, en el plan gratis. Faltan:
+- pasar a Pro (G-06);
+- enlazar las cuentas de los aprobadores a sus fichas (hasta entonces decide la suplencia, marcada);
+- decidir cómo se mandan los enlaces a planta;
+- Comercial, que espera las tablas de ventas;
+- el espejo de JD, que espera de Iberia la VM, DB2 y la tarjeta;
+- la base de conocimiento operando el 18-dic.
 
 Todo, con su dueño, en `PENDIENTES.md`.
 
