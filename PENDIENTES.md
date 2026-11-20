@@ -722,6 +722,8 @@ Rama `plataforma/etapa-1`, Supabase de pruebas `wsqhsjbwkjlqrdxnyadq`. El plan e
 | Publicar dos escenarios sobre la misma plaza con la misma fecha falla en vez de resolverse; «Ve costos» de una ruta no abre los costos a quien firma; la plaza sigue «en creación» después del ingreso; falta la doble aprobación al editar rutas; lo programado a futuro entra al abrir una pantalla, no con un proceso programado | Equipo Boosty | Huecos conocidos de la etapa |
 | `renombrar_hablante` existe en producción sin migración | Equipo Boosty | Crear la migración que la describa |
 | El *artifact* del capítulo 03 publicado por error | Gabriel | ¿Se borra? |
+| 🔴 **Antes de mandar los enlaces a planta**, salir a producción con las migraciones de privacidad `20261120234000` y `20261120235000`, que no van solas porque `main` lee `select('*')` de empleados. Mientras tanto, en producción cualquier sesión lee el contacto del padrón, las notas del consultor, los participantes y el expediente (bucket incluido). Hoy son las dos Marthas y las dos cuentas de Apple | Equipo Boosty · Gabriel | ¿Notas del consultor y expediente en un hotfix aparte, ya? Gabriel decide |
+| ¿Cómo se mandan los enlaces personales (WhatsApp de la empresa o en persona)? Hoy no hay de dónde copiarlos para el envío a mano, porque son una credencial | Gabriel | |
 
 ---
 

@@ -5108,6 +5108,13 @@ export type Database = {
         Args: { p_accion: string; p_publicacion: string }
         Returns: undefined
       }
+      cedulas_certificados: {
+        Args: { p_ids: string[] }
+        Returns: {
+          cedula: string
+          id: string
+        }[]
+      }
       contacto_empleados: {
         Args: { p_ids?: string[] }
         Returns: {
@@ -5118,6 +5125,7 @@ export type Database = {
         }[]
       }
       coordino_grupo: { Args: { grupo: string }; Returns: boolean }
+      cuenta_entrevistas: { Args: never; Returns: number }
       descartar_dispositivo: { Args: { p_token: string }; Returns: undefined }
       dispositivos_de_conversacion: {
         Args: { p_conversacion: string }
@@ -5157,8 +5165,23 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      entrevistas_internas: {
+        Args: { p_ids: string[] }
+        Returns: {
+          fireflies_url: string
+          id: string
+          notas_consultor: string
+        }[]
+      }
       es_admin: { Args: never; Returns: boolean }
       es_editor: { Args: never; Returns: boolean }
+      hallazgos_por_estado: {
+        Args: { p_entrevista: string }
+        Returns: {
+          estado: string
+          n: number
+        }[]
+      }
       hallazgos_validados: { Args: never; Returns: number }
       he_bloqueado: { Args: { p_otro: string }; Returns: boolean }
       marcar_oido: {
@@ -5213,6 +5236,18 @@ export type Database = {
       revisar_reporte: {
         Args: { p_reporte: string; p_revisado: boolean }
         Returns: undefined
+      }
+      sesiones_linea: {
+        Args: never
+        Returns: {
+          descripcion: string
+          duracion_minutos: number
+          estado: string
+          fecha: string
+          id: string
+          tipo: string
+          titulo: string
+        }[]
       }
       soy_miembro: { Args: { grupo: string }; Returns: boolean }
     }

@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { requerirPermiso } from '@/lib/auth'
 import type { MetaTranscripcion } from '@/lib/fireflies'
 import { createClient } from '@/lib/supabase/server'
+import { internasDeEntrevistas } from '@/lib/contacto'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { PREFIJO_CODIGO, TIPOS_SESION, type Database, type TipoSesion } from '@/lib/types'
 
@@ -413,7 +414,7 @@ export async function guardarTranscripcion(payload: {
 
   const { data: entrevista, error: errorLectura } = await supabase
     .from('entrevistas')
-    .select('id, resumen, duracion_minutos, fireflies_url, estado')
+    .select('id, resumen, duracion_minutos, estado')
     .eq('id', entrevistaId)
     .maybeSingle()
 
@@ -461,7 +462,9 @@ export async function guardarTranscripcion(payload: {
   if (payload.duracionMinutos && !entrevista.duracion_minutos) {
     cambios.duracion_minutos = payload.duracionMinutos
   }
-  if (payload.firefliesUrl && !entrevista.fireflies_url) {
+  // El enlace de Fireflies no sale de la tabla: importar es del equipo y lo pide por la función.
+  const yaTieneEnlace = Boolean((await internasDeEntrevistas(supabase, [entrevistaId])).get(entrevistaId)?.fireflies_url)
+  if (payload.firefliesUrl && !yaTieneEnlace) {
     cambios.fireflies_url = payload.firefliesUrl
   }
 

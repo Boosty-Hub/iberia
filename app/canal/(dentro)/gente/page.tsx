@@ -15,6 +15,9 @@ import { legible } from '@/lib/certificado'
 
 export const metadata: Metadata = { title: 'Gente' }
 
+/** De a cuántas personas se abre el directorio. Con ~280 en la nómina, el tope viejo de 200 dejaba gente fuera. */
+const POR_TANDA = 100
+
 type Persona = {
   id: string
   nombre_completo: string
@@ -26,23 +29,27 @@ type Persona = {
 
 export default async function GentePage({ searchParams }: PageProps<'/canal/gente'>) {
   const [yo, params] = await Promise.all([requerirEmpleado(), searchParams])
-  const q = typeof params.q === 'string' ? params.q.trim() : ''
+  // Las comas y los paréntesis romperían el filtro `or` de PostgREST; el comodín, el `ilike`.
+  const q = typeof params.q === 'string' ? params.q.replace(/[,()*%\\]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60) : ''
+  const pedidos = Number(typeof params.ver === 'string' ? params.ver : '')
+  const ver = Number.isFinite(pedidos) && pedidos > POR_TANDA ? Math.min(Math.ceil(pedidos / POR_TANDA) * POR_TANDA, 1000) : POR_TANDA
 
   const supabase = await createClient()
 
   let consulta = supabase
     .from('empleados')
-    .select('id, nombre_completo, cargo, nivel, sede, areas(nombre)')
+    // Solo lo del directorio: el contacto no sale de `empleados` por la API.
+    .select('id, nombre_completo, cargo, nivel, sede, areas(nombre)', { count: 'exact' })
     .eq('activo', true)
     .order('nombre_completo')
-    .limit(200)
+    .range(0, ver - 1)
 
   if (q) {
     const patron = `%${q}%`
     consulta = consulta.or(`nombre_completo.ilike.${patron},cargo.ilike.${patron}`)
   }
 
-  const [{ data: personas }, { data: conexiones }, { data: bloqueos }] = await Promise.all([
+  const [{ data: personas, count }, { data: conexiones }, { data: bloqueos }] = await Promise.all([
     consulta,
     supabase
       .from('conexiones')
@@ -69,6 +76,11 @@ export default async function GentePage({ searchParams }: PageProps<'/canal/gent
   }
 
   const lista = (personas ?? []).filter((p) => p.id !== yo.id) as Persona[]
+  // El total del filtro, sin contarme a mí si entro en él.
+  const meIncluye = !q || [yo.nombre_completo, yo.cargo ?? ''].some((t) => t.toLowerCase().includes(q.toLowerCase()))
+  const total = Math.max((count ?? lista.length) - (meIncluye ? 1 : 0), lista.length)
+  const quedan = total - lista.length
+  const masHref = `?${new URLSearchParams({ ...(q ? { q } : {}), ver: String(ver + POR_TANDA) }).toString()}`
 
   // Agrupada por nivel: en una organización de 280 personas, ver "Dirección"
   // y "Planta" separadas orienta más que una lista alfabética corrida.
@@ -83,7 +95,8 @@ export default async function GentePage({ searchParams }: PageProps<'/canal/gent
           Nuestra gente
         </h1>
         <p className="mt-1 text-[13px] text-marca-500">
-          {lista.length} {lista.length === 1 ? 'persona' : 'personas'} en el directorio
+          {total} {total === 1 ? 'persona' : 'personas'} en el directorio
+          {quedan > 0 ? ` · ves ${lista.length}` : ''}
         </p>
       </header>
 
@@ -136,6 +149,11 @@ export default async function GentePage({ searchParams }: PageProps<'/canal/gent
               </ul>
             </section>
           ))}
+          {quedan > 0 && (
+            <a href={masHref} className="btn-canal btn-canal-suave toque w-full justify-center text-[14px]">
+              Ver {Math.min(quedan, POR_TANDA)} más · quedan {quedan}
+            </a>
+          )}
         </div>
       )}
     </>

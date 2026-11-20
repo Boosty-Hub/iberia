@@ -109,7 +109,9 @@ excluidos en `.git/info/exclude`. Lo que se encontró:
 - 🔴 **En PRODUCCIÓN, desde agosto, cualquier sesión leía por la API las 27.951 líneas de transcripción y los 394 hallazgos con su cita.** Cuentas expuestas: las dos Marthas y las dos de revisión de Apple. Además, quien tenía su ficha enlazada podía darse permiso de publicar o moderar.
   - **Corregido en producción el 20/11** con autorización de Gabriel (`20261120233000_hotfix_lecturas`). Comprobado: una cuenta lectora pasó de 27.951 a 0.
   - Efecto pendiente: la portada del informe cuenta «hallazgos validados» con la sesión de quien lee; a las lectoras les da 0.
-- 🔴 **El padrón deja leer cédula, teléfono y correo a cualquier sesión.** En producción hay 4 de cada uno. Se corrige en la rama **antes de mandar enlaces a planta**.
+- 🔴 **Padrón:** dejaba leer cédula, teléfono y correo a cualquier sesión (en producción hay 4 de cada uno).
+- 🔴 **Expediente y entrevistas:** cualquier sesión podía listar y bajar todo el expediente del bucket de archivos, y leer las notas del consultor, los participantes y los metadatos de las entrevistas.
+- **Arreglo de las dos anteriores:** está en la rama (`234000` y `235000`, con `probar-privacidad` 93/93) y **sale con el paso a producción, no sola**, porque el código de `main` lee el padrón completo. Debe salir **antes de mandar los enlaces a planta**.
 - 🔴 El Supabase de pruebas nació con el registro público abierto. Se cerró y no hubo intrusos; `importar-base` ahora se detiene si lo encuentra abierto.
 - **La revisión de seguridad independiente encontró 11 fallas, todas corregidas en la rama:**
   - publicar sin aprobación;

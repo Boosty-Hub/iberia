@@ -1,5 +1,6 @@
 import { esEditor, puede, type Sesion } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
+import { COLUMNAS_ENTREVISTA, hallazgosPorEstado, internasDeEntrevistas } from '@/lib/contacto'
 import { FRENTE, ESTADOS_ACTIVIDAD, TIPOS_ACTIVIDAD, rango, type EstadoActividad, type Frente, type TipoActividad } from '@/lib/calendario'
 import type { BloqueFicha, DatoFicha, Ficha, ResultadoAccionFicha, SeccionFicha, TonoFicha } from '@/lib/plataforma/ficha-tipos'
 import type { ManejadorFicha } from '@/lib/plataforma/fichas/acciones'
@@ -69,16 +70,19 @@ export async function cargarFichaPrograma(sesion: Sesion, tipo: TipoPrograma, id
 async function fichaEntrevista(sesion: Sesion, id: string): Promise<Ficha | null> {
   if (!puede(sesion, 'modulo:entrevistas')) return null
   const supabase = await createClient()
-  const { data: e } = await supabase.from('entrevistas').select('*, areas(id, nombre)').eq('id', id).maybeSingle()
-  if (!e) return null
+  const { data: fila } = await supabase.from('entrevistas').select(`${COLUMNAS_ENTREVISTA}, areas(id, nombre)`).eq('id', id).maybeSingle()
+  if (!fila) return null
   const equipo = esEditor(sesion.perfil)
+  // Las notas del consultor no salen de la tabla: solo el equipo las pide.
+  const interna = equipo ? (await internasDeEntrevistas(supabase, [id])).get(id) : undefined
+  const e = { ...fila, notas_consultor: interna?.notas_consultor ?? null }
 
-  const [{ data: participantes }, { data: hallazgos }, { data: archivos }, turnos] = await Promise.all([
+  const [{ data: participantes }, hallazgos, { data: archivos }, turnos] = await Promise.all([
     supabase
       .from('sesion_participantes')
       .select('id, rol, etiqueta_hablante, personas(id, nombre_completo, cargo, organizacion)')
       .eq('entrevista_id', id),
-    supabase.from('hallazgos').select('estado').eq('entrevista_id', id),
+    hallazgosPorEstado(supabase, id),
     puede(sesion, 'modulo:archivos') ? supabase.from('archivos').select('id, nombre, tamano_bytes').eq('entrevista_id', id).order('created_at', { ascending: false }) : Promise.resolve({ data: [] as { id: string; nombre: string; tamano_bytes: number | null }[] }),
     // La transcripción es «solo Boosty»: al cliente ni siquiera se le cuenta.
     equipo ? supabase.from('transcripcion_segmentos').select('id', { count: 'exact', head: true }).eq('entrevista_id', id) : Promise.resolve({ count: null }),
@@ -103,7 +107,7 @@ async function fichaEntrevista(sesion: Sesion, id: string): Promise<Ficha | null
     ...(equipo && e.notas_consultor?.trim() ? [{ etiqueta: 'Notas del consultor 🔒', valor: e.notas_consultor.trim() }] : []),
   ]
 
-  const conteo = (est: string) => (hallazgos ?? []).filter((h) => h.estado === est).length
+  const conteo = (est: string) => hallazgos.get(est) ?? 0
   const secciones: SeccionFicha[] = []
 
   const gente = participantes ?? []
@@ -137,7 +141,7 @@ async function fichaEntrevista(sesion: Sesion, id: string): Promise<Ficha | null
   secciones.push({
     clave: 'hallazgos',
     etiqueta: 'Hallazgos',
-    n: equipo ? (hallazgos ?? []).length : conteo('validado'),
+    n: equipo ? [...hallazgos.values()].reduce((a, b) => a + b, 0) : conteo('validado'),
     bloques: [
       { tipo: 'cifras', cifras: cifrasHallazgos },
       { tipo: 'texto', texto: 'Los hallazgos se leen en el informe, cada uno en su punto del circuito. Sin cita textual no hay hallazgo.' },

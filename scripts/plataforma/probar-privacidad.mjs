@@ -14,10 +14,16 @@
  *   · la línea de tiempo de `entrevista`, `archivo` y `actividad`: comentar, mencionar
  *     (solo a quien puede ver el objeto), títulos y recientes;
  *   · Ctrl K encuentra sesiones con la casilla de entrevistas, y sin ella no.
+ *   · (privacidad_programa) sesiones, participantes y archivos —y el bucket— solo con su casilla;
+ *     notas del consultor y enlace de Fireflies solo para el equipo; las cifras siguen saliendo a
+ *     quien las ve (portada, hallazgos de la sesión, línea de tiempo, métrica, tablas); la cédula del
+ *     certificado a su dueño, al equipo y a Certificados + Capital Humano; y el directorio completo.
  * Crea su gente de prueba (correos `*.privacidad@plataforma.local`, cédulas
  * `PRUEBA-PRIV-*`, un rol temporal) y la borra al salir, barriendo por prefijo.
  *
- *   node --env-file=.env.local scripts/plataforma/probar-privacidad.mjs
+ *   node --env-file=.env.local scripts/plataforma/probar-privacidad.mjs [--base http://localhost:3005]
+ *
+ * La parte del directorio pide la página al servidor de pruebas (dev-pruebas.mjs, en el 3005).
  */
 import { createClient } from '@supabase/supabase-js'
 
@@ -33,6 +39,18 @@ const MARCA = `[privacidad-prueba ${Date.now().toString(36)}]`
 const CEDULA = 'PRUEBA-PRIV-'
 const DOMINIO = '.privacidad@plataforma.local'
 const ROL_CH = 'prueba-privacidad-ch'
+const ROL_CERT = 'prueba-privacidad-cert'
+const argv = process.argv.slice(2)
+const BASE = argv.includes('--base') ? argv[argv.indexOf('--base') + 1] : 'http://localhost:3005'
+const REF = new URL(URL_SUPA).hostname.split('.')[0]
+/** La cookie de sesión de Supabase para pedirle páginas al servidor de pruebas. */
+function galletas(sesionSupa) {
+  const nombre = `sb-${REF}-auth-token`
+  const valor = 'base64-' + Buffer.from(JSON.stringify(sesionSupa)).toString('base64url')
+  const L = 3180
+  const partes = valor.length <= L ? [[nombre, valor]] : Array.from({ length: Math.ceil(valor.length / L) }, (_, i) => [`${nombre}.${i}`, valor.slice(i * L, (i + 1) * L)])
+  return partes.map(([n, v]) => `${n}=${v}`).join('; ')
+}
 
 let fallos = 0
 let pasos = 0
@@ -55,7 +73,7 @@ async function sesion(email) {
     auth: { persistSession: false },
     global: { headers: { Authorization: `Bearer ${data.session.access_token}` } },
   })
-  return { cliente, id: data.user.id, email }
+  return { cliente, id: data.user.id, email, sesion: data.session }
 }
 
 async function limpiar() {
@@ -79,10 +97,12 @@ async function limpiar() {
     }
     if (usuarios.length < 200) break
   }
-  const { data: rol } = await servicio.from('roles').select('id').eq('clave', ROL_CH).maybeSingle()
-  if (rol) {
-    await servicio.from('rol_permisos').delete().eq('rol_id', rol.id)
-    await servicio.from('roles').delete().eq('id', rol.id)
+  for (const clave of [ROL_CH, ROL_CERT]) {
+    const { data: rol } = await servicio.from('roles').select('id').eq('clave', clave).maybeSingle()
+    if (rol) {
+      await servicio.from('rol_permisos').delete().eq('rol_id', rol.id)
+      await servicio.from('roles').delete().eq('id', rol.id)
+    }
   }
 }
 
@@ -91,7 +111,8 @@ async function cuenta(nombre, rolClave, organizacion = 'iberia') {
   const { data, error } = await servicio.auth.admin.createUser({
     email,
     email_confirm: true,
-    user_metadata: { nombre_completo: `Prueba ${nombre} (privacidad)`, rol_clave: rolClave, organizacion },
+    // Las normas del canal aceptadas: la app abre directo (la pantalla de normas se prueba aparte).
+    user_metadata: { nombre_completo: `Prueba ${nombre} (privacidad)`, rol_clave: rolClave, organizacion, normas_aceptadas_version: 1 },
   })
   if (error) throw new Error(`${email}: ${error.message}`)
   return data.user.id
@@ -100,7 +121,7 @@ async function cuenta(nombre, rolClave, organizacion = 'iberia') {
 await limpiar()
 // Lo que la prueba deja en cuentas que no son suyas (seguir al comentar, recientes): se borra al salir.
 const ajenos = { seguimientos: [], recientes: [] }
-let admin, consultor, lector, trabajador, ch
+let admin, consultor, lector, trabajador, ch, cert, usuario
 try {
   // --- Gente de prueba -----------------------------------------------------------
   const { data: area } = await servicio.from('areas').select('id').limit(1).single()
@@ -110,11 +131,22 @@ try {
     .select('id')
     .single()
   if (eRol) throw new Error(`rol temporal: ${eRol.message}`)
-  const { error: ePerm } = await servicio.from('rol_permisos').upsert({ rol_id: rol.id, recurso: 'modulo:empleados', ver: true, crear: false, editar: true, eliminar: false }, { onConflict: 'rol_id,recurso' })
+  // Capital Humano: el padrón (editar), Certificados y Consumos (ver), sin entrevistas ni archivos.
+  const casilla = (rol_id, recurso, editar = false) => ({ rol_id, recurso, ver: true, crear: false, editar, eliminar: false })
+  const { error: ePerm } = await servicio.from('rol_permisos').upsert(
+    [casilla(rol.id, 'modulo:empleados', true), casilla(rol.id, 'modulo:certificados'), casilla(rol.id, 'modulo:programa')],
+    { onConflict: 'rol_id,recurso' }
+  )
   if (ePerm) throw new Error(`permiso temporal: ${ePerm.message}`)
+  // Solo Certificados · ver (sin Capital Humano): lee los certificados, no la cédula.
+  const { data: rolCert, error: eRolCert } = await servicio.from('roles').insert({ clave: ROL_CERT, nombre: 'Certificados (prueba de privacidad)', nivel: 'lector' }).select('id').single()
+  if (eRolCert) throw new Error(`rol temporal: ${eRolCert.message}`)
+  const { error: ePermCert } = await servicio.from('rol_permisos').upsert(casilla(rolCert.id, 'modulo:certificados'), { onConflict: 'rol_id,recurso' })
+  if (ePermCert) throw new Error(`permiso temporal: ${ePermCert.message}`)
 
   const idTrabajador = await cuenta('planta', 'personal-planta')
   await cuenta('ch', ROL_CH)
+  await cuenta('cert', ROL_CERT)
   const base = { cargo: 'OPERADOR DE PRUEBA', area_id: area.id, nivel: 'planta', tipo_nomina: 'diaria', fecha_ingreso: '2020-01-01', familia_oficio: 'generico', activo: true }
   const { data: fichas, error: eF } = await servicio
     .from('empleados')
@@ -127,12 +159,25 @@ try {
   const miFicha = fichas.find((f) => f.cedula === `${CEDULA}PLANTA`).id
   const otra = fichas.find((f) => f.cedula === `${CEDULA}OTRA`).id
 
-  ;[admin, consultor, lector, trabajador, ch] = await Promise.all([
+  // Un certificado ficticio del trabajador, con su cédula congelada.
+  const { data: curso } = await servicio.from('cursos').select('id').eq('clave', 'ajito').single()
+  const { data: mat, error: eMat } = await servicio.from('matriculas').insert({ curso_id: curso.id, empleado_id: miFicha }).select('id').single()
+  if (eMat) throw new Error(`matrícula: ${eMat.message}`)
+  const { data: certFila, error: eCert } = await servicio
+    .from('certificados')
+    .insert({ matricula_id: mat.id, codigo: `IB-PRUEBA-PRIV-${Date.now().toString(36)}`, nombre_completo: 'Trabajador Privacidad (prueba)', cedula: `${CEDULA}PLANTA`, cargo: 'Operador de prueba', area_nombre: 'Prueba' })
+    .select('id')
+    .single()
+  if (eCert) throw new Error(`certificado: ${eCert.message}`)
+
+  ;[admin, consultor, lector, trabajador, ch, cert, usuario] = await Promise.all([
     sesion('admin.pruebas@plataforma.local'),
     sesion('consultor.pruebas@plataforma.local'),
     sesion('lector.pruebas@plataforma.local'),
     sesion(`planta${DOMINIO}`),
     sesion(`ch${DOMINIO}`),
+    sesion(`cert${DOMINIO}`),
+    sesion('usuario.pruebas@plataforma.local'),
   ])
 
   // --- 1 · El trabajador ---------------------------------------------------------
@@ -170,8 +215,8 @@ try {
     ok(!pend.error && (pend.data ?? []).every((p) => p.empleado_id === miFicha), 'el empujón no le enseña teléfonos ajenos', pend.error?.message ?? pend.data?.length)
     const pad = await t.from('padron_estado').select('id').limit(5)
     ok(!pad.error && !(pad.data ?? []).length, 'el padrón (padron_estado) le sale vacío', pad.error?.message ?? pad.data?.length)
-    const per = await t.from('personas').select('id, email, telefono, notas').limit(5)
-    ok(!per.error && !(per.data ?? []).length, 'las personas del levantamiento (correo, teléfono, notas) le salen vacías', per.error?.message ?? per.data?.length)
+    const per = await t.from('personas').select('id, nombre_completo').limit(5)
+    ok(!per.error && !(per.data ?? []).length, 'las personas del levantamiento le salen vacías', per.error?.message ?? per.data?.length)
   }
   {
     // Lo que el trabajador sí hace con su ficha: «actualizo mi ficha» (foto) sigue.
@@ -280,6 +325,135 @@ try {
     ok(!(deTrabajador ?? []).length, 'el trabajador (sin entrevistas · ver) no encuentra sesiones', deTrabajador)
     const { data: todo } = await consultor.cliente.schema('ui').rpc('buscar', { p_q: ent.codigo.slice(0, 3), p_limite: 5 })
     ok((todo ?? []).some((r) => r.tipo === 'entrevista'), `sin filtro de tipo, las sesiones salen en la búsqueda general («${ent.codigo.slice(0, 3)}»)`, todo?.map((r) => r.tipo))
+  }
+  // --- 6 · Sesiones, participantes, archivos y lo «solo Boosty» ------------------------
+  console.log('\n6 · Sesiones, participantes y archivos: con su casilla; las notas, solo el equipo')
+  {
+    for (const [quien, u] of [['el trabajador', trabajador], ['Usuario Iberia (sin entrevistas)', usuario], ['Capital Humano (sin entrevistas ni archivos)', ch]]) {
+      const [e, p, a] = await Promise.all([
+        u.cliente.from('entrevistas').select('id').limit(5),
+        u.cliente.from('sesion_participantes').select('id').limit(5),
+        u.cliente.from('archivos').select('id').limit(5),
+      ])
+      ok(!e.error && !p.error && !a.error && !(e.data?.length || p.data?.length || a.data?.length), `${quien} no lee sesiones, participantes ni archivos`,
+        e.error?.message ?? p.error?.message ?? a.error?.message ?? [e.data?.length, p.data?.length, a.data?.length])
+    }
+    // El bucket del expediente: un archivo de prueba, que se borra al salir.
+    const ruta = `${CEDULA.toLowerCase()}${Date.now().toString(36)}/nota.txt`
+    const { error: eSubir } = await servicio.storage.from('archivos').upload(ruta, new Blob(['prueba de privacidad']), { contentType: 'text/plain' })
+    ok(!eSubir, 'archivo de prueba en el bucket del expediente', eSubir?.message)
+    try {
+      const deTrabajador = await trabajador.cliente.storage.from('archivos').download(ruta)
+      ok(Boolean(deTrabajador.error) && !deTrabajador.data, 'el trabajador no baja binarios del expediente')
+      const firmado = await trabajador.cliente.storage.from('archivos').createSignedUrl(ruta, 60)
+      ok(Boolean(firmado.error), 'ni firma un enlace para bajarlo')
+      const deLector = await lector.cliente.storage.from('archivos').download(ruta)
+      ok(!deLector.error && Boolean(deLector.data), 'Lector Iberia (archivos · ver) sí lo baja', deLector.error?.message)
+    } finally {
+      await servicio.storage.from('archivos').remove([ruta])
+    }
+
+    const [{ count: totalSesiones }, { count: conFecha }, { count: deTipoEntrevista }] = await Promise.all([
+      servicio.from('entrevistas').select('id', { count: 'exact', head: true }),
+      servicio.from('entrevistas').select('id', { count: 'exact', head: true }).not('fecha_entrevista', 'is', null),
+      servicio.from('entrevistas').select('id', { count: 'exact', head: true }).eq('tipo', 'entrevista'),
+    ])
+    const l = await lector.cliente.from('entrevistas').select('id, codigo, resumen').range(0, 999)
+    ok(!l.error && l.data?.length === totalSesiones, `Lector Iberia (entrevistas · ver) lee las ${totalSesiones} sesiones`, l.error?.message ?? l.data?.length)
+    for (const columna of ['notas_consultor', 'fireflies_url', 'busqueda']) {
+      for (const [quien, u] of [['Lector Iberia', lector], ['ni el admin', admin]]) {
+        const r = await u.cliente.from('entrevistas').select(`id, ${columna}`).limit(1)
+        ok(negado(r), `${quien}: la tabla no sirve ${columna}`, r.error?.message ?? r.data)
+      }
+    }
+    const todo = await lector.cliente.from('entrevistas').select('*').limit(1)
+    ok(negado(todo), 'select=* sobre entrevistas lo rechaza la base', todo.error?.message ?? todo.data)
+    const { data: conNotas } = await servicio.from('entrevistas').select('id, notas_consultor').not('notas_consultor', 'is', null).limit(1).maybeSingle()
+    if (!conNotas) ok(false, 'hace falta una sesión con notas del consultor en pruebas para probar la puerta')
+    else {
+      const [{ data: deLector }, { data: deAdmin }] = await Promise.all([
+        lector.cliente.rpc('entrevistas_internas', { p_ids: [conNotas.id] }),
+        admin.cliente.rpc('entrevistas_internas', { p_ids: [conNotas.id] }),
+      ])
+      ok(!(deLector ?? []).length, 'entrevistas_internas no le responde al lector', deLector)
+      ok(deAdmin?.[0]?.notas_consultor === conNotas.notas_consultor, 'al admin le da las notas del consultor')
+    }
+    const per = await lector.cliente.from('personas').select('id, notas').limit(1)
+    ok(negado(per), 'las notas de las personas del levantamiento ya no salen', per.error?.message ?? per.data)
+
+    // Las cifras siguen saliendo a quien las ve.
+    const cuentas = await Promise.all([lector, trabajador, usuario].map((u) => u.cliente.rpc('cuenta_entrevistas')))
+    ok(cuentas.every((c) => c.data === deTipoEntrevista), `la portada del informe cuenta ${deTipoEntrevista} entrevistas para cualquiera`, cuentas.map((c) => c.data ?? c.error?.message))
+    const { data: hall } = await servicio.from('hallazgos').select('entrevista_id, estado').not('entrevista_id', 'is', null).range(0, 999)
+    const sesionConHallazgos = (hall ?? []).find((h) => h.estado === 'validado')?.entrevista_id ?? (hall ?? [])[0]?.entrevista_id
+    if (!sesionConHallazgos) ok(false, 'hace falta una sesión con hallazgos en pruebas')
+    else {
+      const esperados = (hall ?? []).filter((h) => h.entrevista_id === sesionConHallazgos)
+      const [{ data: deLector }, { data: deAdmin }, { data: deTrabajador }] = await Promise.all(
+        [lector, admin, trabajador].map((u) => u.cliente.rpc('hallazgos_por_estado', { p_entrevista: sesionConHallazgos }))
+      )
+      const validados = esperados.filter((h) => h.estado === 'validado').length
+      ok((deLector ?? []).every((f) => f.estado === 'validado') && ((deLector ?? []).find((f) => f.estado === 'validado')?.n ?? 0) === validados,
+        `en la sesión el lector ve ${validados} validado(s) y nada más`, deLector)
+      ok((deAdmin ?? []).reduce((a, f) => a + f.n, 0) === esperados.length, `el equipo ve los ${esperados.length} con su estado`, deAdmin)
+      ok(!(deTrabajador ?? []).length, 'el trabajador no ve ni la cuenta', deTrabajador)
+      const vista = await lector.cliente.schema('ui').from('programa_entrevistas').select('id, hallazgos, participantes').range(0, 999)
+      ok(!vista.error && vista.data?.length === totalSesiones && vista.data.find((v) => v.id === sesionConHallazgos)?.hallazgos === validados,
+        'la tabla de sesiones (ui.programa_entrevistas) le cuenta al lector sus validados', vista.error?.message ?? vista.data?.find((v) => v.id === sesionConHallazgos))
+    }
+    const vistaU = await usuario.cliente.schema('ui').from('programa_entrevistas').select('id').limit(3)
+    ok(!vistaU.error && !(vistaU.data ?? []).length, 'y a quien no tiene entrevistas no le sale nada', vistaU.error?.message ?? vistaU.data?.length)
+    const linea = await ch.cliente.from('linea_de_tiempo').select('origen').eq('origen', 'sesion').range(0, 1999)
+    ok(!linea.error && linea.data?.length === conFecha, `la línea de tiempo de Consumos le sigue mostrando las ${conFecha} sesiones a quien tiene Consumos sin entrevistas`, linea.error?.message ?? linea.data?.length)
+    const lineaT = await trabajador.cliente.from('linea_de_tiempo').select('origen').eq('origen', 'sesion').limit(3)
+    ok(!(lineaT.data ?? []).length, 'al trabajador no', lineaT.data?.length)
+    const [mCh, mAdmin, mDirecta] = await Promise.all([
+      ch.cliente.schema('ui').rpc('metrica', { p_clave: 'programa_sesiones' }),
+      admin.cliente.schema('ui').rpc('metrica', { p_clave: 'programa_sesiones' }),
+      trabajador.cliente.schema('ui').rpc('m_programa_sesiones', {}),
+    ])
+    const valor = (m) => JSON.stringify(m.data?.valor ?? m.data?.cifra?.valor ?? m.data)
+    ok(!mCh.error && valor(mCh) === valor(mAdmin) && /\d/.test(valor(mCh)), `la métrica «Sesiones de trabajo» dice lo mismo con Consumos sin entrevistas (${valor(mCh)})`, mCh.error?.message ?? [valor(mCh), valor(mAdmin)])
+    ok(Boolean(mDirecta.error), 'llamada directa sin la casilla, la métrica se niega', mDirecta.data)
+  }
+
+  // --- 7 · La cédula del certificado -------------------------------------------------
+  console.log('\n7 · La cédula del certificado')
+  {
+    const directa = await trabajador.cliente.from('certificados').select('id, cedula').eq('id', certFila.id)
+    ok(negado(directa), 'la tabla no sirve la cédula ni a su dueño (va por la función)', directa.error?.message ?? directa.data)
+    const propia = await trabajador.cliente.from('certificados').select('id, codigo').eq('id', certFila.id)
+    ok(propia.data?.length === 1, 'el trabajador lee su certificado')
+    const cedula = async (u) => (await u.cliente.rpc('cedulas_certificados', { p_ids: [certFila.id] })).data?.[0]?.cedula ?? null
+    ok((await cedula(trabajador)) === `${CEDULA}PLANTA`, 'y su cédula, para la imagen que guarda o manda')
+    ok((await cedula(admin)) === `${CEDULA}PLANTA`, 'el admin la ve (el lote impreso del equipo)')
+    ok((await cedula(ch)) === `${CEDULA}PLANTA`, 'Certificados + Capital Humano la ve')
+    const fila = await cert.cliente.from('certificados').select('id, codigo, ficha').eq('id', certFila.id)
+    ok(fila.data?.length === 1, 'Certificados · ver lee el certificado')
+    ok((await cedula(cert)) === null, 'pero no la cédula (su hoja sale con la ficha)')
+    ok((await cedula(lector)) === null, 'Lector Iberia (sin Certificados) tampoco')
+  }
+
+  // --- 8 · El directorio del canal, completo ---------------------------------------
+  console.log('\n8 · El directorio del canal, de a 100 y completo')
+  {
+    const { count: activos } = await servicio.from('empleados').select('id', { count: 'exact', head: true }).eq('activo', true)
+    const cookie = galletas(trabajador.sesion)
+    const leer = async (q) => {
+      const r = await fetch(`${BASE}/canal/gente${q}`, { headers: { cookie } })
+      return (await r.text()).replace(/<[^>]+>/g, ' ').replace(/&nbsp;|\s+/g, ' ')
+    }
+    const primera = await leer('')
+    const n = Number(primera.match(/(\d+) personas en el directorio/)?.[1] ?? -1)
+    ok(n === activos - 1, `dice ${n} personas (todas menos yo: ${activos - 1}), no 200`, primera.slice(0, 200))
+    ok(/Ver 100 más · quedan \d+/.test(primera) && /ves 100/.test(primera), 'enseña las primeras 100 y ofrece ver más')
+    const todas = await leer('?ver=1000')
+    ok(!/quedan \d+/.test(todas) && todas.includes('Compañera Privacidad (prueba)'), 'con «ver más» hasta el final salen todas, la ficha de prueba incluida')
+    ok(!/04140000002|otra@prueba\.local|PRUEBA-PRIV-OTRA/.test(todas), 'sin teléfono, correo ni cédula de nadie')
+    const busca = await leer(`?q=${encodeURIComponent('Compañera Privacidad')}`)
+    ok(/1 persona en el directorio/.test(busca), 'la búsqueda encuentra a la persona')
+    const rara = await fetch(`${BASE}/canal/gente?q=${encodeURIComponent('a),cedula.ilike.(%')}`, { headers: { cookie } })
+    ok(rara.status === 200, 'una búsqueda con comas y paréntesis no rompe el filtro', rara.status)
   }
 } catch (e) {
   fallos++

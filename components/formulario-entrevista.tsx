@@ -38,7 +38,8 @@ export function FormularioEntrevista({
 }: {
   accion: Accion
   areas: Pick<Area, 'id' | 'nombre' | 'tipo'>[]
-  entrevista?: Entrevista
+  // Sin `busqueda`: la API ya no la sirve (indexa las notas del consultor).
+  entrevista?: Omit<Entrevista, 'busqueda'>
   cancelarHref: string
 }) {
   const [estado, enviar] = useActionState<EstadoFormulario, FormData>(accion, {})

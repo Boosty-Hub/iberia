@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { CertificadoHoja, fechaLarga } from '@/components/certificado-hoja'
 import { requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
+import { COLUMNAS_CERTIFICADO, cedulasDeCertificados } from '@/lib/contacto'
 import { BotonImprimir } from '@/components/sistema/procesos/boton-imprimir'
 import { BOTON_CABECERA, BOTON_CABECERA_PRINCIPAL } from '@/components/sistema/ui/cabecera-modulo'
 
@@ -22,10 +23,13 @@ export default async function ImprimirCertificadosPage({ searchParams }: PagePro
   const [, sp] = await Promise.all([requerirPermiso('modulo:certificados'), searchParams])
   const soloPendientes = sp.entregado === 'no'
   const supabase = await createClient()
-  let consulta = supabase.from('certificados').select('*').order('emitido_en', { ascending: false }).range(0, 999)
+  let consulta = supabase.from('certificados').select(COLUMNAS_CERTIFICADO).order('emitido_en', { ascending: false }).range(0, 999)
   if (soloPendientes) consulta = consulta.is('entregado_en', null)
   const { data } = await consulta
-  const emitidos = data ?? []
+  // La cédula, a quien le toca (equipo, o Certificados + Capital Humano); a los demás la
+  // hoja les sale con el número de ficha (`identificacion()`).
+  const cedulas = await cedulasDeCertificados(supabase, (data ?? []).map((c) => c.id))
+  const emitidos = (data ?? []).map((c) => ({ ...c, cedula: cedulas.get(c.id) ?? null }))
 
   return (
     <>

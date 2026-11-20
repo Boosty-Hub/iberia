@@ -9,6 +9,7 @@ import { CURSO } from '@/lib/adiestramiento'
 import { requerirEmpleado } from '@/lib/canal'
 import type { LeccionGuion } from '@/lib/guion'
 import { createClient } from '@/lib/supabase/server'
+import { COLUMNAS_CERTIFICADO, conCedula } from '@/lib/contacto'
 
 /** La lección del cierre: publicar el certificado se pide desde su matrícula. */
 const ULTIMA = Math.max(...(guion.lecciones as LeccionGuion[]).map((l) => l.numero))
@@ -42,11 +43,13 @@ export default async function CertificadoPage() {
     .maybeSingle()
   if (!matricula) notFound()
 
-  const { data: certificado } = await supabase
+  // La cédula no sale de la tabla: la suya le llega por `cedulas_certificados()`.
+  const { data: fila } = await supabase
     .from('certificados')
-    .select('*')
+    .select(COLUMNAS_CERTIFICADO)
     .eq('matricula_id', matricula.id)
     .maybeSingle()
+  const certificado = await conCedula(supabase, fila)
 
   const { data: publicada } = certificado
     ? await supabase.from('publicaciones').select('id').eq('certificado_id', certificado.id).maybeSingle()

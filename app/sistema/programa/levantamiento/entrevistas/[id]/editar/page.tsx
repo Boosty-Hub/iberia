@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
+import { COLUMNAS_ENTREVISTA, internasDeEntrevistas } from '@/lib/contacto'
 import { nombreSesion } from '@/lib/utils'
 import { FormularioEntrevista } from '@/components/formulario-entrevista'
 import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
@@ -14,11 +15,14 @@ export default async function EditarSesionPage({ params }: PageProps<'/sistema/p
   const [sesion, { id }] = await Promise.all([requerirPermiso('modulo:entrevistas', 'editar'), params])
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound()
   const supabase = await createClient()
-  const [{ data: entrevista }, { data: areas }] = await Promise.all([
-    supabase.from('entrevistas').select('*').eq('id', id).maybeSingle(),
+  const [{ data: fila }, { data: areas }, internas] = await Promise.all([
+    supabase.from('entrevistas').select(COLUMNAS_ENTREVISTA).eq('id', id).maybeSingle(),
     supabase.from('areas').select('id, nombre, tipo').order('orden'),
+    // Editar es del equipo: las notas y el enlace de Fireflies le llegan por la función.
+    internasDeEntrevistas(supabase, [id]),
   ])
-  if (!entrevista) notFound()
+  if (!fila) notFound()
+  const entrevista = { ...fila, notas_consultor: internas.get(id)?.notas_consultor ?? null, fireflies_url: internas.get(id)?.fireflies_url ?? null }
 
   return (
     <>

@@ -25,7 +25,7 @@ export default async function InformePage() {
   const supabase = await createClient()
 
   // RLS ya filtra por publicado y por la casilla «ver» de cada rol.
-  const [{ data: secciones }, { count: entrevistas }, { data: validados }] = await Promise.all([
+  const [{ data: secciones }, { data: entrevistas }, { data: validados }] = await Promise.all([
     supabase
       .from('informe_secciones')
       .select('id, slug, numero, titulo, subtitulo, parte, contenido_md, publicado, updated_at')
@@ -34,7 +34,8 @@ export default async function InformePage() {
     // las formaciones son sesiones del levantamiento, pero no cuentan contra las
     // ~25 entrevistas que compromete el programa. Rotularlas como entrevistas en
     // el documento que lee el cliente sería inflar el avance.
-    supabase.from('entrevistas').select('id', { count: 'exact', head: true }).eq('tipo', 'entrevista'),
+    // `entrevistas` solo la lee quien abre el levantamiento: la portada pide la cuenta.
+    supabase.rpc('cuenta_entrevistas'),
     // La tabla de hallazgos es del equipo (lleva las citas): la portada solo pide la cuenta.
     supabase.rpc('hallazgos_validados'),
   ])

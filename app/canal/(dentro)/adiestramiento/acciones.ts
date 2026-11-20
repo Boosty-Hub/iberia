@@ -261,12 +261,14 @@ export async function publicarCertificado(datos: FormData): Promise<{ ok: boolea
   if (!ctx) return { ok: false }
   const { empleado, supabase, matricula } = ctx
 
-  const { data: certificado } = await supabase
+  // La que va al canal no lleva cédula: no hace falta pedirla.
+  const { data: fila } = await supabase
     .from('certificados')
-    .select('id, codigo, nombre_completo, cedula, ficha, cargo, area_nombre, emitido_en')
+    .select('id, codigo, nombre_completo, ficha, cargo, area_nombre, emitido_en')
     .eq('matricula_id', matricula.id)
     .maybeSingle()
-  if (!certificado) return { ok: false }
+  if (!fila) return { ok: false }
+  const certificado = { ...fila, cedula: null }
 
   const imagen = await imagenCertificado(certificado, { conCedula: false })
   const ruta = rutaCertificadoPublicado(empleado.id, certificado.id)

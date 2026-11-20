@@ -371,6 +371,8 @@ Migración `20261106120000_reportes_y_bloqueos.sql`.
   comentario pasan a `oculto`, una publicación a `archivado`, y «Restaurar» lo devuelve. Ocultar da
   por revisados todos los reportes de esa cosa. Las acciones van por `revisar_reporte()` y
   `ocultar_contenido_reportado()`, que piden la casilla otra vez en la base.
+- **El directorio (`/canal/gente`) se abre de a 100** con «Ver N más» (`?ver=`), y dice el total real: hasta el
+  20-nov-2026 cortaba en 200 y decía «200 personas». La búsqueda limpia comas, paréntesis y comodines antes del `or`.
 - **Bloquear**, desde el directorio (`/canal/gente`), una conversación directa, un mensaje y una
   publicación; se deshace en `/canal/bloqueados` («Personas bloqueadas» en Mi perfil), en la fila del
   directorio y en el aviso de la conversación. Mientras A bloquea a B:
@@ -895,6 +897,10 @@ curso, y el papel es el que queda. Los estilos de impresión están al final de
 
 **Los datos van congelados en la fila**, no leídos del padrón: si la persona cambia de
 cargo en noviembre, el certificado sigue diciendo lo que era el día que lo hizo.
+🔴 **`certificados.cedula` no sale por la API** (desde `privacidad_programa`): se pide con `cedulasDeCertificados()` /
+`conCedula()` de `lib/contacto.ts`, y la función solo la da a su dueño, al equipo editor y a quien tiene
+`modulo:certificados` · ver **y** `modulo:empleados` · editar. Con solo Certificados, el lote impreso sale con el número de
+ficha (`identificacion()`).
 ⚠️ **La cédula es opcional y el número de ficha la sustituye** (`identificacion()` en
 `lib/certificado.ts`): el listado de Capital Humano llegó sin cédulas, y hasta el 27 de
 septiembre de 2026 `certificados.cedula` era `not null` —ninguna de las 276 personas del padrón
@@ -1048,8 +1054,9 @@ El sistema que reemplaza al dashboard para operar a Iberia (Etapa 1 + rediseño 
   `<rol>.pruebas@plataforma.local`): `dev-pruebas.mjs` (dev en el 3005), `produccion-pruebas.mjs` (build de
   producción en el 3007), `sql-pruebas.mjs` (SQL por la Management API, solo al de pruebas; `--registrar`
   anota la migración), y las suites `probar-colaboracion`, `probar-r5`, `probar-ia`, `probar-lienzo`,
-  `probar-r6` (teclado, teléfono, pellizco, PDF), `probar-privacidad` (contacto del padrón con sesiones reales, la cuenta
-  del informe, la línea de tiempo del programa y Ctrl K), `mirar-armazon`, `medir-rendimiento` y
+  `probar-r6` (teclado, teléfono, pellizco, PDF), `probar-privacidad` (contacto del padrón, sesiones, archivos y notas del
+  programa, cédula del certificado y las cifras que se cuentan, con sesiones reales; la línea de tiempo del programa, Ctrl K y
+  el directorio del canal), `mirar-armazon`, `medir-rendimiento` y
   `medir-accesibilidad` (axe-core). Producción: `pasar-a-produccion.mjs` hace un simulacro de solo lectura
   y dice qué falta; con `--ejecutar --confirmo`, y el OK de Gabriel, lo hace.
 
@@ -1297,9 +1304,15 @@ Las cifras son del registro (`programa_horas_mes` —en horas, contra 107—, `p
 y `actividad` (esta por `calendario_actividades.ref`) en `lib/plataforma/fichas/programa.ts`. 🔒 **La transcripción, las
 notas del consultor y los hallazgos sin validar son «solo Boosty»**: la app solo se los muestra al equipo (`esEditor`).
 *(Desde el hotfix del 20-nov-2026 la RLS de `transcripcion_segmentos` y `hallazgos` es solo del equipo —`es_editor()`—; la
-portada del informe cuenta los validados con `hallazgos_validados()`.)* ⚠️ `entrevistas` (con `notas_consultor`),
-`sesion_participantes` y `archivos` siguen legibles por cualquier sesión (`using (true)`): esos campos los esconde la app.
-`personas` (correo, teléfono, notas) ya pide `modulo:entrevistas` · ver. Las fichas `entrevista`, `archivo` y `actividad`
+portada del informe cuenta los validados con `hallazgos_validados()`.)* 🔴 **Desde `privacidad_programa` (20-nov-2026)**
+`entrevistas`, `sesion_participantes` y `personas` piden `modulo:entrevistas` · ver (o el equipo), y `archivos` —con su
+bucket— `modulo:archivos` · ver. **`notas_consultor`, `fireflies_url` y `busqueda` (que indexa las notas) no salen de
+`entrevistas` por la API** —ni al equipo—: se leen con `internasDeEntrevistas()` (`entrevistas_internas()`, solo editores),
+y una consulta nueva nombra sus columnas (`COLUMNAS_ENTREVISTA` de `lib/contacto.ts`). `personas.email`, `telefono` y
+`notas` no los lee ninguna pantalla y ya no salen. **Las cifras que leía quien no abre la tabla salen de funciones que
+cuentan**: `cuenta_entrevistas()` (portada del informe), `hallazgos_por_estado()` (sesión y ficha), `sesiones_linea()`
+(Línea de tiempo de Consumos), `ui.m_programa_sesiones` (corre como dueña y pide `modulo:programa`), y
+`ui.programa_entrevistas`/`programa_archivos` corren como su dueña con la casilla en su `WHERE`. Las fichas `entrevista`, `archivo` y `actividad`
 tienen línea de tiempo (comentarios, menciones, seguir, tareas, recientes) con la casilla de su módulo, y Ctrl K busca
 sesiones —código, título, fecha; nunca la transcripción— con `modulo:entrevistas` · ver.
 Cada ruta vieja de `/dashboard/**` redirige a la nueva con sus parámetros; `/dashboard` va a Mi día (o a la primera

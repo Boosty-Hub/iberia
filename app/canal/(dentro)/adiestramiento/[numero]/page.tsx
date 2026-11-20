@@ -30,6 +30,7 @@ import { legible } from '@/lib/certificado'
 import { dibujaEn } from '@/lib/dibujar'
 import { esSalida, segunInterruptor, turnosSegun, type LeccionGuion, type Turno } from '@/lib/guion'
 import { createClient } from '@/lib/supabase/server'
+import { conCedula } from '@/lib/contacto'
 import { avanzarPaso, empezarLeccion, marcarOido, terminarLeccion } from '../acciones'
 
 export const metadata: Metadata = { title: 'Lección' }
@@ -606,11 +607,13 @@ async function certificadoDe(
     avance: { estado: string }
   }
 ): Promise<EnLeccion> {
-  let { data: hoja } = await supabase
+  // La cédula no sale de la tabla: la suya le llega por `cedulas_certificados()`.
+  const { data: fila } = await supabase
     .from('certificados')
-    .select('id, codigo, nombre_completo, cedula, ficha, cargo, area_nombre, emitido_en')
+    .select('id, codigo, nombre_completo, ficha, cargo, area_nombre, emitido_en')
     .eq('matricula_id', matricula.id)
     .maybeSingle()
+  let hoja = await conCedula(supabase, fila)
   if (!hoja && avance.estado !== 'completada') {
     // Con la fila que devuelve la emisión, no con otro `select`: ver `cerrarLeccion`.
     hoja = (await cerrarLeccion(supabase, { cursoId, matricula, leccionId })).certificado

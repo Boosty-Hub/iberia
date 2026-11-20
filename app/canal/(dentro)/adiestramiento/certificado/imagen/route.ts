@@ -4,6 +4,7 @@ import { empleadoActual } from '@/lib/canal'
 import { nombreArchivo } from '@/lib/certificado'
 import { imagenCertificado } from '@/lib/certificado-imagen'
 import { createClient } from '@/lib/supabase/server'
+import { conCedula } from '@/lib/contacto'
 
 /**
  * Mi certificado en imagen, con la cédula: el que se guarda en el teléfono y el
@@ -31,11 +32,13 @@ export async function GET(peticion: NextRequest) {
     .maybeSingle()
   if (!matricula) return NextResponse.json({ error: 'Sin matrícula' }, { status: 404 })
 
-  const { data: certificado } = await supabase
+  // La cédula no sale de la tabla: la suya le llega por `cedulas_certificados()`.
+  const { data: fila } = await supabase
     .from('certificados')
-    .select('codigo, nombre_completo, cedula, ficha, cargo, area_nombre, emitido_en')
+    .select('id, codigo, nombre_completo, ficha, cargo, area_nombre, emitido_en')
     .eq('matricula_id', matricula.id)
     .maybeSingle()
+  const certificado = await conCedula(supabase, fila)
   if (!certificado) return NextResponse.json({ error: 'Todavía no hay certificado' }, { status: 404 })
 
   const imagen = await imagenCertificado(certificado, { conCedula: true })

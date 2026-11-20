@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { esEditor, puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
+import { COLUMNAS_ENTREVISTA, hallazgosPorEstado, internasDeEntrevistas } from '@/lib/contacto'
 import { fechaCorta, numero } from '@/lib/plataforma/formato'
 import { SERIES_SESION } from '@/lib/plataforma/tablas-programa'
 import { ESTADOS_ENTREVISTA, ESTADOS_HALLAZGO, ROLES_PARTICIPANTE, SEDES, TIPOS_SESION, type EstadoEntrevista, type RolParticipante, type Sede, type TipoSesion } from '@/lib/types'
@@ -79,16 +80,20 @@ export default async function SesionPage({ params }: PageProps<'/sistema/program
   const equipo = esEditor(sesion.perfil)
   const supabase = await createClient()
 
-  const { data: e } = await supabase.from('entrevistas').select('*, areas(id, nombre)').eq('id', id).maybeSingle()
-  if (!e) notFound()
+  const { data: fila } = await supabase.from('entrevistas').select(`${COLUMNAS_ENTREVISTA}, areas(id, nombre)`).eq('id', id).maybeSingle()
+  if (!fila) notFound()
+  // Las notas y el enlace de Fireflies no salen de la tabla: solo el equipo los pide.
+  const interna = equipo ? (await internasDeEntrevistas(supabase, [id])).get(id) : undefined
+  const e = { ...fila, notas_consultor: interna?.notas_consultor ?? null, fireflies_url: interna?.fireflies_url ?? null }
 
-  const [segmentos, { data: archivos }, { data: participantes }, { data: hallazgos }] = await Promise.all([
+  const [segmentos, { data: archivos }, { data: participantes }, hallazgos] = await Promise.all([
     equipo ? transcripcionCompleta(supabase, id) : Promise.resolve([]),
     puede(sesion, 'modulo:archivos')
       ? supabase.from('archivos').select('id, nombre, tamano_bytes, mime_type').eq('entrevista_id', id).order('created_at', { ascending: false })
       : Promise.resolve({ data: [] as { id: string; nombre: string; tamano_bytes: number | null; mime_type: string | null }[] }),
     supabase.from('sesion_participantes').select('id, rol, etiqueta_hablante, personas(id, nombre_completo, cargo, organizacion)').eq('entrevista_id', id),
-    supabase.from('hallazgos').select('estado').eq('entrevista_id', id),
+    // La tabla de hallazgos es del equipo: a quien abre la sesión le llega la cuenta.
+    hallazgosPorEstado(supabase, id),
   ])
 
   const meta = (e.fireflies_meta ?? {}) as Record<string, unknown>
@@ -96,7 +101,7 @@ export default async function SesionPage({ params }: PageProps<'/sistema/program
   const palabrasClave = comoLineas(meta.keywords)
   const participantesFireflies = comoLineas(meta.participantes)
   const sinIdentificar = [...new Set(segmentos.map((s) => s.hablante_original ?? s.hablante).filter((h): h is string => !!h && /^speaker/i.test(h)))].sort()
-  const conteo = (est: string) => (hallazgos ?? []).filter((h) => h.estado === est).length
+  const conteo = (est: string) => hallazgos.get(est) ?? 0
   const estado = e.estado as EstadoEntrevista
 
   const datos: [string, string][] = [
