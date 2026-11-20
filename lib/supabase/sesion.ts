@@ -34,6 +34,9 @@ const RUTAS_PUBLICAS = [
   '/normas',
   '/.well-known/apple-app-site-association',
   '/.well-known/assetlinks.json',
+  // La captura de tasas la llama el programador, sin sesión: la ruta exige su
+  // propio secreto (`TASAS_SECRETO`) y sin él responde 401.
+  '/api/tasas/capturar',
 ]
 
 export async function updateSession(request: NextRequest) {

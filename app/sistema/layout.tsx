@@ -1,74 +1,178 @@
-import { cerrarSesion } from '@/app/login/actions'
-import { IconoChat, IconoSalir } from '@/components/iconos'
 import Link from 'next/link'
-import { Marca } from '@/components/marca'
-import { MenuMovil } from '@/components/menu-movil'
-import { NavSistema } from '@/components/nav-sistema'
-import { Insignia } from '@/components/ui'
-import { puede, requerirSesion } from '@/lib/auth'
-import { destinosSistema } from '@/lib/sistema'
+import { cookies } from 'next/headers'
+import { Suspense } from 'react'
 import { empleadoActual } from '@/lib/canal'
+import { puede, requerirSesion } from '@/lib/auth'
+import { createClient } from '@/lib/supabase/server'
+import { PESTANAS, type Pestana } from '@/lib/plataforma/dominios'
+import { iniciales } from '@/lib/plataforma/formato'
+import { COOKIE_COLUMNA, COOKIE_RIEL, leerMoneda, modulosDelPlan, modulosVisibles, tasasDelDia } from '@/lib/plataforma/servidor'
+import { misPendientes } from '@/components/sistema/shell/acciones'
+import { BandaVerComo, BandasContexto } from '@/components/sistema/shell/bandas'
+import { BotonBuscar, Campana, ControlesContexto, InterruptorMoneda, MenuPersona, VerComo } from '@/components/sistema/shell/barra-cliente'
+import { BarraTasas, PuntoJd } from '@/components/sistema/shell/barra-tasas'
+import { MenuTelefono } from '@/components/sistema/shell/menu-telefono'
+import { ColumnaModulos, NavegacionTelefono, Riel, type VistaMenu } from '@/components/sistema/shell/navegacion'
+import { Desplegable } from '@/components/sistema/ui/desplegable'
+import { PanelFicha } from '@/components/sistema/ui/ficha-objeto'
+import { PaletaComandos, type AccionPaleta } from '@/components/sistema/ui/paleta-comandos'
 
+/**
+ * El armazón de la Plataforma Iberia (Anexo E §3, modelo v2): barra carbón con
+ * los controles globales, riel de dominios con nombres (plegable a iconos),
+ * columna de módulos del dominio, zona de trabajo y panel lateral del objeto.
+ *
+ * Lo que sale en el menú lo decide el permiso de cada módulo (el mismo que pide
+ * su página); la base, con RLS, decide lo que de verdad se lee. El contexto
+ * global (fecha, escenario) vive en la URL; la moneda y el riel, en cookies.
+ */
 export default async function SistemaLayout({ children }: LayoutProps<'/sistema'>) {
   const sesion = await requerirSesion()
-  const { perfil, email, rol } = sesion
-  const permitidos = destinosSistema(sesion)
-  const conCanal = puede(sesion, 'modulo:canal') && Boolean(await empleadoActual())
+  const supabase = await createClient()
+  const jar = await cookies()
+  const esAdminReal = sesion.rolReal.nivel === 'admin'
+
+  const [modulos, tasas, moneda, escenarios, vistas, pendientes, roles, empleado] = await Promise.all([
+    modulosDelPlan(),
+    tasasDelDia(sesion),
+    leerMoneda(),
+    puede(sesion, 'sistema:escenarios')
+      ? supabase.schema('org').from('escenario').select('id, nombre, alcance').in('estado', ['borrador', 'en_aprobacion']).order('creado_en', { ascending: false }).range(0, 29)
+      : null,
+    supabase.schema('ui').from('vista').select('id, nombre, alcance, ruta, parametros, modulo').order('nombre').range(0, 199),
+    misPendientes().catch(() => []),
+    esAdminReal ? supabase.from('roles').select('id, nombre').order('nombre') : null,
+    puede(sesion, 'modulo:canal') ? empleadoActual() : null,
+  ])
+
+  const menu = modulosVisibles(sesion, modulos)
+  const pestanas: Record<string, Pestana[]> = {}
+  for (const [codigo, lista] of Object.entries(PESTANAS)) {
+    pestanas[codigo] = lista.filter((p) => !p.recurso || puede(sesion, p.recurso, p.accion ?? 'ver') || (p.accion === 'crear' && puede(sesion, p.recurso)))
+  }
+
+  const vistasMenu: VistaMenu[] = (vistas.data ?? []).map((v) => {
+    const params = new URLSearchParams(String((v.parametros as { consulta?: string } | null)?.consulta ?? ''))
+    params.set('vista', v.id)
+    return { id: v.id, nombre: v.nombre, alcance: v.alcance as VistaMenu['alcance'], modulo: v.modulo, href: `${v.ruta}?${params}` }
+  })
+
+  const acciones: AccionPaleta[] = [
+    { etiqueta: 'Ir a Mi día', href: '/sistema' },
+    { etiqueta: 'Mis aprobaciones', href: '/sistema/bandeja', detalle: `${pendientes.length} por decidir` },
+    ...(puede(sesion, 'sistema:requisiciones', 'crear') ? [{ etiqueta: 'Nueva requisición de personal', href: '/sistema/nucleo/organizacion/requisiciones/nueva' }] : []),
+    ...(puede(sesion, 'sistema:escenarios') ? [{ etiqueta: 'Abrir un escenario…', href: '/sistema/nucleo/escenarios' }] : []),
+    ...(puede(sesion, 'sistema:tasas') ? [{ etiqueta: 'Tasas de cambio', href: '/sistema/finanzas/tasas', detalle: 'BCV y fecha valor' }] : []),
+    ...(puede(sesion, 'sistema:estructura') ? [{ etiqueta: 'Explorar las plazas', href: '/sistema/nucleo/organizacion/plazas' }] : []),
+    ...(puede(sesion, 'sistema:procesos') ? [{ etiqueta: 'Mapa de procesos', href: '/sistema/nucleo/procesos' }] : []),
+    ...(puede(sesion, 'sistema:documentos') ? [{ etiqueta: 'Biblioteca de documentos', href: '/sistema/nucleo/documentos' }] : []),
+    ...(puede(sesion, 'modulo:usuarios') ? [{ etiqueta: 'Usuarios', href: '/sistema/administracion/usuarios' }] : []),
+  ]
+
+  const listaEscenarios = escenarios?.data ?? []
+  const nombre = sesion.perfil.nombre_completo || sesion.email
+  const modoRiel = jar.get(COOKIE_RIEL)?.value === 'iconos' ? 'iconos' : 'nombres'
+  const modoColumna = jar.get(COOKIE_COLUMNA)?.value === 'plegada' ? 'plegada' : 'abierta'
+  const puedeEsc = puede(sesion, 'sistema:escenarios')
 
   return (
-    <div className="flex min-h-full flex-1">
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-[var(--borde)] bg-white lg:flex">
-        <div className="border-b border-[var(--borde)] px-5 py-4">
-          <Marca />
-        </div>
-        <div className="flex-1 overflow-y-auto">
-          <NavSistema permitidos={permitidos} />
-        </div>
-        <div className="border-t border-[var(--borde)] px-5 py-3">
-          <p className="text-[11px] leading-relaxed text-marca-400">
-            Plataforma Iberia
-            <br />
-            Etapa 1 · Procesos y estructura
-          </p>
-        </div>
-      </aside>
+    <div className="flex min-h-dvh flex-1 flex-col bg-[#f4f5f7] text-[13px]">
+      <a href="#contenido" className="sr-only z-[70] rounded-lg bg-white px-3 py-2 text-sm font-semibold text-marca-900 focus:not-sr-only focus:fixed focus:top-2 focus:left-2">
+        Saltar al contenido
+      </a>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-[60px] items-center gap-3 border-b border-[var(--borde)] bg-white/95 px-4 backdrop-blur sm:px-5">
-          <MenuMovil titulo="Menú" etiqueta="Abrir el menú">
-            <NavSistema permitidos={permitidos} />
-          </MenuMovil>
-          <div className="lg:hidden">
-            <Marca compacta alto={26} />
-          </div>
-
-          <div className="ml-auto flex items-center gap-3">
-            {conCanal && (
-              <Link href="/canal" className="btn-neutro h-10 px-3" aria-label="Ir al canal">
-                <IconoChat className="h-4 w-4" />
-                <span className="hidden md:inline">El canal</span>
-              </Link>
-            )}
-            <div className="hidden text-right sm:block">
-              <p className="text-sm leading-tight font-medium text-marca-800">{perfil.nombre_completo || email}</p>
-              <p className="text-xs leading-tight text-marca-500">{rol.nombre}</p>
+      <header className="sticky top-0 z-40 flex h-12 items-center gap-2 bg-[#2b2a28] px-2.5 text-white sm:px-3">
+        <MenuTelefono>
+          <Suspense>
+            <div className="flex flex-col gap-2 border-b border-[var(--borde)] p-3">
+              <ControlesContexto escenarios={listaEscenarios} puedeEscenarios={puedeEsc} claro />
+              <InterruptorMoneda inicial={moneda} tasaUsd={tasas?.usd ?? null} fechaValor={tasas?.usdFechaValor ?? null} claro />
             </div>
-            <Insignia tono={rol.nivel === 'lector' ? 'neutro' : 'acento'} className="hidden sm:inline-flex">
-              {rol.nombre}
-            </Insignia>
-            <form action={cerrarSesion}>
-              <button type="submit" className="btn-neutro h-10 px-3" title="Cerrar sesión" aria-label="Cerrar sesión">
-                <IconoSalir className="h-4 w-4" />
-                <span className="sr-only sm:not-sr-only">Salir</span>
-              </button>
-            </form>
-          </div>
-        </header>
+            <NavegacionTelefono modulos={menu} pestanas={pestanas} vistas={vistasMenu} />
+          </Suspense>
+        </MenuTelefono>
 
-        <main className="flex-1 px-4 py-6 sm:px-5 lg:px-8 lg:py-8">
-          <div className="mx-auto max-w-7xl">{children}</div>
+        <Link href="/sistema" className="flex shrink-0 items-center gap-2 rounded-lg font-extrabold tracking-wide whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+          <span className="rounded-md bg-[#D4332C] px-1.5 py-0.5 text-[12px]">IB</span>
+          <span className="hidden text-[14px] sm:inline">Plataforma Iberia</span>
+        </Link>
+
+        <div className="hidden min-w-0 flex-1 min-[901px]:flex">
+          <BotonBuscar />
+        </div>
+        <div className="flex-1 min-[901px]:hidden" />
+
+        <div className="hidden items-center gap-2 min-[1240px]:flex">
+          <Suspense>
+            <ControlesContexto escenarios={listaEscenarios} puedeEscenarios={puedeEsc} />
+          </Suspense>
+          <InterruptorMoneda inicial={moneda} tasaUsd={tasas?.usd ?? null} fechaValor={tasas?.usdFechaValor ?? null} />
+        </div>
+        <Desplegable
+          etiqueta="Contexto: fecha de los datos, escenario y moneda"
+          alinear="der"
+          ancho="w-80"
+          className="hidden min-[901px]:block min-[1240px]:hidden"
+          claseBoton="inline-flex h-8 items-center gap-1 rounded-lg border border-[#4a4845] bg-[#3a3936] px-2.5 text-xs text-[#e8e5df] hover:bg-[#45433f]"
+          boton={<>Contexto ▾</>}
+        >
+          <Suspense>
+            <div className="flex flex-col gap-2 p-3">
+              <ControlesContexto escenarios={listaEscenarios} puedeEscenarios={puedeEsc} claro />
+              <InterruptorMoneda inicial={moneda} tasaUsd={tasas?.usd ?? null} fechaValor={tasas?.usdFechaValor ?? null} claro />
+            </div>
+          </Suspense>
+        </Desplegable>
+
+        <div className="hidden sm:flex">
+          <BarraTasas t={tasas} enlace={puede(sesion, 'sistema:tasas')} />
+        </div>
+        <div className="sm:hidden">
+          <BarraTasas t={tasas} enlace={puede(sesion, 'sistema:tasas')} compacta />
+        </div>
+        <PuntoJd />
+        {esAdminReal && roles?.data && (
+          <div className="hidden xl:block">
+            <VerComo roles={roles.data} activo={sesion.vistaComo?.rolId ?? null} rolReal={sesion.rolReal.id} />
+          </div>
+        )}
+        <div className="min-[901px]:hidden">
+          <BotonBuscar compacto />
+        </div>
+        <Campana inicial={pendientes} />
+        <MenuPersona
+          nombre={nombre}
+          email={sesion.email}
+          rol={sesion.rolReal.nombre}
+          iniciales={iniciales(nombre)}
+          verComo={sesion.vistaComo?.nombre ?? null}
+          conCanal={Boolean(empleado)}
+          conPanel={puede(sesion, 'modulo:panel')}
+        />
+      </header>
+
+      <div className="flex min-w-0 flex-1">
+        <Suspense fallback={<div className="hidden w-[184px] shrink-0 border-r border-[var(--borde)] bg-white min-[901px]:block" />}>
+          <Riel modulos={menu} modo={modoRiel} />
+          <ColumnaModulos modulos={menu} pestanas={pestanas} vistas={vistasMenu} modo={modoColumna} />
+        </Suspense>
+
+        <main id="contenido" className="min-w-0 flex-1">
+          {sesion.vistaComo && <BandaVerComo rol={sesion.vistaComo.nombre} />}
+          <Suspense>
+            <BandasContexto escenarios={listaEscenarios} />
+          </Suspense>
+          <div className="px-3 pt-4 pb-10 sm:px-5">{children}</div>
         </main>
+
+        <Suspense>
+          <PanelFicha />
+        </Suspense>
       </div>
+
+      <Suspense>
+        <PaletaComandos acciones={acciones} />
+      </Suspense>
     </div>
   )
 }

@@ -119,6 +119,12 @@ export default async function EscenarioPage({ params, searchParams }: PageProps<
               {e.vigente_desde && <> · rige desde el {fecha(e.vigente_desde)}</>}
             </p>
             {e.descripcion && <p className="mt-1 max-w-2xl text-sm text-marca-700">{e.descripcion}</p>}
+            <Link
+              href={`/sistema/nucleo/procesos?esc=${e.id}`}
+              className="mt-3 inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-[#d9cff0] bg-[#f7f4fd] px-3.5 text-sm font-semibold text-[#6b4fb3] hover:bg-[#f1edfa]"
+            >
+              ◆ {e.estado === 'borrador' ? 'Editar en el mapa' : 'Ver en el mapa'}
+            </Link>
           </div>
           <Insignia tono={TONO_ESCENARIO[e.estado] ?? 'neutro'}>{ESTADOS_ESCENARIO[e.estado] ?? e.estado}</Insignia>
         </div>

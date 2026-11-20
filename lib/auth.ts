@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { cache } from 'react'
 import { createClient } from '@/lib/supabase/server'
@@ -16,7 +17,19 @@ export type Sesion = {
   permisos: MapaPermisos
   /** La versión de las normas del canal que aceptó (0 si ninguna). Ver `lib/normas.ts`. */
   normasAceptadas: number
+  /** El rol de verdad. Es el mismo que `rol`, salvo con «ver como» activo. */
+  rolReal: RolAsignado
+  /**
+   * «Ver como» (solo el nivel administrador, cookie `ver_como` en `/sistema`):
+   * `rol` y `permisos` pasan a ser los del rol que se previsualiza. **Solo
+   * recorta**: quien lo usa es administrador, que ya lo puede todo, y la base
+   * sigue respondiendo con su usuario real (la RLS no cambia).
+   */
+  vistaComo: { rolId: string; nombre: string } | null
 }
+
+/** La cookie de «ver como». Vive solo bajo `/sistema`: el panel y el canal no la oyen. */
+export const COOKIE_VER_COMO = 'ver_como'
 
 const ROLES_EDITORES: Rol[] = ['admin', 'consultor']
 
@@ -51,19 +64,38 @@ export const obtenerSesion = cache(async (): Promise<Sesion | null> => {
     permisos[f.recurso] = { ver: f.ver, crear: f.crear, editar: f.editar, eliminar: f.eliminar }
   }
 
-  return {
+  const rolReal: RolAsignado = (rol as RolAsignado | null) ?? {
+    id: perfil.rol_id,
+    clave: perfil.rol,
+    nombre: perfil.rol,
+    nivel: perfil.rol as Nivel,
+  }
+  const base: Sesion = {
     userId: user.id,
     email: user.email ?? perfil.email,
     perfil: resto as Profile,
-    rol: (rol as RolAsignado | null) ?? {
-      id: perfil.rol_id,
-      clave: perfil.rol,
-      nombre: perfil.rol,
-      nivel: perfil.rol as Nivel,
-    },
+    rol: rolReal,
     permisos,
     normasAceptadas: versionAceptada(user.user_metadata),
+    rolReal,
+    vistaComo: null,
   }
+
+  // «Ver como»: solo para el nivel administrador. A cualquier otro se le ignora
+  // la cookie, así que nunca da más de lo que la sesión tiene.
+  if (rolReal.nivel !== 'admin') return base
+  const verComo = (await cookies()).get(COOKIE_VER_COMO)?.value
+  if (!verComo || verComo === rolReal.id || !/^[0-9a-f-]{36}$/i.test(verComo)) return base
+  const [{ data: otro }, { data: matriz }] = await Promise.all([
+    supabase.from('roles').select('id, clave, nombre, nivel').eq('id', verComo).maybeSingle(),
+    supabase.from('rol_permisos').select('recurso, ver, crear, editar, eliminar').eq('rol_id', verComo),
+  ])
+  if (!otro) return base
+  const permisosOtro: MapaPermisos = {}
+  for (const f of matriz ?? []) {
+    permisosOtro[f.recurso] = { ver: f.ver, crear: f.crear, editar: f.editar, eliminar: f.eliminar }
+  }
+  return { ...base, rol: otro as RolAsignado, permisos: permisosOtro, vistaComo: { rolId: otro.id, nombre: otro.nombre } }
 })
 
 export async function requerirSesion(): Promise<Sesion> {
@@ -136,6 +168,11 @@ export function inicioDelPanel(sesion: Sesion | null | undefined): string | null
 export async function requerirPermiso(recurso: string, accion: Accion = 'ver'): Promise<Sesion> {
   const sesion = await requerirSesion()
   if (!puede(sesion, recurso, accion)) {
+    // Con «ver como», la pantalla que el rol no abre devuelve a «Mi día», que
+    // se abre con cualquier sesión: la previsualización no se sale de /sistema.
+    // Y lo mismo con un recurso de la plataforma: quien entra a /sistema se
+    // queda en /sistema, en vez de saltar al panel o a «sin acceso».
+    if (sesion.vistaComo || recurso.startsWith('sistema:')) redirect('/sistema?aviso=sin-permiso')
     const panel = inicioDelPanel(sesion)
     redirect(panel === '/dashboard' ? '/dashboard?aviso=sin-permiso' : (panel ?? destinoInicial(sesion)))
   }

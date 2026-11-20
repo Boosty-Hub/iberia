@@ -159,6 +159,21 @@ export const MODULOS: Recurso[] = [
     acciones: ['ver', 'crear', 'editar'],
   },
   { clave: 'sistema:auditoria', nombre: 'Auditoría', grupo: 'sistema', acciones: ['ver'], subtitulo: 'Quién cambió qué y cuándo' },
+  {
+    clave: 'sistema:tasas',
+    nombre: 'Tasas de cambio',
+    grupo: 'sistema',
+    acciones: ['ver', 'editar'],
+    detalle: { ver: 'Historial de las tasas oficiales', editar: 'Cargar una tasa a mano, con motivo (respaldo)' },
+    subtitulo: 'La tasa BCV de la barra la ve todo el que tiene sesión',
+  },
+  {
+    clave: 'sistema:tasas-paralelo',
+    nombre: 'Dólar paralelo y brecha',
+    grupo: 'sistema',
+    acciones: ['ver'],
+    subtitulo: 'Referencia de mercado, uso interno, nunca para facturar · cada lectura queda registrada',
+  },
   { clave: 'modulo:panel', nombre: 'Panel', grupo: 'panel', acciones: ['ver'], subtitulo: 'La portada del dashboard' },
   {
     clave: 'modulo:entrevistas',

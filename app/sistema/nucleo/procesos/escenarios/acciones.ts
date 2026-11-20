@@ -136,6 +136,99 @@ export async function agregarNodo(_: EstadoEscenario, fd: FormData): Promise<Est
   return { ok: 'Agregado al escenario.' }
 }
 
+// -----------------------------------------------------------------------------
+// Lo que usa el lienzo del mapa: cada acción devuelve su estado, sin redirigir
+// -----------------------------------------------------------------------------
+
+/**
+ * Cambiar de padre un proceso del escenario (arrastrar una caja sobre otra).
+ * El padre tiene que estar exactamente un nivel arriba: el nivel no se toca,
+ * porque al publicar solo se versiona lo que cambió y un subárbol re-nivelado
+ * dejaría a sus hijos con el nivel viejo.
+ */
+export async function moverNodo(_: EstadoEscenario, fd: FormData): Promise<EstadoEscenario> {
+  await requerirPermiso('sistema:escenarios', 'editar')
+  await requerirPermiso('sistema:procesos', 'editar')
+  const supabase = await createClient()
+  const sgc = supabase.schema('sgc')
+  const escenario = texto(fd, 'escenario')
+  const err = await enEdicion(supabase, escenario)
+  if (err) return { error: err }
+  const ref = texto(fd, 'ref')
+  const padreRef = texto(fd, 'padre_ref')
+  if (!padreRef || padreRef === ref) return { error: 'Elige de qué proceso pasa a colgar.' }
+  const { data: filas } = await sgc.from('proceso').select('ref, padre_ref, nivel, estado').eq('escenario_id', escenario).range(0, 4999)
+  const porRef = new Map((filas ?? []).map((f) => [f.ref, f]))
+  const nodo = porRef.get(ref)
+  const padre = porRef.get(padreRef)
+  if (!nodo) return { error: 'Ese proceso no es de este escenario.' }
+  if (!padre || padre.estado === 'retirada') return { error: 'El padre elegido no está en el escenario.' }
+  if (nodo.estado === 'retirada') return { error: 'Está retirado en el escenario: restáuralo antes de moverlo.' }
+  if (padre.nivel !== nodo.nivel - 1) return { error: 'El padre tiene que estar exactamente un nivel arriba.' }
+  for (let p: string | null = padreRef, i = 0; p && i < 10; p = porRef.get(p)?.padre_ref ?? null, i++)
+    if (p === ref) return { error: 'No se puede colgar de algo que depende de él.' }
+  const { data, error } = await sgc.from('proceso').update({ padre_ref: padreRef }).eq('escenario_id', escenario).eq('ref', ref).select('id')
+  if (error) return { error: mensajeDe(error) }
+  if (!data?.length) return { error: 'La base no dejó moverlo.' }
+  revalidatePath(`${RUTA}/${escenario}`)
+  return { ok: 'Movido en el escenario.' }
+}
+
+export async function renombrarNodo(_: EstadoEscenario, fd: FormData): Promise<EstadoEscenario> {
+  await requerirPermiso('sistema:escenarios', 'editar')
+  await requerirPermiso('sistema:procesos', 'editar')
+  const supabase = await createClient()
+  const escenario = texto(fd, 'escenario')
+  const err = await enEdicion(supabase, escenario)
+  if (err) return { error: err }
+  const nombre = texto(fd, 'nombre')
+  if (nombre.length < 3) return { error: 'El nombre necesita al menos tres letras.' }
+  const { data, error } = await supabase
+    .schema('sgc')
+    .from('proceso')
+    .update({ nombre })
+    .eq('escenario_id', escenario)
+    .eq('ref', texto(fd, 'ref'))
+    .neq('estado', 'retirada')
+    .select('id')
+  if (error) return { error: mensajeDe(error) }
+  if (!data?.length) return { error: 'No se encontró en el escenario (o está retirado).' }
+  revalidatePath(`${RUTA}/${escenario}`)
+  return { ok: 'Renombrado en el escenario.' }
+}
+
+/** Retirar o restaurar un subárbol del escenario, devolviendo el estado (para el lienzo). */
+export async function retirarEnEscenario(_: EstadoEscenario, fd: FormData): Promise<EstadoEscenario> {
+  await requerirPermiso('sistema:escenarios', 'editar')
+  await requerirPermiso('sistema:procesos', 'editar')
+  const supabase = await createClient()
+  const sgc = supabase.schema('sgc')
+  const escenario = texto(fd, 'escenario')
+  const ref = texto(fd, 'ref')
+  const restaurar = fd.get('restaurar') === 'si'
+  const err = await enEdicion(supabase, escenario)
+  if (err) return { error: err }
+  const { data: filas } = await sgc.from('proceso').select('ref, padre_ref, estado').eq('escenario_id', escenario).range(0, 4999)
+  const lista = filas ?? []
+  if (restaurar) {
+    const padre = lista.find((f) => f.ref === lista.find((x) => x.ref === ref)?.padre_ref)
+    if (padre?.estado === 'retirada') return { error: 'Su padre también está retirado: restaura primero el padre.' }
+  }
+  const hijos = new Map<string, string[]>()
+  for (const f of lista) if (f.padre_ref) (hijos.get(f.padre_ref) ?? hijos.set(f.padre_ref, []).get(f.padre_ref)!).push(f.ref)
+  const refs: string[] = []
+  const pila = [ref]
+  while (pila.length && refs.length < 2000) {
+    const r = pila.pop()!
+    refs.push(r)
+    pila.push(...(hijos.get(r) ?? []))
+  }
+  const { error } = await sgc.from('proceso').update({ estado: restaurar ? 'borrador' : 'retirada' }).eq('escenario_id', escenario).in('ref', refs)
+  if (error) return { error: mensajeDe(error) }
+  revalidatePath(`${RUTA}/${escenario}`)
+  return { ok: restaurar ? 'Restaurado en el escenario.' : `Retirado del escenario${refs.length > 1 ? `, con ${refs.length - 1} debajo` : ''}.` }
+}
+
 /** Retirar (o restaurar) un nodo y todo lo que cuelga de él, dentro del escenario. */
 export async function retirarNodo(fd: FormData) {
   await requerirPermiso('sistema:escenarios', 'editar')

@@ -181,6 +181,12 @@ export default async function EscenarioPage({ params, searchParams }: PageProps<
             {e.publicado_en && <span>· publicado el {fechaHora(e.publicado_en)}</span>}
           </div>
           {e.descripcion && <p className="mt-2 max-w-2xl text-sm text-marca-600">{e.descripcion}</p>}
+          <Link
+            href={`/sistema/nucleo/organizacion?esc=${id}`}
+            className="mt-3 inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-[#d9cff0] bg-[#f7f4fd] px-3.5 text-sm font-semibold text-[#6b4fb3] hover:bg-[#f1edfa]"
+          >
+            ◆ {editable ? 'Editar en el organigrama' : 'Ver en el organigrama'}
+          </Link>
         </div>
         <div className="grid grid-cols-2 gap-3 text-center">
           <div className="tarjeta px-4 py-3">

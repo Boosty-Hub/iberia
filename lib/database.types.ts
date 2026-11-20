@@ -128,6 +128,24 @@ export type Database = {
         }
         Relationships: []
       }
+      lectura_paralelo: {
+        Row: {
+          dia: string
+          perfil_id: string
+          primera: string
+        }
+        Insert: {
+          dia?: string
+          perfil_id: string
+          primera?: string
+        }
+        Update: {
+          dia?: string
+          perfil_id?: string
+          primera?: string
+        }
+        Relationships: []
+      }
       modulo: {
         Row: {
           codigo: string
@@ -197,16 +215,103 @@ export type Database = {
         }
         Relationships: []
       }
+      tasa_cambio: {
+        Row: {
+          capturada_en: string
+          creado_por: string | null
+          estado: string
+          fecha_valor: string
+          fuente: string
+          id: number
+          lado: string
+          metodo: string
+          moneda: string
+          motivo: string | null
+          payload: Json | null
+          publicada_en: string | null
+          reemplaza_id: number | null
+          tasa: number
+          tipo: string
+          verificada_con: string | null
+        }
+        Insert: {
+          capturada_en?: string
+          creado_por?: string | null
+          estado?: string
+          fecha_valor: string
+          fuente: string
+          id?: never
+          lado?: string
+          metodo: string
+          moneda: string
+          motivo?: string | null
+          payload?: Json | null
+          publicada_en?: string | null
+          reemplaza_id?: number | null
+          tasa: number
+          tipo: string
+          verificada_con?: string | null
+        }
+        Update: {
+          capturada_en?: string
+          creado_por?: string | null
+          estado?: string
+          fecha_valor?: string
+          fuente?: string
+          id?: never
+          lado?: string
+          metodo?: string
+          moneda?: string
+          motivo?: string | null
+          payload?: Json | null
+          publicada_en?: string | null
+          reemplaza_id?: number | null
+          tasa?: number
+          tipo?: string
+          verificada_con?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasa_cambio_reemplaza_id_fkey"
+            columns: ["reemplaza_id"]
+            isOneToOne: false
+            referencedRelation: "tasa_cambio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      cargar_tasa_manual: {
+        Args: {
+          p_fecha_valor: string
+          p_moneda: string
+          p_motivo: string
+          p_tasa: number
+          p_tipo: string
+        }
+        Returns: number
+      }
       puede_conciliar: { Args: { p_modulo: string }; Returns: boolean }
       resolver_conciliacion: {
         Args: { p_estado: string; p_id: string; p_resolucion?: string }
         Returns: undefined
       }
+      serie_tasas: {
+        Args: { p_desde: string; p_hasta?: string }
+        Returns: {
+          brecha: number
+          dia: string
+          eur: number
+          paralelo: number
+          usd: number
+          usd_fecha_valor: string
+        }[]
+      }
+      tasas_del_dia: { Args: { p_dia?: string }; Returns: Json }
     }
     Enums: {
       [_ in never]: never
@@ -1278,6 +1383,31 @@ export type Database = {
       }
       hoy: { Args: never; Returns: string }
       impacto_requisicion: { Args: { p_req: string }; Returns: Json }
+      lienzo: {
+        Args: { p_escenario?: string; p_fecha?: string }
+        Returns: {
+          antes: Json
+          aprob: number
+          clase: string
+          codigo: string
+          costo_usd: number
+          costo_ves: number
+          diff: string
+          estado: string
+          excede: number
+          id: string
+          inferido: boolean
+          nombre: string
+          ocu: number
+          orden: number
+          padre: string
+          personas: string[]
+          ref: string
+          sede: string
+          tipo: string
+          vacantes: number
+        }[]
+      }
       mover_ocupacion: {
         Args: {
           p_excede?: boolean
@@ -4543,6 +4673,33 @@ export type Database = {
         Returns: string
       }
       enviar_proceso: { Args: { p_id: string }; Returns: string }
+      ficha_llena: { Args: { p_ficha: Json }; Returns: boolean }
+      lienzo: {
+        Args: { p_escenario?: string; p_fecha?: string }
+        Returns: {
+          antes: Json
+          codigo_informe: string
+          codigo_sgc: string
+          diff: string
+          docs_total: number
+          docs_vigentes: number
+          dueno: string
+          dueno_estado: string
+          dueno_plaza_ref: string
+          estado_operativo: string
+          id: string
+          nivel: number
+          nombre: string
+          orden: number
+          padre: string
+          ref: string
+          revision_abierta: boolean
+          salud: string
+          tiene_ficha: boolean
+          tipo: string
+          version: number
+        }[]
+      }
       nuevo_borrador: { Args: { p_ref: string }; Returns: string }
       opciones_documentos: {
         Args: never
@@ -4558,6 +4715,100 @@ export type Database = {
         Returns: undefined
       }
       publicar_proceso: { Args: { p_id: string }; Returns: undefined }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  ui: {
+    Tables: {
+      vista: {
+        Row: {
+          actualizado_en: string
+          alcance: string
+          creado_en: string
+          id: string
+          modulo: string | null
+          nombre: string
+          parametros: Json
+          propietario: string
+          recurso: string | null
+          ruta: string
+          tabla: string
+        }
+        Insert: {
+          actualizado_en?: string
+          alcance?: string
+          creado_en?: string
+          id?: string
+          modulo?: string | null
+          nombre: string
+          parametros?: Json
+          propietario?: string
+          recurso?: string | null
+          ruta: string
+          tabla: string
+        }
+        Update: {
+          actualizado_en?: string
+          alcance?: string
+          creado_en?: string
+          id?: string
+          modulo?: string | null
+          nombre?: string
+          parametros?: Json
+          propietario?: string
+          recurso?: string | null
+          ruta?: string
+          tabla?: string
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      buscar: {
+        Args: { p_limite?: number; p_q: string }
+        Returns: {
+          codigo: string
+          detalle: string
+          href: string
+          id: string
+          rango: number
+          tipo: string
+          titulo: string
+        }[]
+      }
+      etiqueta: { Args: { p_clave: string; p_tipo: string }; Returns: string }
+      plano: { Args: { p: string }; Returns: string }
+      plazas: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          busqueda: string
+          cargo: string
+          cargo_id: string
+          certeza: string
+          dotacion: number
+          estado: string
+          exceso: number
+          familia: string
+          nomina: string
+          ocupadas: number
+          ref: string
+          sede: string
+          sede_nombre: string
+          tipo_nomina: string
+          unidad: string
+          unidad_ref: string
+          unidad_tipo: string
+          vacantes: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
@@ -4699,6 +4950,9 @@ export const Constants = {
     Enums: {},
   },
   sgc: {
+    Enums: {},
+  },
+  ui: {
     Enums: {},
   },
 } as const

@@ -78,6 +78,24 @@ export async function moverUnidad(_a: EstadoAccion, fd: FormData): Promise<Estad
   return listo(esc, 'Unidad movida.')
 }
 
+/** Pasar una plaza a otra unidad del escenario (el arrastre del lienzo). Conserva a quién reporta. */
+export async function moverPlaza(_a: EstadoAccion, fd: FormData): Promise<EstadoAccion> {
+  await requerirPermiso('sistema:escenarios', 'editar')
+  const esc = campo(fd, 'escenario')
+  const { supabase, error } = await enBorrador(esc)
+  if (error) return { error }
+  const ref = campo(fd, 'ref')
+  const unidad = campo(fd, 'unidad_ref')
+  if (!unidad) return { error: 'Elige la unidad a la que pasa la plaza.' }
+  const org = supabase.schema('org')
+  const { data: destino } = await org.from('unidad').select('ref').eq('escenario_id', esc).eq('ref', unidad).maybeSingle()
+  if (!destino) return { error: 'Esa unidad no está en el escenario.' }
+  const { data, error: e } = await org.from('plaza').update({ unidad_ref: unidad }).eq('escenario_id', esc).eq('ref', ref).select('id')
+  if (e) return { error: mensajeError(e) }
+  if (!data?.length) return { error: 'No se encontró la plaza en el escenario.' }
+  return listo(esc, 'Plaza movida.')
+}
+
 export async function agregarUnidad(_a: EstadoAccion, fd: FormData): Promise<EstadoAccion> {
   await requerirPermiso('sistema:escenarios', 'editar')
   const esc = campo(fd, 'escenario')

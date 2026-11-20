@@ -189,12 +189,12 @@ const MATRIZ = {
     'sistema:inicio': V, 'sistema:estructura': T, 'sistema:escenarios': T, 'sistema:procesos': T,
     'sistema:documentos': { ...V, editar: true }, 'sistema:dotacion': { ...V, editar: true },
     'sistema:requisiciones': { ...V, crear: true, editar: true }, 'sistema:aprobaciones': { ...V, editar: true },
-    'sistema:catalogos': { ...V, crear: true, editar: true }, 'sistema:auditoria': V,
+    'sistema:catalogos': { ...V, crear: true, editar: true }, 'sistema:auditoria': V, 'sistema:tasas': V,
   },
-  lector: { 'sistema:inicio': V, 'sistema:estructura': V, 'sistema:procesos': V, 'sistema:documentos': V, 'sistema:dotacion': V },
+  lector: { 'sistema:inicio': V, 'sistema:estructura': V, 'sistema:procesos': V, 'sistema:documentos': V, 'sistema:dotacion': V, 'sistema:tasas': V },
   'usuario-iberia': {
     'sistema:inicio': V, 'sistema:estructura': V, 'sistema:procesos': V, 'sistema:documentos': V,
-    'sistema:requisiciones': { ...V, ver: false, crear: true },
+    'sistema:requisiciones': { ...V, ver: false, crear: true }, 'sistema:tasas': V,
   },
 }
 console.log('Matriz del grupo sistema…')
