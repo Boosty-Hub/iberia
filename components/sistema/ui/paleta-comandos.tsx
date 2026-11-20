@@ -37,10 +37,11 @@ const SECCION: Record<string, string> = {
   documento: 'Documentos',
   requisicion: 'Requisiciones',
   escenario: 'Escenarios',
+  entrevista: 'Sesiones',
   modulo: 'Módulos',
 }
-const ORDEN_OBJETOS = ['unidad', 'plaza', 'cargo', 'persona', 'proceso', 'documento', 'requisicion', 'escenario']
-const CON_FICHA = new Set(['unidad', 'cargo', 'plaza', 'persona', 'proceso', 'documento', 'requisicion', 'escenario'])
+const ORDEN_OBJETOS = ['unidad', 'plaza', 'cargo', 'persona', 'proceso', 'documento', 'requisicion', 'escenario', 'entrevista']
+const CON_FICHA = new Set(['unidad', 'cargo', 'plaza', 'persona', 'proceso', 'documento', 'requisicion', 'escenario', 'entrevista', 'archivo', 'actividad'])
 const SINGULAR: Record<string, string> = {
   unidad: 'Unidad',
   plaza: 'Plaza',
@@ -50,6 +51,9 @@ const SINGULAR: Record<string, string> = {
   documento: 'Documento',
   requisicion: 'Requisición',
   escenario: 'Escenario',
+  entrevista: 'Sesión',
+  archivo: 'Archivo',
+  actividad: 'Actividad',
 }
 
 /** Los atajos de «g + letra»: a dónde lleva cada uno. */

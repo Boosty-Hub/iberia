@@ -338,6 +338,12 @@ try {
   const salidos = segunda.filter((r) => r.estado !== 'preparado')
   comprobar('con WhatsApp apagado nada se manda solo', salidos.length === 0)
 
+  // El teléfono de cada fila ya no viene embebido de `empleados` (la tabla no lo sirve
+  // por la API desde `seguimiento_privacidad`): sale de `contacto_empleados()`.
+  await pagina.reload({ waitUntil: 'networkidle' })
+  const comoSale = comoSeLee('0412-1234567') ?? '0412-1234567'
+  comprobar('la lista enseña el teléfono de cada quien', (await pagina.locator('body').innerText()).includes(comoSale), comoSale)
+
   await pagina.screenshot({ path: 'capturas/adiestramiento/12-empujon-con-gente.png', fullPage: true })
   await contexto.close()
 } finally {

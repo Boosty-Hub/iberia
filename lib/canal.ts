@@ -3,7 +3,17 @@ import { inicioDelPanel, type Sesion } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import type { Row } from '@/lib/types'
 
-export type Empleado = Row<'empleados'>
+/**
+ * La ficha tal como la sirve la API a una sesión: sin cédula, teléfono, correo,
+ * fecha de ingreso ni tipo de nómina (privilegios de columna, migración
+ * `seguimiento_privacidad`): un `select('*')` sobre `empleados` lo rechaza la
+ * base. El contacto se pide aparte con `contacto_empleados()`, que a cada quien
+ * solo le da lo suyo.
+ */
+export const COLUMNAS_EMPLEADO =
+  'id, ficha, nombre_completo, cargo, area_id, sede, nivel, familia_oficio, foto_url, activo, perfil_id, puede_publicar, es_moderador, created_at, updated_at' as const
+
+export type Empleado = Omit<Row<'empleados'>, 'cedula' | 'telefono' | 'email' | 'fecha_ingreso' | 'tipo_nomina' | 'busqueda'>
 
 export type EmpleadoConArea = Empleado & {
   areas: { id: string; nombre: string } | null
@@ -24,7 +34,7 @@ export async function empleadoActual(): Promise<EmpleadoConArea | null> {
 
   const { data } = await supabase
     .from('empleados')
-    .select('*, areas(id, nombre)')
+    .select(`${COLUMNAS_EMPLEADO}, areas(id, nombre)`)
     .eq('perfil_id', user.id)
     .eq('activo', true)
     .maybeSingle()

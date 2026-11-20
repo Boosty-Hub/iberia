@@ -5108,6 +5108,15 @@ export type Database = {
         Args: { p_accion: string; p_publicacion: string }
         Returns: undefined
       }
+      contacto_empleados: {
+        Args: { p_ids?: string[] }
+        Returns: {
+          cedula: string
+          email: string
+          empleado_id: string
+          telefono: string
+        }[]
+      }
       coordino_grupo: { Args: { grupo: string }; Returns: boolean }
       descartar_dispositivo: { Args: { p_token: string }; Returns: undefined }
       dispositivos_de_conversacion: {
@@ -5150,6 +5159,7 @@ export type Database = {
       }
       es_admin: { Args: never; Returns: boolean }
       es_editor: { Args: never; Returns: boolean }
+      hallazgos_validados: { Args: never; Returns: number }
       he_bloqueado: { Args: { p_otro: string }; Returns: boolean }
       marcar_oido: {
         Args: { p_leccion: string; p_matricula: string; p_pieza: string }
@@ -6164,6 +6174,7 @@ export type Database = {
           ficha: string
           id: string
           nombre: string
+          por_entregar: boolean
         }[]
       }
       formacion_personas: {

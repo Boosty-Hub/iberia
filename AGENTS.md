@@ -125,7 +125,7 @@ escritorio de un consultor.
   guarda el hash, nunca el token en claro, y la tabla no se lee desde el cliente.
 
 ```
-npm run probar:canal   -- --password "<clave>"   # 21 comprobaciones de RLS reales
+npm run probar:canal   -- --password "<clave>"   # 28 comprobaciones de RLS reales (también el contacto del padrón)
 npm run capturar:canal -- --password "<clave>" --flujo   # iPhone 14 + flujo de mensaje
 ```
 
@@ -159,6 +159,15 @@ Migración `20261120232000_integracion_canal.sql`. Mismas URLs: la app nativa no
   cualquiera darse `puede_publicar`/`es_moderador` o cambiarse nivel y área por la API. Ahora quién publica o
   modera lo cambia `modulo:reportes` editar; identidad, nivel, área y cuenta, solo el equipo editor o la clave
   de servicio.
+- 🔴 **El contacto del padrón no sale de `empleados` por la API** (desde el 20-nov-2026, migración
+  `seguimiento_privacidad`): `authenticated` solo tiene SELECT sobre las columnas del directorio (nombre, cargo, área,
+  foto, nivel, sede, ficha, oficio, banderas). Cédula, teléfono, correo, fecha de ingreso y tipo de nómina dan
+  `42501` en un `select`, en `select=*`, en un filtro, en un orden y embebidas. **La única puerta es
+  `contacto_empleados(p_ids)`** (`contactosDe()` de `lib/contacto.ts`): lo propio a cada quien; todo al equipo editor
+  y a `modulo:empleados` · editar (Capital Humano); el teléfono también a `modulo:recordatorios` · editar. Escribir no
+  cambió, ni la clave de servicio, ni `padron_estado` (corre como su dueña). ⚠️ Una consulta nueva a `empleados` con
+  sesión nombra sus columnas (`COLUMNAS_EMPLEADO` de `lib/canal.ts`); `select('*')` falla. Y un `grant select on all
+  tables in schema public` lo reabriría en silencio: `probar:canal` y `scripts/plataforma/probar-privacidad.mjs` lo cazan.
 - El canal adopta el token de contraste de la plataforma (`marca-400` = `#706a67` dentro de `.canal`) y cada
   ruta del canal tiene su `loading.tsx` (`EsqueletoCanal`).
 
@@ -1039,7 +1048,8 @@ El sistema que reemplaza al dashboard para operar a Iberia (Etapa 1 + rediseño 
   `<rol>.pruebas@plataforma.local`): `dev-pruebas.mjs` (dev en el 3005), `produccion-pruebas.mjs` (build de
   producción en el 3007), `sql-pruebas.mjs` (SQL por la Management API, solo al de pruebas; `--registrar`
   anota la migración), y las suites `probar-colaboracion`, `probar-r5`, `probar-ia`, `probar-lienzo`,
-  `probar-r6` (teclado, teléfono, pellizco, PDF), `mirar-armazon`, `medir-rendimiento` y
+  `probar-r6` (teclado, teléfono, pellizco, PDF), `probar-privacidad` (contacto del padrón con sesiones reales, la cuenta
+  del informe, la línea de tiempo del programa y Ctrl K), `mirar-armazon`, `medir-rendimiento` y
   `medir-accesibilidad` (axe-core). Producción: `pasar-a-produccion.mjs` hace un simulacro de solo lectura
   y dice qué falta; con `--ejecutar --confirmo`, y el OK de Gabriel, lo hace.
 
@@ -1088,7 +1098,8 @@ Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).
   de septiembre de 2026 un lector se hacía administrador con una llamada a la API.
   Lo cierra el trigger `a_profiles_proteger_acceso`, y `probar:permisos` lo comprueba.
   **Cualquier política de «lo propio» sobre una tabla con columnas de acceso necesita
-  su trigger**: la RLS decide qué filas, no qué columnas.
+  su trigger**: la RLS decide qué filas, no qué columnas. **Y una columna que no se debe leer se cierra con
+  privilegios de columna**, no con RLS (así está el contacto de `empleados`; ver «El canal dentro de la plataforma»).
 - **`SUPABASE_SECRET_KEY` bypasea RLS.** Solo en `createAdminClient()`, y solo para
   provisionar usuarios. Nunca para leer datos por cuenta de un usuario.
 - **Recuperar la contraseña** (19 de octubre de 2026): «¿Olvidaste tu contraseña?» en el login
@@ -1285,7 +1296,12 @@ Las cifras son del registro (`programa_horas_mes` —en horas, contra 107—, `p
 `levantamiento_entrevistas`, `levantamiento_archivos`; migración `integracion_programa`). Fichas `entrevista`, `archivo`
 y `actividad` (esta por `calendario_actividades.ref`) en `lib/plataforma/fichas/programa.ts`. 🔒 **La transcripción, las
 notas del consultor y los hallazgos sin validar son «solo Boosty»**: la app solo se los muestra al equipo (`esEditor`).
-⚠️ La RLS de `transcripcion_segmentos` sigue abierta a cualquier sesión (`using (true)`): el perímetro lo pone la app.
+*(Desde el hotfix del 20-nov-2026 la RLS de `transcripcion_segmentos` y `hallazgos` es solo del equipo —`es_editor()`—; la
+portada del informe cuenta los validados con `hallazgos_validados()`.)* ⚠️ `entrevistas` (con `notas_consultor`),
+`sesion_participantes` y `archivos` siguen legibles por cualquier sesión (`using (true)`): esos campos los esconde la app.
+`personas` (correo, teléfono, notas) ya pide `modulo:entrevistas` · ver. Las fichas `entrevista`, `archivo` y `actividad`
+tienen línea de tiempo (comentarios, menciones, seguir, tareas, recientes) con la casilla de su módulo, y Ctrl K busca
+sesiones —código, título, fecha; nunca la transcripción— con `modulo:entrevistas` · ver.
 Cada ruta vieja de `/dashboard/**` redirige a la nueva con sus parámetros; `/dashboard` va a Mi día (o a la primera
 pantalla de quien no tiene `modulo:panel`). El layout y la barra del panel viejo se retiraron.
 

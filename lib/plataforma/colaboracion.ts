@@ -7,8 +7,12 @@
 
 import { fechaLarga, hoyCaracas, numero, sumarDias } from '@/lib/plataforma/formato'
 
-/** Los objetos que tienen línea de tiempo (el `CHECK` de `nucleo.evento.objeto_tipo`). */
-export const TIPOS_CON_LINEA = ['unidad', 'plaza', 'cargo', 'persona', 'requisicion', 'escenario', 'proceso', 'documento'] as const
+/**
+ * Los objetos que tienen línea de tiempo (el `CHECK` de `nucleo.evento.objeto_tipo`). Los del programa
+ * (`entrevista`, `archivo`, `actividad`) entraron con `seguimiento_privacidad`: los ve quien tiene la casilla
+ * de su módulo (`privado.puede_ver_objeto_de`).
+ */
+export const TIPOS_CON_LINEA = ['unidad', 'plaza', 'cargo', 'persona', 'requisicion', 'escenario', 'proceso', 'documento', 'entrevista', 'archivo', 'actividad'] as const
 export type TipoConLinea = (typeof TIPOS_CON_LINEA)[number]
 
 export function tieneLinea(tipo: string): tipo is TipoConLinea {
@@ -24,6 +28,9 @@ export const ETIQUETA_OBJETO: Record<TipoConLinea, string> = {
   escenario: 'Escenario',
   proceso: 'Proceso',
   documento: 'Documento',
+  entrevista: 'Sesión',
+  archivo: 'Archivo',
+  actividad: 'Actividad',
 }
 
 /** El valor de `?ficha=` que abre el objeto en el panel lateral. */

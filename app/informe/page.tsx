@@ -25,7 +25,7 @@ export default async function InformePage() {
   const supabase = await createClient()
 
   // RLS ya filtra por publicado y por la casilla «ver» de cada rol.
-  const [{ data: secciones }, { count: entrevistas }, { data: hallazgos }] = await Promise.all([
+  const [{ data: secciones }, { count: entrevistas }, { data: validados }] = await Promise.all([
     supabase
       .from('informe_secciones')
       .select('id, slug, numero, titulo, subtitulo, parte, contenido_md, publicado, updated_at')
@@ -35,14 +35,14 @@ export default async function InformePage() {
     // ~25 entrevistas que compromete el programa. Rotularlas como entrevistas en
     // el documento que lee el cliente sería inflar el avance.
     supabase.from('entrevistas').select('id', { count: 'exact', head: true }).eq('tipo', 'entrevista'),
-    supabase.from('hallazgos').select('id, estado'),
+    // La tabla de hallazgos es del equipo (lleva las citas): la portada solo pide la cuenta.
+    supabase.rpc('hallazgos_validados'),
   ])
 
   const todas = (secciones ?? []).filter((s) => puede(sesion, `informe:${s.slug}`))
   const conContenido = todas.filter((s) => s.contenido_md?.trim())
   const visibles = quienEscribe ? todas : conContenido
 
-  const validados = (hallazgos ?? []).filter((h) => h.estado === 'validado').length
   const ultimaActualizacion = conContenido.reduce<string | null>(
     (max, s) => (!max || s.updated_at > max ? s.updated_at : max),
     null
@@ -68,7 +68,7 @@ export default async function InformePage() {
   const primera = visibles[0]
   const cifras = [
     { rotulo: 'Entrevistas', valor: String(entrevistas ?? 0) },
-    { rotulo: 'Hallazgos validados', valor: String(validados) },
+    { rotulo: 'Hallazgos validados', valor: String(validados ?? 0) },
     {
       rotulo: 'Secciones',
       // Quien escribe necesita ver cuánto falta; al lector de Iberia el

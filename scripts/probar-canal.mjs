@@ -56,10 +56,15 @@ try {
   })
   if (errAuth) throw new Error(`No se pudo entrar: ${errAuth.message}`)
 
+  // La ficha propia, por la cuenta: el correo del padrón ya no se puede filtrar
+  // desde una sesión (privilegios de columna, migración seguimiento_privacidad).
+  const {
+    data: { user: cuenta },
+  } = await comoEmpleado.auth.getUser()
   const { data: yo } = await comoEmpleado
     .from('empleados')
     .select('id, nombre_completo, nivel')
-    .eq('email', EMAIL)
+    .eq('perfil_id', cuenta.id)
     .maybeSingle()
 
   if (!yo) throw new Error(`${EMAIL} no tiene ficha en el padrón`)
@@ -76,6 +81,31 @@ try {
   const otro = gente.find((p) => p.id !== yo.id && p.nivel === 'planta')
   const par = gente.find((p) => p.id !== yo.id && p.nivel === 'gerencia')
   comprobar('hay alguien de planta y alguien de gerencia para probar', !!otro && !!par)
+
+  // --- El dato de contacto del padrón -------------------------------------------
+  // Cédula, teléfono y correo no salen de la tabla por la API para nadie; el
+  // contacto ajeno solo lo da `contacto_empleados()` al equipo y a Capital Humano.
+  console.log('\n── Contacto del padrón')
+  for (const columna of ['cedula', 'telefono', 'email']) {
+    const { error } = await comoEmpleado.from('empleados').select(`id, ${columna}`).limit(1)
+    comprobar(`la tabla no sirve ${columna} por la API`, error?.code === '42501', error ? error.message : 'la leyó')
+  }
+  {
+    const { error } = await comoEmpleado.from('empleados').select('*').limit(1)
+    comprobar('select=* sobre empleados lo rechaza la base', error?.code === '42501', error ? error.message : 'la leyó')
+    const { error: errFiltro } = await comoEmpleado.from('empleados').select('id').like('cedula', 'V%').limit(1)
+    comprobar('tampoco se puede filtrar por cédula', errFiltro?.code === '42501', errFiltro ? errFiltro.message : 'filtró')
+  }
+  const [{ data: editor }, { data: capitalHumano }, { data: contactos }] = await Promise.all([
+    comoEmpleado.rpc('es_editor'),
+    comoEmpleado.rpc('puede', { p_recurso: 'modulo:empleados', p_accion: 'editar' }),
+    comoEmpleado.rpc('contacto_empleados', { p_ids: [yo.id, otro.id, par.id] }),
+  ])
+  comprobar('mi propio contacto me llega', (contactos ?? []).some((c) => c.empleado_id === yo.id))
+  if (editor || capitalHumano)
+    comprobar('cuenta del equipo: el contacto ajeno le llega', (contactos ?? []).some((c) => c.empleado_id !== yo.id))
+  else
+    comprobar('el contacto ajeno no me llega', !(contactos ?? []).some((c) => c.empleado_id !== yo.id), JSON.stringify(contactos))
 
   // --- Conexiones -------------------------------------------------------------
   console.log('\n── Conexiones')

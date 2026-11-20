@@ -7,6 +7,7 @@ import { requerirAdmin, requerirPermiso } from '@/lib/auth'
 import { avisarRecordatorios } from '@/lib/notificaciones'
 import { escalonQueToca, redactar } from '@/lib/recordatorios'
 import { createClient } from '@/lib/supabase/server'
+import { contactosDe } from '@/lib/contacto'
 import { estaLista, mandarPlantilla, probarConexion, type Conexion } from '@/lib/whatsapp'
 
 /**
@@ -137,14 +138,19 @@ export async function mandarPorWhatsapp(): Promise<void> {
 
   const { data: preparados } = await supabase
     .from('recordatorios')
-    .select('id, mensaje, matricula_id, matriculas(empleado_id, empleados(telefono))')
+    .select('id, mensaje, matricula_id, matriculas(empleado_id)')
     .eq('estado', 'preparado')
     .limit(200)
 
+  // El teléfono sale de `contacto_empleados()`: la tabla ya no lo sirve por la API.
+  const empleadoDe = (fila: { matriculas: unknown }) => (fila.matriculas as { empleado_id?: string } | null)?.empleado_id ?? null
+  const contactos = await contactosDe(supabase, (preparados ?? []).map(empleadoDe))
+
   const enviados: string[] = []
   for (const fila of preparados ?? []) {
-    const empleado = (fila.matriculas as { empleados?: { telefono: string | null } } | null)?.empleados
-    const envio = await mandarPlantilla(conexion as Conexion, empleado?.telefono ?? null, [fila.mensaje])
+    const id = empleadoDe(fila)
+    const telefono = id ? (contactos.get(id)?.telefono ?? null) : null
+    const envio = await mandarPlantilla(conexion as Conexion, telefono, [fila.mensaje])
     await supabase
       .from('recordatorios')
       .update(

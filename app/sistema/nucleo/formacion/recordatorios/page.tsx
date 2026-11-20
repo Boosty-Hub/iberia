@@ -5,6 +5,7 @@ import { CURSO } from '@/lib/adiestramiento'
 import { esAdmin, requerirPermiso } from '@/lib/auth'
 import { escalera } from '@/lib/recordatorios'
 import { createClient } from '@/lib/supabase/server'
+import { contactosDe } from '@/lib/contacto'
 import { fechaHora, numero } from '@/lib/plataforma/formato'
 import { comoSeLee } from '@/lib/telefono'
 import { estaLista, type Conexion } from '@/lib/whatsapp'
@@ -47,10 +48,14 @@ export default async function FormacionRecordatoriosPage({ searchParams }: PageP
     supabase.from('recordatorios_pendientes').select('matricula_id, dias').eq('curso_id', curso?.id ?? '00000000-0000-0000-0000-000000000000').range(0, 4999),
     supabase
       .from('recordatorios')
-      .select('id, escalon, estado, mensaje, detalle, created_at, enviado_en, matriculas(nombre_corto, empleados(nombre_completo, telefono, cargo))')
+      .select('id, escalon, estado, mensaje, detalle, created_at, enviado_en, matriculas(nombre_corto, empleados(id, nombre_completo, cargo))')
       .order('created_at', { ascending: false })
       .range(0, 499),
   ])
+  // El teléfono ya no viene embebido: sale de `contacto_empleados()` (ver lib/contacto.ts).
+  const personaDe = (fila: { matriculas: unknown }) =>
+    (fila.matriculas as { empleados: { id: string; nombre_completo: string; cargo: string | null } | null } | null)?.empleados ?? null
+  const contactos = await contactosDe(supabase, (recordatorios ?? []).map((r) => personaDe(r)?.id))
 
   // Del token solo se sabe si existe: el valor no sale de aquí.
   const tieneToken = Boolean(conexion?.token)
@@ -155,7 +160,8 @@ export default async function FormacionRecordatoriosPage({ searchParams }: PageP
         ) : (
           <ul className="divide-y divide-[var(--borde)]">
             {visibles.map((fila) => {
-              const persona = (fila.matriculas as { empleados: { nombre_completo: string; telefono: string | null; cargo: string | null } | null } | null)?.empleados
+              const ficha = personaDe(fila)
+              const persona = ficha ? { ...ficha, telefono: contactos.get(ficha.id)?.telefono ?? null } : null
               const estado = ESTADOS[fila.estado] ?? { etiqueta: fila.estado, clase: 'bg-[#eef0f3] text-marca-600' }
               return (
                 <li key={fila.id} className="px-3.5 py-3">
