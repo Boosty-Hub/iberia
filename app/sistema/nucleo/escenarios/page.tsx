@@ -31,7 +31,7 @@ export default async function EscenariosPage({ searchParams }: PageProps<'/siste
             <Link href="/sistema/nucleo/procesos/escenarios" className={BOTON_CABECERA}>
               Escenarios de procesos
             </Link>
-            {puede(sesion, 'sistema:escenarios', 'crear') && <NuevoEscenario />}
+            {puede(sesion, 'sistema:escenarios', 'crear') && <NuevoEscenario abierto={sp.nuevo === '1'} />}
           </>
         }
         descripcion="Diseña la estructura como debería ser sin tocar la de hoy: altas, cierres y movimientos contra la realidad de su fecha base. Una fila abre su ficha; desde ahí, el lienzo en modo escenario, la comparación y el envío a aprobación."

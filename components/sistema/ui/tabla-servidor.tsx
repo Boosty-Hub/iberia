@@ -4,6 +4,7 @@ import type { ContextoGlobal } from '@/lib/plataforma/servidor'
 import { leerEstado } from '@/lib/plataforma/tabla'
 import { consultarPagina, resumir, type FuenteTabla } from '@/lib/plataforma/tabla-servidor'
 import { TablaDatos, type VistaTabla } from '@/components/sistema/ui/tabla-datos'
+import type { MarcaCelda } from '@/lib/ia/niveles'
 
 /**
  * La forma corta de usar `TablaDatos` desde una página: lee el estado de la URL,
@@ -17,6 +18,7 @@ export async function TablaServidor({
   ctx,
   alEditar,
   alAccion,
+  marcas,
   vacio,
 }: {
   fuente: FuenteTabla
@@ -25,6 +27,8 @@ export async function TablaServidor({
   ctx: ContextoGlobal
   alEditar?: (clave: string, columna: string, valor: string) => Promise<{ error?: string } | void>
   alAccion?: (clave: string, accion: string, texto: string) => Promise<{ error?: string; ficha?: string | null } | void>
+  /** R4 · marcas ⚑ de la IA por fila y columna. */
+  marcas?: Record<string, Record<string, MarcaCelda>>
   vacio?: string
 }) {
   const estado = leerEstado(sp, fuente.columnas, { orden: fuente.orden.columna, dir: fuente.orden.dir, tamano: fuente.tamano })
@@ -62,6 +66,7 @@ export async function TablaServidor({
       error={pagina.error}
       alEditar={alEditar}
       alAccion={alAccion}
+      marcas={marcas}
       vacio={vacio}
     />
   )

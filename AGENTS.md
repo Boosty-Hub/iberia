@@ -944,6 +944,34 @@ táctiles menores de 44 px.
 archivos: hasta el 27 de septiembre de 2026 habían quedado 115 sueltos —fotos, audios de
 devoluciones— en 101 carpetas sin dueño. `probar:supabase` falla si vuelve a quedar alguna.
 
+## Plataforma Iberia · el registro de métricas (`/sistema`, R5)
+
+Desde el 20 de noviembre de 2026. **Cada cifra de la plataforma se define una sola vez**: «procesos con
+ficha» decía 48/205 en Mi día y 46/185 en Procesos › Resumen porque cada página contaba a su manera.
+
+- **El registro es `ui.metrica`** (clave, definición en palabras, unidad, módulo, permiso, dueño, fuente,
+  tabla de origen) y **cada métrica es una función `ui.m_<clave>(p_al, p_escenario)`** que devuelve
+  `(valor, total, detalle, calculado_en)`, con la RLS de quien mira. `ui.metrica(clave, al, esc)` y
+  `ui.metricas(claves[], al, esc)` revisan el permiso y devuelven definición + cifra en un JSON.
+  Es la semilla de DAT-SEM; se lista en `/sistema/datos/metricas`.
+- **En la app, solo por `lib/plataforma/metricas.tsx`**: `<KpiMetrica clave ctx sesion />` pinta la cifra
+  con su sello, la definición en la ⓘ y el clic a su tabla. `precargarMetricas()` trae las de una página en
+  una vuelta. Una parte del detalle (`parte`) o el complemento (`complemento`) no son métricas nuevas.
+  🔴 **Un Kpi con una cifra calculada en la página es el error que esto vino a quitar**: una cifra nueva
+  es una función `ui.m_*` + su fila en `ui.metrica`, en una migración.
+- **Las métricas se apoyan en la misma fuente que su tabla**: dotación sobre `ui.plazas` (= el pie de la
+  tabla Plazas), procesos sobre `sgc.lienzo` (= el catálogo, sin los nuevos en borrador), conciliación
+  sobre `ui.conciliacion_documentos`. Las que no tienen historia por fecha (`con_fecha = false`) lo dicen.
+- **Mi día por rol**: `ui.portada_rol` (Administración › Portadas); sin fila, la del nivel
+  (`PORTADA_POR_NIVEL`). Una cifra en la portada no da permiso: sin él, no sale.
+- **La RLS de `org`, `sgc`, `flujo`, `control` y `nucleo` evalúa `puede()` y `auth.uid()` una vez por
+  consulta** (`(select …)`, initPlan): `ui.procesos` bajó de ~380 a ~80 ms y `ui.plazas` de ~220 a ~45 ms
+  en la base. ⚠️ Una política nueva se escribe así desde el principio.
+- **Tablas en memoria**: una fuente con `enMemoria: true` (catálogo de procesos, plazas) se lee una vez
+  por petición y se filtra, ordena y pagina en el servidor de Next.
+- `node --env-file=.env.local scripts/plataforma/probar-r5.mjs [--como lector]` comprueba que la misma
+  cifra diga lo mismo en Mi día y en su módulo, Ctrl K sin tildes → ficha, «?», «g p» y los tiempos.
+
 ## Seguridad — no negociable
 
 Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).

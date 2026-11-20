@@ -2,12 +2,12 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
-import { fechaLarga, hoyCaracas, porcentaje, sumarDias, tasa, variacion } from '@/lib/plataforma/formato'
+import { fechaLarga, porcentaje, sumarDias } from '@/lib/plataforma/formato'
 import { leerContexto, tasasDelDia } from '@/lib/plataforma/servidor'
 import { TABLA_TASAS } from '@/lib/plataforma/tablas'
 import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
 import { GraficoBarras, GraficoLineas } from '@/components/sistema/ui/graficos'
-import { Kpi } from '@/components/sistema/ui/kpi'
+import { KpiMetrica, precargarMetricas } from '@/lib/plataforma/metricas'
 import { TablaServidor } from '@/components/sistema/ui/tabla-servidor'
 import { IconoCandadito } from '@/components/sistema/shell/iconos'
 import { FormularioTasa } from '@/app/sistema/finanzas/tasas/formulario'
@@ -37,6 +37,7 @@ export default async function TasasPage({ searchParams }: PageProps<'/sistema/fi
   const [t, { data: serie }] = await Promise.all([
     tasasDelDia(sesion, ctx.esHoy ? undefined : ctx.al),
     supabase.schema('control').rpc('serie_tasas', { p_desde: desde, p_hasta: hasta }),
+    precargarMetricas(['tasa_bcv_usd', 'tasa_bcv_eur', ...(puede(sesion, 'sistema:tasas-paralelo') ? ['tasa_paralelo', 'brecha_cambiaria'] : [])], ctx),
   ])
   const filas = serie ?? []
   const vePar = Boolean(t?.veParalelo)
@@ -47,14 +48,6 @@ export default async function TasasPage({ searchParams }: PageProps<'/sistema/fi
   const par = vePar ? filas.map((f) => num(f.paralelo)) : []
   const brecha = vePar ? filas.map((f) => num(f.brecha)) : []
   const conBrecha = brecha.filter((x): x is number => x !== null)
-
-  // La tasa vigente es la última con fecha valor <= hoy; si la última captura
-  // tiene más de 4 días, el sello lo dice (fines de semana y feriados no publican).
-  const atrasada = t?.usdFechaValor ? t.usdFechaValor < sumarDias(hoyCaracas(), -4) : true
-  const vUsd = t?.usd && t.usdAnterior ? variacion(((t.usd - t.usdAnterior) / t.usdAnterior) * 100) : null
-  const eurAnterior = [...eur].reverse().find((x) => x !== null && x !== t?.eur) ?? null
-  const vEur = t?.eur && eurAnterior ? variacion(((t.eur - eurAnterior) / eurAnterior) * 100) : null
-  const brecha30 = conBrecha.length ? conBrecha[0] : null
 
   const enlacePeriodo = (p: number) => {
     const q = new URLSearchParams()
@@ -92,56 +85,12 @@ export default async function TasasPage({ searchParams }: PageProps<'/sistema/fi
         )}
       </div>
 
+      {/* Las cuatro cifras salen del registro de métricas: las mismas de la barra y de Mi día. */}
       <div className={cn('grid gap-3', vePar ? 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2')}>
-        <Kpi
-          titulo="BCV · dólar"
-          valor={tasa(t?.usd)}
-          unidad="Bs"
-          comparacion={t?.usdAnterior ? { texto: `anterior ${tasa(t.usdAnterior)} · ${vUsd?.texto ?? ''} · vale desde ${fechaLarga(t.usdFechaValor)}` } : null}
-          serie={usd}
-          color={COLOR.usd}
-          escalones
-          sello={{
-            fuente: 'bcv.org.ve',
-            en: t?.usdCapturada,
-            estado: !t?.usd ? 'sin_dato' : atrasada ? 'atrasado' : 'al_dia',
-            detalle: t?.usdVerificada ?? undefined,
-          }}
-        />
-        <Kpi
-          titulo="BCV · euro"
-          valor={tasa(t?.eur)}
-          unidad="Bs"
-          comparacion={t?.eur ? { texto: `${vEur ? `${vEur.texto} · ` : ''}vale desde ${fechaLarga(t.eurFechaValor)}` } : null}
-          serie={eur}
-          color={COLOR.eur}
-          escalones
-          sello={{ fuente: 'bcv.org.ve', en: t?.usdCapturada, estado: !t?.eur ? 'sin_dato' : atrasada ? 'atrasado' : 'al_dia' }}
-        />
-        {vePar && (
-          <Kpi
-            titulo="Paralelo · dólar"
-            icono={<IconoCandadito className="h-3.5 w-3.5 text-[#b7791f]" aria-label="uso interno" />}
-            valor={tasa(t?.paralelo)}
-            unidad="Bs"
-            comparacion={{ texto: 'Referencia de mercado · uso interno' }}
-            serie={par}
-            color={COLOR.paralelo}
-            sello={{ fuente: 've.dolarapi.com', en: t?.paraleloCapturada, estado: t?.paralelo ? 'al_dia' : 'sin_dato' }}
-          />
-        )}
-        {vePar && (
-          <Kpi
-            titulo="Brecha del día"
-            valor={porcentaje(t?.brecha)}
-            comparacion={{
-              texto: `${t?.brechaAnterior !== null && t?.brechaAnterior !== undefined ? `anterior ${porcentaje(t.brechaAnterior)}` : ''}${brecha30 !== null ? ` · hace ${periodo} días ${porcentaje(brecha30)}` : ''}`,
-            }}
-            serie={brecha}
-            color="#8a5a12"
-            sello={{ fuente: 'paralelo ÷ BCV − 1', estado: t?.brecha !== null && t?.brecha !== undefined ? 'al_dia' : 'sin_dato' }}
-          />
-        )}
+        <KpiMetrica clave="tasa_bcv_usd" ctx={ctx} sesion={sesion} />
+        <KpiMetrica clave="tasa_bcv_eur" ctx={ctx} sesion={sesion} />
+        {vePar && <KpiMetrica clave="tasa_paralelo" ctx={ctx} sesion={sesion} />}
+        {vePar && <KpiMetrica clave="brecha_cambiaria" ctx={ctx} sesion={sesion} titulo="Brecha del día" />}
       </div>
 
       <div className={cn('mt-3 grid gap-3', vePar && 'xl:grid-cols-2')}>
@@ -179,7 +128,7 @@ export default async function TasasPage({ searchParams }: PageProps<'/sistema/fi
       </section>
 
       {puede(sesion, 'sistema:tasas', 'editar') && (
-        <section className="mt-4 rounded-xl border border-[var(--borde)] bg-white p-4">
+        <section id="cargar-tasa" className="mt-4 scroll-mt-16 rounded-xl border border-[var(--borde)] bg-white p-4">
           <h2 className="text-[13px] font-semibold text-marca-900">Cargar una tasa a mano</h2>
           <p className="mb-3 text-[12px] text-marca-500">Respaldo para cuando el BCV no publica o la captura automática falla. Queda con tu nombre y tu motivo en la auditoría.</p>
           <FormularioTasa conParalelo={vePar} />

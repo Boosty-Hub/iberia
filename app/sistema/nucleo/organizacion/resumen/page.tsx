@@ -2,12 +2,12 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
-import { fechaLarga, numero, porcentaje } from '@/lib/plataforma/formato'
+import { fechaLarga, numero } from '@/lib/plataforma/formato'
 import { dotacionPorDireccion } from '@/lib/plataforma/organizacion-datos'
 import { leerContexto } from '@/lib/plataforma/servidor'
 import { BarrasDotacion } from '@/components/sistema/organizacion/barras-dotacion'
 import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
-import { Kpi, type Sello } from '@/components/sistema/ui/kpi'
+import { KpiMetrica, precargarMetricas } from '@/lib/plataforma/metricas'
 
 export const metadata: Metadata = { title: 'Resumen · Organización' }
 
@@ -38,30 +38,16 @@ export default async function ResumenPage({ searchParams }: PageProps<'/sistema/
   const ctx = await leerContexto(sp)
   const supabase = await createClient()
   const conPlan = puede(sesion, 'sistema:dotacion')
+  const conReq = puede(sesion, 'sistema:requisiciones') || puede(sesion, 'sistema:requisiciones', 'crear')
   const [direcciones, { data: alertasCrudas }] = await Promise.all([
     dotacionPorDireccion(supabase, ctx.al, conPlan),
     supabase.schema('ui').rpc('alertas_organizacion', { p_al: ctx.al }),
+    precargarMetricas(['dotacion_aprobada', 'dotacion_ocupada', 'dotacion_vacantes', 'dotacion_por_encima', conPlan ? 'dotacion_en_requisicion' : 'requisiciones_abiertas'], ctx),
   ])
   const a = (alertasCrudas ?? {}) as Partial<Alertas>
 
-  const t = direcciones.reduce(
-    (s, d) => ({
-      aprobada: s.aprobada + d.aprobada,
-      ocupada: s.ocupada + d.ocupada,
-      vacantes: s.vacantes + d.vacantes,
-      porEncima: s.porEncima + d.porEncima,
-      plan: d.plan === null ? s.plan : (s.plan ?? 0) + d.plan,
-      enRequisicion: s.enRequisicion + d.enRequisicion,
-      plazas: s.plazas + d.plazas,
-    }),
-    { aprobada: 0, ocupada: 0, vacantes: 0, porEncima: 0, plan: null as number | null, enRequisicion: 0, plazas: 0 }
-  )
-  const sello: Sello = {
-    fuente: 'Estructura (organigramas II-21-14 y ediciones)',
-    en: a.ultima_edicion ?? null,
-    estado: ctx.esHoy ? 'al_dia' : 'manual',
-    detalle: `Plazas vigentes al ${fechaLarga(ctx.al)}. La hora es la del último cambio registrado en la estructura.`,
-  }
+  // El plan del año (para la nota de la gráfica); las cifras de arriba salen del registro de métricas.
+  const conPlanAprobado = direcciones.some((d) => d.plan !== null)
   const q = (href: string) => (ctx.esHoy ? href : `${href}${href.includes('?') ? '&' : '?'}al=${ctx.al}`)
 
   const alertas = [
@@ -93,38 +79,11 @@ export default async function ResumenPage({ searchParams }: PageProps<'/sistema/
       />
 
       <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
-        <Kpi titulo="Dotación aprobada" valor={numero(t.aprobada)} comparacion={{ texto: `${numero(t.plazas)} plazas` }} sello={sello} href={q(`${BASE}/plazas`)} />
-        <Kpi
-          titulo="Ocupada"
-          valor={numero(t.ocupada)}
-          comparacion={{ texto: t.aprobada ? `${porcentaje((t.ocupada / t.aprobada) * 100, 0)} de lo aprobado` : '—' }}
-          sello={sello}
-          href={q(`${BASE}/personas`)}
-        />
-        <Kpi titulo="Vacantes" valor={numero(t.vacantes)} comparacion={{ texto: 'puestos aprobados sin titular' }} sello={sello} href={q(`${BASE}/plazas?orden=vacantes&dir=desc`)} />
-        <Kpi
-          titulo="Por encima"
-          valor={numero(t.porEncima)}
-          comparacion={{ texto: `en ${numero(a.plazas_por_encima ?? 0)} plaza${a.plazas_por_encima === 1 ? '' : 's'}: es un hallazgo, no un error de carga` }}
-          sello={sello}
-          href={q(`${BASE}/plazas?orden=exceso&dir=desc`)}
-        />
-        {conPlan ? (
-          <Kpi
-            titulo="En requisición"
-            valor={numero(t.enRequisicion)}
-            comparacion={{ texto: t.plan === null ? 'Sin plan aprobado del año' : `Plan ${ctx.al.slice(0, 4)}: ${numero(t.plan)}` }}
-            sello={{ fuente: 'Requisiciones y plan de dotación', estado: 'al_dia', detalle: 'Personas pedidas en requisiciones en ruta, aprobadas o en selección.' }}
-            href={`${BASE}/dotacion`}
-          />
-        ) : (
-          <Kpi
-            titulo="Requisiciones en ruta"
-            valor={numero(a.requisiciones_en_ruta ?? 0)}
-            sello={{ fuente: 'Requisiciones de personal (II-21-40-001)', estado: 'al_dia' }}
-            href={puede(sesion, 'sistema:requisiciones', 'crear') ? `${BASE}/requisiciones?f.estado=en_aprobacion` : undefined}
-          />
-        )}
+        <KpiMetrica clave="dotacion_aprobada" ctx={ctx} sesion={sesion} />
+        <KpiMetrica clave="dotacion_ocupada" ctx={ctx} sesion={sesion} titulo="Ocupada" />
+        <KpiMetrica clave="dotacion_vacantes" ctx={ctx} sesion={sesion} />
+        <KpiMetrica clave="dotacion_por_encima" ctx={ctx} sesion={sesion} titulo="Por encima" />
+        {conPlan ? <KpiMetrica clave="dotacion_en_requisicion" ctx={ctx} sesion={sesion} /> : conReq && <KpiMetrica clave="requisiciones_abiertas" ctx={ctx} sesion={sesion} />}
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
@@ -146,7 +105,7 @@ export default async function ResumenPage({ searchParams }: PageProps<'/sistema/
             }))}
           />
           <p className="mt-3 text-[10.5px] text-marca-400">
-            Fuente: plazas vigentes al {fechaLarga(ctx.al)}{t.plan !== null ? ` y plan ${ctx.al.slice(0, 4)} aprobado` : ''}. La dirección es la unidad de tipo dirección más cercana hacia arriba.
+            Fuente: plazas vigentes al {fechaLarga(ctx.al)}{conPlanAprobado ? ` y plan ${ctx.al.slice(0, 4)} aprobado` : ''}. La dirección es la unidad de tipo dirección más cercana hacia arriba.
           </p>
         </section>
 

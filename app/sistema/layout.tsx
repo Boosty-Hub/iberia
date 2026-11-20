@@ -17,6 +17,9 @@ import { ColumnaModulos, NavegacionTelefono, Riel, type VistaMenu } from '@/comp
 import { Desplegable } from '@/components/sistema/ui/desplegable'
 import { PanelFicha } from '@/components/sistema/ui/ficha-objeto'
 import { PaletaComandos, type AccionPaleta } from '@/components/sistema/ui/paleta-comandos'
+import { PanelPreguntaIa } from '@/components/sistema/ia/panel-pregunta'
+import { estadoIa } from '@/lib/ia/servidor'
+import { capacidadViva } from '@/lib/ia/niveles'
 
 /**
  * El armazón de la Plataforma Iberia (Anexo E §3, modelo v2): barra carbón con
@@ -65,8 +68,17 @@ export default async function SistemaLayout({ children }: LayoutProps<'/sistema'
     { etiqueta: 'Ir a Mi día', href: '/sistema' },
     { etiqueta: 'Mis aprobaciones', href: '/sistema/bandeja', detalle: `${pendientes.length} por decidir` },
     ...(puede(sesion, 'sistema:requisiciones', 'crear') ? [{ etiqueta: 'Nueva requisición de personal', href: '/sistema/nucleo/organizacion/requisiciones/nueva' }] : []),
+    ...(puede(sesion, 'sistema:escenarios', 'crear')
+      ? [
+          { etiqueta: 'Nuevo escenario de estructura', href: '/sistema/nucleo/escenarios?nuevo=1', detalle: 'copia la estructura de hoy' },
+          { etiqueta: 'Nuevo escenario de procesos', href: '/sistema/nucleo/procesos/escenarios', detalle: 'desde el catálogo' },
+        ]
+      : []),
     ...(puede(sesion, 'sistema:escenarios') ? [{ etiqueta: 'Abrir un escenario…', href: '/sistema/nucleo/escenarios' }] : []),
+    { etiqueta: 'Ir a «Datos al»…', href: '', clave: 'fecha', detalle: 'ver las cifras y las tablas a otra fecha' },
+    ...(puede(sesion, 'sistema:tasas', 'editar') ? [{ etiqueta: 'Cargar una tasa a mano', href: '/sistema/finanzas/tasas#cargar-tasa', detalle: 'respaldo, con motivo' }] : []),
     ...(puede(sesion, 'sistema:tasas') ? [{ etiqueta: 'Tasas de cambio', href: '/sistema/finanzas/tasas', detalle: 'BCV y fecha valor' }] : []),
+    { etiqueta: 'Registro de métricas', href: '/sistema/datos/metricas', detalle: 'qué cuenta cada cifra' },
     ...(puede(sesion, 'sistema:estructura') ? [{ etiqueta: 'Explorar las plazas', href: '/sistema/nucleo/organizacion/plazas' }] : []),
     ...(puede(sesion, 'sistema:procesos') ? [{ etiqueta: 'Mapa de procesos', href: '/sistema/nucleo/procesos' }] : []),
     ...(puede(sesion, 'sistema:documentos') ? [{ etiqueta: 'Biblioteca de documentos', href: '/sistema/nucleo/documentos' }] : []),
@@ -175,7 +187,9 @@ export default async function SistemaLayout({ children }: LayoutProps<'/sistema'
       </div>
 
       <Suspense>
-        <PaletaComandos acciones={acciones} />
+        <PaletaComandos acciones={acciones} conIa={capacidadViva(await estadoIa(), 'NUC-PRO-IA-01')} />
+        {/* R4 · el panel «Preguntar a la IA» (lo abren la cabecera, la ficha y Ctrl K). */}
+        <PanelPreguntaIa />
       </Suspense>
     </div>
   )

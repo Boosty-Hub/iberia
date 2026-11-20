@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import { puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
-import { numero, porcentaje } from '@/lib/plataforma/formato'
+import { leerContexto } from '@/lib/plataforma/servidor'
+import { KpiMetrica, precargarMetricas } from '@/lib/plataforma/metricas'
 import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
-import { Kpi } from '@/components/sistema/ui/kpi'
 import { BarrasApiladas } from '@/components/sistema/procesos/piezas-r2'
 import { todosLosDocumentos } from '@/components/sistema/procesos/datos-r2'
 
@@ -22,21 +22,14 @@ const TRAMOS = [
  * concentra, por tipo y por macroproceso. Sale de `ui.documentos()` con la RLS
  * de quien mira: sin `sistema:perimetros`, el perímetro no cuenta.
  */
-export default async function ResumenDocumentosPage() {
-  const sesion = await requerirPermiso('sistema:documentos')
+export default async function ResumenDocumentosPage({ searchParams }: PageProps<'/sistema/nucleo/documentos/resumen'>) {
+  const [sesion, sp] = await Promise.all([requerirPermiso('sistema:documentos'), searchParams])
+  const ctx = await leerContexto(sp)
   const supabase = await createClient()
-  const [docs, { data: ultimo }] = await Promise.all([
+  const [docs] = await Promise.all([
     todosLosDocumentos(supabase),
-    supabase.schema('sgc').from('documento').select('creado_en').order('creado_en', { ascending: false }).limit(1).maybeSingle(),
+    precargarMetricas(['documentos_vigentes', 'documentos_en_conciliacion', 'documentos_inventario'], ctx),
   ])
-  const sello = { fuente: 'inventario del SGC (sgc.documento)', en: ultimo?.creado_en ?? null, estado: 'al_dia' as const }
-  const vigentes = docs.filter((d) => d.estado === 'vigente')
-  const conProceso = vigentes.filter((d) => d.proceso_ref).length
-  const sinDet = docs.filter((d) => d.estado === 'sin_determinar').length
-  const obsoletos = docs.filter((d) => d.estado === 'obsoleto').length
-  const sensibles = docs.filter((d) => d.datos_sensibles).length
-  const repetidos = docs.filter((d) => d.codigo_repetido).length
-  const enCola = docs.reduce((s, d) => s + (d.pendientes ?? 0), 0)
   const tramo = (estado: string) => (estado === 'vigente' ? 'vigente' : estado === 'obsoleto' || estado === 'retirado' ? 'obsoleto' : 'sin_determinar')
 
   const agrupar = (clave: (d: (typeof docs)[number]) => string | null, etiqueta: (d: (typeof docs)[number]) => string, href: (k: string) => string) => {
@@ -71,20 +64,34 @@ export default async function ResumenDocumentosPage() {
         migas={[{ etiqueta: 'Resumen' }]}
         descripcion={`El inventario del SGC en cifras: vigentes, vinculados a un proceso y lo que espera en la conciliación.${puede(sesion, 'sistema:perimetros') ? '' : ' Los documentos de perímetro no cuentan: no están a tu alcance.'}`}
       />
+      {/* Las cifras salen del registro de métricas (`ui.metrica`): las mismas de Mi día. */}
       <div className="mb-3 grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
-        <Kpi titulo="Vigentes" valor={numero(vigentes.length)} unidad={`de ${numero(docs.length)}`} comparacion={{ texto: `${porcentaje(docs.length ? (vigentes.length / docs.length) * 100 : 0)} del inventario` }} sello={sello} href="/sistema/nucleo/documentos" />
-        <Kpi
-          titulo="Vigentes con proceso"
-          valor={numero(conProceso)}
-          unidad={`de ${numero(vigentes.length)}`}
-          comparacion={{ texto: `${numero(vigentes.length - conProceso)} vigentes sin proceso vinculado` }}
-          sello={sello}
-          href="/sistema/nucleo/documentos?f.proceso_ref=%E2%88%85"
+        <KpiMetrica clave="documentos_vigentes" ctx={ctx} sesion={sesion} titulo="Vigentes" />
+        <KpiMetrica
+          clave="documentos_vigentes"
+          ctx={ctx}
+          sesion={sesion}
+          parte={{ detalle: 'con_proceso', titulo: 'Vigentes con proceso', deTotal: true, texto: 'vinculados a un proceso · el clic abre los que no', href: '/sistema/nucleo/documentos?f.proceso_ref=%E2%88%85' }}
         />
-        <Kpi titulo="Sin determinar" valor={numero(sinDet)} comparacion={{ texto: 'Estado por decidir en la conciliación' }} sello={sello} href="/sistema/nucleo/documentos/conciliacion?f.motivo=sin_determinar" />
-        <Kpi titulo="Obsoletos" valor={numero(obsoletos)} comparacion={{ texto: 'Confirmar que salen de circulación' }} sello={sello} href={`${BIBLIOTECA}&f.estado=obsoleto`} />
-        <Kpi titulo="Con datos sensibles" valor={numero(sensibles)} comparacion={{ texto: `${numero(repetidos)} con código reutilizado` }} sello={sello} href={`${BIBLIOTECA}&f.datos_sensibles=true`} />
-        <Kpi titulo="En la cola de conciliación" valor={numero(enCola)} comparacion={{ texto: 'Puntos por decidir' }} sello={{ ...sello, fuente: 'sgc.documento + documento_conciliacion' }} href="/sistema/nucleo/documentos/conciliacion" />
+        <KpiMetrica
+          clave="documentos_en_conciliacion"
+          ctx={ctx}
+          sesion={sesion}
+          parte={{ detalle: 'sin_determinar', titulo: 'Sin determinar', texto: 'Estado por decidir en la conciliación', href: '/sistema/nucleo/documentos/conciliacion?f.motivo=sin_determinar' }}
+        />
+        <KpiMetrica
+          clave="documentos_inventario"
+          ctx={ctx}
+          sesion={sesion}
+          parte={{ detalle: 'obsoleto', titulo: 'Obsoletos', texto: 'Confirmar que salen de circulación', href: `${BIBLIOTECA}&f.estado=obsoleto` }}
+        />
+        <KpiMetrica
+          clave="documentos_inventario"
+          ctx={ctx}
+          sesion={sesion}
+          parte={{ detalle: 'datos_sensibles', titulo: 'Con datos sensibles', texto: 'Sanear antes de difundir', href: `${BIBLIOTECA}&f.datos_sensibles=true` }}
+        />
+        <KpiMetrica clave="documentos_en_conciliacion" ctx={ctx} sesion={sesion} titulo="En la cola de conciliación" />
       </div>
       <div className="grid gap-3 xl:grid-cols-2">
         <section className="min-w-0 rounded-xl border border-[var(--borde)] bg-white p-3.5">

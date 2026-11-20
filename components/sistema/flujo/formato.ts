@@ -114,6 +114,8 @@ export function enlaceObjeto(tipo: string, objetoId: string, refProceso?: string
       return `/sistema/nucleo/escenarios/${objetoId}`
     case 'escenario_procesos':
       return `/sistema/nucleo/procesos/escenarios/${objetoId}`
+    case 'nivel_ia':
+      return '/sistema/administracion/ia'
     default:
       return null
   }

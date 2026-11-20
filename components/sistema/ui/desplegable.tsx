@@ -18,6 +18,7 @@ export function Desplegable({
   claseBoton,
   ancho = 'w-64',
   oscuro = false,
+  inicialAbierto = false,
 }: {
   boton: ReactNode
   /** Lo que lee un lector de pantalla del botón. */
@@ -28,8 +29,10 @@ export function Desplegable({
   claseBoton?: string
   ancho?: string
   oscuro?: boolean
+  /** Abrirlo al montar (por ejemplo, cuando se llega desde Ctrl K con `?nuevo=1`). */
+  inicialAbierto?: boolean
 }) {
-  const [abierto, setAbierto] = useState(false)
+  const [abierto, setAbierto] = useState(inicialAbierto)
   const caja = useRef<HTMLDivElement>(null)
   const boton_ = useRef<HTMLButtonElement>(null)
   const id = useId()

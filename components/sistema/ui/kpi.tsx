@@ -77,6 +77,8 @@ export function Kpi({
   sello,
   href,
   icono,
+  ayuda,
+  metrica,
   className,
 }: {
   titulo: ReactNode
@@ -90,15 +92,19 @@ export function Kpi({
   /** A dónde lleva la cifra: la tabla o la página que la origina. */
   href?: string
   icono?: ReactNode
+  /** La definición de la cifra: sale en la ⓘ, con el ratón encima o con el foco. */
+  ayuda?: ReactNode
+  /** La clave del registro de métricas (para pruebas y enlaces). */
+  metrica?: string
   className?: string
 }) {
   const cuerpo = (
     <>
-      <h3 className="flex items-center gap-1.5 text-[12px] font-semibold text-marca-500">
+      <h3 className={cn('flex items-center gap-1.5 text-[12px] font-semibold text-marca-500', ayuda && 'pr-6')}>
         {titulo}
         {icono}
       </h3>
-      <p className="mt-1.5 text-[24px] leading-none font-bold text-marca-900 tabular-nums [overflow-wrap:anywhere]">
+      <p data-valor className="mt-1.5 text-[24px] leading-none font-bold text-marca-900 tabular-nums [overflow-wrap:anywhere]">
         {valor}
         {unidad && <span className="ml-1 text-[15px] font-semibold text-marca-700">{unidad}</span>}
       </p>
@@ -108,11 +114,34 @@ export function Kpi({
     </>
   )
   const clase = cn('block rounded-xl border border-[var(--borde)] bg-white p-3.5', className)
-  return href ? (
-    <Link href={href} className={cn(clase, 'transition-shadow hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] focus-visible:outline-2 focus-visible:outline-acento-500')}>
+  const tarjeta = href ? (
+    <Link href={href} data-metrica={ayuda ? undefined : metrica} className={cn(clase, 'h-full transition-shadow hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] focus-visible:outline-2 focus-visible:outline-acento-500')}>
       {cuerpo}
     </Link>
   ) : (
-    <div className={clase}>{cuerpo}</div>
+    <div data-metrica={ayuda ? undefined : metrica} className={cn(clase, 'h-full')}>{cuerpo}</div>
+  )
+  if (!ayuda) return tarjeta
+  // La ⓘ va fuera del enlace (un control dentro de otro no se toca bien) y se
+  // abre sin JavaScript: con el ratón encima o con el foco del teclado.
+  return (
+    <div className="relative min-w-0" data-kpi data-metrica={metrica}>
+      {tarjeta}
+      <span className="group/ayuda absolute top-2 right-2">
+        <button
+          type="button"
+          className="grid h-6 w-6 place-items-center rounded-full text-[13px] leading-none text-marca-400 hover:bg-marca-50 hover:text-marca-700 focus-visible:outline-2 focus-visible:outline-acento-500"
+          aria-label={`Qué cuenta «${typeof titulo === 'string' ? titulo : 'esta cifra'}»`}
+        >
+          ⓘ
+        </button>
+        <span
+          role="tooltip"
+          className="invisible absolute top-7 right-0 z-30 w-72 max-w-[calc(100vw-2.5rem)] max-sm:fixed max-sm:inset-x-4 max-sm:top-auto max-sm:bottom-4 max-sm:w-auto max-sm:max-w-none rounded-lg border border-[var(--borde)] bg-white p-3 text-left text-[12px] leading-snug font-normal text-marca-700 opacity-0 shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-opacity group-focus-within/ayuda:visible group-focus-within/ayuda:opacity-100 group-hover/ayuda:visible group-hover/ayuda:opacity-100"
+        >
+          {ayuda}
+        </span>
+      </span>
+    </div>
   )
 }

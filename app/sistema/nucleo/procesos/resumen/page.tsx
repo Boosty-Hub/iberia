@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
 import { puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
-import { fechaLarga, numero, porcentaje } from '@/lib/plataforma/formato'
+import { fechaLarga } from '@/lib/plataforma/formato'
 import { leerContexto } from '@/lib/plataforma/servidor'
 import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
-import { Kpi } from '@/components/sistema/ui/kpi'
+import { KpiMetrica, precargarMetricas } from '@/lib/plataforma/metricas'
 import { BarrasApiladas, ListaAlertas } from '@/components/sistema/procesos/piezas-r2'
 import type { Database } from '@/lib/database.types'
 
@@ -30,13 +30,11 @@ export default async function ResumenProcesosPage({ searchParams }: PageProps<'/
   const [sesion, sp] = await Promise.all([requerirPermiso('sistema:procesos'), searchParams])
   const ctx = await leerContexto(sp)
   const supabase = await createClient()
-  const [{ data, error }, { data: ultimo }, validacion] = await Promise.all([
+  const [{ data, error }] = await Promise.all([
     supabase.schema('ui').rpc('procesos', { p_al: ctx.al, ...(ctx.esc ? { p_escenario: ctx.esc } : {}) }).range(0, 1999),
-    supabase.schema('sgc').from('proceso').select('creado_en').is('escenario_id', null).order('creado_en', { ascending: false }).limit(1).maybeSingle(),
-    supabase.schema('ui').rpc('validacion_procesos').range(0, 199),
+    precargarMetricas(['procesos_catalogo', 'procesos_con_ficha', 'procesos_con_dueno', 'procesos_en_revision', 'procesos_sin_documentar', 'procesos_validados'], ctx),
   ])
   const filas: Fila[] = data ?? []
-  const sello = { fuente: 'catálogo del SGC (sgc.proceso)', en: ultimo?.creado_en ?? null, estado: ctx.esHoy ? ('al_dia' as const) : ('manual' as const), detalle: `Datos al ${fechaLarga(ctx.al)}` }
   const conCtx = (href: string) => {
     const q = new URLSearchParams()
     if (ctx.esc) q.set('esc', ctx.esc)
@@ -46,20 +44,10 @@ export default async function ResumenProcesosPage({ searchParams }: PageProps<'/
   }
   const ficha = (ref: string) => conCtx(`/sistema/nucleo/procesos/resumen?ficha=proceso:${ref}`)
 
-  const porNivel = [0, 1, 2, 3].map((n) => filas.filter((f) => f.nivel === n).length)
-  const operativos = filas.filter((f) => f.nivel > 0)
-  const conFicha = operativos.filter((f) => f.tiene_ficha).length
-  const casados = filas.filter((f) => f.dueno_estado === 'asignado' || f.dueno_estado === 'vacante').length
-  const enRevision = filas.filter((f) => f.ciclo === 'en_revision').length
-  const borradores = filas.filter((f) => f.ciclo === 'borrador').length
-  const sinDoc = filas.filter((f) => f.salud === 'sin_documentar').length
   const vacantes = filas.filter((f) => f.alerta_vacante)
   const sinInd = filas.filter((f) => f.alerta_sin_indicadores)
   const dudosos = filas.filter((f) => f.codigo_dudoso)
   const notas = filas.filter((f) => f.dueno_ficha_difiere)
-  const val = validacion.data ?? []
-  const validados = val.reduce((s, v) => s + v.validados, 0)
-  const enValidacion = val.reduce((s, v) => s + v.procesos, 0)
 
   // La salud de cada macroproceso cuenta todo lo que tiene debajo.
   const macros = filas.filter((f) => f.nivel === 0)
@@ -81,52 +69,14 @@ export default async function ResumenProcesosPage({ searchParams }: PageProps<'/
       />
       {error && <p className="mb-3 rounded-lg bg-[#fbeceb] px-3 py-2 text-[12.5px] text-[#a3241f]">No se pudo leer el catálogo: {error.message}</p>}
 
+      {/* Las cifras salen del registro de métricas (`ui.metrica`): las mismas de Mi día. */}
       <div className="mb-3 grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
-        <Kpi
-          titulo="Procesos en el catálogo"
-          valor={numero(filas.length)}
-          comparacion={{ texto: `${numero(porNivel[0])} macro · ${numero(porNivel[1])} proc. · ${numero(porNivel[2])} sub. · ${numero(porNivel[3])} act.` }}
-          sello={sello}
-          href={conCtx(CATALOGO)}
-        />
-        <Kpi
-          titulo="Con ficha PHVA"
-          valor={numero(conFicha)}
-          unidad={`de ${numero(operativos.length)}`}
-          comparacion={{ texto: `${porcentaje(operativos.length ? (conFicha / operativos.length) * 100 : 0)} de los niveles 1 a 3` }}
-          sello={sello}
-          href={conCtx(`${CATALOGO}?f.tiene_ficha=true`)}
-        />
-        <Kpi
-          titulo="Con dueño casado"
-          valor={numero(casados)}
-          unidad={`de ${numero(filas.length)}`}
-          comparacion={{ texto: `${numero(vacantes.length)} con la plaza dueña vacante` }}
-          sello={sello}
-          href={conCtx(`${CATALOGO}?f.dueno_estado=asignado&f.dueno_estado=vacante`)}
-        />
-        <Kpi
-          titulo="En revisión"
-          valor={numero(enRevision)}
-          comparacion={{ texto: `${numero(borradores)} borrador${borradores === 1 ? '' : 'es'} abierto${borradores === 1 ? '' : 's'}` }}
-          sello={sello}
-          href={conCtx(`${CATALOGO}?f.ciclo=en_revision&f.ciclo=borrador`)}
-        />
-        <Kpi
-          titulo="Sin documentar"
-          valor={numero(sinDoc)}
-          comparacion={{ texto: `${porcentaje(filas.length ? (sinDoc / filas.length) * 100 : 0)} del catálogo, sin ficha ni documento` }}
-          sello={sello}
-          href={conCtx(`${CATALOGO}?f.salud=sin_documentar`)}
-        />
-        <Kpi
-          titulo="Validados en la plataforma"
-          valor={numero(validados)}
-          unidad={`de ${numero(enValidacion)}`}
-          comparacion={{ texto: 'Vigentes que pasaron por la ruta de aprobación' }}
-          sello={{ ...sello, fuente: 'sgc.proceso + flujo.solicitud' }}
-          href="/sistema/nucleo/procesos/validacion"
-        />
+        <KpiMetrica clave="procesos_catalogo" ctx={ctx} sesion={sesion} />
+        <KpiMetrica clave="procesos_con_ficha" ctx={ctx} sesion={sesion} titulo="Con ficha PHVA" />
+        <KpiMetrica clave="procesos_con_dueno" ctx={ctx} sesion={sesion} titulo="Con dueño casado" />
+        <KpiMetrica clave="procesos_en_revision" ctx={ctx} sesion={sesion} titulo="En revisión" />
+        <KpiMetrica clave="procesos_sin_documentar" ctx={ctx} sesion={sesion} titulo="Sin documentar" />
+        <KpiMetrica clave="procesos_validados" ctx={ctx} sesion={sesion} titulo="Validados en la plataforma" />
       </div>
 
       <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_340px]">

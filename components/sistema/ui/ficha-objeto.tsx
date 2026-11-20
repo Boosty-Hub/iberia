@@ -4,10 +4,11 @@ import Link from 'next/link'
 import { useEffect, useRef, useState, useTransition, type ReactNode } from 'react'
 import { cargarFicha } from '@/components/sistema/shell/acciones'
 import { useContextoUrl } from '@/components/sistema/shell/contexto-url'
-import { IconoChispa, IconoFlechaAfuera } from '@/components/sistema/shell/iconos'
+import { IconoFlechaAfuera } from '@/components/sistema/shell/iconos'
 import { IconoCerrar } from '@/components/iconos'
 import { LineaTiempoCliente } from '@/components/sistema/colaboracion/linea-tiempo-cliente'
-import { BloquesFicha, FilaAcciones, FilaDato, LeyendaIa } from '@/components/sistema/ui/ficha-edicion'
+import { BloquesFicha, FilaAcciones, FilaDato } from '@/components/sistema/ui/ficha-edicion'
+import { PestanaIa } from '@/components/sistema/ia/pestana-ia'
 import { TONO_CHIP, type Ficha } from '@/lib/plataforma/ficha-tipos'
 import { fechaLarga } from '@/lib/plataforma/formato'
 import { cn } from '@/lib/utils'
@@ -220,14 +221,8 @@ export function FichaObjeto({
                 <Vacio>Este objeto no ha pasado por una ruta de aprobación.</Vacio>
               ))}
 
-            {pestana === 'ia' && (
-              <>
-                <p className="mb-2 flex items-center gap-1.5 text-[12px] font-semibold text-[#5a3f9e]">
-                  <IconoChispa className="h-4 w-4" /> IA de este módulo
-                </p>
-                <LeyendaIa />
-              </>
-            )}
+            {/* R4: propuestas de la IA sobre este objeto y las capacidades que aplican (`components/sistema/ia`). */}
+            {pestana === 'ia' && <PestanaIa tipo={ficha.tipo} id={ficha.id} titulo={ficha.titulo} />}
           </>
         )}
       </div>

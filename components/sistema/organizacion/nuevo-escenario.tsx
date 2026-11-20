@@ -8,10 +8,10 @@ const BOTON = 'inline-flex h-8 items-center gap-1.5 rounded-lg bg-[#2b2a28] px-3
 const CAMPO = 'h-8 w-full rounded-md border border-[var(--borde)] bg-white px-2 text-[13px] outline-none focus:border-marca-500'
 
 /** «Nuevo escenario»: copia la estructura de hoy y abre el editor del escenario. */
-export function NuevoEscenario() {
+export function NuevoEscenario({ abierto = false }: { abierto?: boolean }) {
   const [estado, accion, pendiente] = useActionState(crearEscenario, {})
   return (
-    <Desplegable etiqueta="Abrir un escenario de estructura" alinear="der" ancho="w-80" claseBoton={BOTON} boton={<>+ Nuevo escenario</>}>
+    <Desplegable etiqueta="Abrir un escenario de estructura" alinear="der" ancho="w-80" claseBoton={BOTON} boton={<>+ Nuevo escenario</>} inicialAbierto={abierto}>
       <form action={accion} className="flex flex-col gap-2 p-3 text-[12px] text-marca-600">
         <p>Copia la estructura vigente de hoy. Lo que cambies ahí no toca la realidad hasta que se apruebe.</p>
         <label className="flex flex-col gap-0.5">

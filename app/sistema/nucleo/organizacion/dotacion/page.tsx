@@ -10,6 +10,7 @@ import { BarrasDotacion } from '@/components/sistema/organizacion/barras-dotacio
 import { PlanVersiones, type VersionPlan } from '@/components/sistema/organizacion/plan-versiones'
 import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
 import { Kpi } from '@/components/sistema/ui/kpi'
+import { KpiMetrica, leerMetrica, precargarMetricas } from '@/lib/plataforma/metricas'
 import { TablaServidor } from '@/components/sistema/ui/tabla-servidor'
 
 export const metadata: Metadata = { title: 'Dotación · Organización' }
@@ -30,8 +31,9 @@ export default async function DotacionPage({ searchParams }: PageProps<'/sistema
   const anio = Number(ctx.al.slice(0, 4))
   const editar = puede(sesion, 'sistema:dotacion', 'editar')
 
-  const [direcciones, { data: planes }, { data: unidades }, { data: cargos }] = await Promise.all([
+  const [direcciones, , { data: planes }, { data: unidades }, { data: cargos }] = await Promise.all([
     dotacionPorDireccion(supabase, ctx.al, true),
+    precargarMetricas(['dotacion_aprobada', 'dotacion_ocupada', 'dotacion_en_requisicion'], ctx).then(() => null),
     org.from('plan_dotacion').select('id, anio, version, estado, aprobado_por, aprobado_en, nota, plan_dotacion_linea(cantidad)').eq('anio', anio).order('version', { ascending: false }),
     editar ? org.from('unidad').select('ref, nombre').is('escenario_id', null).filter('vigencia', 'cs', `[${ctx.al},${ctx.al}]`).order('nombre').range(0, 999) : Promise.resolve({ data: [] as { ref: string; nombre: string }[] }),
     editar ? org.from('cargo').select('id, nombre').eq('activo', true).order('nombre').range(0, 1999) : Promise.resolve({ data: [] as { id: string; nombre: string }[] }),
@@ -56,13 +58,10 @@ export default async function DotacionPage({ searchParams }: PageProps<'/sistema
   const borrador = versiones.find((v) => v.estado === 'borrador')
   const aprobado = versiones.find((v) => v.estado === 'aprobado')
 
-  const t = direcciones.reduce(
-    (s, d) => ({ aprobada: s.aprobada + d.aprobada, ocupada: s.ocupada + d.ocupada, req: s.req + d.enRequisicion, porEncima: s.porEncima + d.porEncima }),
-    { aprobada: 0, ocupada: 0, req: 0, porEncima: 0 }
-  )
+  // «Aprobada − plan» usa la misma dotación aprobada del registro de métricas.
+  const t = { aprobada: (await leerMetrica('dotacion_aprobada', ctx))?.valor ?? 0 }
   const plan = aprobado?.total ?? null
   const fuente = editar && borrador ? { ...TABLA_DOTACION, columnas: TABLA_DOTACION.columnas.map((c) => (c.clave === 'plan_borrador' ? { ...c, editable: true, ayudaEdicion: `Cantidad en el borrador v${borrador.version}` } : c)) } : TABLA_DOTACION
-  const selloEstructura = { fuente: 'Plazas vigentes de la estructura', estado: (ctx.esHoy ? 'al_dia' : 'manual') as 'al_dia' | 'manual', detalle: `Al ${fechaLarga(ctx.al)}` }
 
   return (
     <>
@@ -75,21 +74,15 @@ export default async function DotacionPage({ searchParams }: PageProps<'/sistema
       />
 
       <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
-        <Kpi titulo="Aprobada" valor={numero(t.aprobada)} sello={selloEstructura} href={`${BASE}/plazas`} />
-        <Kpi titulo="Ocupada" valor={numero(t.ocupada)} comparacion={{ texto: `${numero(t.porEncima)} por encima de la dotación` }} sello={selloEstructura} href={`${BASE}/personas`} />
+        <KpiMetrica clave="dotacion_aprobada" ctx={ctx} sesion={sesion} titulo="Aprobada" />
+        <KpiMetrica clave="dotacion_ocupada" ctx={ctx} sesion={sesion} titulo="Ocupada" />
         <Kpi
           titulo={`Plan ${anio}`}
           valor={plan === null ? 'Sin plan' : numero(plan)}
           comparacion={plan === null ? { texto: 'No hay versión aprobada' } : { texto: `Aprobada − plan: ${t.aprobada - plan > 0 ? '+' : ''}${numero(t.aprobada - plan)}` }}
           sello={{ fuente: aprobado ? `Plan ${anio} v${aprobado.version} aprobado` : `Plan ${anio}`, estado: aprobado ? 'al_dia' : 'sin_dato', detalle: aprobado?.aprobadoEn ? `Aprobado el ${aprobado.aprobadoEn}` : undefined }}
         />
-        <Kpi
-          titulo="En requisición"
-          valor={numero(t.req)}
-          comparacion={{ texto: 'personas pedidas en ruta, aprobadas o en selección' }}
-          sello={{ fuente: 'Requisiciones de personal (II-21-40-001)', estado: 'al_dia' }}
-          href={puede(sesion, 'sistema:requisiciones', 'crear') ? `${BASE}/requisiciones` : undefined}
-        />
+        <KpiMetrica clave="dotacion_en_requisicion" ctx={ctx} sesion={sesion} />
         <Kpi
           titulo="Borrador del plan"
           valor={borrador ? `v${borrador.version}` : '—'}

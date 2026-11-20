@@ -4,6 +4,9 @@ import { puede, type Sesion } from '@/lib/auth'
 import { DOMINIOS, ESTADO_MODULO, MODULOS_MI_DIA, PESTANAS, dominioDe, type Pestana } from '@/lib/plataforma/dominios'
 import { modulosDelPlan } from '@/lib/plataforma/servidor'
 import { PestanasModulo } from '@/components/sistema/ui/pestanas-modulo'
+import { BotonPreguntarIa } from '@/components/sistema/ia/boton-preguntar'
+import { estadoIa } from '@/lib/ia/servidor'
+import { capacidadViva } from '@/lib/ia/niveles'
 import { cn } from '@/lib/utils'
 
 /**
@@ -36,7 +39,9 @@ export async function CabeceraModulo({
   cuentas?: Record<string, number>
   descripcion?: ReactNode
 }) {
-  const modulos = await modulosDelPlan()
+  const [modulos, ia] = await Promise.all([modulosDelPlan(), estadoIa()])
+  // R4 · «Preguntar a la IA» (NUC-PRO-IA-01): solo con la IA y la capacidad encendidas.
+  const preguntar = capacidadViva(ia, 'NUC-PRO-IA-01')
   const m = [...MODULOS_MI_DIA, ...modulos].find((x) => x.codigo === codigo)
   const dominio = m ? (m.dominio === 'Mi día' ? DOMINIOS[0] : DOMINIOS.find((d) => d.clave === dominioDe(m))) : null
   const lista = (pestanas ?? PESTANAS[codigo] ?? []).filter(
@@ -95,7 +100,12 @@ export async function CabeceraModulo({
             {estado.etiqueta}
           </span>
         )}
-        {acciones && <div className="ml-auto flex flex-wrap items-center gap-1.5">{acciones}</div>}
+        {(acciones || preguntar) && (
+          <div className="ml-auto flex flex-wrap items-center gap-1.5">
+            {preguntar && <BotonPreguntarIa />}
+            {acciones}
+          </div>
+        )}
       </div>
       {descripcion && <p className="-mt-1 mb-2 max-w-3xl text-[12.5px] text-marca-500">{descripcion}</p>}
       {lista.length > 1 && <PestanasModulo pestanas={lista} cuentas={cuentas} />}

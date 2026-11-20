@@ -137,7 +137,7 @@ export const ESTADO_MODULO: Record<EstadoModulo, { etiqueta: string; color: stri
 }
 
 /** Pestaña de un módulo: una ruta de verdad. `recurso` = lo que exige su página. */
-export type Pestana = { etiqueta: string; href: string; recurso?: string; accion?: 'ver' | 'crear' }
+export type Pestana = { etiqueta: string; href: string; recurso?: string; accion?: 'ver' | 'crear' | 'editar' }
 
 /**
  * Las pestañas de los módulos que ya tienen pantallas. La anatomía común
@@ -183,8 +183,15 @@ export const PESTANAS: Record<string, Pestana[]> = {
   'NUC-IDN': [
     { etiqueta: 'Usuarios', href: '/sistema/administracion/usuarios', recurso: 'modulo:usuarios' },
     { etiqueta: 'Roles y permisos', href: '/sistema/administracion/roles', recurso: 'modulo:roles' },
+    { etiqueta: 'Portadas de Mi día', href: '/sistema/administracion/portadas', recurso: 'modulo:roles', accion: 'editar' },
   ],
+  'DAT-SEM': [{ etiqueta: 'Métricas', href: '/sistema/datos/metricas', recurso: 'sistema:inicio' }],
   'FIN-TAS': [{ etiqueta: 'Tasas', href: '/sistema/finanzas/tasas', recurso: 'sistema:tasas' }],
+  // R4 · IA visible
+  'NUC-GIA': [
+    { etiqueta: 'Capacidades', href: '/sistema/administracion/ia', recurso: 'sistema:ia' },
+    { etiqueta: 'Actividad de la IA', href: '/sistema/administracion/ia/actividad', recurso: 'sistema:ia-actividad' },
+  ],
 }
 
 /** La anatomía común, para la página de un módulo planificado. */

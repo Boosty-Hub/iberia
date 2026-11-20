@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 import { requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
-import { numero, porcentaje } from '@/lib/plataforma/formato'
+import { numero } from '@/lib/plataforma/formato'
 import { leerContexto } from '@/lib/plataforma/servidor'
 import { TABLA_VALIDACION_PROCESOS } from '@/lib/plataforma/tablas-procesos'
 import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
-import { Kpi } from '@/components/sistema/ui/kpi'
+import { KpiMetrica, precargarMetricas } from '@/lib/plataforma/metricas'
 import { TablaServidor } from '@/components/sistema/ui/tabla-servidor'
 
 export const metadata: Metadata = { title: 'Validación · Procesos' }
@@ -27,11 +27,12 @@ export default async function ValidacionPage({ searchParams }: PageProps<'/siste
   const [sesion, sp] = await Promise.all([requerirPermiso('sistema:procesos'), searchParams])
   const ctx = await leerContexto(sp)
   const supabase = await createClient()
-  const { data } = await supabase.schema('ui').rpc('validacion_procesos').range(0, 199)
+  const [{ data }] = await Promise.all([
+    supabase.schema('ui').rpc('validacion_procesos').range(0, 199),
+    precargarMetricas(['procesos_validados', 'procesos_con_ficha', 'procesos_en_revision'], ctx),
+  ])
   const filas = data ?? []
-  const suma = (k: 'procesos' | 'sin_ficha' | 'borradores' | 'en_revision' | 'validados') => filas.reduce((s, f) => s + (f[k] ?? 0), 0)
   const porEtapa = (e: string) => filas.filter((f) => f.etapa === e).length
-  const sello = { fuente: 'sgc.proceso + flujo.solicitud', en: new Date().toISOString(), estado: 'al_dia' as const }
   return (
     <>
       <CabeceraModulo
@@ -59,16 +60,21 @@ export default async function ValidacionPage({ searchParams }: PageProps<'/siste
           </li>
         ))}
       </ol>
+      {/* Las cifras salen del registro de métricas (`ui.metrica`): las mismas de Procesos › Resumen. */}
       <div className="mb-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Kpi titulo="Procesos por validar" valor={numero(suma('procesos') - suma('validados'))} unidad={`de ${numero(suma('procesos'))}`} sello={sello} />
-        <Kpi titulo="«Cómo es» por levantar" valor={numero(suma('sin_ficha'))} comparacion={{ texto: 'Procesos sin ficha PHVA' }} sello={sello} href="/sistema/nucleo/procesos/catalogo?f.tiene_ficha=false" />
-        <Kpi titulo="En mejoras o en revisión" valor={numero(suma('borradores') + suma('en_revision'))} comparacion={{ texto: `${numero(suma('en_revision'))} esperan al comité` }} sello={sello} href="/sistema/nucleo/procesos/catalogo?f.ciclo=borrador&f.ciclo=en_revision" />
-        <Kpi
-          titulo="Validados"
-          valor={numero(suma('validados'))}
-          comparacion={{ texto: `${porcentaje(suma('procesos') ? (suma('validados') / suma('procesos')) * 100 : 0)} · meta: compras, comercial y finanzas al 31-mar-2027` }}
-          sello={sello}
+        <KpiMetrica clave="procesos_validados" ctx={ctx} sesion={sesion} complemento={{ titulo: 'Procesos por validar', texto: 'Niveles 1 a 3 sin una versión validada' }} />
+        <KpiMetrica
+          clave="procesos_con_ficha"
+          ctx={ctx}
+          sesion={sesion}
+          complemento={{
+            titulo: '«Cómo es» por levantar',
+            texto: 'Procesos de niveles 1 a 3 sin ficha PHVA',
+            href: '/sistema/nucleo/procesos/catalogo?f.tiene_ficha=false&f.nivel_nombre=Proceso&f.nivel_nombre=Subproceso&f.nivel_nombre=Actividad',
+          }}
         />
+        <KpiMetrica clave="procesos_en_revision" ctx={ctx} sesion={sesion} titulo="En revisión" />
+        <KpiMetrica clave="procesos_validados" ctx={ctx} sesion={sesion} titulo="Validados" />
       </div>
       <TablaServidor fuente={TABLA_VALIDACION_PROCESOS} sp={sp} sesion={sesion} ctx={ctx} vacio="No hay macroprocesos con estos filtros." />
       <p className="mt-2 text-[11.5px] text-marca-500">

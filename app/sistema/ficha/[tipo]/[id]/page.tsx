@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { requerirSesion } from '@/lib/auth'
 import { cargarFicha } from '@/lib/plataforma/fichas'
+import { anotarReciente } from '@/lib/plataforma/recientes'
 import { TIPOS_FICHA, leerFicha } from '@/lib/plataforma/ficha-tipos'
 import { FichaObjeto } from '@/components/sistema/ui/ficha-objeto'
 
@@ -16,6 +17,7 @@ export default async function FichaPage({ params }: PageProps<'/sistema/ficha/[t
   const [sesion, { tipo, id }] = await Promise.all([requerirSesion(), params])
   const f = leerFicha(`${tipo}:${id}`)
   const ficha = f ? await cargarFicha(sesion, f.tipo, f.id) : null
+  await anotarReciente(ficha)
 
   if (!ficha)
     return (

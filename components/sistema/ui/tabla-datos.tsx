@@ -9,6 +9,8 @@ import { IconoBajar, IconoCandadito, IconoEstrella, IconoFlechita, IconoGente, I
 import { Desplegable } from '@/components/sistema/ui/desplegable'
 import { borrarVista, exportarCsv, guardarVista } from '@/components/sistema/ui/tabla-acciones'
 import { fechaCorta, fechaHora, numero, porcentaje, tasa } from '@/lib/plataforma/formato'
+import { MarcaIa } from '@/components/sistema/ia/nivel-ia'
+import type { MarcaCelda } from '@/lib/ia/niveles'
 import { PREFIJO_FILTRO, TAMANOS, consultaDeEstado, type AccionFila, type Columna, type EstadoTabla, type TonoCelda } from '@/lib/plataforma/tabla'
 import { cn } from '@/lib/utils'
 
@@ -199,6 +201,7 @@ export function TablaDatos({
   error,
   alEditar,
   alAccion,
+  marcas,
   vacio = 'No hay filas con estos filtros.',
 }: {
   id: string
@@ -220,6 +223,8 @@ export function TablaDatos({
   alEditar?: (clave: string, columna: string, valor: string) => Promise<{ error?: string } | void>
   /** Las acciones de fila que piden un texto (columna `acciones`). Puede devolver la ficha que hay que abrir. */
   alAccion?: (clave: string, accion: string, texto: string) => Promise<{ error?: string; ficha?: string | null } | void>
+  /** R4 · marcas ⚑ de la IA por fila (`claveFila`) y columna, con su razón. */
+  marcas?: Record<string, Record<string, MarcaCelda>>
   vacio?: string
 }) {
   const { sp, fijar, pendiente, ruta } = useContextoUrl()
@@ -345,7 +350,7 @@ export function TablaDatos({
         {conBusqueda && (
           <label className="inline-flex h-8 min-w-[12rem] flex-1 items-center gap-1.5 rounded-lg border border-[var(--borde)] bg-white px-2.5 text-xs sm:max-w-[18rem] sm:flex-none">
             <IconoLupa className="h-3.5 w-3.5 shrink-0 text-marca-400" />
-            <input value={busqueda} onChange={(e) => setBusqueda(e.target.value)} placeholder="Buscar en la tabla…" className="min-w-0 flex-1 bg-transparent outline-none" aria-label="Buscar en la tabla" />
+            <input value={busqueda} onChange={(e) => setBusqueda(e.target.value)} placeholder="Buscar en la tabla…  ( / )" className="min-w-0 flex-1 bg-transparent outline-none" aria-label="Buscar en la tabla" data-busqueda-tabla />
           </label>
         )}
 
@@ -599,6 +604,7 @@ export function TablaDatos({
                         return (
                           <td key={cell.id} className={cn('h-8 border-b border-[#eef0f3] px-2.5 py-1 whitespace-nowrap text-marca-800', NUMERICAS.has(c.tipo ?? '') && 'text-right tabular-nums')}>
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            {marcas?.[String(f[claveFila])]?.[c.clave] && <MarcaIa marca={marcas[String(f[claveFila])][c.clave]} />}
                           </td>
                         )
                       })}

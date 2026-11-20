@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { cargarFicha as armarFicha } from '@/lib/plataforma/fichas'
 import { leerFicha, type Ficha } from '@/lib/plataforma/ficha-tipos'
 import { enlaceObjeto } from '@/components/sistema/flujo/formato'
+import { anotarReciente } from '@/lib/plataforma/recientes'
 
 /**
  * Las acciones del armazón. Solo exporta funciones async ('use server'): los
@@ -48,17 +49,35 @@ export async function fijarVerComo(rolId: string | null) {
   return { ok: true }
 }
 
-export type ResultadoBusqueda = { tipo: string; id: string; codigo: string | null; titulo: string; detalle: string | null; href: string }
+export type ResultadoBusqueda = { tipo: string; id: string; codigo: string | null; titulo: string; detalle: string | null; href: string; total: number }
 
-/** La búsqueda de la paleta: `ui.buscar()` con la RLS de quien busca. */
-export async function buscar(q: string): Promise<ResultadoBusqueda[]> {
-  await requerirSesion()
+/**
+ * La búsqueda de la paleta: `ui.buscar()` con la RLS de quien busca, sin
+ * tildes. Sin `tipo`, las primeras de cada sección; con `tipo` y `desde`, la
+ * página siguiente de esa sección («Ver más»).
+ */
+export async function buscar(q: string, tipo?: string, desde = 0): Promise<ResultadoBusqueda[]> {
+  // Sin `requerirSesion()`: costaba dos vueltas más por tecla. `ui.buscar` solo la
+  // ejecuta `authenticated` y lee con la RLS de quien busca; sin sesión, la base
+  // la rechaza y aquí sale vacío.
   const texto = q.trim().slice(0, 80)
   if (texto.length < 2 && !/^\d+$/.test(texto)) return []
   const supabase = await createClient()
-  const { data, error } = await supabase.schema('ui').rpc('buscar', { p_q: texto, p_limite: 5 })
+  const { data, error } = await supabase
+    .schema('ui')
+    .rpc('buscar', { p_q: texto, p_limite: tipo ? 10 : 5, ...(tipo ? { p_tipo: tipo, p_desde: Math.max(0, Math.floor(desde)) } : {}) })
   if (error) return []
-  return (data ?? []).map((r) => ({ tipo: r.tipo, id: r.id, codigo: r.codigo, titulo: r.titulo, detalle: r.detalle, href: r.href }))
+  return (data ?? []).map((r) => ({ tipo: r.tipo, id: r.id, codigo: r.codigo, titulo: r.titulo, detalle: r.detalle, href: r.href, total: r.total }))
+}
+
+export type Reciente = { tipo: string; id: string; titulo: string; detalle: string | null }
+
+/** Los últimos 8 objetos que abrí y todavía puedo ver. */
+export async function misRecientes(): Promise<Reciente[]> {
+  // Como `buscar`: la función filtra por `auth.uid()` y sin sesión no devuelve nada.
+  const supabase = await createClient()
+  const { data } = await supabase.schema('ui').rpc('recientes', { p_limite: 8 })
+  return (data ?? []).map((r) => ({ tipo: r.tipo, id: r.id, titulo: r.titulo, detalle: r.detalle }))
 }
 
 export type Pendiente = { id: string; titulo: string; paso: string; desde: string; href: string | null; pidio: string | null }
@@ -87,5 +106,7 @@ export async function cargarFicha(valor: string): Promise<{ ficha: Ficha | null 
   const sesion = await requerirSesion()
   const f = leerFicha(valor)
   if (!f) return { ficha: null }
-  return { ficha: await armarFicha(sesion, f.tipo, f.id) }
+  const ficha = await armarFicha(sesion, f.tipo, f.id)
+  await anotarReciente(ficha)
+  return { ficha }
 }

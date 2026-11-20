@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           accion: string
           actor: string | null
+          actor_es_ia: boolean
           antes: Json | null
           despues: Json | null
           en: string
@@ -31,6 +32,7 @@ export type Database = {
         Insert: {
           accion: string
           actor?: string | null
+          actor_es_ia?: boolean
           antes?: Json | null
           despues?: Json | null
           en?: string
@@ -44,6 +46,7 @@ export type Database = {
         Update: {
           accion?: string
           actor?: string | null
+          actor_es_ia?: boolean
           antes?: Json | null
           despues?: Json | null
           en?: string
@@ -571,6 +574,417 @@ export type Database = {
       }
       pedi_yo: { Args: { p_solicitud: string }; Returns: boolean }
       puede_decidir: { Args: { p_paso: string }; Returns: boolean }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  ia: {
+    Tables: {
+      actividad: {
+        Row: {
+          accion: string
+          actor_es_ia: boolean
+          aprobado_por: string | null
+          capacidad: string | null
+          costo_tokens: number | null
+          costo_usd: number
+          creado_en: string
+          evidencia: Json
+          id: string
+          latencia_ms: number | null
+          modelo: string | null
+          nivel: string | null
+          objeto_id: string | null
+          objeto_tipo: string | null
+          pedido_por: string | null
+          propuesta_id: string | null
+          resumen: string
+          tokens_entrada: number
+          tokens_salida: number
+        }
+        Insert: {
+          accion: string
+          actor_es_ia?: boolean
+          aprobado_por?: string | null
+          capacidad?: string | null
+          costo_tokens?: number | null
+          costo_usd?: number
+          creado_en?: string
+          evidencia?: Json
+          id?: string
+          latencia_ms?: number | null
+          modelo?: string | null
+          nivel?: string | null
+          objeto_id?: string | null
+          objeto_tipo?: string | null
+          pedido_por?: string | null
+          propuesta_id?: string | null
+          resumen: string
+          tokens_entrada?: number
+          tokens_salida?: number
+        }
+        Update: {
+          accion?: string
+          actor_es_ia?: boolean
+          aprobado_por?: string | null
+          capacidad?: string | null
+          costo_tokens?: number | null
+          costo_usd?: number
+          creado_en?: string
+          evidencia?: Json
+          id?: string
+          latencia_ms?: number | null
+          modelo?: string | null
+          nivel?: string | null
+          objeto_id?: string | null
+          objeto_tipo?: string | null
+          pedido_por?: string | null
+          propuesta_id?: string | null
+          resumen?: string
+          tokens_entrada?: number
+          tokens_salida?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "actividad_capacidad_fkey"
+            columns: ["capacidad"]
+            isOneToOne: false
+            referencedRelation: "capacidad"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "actividad_propuesta_id_fkey"
+            columns: ["propuesta_id"]
+            isOneToOne: false
+            referencedRelation: "propuesta"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cambio_nivel: {
+        Row: {
+          a: string
+          capacidad: string
+          cerrado_en: string | null
+          de: string
+          estado: string
+          evidencia: string | null
+          id: string
+          motivo: string
+          pedido_en: string
+          pedido_por: string
+          solicitud_id: string | null
+        }
+        Insert: {
+          a: string
+          capacidad: string
+          cerrado_en?: string | null
+          de: string
+          estado?: string
+          evidencia?: string | null
+          id?: string
+          motivo: string
+          pedido_en?: string
+          pedido_por?: string
+          solicitud_id?: string | null
+        }
+        Update: {
+          a?: string
+          capacidad?: string
+          cerrado_en?: string | null
+          de?: string
+          estado?: string
+          evidencia?: string | null
+          id?: string
+          motivo?: string
+          pedido_en?: string
+          pedido_por?: string
+          solicitud_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cambio_nivel_capacidad_fkey"
+            columns: ["capacidad"]
+            isOneToOne: false
+            referencedRelation: "capacidad"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
+      capacidad: {
+        Row: {
+          actualizado_en: string
+          codigo: string
+          creado_en: string
+          dueno_cargo: string
+          encendida: boolean
+          evidencia_para_subir: string | null
+          modulo: string
+          nivel_actual: string
+          nombre: string
+          nota: string | null
+          objeto_tipos: string[]
+          perimetro: boolean
+          que_hace: string
+          techo: string
+          uso: string
+        }
+        Insert: {
+          actualizado_en?: string
+          codigo: string
+          creado_en?: string
+          dueno_cargo: string
+          encendida?: boolean
+          evidencia_para_subir?: string | null
+          modulo: string
+          nivel_actual?: string
+          nombre: string
+          nota?: string | null
+          objeto_tipos?: string[]
+          perimetro?: boolean
+          que_hace: string
+          techo: string
+          uso: string
+        }
+        Update: {
+          actualizado_en?: string
+          codigo?: string
+          creado_en?: string
+          dueno_cargo?: string
+          encendida?: boolean
+          evidencia_para_subir?: string | null
+          modulo?: string
+          nivel_actual?: string
+          nombre?: string
+          nota?: string | null
+          objeto_tipos?: string[]
+          perimetro?: boolean
+          que_hace?: string
+          techo?: string
+          uso?: string
+        }
+        Relationships: []
+      }
+      interruptor_general: {
+        Row: {
+          cambiado_en: string
+          cambiado_por: string | null
+          encendido: boolean
+          id: boolean
+          motivo: string | null
+        }
+        Insert: {
+          cambiado_en?: string
+          cambiado_por?: string | null
+          encendido?: boolean
+          id?: boolean
+          motivo?: string | null
+        }
+        Update: {
+          cambiado_en?: string
+          cambiado_por?: string | null
+          encendido?: boolean
+          id?: boolean
+          motivo?: string | null
+        }
+        Relationships: []
+      }
+      propuesta: {
+        Row: {
+          capacidad: string
+          creado_en: string
+          cuerpo: string
+          decidido_en: string | null
+          decidido_por: string | null
+          deshacer_hasta: string | null
+          estado: string
+          evidencia: Json
+          explicacion: string | null
+          id: string
+          motivo: string | null
+          nivel: string
+          objeto_id: string
+          objeto_tipo: string
+          payload: Json
+          pedido_por: string | null
+          regla: string
+          titulo: string
+        }
+        Insert: {
+          capacidad: string
+          creado_en?: string
+          cuerpo: string
+          decidido_en?: string | null
+          decidido_por?: string | null
+          deshacer_hasta?: string | null
+          estado?: string
+          evidencia?: Json
+          explicacion?: string | null
+          id?: string
+          motivo?: string | null
+          nivel: string
+          objeto_id: string
+          objeto_tipo: string
+          payload?: Json
+          pedido_por?: string | null
+          regla: string
+          titulo: string
+        }
+        Update: {
+          capacidad?: string
+          creado_en?: string
+          cuerpo?: string
+          decidido_en?: string | null
+          decidido_por?: string | null
+          deshacer_hasta?: string | null
+          estado?: string
+          evidencia?: Json
+          explicacion?: string | null
+          id?: string
+          motivo?: string | null
+          nivel?: string
+          objeto_id?: string
+          objeto_tipo?: string
+          payload?: Json
+          pedido_por?: string | null
+          regla?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "propuesta_capacidad_fkey"
+            columns: ["capacidad"]
+            isOneToOne: false
+            referencedRelation: "capacidad"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      al_decidir_nivel: {
+        Args: {
+          p_cambio: string
+          p_decision: string
+          p_estado_solicitud: string
+        }
+        Returns: undefined
+      }
+      aplicar_metadatos: {
+        Args: { p_cambios: Json; p_doc: string }
+        Returns: undefined
+      }
+      candidatos_clasificacion: {
+        Args: { p_limite?: number }
+        Returns: {
+          codigo: string
+          estado: string
+          evidencia_estado: string
+          familia: string
+          fecha: string
+          id: string
+          proceso: string
+          proceso_ref: string
+          proceso_xx: string
+          tipo_yy: string
+          titulo: string
+          version: string
+        }[]
+      }
+      decidir_propuesta: {
+        Args: {
+          p_cambios?: Json
+          p_decision: string
+          p_id: string
+          p_motivo?: string
+        }
+        Returns: string
+      }
+      deshacer: { Args: { p_id: string; p_motivo?: string }; Returns: string }
+      encender: {
+        Args: { p_codigo: string; p_encendida: boolean; p_motivo?: string }
+        Returns: boolean
+      }
+      estado: { Args: never; Returns: Json }
+      explicar_propuestas: { Args: { p_items: Json }; Returns: number }
+      fijar_interruptor: {
+        Args: { p_encendido: boolean; p_motivo?: string }
+        Returns: boolean
+      }
+      fijar_tope: { Args: { p_motivo: string; p_usd: number }; Returns: number }
+      gastado_hoy: { Args: never; Returns: number }
+      mis_propuestas: {
+        Args: { p_limite?: number }
+        Returns: {
+          capacidad: string
+          creado_en: string
+          id: string
+          nivel: string
+          objeto: string
+          objeto_id: string
+          objeto_tipo: string
+          titulo: string
+          total: number
+        }[]
+      }
+      motivo_bloqueo: { Args: { p_codigo: string }; Returns: string }
+      n: { Args: { p: string }; Returns: number }
+      pedir_cambio_nivel: {
+        Args: {
+          p_codigo: string
+          p_evidencia?: string
+          p_motivo: string
+          p_nivel: string
+        }
+        Returns: string
+      }
+      proponer_clasificacion: {
+        Args: { p_items: Json }
+        Returns: {
+          documento: string
+          estado: string
+          id: string
+          nivel: string
+          titulo: string
+        }[]
+      }
+      puede_decidir_tipo: { Args: { p_tipo: string }; Returns: boolean }
+      registrar_llamada: {
+        Args: {
+          p_accion: string
+          p_capacidad: string
+          p_costo_usd: number
+          p_evidencia: Json
+          p_latencia_ms: number
+          p_modelo: string
+          p_objeto_id?: string
+          p_objeto_tipo?: string
+          p_resumen: string
+          p_tokens_entrada: number
+          p_tokens_salida: number
+        }
+        Returns: string
+      }
+      revisar_plazas: {
+        Args: never
+        Returns: {
+          cuerpo: string
+          evidencia: Json
+          id: string
+          objeto_id: string
+          regla: string
+          titulo: string
+        }[]
+      }
+      tablero: { Args: never; Returns: Json }
+      tope_diario: { Args: never; Returns: number }
     }
     Enums: {
       [_ in never]: never
@@ -5031,6 +5445,117 @@ export type Database = {
   }
   ui: {
     Tables: {
+      metrica: {
+        Row: {
+          accion: string
+          actualizado_en: string
+          clave: string
+          con_escenario: boolean
+          con_fecha: boolean
+          consulta: string
+          definicion: string
+          dueno: string | null
+          estado: string
+          fuente: string
+          href: string | null
+          modulo: string | null
+          nombre: string
+          orden: number
+          recurso: string
+          unidad: string
+          version: number
+        }
+        Insert: {
+          accion?: string
+          actualizado_en?: string
+          clave: string
+          con_escenario?: boolean
+          con_fecha?: boolean
+          consulta: string
+          definicion: string
+          dueno?: string | null
+          estado?: string
+          fuente: string
+          href?: string | null
+          modulo?: string | null
+          nombre: string
+          orden?: number
+          recurso: string
+          unidad: string
+          version?: number
+        }
+        Update: {
+          accion?: string
+          actualizado_en?: string
+          clave?: string
+          con_escenario?: boolean
+          con_fecha?: boolean
+          consulta?: string
+          definicion?: string
+          dueno?: string | null
+          estado?: string
+          fuente?: string
+          href?: string | null
+          modulo?: string | null
+          nombre?: string
+          orden?: number
+          recurso?: string
+          unidad?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      portada_rol: {
+        Row: {
+          actualizado_en: string
+          actualizado_por: string | null
+          metricas: string[]
+          orden: number
+          rol_id: string
+        }
+        Insert: {
+          actualizado_en?: string
+          actualizado_por?: string | null
+          metricas?: string[]
+          orden?: number
+          rol_id: string
+        }
+        Update: {
+          actualizado_en?: string
+          actualizado_por?: string | null
+          metricas?: string[]
+          orden?: number
+          rol_id?: string
+        }
+        Relationships: []
+      }
+      reciente: {
+        Row: {
+          abierto_en: string
+          detalle: string | null
+          objeto_id: string
+          perfil: string
+          tipo: string
+          titulo: string
+        }
+        Insert: {
+          abierto_en?: string
+          detalle?: string | null
+          objeto_id: string
+          perfil?: string
+          tipo: string
+          titulo: string
+        }
+        Update: {
+          abierto_en?: string
+          detalle?: string | null
+          objeto_id?: string
+          perfil?: string
+          tipo?: string
+          titulo?: string
+        }
+        Relationships: []
+      }
       vista: {
         Row: {
           actualizado_en: string
@@ -5080,7 +5605,12 @@ export type Database = {
     Functions: {
       alertas_organizacion: { Args: { p_al?: string }; Returns: Json }
       buscar: {
-        Args: { p_limite?: number; p_q: string }
+        Args: {
+          p_desde?: number
+          p_limite?: number
+          p_q: string
+          p_tipo?: string
+        }
         Returns: {
           codigo: string
           detalle: string
@@ -5089,6 +5619,7 @@ export type Database = {
           rango: number
           tipo: string
           titulo: string
+          total: number
         }[]
       }
       campo_legible: { Args: { p: string }; Returns: string }
@@ -5295,6 +5826,18 @@ export type Database = {
           vacantes: number
         }[]
       }
+      dotacion_base: {
+        Args: { p_al: string; p_escenario: string }
+        Returns: {
+          aprobada: number
+          ocupada: number
+          plazas: number
+          plazas_por_encima: number
+          plazas_vacias: number
+          por_encima: number
+          vacantes: number
+        }[]
+      }
       escenarios: {
         Args: never
         Returns: {
@@ -5385,6 +5928,212 @@ export type Database = {
           ref: string
           version: number
         }[]
+      }
+      m_brecha_cambiaria: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_documentos_en_conciliacion: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_documentos_inventario: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_documentos_vigentes: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_dotacion_aprobada: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_dotacion_en_requisicion: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_dotacion_ocupada: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_dotacion_por_encima: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_dotacion_vacantes: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_mis_requisiciones: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_mis_tareas: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_por_decidir: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_procesos_catalogo: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_procesos_con_dueno: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_procesos_con_ficha: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_procesos_en_revision: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_procesos_sin_documentar: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_procesos_validados: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_requisiciones_abiertas: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_tasa_bcv_eur: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_tasa_bcv_usd: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_tasa_paralelo: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      metrica: {
+        Args: { p_al?: string; p_clave: string; p_escenario?: string }
+        Returns: Json
+      }
+      metricas: {
+        Args: { p_al?: string; p_claves?: string[]; p_escenario?: string }
+        Returns: Json[]
       }
       parametros_costo: {
         Args: { p_fecha?: string }
@@ -5488,6 +6237,36 @@ export type Database = {
           version: number
         }[]
       }
+      procesos_base: {
+        Args: { p_al: string; p_escenario: string }
+        Returns: {
+          dueno_estado: string
+          nivel: number
+          ref: string
+          salud: string
+          tiene_ficha: boolean
+          version: number
+        }[]
+      }
+      recientes: {
+        Args: { p_limite?: number }
+        Returns: {
+          abierto_en: string
+          detalle: string
+          id: string
+          tipo: string
+          titulo: string
+        }[]
+      }
+      registrar_reciente: {
+        Args: {
+          p_detalle?: string
+          p_id: string
+          p_tipo: string
+          p_titulo: string
+        }
+        Returns: undefined
+      }
       requisiciones: {
         Args: never
         Returns: {
@@ -5512,6 +6291,14 @@ export type Database = {
           unidad: string
           unidad_ref: string
         }[]
+      }
+      tasa_estado: {
+        Args: { p_al: string; p_fecha_valor: string }
+        Returns: string
+      }
+      ultimo_cambio: {
+        Args: { p_esquema: string; p_tablas: string[] }
+        Returns: string
       }
       validacion_procesos: {
         Args: never
@@ -5673,6 +6460,9 @@ export const Constants = {
     Enums: {},
   },
   flujo: {
+    Enums: {},
+  },
+  ia: {
     Enums: {},
   },
   nucleo: {

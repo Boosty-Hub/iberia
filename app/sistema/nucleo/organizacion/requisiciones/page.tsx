@@ -7,6 +7,7 @@ import { leerContexto } from '@/lib/plataforma/servidor'
 import { TABLA_REQUISICIONES } from '@/lib/plataforma/tablas-organizacion'
 import { BOTON_CABECERA, BOTON_CABECERA_PRINCIPAL, CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
 import { Kpi } from '@/components/sistema/ui/kpi'
+import { KpiMetrica, precargarMetricas } from '@/lib/plataforma/metricas'
 import { TablaServidor } from '@/components/sistema/ui/tabla-servidor'
 import { cn } from '@/lib/utils'
 
@@ -25,13 +26,13 @@ export default async function RequisicionesPage({ searchParams }: PageProps<'/si
   const [sesion, sp] = await Promise.all([requerirPermiso('sistema:requisiciones', 'crear'), searchParams])
   const ctx = await leerContexto(sp)
   const supabase = await createClient()
-  const { data } = await supabase.schema('ui').rpc('requisiciones').select('estado, dias, mia').range(0, 4999)
+  const [{ data }] = await Promise.all([
+    supabase.schema('ui').rpc('requisiciones').select('estado, dias').range(0, 4999),
+    precargarMetricas(['requisiciones_abiertas', 'mis_requisiciones'], ctx),
+  ])
   const filas = data ?? []
   const cuenta = (f: (r: (typeof filas)[number]) => boolean) => filas.filter(f).length
-  const enRuta = cuenta((r) => r.estado === 'en_aprobacion')
   const viejas = cuenta((r) => r.estado === 'en_aprobacion' && (r.dias ?? 0) > 5)
-  const seleccion = cuenta((r) => r.estado === 'aprobada' || r.estado === 'en_seleccion')
-  const mias = cuenta((r) => r.mia === 'si')
   const sello = { fuente: 'Requisiciones y su ruta de aprobación', estado: 'al_dia' as const }
   const mio = sp['f.mia'] === 'si'
   const enlace = (q: string) => `${RUTA}${q ? `?${q}` : ''}`
@@ -60,10 +61,15 @@ export default async function RequisicionesPage({ searchParams }: PageProps<'/si
         }
       />
       <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Kpi titulo="En aprobación" valor={numero(enRuta)} sello={sello} href={enlace('f.estado=en_aprobacion')} />
+        <KpiMetrica clave="requisiciones_abiertas" ctx={ctx} sesion={sesion} parte={{ detalle: 'en_aprobacion', titulo: 'En aprobación', texto: 'en su ruta de firmas', href: enlace('f.estado=en_aprobacion') }} />
         <Kpi titulo="Más de 5 días en un paso" valor={numero(viejas)} comparacion={{ texto: 'en la ruta, sin decidir' }} sello={sello} href={enlace('f.estado=en_aprobacion&orden=dias&dir=desc')} />
-        <Kpi titulo="Aprobadas o en selección" valor={numero(seleccion)} comparacion={{ texto: 'esperan candidato e ingreso' }} sello={sello} href={enlace('f.estado=aprobada&f.estado=en_seleccion')} />
-        <Kpi titulo="Pedidas por mí" valor={numero(mias)} sello={sello} href={enlace('f.mia=si')} />
+        <KpiMetrica
+          clave="requisiciones_abiertas"
+          ctx={ctx}
+          sesion={sesion}
+          parte={{ detalle: 'aprobada_o_seleccion', titulo: 'Aprobadas o en selección', texto: 'esperan candidato e ingreso', href: enlace('f.estado=aprobada&f.estado=en_seleccion') }}
+        />
+        <KpiMetrica clave="mis_requisiciones" ctx={ctx} sesion={sesion} titulo="Pedidas por mí, vivas" />
       </div>
       <TablaServidor fuente={TABLA_REQUISICIONES} sp={sp} sesion={sesion} ctx={ctx} vacio="No hay requisiciones con estos filtros." />
     </>

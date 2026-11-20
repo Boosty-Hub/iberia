@@ -9,6 +9,7 @@ import { Kpi } from '@/components/sistema/ui/kpi'
 import { TablaServidor } from '@/components/sistema/ui/tabla-servidor'
 import { Segmentos } from '@/components/sistema/procesos/piezas-r2'
 import { resolverDesdeCola } from '@/app/sistema/nucleo/documentos/acciones'
+import { ClasificacionDocumentosIa } from '@/components/sistema/ia/clasificacion-documentos'
 
 export const metadata: Metadata = { title: 'Conciliación · Documentos' }
 
@@ -61,6 +62,8 @@ export default async function ConciliacionDocumentosPage({ searchParams }: PageP
           <Kpi key={m} titulo={ETIQUETAS_MOTIVO[m]} valor={numero(n)} unidad="pendientes" comparacion={{ texto: TEXTO[m] }} sello={sello} href={`${RUTA}?f.motivo=${m}`} />
         ))}
       </div>
+      {/* R4 · NUC-DOC-IA-02 */}
+      <ClasificacionDocumentosIa puedeEditar={edita} />
       <Segmentos
         etiqueta="Qué puntos ver"
         activa={todo ? 'todo' : 'pendientes'}

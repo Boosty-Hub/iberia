@@ -174,6 +174,21 @@ export const MODULOS: Recurso[] = [
     acciones: ['ver'],
     subtitulo: 'Referencia de mercado, uso interno, nunca para facturar · cada lectura queda registrada',
   },
+  {
+    clave: 'sistema:ia',
+    nombre: 'Gobierno de IA',
+    grupo: 'sistema',
+    acciones: ['ver', 'editar'],
+    detalle: { ver: 'Catálogo, niveles, métricas y costo', editar: 'Interruptores, tope y pedir cambios de nivel (subir pasa por aprobación)' },
+    subtitulo: 'NUC-GIA · capacidades N0–N4, techos e interruptor general',
+  },
+  {
+    clave: 'sistema:ia-actividad',
+    nombre: 'Actividad de la IA',
+    grupo: 'sistema',
+    acciones: ['ver'],
+    subtitulo: 'El registro inmutable; lo de cada objeto lo ve quien puede leer el objeto',
+  },
   { clave: 'modulo:panel', nombre: 'Panel', grupo: 'panel', acciones: ['ver'], subtitulo: 'La portada del dashboard' },
   {
     clave: 'modulo:entrevistas',

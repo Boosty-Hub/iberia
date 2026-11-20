@@ -67,6 +67,8 @@ export const ETIQUETAS_TIPO_CRUCE: Record<string, string> = {
 
 export const TABLA_CATALOGO_PROCESOS: FuenteTabla = {
   id: 'procesos-catalogo',
+  // `ui.procesos` arma el árbol entero en cada llamada: una lectura por petición.
+  enMemoria: true,
   titulo: 'Catálogo de procesos',
   modulo: 'NUC-PRO',
   recurso: 'sistema:procesos',

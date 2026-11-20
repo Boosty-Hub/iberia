@@ -11,6 +11,8 @@ import { FUENTES_PROCESOS } from '@/lib/plataforma/tablas-procesos'
 export const TABLA_PLAZAS: FuenteTabla = {
   id: 'plazas',
   titulo: 'Plazas',
+  // ~100 filas que `ui.plazas` calcula con sus titulares: una lectura por petición.
+  enMemoria: true,
   modulo: 'NUC-ORG',
   recurso: 'sistema:estructura',
   ruta: '/sistema/nucleo/organizacion/plazas',
