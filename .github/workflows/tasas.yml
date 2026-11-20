@@ -1,0 +1,43 @@
+# Captura de tasas de la Plataforma Iberia (ver AGENTS.md y el Anexo E §6).
+#
+#   · BCV (dólar y euro, verificado contra DolarApi): el BCV publica entre las
+#     4:13 y las 4:47 p. m. de Caracas; se intenta a las 4:50, 5:20 y 6:20 p. m.
+#     (20:50, 21:20 y 22:20 UTC), de lunes a viernes. La captura es idempotente:
+#     si la fecha valor ya está, no duplica.
+#   · Paralelo (DolarApi): 9 a. m., 1 p. m. y 5 p. m. de Caracas, todos los días.
+#
+# Llama a POST /api/tasas/capturar con el secreto TASAS_SECRETO (secreto del
+# repositorio; el mismo valor que la variable de Netlify). GitHub puede retrasar
+# un cron programado varios minutos: está bien para esto.
+name: Tasas de cambio
+
+on:
+  schedule:
+    - cron: '50 20 * * 1-5'
+    - cron: '20 21 * * 1-5'
+    - cron: '20 22 * * 1-5'
+    - cron: '0 13 * * *'
+    - cron: '0 17 * * *'
+  workflow_dispatch:
+    inputs:
+      solo_paralelo:
+        description: 'Solo el paralelo'
+        type: boolean
+        default: false
+
+jobs:
+  capturar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Capturar
+        env:
+          SECRETO: ${{ secrets.TASAS_SECRETO }}
+          SOLO_PARALELO: ${{ github.event.schedule == '0 13 * * *' || github.event.schedule == '0 17 * * *' || inputs.solo_paralelo == true }}
+        run: |
+          url="https://iberiavenezuela.netlify.app/api/tasas/capturar"
+          if [ "$SOLO_PARALELO" = "true" ]; then url="$url?paralelo"; fi
+          codigo=$(curl -s -o respuesta.json -w '%{http_code}' -X POST -H "x-tasas-secreto: $SECRETO" "$url")
+          cat respuesta.json; echo
+          echo "HTTP $codigo"
+          test "$codigo" = "200"
