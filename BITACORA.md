@@ -164,15 +164,28 @@ de personal). El plan de la etapa es el Anexo D:
   - **Organización** y **Procesos y Documentos** con el diseño nuevo.
   - **Trabajo en equipo** (esquema `nucleo`): línea de tiempo con comentarios y @menciones, seguir un objeto, notificaciones, tareas y la bandeja rehecha.
   - Las pruebas de punta a punta de requisición, escenario y ficha de proceso pasan sobre las pantallas nuevas.
+- `de108d5` · R4 y R5.
+  - **R4 · IA visible** (esquema `ia`):
+    - Gobierno de IA con interruptores, tope de 10 capacidades y tope de gasto.
+    - Actividad de la IA, que no se puede borrar.
+    - Tres capacidades reales:
+      - «Preguntar a la IA», en N1, con citas;
+      - recomendaciones sobre plazas, en N2, con ⚑ en la tabla;
+      - clasificación de documentos, en N2; en N4 solo toca metadatos y se puede deshacer en 12 h.
+    - Las pruebas costaron US$ 0,19.
+  - **R5 · registro único de métricas** (`ui.metrica`, 22): «procesos con ficha» da 46/185 en todas partes. Además:
+    - Mi día por rol, con portadas editables;
+    - Ctrl K completo;
+    - las 85 políticas RLS evalúan `puede()` una vez por consulta, y `ui.procesos` bajó de 0,3 s a 0,08 s.
 
 **Lo que se rompió o se encontró:**
 - 🔴 **El Supabase de pruebas nació con el registro público abierto.** Con el alta que toma el rol de los metadatos, cualquiera se hacía administrador. Se cerró el 20/11; solo había cuentas de prueba. Desde ahora `importar-base` falla si está abierto.
 - La auditoría dejaba leer montos de nómina a quien tenía permiso de auditoría. Corregido en la `200000`.
 - `publicar_escenario` fallaba con versiones del mismo día o programadas. Corregido.
 - Un `db push --include-all` de un agente le quitó el permiso de ejecución a las funciones de bloqueos del canal en pruebas. R3 lo restituyó, y `probar:bloqueos` da 68/68 en pruebas.
-- **Inconsistencia de cifras:** «procesos con ficha» da 48/205 en Mi día y 46/185 en el resumen de Procesos. Hay que definir cada métrica una sola vez.
+- **Inconsistencia de cifras:** «procesos con ficha» daba 48/205 en Mi día y 46/185 en Procesos. Lo resolvió R5.
 
-**Dónde quedamos**: R0 a R3 en la rama. Faltan R4 (IA visible), R5 (Mi día por rol y Ctrl K completo) y R6 (endurecer). Para producción hacen falta el OK de Gabriel, Supabase en plan pago, las migraciones `20261120*`, exponer `org, sgc, flujo, control, ui, nucleo` y el programador de tasas. Lo que falta está en `PENDIENTES.md`, «Plataforma Iberia · Etapa 1».
+**Dónde quedamos**: R0 a R5 en la rama. Falta R6 (endurecer). Para producción hacen falta el OK de Gabriel, Supabase en plan pago, las migraciones `20261120*`, exponer `org, sgc, flujo, control, ui, nucleo` y el programador de tasas. Lo que falta está en `PENDIENTES.md`, «Plataforma Iberia · Etapa 1».
 
 ---
 
