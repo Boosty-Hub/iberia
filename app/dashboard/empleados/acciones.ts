@@ -187,7 +187,7 @@ export async function enlazarCuenta(datos: FormData) {
   const error = await enlazarCuentaConFicha(perfilId, empleadoId, perfil.email)
   if (error) console.error('[padrón] no se enlazó la cuenta:', error)
   revalidatePath(RUTA)
-  revalidatePath('/dashboard/usuarios')
+  revalidatePath('/sistema/administracion/usuarios')
 }
 
 export async function mandarEnlaces(datos: FormData) {

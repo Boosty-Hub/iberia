@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
-import { guardarMatriz, type FilaMatriz } from '@/app/dashboard/roles/acciones'
+import { guardarMatriz, type FilaMatriz } from '@/app/sistema/administracion/roles/acciones'
 import { IconoAlerta, IconoBuscar, IconoCandado, IconoCheck } from '@/components/iconos'
 import {
   ACCIONES,

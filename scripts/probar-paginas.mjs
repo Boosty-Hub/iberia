@@ -97,8 +97,8 @@ const RUTAS = [
   { ruta: '/dashboard/entrevistas/nueva', marcadores: ['Nombre del entrevistado', 'Crear entrevista'] },
   { ruta: '/dashboard/archivos', marcadores: ['Archivos', 'Subir archivo'] },
   { ruta: '/dashboard/programa', marcadores: ['Consumos y l', 'Cómo va el programa'] },
-  { ruta: '/dashboard/roles', marcadores: ['Roles y permisos'] },
-  { ruta: '/dashboard/usuarios', marcadores: ['Provisionar acceso', 'Cuentas'] },
+  { ruta: '/sistema/administracion/roles', marcadores: ['Roles y permisos'] },
+  { ruta: '/sistema/administracion/usuarios', marcadores: ['Provisionar acceso', 'Cuentas'] },
   { ruta: '/informe', marcadores: ['arquitectura de IA', 'construcci'] },
 ]
 

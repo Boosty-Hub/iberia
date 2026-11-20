@@ -703,6 +703,26 @@ procesos y estructura**. El nombre lo puso Alberto.
 
 ---
 
+## Plataforma Iberia · Etapa 1 — procesos, estructura, dotación (desde el 20 de noviembre)
+
+Rama `plataforma/etapa-1`, Supabase de pruebas `wsqhsjbwkjlqrdxnyadq`. El plan está en
+`plataforma/plan/D-etapa-1-procesos-estructura.md`, fuera de git.
+
+| Qué | De quién | Nota |
+|---|---|---|
+| **OK de Gabriel para el commit y, después, para producción** | Gabriel | En producción: aplicar las once migraciones `20261120*`, exponer `org,sgc,flujo,control` en la API, correr `scripts/plataforma/importar-base.mjs` e `importar-semillas.mjs --destino produccion --confirmo`, y regenerar los tipos. **No antes de pasar Supabase a Pro** (G-06) |
+| **Base de conocimiento operando al 18 de diciembre** (New Iberia) | Equipo Boosty | Los bloques 1 a 4 del Anexo D, ya en producción |
+| Organigramas 2026 que faltan: Gerencia General, Operaciones, Distribución, Oficina Caracas y Capital Humano | Capital Humano | Hoy van los de 2023, marcados |
+| Tipo de nómina, sede, dirección y centro de costo por ficha | Capital Humano | El importador del padrón los perdió (confidencial y ventas quedaron como «mensual»; el 94 % sin sede) |
+| Costo de referencia por cargo, la convención colectiva vigente y la confirmación de los componentes de costo | Capital Humano · Finanzas | Sin eso, la sección de costos no muestra cifras. No se inventó ninguna |
+| Los 74 puntos de conciliación | Capital Humano · Calidad | `/sistema/nucleo/conciliacion` |
+| Sentido de los códigos 21/22 y los códigos XX de los siete procesos nuevos | Calidad (Iberia) | Pendientes de Iberia en NUC-PRO |
+| Publicar dos escenarios sobre la misma plaza con la misma fecha falla en vez de resolverse; «Ve costos» de una ruta no abre los costos a quien firma; la plaza sigue «en creación» después del ingreso; falta la doble aprobación al editar rutas; lo programado a futuro entra al abrir una pantalla, no con un proceso programado | Equipo Boosty | Huecos conocidos de la etapa |
+| `renombrar_hablante` existe en producción sin migración | Equipo Boosty | Crear la migración que la describa |
+| El *artifact* del capítulo 03 publicado por error | Gabriel | ¿Se borra? |
+
+---
+
 ## El dashboard — lo que hay que arreglar
 
 - ~~`/dashboard/hallazgos` da un error de hidratación~~ ✅ **Ya no aparece** (24 de

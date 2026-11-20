@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react'
 import { useFormStatus } from 'react-dom'
-import { actualizarRol, crearRol, eliminarRol, type EstadoRol } from '@/app/dashboard/roles/acciones'
+import { actualizarRol, crearRol, eliminarRol, type EstadoRol } from '@/app/sistema/administracion/roles/acciones'
 import { IconoAlerta, IconoBasura, IconoCheck, IconoMas } from '@/components/iconos'
 import { NIVELES, NIVEL_DESCRIPCION, type Nivel } from '@/lib/permisos'
 

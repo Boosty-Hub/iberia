@@ -315,3 +315,66 @@ export const IconoLista = (p: Props) => (
     <circle cx="4.5" cy="18" r="0.9" fill="currentColor" />
   </Base>
 )
+
+// ── Plataforma Iberia (20-nov-2026) ──────────────────────────────────────────
+
+/** Tres cajas en árbol: la estructura organizativa. */
+export const IconoOrganigrama = (p: Props) => (
+  <Base {...p}>
+    <rect x="9" y="3" width="6" height="4.5" rx="1" />
+    <rect x="3" y="16.5" width="6" height="4.5" rx="1" />
+    <rect x="15" y="16.5" width="6" height="4.5" rx="1" />
+    <path d="M12 7.5v4.5M6 16.5V12h12v4.5" />
+  </Base>
+)
+
+/** Pasos encadenados: los procesos. */
+export const IconoProcesos = (p: Props) => (
+  <Base {...p}>
+    <rect x="2.5" y="9" width="5.5" height="6" rx="1.2" />
+    <rect x="9.25" y="9" width="5.5" height="6" rx="1.2" />
+    <rect x="16" y="9" width="5.5" height="6" rx="1.2" />
+    <path d="M8 12h1.25M14.75 12H16" />
+  </Base>
+)
+
+/** Una hoja con esquina doblada: un documento controlado. */
+export const IconoDocumento = (p: Props) => (
+  <Base {...p}>
+    <path d="M6 3h8l4 4v14H6z" />
+    <path d="M14 3v4h4M9 12h6M9 15.5h6" />
+  </Base>
+)
+
+/** Personas contadas: la dotación. */
+export const IconoDotacion = (p: Props) => (
+  <Base {...p}>
+    <circle cx="8" cy="8" r="2.8" />
+    <path d="M3 19c.6-3 2.6-4.8 5-4.8s4.4 1.8 5 4.8" />
+    <path d="M16 7v6M13 10h6" />
+  </Base>
+)
+
+/** Una casilla marcada en un sello: aprobaciones. */
+export const IconoAprobacion = (p: Props) => (
+  <Base {...p}>
+    <rect x="4" y="4" width="16" height="16" rx="3" />
+    <path d="M8.5 12.5l2.5 2.5 4.5-5" />
+  </Base>
+)
+
+/** Dos caminos que se separan: un escenario. */
+export const IconoEscenario = (p: Props) => (
+  <Base {...p}>
+    <path d="M6 20V9a3 3 0 013-3h9" />
+    <path d="M15 3l3 3-3 3" />
+    <path d="M6 13h6a3 3 0 013 3v4" />
+  </Base>
+)
+
+/** Etiquetas apiladas: catálogos. */
+export const IconoCatalogo = (p: Props) => (
+  <Base {...p}>
+    <path d="M4 6.5h16M4 12h16M4 17.5h10" />
+  </Base>
+)

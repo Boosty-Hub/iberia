@@ -58,6 +58,86 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 - 🔴 **El plan gratuito de Supabase pausa el proyecto**: pasó antes del 19/10 y nadie podía entrar.
   Decidir si pasa a Pro (`PENDIENTES.md`).
 
+> **Plataforma Iberia (20/11):** la Etapa 1 está construida en la rama `plataforma/etapa-1`, contra un
+> Supabase de pruebas, **sin commit ni producción**. Ver la sesión 56.
+
+---
+
+## 19 y 20 de noviembre · Sesión 56 — el levantamiento ISO, el plan maestro y la Etapa 1 de la plataforma
+
+Tres encargos de Gabriel, dos por Telegram y uno en la terminal.
+
+**1. El levantamiento ISO (19/11).** La carpeta del SGC del cliente, «Procesos Iberia» (10.994
+archivos, 22 GB), se movió al repositorio y se leyó archivo por archivo. **Las dos carpetas están
+fuera de git** (`.git/info/exclude`, no `.gitignore`), igual que `levantamiento-iso/`, donde quedó
+el análisis.
+- **No hay evidencia de certificación ISO 9001.**
+- Hubo tres arranques: 2002-04, 2005-08 y 2008. El trabajo de fondo se hizo entre 2009 y 2013.
+- ISODOCUMENT, implantado en 2012, fracasó y en 2021 se volvió al «esquema manual».
+- 🔴 La carpeta trae **contraseñas en texto plano** en las presentaciones de inducción, además de datos
+  personales.
+
+**2. El plan maestro de la Plataforma Iberia (20/11).** Lo escribieron 26 agentes y está en
+`plataforma/plan/`, fuera de git: esqueleto, once capítulos, anexos A a D, resumen y diez decisiones
+para Gabriel (G-01 a G-10).
+- Decisión D-01: **misma app, mismo repositorio y mismo Supabase, en la ruta `/sistema`**. El programa
+  de la Fase 1 queda dentro, como el dominio PRG.
+- La plataforma tiene 65 módulos y 11 portales. La IA va por niveles, de N0 a N4, con techos.
+- ⚠️ Un agente publicó por error el capítulo 03 como *artifact* privado en claude.ai. Se le preguntó a
+  Gabriel si se borra; todavía no ha contestado.
+
+**3. La Etapa 1, construida** (pedido de Gabriel por notas de voz: primero procesos, estructura y
+mapas; todo editable; un solo sistema de usuarios, roles y permisos; dotación con costos y requisición
+de personal). El plan de la etapa es el Anexo D:
+- **Supabase de pruebas «Iberia Pruebas»** (`wsqhsjbwkjlqrdxnyadq`, plan gratuito, en la
+  organización de Iberia). Sus claves están en `.env.local` como `SUPABASE_PRUEBAS_*`. Se le aplicaron
+  las 42 migraciones de siempre más once nuevas (`20261120*`), y se expusieron los esquemas `org`,
+  `sgc`, `flujo` y `control`. **Producción no se tocó.**
+- **Un solo sistema de permisos**:
+  - La matriz de siempre ahora incluye recursos `sistema:*`.
+  - Hay un nivel nuevo, `usuario` (rol «Usuario Iberia»), que trabaja en el sistema pero no es del equipo.
+  - Usuarios y roles se mudaron a `/sistema/administracion`; las rutas del panel redirigen.
+- **Pantallas**:
+  - Organización: organigrama vivo con fecha, edición con fecha efectiva, cargos, dotación con plan
+    del año y costos, y conciliación.
+  - Procesos: mapa, árbol, ficha PHVA con ciclo de aprobación, cruce SGC ↔ informe y escenarios de
+    procesos.
+  - Documentos: biblioteca de los 1.307 documentos.
+  - Flujos: requisición de personal digital (II-21-40-001) con su impacto, bandeja de aprobaciones,
+    escenarios de estructura, y rutas, catálogos y auditoría.
+- **Datos importados** desde semillas preparadas por agentes (`plataforma/semillas/`, NDA):
+  - Estructura: 45 unidades, 110 cargos, 106 plazas y 263 ocupaciones; 26 de ellas van por encima de
+    la dotación.
+  - Procesos: 204, de los cuales 47 traen su ficha PHVA.
+  - Documentos: 1.307.
+  - Conciliación: 74 puntos para Capital Humano y Calidad.
+- **Probado de punta a punta en pruebas** con cuentas ficticias: una requisición de cargo nuevo pasó
+  por sus 5 pasos y creó la plaza y los ingresos; un escenario de estructura se aprobó y se publicó con
+  fecha; dos ediciones de proceso y un escenario de procesos se aprobaron desde la bandeja.
+
+**Lo que se decidió:**
+- La requisición digital **no pide edad, sexo, estatura ni peso**. Iban en el formato y chocan con la
+  no discriminación de la LOTTT. Un requisito físico se pide con su justificación (E1-04).
+- **Los costos son de referencia por cargo**, no el salario de nadie. Los componentes de ley son filas
+  editables con vigencia y quedan «por confirmar». Son perímetro de nómina (`sistema:costos`), sin IA.
+  No se cargó ni un costo ni una tasa: los pone Capital Humano.
+- Nada se borra: lo que cambia se cierra con fecha. La vigencia retroactiva no se permite.
+
+**Lo que se rompió o se encontró:**
+- 🔴 Las funciones de publicar (proceso, requisición, escenario) se podían ejecutar con cualquier
+  sesión, porque solo se habían revocado de `authenticated` y no de PUBLIC. Se cerró en la migración
+  `160000`.
+- Las políticas de `flujo.solicitud` y `flujo.paso` se llamaban entre sí en bucle: quien pedía una
+  requisición no la podía abrir. Corregido en la `172000`.
+- ⚠️ **Deriva en producción**: la función `renombrar_hablante` existe en la base pero no en ninguna
+  migración. La usa `scripts/sembrar-contexto.mjs`.
+- ⚠️ El Supabase de producción sigue en el plan gratuito (G-06).
+
+**Dónde quedamos**: todo en la rama, sin commit. Las 16 pantallas responden en escritorio y en
+teléfono, y tipos y lint están limpios. Para llegar a producción hace falta el OK de Gabriel, aplicar
+las once migraciones y exponer los esquemas. Lo que falta, en `PENDIENTES.md`, «Plataforma Iberia ·
+Etapa 1».
+
 ---
 
 ## 3 al 6 de noviembre · Sesión 55 — la app va a revisión, y Apple pregunta

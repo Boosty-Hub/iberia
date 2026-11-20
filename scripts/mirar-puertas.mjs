@@ -167,7 +167,7 @@ try {
       }
       ver((await p.getByRole('link', { name: /Ver el informe/ }).count()) >= 1, 'la cabecera trae «Ver el informe»')
       await p.screenshot({ path: `${SALIDA}/${nombre}-portada.png` })
-      for (const ruta of ['/dashboard/entrevistas', '/dashboard/usuarios', '/dashboard/roles', '/dashboard/empleados', '/informe']) {
+      for (const ruta of ['/dashboard/entrevistas', '/sistema/administracion/usuarios', '/sistema/administracion/roles', '/dashboard/empleados', '/informe']) {
         const r = await p.goto(`${BASE}${ruta}`, { waitUntil: 'networkidle' })
         ver(r?.ok() && new URL(p.url()).pathname.startsWith(ruta.split('?')[0]), `abre ${ruta}`, `${r?.status()} ${p.url()}`)
       }

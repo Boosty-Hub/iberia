@@ -28,17 +28,19 @@ export type Certificado = Row<'certificados'>
 // los valores son las etiquetas que ve el usuario.
 // -----------------------------------------------------------------------------
 
-export type Rol = 'admin' | 'consultor' | 'lector'
+export type Rol = 'admin' | 'consultor' | 'usuario' | 'lector'
 
 export const ROLES: Record<Rol, string> = {
   admin: 'Administrador',
   consultor: 'Consultor',
+  usuario: 'Usuario',
   lector: 'Lector',
 }
 
 export const ROL_DESCRIPCION: Record<Rol, string> = {
   admin: 'Control total, incluida la gestión de usuarios',
   consultor: 'Edita entrevistas, archivos, hallazgos e informe',
+  usuario: 'Trabaja en la plataforma según su matriz; no edita el programa',
   lector: 'Solo lectura del levantamiento y del informe publicado',
 }
 

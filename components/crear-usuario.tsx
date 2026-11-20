@@ -2,7 +2,7 @@
 
 import { useActionState } from 'react'
 import { useFormStatus } from 'react-dom'
-import { crearUsuario, type EstadoUsuario } from '@/app/dashboard/usuarios/acciones'
+import { crearUsuario, type EstadoUsuario } from '@/app/sistema/administracion/usuarios/acciones'
 import { IconoAlerta, IconoCheck, IconoMas } from '@/components/iconos'
 import { NIVELES, type Nivel } from '@/lib/permisos'
 import { ORGANIZACIONES } from '@/lib/types'

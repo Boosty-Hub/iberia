@@ -85,8 +85,8 @@ export async function crearRol(_anterior: EstadoRol, fd: FormData): Promise<Esta
     }
   }
 
-  revalidatePath('/dashboard/roles')
-  redirect(`/dashboard/roles/${id}?creado=1`)
+  revalidatePath('/sistema/administracion/roles')
+  redirect(`/sistema/administracion/roles/${id}?creado=1`)
 }
 
 export async function actualizarRol(_anterior: EstadoRol, fd: FormData): Promise<EstadoRol> {
@@ -115,8 +115,8 @@ export async function actualizarRol(_anterior: EstadoRol, fd: FormData): Promise
   const { error } = await supabase.from('roles').update(cambios).eq('id', id)
   if (error) return { error: mensajeDe(error) }
 
-  revalidatePath('/dashboard/roles')
-  revalidatePath(`/dashboard/roles/${id}`)
+  revalidatePath('/sistema/administracion/roles')
+  revalidatePath(`/sistema/administracion/roles/${id}`)
   return { ok: cambios.nivel ? `Guardado. El nivel pasó a ${NIVELES[cambios.nivel]}.` : 'Guardado.' }
 }
 
@@ -137,8 +137,8 @@ export async function eliminarRol(_anterior: EstadoRol, fd: FormData): Promise<E
   // Sin política que lo deje, Postgres no se queja: filtra la fila y no borra.
   if (!data?.length) return { error: 'La base no dejó borrarlo.' }
 
-  revalidatePath('/dashboard/roles')
-  redirect('/dashboard/roles?borrado=1')
+  revalidatePath('/sistema/administracion/roles')
+  redirect('/sistema/administracion/roles?borrado=1')
 }
 
 export type FilaMatriz = { recurso: string } & Permiso
@@ -186,7 +186,7 @@ export async function guardarMatriz(rolId: string, filas: FilaMatriz[]): Promise
     if (e2) return { error: e2.message }
   }
 
-  revalidatePath(`/dashboard/roles/${rolId}`)
-  revalidatePath('/dashboard/roles')
+  revalidatePath(`/sistema/administracion/roles/${rolId}`)
+  revalidatePath('/sistema/administracion/roles')
   return { ok: `Permisos guardados: ${guardar.length} recurso(s) habilitados.` }
 }

@@ -91,8 +91,8 @@ const GRUPOS: { titulo: string; items: Item[] }[] = [
   {
     titulo: 'Administración',
     items: [
-      { clave: 'usuarios', href: '/dashboard/usuarios', etiqueta: 'Usuarios', Icono: IconoUsuarios },
-      { clave: 'roles', href: '/dashboard/roles', etiqueta: 'Roles y permisos', Icono: IconoEscudo },
+      { clave: 'usuarios', href: '/sistema/administracion/usuarios', etiqueta: 'Usuarios', Icono: IconoUsuarios },
+      { clave: 'roles', href: '/sistema/administracion/roles', etiqueta: 'Roles y permisos', Icono: IconoEscudo },
     ],
   },
 ]

@@ -77,8 +77,8 @@ export async function crearUsuario(_anterior: EstadoUsuario, fd: FormData): Prom
   // Si no se pudo enlazar, la cuenta queda creada igual y se dice por qué.
   const sinEnlace = empleadoId && creado?.user ? await enlazar(creado.user.id, empleadoId, email) : null
 
-  revalidatePath('/dashboard/usuarios')
-  revalidatePath('/dashboard/roles')
+  revalidatePath('/sistema/administracion/usuarios')
+  revalidatePath('/sistema/administracion/roles')
   revalidatePath('/dashboard/empleados')
   if (sinEnlace) return { error: `Usuario ${email} creado, pero sin ficha: ${sinEnlace}` }
   return { ok: `Usuario ${email} creado con el rol ${rol.nombre}. Entrégale el correo y la contraseña.` }
@@ -98,7 +98,7 @@ export async function enlazarFicha(fd: FormData) {
   const error = await enlazar(id, empleadoId, perfil.email)
   if (error) console.error('[usuarios] no se enlazó la ficha:', error)
 
-  revalidatePath('/dashboard/usuarios')
+  revalidatePath('/sistema/administracion/usuarios')
   revalidatePath('/dashboard/empleados')
 }
 
@@ -112,7 +112,7 @@ export async function desenlazarFicha(fd: FormData) {
   if (!id) return
   const admin = createAdminClient()
   await admin.from('empleados').update({ perfil_id: null }).eq('perfil_id', id)
-  revalidatePath('/dashboard/usuarios')
+  revalidatePath('/sistema/administracion/usuarios')
   revalidatePath('/dashboard/empleados')
 }
 
@@ -131,8 +131,8 @@ export async function cambiarRol(fd: FormData) {
 
   await supabase.from('profiles').update({ rol_id: rol.id }).eq('id', id)
 
-  revalidatePath('/dashboard/usuarios')
-  revalidatePath('/dashboard/roles')
+  revalidatePath('/sistema/administracion/usuarios')
+  revalidatePath('/sistema/administracion/roles')
 }
 
 export async function alternarActivo(fd: FormData) {
@@ -147,7 +147,7 @@ export async function alternarActivo(fd: FormData) {
   if (!actual) return
 
   await supabase.from('profiles').update({ activo: !actual.activo }).eq('id', id)
-  revalidatePath('/dashboard/usuarios')
+  revalidatePath('/sistema/administracion/usuarios')
 }
 
 export async function eliminarUsuario(fd: FormData) {
@@ -160,6 +160,6 @@ export async function eliminarUsuario(fd: FormData) {
   const admin = createAdminClient()
   await admin.auth.admin.deleteUser(id)
 
-  revalidatePath('/dashboard/usuarios')
-  revalidatePath('/dashboard/roles')
+  revalidatePath('/sistema/administracion/usuarios')
+  revalidatePath('/sistema/administracion/roles')
 }

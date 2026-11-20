@@ -59,8 +59,8 @@ const PAGINAS = [
   { nombre: '05-archivos', ruta: '/dashboard/archivos' },
   // Sin hallazgos ni editor del informe desde el 25 de septiembre: los hallazgos
   // se leen en el informe y el informe se escribe en las sesiones.
-  { nombre: '10-usuarios', ruta: '/dashboard/usuarios' },
-  { nombre: '10b-roles', ruta: '/dashboard/roles' },
+  { nombre: '10-usuarios', ruta: '/sistema/administracion/usuarios' },
+  { nombre: '10b-roles', ruta: '/sistema/administracion/roles' },
   { nombre: '11-informe', ruta: '/informe' },
   // Las secciones con dibujo son las que más se rompen: el circuito, el mapa
   // —que es la sección del mapa de procesos— y el espejo de la arquitectura.

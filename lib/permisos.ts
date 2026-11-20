@@ -29,23 +29,31 @@ export const ETIQUETA_ACCION: Record<Accion, string> = {
   eliminar: 'Eliminar',
 }
 
-export type Nivel = 'admin' | 'consultor' | 'lector'
+export type Nivel = 'admin' | 'consultor' | 'usuario' | 'lector'
 
 export const NIVELES: Record<Nivel, string> = {
   admin: 'Administrador',
   consultor: 'Equipo consultor',
+  usuario: 'Usuario de la plataforma',
   lector: 'Solo lectura',
 }
 
 export const NIVEL_DESCRIPCION: Record<Nivel, string> = {
   admin: 'Lo puede todo, incluidos usuarios, roles y permisos. Su matriz no se edita.',
   consultor: 'Puede ver, crear, editar y eliminar lo que la matriz le marque. No administra usuarios ni roles.',
+  usuario:
+    'Personal de Iberia que trabaja en la plataforma: ve, crea y edita lo que la matriz le marque en el sistema. No administra usuarios ni roles, y no es del equipo consultor: no edita el programa.',
   lector: 'Solo puede ver lo que la matriz le marque. Nada de crear, editar ni eliminar.',
 }
 
-export type Grupo = 'panel' | 'informe' | 'curso' | 'administracion'
+export type Grupo = 'sistema' | 'panel' | 'informe' | 'curso' | 'administracion'
 
 export const GRUPOS: { clave: Grupo; titulo: string; descripcion: string }[] = [
+  {
+    clave: 'sistema',
+    titulo: 'Plataforma Iberia',
+    descripcion: 'Los módulos del sistema: estructura, procesos, documentos, dotación, aprobaciones. Una sola matriz para toda la plataforma.',
+  },
   { clave: 'panel', titulo: 'Módulos del panel', descripcion: 'Cada pantalla del dashboard y el canal.' },
   {
     clave: 'informe',
@@ -75,6 +83,82 @@ export type Recurso = {
 }
 
 export const MODULOS: Recurso[] = [
+  // ── Plataforma Iberia · Etapa 1 (20-nov-2026). Un módulo nuevo del sistema se
+  // añade aquí el mismo día, con las acciones que existen de verdad.
+  { clave: 'sistema:inicio', nombre: 'Inicio del sistema', grupo: 'sistema', acciones: ['ver'], subtitulo: 'La portada de /sistema y el registro de módulos' },
+  {
+    clave: 'sistema:estructura',
+    nombre: 'Estructura organizativa',
+    grupo: 'sistema',
+    acciones: ['ver', 'crear', 'editar', 'eliminar'],
+    detalle: { crear: 'Unidades, cargos, plazas y ocupaciones', editar: 'Corregir y mover con fecha', eliminar: 'Cerrar con fecha (nada se borra)' },
+  },
+  {
+    clave: 'sistema:escenarios',
+    nombre: 'Escenarios',
+    grupo: 'sistema',
+    acciones: ['ver', 'crear', 'editar', 'eliminar'],
+    detalle: { crear: 'Abrir un escenario', editar: 'Diseñar dentro del escenario', eliminar: 'Descartarlo' },
+    subtitulo: 'Estructura y procesos «como debería ser»',
+  },
+  {
+    clave: 'sistema:procesos',
+    nombre: 'Procesos',
+    grupo: 'sistema',
+    acciones: ['ver', 'crear', 'editar', 'eliminar'],
+    detalle: { crear: 'Nodos y borradores', editar: 'Fichas, cruces y revisión', eliminar: 'Retirar con fecha' },
+  },
+  {
+    clave: 'sistema:documentos',
+    nombre: 'Documentos del SGC',
+    grupo: 'sistema',
+    acciones: ['ver', 'editar'],
+    detalle: { editar: 'Corregir metadatos, estado y vínculos' },
+  },
+  {
+    clave: 'sistema:perimetros',
+    nombre: 'Documentos de perímetro',
+    grupo: 'sistema',
+    acciones: ['ver'],
+    subtitulo: 'Nómina, servicio médico, PCP y fórmulas',
+  },
+  {
+    clave: 'sistema:dotacion',
+    nombre: 'Dotación',
+    grupo: 'sistema',
+    acciones: ['ver', 'editar'],
+    detalle: { editar: 'Plan de dotación por año' },
+    subtitulo: 'Cantidades, sin costos',
+  },
+  {
+    clave: 'sistema:costos',
+    nombre: 'Costos de personal',
+    grupo: 'sistema',
+    acciones: ['ver', 'editar'],
+    detalle: { editar: 'Costos de referencia, componentes y parámetros' },
+    subtitulo: 'Perímetro de nómina · sin IA',
+  },
+  {
+    clave: 'sistema:requisiciones',
+    nombre: 'Requisiciones de personal',
+    grupo: 'sistema',
+    acciones: ['ver', 'crear', 'editar'],
+    detalle: { ver: 'Todas, no solo las propias', crear: 'Pedir para su unidad', editar: 'Recursos Humanos: gestionar' },
+  },
+  {
+    clave: 'sistema:aprobaciones',
+    nombre: 'Rutas de aprobación',
+    grupo: 'sistema',
+    acciones: ['ver', 'editar'],
+    detalle: { ver: 'Ver todas las solicitudes', editar: 'Configurar las rutas (sensible)' },
+  },
+  {
+    clave: 'sistema:catalogos',
+    nombre: 'Catálogos',
+    grupo: 'sistema',
+    acciones: ['ver', 'crear', 'editar'],
+  },
+  { clave: 'sistema:auditoria', nombre: 'Auditoría', grupo: 'sistema', acciones: ['ver'], subtitulo: 'Quién cambió qué y cuándo' },
   { clave: 'modulo:panel', nombre: 'Panel', grupo: 'panel', acciones: ['ver'], subtitulo: 'La portada del dashboard' },
   {
     clave: 'modulo:entrevistas',
@@ -169,6 +253,7 @@ export function construirInventario(
   lecciones: { numero: number; titulo: string }[]
 ): Recurso[] {
   return [
+    ...MODULOS.filter((m) => m.grupo === 'sistema'),
     ...MODULOS.filter((m) => m.grupo === 'panel'),
     ...secciones.map<Recurso>((s) => ({
       clave: `informe:${s.slug}`,

@@ -10,7 +10,1328 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.15"
+    PostgrestVersion: "14.18"
+  }
+  control: {
+    Tables: {
+      auditoria: {
+        Row: {
+          accion: string
+          actor: string | null
+          antes: Json | null
+          despues: Json | null
+          en: string
+          esquema: string
+          hash: string
+          hash_previo: string | null
+          id: number
+          registro_id: string
+          tabla: string
+        }
+        Insert: {
+          accion: string
+          actor?: string | null
+          antes?: Json | null
+          despues?: Json | null
+          en?: string
+          esquema: string
+          hash: string
+          hash_previo?: string | null
+          id?: never
+          registro_id: string
+          tabla: string
+        }
+        Update: {
+          accion?: string
+          actor?: string | null
+          antes?: Json | null
+          despues?: Json | null
+          en?: string
+          esquema?: string
+          hash?: string
+          hash_previo?: string | null
+          id?: never
+          registro_id?: string
+          tabla?: string
+        }
+        Relationships: []
+      }
+      catalogo: {
+        Row: {
+          activo: boolean
+          clave: string
+          descripcion: string | null
+          etiqueta: string
+          orden: number
+          tipo: string
+        }
+        Insert: {
+          activo?: boolean
+          clave: string
+          descripcion?: string | null
+          etiqueta: string
+          orden?: number
+          tipo: string
+        }
+        Update: {
+          activo?: boolean
+          clave?: string
+          descripcion?: string | null
+          etiqueta?: string
+          orden?: number
+          tipo?: string
+        }
+        Relationships: []
+      }
+      conciliacion: {
+        Row: {
+          creado_en: string
+          descripcion: string
+          estado: string
+          fuente: string | null
+          id: string
+          modulo: string
+          objeto: string | null
+          resolucion: string | null
+          responsable: string | null
+          resuelto_en: string | null
+          resuelto_por: string | null
+          tipo: string
+        }
+        Insert: {
+          creado_en?: string
+          descripcion: string
+          estado?: string
+          fuente?: string | null
+          id?: string
+          modulo: string
+          objeto?: string | null
+          resolucion?: string | null
+          responsable?: string | null
+          resuelto_en?: string | null
+          resuelto_por?: string | null
+          tipo: string
+        }
+        Update: {
+          creado_en?: string
+          descripcion?: string
+          estado?: string
+          fuente?: string | null
+          id?: string
+          modulo?: string
+          objeto?: string | null
+          resolucion?: string | null
+          responsable?: string | null
+          resuelto_en?: string | null
+          resuelto_por?: string | null
+          tipo?: string
+        }
+        Relationships: []
+      }
+      modulo: {
+        Row: {
+          codigo: string
+          descripcion: string | null
+          dominio: string
+          estado: string
+          fase: string | null
+          nombre: string
+          orden: number
+          recurso: string | null
+          ruta: string | null
+        }
+        Insert: {
+          codigo: string
+          descripcion?: string | null
+          dominio: string
+          estado?: string
+          fase?: string | null
+          nombre: string
+          orden?: number
+          recurso?: string | null
+          ruta?: string | null
+        }
+        Update: {
+          codigo?: string
+          descripcion?: string | null
+          dominio?: string
+          estado?: string
+          fase?: string | null
+          nombre?: string
+          orden?: number
+          recurso?: string | null
+          ruta?: string | null
+        }
+        Relationships: []
+      }
+      parametro: {
+        Row: {
+          clave: string
+          fuente: string | null
+          id: string
+          nombre: string
+          por_confirmar: boolean
+          unidad: string
+          valor: number
+          vigencia: unknown
+        }
+        Insert: {
+          clave: string
+          fuente?: string | null
+          id?: string
+          nombre: string
+          por_confirmar?: boolean
+          unidad: string
+          valor: number
+          vigencia?: unknown
+        }
+        Update: {
+          clave?: string
+          fuente?: string | null
+          id?: string
+          nombre?: string
+          por_confirmar?: boolean
+          unidad?: string
+          valor?: number
+          vigencia?: unknown
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      puede_conciliar: { Args: { p_modulo: string }; Returns: boolean }
+      resolver_conciliacion: {
+        Args: { p_estado: string; p_id: string; p_resolucion?: string }
+        Returns: undefined
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  flujo: {
+    Tables: {
+      paso: {
+        Row: {
+          accion: string
+          aprobador_perfil: string | null
+          aprobador_plaza_ref: string | null
+          comentario: string | null
+          decidido_en: string | null
+          decidido_por: string | null
+          decision: string
+          hito: boolean
+          id: string
+          nombre: string
+          orden: number
+          regla: Json | null
+          solicitud_id: string
+          ve_costos: boolean
+        }
+        Insert: {
+          accion: string
+          aprobador_perfil?: string | null
+          aprobador_plaza_ref?: string | null
+          comentario?: string | null
+          decidido_en?: string | null
+          decidido_por?: string | null
+          decision?: string
+          hito?: boolean
+          id?: string
+          nombre: string
+          orden: number
+          regla?: Json | null
+          solicitud_id: string
+          ve_costos?: boolean
+        }
+        Update: {
+          accion?: string
+          aprobador_perfil?: string | null
+          aprobador_plaza_ref?: string | null
+          comentario?: string | null
+          decidido_en?: string | null
+          decidido_por?: string | null
+          decision?: string
+          hito?: boolean
+          id?: string
+          nombre?: string
+          orden?: number
+          regla?: Json | null
+          solicitud_id?: string
+          ve_costos?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paso_solicitud_id_fkey"
+            columns: ["solicitud_id"]
+            isOneToOne: false
+            referencedRelation: "solicitud"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ruta: {
+        Row: {
+          activa: boolean
+          descripcion: string | null
+          id: string
+          nombre: string
+          tipo_objeto: string
+          vigencia: unknown
+        }
+        Insert: {
+          activa?: boolean
+          descripcion?: string | null
+          id?: string
+          nombre: string
+          tipo_objeto: string
+          vigencia?: unknown
+        }
+        Update: {
+          activa?: boolean
+          descripcion?: string | null
+          id?: string
+          nombre?: string
+          tipo_objeto?: string
+          vigencia?: unknown
+        }
+        Relationships: []
+      }
+      ruta_paso: {
+        Row: {
+          accion: string
+          cargo_id: string | null
+          condicion: Json | null
+          hito: boolean
+          id: string
+          nombre: string
+          orden: number
+          plaza_ref: string | null
+          resolutor: string
+          rol_id: string | null
+          ruta_id: string
+          ve_costos: boolean
+        }
+        Insert: {
+          accion?: string
+          cargo_id?: string | null
+          condicion?: Json | null
+          hito?: boolean
+          id?: string
+          nombre: string
+          orden: number
+          plaza_ref?: string | null
+          resolutor: string
+          rol_id?: string | null
+          ruta_id: string
+          ve_costos?: boolean
+        }
+        Update: {
+          accion?: string
+          cargo_id?: string | null
+          condicion?: Json | null
+          hito?: boolean
+          id?: string
+          nombre?: string
+          orden?: number
+          plaza_ref?: string | null
+          resolutor?: string
+          rol_id?: string | null
+          ruta_id?: string
+          ve_costos?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ruta_paso_ruta_id_fkey"
+            columns: ["ruta_id"]
+            isOneToOne: false
+            referencedRelation: "ruta"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      solicitud: {
+        Row: {
+          cerrado_en: string | null
+          creado_en: string
+          creado_por: string | null
+          estado: string
+          id: string
+          objeto_id: string
+          paso_actual: number | null
+          ruta_id: string
+          tipo_objeto: string
+          titulo: string
+        }
+        Insert: {
+          cerrado_en?: string | null
+          creado_en?: string
+          creado_por?: string | null
+          estado?: string
+          id?: string
+          objeto_id: string
+          paso_actual?: number | null
+          ruta_id: string
+          tipo_objeto: string
+          titulo: string
+        }
+        Update: {
+          cerrado_en?: string | null
+          creado_en?: string
+          creado_por?: string | null
+          estado?: string
+          id?: string
+          objeto_id?: string
+          paso_actual?: number | null
+          ruta_id?: string
+          tipo_objeto?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitud_ruta_id_fkey"
+            columns: ["ruta_id"]
+            isOneToOne: false
+            referencedRelation: "ruta"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      al_decidir: {
+        Args: {
+          p_accion: string
+          p_decision: string
+          p_estado_solicitud: string
+          p_hito: boolean
+          p_objeto: string
+          p_tipo: string
+        }
+        Returns: undefined
+      }
+      bandeja: {
+        Args: never
+        Returns: {
+          accion: string
+          aprobador_perfil: string
+          aprobador_plaza_ref: string
+          esperando_desde: string
+          hito: boolean
+          objeto_id: string
+          orden: number
+          paso: string
+          paso_id: string
+          pedido_en: string
+          pedido_por: string
+          pedido_por_nombre: string
+          regla: Json
+          solicitud_id: string
+          tipo_objeto: string
+          titulo: string
+          ve_costos: boolean
+        }[]
+      }
+      decidir: {
+        Args: { p_comentario?: string; p_decision: string; p_paso: string }
+        Returns: string
+      }
+      firmo_en: { Args: { p_solicitud: string }; Returns: boolean }
+      firmo_objeto: { Args: { p_objeto: string }; Returns: boolean }
+      iniciar: {
+        Args: {
+          p_contexto?: Json
+          p_objeto: string
+          p_tipo: string
+          p_titulo: string
+          p_unidad: string
+        }
+        Returns: string
+      }
+      nombres: {
+        Args: { p_ids: string[] }
+        Returns: {
+          id: string
+          nombre: string
+        }[]
+      }
+      pedi_yo: { Args: { p_solicitud: string }; Returns: boolean }
+      puede_decidir: { Args: { p_paso: string }; Returns: boolean }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  org: {
+    Tables: {
+      cargo: {
+        Row: {
+          activo: boolean
+          clave: string
+          creado_en: string
+          familia: string | null
+          familia_cat: string | null
+          id: string
+          nivel: number | null
+          nombre: string
+          proposito: string | null
+          sinonimos: string[]
+        }
+        Insert: {
+          activo?: boolean
+          clave: string
+          creado_en?: string
+          familia?: string | null
+          familia_cat?: string | null
+          id?: string
+          nivel?: number | null
+          nombre: string
+          proposito?: string | null
+          sinonimos?: string[]
+        }
+        Update: {
+          activo?: boolean
+          clave?: string
+          creado_en?: string
+          familia?: string | null
+          familia_cat?: string | null
+          id?: string
+          nivel?: number | null
+          nombre?: string
+          proposito?: string | null
+          sinonimos?: string[]
+        }
+        Relationships: []
+      }
+      componente_costo: {
+        Row: {
+          aplica_a: string
+          base: string
+          base_legal: string | null
+          forma: string
+          fuente: string | null
+          id: string
+          moneda: string | null
+          nombre: string
+          nota: string | null
+          orden: number
+          piso_parametro: string | null
+          por_confirmar: boolean
+          tope_salarios_minimos: number | null
+          valor: number
+          vigencia: unknown
+        }
+        Insert: {
+          aplica_a?: string
+          base?: string
+          base_legal?: string | null
+          forma: string
+          fuente?: string | null
+          id?: string
+          moneda?: string | null
+          nombre: string
+          nota?: string | null
+          orden?: number
+          piso_parametro?: string | null
+          por_confirmar?: boolean
+          tope_salarios_minimos?: number | null
+          valor: number
+          vigencia?: unknown
+        }
+        Update: {
+          aplica_a?: string
+          base?: string
+          base_legal?: string | null
+          forma?: string
+          fuente?: string | null
+          id?: string
+          moneda?: string | null
+          nombre?: string
+          nota?: string | null
+          orden?: number
+          piso_parametro?: string | null
+          por_confirmar?: boolean
+          tope_salarios_minimos?: number | null
+          valor?: number
+          vigencia?: unknown
+        }
+        Relationships: []
+      }
+      costo_referencia: {
+        Row: {
+          bonos_usd_mensual: number
+          cargo_id: string
+          fuente: string | null
+          id: string
+          moneda: string
+          salario_mensual: number
+          vigencia: unknown
+        }
+        Insert: {
+          bonos_usd_mensual?: number
+          cargo_id: string
+          fuente?: string | null
+          id?: string
+          moneda?: string
+          salario_mensual: number
+          vigencia?: unknown
+        }
+        Update: {
+          bonos_usd_mensual?: number
+          cargo_id?: string
+          fuente?: string | null
+          id?: string
+          moneda?: string
+          salario_mensual?: number
+          vigencia?: unknown
+        }
+        Relationships: [
+          {
+            foreignKeyName: "costo_referencia_cargo_id_fkey"
+            columns: ["cargo_id"]
+            isOneToOne: false
+            referencedRelation: "cargo"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      escenario: {
+        Row: {
+          alcance: string
+          creado_en: string
+          creado_por: string | null
+          descripcion: string | null
+          estado: string
+          fecha_base: string
+          id: string
+          nombre: string
+          proceso_raiz_ref: string | null
+          publicado_en: string | null
+          vigente_desde: string | null
+        }
+        Insert: {
+          alcance: string
+          creado_en?: string
+          creado_por?: string | null
+          descripcion?: string | null
+          estado?: string
+          fecha_base?: string
+          id?: string
+          nombre: string
+          proceso_raiz_ref?: string | null
+          publicado_en?: string | null
+          vigente_desde?: string | null
+        }
+        Update: {
+          alcance?: string
+          creado_en?: string
+          creado_por?: string | null
+          descripcion?: string | null
+          estado?: string
+          fecha_base?: string
+          id?: string
+          nombre?: string
+          proceso_raiz_ref?: string | null
+          publicado_en?: string | null
+          vigente_desde?: string | null
+        }
+        Relationships: []
+      }
+      ocupacion: {
+        Row: {
+          certeza: string
+          creado_en: string
+          empleado_id: string
+          excede_dotacion: boolean
+          id: string
+          motivo: string | null
+          plaza_ref: string
+          tipo: string
+          tipo_cat: string | null
+          vigencia: unknown
+        }
+        Insert: {
+          certeza?: string
+          creado_en?: string
+          empleado_id: string
+          excede_dotacion?: boolean
+          id?: string
+          motivo?: string | null
+          plaza_ref: string
+          tipo?: string
+          tipo_cat?: string | null
+          vigencia?: unknown
+        }
+        Update: {
+          certeza?: string
+          creado_en?: string
+          empleado_id?: string
+          excede_dotacion?: boolean
+          id?: string
+          motivo?: string | null
+          plaza_ref?: string
+          tipo?: string
+          tipo_cat?: string | null
+          vigencia?: unknown
+        }
+        Relationships: []
+      }
+      plan_dotacion: {
+        Row: {
+          anio: number
+          aprobado_en: string | null
+          aprobado_por: string | null
+          estado: string
+          id: string
+          nota: string | null
+          version: number
+        }
+        Insert: {
+          anio: number
+          aprobado_en?: string | null
+          aprobado_por?: string | null
+          estado?: string
+          id?: string
+          nota?: string | null
+          version?: number
+        }
+        Update: {
+          anio?: number
+          aprobado_en?: string | null
+          aprobado_por?: string | null
+          estado?: string
+          id?: string
+          nota?: string | null
+          version?: number
+        }
+        Relationships: []
+      }
+      plan_dotacion_linea: {
+        Row: {
+          cantidad: number
+          cargo_id: string
+          id: string
+          nota: string | null
+          plan_id: string
+          unidad_ref: string
+        }
+        Insert: {
+          cantidad: number
+          cargo_id: string
+          id?: string
+          nota?: string | null
+          plan_id: string
+          unidad_ref: string
+        }
+        Update: {
+          cantidad?: number
+          cargo_id?: string
+          id?: string
+          nota?: string | null
+          plan_id?: string
+          unidad_ref?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_dotacion_linea_cargo_id_fkey"
+            columns: ["cargo_id"]
+            isOneToOne: false
+            referencedRelation: "cargo"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_dotacion_linea_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plan_dotacion"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plaza: {
+        Row: {
+          cargo_id: string
+          certeza: string
+          dotacion: number
+          esc: string | null
+          escenario_id: string | null
+          estado: string
+          estado_cat: string | null
+          fuente: string | null
+          id: string
+          nomina_cat: string | null
+          nota: string | null
+          ref: string
+          reporta_a_ref: string | null
+          sede: string | null
+          sede_cat: string | null
+          tipo_nomina: string | null
+          unidad_ref: string
+          vigencia: unknown
+        }
+        Insert: {
+          cargo_id: string
+          certeza?: string
+          dotacion?: number
+          esc?: string | null
+          escenario_id?: string | null
+          estado?: string
+          estado_cat?: string | null
+          fuente?: string | null
+          id?: string
+          nomina_cat?: string | null
+          nota?: string | null
+          ref?: string
+          reporta_a_ref?: string | null
+          sede?: string | null
+          sede_cat?: string | null
+          tipo_nomina?: string | null
+          unidad_ref: string
+          vigencia?: unknown
+        }
+        Update: {
+          cargo_id?: string
+          certeza?: string
+          dotacion?: number
+          esc?: string | null
+          escenario_id?: string | null
+          estado?: string
+          estado_cat?: string | null
+          fuente?: string | null
+          id?: string
+          nomina_cat?: string | null
+          nota?: string | null
+          ref?: string
+          reporta_a_ref?: string | null
+          sede?: string | null
+          sede_cat?: string | null
+          tipo_nomina?: string | null
+          unidad_ref?: string
+          vigencia?: unknown
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plaza_cargo_id_fkey"
+            columns: ["cargo_id"]
+            isOneToOne: false
+            referencedRelation: "cargo"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plaza_escenario_id_fkey"
+            columns: ["escenario_id"]
+            isOneToOne: false
+            referencedRelation: "escenario"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      requisicion: {
+        Row: {
+          candidato: string | null
+          cantidad: number
+          cargo_id: string
+          condiciones: Json
+          creado_en: string
+          creado_por: string | null
+          estado: string
+          fecha_deseada: string | null
+          fecha_ingreso: string | null
+          id: string
+          impacto: Json | null
+          justificacion: string
+          motivo_contrato: string | null
+          nomina_cat: string | null
+          numero: number
+          origen: string
+          origen_cat: string | null
+          perfil: Json
+          plaza_ref: string | null
+          reemplaza_empleado_id: string | null
+          solicitud_id: string | null
+          tiempo_contrato: string | null
+          tipo_nomina: string | null
+          unidad_ref: string
+        }
+        Insert: {
+          candidato?: string | null
+          cantidad?: number
+          cargo_id: string
+          condiciones?: Json
+          creado_en?: string
+          creado_por?: string | null
+          estado?: string
+          fecha_deseada?: string | null
+          fecha_ingreso?: string | null
+          id?: string
+          impacto?: Json | null
+          justificacion: string
+          motivo_contrato?: string | null
+          nomina_cat?: string | null
+          numero?: never
+          origen: string
+          origen_cat?: string | null
+          perfil?: Json
+          plaza_ref?: string | null
+          reemplaza_empleado_id?: string | null
+          solicitud_id?: string | null
+          tiempo_contrato?: string | null
+          tipo_nomina?: string | null
+          unidad_ref: string
+        }
+        Update: {
+          candidato?: string | null
+          cantidad?: number
+          cargo_id?: string
+          condiciones?: Json
+          creado_en?: string
+          creado_por?: string | null
+          estado?: string
+          fecha_deseada?: string | null
+          fecha_ingreso?: string | null
+          id?: string
+          impacto?: Json | null
+          justificacion?: string
+          motivo_contrato?: string | null
+          nomina_cat?: string | null
+          numero?: never
+          origen?: string
+          origen_cat?: string | null
+          perfil?: Json
+          plaza_ref?: string | null
+          reemplaza_empleado_id?: string | null
+          solicitud_id?: string | null
+          tiempo_contrato?: string | null
+          tipo_nomina?: string | null
+          unidad_ref?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requisicion_cargo_id_fkey"
+            columns: ["cargo_id"]
+            isOneToOne: false
+            referencedRelation: "cargo"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      requisicion_costo: {
+        Row: {
+          bonos_usd: number | null
+          impacto_costo: Json | null
+          moneda: string | null
+          nota: string | null
+          requisicion_id: string
+          salario_propuesto: number | null
+        }
+        Insert: {
+          bonos_usd?: number | null
+          impacto_costo?: Json | null
+          moneda?: string | null
+          nota?: string | null
+          requisicion_id: string
+          salario_propuesto?: number | null
+        }
+        Update: {
+          bonos_usd?: number | null
+          impacto_costo?: Json | null
+          moneda?: string | null
+          nota?: string | null
+          requisicion_id?: string
+          salario_propuesto?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requisicion_costo_requisicion_id_fkey"
+            columns: ["requisicion_id"]
+            isOneToOne: true
+            referencedRelation: "requisicion"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasa_cambio: {
+        Row: {
+          fecha: string
+          fuente: string
+          ves_por_usd: number
+        }
+        Insert: {
+          fecha: string
+          fuente?: string
+          ves_por_usd: number
+        }
+        Update: {
+          fecha?: string
+          fuente?: string
+          ves_por_usd?: number
+        }
+        Relationships: []
+      }
+      unidad: {
+        Row: {
+          area_id: string | null
+          certeza: string
+          clave: string
+          codigo_organigrama: string | null
+          esc: string | null
+          escenario_id: string | null
+          fuente: string | null
+          id: string
+          nombre: string
+          nota: string | null
+          orden: number
+          padre_ref: string | null
+          ref: string
+          sede: string | null
+          sede_cat: string | null
+          tipo: string
+          tipo_cat: string | null
+          vigencia: unknown
+        }
+        Insert: {
+          area_id?: string | null
+          certeza?: string
+          clave: string
+          codigo_organigrama?: string | null
+          esc?: string | null
+          escenario_id?: string | null
+          fuente?: string | null
+          id?: string
+          nombre: string
+          nota?: string | null
+          orden?: number
+          padre_ref?: string | null
+          ref?: string
+          sede?: string | null
+          sede_cat?: string | null
+          tipo: string
+          tipo_cat?: string | null
+          vigencia?: unknown
+        }
+        Update: {
+          area_id?: string | null
+          certeza?: string
+          clave?: string
+          codigo_organigrama?: string | null
+          esc?: string | null
+          escenario_id?: string | null
+          fuente?: string | null
+          id?: string
+          nombre?: string
+          nota?: string | null
+          orden?: number
+          padre_ref?: string | null
+          ref?: string
+          sede?: string | null
+          sede_cat?: string | null
+          tipo?: string
+          tipo_cat?: string | null
+          vigencia?: unknown
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unidad_escenario_id_fkey"
+            columns: ["escenario_id"]
+            isOneToOne: false
+            referencedRelation: "escenario"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      aplicar_requisicion: { Args: { p_req: string }; Returns: undefined }
+      aprobar_plan_dotacion: { Args: { p_plan: string }; Returns: undefined }
+      asignar_ocupacion: {
+        Args: {
+          p_empleado_id: string
+          p_excede?: boolean
+          p_fecha: string
+          p_motivo?: string
+          p_plaza_ref: string
+          p_tipo: string
+        }
+        Returns: string
+      }
+      cancelar_requisicion: {
+        Args: { p_motivo?: string; p_req: string }
+        Returns: undefined
+      }
+      cerrada_en: {
+        Args: { p_fecha: string; p_vigencia: unknown }
+        Returns: unknown
+      }
+      cerrar_plaza: {
+        Args: { p_fecha: string; p_motivo: string; p_ref: string }
+        Returns: undefined
+      }
+      cerrar_unidad: {
+        Args: { p_fecha: string; p_motivo: string; p_ref: string }
+        Returns: undefined
+      }
+      comparar_escenario: {
+        Args: { p_escenario: string }
+        Returns: {
+          antes: Json
+          cambio: string
+          despues: Json
+          objeto: string
+          ref: string
+        }[]
+      }
+      costo_cargos: {
+        Args: { p_fecha?: string }
+        Returns: {
+          cargo_id: string
+          costo: Json
+        }[]
+      }
+      costo_mensual: {
+        Args: { p_cargo: string; p_fecha?: string; p_tasa?: number }
+        Returns: Json
+      }
+      costo_mensual_servicio: { Args: { p_cargo: string }; Returns: Json }
+      crear_componente_costo: {
+        Args: {
+          p_aplica_a: string
+          p_base: string
+          p_base_legal: string
+          p_fecha: string
+          p_forma: string
+          p_fuente: string
+          p_moneda: string
+          p_nombre: string
+          p_nota?: string
+          p_piso: string
+          p_por_confirmar: boolean
+          p_tope: number
+          p_valor: number
+        }
+        Returns: string
+      }
+      crear_escenario_estructura: {
+        Args: { p_descripcion?: string; p_fecha?: string; p_nombre: string }
+        Returns: string
+      }
+      crear_plaza: {
+        Args: {
+          p_cargo_id: string
+          p_dotacion: number
+          p_estado: string
+          p_fecha: string
+          p_nota?: string
+          p_reporta_a_ref: string
+          p_sede: string
+          p_tipo_nomina: string
+          p_unidad_ref: string
+        }
+        Returns: string
+      }
+      crear_unidad: {
+        Args: {
+          p_clave: string
+          p_codigo?: string
+          p_fecha: string
+          p_nombre: string
+          p_nota?: string
+          p_padre_ref: string
+          p_sede: string
+          p_tipo: string
+        }
+        Returns: string
+      }
+      cubrir_requisicion: {
+        Args: { p_empleado: string; p_fecha: string; p_req: string }
+        Returns: string
+      }
+      describir_plazas: {
+        Args: { p_refs: string[] }
+        Returns: {
+          cargo: string
+          ref: string
+          unidad: string
+        }[]
+      }
+      direccion_de: {
+        Args: { p_fecha?: string; p_unidad: string }
+        Returns: string
+      }
+      editar_componente_costo: {
+        Args: {
+          p_aplica_a: string
+          p_base: string
+          p_base_legal: string
+          p_fecha: string
+          p_forma: string
+          p_fuente: string
+          p_id: string
+          p_moneda: string
+          p_nota?: string
+          p_piso: string
+          p_por_confirmar: boolean
+          p_tope: number
+          p_valor: number
+        }
+        Returns: string
+      }
+      editar_plaza: {
+        Args: {
+          p_certeza?: string
+          p_dotacion: number
+          p_estado: string
+          p_fecha: string
+          p_nota?: string
+          p_ref: string
+          p_reporta_a_ref: string
+          p_sede: string
+          p_tipo_nomina: string
+          p_unidad_ref?: string
+        }
+        Returns: Json
+      }
+      editar_unidad: {
+        Args: {
+          p_certeza?: string
+          p_codigo?: string
+          p_fecha: string
+          p_nombre: string
+          p_nota?: string
+          p_padre_ref: string
+          p_ref: string
+          p_sede: string
+          p_tipo: string
+        }
+        Returns: string
+      }
+      enviar_escenario: {
+        Args: { p_esc: string; p_vigente_desde: string }
+        Returns: string
+      }
+      enviar_requisicion: { Args: { p_req: string }; Returns: string }
+      escenario_en_borrador: { Args: { p_esc: string }; Returns: boolean }
+      estructura_al: {
+        Args: { p_escenario?: string; p_fecha?: string }
+        Returns: {
+          cargo: string
+          cargo_id: string
+          dotacion: number
+          estado: string
+          familia: string
+          ocupadas: number
+          orden: number
+          padre_ref: string
+          plaza_ref: string
+          reporta_a_ref: string
+          sede: string
+          tipo: string
+          tipo_nomina: string
+          unidad: string
+          unidad_clave: string
+          unidad_ref: string
+        }[]
+      }
+      exigir_fecha: { Args: { p_fecha: string }; Returns: undefined }
+      exigir_permiso: {
+        Args: { p_accion: string; p_mensaje: string; p_recurso: string }
+        Returns: undefined
+      }
+      fijar_costo_referencia: {
+        Args: {
+          p_bonos_usd: number
+          p_cargo: string
+          p_fecha: string
+          p_fuente?: string
+          p_moneda: string
+          p_salario: number
+        }
+        Returns: string
+      }
+      fijar_parametro: {
+        Args: {
+          p_clave: string
+          p_fecha: string
+          p_fuente?: string
+          p_por_confirmar?: boolean
+          p_valor: number
+        }
+        Returns: string
+      }
+      guardar_lineas_plan: {
+        Args: { p_lineas: Json; p_plan: string }
+        Returns: number
+      }
+      hoy: { Args: never; Returns: string }
+      impacto_requisicion: { Args: { p_req: string }; Returns: Json }
+      mover_ocupacion: {
+        Args: {
+          p_excede?: boolean
+          p_fecha: string
+          p_id: string
+          p_motivo?: string
+          p_plaza_destino: string
+          p_tipo?: string
+        }
+        Returns: string
+      }
+      nuevo_plan_dotacion: {
+        Args: { p_anio: number; p_nota?: string }
+        Returns: string
+      }
+      ocupantes_de_unidad: {
+        Args: { p_unidad: string }
+        Returns: {
+          cargo: string
+          cargo_id: string
+          empleado_id: string
+          nombre: string
+          plaza_ref: string
+          tipo: string
+        }[]
+      }
+      perfil_de_plaza: {
+        Args: { p_fecha?: string; p_plaza: string }
+        Returns: string
+      }
+      plaza_jefe_de: {
+        Args: { p_fecha?: string; p_unidad: string }
+        Returns: string
+      }
+      publicar_escenario: { Args: { p_esc: string }; Returns: undefined }
+      registrar_candidato: {
+        Args: { p_candidato: string; p_fecha: string; p_req: string }
+        Returns: undefined
+      }
+      retirar_componente_costo: {
+        Args: { p_fecha: string; p_id: string }
+        Returns: undefined
+      }
+      terminar_ocupacion: {
+        Args: { p_fecha: string; p_id: string; p_motivo?: string }
+        Returns: undefined
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
@@ -341,11 +1662,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "bloqueos_bloqueado_id_fkey"
+            columns: ["bloqueado_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bloqueos_bloqueado_id_fkey"
+            columns: ["bloqueado_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["empleado_id"]
+          },
+          {
             foreignKeyName: "bloqueos_bloqueador_id_fkey"
             columns: ["bloqueador_id"]
             isOneToOne: false
             referencedRelation: "empleados"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bloqueos_bloqueador_id_fkey"
+            columns: ["bloqueador_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bloqueos_bloqueador_id_fkey"
+            columns: ["bloqueador_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["empleado_id"]
           },
         ]
       }
@@ -2322,11 +3671,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reportes_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reportes_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["empleado_id"]
+          },
+          {
             foreignKeyName: "reportes_reportante_id_fkey"
             columns: ["reportante_id"]
             isOneToOne: false
             referencedRelation: "empleados"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reportes_reportante_id_fkey"
+            columns: ["reportante_id"]
+            isOneToOne: false
+            referencedRelation: "padron_estado"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reportes_reportante_id_fkey"
+            columns: ["reportante_id"]
+            isOneToOne: false
+            referencedRelation: "recordatorios_pendientes"
+            referencedColumns: ["empleado_id"]
           },
           {
             foreignKeyName: "reportes_revisado_por_fkey"
@@ -2877,14 +4254,310 @@ export type Database = {
         Returns: undefined
       }
       revisar_reporte: {
-        Args: { p_revisado: boolean; p_reporte: string }
+        Args: { p_reporte: string; p_revisado: boolean }
         Returns: undefined
       }
-      renombrar_hablante: {
-        Args: { p_entrevista: string; p_etiqueta: string; p_nombre: string }
-        Returns: number
-      }
       soy_miembro: { Args: { grupo: string }; Returns: boolean }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  sgc: {
+    Tables: {
+      documento: {
+        Row: {
+          alias: string[]
+          archivos: string[]
+          codigo: string
+          creado_en: string
+          datos_sensibles: boolean
+          destino: string | null
+          estado: string
+          evidencia_estado: string | null
+          familia: string | null
+          fecha: string | null
+          id: string
+          nota: string | null
+          perim_cat: string | null
+          perimetro: string
+          proceso_ref: string | null
+          proceso_xx: string | null
+          tipo_yy: string | null
+          titulo: string
+          version: string | null
+        }
+        Insert: {
+          alias?: string[]
+          archivos?: string[]
+          codigo: string
+          creado_en?: string
+          datos_sensibles?: boolean
+          destino?: string | null
+          estado: string
+          evidencia_estado?: string | null
+          familia?: string | null
+          fecha?: string | null
+          id?: string
+          nota?: string | null
+          perim_cat?: string | null
+          perimetro?: string
+          proceso_ref?: string | null
+          proceso_xx?: string | null
+          tipo_yy?: string | null
+          titulo: string
+          version?: string | null
+        }
+        Update: {
+          alias?: string[]
+          archivos?: string[]
+          codigo?: string
+          creado_en?: string
+          datos_sensibles?: boolean
+          destino?: string | null
+          estado?: string
+          evidencia_estado?: string | null
+          familia?: string | null
+          fecha?: string | null
+          id?: string
+          nota?: string | null
+          perim_cat?: string | null
+          perimetro?: string
+          proceso_ref?: string | null
+          proceso_xx?: string | null
+          tipo_yy?: string | null
+          titulo?: string
+          version?: string | null
+        }
+        Relationships: []
+      }
+      proceso: {
+        Row: {
+          area_texto: string | null
+          clave: string
+          codigo_informe: string | null
+          codigo_sgc: string | null
+          creado_en: string
+          creado_por: string | null
+          dueno_plaza_ref: string | null
+          dueno_texto: string | null
+          esc: string | null
+          escenario_id: string | null
+          estado: string
+          estado_cat: string | null
+          estado_operativo: string
+          ficha: Json
+          fuente: string[]
+          generacion: string | null
+          id: string
+          nivel: number
+          nombre: string
+          nota: string | null
+          orden: number
+          padre_ref: string | null
+          ref: string
+          tipo: string | null
+          tipo_cat: string | null
+          version: number
+          vigencia: unknown
+        }
+        Insert: {
+          area_texto?: string | null
+          clave: string
+          codigo_informe?: string | null
+          codigo_sgc?: string | null
+          creado_en?: string
+          creado_por?: string | null
+          dueno_plaza_ref?: string | null
+          dueno_texto?: string | null
+          esc?: string | null
+          escenario_id?: string | null
+          estado?: string
+          estado_cat?: string | null
+          estado_operativo?: string
+          ficha?: Json
+          fuente?: string[]
+          generacion?: string | null
+          id?: string
+          nivel: number
+          nombre: string
+          nota?: string | null
+          orden?: number
+          padre_ref?: string | null
+          ref?: string
+          tipo?: string | null
+          tipo_cat?: string | null
+          version?: number
+          vigencia?: unknown
+        }
+        Update: {
+          area_texto?: string | null
+          clave?: string
+          codigo_informe?: string | null
+          codigo_sgc?: string | null
+          creado_en?: string
+          creado_por?: string | null
+          dueno_plaza_ref?: string | null
+          dueno_texto?: string | null
+          esc?: string | null
+          escenario_id?: string | null
+          estado?: string
+          estado_cat?: string | null
+          estado_operativo?: string
+          ficha?: Json
+          fuente?: string[]
+          generacion?: string | null
+          id?: string
+          nivel?: number
+          nombre?: string
+          nota?: string | null
+          orden?: number
+          padre_ref?: string | null
+          ref?: string
+          tipo?: string | null
+          tipo_cat?: string | null
+          version?: number
+          vigencia?: unknown
+        }
+        Relationships: []
+      }
+      proceso_cruce: {
+        Row: {
+          codigo_sgc: string | null
+          confirmado: boolean
+          id: string
+          informe_macro_id: string | null
+          informe_proceso_id: string | null
+          nota: string | null
+          proceso_ref: string
+          tipo: string
+        }
+        Insert: {
+          codigo_sgc?: string | null
+          confirmado?: boolean
+          id?: string
+          informe_macro_id?: string | null
+          informe_proceso_id?: string | null
+          nota?: string | null
+          proceso_ref: string
+          tipo: string
+        }
+        Update: {
+          codigo_sgc?: string | null
+          confirmado?: boolean
+          id?: string
+          informe_macro_id?: string | null
+          informe_proceso_id?: string | null
+          nota?: string | null
+          proceso_ref?: string
+          tipo?: string
+        }
+        Relationships: []
+      }
+      tipo_documento: {
+        Row: {
+          generacion: string
+          nivel: number | null
+          nombre: string
+          yy: string
+        }
+        Insert: {
+          generacion: string
+          nivel?: number | null
+          nombre: string
+          yy: string
+        }
+        Update: {
+          generacion?: string
+          nivel?: number | null
+          nombre?: string
+          yy?: string
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      activar_programados: { Args: never; Returns: number }
+      buscar_documentos: {
+        Args: {
+          p_desde?: number
+          p_estado?: string
+          p_familia?: string
+          p_limite?: number
+          p_perimetro?: string
+          p_proceso?: string
+          p_texto?: string
+          p_xx?: string
+          p_yy?: string
+        }
+        Returns: {
+          alias: string[]
+          codigo: string
+          datos_sensibles: boolean
+          estado: string
+          familia: string
+          fecha: string
+          id: string
+          perimetro: string
+          proceso_ref: string
+          proceso_xx: string
+          tipo_yy: string
+          titulo: string
+          total: number
+          version: string
+        }[]
+      }
+      comparar_escenario_procesos: {
+        Args: { p_escenario: string }
+        Returns: {
+          antes: Json
+          borrador_abierto: boolean
+          cambio: string
+          campos: string[]
+          despues: Json
+          nivel: number
+          nombre: string
+          ref: string
+        }[]
+      }
+      conteo_documentos: {
+        Args: never
+        Returns: {
+          proceso_ref: string
+          total: number
+          vigentes: number
+        }[]
+      }
+      crear_escenario_procesos: {
+        Args: { p_descripcion?: string; p_nombre: string; p_raiz?: string }
+        Returns: string
+      }
+      enviar_escenario_procesos: {
+        Args: { p_esc: string; p_vigente_desde: string }
+        Returns: string
+      }
+      enviar_proceso: { Args: { p_id: string }; Returns: string }
+      nuevo_borrador: { Args: { p_ref: string }; Returns: string }
+      opciones_documentos: {
+        Args: never
+        Returns: {
+          campo: string
+          total: number
+          valor: string
+        }[]
+      }
+      plano: { Args: { p: string }; Returns: string }
+      publicar_escenario_procesos: {
+        Args: { p_esc: string }
+        Returns: undefined
+      }
+      publicar_proceso: { Args: { p_id: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
@@ -3013,7 +4686,19 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  control: {
+    Enums: {},
+  },
+  flujo: {
+    Enums: {},
+  },
+  org: {
+    Enums: {},
+  },
   public: {
+    Enums: {},
+  },
+  sgc: {
     Enums: {},
   },
 } as const
