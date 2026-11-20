@@ -2,6 +2,7 @@ import { puede, type Sesion } from '@/lib/auth'
 import type { Ficha, TipoFicha } from '@/lib/plataforma/ficha-tipos'
 import { fichaDocumento, fichaProceso } from '@/lib/plataforma/fichas/procesos'
 import { cargarFichaOrganizacion, esTipoOrganizacion } from '@/lib/plataforma/fichas/organizacion'
+import { cargarFichaPrograma, esTipoPrograma } from '@/lib/plataforma/fichas/programa'
 
 /**
  * Arma la ficha de un objeto con la sesión de quien la pide: cada consulta pasa
@@ -20,12 +21,17 @@ const PERMISO: Record<TipoFicha, [string, 'ver' | 'crear']> = {
   persona: ['sistema:estructura', 'ver'],
   escenario: ['sistema:escenarios', 'ver'],
   conciliacion: ['sistema:estructura', 'ver'],
+  entrevista: ['modulo:entrevistas', 'ver'],
+  archivo: ['modulo:archivos', 'ver'],
+  actividad: ['modulo:calendario', 'ver'],
 }
 
 export async function cargarFicha(sesion: Sesion, tipo: TipoFicha, id: string): Promise<Ficha | null> {
   // R1: Organización tiene su resolutor (unidad, plaza, cargo, persona,
   // requisición, escenario, conciliación); pide sus permisos por dentro.
   if (esTipoOrganizacion(tipo)) return cargarFichaOrganizacion(sesion, tipo, id)
+  // Programa (PRG): sesión del levantamiento, archivo del expediente y actividad del calendario.
+  if (esTipoPrograma(tipo)) return puede(sesion, ...PERMISO[tipo]) ? cargarFichaPrograma(sesion, tipo, id) : null
   const [recurso, accion] = PERMISO[tipo]
   if (!puede(sesion, recurso, accion)) return null
 

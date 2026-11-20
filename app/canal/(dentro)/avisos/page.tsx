@@ -4,6 +4,9 @@ import { IconoCampana, IconoCheck, IconoOficial } from '@/components/iconos'
 import { responderConexion } from '@/app/canal/(dentro)/gente/acciones'
 import { haceCuanto, iniciales, requerirEmpleado } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
+import { avisosDelCanal } from '@/lib/canal-avisos'
+import { AvisoPlataforma } from '@/components/canal/aviso-plataforma'
+import { marcarAvisosLeidos } from './acciones'
 import { legible } from '@/lib/certificado'
 
 export const metadata: Metadata = { title: 'Avisos' }
@@ -13,7 +16,7 @@ export default async function AvisosPage() {
   const supabase = await createClient()
   const ahora = new Date()
 
-  const [{ data: solicitudes }, { data: oficiales }, { data: leidas }] =
+  const [{ data: solicitudes }, { data: oficiales }, { data: leidas }, plataforma] =
     await Promise.all([
       supabase
         .from('conexiones')
@@ -32,13 +35,15 @@ export default async function AvisosPage() {
         .from('publicacion_lecturas')
         .select('publicacion_id')
         .eq('empleado_id', yo.id),
+      // Los avisos de la plataforma: la misma campana que en /sistema.
+      avisosDelCanal(30),
     ])
 
   const yaLeidas = new Set((leidas ?? []).map((l) => l.publicacion_id))
   const comunicados = oficiales ?? []
   const solicitudesPendientes = solicitudes ?? []
 
-  const vacio = solicitudesPendientes.length === 0 && comunicados.length === 0
+  const vacio = solicitudesPendientes.length === 0 && comunicados.length === 0 && plataforma.lista.length === 0
 
   return (
     <>
@@ -47,7 +52,7 @@ export default async function AvisosPage() {
           Avisos
         </h1>
         <p className="mt-1 text-[13px] text-marca-500">
-          Solicitudes de conexión y comunicados de la empresa
+          Lo que te toca, solicitudes de conexión y comunicados de la empresa
         </p>
       </header>
 
@@ -60,10 +65,34 @@ export default async function AvisosPage() {
             No tienes avisos
           </h2>
           <p className="mx-auto mt-2 max-w-xs text-[15px] leading-relaxed text-marca-500">
-            Aquí te avisamos cuando alguien quiera conectar contigo o cuando la
-            empresa publique un comunicado.
+            Aquí te avisamos cuando te asignen una tarea, cuando alguien quiera
+            conectar contigo o cuando la empresa publique un comunicado.
           </p>
         </div>
+      )}
+
+      {plataforma.lista.length > 0 && (
+        <section className="mb-5" aria-labelledby="avisos-para-ti">
+          <div className="mb-2 flex items-center justify-between gap-2 px-1">
+            <h2 id="avisos-para-ti" className="text-[11px] font-bold tracking-wider text-marca-500 uppercase">
+              Para ti{plataforma.noLeidas > 0 ? ` · ${plataforma.noLeidas} sin leer` : ''}
+            </h2>
+            {plataforma.noLeidas > 0 && (
+              <form action={marcarAvisosLeidos}>
+                <button type="submit" className="toque -my-2 px-2 text-[13px] font-semibold text-acento-700 active:text-acento-800">
+                  Marcar todo leído
+                </button>
+              </form>
+            )}
+          </div>
+          <ul className="tarjeta-canal divide-y divide-marca-100 overflow-hidden">
+            {plataforma.lista.map((a) => (
+              <li key={a.id}>
+                <AvisoPlataforma aviso={a} ahora={ahora} />
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       {solicitudesPendientes.length > 0 && (

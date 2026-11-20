@@ -5,7 +5,20 @@
  * página completa. Todo es serializable: viaja desde una acción de servidor.
  */
 
-export type TipoFicha = 'unidad' | 'plaza' | 'cargo' | 'persona' | 'proceso' | 'documento' | 'requisicion' | 'escenario' | 'conciliacion'
+export type TipoFicha =
+  | 'unidad'
+  | 'plaza'
+  | 'cargo'
+  | 'persona'
+  | 'proceso'
+  | 'documento'
+  | 'requisicion'
+  | 'escenario'
+  | 'conciliacion'
+  // Programa (PRG): `lib/plataforma/fichas/programa.ts`.
+  | 'entrevista'
+  | 'archivo'
+  | 'actividad'
 
 export const TIPOS_FICHA: Record<TipoFicha, string> = {
   unidad: 'Unidad',
@@ -17,6 +30,9 @@ export const TIPOS_FICHA: Record<TipoFicha, string> = {
   requisicion: 'Requisición',
   escenario: 'Escenario',
   conciliacion: 'Punto de conciliación',
+  entrevista: 'Sesión del levantamiento',
+  archivo: 'Archivo del expediente',
+  actividad: 'Actividad del calendario',
 }
 
 export type TonoFicha = 'neutro' | 'verde' | 'ambar' | 'rojo' | 'azul' | 'morado'

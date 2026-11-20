@@ -54,7 +54,39 @@ export type Columna = {
   acciones?: AccionFila[]
 }
 
-export type AccionFila = { clave: string; etiqueta: string; titulo?: string; href?: string; pide?: string }
+/**
+ * `abre`: otra ficha que la de la fila, con `{columna}` (p. ej. `plaza:{plaza_ref}`):
+ * se abre en el panel sin salir de la tabla ni perder sus filtros.
+ */
+export type AccionFila = { clave: string; etiqueta: string; titulo?: string; href?: string; pide?: string; abre?: string }
+
+/**
+ * Selección múltiple de `TablaDatos` (Anexo E §4) y lo que se hace en lote.
+ * Las acciones son acciones de servidor que reciben las claves marcadas (y
+ * vuelven a pedir su permiso: la barra no decide nada).
+ *
+ * - `nombre`: la columna con el nombre de la fila («Marcar a …»).
+ * - `bloqueo`: columna con el motivo por el que una fila no se puede marcar
+ *   (vacía = se puede).
+ * - Cada acción cuenta las marcadas a las que aplica con `aplica` (una columna
+ *   que vale verdadero en esas filas); sin ninguna, el botón se apaga.
+ * - `avisos`: una línea bajo la barra cuando alguna marcada cumple `columna`;
+ *   `{n}` es cuántas.
+ */
+export type AccionLote = {
+  clave: string
+  etiqueta: string
+  principal?: boolean
+  aplica?: string
+  confirmar?: string
+  ejecutar: (claves: string[]) => Promise<{ ok?: string; error?: string } | void>
+}
+export type LoteTabla = {
+  nombre: string
+  bloqueo?: string
+  acciones: AccionLote[]
+  avisos?: { columna: string; texto: string; tono?: 'ambar' | 'rojo' }[]
+}
 
 export type EstadoTabla = {
   q: string

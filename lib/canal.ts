@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { inicioDelPanel, type Sesion } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import type { Row } from '@/lib/types'
 
@@ -141,4 +142,17 @@ export function haceCuanto(fecha: string | null | undefined, ahora: Date): strin
   if (dias < 7) return `hace ${dias} días`
 
   return d.toLocaleDateString('es-VE', { day: 'numeric', month: 'short' })
+}
+
+/**
+ * ¿Tiene algo que abrir en la plataforma (`/sistema`)? Es lo que decide el
+ * enlace «Plataforma» del canal: el nivel administrador, quien tiene alguna
+ * pantalla del panel o alguna casilla `sistema:*` con ver. El personal de planta,
+ * que solo tiene el canal y sus lecciones, no lo ve.
+ */
+export function tienePlataforma(sesion: Sesion | null | undefined): boolean {
+  if (!sesion) return false
+  if (sesion.rol.nivel === 'admin') return true
+  if (inicioDelPanel(sesion)) return true
+  return Object.entries(sesion.permisos).some(([recurso, p]) => recurso.startsWith('sistema:') && p.ver)
 }

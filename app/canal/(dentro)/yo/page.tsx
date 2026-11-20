@@ -5,7 +5,9 @@ import {
   IconoBloquear,
   IconoCampana,
   IconoChat,
+  IconoCheck,
   IconoEscudo,
+  IconoOrganigrama,
   IconoPanel,
   IconoSalir,
   IconoUsuarios,
@@ -14,8 +16,12 @@ import {
   NIVELES_EMPLEADO,
   iniciales,
   requerirEmpleado,
+  tienePlataforma,
   type NivelEmpleado,
 } from '@/lib/canal'
+import { obtenerSesion } from '@/lib/auth'
+import { leerMiCargo } from '@/lib/mi-cargo'
+import { misTareasAbiertas } from '@/lib/canal-avisos'
 import { createClient } from '@/lib/supabase/server'
 import { legible } from '@/lib/certificado'
 
@@ -31,7 +37,7 @@ export default async function YoPage() {
   const yo = await requerirEmpleado()
   const supabase = await createClient()
 
-  const [{ count: conexiones }, { count: pendientes }, { count: bloqueadas }] = await Promise.all([
+  const [{ count: conexiones }, { count: pendientes }, { count: bloqueadas }, sesion, cargo, tareas] = await Promise.all([
     supabase
       .from('conexiones')
       .select('id', { count: 'exact', head: true })
@@ -44,9 +50,15 @@ export default async function YoPage() {
       .eq('recibe_id', yo.id),
     // Solo los míos: la RLS no deja contar los de nadie más.
     supabase.from('bloqueos').select('id', { count: 'exact', head: true }),
+    obtenerSesion(),
+    leerMiCargo(),
+    misTareasAbiertas(1),
   ])
 
-  const puedePublicar = yo.puede_publicar || yo.es_moderador
+  // La plaza titular (o la primera) para la tarjeta de «Mi cargo».
+  const plaza = cargo?.plazas[0] ?? null
+  const jefe = plaza?.reporta_a?.personas[0]
+  const conPlataforma = tienePlataforma(sesion)
 
   return (
     <>
@@ -74,7 +86,36 @@ export default async function YoPage() {
         </div>
       </section>
 
+      <Link href="/canal/yo/cargo" className="tarjeta-canal mb-4 flex items-center gap-3 px-4 py-3.5 active:bg-marca-50">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-oro-100 text-oro-800">
+          <IconoOrganigrama className="h-5 w-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[11px] font-bold tracking-[0.12em] text-marca-500 uppercase">Mi cargo</span>
+          <span className="block truncate text-[15px] font-semibold text-marca-900">
+            {plaza ? plaza.cargo : yo.cargo ? legible(yo.cargo) : 'Tu lugar en la estructura'}
+          </span>
+          <span className="block truncate text-[13px] text-marca-500">
+            {plaza ? [plaza.unidad, jefe ? `le reportas a ${jefe}` : null].filter(Boolean).join(' · ') : 'Tu unidad, a quién le reportas y tus procesos'}
+          </span>
+        </span>
+        <span aria-hidden className="text-lg text-marca-300">
+          ›
+        </span>
+      </Link>
+
       <ul className="tarjeta-canal mb-4 divide-y divide-marca-100 overflow-hidden">
+        <li>
+          <Link href="/canal/tareas" className="flex items-center gap-3 px-4 py-3.5 active:bg-marca-50">
+            <IconoCheck className="h-5 w-5 text-marca-400" />
+            <span className="flex-1 text-[15px] text-marca-800">Mis tareas</span>
+            {tareas.total > 0 && (
+              <span className="grid h-5 min-w-5 place-items-center rounded-full bg-acento-600 px-1.5 text-[11px] font-bold text-white tabular-nums">
+                {tareas.total}
+              </span>
+            )}
+          </Link>
+        </li>
         <li>
           <Link
             href="/canal/gente"
@@ -131,15 +172,15 @@ export default async function YoPage() {
             <span className="flex-1 text-[15px] text-marca-800">Ayuda y soporte</span>
           </Link>
         </li>
-        {puedePublicar && (
+        {conPlataforma && (
           <li>
             <Link
-              href="/dashboard"
+              href="/sistema"
               className="flex items-center gap-3 px-4 py-3.5 active:bg-marca-50"
             >
               <IconoPanel className="h-5 w-5 text-marca-400" />
               <span className="flex-1 text-[15px] text-marca-800">
-                Panel del programa
+                Plataforma Iberia
               </span>
             </Link>
           </li>

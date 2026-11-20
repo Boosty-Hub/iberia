@@ -20,6 +20,8 @@ export type ModuloPlan = {
   recurso: string | null
   descripcion: string | null
   orden: number
+  /** Lo que exige `recurso` para salir en el menú (por defecto, ver). */
+  accion?: 'ver' | 'crear' | 'editar'
 }
 
 export type ClaveDominio =
@@ -129,6 +131,41 @@ export const MODULOS_MI_DIA: ModuloPlan[] = [
   },
 ]
 
+/**
+ * «Padrón y accesos» tampoco es un módulo del plan: es una vista del maestro de
+ * persona (NUC-IDN) para quien trabaja el padrón —ficha, plaza, cuenta,
+ * matrícula y enlace personal—. Va en Personas, junto a Formación, porque es
+ * donde Capital Humano lo busca. Se abre con `modulo:empleados` · editar: su
+ * vista solo le responde al equipo.
+ */
+export const MODULO_PADRON: ModuloPlan = {
+  codigo: 'PER-PAD',
+  nombre: 'Padrón y accesos',
+  dominio: 'Personas y seguridad',
+  fase: null,
+  estado: 'operando',
+  ruta: '/sistema/personas/padron',
+  recurso: 'modulo:empleados',
+  accion: 'editar',
+  descripcion: 'Las fichas del padrón con su plaza, su cuenta, su matrícula y su enlace personal.',
+  orden: 57,
+}
+
+/**
+ * Módulos que reúnen pantallas con casillas distintas: salen en el menú si la
+ * sesión tiene su `recurso` **o** alguna de estas (ver). PRG-PLN junta Consumos
+ * (`modulo:programa`) y el Calendario (`modulo:calendario`); PRG-LEV, las
+ * entrevistas y el expediente (`modulo:archivos`). La raíz de cada uno manda a
+ * la primera pestaña que la sesión puede abrir.
+ */
+export const RECURSOS_ALTERNOS: Record<string, string[]> = {
+  'PRG-PLN': ['modulo:calendario'],
+  'PRG-LEV': ['modulo:archivos'],
+}
+
+/** Los módulos que declara la interfaz y no la base: se suman a los del plan. */
+export const MODULOS_INTERFAZ: ModuloPlan[] = [...MODULOS_MI_DIA, MODULO_PADRON]
+
 export const ESTADO_MODULO: Record<EstadoModulo, { etiqueta: string; color: string }> = {
   operando: { etiqueta: 'Operando', color: '#1f8a5b' },
   en_construccion: { etiqueta: 'En construcción', color: '#b7791f' },
@@ -184,6 +221,37 @@ export const PESTANAS: Record<string, Pestana[]> = {
     { etiqueta: 'Usuarios', href: '/sistema/administracion/usuarios', recurso: 'modulo:usuarios' },
     { etiqueta: 'Roles y permisos', href: '/sistema/administracion/roles', recurso: 'modulo:roles' },
     { etiqueta: 'Portadas de Mi día', href: '/sistema/administracion/portadas', recurso: 'modulo:roles', accion: 'editar' },
+  ],
+  // Integración del panel viejo: el curso de Ajito y el padrón.
+  'NUC-FOR': [
+    { etiqueta: 'Resumen', href: '/sistema/nucleo/formacion', recurso: 'modulo:adiestramiento' },
+    { etiqueta: 'Avance', href: '/sistema/nucleo/formacion/avance', recurso: 'modulo:adiestramiento' },
+    { etiqueta: 'Certificados', href: '/sistema/nucleo/formacion/certificados', recurso: 'modulo:certificados' },
+    { etiqueta: 'Recordatorios', href: '/sistema/nucleo/formacion/recordatorios', recurso: 'modulo:recordatorios', accion: 'editar' },
+  ],
+  'PER-PAD': [{ etiqueta: 'Padrón', href: '/sistema/personas/padron', recurso: 'modulo:empleados', accion: 'editar' }],
+  // El canal (la app de la planta): su administración. Las cifras y listas son
+  // cuentas; ningún camino de aquí lee el texto de un mensaje privado.
+  'NUC-CAN': [
+    { etiqueta: 'Resumen', href: '/sistema/nucleo/canal', recurso: 'modulo:reportes' },
+    { etiqueta: 'Publicaciones', href: '/sistema/nucleo/canal/publicaciones', recurso: 'modulo:reportes' },
+    { etiqueta: 'Grupos', href: '/sistema/nucleo/canal/grupos', recurso: 'modulo:reportes' },
+    { etiqueta: 'Moderación', href: '/sistema/nucleo/canal/moderacion', recurso: 'modulo:reportes' },
+    { etiqueta: 'Uso', href: '/sistema/nucleo/canal/uso', recurso: 'modulo:reportes' },
+  ],
+  // El programa (PRG): lo que era el panel viejo, con las casillas de siempre.
+  'PRG-PLN': [
+    { etiqueta: 'Resumen', href: '/sistema/programa', recurso: 'modulo:programa' },
+    { etiqueta: 'Consumos', href: '/sistema/programa/consumos', recurso: 'modulo:programa' },
+    { etiqueta: 'Línea de tiempo', href: '/sistema/programa/linea', recurso: 'modulo:programa' },
+    { etiqueta: 'Calendario', href: '/sistema/programa/calendario', recurso: 'modulo:calendario' },
+    { etiqueta: 'IA', href: '/sistema/programa/ia' },
+  ],
+  'PRG-LEV': [
+    { etiqueta: 'Resumen', href: '/sistema/programa/levantamiento', recurso: 'modulo:entrevistas' },
+    { etiqueta: 'Entrevistas', href: '/sistema/programa/levantamiento/entrevistas', recurso: 'modulo:entrevistas' },
+    { etiqueta: 'Archivos', href: '/sistema/programa/levantamiento/archivos', recurso: 'modulo:archivos' },
+    { etiqueta: 'IA', href: '/sistema/programa/levantamiento/ia' },
   ],
   'DAT-SEM': [{ etiqueta: 'Métricas', href: '/sistema/datos/metricas', recurso: 'sistema:inicio' }],
   'FIN-TAS': [{ etiqueta: 'Tasas', href: '/sistema/finanzas/tasas', recurso: 'sistema:tasas' }],

@@ -11,7 +11,7 @@ import { borrarVista, exportarCsv, guardarVista } from '@/components/sistema/ui/
 import { fechaCorta, fechaHora, numero, porcentaje, tasa } from '@/lib/plataforma/formato'
 import { MarcaIa } from '@/components/sistema/ia/nivel-ia'
 import type { MarcaCelda } from '@/lib/ia/niveles'
-import { PREFIJO_FILTRO, TAMANOS, consultaDeEstado, type AccionFila, type Columna, type EstadoTabla, type TonoCelda } from '@/lib/plataforma/tabla'
+import { PREFIJO_FILTRO, TAMANOS, consultaDeEstado, type AccionFila, type Columna, type EstadoTabla, type LoteTabla, type TonoCelda } from '@/lib/plataforma/tabla'
 import { cn } from '@/lib/utils'
 
 /**
@@ -204,6 +204,7 @@ export function TablaDatos({
   alAccion,
   marcas,
   vacio = 'No hay filas con estos filtros.',
+  lote,
 }: {
   id: string
   columnas: Columna[]
@@ -227,6 +228,8 @@ export function TablaDatos({
   /** R4 · marcas ⚑ de la IA por fila (`claveFila`) y columna, con su razón. */
   marcas?: Record<string, Record<string, MarcaCelda>>
   vacio?: string
+  /** Selección múltiple y acciones en lote (la barra sale abajo, pegada, al marcar algo). */
+  lote?: LoteTabla
 }) {
   const { sp, fijar, pendiente, ruta } = useContextoUrl()
   const router = useRouter()
@@ -234,6 +237,52 @@ export function TablaDatos({
   const [exportando, iniciarExportar] = useTransition()
   const [aviso, setAviso] = useState<string | null>(null)
   const fichaActiva = sp.get('ficha')
+  // Lo marcado sobrevive a cambiar de página o de filtro: se guarda la fila
+  // entera para poder contar a cuántas aplica cada acción.
+  const [marcadas, setMarcadas] = useState<Map<string, Fila>>(() => new Map())
+  const [enLote, iniciarLote] = useTransition()
+  const [avisoLote, setAvisoLote] = useState<{ texto: string; error?: boolean } | null>(null)
+  const extra = lote ? 1 : 0
+  // Tras una acción la página se vuelve a pintar: para contar se usa la fila
+  // fresca si está en esta página, y la guardada si no.
+  const frescas = new Map(filas.map((f) => [String(f[claveFila]), f]))
+  const marcadasHoy = [...marcadas.entries()].map(([k, f]) => [k, frescas.get(k) ?? f] as const)
+  const marcable = (f: Fila) => !lote?.bloqueo || !f[lote.bloqueo]
+  const enPagina = lote ? filas.filter(marcable) : []
+  const todasEnPagina = enPagina.length > 0 && enPagina.every((f) => marcadas.has(String(f[claveFila])))
+  const alternarFila = (f: Fila) =>
+    setMarcadas((m) => {
+      const n = new Map(m)
+      const k = String(f[claveFila])
+      if (n.has(k)) n.delete(k)
+      else n.set(k, f)
+      return n
+    })
+  const alternarPagina = () =>
+    setMarcadas((m) => {
+      const n = new Map(m)
+      for (const f of enPagina) {
+        if (todasEnPagina) n.delete(String(f[claveFila]))
+        else n.set(String(f[claveFila]), f)
+      }
+      return n
+    })
+  const ejecutarLote = (a: LoteTabla['acciones'][number], claves: string[]) => {
+    if (a.confirmar && !window.confirm(a.confirmar)) return
+    iniciarLote(async () => {
+      setAvisoLote(null)
+      try {
+        const r = await a.ejecutar(claves)
+        if (r && r.error) return setAvisoLote({ texto: r.error, error: true })
+        // La selección se queda: el trabajo es una secuencia sobre la misma gente
+        // (matricular, acuñar, mandar), y cada botón cuenta a quién le aplica.
+        setAvisoLote({ texto: (r && r.ok) || 'Listo.' })
+        router.refresh()
+      } catch {
+        setAvisoLote({ texto: 'No se pudo completar. Vuelve a intentarlo.', error: true })
+      }
+    })
+  }
 
   // La búsqueda va a la URL con una pausa de 300 ms.
   useEffect(() => {
@@ -520,6 +569,20 @@ export function TablaDatos({
             <thead>
               {tabla.getHeaderGroups().map((hg) => (
                 <tr key={hg.id}>
+                  {lote && (
+                    <th scope="col" className="sticky top-0 w-9 border-b border-[var(--borde)] bg-[#fafbfc] px-2.5 py-0">
+                      <span className="relative inline-flex min-h-8 items-center">
+                        <input
+                          type="checkbox"
+                          checked={todasEnPagina}
+                          onChange={alternarPagina}
+                          disabled={!enPagina.length}
+                          aria-label="Marcar todas las de esta página"
+                          className="h-4 w-4 accent-[#2b2a28]"
+                        />
+                      </span>
+                    </th>
+                  )}
                   {hg.headers.map((h) => {
                     const c = porClave.get(h.column.id)!
                     const num = NUMERICAS.has(c.tipo ?? '')
@@ -554,7 +617,7 @@ export function TablaDatos({
             <tbody>
               {!filas.length && (
                 <tr>
-                  <td colSpan={visibles.length} className="px-3 py-10 text-center text-marca-400">
+                  <td colSpan={visibles.length + extra} className="px-3 py-10 text-center text-marca-400">
                     {vacio}
                   </td>
                 </tr>
@@ -571,6 +634,7 @@ export function TablaDatos({
                   <Fragment key={r.id}>
                     {nuevoGrupo && colAgrupar && (
                       <tr className="bg-[#f4f5f7]">
+                        {lote && <td className="border-b border-[var(--borde)]" />}
                         {r.getVisibleCells().map((cell, i) => {
                           const c = porClave.get(cell.column.id)!
                           return (
@@ -597,9 +661,23 @@ export function TablaDatos({
                       className={cn(
                         'group',
                         ficha && 'cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-acento-500',
-                        seleccionada ? 'bg-acento-50/60' : 'hover:bg-[#f8f9fb]'
+                        seleccionada ? 'bg-acento-50/60' : marcadas.has(r.id) ? 'bg-[#fffaf0]' : 'hover:bg-[#f8f9fb]'
                       )}
                     >
+                      {lote && (
+                        <td className="h-8 w-9 border-b border-[#eef0f3] px-2.5 py-1" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            checked={marcadas.has(r.id)}
+                            onChange={() => alternarFila(f)}
+                            onKeyDown={(e) => e.stopPropagation()}
+                            disabled={!marcable(f)}
+                            title={!marcable(f) ? String(f[lote.bloqueo!]) : undefined}
+                            aria-label={`Marcar a ${String(f[lote.nombre] ?? r.id)}`}
+                            className="h-4 w-4 accent-[#2b2a28]"
+                          />
+                        </td>
+                      )}
                       {r.getVisibleCells().map((cell) => {
                         const c = porClave.get(cell.column.id)!
                         return (
@@ -617,6 +695,7 @@ export function TablaDatos({
             {hayTotales && filas.length > 0 && (
               <tfoot>
                 <tr className="bg-[#fafbfc]">
+                  {lote && <td className="border-t border-[var(--borde)]" />}
                   {visibles.map((c, i) => (
                     <td key={c.clave} className={cn('border-t border-[var(--borde)] px-2.5 py-2 text-[12.5px] font-bold text-marca-900', NUMERICAS.has(c.tipo ?? '') && 'text-right tabular-nums')}>
                       {i === 0 ? `Total · ${numero(total)} filas` : c.total ? numero(totales[c.clave] ?? 0) : ''}
@@ -657,6 +736,62 @@ export function TablaDatos({
           </span>
         </div>
       </div>
+
+      {lote && avisoLote && !marcadas.size && (
+        <p role="status" className={cn('mt-2 text-xs', avisoLote.error ? 'text-acento-700' : 'text-marca-600')}>
+          {avisoLote.texto}
+        </p>
+      )}
+
+      {/* ── La barra de lo marcado: abajo y pegada, porque con cuarenta filas marcadas la cabecera ya no se ve ── */}
+      {lote && marcadas.size > 0 && (
+        <div role="region" aria-label="Acciones con lo marcado" className="sticky bottom-0 z-10 mt-2.5 rounded-xl border border-[var(--borde)] bg-white/95 px-3 py-2.5 shadow-[0_-4px_14px_rgba(43,42,40,0.08)] backdrop-blur">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="mr-1 text-[13px] font-semibold text-marca-900 tabular-nums">
+              {numero(marcadas.size)} marcada{marcadas.size === 1 ? '' : 's'}
+            </span>
+            {lote.acciones.map((a) => {
+              const claves = marcadasHoy.filter(([, f]) => !a.aplica || Boolean(f[a.aplica])).map(([k]) => k)
+              return (
+                <button
+                  key={a.clave}
+                  type="button"
+                  disabled={enLote || claves.length === 0}
+                  onClick={() => ejecutarLote(a, claves)}
+                  className={cn(
+                    'inline-flex h-8 items-center gap-1 rounded-lg px-2.5 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-acento-500 disabled:opacity-45',
+                    a.principal ? 'bg-[#D4332C] text-white hover:bg-[#b92a24]' : 'border border-[var(--borde)] bg-white text-marca-800 hover:bg-marca-50'
+                  )}
+                >
+                  {a.etiqueta}
+                  {claves.length > 0 && <span className="tabular-nums">({numero(claves.length)})</span>}
+                </button>
+              )
+            })}
+            <button type="button" onClick={() => setMarcadas(new Map())} className="ml-1 text-xs text-marca-500 underline hover:text-marca-800">
+              Quitar la selección
+            </button>
+            {enLote && (
+              <span role="status" className="text-xs text-marca-500">
+                Trabajando…
+              </span>
+            )}
+          </div>
+          {(lote.avisos ?? []).map((av) => {
+            const n = marcadasHoy.filter(([, f]) => Boolean(f[av.columna])).length
+            return n ? (
+              <p key={av.columna} className={cn('mt-1.5 text-xs', av.tono === 'rojo' ? 'text-acento-700' : 'text-[#8a5a12]')}>
+                {av.texto.replace('{n}', numero(n))}
+              </p>
+            ) : null
+          })}
+          {avisoLote && (
+            <p role="status" className={cn('mt-1.5 text-xs', avisoLote.error ? 'text-acento-700' : 'text-marca-600')}>
+              {avisoLote.texto}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -733,6 +868,7 @@ function AccionesFila({
             onClick={() => {
               setError(null)
               if (a.pide && alAccion) setPidiendo(a)
+              else if (a.abre) fijar({ ficha: a.abre.replace(/\{(\w+)\}/g, (_, k: string) => String(fila[k] ?? '')) })
               else if (ficha) fijar({ ficha })
             }}
           >

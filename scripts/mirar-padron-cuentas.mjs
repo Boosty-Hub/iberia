@@ -89,25 +89,29 @@ try {
     if (m.type() === 'error') fallos.push(`[consola] ${m.text()}`)
   })
   // Sin tilde, a propósito: la búsqueda no las distingue.
-  await p.goto(`${BASE}/dashboard/empleados?q=pruebaviva`, { waitUntil: 'networkidle' })
-  // Por el número de ficha: la copia también nombra a la real en su aviso.
-  const filaReal = p.locator('tbody tr').filter({ has: p.locator('p', { hasText: /^Ficha 99001/ }) })
-  const filaMuestra = p.locator('tbody tr', { hasText: 'Cargada a mano' })
+  await p.goto(`${BASE}/sistema/personas/padron?q=pruebaviva`, { waitUntil: 'networkidle' })
+  // Por el número de ficha (columna Ficha) y por el origen (insignia «Muestra repetida»).
+  const filaReal = p.locator('tbody tr', { hasText: '99001' })
+  const filaMuestra = p.locator('tbody tr', { hasText: 'Muestra repetida' })
   ver((await p.locator('tbody tr').count()) === 2, 'la búsqueda trae las dos')
-  ver((await filaMuestra.locator('[data-duplicada]').count()) === 1, 'la copia sale como ficha de muestra repetida')
+  ver((await filaMuestra.count()) === 1, 'la copia sale como ficha de muestra repetida')
   ver(await filaMuestra.locator('input[type="checkbox"]').isDisabled(), 'y no se puede marcar')
-  const propuesta = filaReal.locator('[data-cuenta-propuesta]')
-  ver((await propuesta.count()) === 1 && (await propuesta.innerText()).includes(CORREO), 'la ficha real ofrece enlazar su cuenta')
+  ver((await filaReal.getByText('Por enlazar').count()) === 1, 'la ficha real ofrece enlazar su cuenta')
   await p.screenshot({ path: `${SALIDA}/1-antes.png`, fullPage: true })
 
-  await propuesta.getByRole('button', { name: 'Enlazar' }).click()
-  await filaReal.locator('[data-cuenta]', { hasText: CORREO }).waitFor({ timeout: 20000 }).catch(() => {})
-  ver((await filaReal.locator('[data-cuenta]').innerText()).includes(CORREO), 'enlazada: la fila dice su cuenta')
+  // Enlazar vive en la ficha de la persona (pestaña Accesos), con confirmación.
+  await filaReal.locator('td').nth(1).click()
+  await p.getByRole('tab', { name: /Accesos/ }).click()
+  await p.getByRole('button', { name: /^Enlazar con / }).click()
+  await p.getByRole('button', { name: 'Confirmar' }).click()
+  await filaReal.getByText('Con su correo').waitFor({ timeout: 20000 }).catch(() => {})
+  ver((await filaReal.getByText('Con su correo').count()) === 1, 'enlazada: la fila dice que tiene cuenta con su correo')
+  await p.keyboard.press('Escape')
 
   await filaReal.locator('input[type="checkbox"]').check()
   await p.getByRole('button', { name: /^Matricular/ }).click()
-  await filaReal.getByText('0 de 9').waitFor({ timeout: 20000 }).catch(() => {})
-  ver((await filaReal.getByText('0 de 9').count()) === 1, 'y matriculada')
+  await filaReal.getByText('Sin empezar').waitFor({ timeout: 20000 }).catch(() => {})
+  ver((await filaReal.getByText('Sin empezar').count()) === 1, 'y matriculada')
   await p.screenshot({ path: `${SALIDA}/2-despues.png`, fullPage: true })
 
   const { data: fila } = await admin.from('empleados').select('perfil_id').eq('id', real.id).single()

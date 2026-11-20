@@ -1,5 +1,5 @@
 /**
- * Recorre el calendario de la Fase 2 y New Iberia (`/dashboard/calendario`):
+ * Recorre el calendario de la Fase 2 y New Iberia (`/sistema/programa/calendario`):
  *
  *   1. En escritorio, actualiza una actividad desde la agenda —estado, fecha
  *      confirmada y nota—, recarga y mira que quedó; después la devuelve a como
@@ -70,7 +70,7 @@ try {
   const escritorio = await navegador.newContext({ viewport: { width: 1440, height: 900 }, locale: 'es-VE' })
   await escritorio.addCookies(sesion)
   const p = await escritorio.newPage()
-  await p.goto(`${BASE}/dashboard/calendario`)
+  await p.goto(`${BASE}/sistema/programa/calendario`)
   await p.getByRole('heading', { name: 'Calendario del proyecto' }).waitFor()
 
   const fila = p.locator('li', { hasText: 'Iberia habilita la tarjeta de pago' }).last()
@@ -129,7 +129,7 @@ try {
   const telefono = await navegador.newContext({ ...devices['iPhone 14'], locale: 'es-VE' })
   await telefono.addCookies(sesion)
   const t = await telefono.newPage()
-  await t.goto(`${BASE}/dashboard/calendario`)
+  await t.goto(`${BASE}/sistema/programa/calendario`)
   await t.getByRole('heading', { name: 'Calendario del proyecto' }).waitFor()
   const desborde = await t.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
   comprobar(desborde <= 0, `en un iPhone 14 la página no se desborda de lado (${desborde} px)`)

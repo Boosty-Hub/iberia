@@ -137,6 +137,8 @@ export function valorMetrica(m: Metrica, complemento = false): { valor: string; 
   const v = complemento && m.total !== null && m.valor !== null ? m.total - m.valor : m.valor
   if (m.unidad === 'Bs') return { valor: tasa(v), unidad: 'Bs' }
   if (m.unidad === '%') return { valor: porcentaje(v, 2) }
+  // Horas (el programa): hasta dos decimales, y la referencia en horas, nunca en dinero.
+  if (m.unidad === 'horas') return { valor: `${numero(v, 2, 0)} h`, unidad: m.total !== null ? `de ${numero(m.total)} h` : undefined }
   return { valor: numero(v), unidad: m.total !== null ? `de ${numero(m.total)}` : undefined }
 }
 
@@ -179,6 +181,20 @@ const COMPARACION: Record<string, (m: Metrica) => string | null> = {
   },
   mis_tareas: (m) => (d(m, 'vencidas') ? `⚠ ${plural(d(m, 'vencidas'), 'vencida', 'vencidas')}` : d(m, 'vencen_hoy') ? `${numero(d(m, 'vencen_hoy'))} vencen hoy` : 'Ninguna vencida'),
   por_decidir: (m) => (d(m, 'mas_de_5_dias') ? `${numero(d(m, 'mas_de_5_dias'))} esperan más de 5 días` : 'Ninguna espera más de 5 días'),
+  // PRG · el programa (lo lee Iberia: en horas y sin alarmas)
+  programa_horas_mes: (m) => `promedio de la fase: ${numero(d(m, 'promedio'), 1, 0)} h al mes en ${plural(d(m, 'meses'), 'mes', 'meses')} · acumulado ${numero(d(m, 'acumulado'), 2, 0)} h`,
+  programa_sesiones: (m) => `${numero(d(m, 'ent'))} entrevistas · ${numero(d(m, 'ses'))} reuniones y recorridos · ${numero(d(m, 'for'))} formaciones`,
+  programa_entregables: (m) => {
+    const s = m.detalle?.siguiente as { titulo?: string; fecha?: string } | null | undefined
+    return `${numero(d(m, 'proximos_30'))} en 30 días${d(m, 'vencidos') ? ` · ${numero(d(m, 'vencidos'))} con la fecha pasada` : ''}${s?.fecha ? ` · el siguiente, ${fechaLarga(s.fecha)}` : ''}`
+  },
+  levantamiento_entrevistas: (m) => `meta de ~${numero(m.total)} de la cláusula 5 · ${numero(d(m, 'programada'))} programadas · SES y FOR aparte`,
+  levantamiento_archivos: (m) => `${numero(d(m, 'confidenciales'))} confidenciales · ${numero(d(m, 'con_sesion'))} vinculados a una sesión`,
+  // NUC-FOR · el curso de Ajito
+  formacion_matriculados: (m) => `${numero(d(m, 'en_curso'))} en curso · ${numero(d(m, 'sin_empezar'))} sin empezar${d(m, 'sin_matricula') ? ` · a ${numero(d(m, 'sin_matricula'))} les falta` : ''}`,
+  formacion_completaron: (m) => (m.total ? `${porcentaje(((m.valor ?? 0) / m.total) * 100, 0)} de los matriculados` : 'Nadie matriculado todavía'),
+  formacion_avance: (m) => (m.detalle?.promedio === null || m.detalle?.promedio === undefined ? 'Sin matrículas' : `${numero(Number(m.detalle.promedio), 1)} de ${numero(d(m, 'lecciones'))} por persona, en promedio`),
+  formacion_certificados: (m) => `${plural(d(m, 'entregados'), 'entregado', 'entregados')} en mano · ${numero(d(m, 'sin_entregar'))} por entregar`,
 }
 
 export function comparacionMetrica(m: Metrica): string | null {
@@ -315,9 +331,10 @@ export async function KpiMetrica({
 
 /** Si un rol no tiene portada guardada, la de su nivel. */
 export const PORTADA_POR_NIVEL: Record<string, string[]> = {
-  admin: ['dotacion_ocupada', 'procesos_con_ficha', 'documentos_vigentes', 'requisiciones_abiertas', 'tasa_bcv_usd'],
-  consultor: ['dotacion_ocupada', 'procesos_con_ficha', 'documentos_vigentes', 'requisiciones_abiertas', 'tasa_bcv_usd'],
-  lector: ['dotacion_ocupada', 'dotacion_por_encima', 'procesos_con_ficha', 'brecha_cambiaria'],
+  // El programa entra en la portada: era lo primero que veía quien abría el panel viejo.
+  admin: ['dotacion_ocupada', 'procesos_con_ficha', 'documentos_vigentes', 'requisiciones_abiertas', 'tasa_bcv_usd', 'programa_entregables'],
+  consultor: ['dotacion_ocupada', 'procesos_con_ficha', 'documentos_vigentes', 'requisiciones_abiertas', 'tasa_bcv_usd', 'programa_horas_mes'],
+  lector: ['dotacion_ocupada', 'dotacion_por_encima', 'procesos_con_ficha', 'brecha_cambiaria', 'programa_entregables', 'levantamiento_entrevistas'],
   usuario: ['mis_requisiciones', 'mis_tareas', 'tasa_bcv_usd'],
 }
 

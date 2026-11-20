@@ -87,6 +87,7 @@ export default async function SistemaLayout({ children }: LayoutProps<'/sistema'
     ...(puede(sesion, 'sistema:procesos') ? [{ etiqueta: 'Mapa de procesos', href: '/sistema/nucleo/procesos' }] : []),
     ...(puede(sesion, 'sistema:documentos') ? [{ etiqueta: 'Biblioteca de documentos', href: '/sistema/nucleo/documentos' }] : []),
     ...(puede(sesion, 'modulo:usuarios') ? [{ etiqueta: 'Usuarios', href: '/sistema/administracion/usuarios' }] : []),
+    ...(puede(sesion, 'modulo:reportes') ? [{ etiqueta: 'Moderación del canal', href: '/sistema/nucleo/canal/moderacion', detalle: 'lo que la gente reporta' }] : []),
   ]
 
   const listaEscenarios = escenarios?.data ?? []

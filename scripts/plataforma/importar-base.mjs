@@ -137,11 +137,11 @@ const EN_ETAPA_1 = {
   'NUC-FLU': ['en_construccion', '/sistema/bandeja', null],
   'NUC-AUD': ['en_construccion', '/sistema/administracion/auditoria', 'sistema:auditoria'],
   'NUC-CFG': ['en_construccion', '/sistema/administracion/catalogos', 'sistema:catalogos'],
-  'NUC-CAN': ['operando', '/canal', 'modulo:canal'],
-  'NUC-FOR': ['operando', '/dashboard/adiestramiento', 'modulo:adiestramiento'],
-  'PRG-PLN': ['operando', '/dashboard/programa', 'modulo:programa'],
-  'PRG-LEV': ['operando', '/dashboard/entrevistas', 'modulo:entrevistas'],
-  'PRG-BIB': ['operando', '/informe', null],
+  'NUC-CAN': ['operando', '/sistema/nucleo/canal', 'modulo:reportes'],
+  'NUC-FOR': ['operando', '/sistema/nucleo/formacion', 'modulo:adiestramiento'],
+  'PRG-PLN': ['operando', '/sistema/programa', 'modulo:programa'],
+  'PRG-LEV': ['operando', '/sistema/programa/levantamiento', 'modulo:entrevistas'],
+  'PRG-BIB': ['operando', '/sistema/programa/biblioteca', null],
 }
 
 const modulos = leerCsv(fs.readFileSync(MODULOS_CSV, 'utf8')).map((m, i) => {

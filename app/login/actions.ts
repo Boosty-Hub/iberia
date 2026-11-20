@@ -29,7 +29,7 @@ function destinoSeguro(valor: string | null): string {
 }
 
 /** El que pone la página del login cuando no llega `?destino=`. */
-const DESTINO_POR_DEFECTO = '/dashboard'
+const DESTINO_POR_DEFECTO = '/'
 
 export async function iniciarSesion(
   _anterior: EstadoLogin,
@@ -58,7 +58,7 @@ export async function iniciarSesion(
   // respuesta larga se cortaba y salía «TypeError: Load failed». La acción solo
   // dice a dónde ir y el formulario navega con una carga normal de la página.
   //
-  // Sin destino pedido, se ahorra el salto por `/dashboard`: el mismo
+  // Sin destino pedido, se ahorra el salto por `/`: el mismo
   // `destinoInicial()` al que esa página manda a quien no tiene panel. El perfil
   // se valida en obtenerSesion(): si está inactivo, el destino lo devuelve al login.
   if (destino === DESTINO_POR_DEFECTO) {
@@ -147,7 +147,7 @@ export async function cambiarClave(
   if (error) return { error: traducirErrorClave(error.message) }
 
   revalidatePath('/', 'layout')
-  redirect('/dashboard')
+  redirect('/')
 }
 
 export async function cerrarSesion() {

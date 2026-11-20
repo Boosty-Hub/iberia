@@ -156,7 +156,8 @@ try {
       email_confirm: true,
       // El rol de un trabajador: con el de Lector Iberia, que tiene la casilla de
       // Certificados, leería los de todos, y está bien que los lea.
-      user_metadata: { nombre_completo: persona.nombre, organizacion: 'iberia', rol: 'lector', rol_clave: 'personal-planta' },
+      // Con las normas del canal aceptadas: aquí se prueba el certificado, no esa pantalla.
+      user_metadata: { nombre_completo: persona.nombre, organizacion: 'iberia', rol: 'lector', rol_clave: 'personal-planta', normas_aceptadas_version: 1 },
     })
 
     const { data: ficha } = await admin
@@ -476,7 +477,7 @@ try {
     )
 
     const pagina = await contexto.newPage()
-    await pagina.goto(`${BASE}/dashboard/adiestramiento/certificados`, {
+    await pagina.goto(`${BASE}/sistema/nucleo/formacion/certificados/imprimir`, {
       waitUntil: 'networkidle',
     })
 

@@ -6,7 +6,7 @@ import { CORREO_SOPORTE } from '@/lib/normas'
  * aceptar al entrar al canal: si fueran dos, dirían cosas distintas.
  *
  * Lo que promete tiene que ser verdad: el reporte con los tres puntos, el
- * bloqueo y la revisión del equipo en `/dashboard/reportes`. Si cambia algo que
+ * bloqueo y la revisión del equipo en `/sistema/nucleo/canal/moderacion`. Si cambia algo que
  * obligue a aceptarlas otra vez, se sube `VERSION_NORMAS` en `lib/normas.ts`.
  */
 export function NormasDeUso() {

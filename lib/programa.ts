@@ -70,7 +70,7 @@ export const PERFIL_TRABAJO: Record<Perfil, string> = {
 /**
  * Tarifa por hora de cada perfil, en dólares. Término firmado.
  *
- * ⚠️ **No se pinta en pantalla.** `/dashboard/programa` lo lee Iberia, y el
+ * ⚠️ **No se pinta en pantalla.** `/sistema/programa` lo lee Iberia, y el
  * precio ya está firmado en el contrato: un contador de dinero corriendo en una
  * pantalla no informa, negocia. Vive aquí porque de aquí sale `FEE_MENSUAL`, y
  * se usa cuando hay que escribir el reporte mensual.

@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useRef, useState, useTransition } from 'react'
-import { guardarTranscripcion } from '@/app/dashboard/entrevistas/acciones'
+import { guardarTranscripcion } from '@/app/sistema/programa/levantamiento/entrevistas/acciones'
 import { IconoAlerta, IconoCheck, IconoImportar } from '@/components/iconos'
 import { parsearTranscripcion, type TranscripcionParseada } from '@/lib/fireflies'
 import { formatTimestamp } from '@/lib/utils'

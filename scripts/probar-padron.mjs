@@ -166,7 +166,7 @@ try {
     if (m.type() === 'error') problemas.push(`[consola] ${m.text()}`)
   })
 
-  await panel.goto(`${BASE}/dashboard/empleados?q=Yorgelis`, { waitUntil: 'networkidle' })
+  await panel.goto(`${BASE}/sistema/personas/padron?q=Yorgelis`, { waitUntil: 'networkidle' })
   comprobar('la persona sale en el padrón', await panel.getByText('Yorgelis Pérez').isVisible())
 
   await panel.getByRole('checkbox', { name: /marcar a yorgelis/i }).check()
@@ -207,6 +207,13 @@ try {
     .eq('id', ficha.id)
     .single()
   comprobar('y de paso se le crea la cuenta a quien no la tenía', Boolean(recargada.perfil_id))
+
+  // Las normas del canal se aceptan una vez antes de entrar (guía 1.2): se dan por
+  // aceptadas para que la prueba mire el curso, no esa pantalla.
+  if (recargada.perfil_id) {
+    const { data: u } = await admin.auth.admin.getUserById(recargada.perfil_id)
+    await admin.auth.admin.updateUserById(recargada.perfil_id, { user_metadata: { ...(u?.user?.user_metadata ?? {}), normas_aceptadas_version: 1 } })
+  }
 
   const { data: acceso } = await admin
     .from('accesos')
@@ -299,7 +306,7 @@ try {
   comprobar('y los usos que lleva', fila?.acceso_usos === 2, String(fila?.acceso_usos))
   comprobar('y la matrícula', Boolean(fila?.matricula_id))
 
-  await panel.goto(`${BASE}/dashboard/empleados?q=Yorgelis`, { waitUntil: 'networkidle' })
+  await panel.goto(`${BASE}/sistema/personas/padron?q=Yorgelis`, { waitUntil: 'networkidle' })
   await panel.screenshot({ path: 'capturas/adiestramiento/13-padron.png', fullPage: true })
 
   await trabajador.close()

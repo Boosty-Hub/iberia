@@ -264,7 +264,7 @@ try {
     if (m.type() === 'error') problemas.push(`[consola] ${m.text()}`)
   })
 
-  await pagina.goto(`${BASE}/dashboard/adiestramiento/recordatorios`, {
+  await pagina.goto(`${BASE}/sistema/nucleo/formacion/recordatorios`, {
     waitUntil: 'networkidle',
   })
 

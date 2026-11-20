@@ -1299,6 +1299,32 @@ export type Database = {
           nombre: string
         }[]
       }
+      mi_cargo: { Args: never; Returns: Json }
+      mis_documentos: {
+        Args: never
+        Returns: {
+          codigo: string
+          fecha: string
+          id: string
+          proceso: string
+          relacion: string
+          titulo: string
+          version: string
+        }[]
+      }
+      mis_procesos: {
+        Args: never
+        Returns: {
+          codigo: string
+          dueno: string
+          nivel: number
+          nivel_nombre: string
+          nombre: string
+          objetivo: string
+          ref: string
+          relacion: string
+        }[]
+      }
       no_leidas: { Args: never; Returns: number }
       nombres: {
         Args: { p_ids: string[] }
@@ -2616,6 +2642,7 @@ export type Database = {
           nota: string
           orden: number
           participantes: string
+          ref: string
           responsable: string
           tipo: string
           titulo: string
@@ -2633,6 +2660,7 @@ export type Database = {
           nota?: string
           orden?: number
           participantes?: string
+          ref?: string
           responsable?: string
           tipo?: string
           titulo: string
@@ -2650,6 +2678,7 @@ export type Database = {
           nota?: string
           orden?: number
           participantes?: string
+          ref?: string
           responsable?: string
           tipo?: string
           titulo?: string
@@ -5067,6 +5096,18 @@ export type Database = {
     }
     Functions: {
       cabe_otro_participante: { Args: { conv: string }; Returns: boolean }
+      canal_autorizar: {
+        Args: {
+          p_empleado: string
+          p_es_moderador: boolean
+          p_puede_publicar: boolean
+        }
+        Returns: undefined
+      }
+      canal_moderar_publicacion: {
+        Args: { p_accion: string; p_publicacion: string }
+        Returns: undefined
+      }
       coordino_grupo: { Args: { grupo: string }; Returns: boolean }
       descartar_dispositivo: { Args: { p_token: string }; Returns: undefined }
       dispositivos_de_conversacion: {
@@ -5692,7 +5733,58 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      programa_archivos: {
+        Row: {
+          acciones: string | null
+          area: string | null
+          area_id: string | null
+          busqueda: string | null
+          categoria: string | null
+          confidencial: boolean | null
+          descripcion: string | null
+          entrevista: string | null
+          entrevista_id: string | null
+          extension: string | null
+          fase: number | null
+          id: string | null
+          mime_type: string | null
+          nombre: string | null
+          subido_en: string | null
+          tamano_bytes: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "archivos_entrevista_id_fkey"
+            columns: ["entrevista_id"]
+            isOneToOne: false
+            referencedRelation: "programa_entrevistas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      programa_entrevistas: {
+        Row: {
+          area: string | null
+          area_id: string | null
+          busqueda: string | null
+          codigo: string | null
+          con_transcripcion: boolean | null
+          duracion_minutos: number | null
+          entrevistado_cargo: string | null
+          entrevistado_nombre: string | null
+          entrevistador: string | null
+          estado: string | null
+          fecha: string | null
+          hallazgos: number | null
+          id: string | null
+          participantes: number | null
+          sede: string | null
+          serie: string | null
+          tipo: string | null
+          titulo: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       alertas_organizacion: { Args: { p_al?: string }; Returns: Json }
@@ -5718,6 +5810,64 @@ export type Database = {
       campos_cambiados: {
         Args: { p_antes: Json; p_despues: Json }
         Returns: string
+      }
+      canal_grupos: {
+        Args: never
+        Returns: {
+          activo: boolean
+          area: string
+          busqueda: string
+          coordinadores: string
+          creado_en: string
+          id: string
+          mensajes_30d: number
+          miembros: number
+          nombre: string
+          proposito: string
+          tipo: string
+          ultimo_mensaje: string
+        }[]
+      }
+      canal_publicaciones: {
+        Args: never
+        Returns: {
+          area: string
+          audiencia: string
+          autor: string
+          autor_cargo: string
+          bajada: string
+          comentarios: number
+          creado_en: string
+          estado: string
+          fijado: boolean
+          id: string
+          lecturas: number
+          oficial: boolean
+          publicado_en: string
+          reacciones: number
+          reportes_abiertos: number
+          tipo: string
+          titulo: string
+        }[]
+      }
+      canal_uso: {
+        Args: { p_al?: string }
+        Returns: {
+          activas_30d: number
+          adopcion: number
+          area: string
+          busqueda: string
+          clave: string
+          con_cuenta: number
+          en_padron: number
+          entraron: number
+          lecturas_30d: number
+          mensajes_30d: number
+          nivel: string
+          nivel_nombre: string
+          sede: string
+          sede_nombre: string
+        }[]
       }
       cargos: {
         Args: { p_al?: string }
@@ -5971,6 +6121,78 @@ export type Database = {
         }[]
       }
       etiqueta: { Args: { p_clave: string; p_tipo: string }; Returns: string }
+      formacion_avance: {
+        Args: never
+        Returns: {
+          area: string
+          area_id: string
+          avance: number
+          busqueda: string
+          completados: number
+          en_curso: number
+          familia: string
+          id: string
+          lecciones_promedio: number
+          matriculados: number
+          sin_empezar: number
+        }[]
+      }
+      formacion_base: {
+        Args: never
+        Returns: {
+          actualizado_en: string
+          completados: number
+          elegibles: number
+          en_curso: number
+          hechas: number
+          lecciones: number
+          matriculados: number
+          por_leccion: Json
+          sin_empezar: number
+        }[]
+      }
+      formacion_certificados: {
+        Args: never
+        Returns: {
+          area: string
+          busqueda: string
+          cargo: string
+          codigo: string
+          emitido_en: string
+          entregado: string
+          entregado_en: string
+          ficha: string
+          id: string
+          nombre: string
+        }[]
+      }
+      formacion_personas: {
+        Args: never
+        Returns: {
+          area: string
+          busqueda: string
+          cargo: string
+          certificado: string
+          dias_callado: number
+          empleado_id: string
+          estado: string
+          familia: string
+          ficha: string
+          id: string
+          l0: string
+          l1: string
+          l2: string
+          l3: string
+          l4: string
+          l5: string
+          l6: string
+          l7: string
+          l8: string
+          lecciones_hechas: number
+          nombre: string
+          ultimo_toque: string
+        }[]
+      }
       fuente_legible: { Args: { p: string }; Returns: string }
       historial_documentos: {
         Args: never
@@ -6022,6 +6244,51 @@ export type Database = {
         }[]
       }
       m_brecha_cambiaria: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_canal_grupos: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_canal_mensajes_mes: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_canal_personas_activas: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_canal_publicaciones_mes: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_canal_reportes_abiertos: {
         Args: { p_al?: string; p_escenario?: string }
         Returns: {
           calculado_en: string
@@ -6094,6 +6361,60 @@ export type Database = {
         }[]
       }
       m_dotacion_vacantes: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_formacion_avance: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_formacion_certificados: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_formacion_completaron: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_formacion_matriculados: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_levantamiento_archivos: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_levantamiento_entrevistas: {
         Args: { p_al?: string; p_escenario?: string }
         Returns: {
           calculado_en: string
@@ -6175,6 +6496,33 @@ export type Database = {
         }[]
       }
       m_procesos_validados: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_programa_entregables: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_programa_horas_mes: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_programa_sesiones: {
         Args: { p_al?: string; p_escenario?: string }
         Returns: {
           calculado_en: string

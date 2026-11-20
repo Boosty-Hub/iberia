@@ -2,7 +2,7 @@ import { cookies } from 'next/headers'
 import { cache } from 'react'
 import { puede, type Sesion } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
-import { DOMINIOS, MODULOS_MI_DIA, dominioDe, type ClaveDominio, type EstadoModulo, type ModuloPlan } from '@/lib/plataforma/dominios'
+import { DOMINIOS, MODULOS_INTERFAZ, RECURSOS_ALTERNOS, dominioDe, type ClaveDominio, type EstadoModulo, type ModuloPlan } from '@/lib/plataforma/dominios'
 import { esFecha, esUuid, hoyCaracas } from '@/lib/plataforma/formato'
 
 /**
@@ -29,9 +29,16 @@ export const modulosDelPlan = cache(async (): Promise<ModuloPlan[]> => {
  * pantalla) y los que tienen pantalla si su permiso alcanza. «Mi día» siempre.
  */
 export function modulosVisibles(sesion: Sesion, modulos: ModuloPlan[]): (ModuloPlan & { dominioClave: ClaveDominio })[] {
-  const todos = [...MODULOS_MI_DIA, ...modulos]
+  const todos = [...MODULOS_INTERFAZ, ...modulos]
   return todos
-    .filter((m) => m.estado === 'planificado' || !m.recurso || puede(sesion, m.recurso) || (m.recurso === 'sistema:requisiciones' && puede(sesion, m.recurso, 'crear')))
+    .filter(
+      (m) =>
+        m.estado === 'planificado' ||
+        !m.recurso ||
+        puede(sesion, m.recurso, m.accion ?? 'ver') ||
+        (m.recurso === 'sistema:requisiciones' && puede(sesion, m.recurso, 'crear')) ||
+        (RECURSOS_ALTERNOS[m.codigo] ?? []).some((r) => puede(sesion, r))
+    )
     .map((m) => ({ ...m, dominioClave: m.dominio === 'Mi día' ? ('inicio' as const) : dominioDe(m) }))
     .sort((a, b) => DOMINIOS.findIndex((d) => d.clave === a.dominioClave) - DOMINIOS.findIndex((d) => d.clave === b.dominioClave) || a.orden - b.orden)
 }

@@ -64,6 +64,17 @@ export default async function MiDiaPage({ searchParams }: PageProps<'/sistema'>)
           <Aviso tono="ambar">Esa pantalla no está al alcance {sesion.vistaComo ? 'del rol que estás previsualizando' : 'de tu rol'}.</Aviso>
         </div>
       )}
+      {/* Los avisos del panel viejo (`requerirEditor`, `requerirAdmin`), que ahora cae aquí. */}
+      {sp.aviso === 'solo-lectura' && (
+        <div className="mb-3">
+          <Aviso tono="ambar">Tu cuenta es de solo lectura: puedes consultar, pero no editar.</Aviso>
+        </div>
+      )}
+      {sp.aviso === 'solo-admin' && (
+        <div className="mb-3">
+          <Aviso tono="ambar">Esa sección es exclusiva de los administradores del programa.</Aviso>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <section className="min-w-0 rounded-xl border border-[var(--borde)] bg-white" aria-labelledby="te-toca">

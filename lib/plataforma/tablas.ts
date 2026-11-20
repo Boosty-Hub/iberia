@@ -1,6 +1,9 @@
 import type { FuenteTabla } from '@/lib/plataforma/tabla-servidor'
 import { FUENTES_ORGANIZACION } from '@/lib/plataforma/tablas-organizacion'
 import { FUENTES_PROCESOS } from '@/lib/plataforma/tablas-procesos'
+import { FUENTES_PROGRAMA } from '@/lib/plataforma/tablas-programa'
+import { FUENTES_FORMACION } from '@/lib/plataforma/tablas-formacion'
+import { FUENTES_CANAL } from '@/lib/plataforma/tablas-canal'
 
 /**
  * Las fuentes de `TablaDatos`: una por tabla de la plataforma. La página la
@@ -100,6 +103,9 @@ export const TABLA_TASAS: FuenteTabla = {
 export const FUENTES: Record<string, FuenteTabla> = {
   ...FUENTES_ORGANIZACION,
   ...FUENTES_PROCESOS,
+  ...FUENTES_PROGRAMA,
+  ...FUENTES_FORMACION,
+  ...FUENTES_CANAL,
   [TABLA_PLAZAS.id]: TABLA_PLAZAS,
   [TABLA_TASAS.id]: TABLA_TASAS,
 }

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { puede, type Sesion } from '@/lib/auth'
-import { DOMINIOS, ESTADO_MODULO, MODULOS_MI_DIA, PESTANAS, dominioDe, type Pestana } from '@/lib/plataforma/dominios'
+import { DOMINIOS, ESTADO_MODULO, MODULOS_INTERFAZ, PESTANAS, dominioDe, type Pestana } from '@/lib/plataforma/dominios'
 import { modulosDelPlan } from '@/lib/plataforma/servidor'
 import { PestanasModulo } from '@/components/sistema/ui/pestanas-modulo'
 import { BotonPreguntarIa } from '@/components/sistema/ia/boton-preguntar'
@@ -42,7 +42,7 @@ export async function CabeceraModulo({
   const [modulos, ia] = await Promise.all([modulosDelPlan(), estadoIa()])
   // R4 · «Preguntar a la IA» (NUC-PRO-IA-01): solo con la IA y la capacidad encendidas.
   const preguntar = capacidadViva(ia, 'NUC-PRO-IA-01')
-  const m = [...MODULOS_MI_DIA, ...modulos].find((x) => x.codigo === codigo)
+  const m = [...MODULOS_INTERFAZ, ...modulos].find((x) => x.codigo === codigo)
   const dominio = m ? (m.dominio === 'Mi día' ? DOMINIOS[0] : DOMINIOS.find((d) => d.clave === dominioDe(m))) : null
   const lista = (pestanas ?? PESTANAS[codigo] ?? []).filter(
     (p) => !p.recurso || puede(sesion, p.recurso, p.accion ?? 'ver') || (p.accion === 'crear' && puede(sesion, p.recurso))

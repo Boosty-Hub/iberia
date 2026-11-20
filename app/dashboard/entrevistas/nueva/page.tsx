@@ -1,31 +1,7 @@
-import type { Metadata } from 'next'
-import { FormularioEntrevista } from '@/components/formulario-entrevista'
-import { EncabezadoPagina } from '@/components/ui'
-import { requerirPermiso } from '@/lib/auth'
-import { createClient } from '@/lib/supabase/server'
-import { crearEntrevista } from '../acciones'
+import { redirect } from 'next/navigation'
+import { rutaNueva } from '@/lib/plataforma/redireccion'
 
-export const metadata: Metadata = { title: 'Nueva entrevista' }
-
-export default async function NuevaEntrevistaPage() {
-  await requerirPermiso('modulo:entrevistas', 'crear')
-  const supabase = await createClient()
-
-  const { data: areas } = await supabase.from('areas').select('id, nombre, tipo').order('orden')
-
-  return (
-    <>
-      <EncabezadoPagina
-        rotulo="Corriente B · Diagnóstico"
-        titulo="Nueva entrevista"
-        descripcion="Registra la entrevista con sus datos básicos. La transcripción de Fireflies se importa después, desde el detalle."
-      />
-
-      <FormularioEntrevista
-        accion={crearEntrevista}
-        areas={areas ?? []}
-        cancelarHref="/dashboard/entrevistas"
-      />
-    </>
-  )
+/** Crear una sesión a mano → Levantamiento. Se mudó a la plataforma (20-nov-2026); los parámetros viajan. */
+export default async function Redireccion({ searchParams }: PageProps<'/dashboard/entrevistas/nueva'>) {
+  redirect(rutaNueva('/sistema/programa/levantamiento/entrevistas/nueva', await searchParams))
 }

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useRef, useState, useTransition } from 'react'
-import { crearEntrevistaDesdeArchivo } from '@/app/dashboard/entrevistas/acciones'
+import { crearEntrevistaDesdeArchivo } from '@/app/sistema/programa/levantamiento/entrevistas/acciones'
 import {
   IconoAlerta,
   IconoBasura,
@@ -267,7 +267,7 @@ export function ImportarEntrevistas({ areas }: { areas: AreaMinima[] }) {
                         </Insignia>
                         {item.creadaId && (
                           <Link
-                            href={`/dashboard/entrevistas/${item.creadaId}`}
+                            href={`/sistema/programa/levantamiento/entrevistas/${item.creadaId}`}
                             className="text-xs font-medium text-acento-700 hover:underline"
                           >
                             Abrir →

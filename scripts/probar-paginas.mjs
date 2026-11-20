@@ -88,15 +88,17 @@ async function pedir(ruta) {
 }
 
 const RUTAS = [
-  { ruta: '/dashboard', marcadores: ['Fase 1', 'Entrevistas registradas', 'Gabriel'] },
-  { ruta: '/dashboard/entrevistas', marcadores: ['Entrevistas', 'Importar de Fireflies'] },
+  // El panel viejo se mudó a la plataforma (20-nov-2026): Mi día y el dominio Programa.
+  { ruta: '/sistema', marcadores: ['Te toca decidir'] },
+  { ruta: '/sistema/programa/levantamiento/entrevistas', marcadores: ['Levantamiento', 'Importar de Fireflies'] },
   {
-    ruta: '/dashboard/entrevistas/importar',
-    marcadores: ['Importar entrevistas', 'Arrastra los archivos', 'Crear a mano'],
+    ruta: '/sistema/programa/levantamiento/entrevistas/importar',
+    marcadores: ['Importar de Fireflies', 'Arrastra los archivos', 'Crear a mano'],
   },
-  { ruta: '/dashboard/entrevistas/nueva', marcadores: ['Nombre del entrevistado', 'Crear entrevista'] },
-  { ruta: '/dashboard/archivos', marcadores: ['Archivos', 'Subir archivo'] },
-  { ruta: '/dashboard/programa', marcadores: ['Consumos y l', 'Cómo va el programa'] },
+  { ruta: '/sistema/programa/levantamiento/entrevistas/nueva', marcadores: ['Nombre del entrevistado', 'Crear entrevista'] },
+  { ruta: '/sistema/programa/levantamiento/archivos', marcadores: ['Archivos', 'Subir un archivo'] },
+  { ruta: '/sistema/programa/consumos', marcadores: ['Mes a mes, perfil por perfil', 'Quién dedicó las horas'] },
+  { ruta: '/sistema/programa/calendario', marcadores: ['Calendario', 'Próximos 30 días'] },
   { ruta: '/sistema/administracion/roles', marcadores: ['Roles y permisos'] },
   { ruta: '/sistema/administracion/usuarios', marcadores: ['Provisionar acceso', 'Cuentas'] },
   { ruta: '/informe', marcadores: ['arquitectura de IA', 'construcci'] },
@@ -126,15 +128,15 @@ console.log('\n── Reglas de sesión')
 
 const enLogin = await pedir('/login')
 verificar(
-  '/login con sesión redirige al dashboard',
-  enLogin.status === 307 && enLogin.ubicacion?.includes('/dashboard'),
+  '/login con sesión redirige a la raíz (que reparte a cada quien)',
+  enLogin.status === 307 && Boolean(enLogin.ubicacion) && new URL(enLogin.ubicacion, BASE).pathname === '/',
   `HTTP ${enLogin.status} → ${enLogin.ubicacion}`
 )
 
 const raiz = await pedir('/')
 verificar(
-  '/ con sesión lleva al dashboard',
-  raiz.status === 307 && raiz.ubicacion?.includes('/dashboard'),
+  '/ con sesión de admin lleva a Mi día',
+  raiz.status === 307 && raiz.ubicacion?.includes('/sistema'),
   `HTTP ${raiz.status} → ${raiz.ubicacion}`
 )
 
@@ -166,7 +168,7 @@ if (!archivos?.length) {
   console.log('\n── Descargas')
 
   for (const a of archivos) {
-    const res = await fetch(`${BASE}/dashboard/archivos/${a.id}/descargar`, {
+    const res = await fetch(`${BASE}/sistema/programa/levantamiento/archivos/${a.id}/descargar`, {
       headers: { cookie: cookieHeader },
       redirect: 'manual',
     })
@@ -186,7 +188,7 @@ if (!archivos?.length) {
   }
 
   const descargaSinSesion = await fetch(
-    `${BASE}/dashboard/archivos/${archivos[0].id}/descargar`,
+    `${BASE}/sistema/programa/levantamiento/archivos/${archivos[0].id}/descargar`,
     { redirect: 'manual' }
   )
   verificar(

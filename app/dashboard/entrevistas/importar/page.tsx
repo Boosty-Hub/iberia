@@ -1,32 +1,7 @@
-import type { Metadata } from 'next'
-import Link from 'next/link'
-import { ImportarEntrevistas } from '@/components/importar-entrevistas'
-import { EncabezadoPagina } from '@/components/ui'
-import { requerirPermiso } from '@/lib/auth'
-import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import { rutaNueva } from '@/lib/plataforma/redireccion'
 
-export const metadata: Metadata = { title: 'Importar entrevistas' }
-
-export default async function ImportarEntrevistasPage() {
-  await requerirPermiso('modulo:entrevistas', 'crear')
-  const supabase = await createClient()
-
-  const { data: areas } = await supabase.from('areas').select('id, nombre, slug, tipo').order('orden')
-
-  return (
-    <>
-      <EncabezadoPagina
-        rotulo="Corriente B · Diagnóstico"
-        titulo="Importar entrevistas"
-        descripcion="Carga los archivos de Fireflies y el sistema arma cada entrevista: entrevistado, cargo, área, sede, fecha, duración, resumen y transcripción completa."
-        acciones={
-          <Link href="/dashboard/entrevistas/nueva" className="btn-neutro">
-            Crear a mano
-          </Link>
-        }
-      />
-
-      <ImportarEntrevistas areas={areas ?? []} />
-    </>
-  )
+/** Importar de Fireflies → Levantamiento. Se mudó a la plataforma (20-nov-2026); los parámetros viajan. */
+export default async function Redireccion({ searchParams }: PageProps<'/dashboard/entrevistas/importar'>) {
+  redirect(rutaNueva('/sistema/programa/levantamiento/entrevistas/importar', await searchParams))
 }

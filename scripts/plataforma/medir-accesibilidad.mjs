@@ -45,7 +45,9 @@ for (const [vista, viewport] of VISTAS) {
   const ctx = await nav.newContext({ viewport, hasTouch: vista === 'teléfono', isMobile: vista === 'teléfono' })
   await ctx.addCookies(cookies)
   const pagina = await ctx.newPage()
-  for (const [nombre, ruta] of RUTAS_R6) {
+  // `--rutas /a,/b`: otras rutas en vez de las de R6 (p. ej. las del Programa).
+  const rutas = opc('--rutas', null)?.split(',').map((r) => [r, r]) ?? RUTAS_R6
+  for (const [nombre, ruta] of rutas) {
     if (SOLO && !ruta.includes(SOLO)) continue
     await pagina.goto(BASE + ruta, { waitUntil: 'networkidle', timeout: 120000 })
     await analizar(pagina, `${vista} · ${nombre}`)

@@ -16,6 +16,7 @@ import {
 import { fechaCorta, fechaHora, fechaLarga, hoyCaracas, numero } from '@/lib/plataforma/formato'
 import { fuenteLegible } from '@/lib/plataforma/fuentes'
 import { leerMoneda } from '@/lib/plataforma/servidor'
+import { seccionesPadron, veePadron } from '@/lib/plataforma/fichas/padron'
 
 /**
  * Las fichas de Organización (R1): unidad, plaza, cargo, persona, requisición,
@@ -272,7 +273,8 @@ export async function cargarFichaOrganizacion(sesion: Sesion, tipo: TipoOrganiza
     case 'cargo':
       return puede(sesion, 'sistema:estructura') ? fichaCargo(supabase, sesion, id) : null
     case 'persona':
-      return puede(sesion, 'sistema:estructura') ? fichaPersona(supabase, sesion, id) : null
+      // La ficha de la persona la abre también quien trabaja el padrón (sus pestañas Padrón · Accesos · Formación).
+      return puede(sesion, 'sistema:estructura') || veePadron(sesion) ? fichaPersona(supabase, sesion, id) : null
     case 'requisicion':
       // La ve quien la pidió, quien tiene el permiso y quien firma en su ruta: lo decide la RLS.
       return fichaRequisicion(supabase, sesion, id)
@@ -688,9 +690,11 @@ async function fichaPersona(supabase: Cliente, sesion: Sesion, id: string): Prom
   const hoy = hoyCaracas()
   const org = supabase.schema('org')
   const editar = puede(sesion, 'sistema:estructura', 'editar')
+  const estructura = puede(sesion, 'sistema:estructura')
+  const padron = seccionesPadron(supabase, sesion, id)
   const [{ data: e }, { data: ocup }, cat] = await Promise.all([
     supabase.from('empleados').select('id, nombre_completo, ficha, cargo, activo').eq('id', id).maybeSingle(),
-    org.from('ocupacion').select('id, plaza_ref, tipo, vigencia, certeza, excede_dotacion, motivo').eq('empleado_id', id).order('creado_en', { ascending: false }).range(0, 49),
+    !estructura ? Promise.resolve({ data: [] as { id: string; plaza_ref: string; tipo: string; vigencia: unknown; certeza: string; excede_dotacion: boolean; motivo: string | null }[] }) : org.from('ocupacion').select('id, plaza_ref, tipo, vigencia, certeza, excede_dotacion, motivo').eq('empleado_id', id).order('creado_en', { ascending: false }).range(0, 49),
     catalogo(supabase, ['tipo_ocupacion']),
   ])
   if (!e) return null
@@ -723,7 +727,7 @@ async function fichaPersona(supabase: Cliente, sesion: Sesion, id: string): Prom
     subtitulo: desc0 ? `${desc0.cargo} · ${desc0.unidad}` : 'Sin plaza al día de hoy',
     codigo: e.ficha ? `Ficha ${e.ficha}` : null,
     estado: !e.activo ? { etiqueta: 'Inactiva en el padrón', tono: 'neutro' } : principal ? { etiqueta: etiquetaDe(cat.tipo_ocupacion, principal.tipo), tono: 'verde' } : { etiqueta: 'Sin plaza', tono: 'ambar' },
-    hrefModulo: `${BASE}/personas?ficha=persona:${id}`,
+    hrefModulo: estructura ? `${BASE}/personas?ficha=persona:${id}` : `/sistema/personas/padron?ficha=persona:${id}`,
     datos: [
       { etiqueta: 'Nombre', valor: e.nombre_completo },
       { etiqueta: 'Ficha', valor: e.ficha ?? '—', mono: true },
@@ -748,7 +752,7 @@ async function fichaPersona(supabase: Cliente, sesion: Sesion, id: string): Prom
       { etiqueta: 'Desde', valor: principal ? fechaLarga(desde(principal.vigencia)) : '—' },
       { etiqueta: 'Certeza', valor: principal ? (CERTEZA[principal.certeza] ?? principal.certeza) : '—' },
       ...(principal?.excede_dotacion ? [{ etiqueta: 'Sobre la dotación', valor: 'Sí: está registrada por encima de la dotación aprobada' }] : []),
-      { etiqueta: 'Datos personales', valor: 'Los lleva Capital Humano en el padrón; aquí solo se muestra el nombre y la ficha.' },
+      { etiqueta: 'Datos personales', valor: veePadron(sesion) ? 'Los lleva Capital Humano: están en la pestaña Padrón, que solo ve quien trabaja el padrón.' : 'Los lleva Capital Humano en el padrón; aquí solo se muestra el nombre y la ficha.' },
     ],
     secciones: [
       {
@@ -796,6 +800,7 @@ async function fichaPersona(supabase: Cliente, sesion: Sesion, id: string): Prom
           { tipo: 'lista', titulo: 'Rutas donde firma su cargo', vacio: 'Su cargo no firma en ninguna ruta activa.', items: d.rutas.map((r) => ({ tipo: 'Ruta', titulo: r.paso, detalle: r.ruta })) },
         ],
       },
+      ...(await padron),
     ],
     relaciones: [
       ...vigentes.flatMap((o) => {

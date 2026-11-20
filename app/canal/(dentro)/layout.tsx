@@ -7,8 +7,8 @@ import { NavInferior } from '@/components/canal/nav-inferior'
 import { NormasDeUso } from '@/components/normas-de-uso'
 import { VERSION_NORMAS } from '@/lib/normas'
 import { NotificacionesNativas } from '@/components/canal/notificaciones-nativas'
-import { destinoInicial, inicioDelPanel, obtenerSesion, puede } from '@/lib/auth'
-import { iniciales, requerirEmpleado } from '@/lib/canal'
+import { destinoInicial, obtenerSesion, puede } from '@/lib/auth'
+import { iniciales, requerirEmpleado, tienePlataforma } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
@@ -48,19 +48,24 @@ export default async function CanalLayout({ children }: LayoutProps<'/canal'>) {
     return <PantallaNormas />
   }
 
-  const panel = inicioDelPanel(sesion)
+  // La puerta a la plataforma (`/sistema`) para quien tiene algo que abrir allá.
+  // Antes era «Panel» y llevaba al dashboard; todo lo de administrar se mudó.
+  const plataforma = tienePlataforma(sesion)
   const supabase = await createClient()
 
-  // Los dos contadores de la cabecera y del pie. Se preguntan aquí una vez y
-  // no en cada pantalla.
-  const [{ data: sinLeer }, { count: solicitudes }] = await Promise.all([
+  // Los contadores de la cabecera y del pie. Se preguntan aquí una vez y no en
+  // cada pantalla. La campana suma las solicitudes de conexión y los avisos de
+  // la plataforma sin leer (`nucleo.notificacion`: la misma campana de /sistema).
+  const [{ data: sinLeer }, { count: solicitudes }, { data: avisos }] = await Promise.all([
     supabase.rpc('mensajes_sin_leer'),
     supabase
       .from('conexiones')
       .select('id', { count: 'exact', head: true })
       .eq('recibe_id', empleado.id)
       .eq('estado', 'pendiente'),
+    supabase.schema('nucleo').rpc('no_leidas'),
   ])
+  const enCampana = (solicitudes ?? 0) + (avisos ?? 0)
 
   return (
     <div className="canal flex min-h-full flex-1 flex-col">
@@ -86,27 +91,32 @@ export default async function CanalLayout({ children }: LayoutProps<'/canal'>) {
             {/* La puerta al panel, para quien tiene algún módulo de allá: sin esto
                 se entraba al canal y no había cómo llegar a ellos. Lleva a la
                 primera pantalla que su rol abre, que no siempre es la portada. */}
-            {panel && (
+            {plataforma && (
               <Link
-                href={panel}
+                href="/sistema"
                 className="toque gap-1.5 rounded-full px-3 text-[13px] font-semibold text-marca-600 active:bg-marca-100"
               >
                 <IconoPanel className="h-5 w-5" />
-                Panel
+                Plataforma
               </Link>
             )}
             <Link
               href="/canal/avisos"
-              aria-label="Avisos"
+              aria-label={enCampana > 0 ? `Avisos, ${enCampana} sin ver` : 'Avisos'}
               className="toque relative w-11 rounded-full text-marca-500 active:bg-marca-100"
             >
               <IconoCampana className="h-6 w-6" />
-              {(solicitudes ?? 0) > 0 && (
-                <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 rounded-full bg-acento-600 ring-2 ring-white" />
+              {enCampana > 0 && (
+                <span
+                  aria-hidden
+                  className="absolute top-1 right-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-acento-600 px-1 text-[10px] font-bold text-white ring-2 ring-white tabular-nums"
+                >
+                  {enCampana > 9 ? '9+' : enCampana}
+                </span>
               )}
             </Link>
 
-            <Link href="/canal/yo" aria-label="Mi perfil" className="toque w-11">
+            <Link href="/canal/yo" aria-label={`${iniciales(empleado.nombre_completo)}, mi perfil`} className="toque w-11">
               <span className="grid h-9 w-9 place-items-center rounded-full bg-oro-300 text-[13px] font-bold text-marca-900">
                 {iniciales(empleado.nombre_completo)}
               </span>

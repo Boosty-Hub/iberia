@@ -34,7 +34,7 @@ export function PreviaArchivo({
   const dialogo = useRef<HTMLDialogElement>(null)
   const [abierto, setAbierto] = useState(false)
 
-  const url = `/dashboard/archivos/${id}/ver`
+  const url = `/sistema/programa/levantamiento/archivos/${id}/ver`
   const tipo = claseDe(mime, nombre)
 
   function abrir() {
@@ -74,7 +74,7 @@ export function PreviaArchivo({
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
               <a
-                href={`/dashboard/archivos/${id}/descargar`}
+                href={`/sistema/programa/levantamiento/archivos/${id}/descargar`}
                 className="btn-neutro px-2.5"
                 title={`Descargar ${nombre}`}
               >
@@ -156,7 +156,7 @@ function Contenido({
           Las hojas de cálculo y los documentos de Office no los abre el navegador. Descárgalo
           para verlo — y bórralo cuando termines, que es material bajo NDA.
         </p>
-        <a href={`/dashboard/archivos/${id}/descargar`} className="btn-acento mt-4 inline-flex">
+        <a href={`/sistema/programa/levantamiento/archivos/${id}/descargar`} className="btn-acento mt-4 inline-flex">
           Descargar {nombre}
         </a>
       </div>
@@ -197,4 +197,13 @@ function Texto({ url, comoMarkdown }: { url: string; comoMarkdown: boolean }) {
       )}
     </div>
   )
+}
+
+/**
+ * El visor sin el diálogo, para la página del archivo en la plataforma
+ * (`/sistema/programa/levantamiento/archivos/[id]`): mismo origen, mismas
+ * reglas de qué se puede ver y qué se dice que no.
+ */
+export function VisorArchivo({ id, nombre, mime }: { id: string; nombre: string; mime: string | null }) {
+  return <Contenido tipo={claseDe(mime, nombre)} url={`/sistema/programa/levantamiento/archivos/${id}/ver`} nombre={nombre} id={id} />
 }

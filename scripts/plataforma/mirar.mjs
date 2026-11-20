@@ -89,7 +89,7 @@ for (const [nombreTam, w, h] of tamanos) {
     errores.length = 0
     const r = await pagina.goto(BASE + ruta, { waitUntil: 'networkidle', timeout: 90000 })
     const desborde = await pagina.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
-    const archivo = `capturas/sistema/${COMO}-${nombreTam}-${ruta.replace(/[\/?=&]+/g, '_').replace(/^_/, '') || 'raiz'}.png`
+    const archivo = `capturas/sistema/${COMO}-${nombreTam}-${ruta.replace(/[\/?=&:]+/g, '_').replace(/^_/, '') || 'raiz'}.png`
     await pagina.screenshot({ path: archivo, fullPage: true })
     const mal = r.status() >= 400 || errores.length || desborde > 2 || !pagina.url().includes(ruta.split('?')[0])
     if (mal) fallos++

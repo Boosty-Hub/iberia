@@ -79,7 +79,7 @@ export async function crearUsuario(_anterior: EstadoUsuario, fd: FormData): Prom
 
   revalidatePath('/sistema/administracion/usuarios')
   revalidatePath('/sistema/administracion/roles')
-  revalidatePath('/dashboard/empleados')
+  revalidatePath('/sistema/personas/padron')
   if (sinEnlace) return { error: `Usuario ${email} creado, pero sin ficha: ${sinEnlace}` }
   return { ok: `Usuario ${email} creado con el rol ${rol.nombre}. Entrégale el correo y la contraseña.` }
 }
@@ -99,7 +99,7 @@ export async function enlazarFicha(fd: FormData) {
   if (error) console.error('[usuarios] no se enlazó la ficha:', error)
 
   revalidatePath('/sistema/administracion/usuarios')
-  revalidatePath('/dashboard/empleados')
+  revalidatePath('/sistema/personas/padron')
 }
 
 /**
@@ -113,7 +113,7 @@ export async function desenlazarFicha(fd: FormData) {
   const admin = createAdminClient()
   await admin.from('empleados').update({ perfil_id: null }).eq('perfil_id', id)
   revalidatePath('/sistema/administracion/usuarios')
-  revalidatePath('/dashboard/empleados')
+  revalidatePath('/sistema/personas/padron')
 }
 
 export async function cambiarRol(fd: FormData) {

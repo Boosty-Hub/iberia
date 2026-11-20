@@ -131,13 +131,14 @@ try {
       await p.goto(`${BASE}/canal`, { waitUntil: 'networkidle' })
     }
     await alPanel.click()
-    await p.waitForURL(/\/dashboard/, { timeout: 20000 })
+    // El panel viejo vive en la plataforma desde el 20-nov-2026.
+    await p.waitForURL(/\/sistema/, { timeout: 20000 })
     // La página entera, no el esqueleto de carga que Next pinta al instante.
     await p.locator('h1').first().waitFor({ timeout: 20000 })
     await p.waitForLoadState('networkidle')
     const destino = new URL(p.url()).pathname
     ver(
-      tiene.has('modulo:panel') ? destino === '/dashboard' : destino !== '/dashboard',
+      tiene.has('modulo:panel') ? destino === '/sistema' : destino !== '/sistema',
       `«Panel» cae en una pantalla que su rol abre (${destino})`
     )
     ver(!(await p.getByText('No tienes permiso').count()), 'sin aviso de permiso')
@@ -145,38 +146,47 @@ try {
 
     // Lo que su rol abre del curso en el panel tiene que traer datos, no ceros.
     if (nombre === 'escritorio' && tiene.has('modulo:adiestramiento')) {
-      await p.goto(`${BASE}/dashboard/adiestramiento`, { waitUntil: 'networkidle' })
+      await p.goto(`${BASE}/sistema/nucleo/formacion`, { waitUntil: 'networkidle' })
+      // La cifra es la métrica del registro `formacion_matriculados` (Formación › Resumen).
       const matriculados = await p.evaluate(() => {
-        const rotulo = [...document.querySelectorAll('*')].find((e) => e.textContent?.trim() === 'Con matrícula')
-        return Number(rotulo?.parentElement?.textContent?.match(/\d+/)?.[0] ?? 0)
+        const kpi = document.querySelector('[data-kpi][data-metrica="formacion_matriculados"] [data-valor]')
+        return Number(kpi?.textContent?.match(/\d+/)?.[0] ?? 0)
       })
       ver(matriculados > 0, `el tablero de Adiestramiento trae cifras (${matriculados} con matrícula)`)
-      ver((await p.getByRole('link', { name: /El curso de Ajito/ }).count()) >= 1, 'la barra trae «El curso de Ajito»')
+      ver((await p.getByRole('link', { name: /Abrir el curso/ }).count()) >= 1, 'Formación trae «Abrir el curso»')
       await p.screenshot({ path: `${SALIDA}/${nombre}-adiestramiento.png` })
     }
     if (nombre === 'escritorio' && tiene.has('modulo:certificados')) {
-      await p.goto(`${BASE}/dashboard/adiestramiento/certificados`, { waitUntil: 'networkidle' })
+      await p.goto(`${BASE}/sistema/nucleo/formacion/certificados/imprimir`, { waitUntil: 'networkidle' })
       const hojas = await p.locator('[data-certificado]').count()
       ver(hojas >= 1, `Certificados trae los emitidos (${hojas})`)
     }
     // El administrador ve el panel entero, la administración y el informe.
     if (nombre === 'escritorio' && rol.nivel === 'admin') {
-      await p.goto(`${BASE}/dashboard`, { waitUntil: 'networkidle' })
-      for (const destino of ['Panel', 'Entrevistas', 'Archivos', 'Consumos', 'Adiestramiento', 'Empleados · padrón', 'El curso de Ajito', 'Usuarios', 'Roles y permisos']) {
-        ver((await p.locator('aside').getByRole('link', { name: destino }).count()) >= 1, `la barra trae «${destino}»`)
+      // El programa (lo que era el panel) es el dominio Programa de la plataforma.
+      await p.goto(`${BASE}/sistema/programa`, { waitUntil: 'networkidle' })
+      for (const destino of ['Resumen', 'Consumos', 'Línea de tiempo', 'Calendario']) {
+        ver((await p.getByRole('navigation', { name: 'Pestañas del módulo' }).getByRole('link', { name: destino }).count()) >= 1, `Plan y seguimiento trae «${destino}»`)
       }
-      ver((await p.getByRole('link', { name: /Ver el informe/ }).count()) >= 1, 'la cabecera trae «Ver el informe»')
+      for (const destino of ['Levantamiento', 'Biblioteca del programa']) {
+        ver((await p.getByRole('link', { name: new RegExp(destino) }).count()) >= 1, `el menú trae «${destino}»`)
+      }
       await p.screenshot({ path: `${SALIDA}/${nombre}-portada.png` })
-      for (const ruta of ['/dashboard/entrevistas', '/sistema/administracion/usuarios', '/sistema/administracion/roles', '/dashboard/empleados', '/informe']) {
+      for (const ruta of ['/sistema/programa/levantamiento/entrevistas', '/sistema/programa/biblioteca', '/sistema/administracion/usuarios', '/sistema/administracion/roles', '/sistema/personas/padron', '/informe']) {
         const r = await p.goto(`${BASE}${ruta}`, { waitUntil: 'networkidle' })
         ver(r?.ok() && new URL(p.url()).pathname.startsWith(ruta.split('?')[0]), `abre ${ruta}`, `${r?.status()} ${p.url()}`)
       }
     }
 
     // La portada, pedida a mano: si no la tiene, lo manda a su primera pantalla.
+    // (`/dashboard` es una redirección: el panel vive en `/sistema`.)
     await p.goto(`${BASE}/dashboard`, { waitUntil: 'networkidle' })
-    ver(new URL(p.url()).pathname.startsWith('/dashboard'), 'la portada que no le toca lo deja en el panel', p.url())
+    ver(new URL(p.url()).pathname.startsWith('/sistema'), 'la portada que no le toca lo deja en la plataforma', p.url())
 
+    // «El canal» va en el menú de la cuenta, arriba a la derecha.
+    if (!(await p.getByRole('link', { name: /El canal|Ir al canal/ }).first().isVisible().catch(() => false))) {
+      await p.getByRole('button', { name: /tu cuenta/ }).first().click().catch(() => {})
+    }
     const alCanal = p.getByRole('link', { name: /El canal|Ir al canal/ }).first()
     ver((await alCanal.count()) === 1, 'el panel tiene el botón al canal')
     await alCanal.click()

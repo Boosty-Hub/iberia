@@ -247,8 +247,8 @@ export function MenuPersona({
         </div>
         <div className="p-1.5">
           {conPanel && (
-            <Link href="/dashboard" className="block rounded-lg px-3 py-2 hover:bg-marca-50">
-              El programa (panel)
+            <Link href="/sistema/programa" className="block rounded-lg px-3 py-2 hover:bg-marca-50">
+              El programa
             </Link>
           )}
           {conCanal && (

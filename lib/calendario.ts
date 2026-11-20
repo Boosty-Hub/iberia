@@ -1,5 +1,5 @@
 /**
- * El calendario de la Fase 2 y de New Iberia (`/dashboard/calendario`): el
+ * El calendario de la Fase 2 y de New Iberia (`/sistema/programa/calendario`): el
  * vocabulario de la tabla `calendario_actividades`. Las claves espejan los
  * `CHECK` de la migración `calendario`; los valores son lo que se ve.
  *
@@ -73,6 +73,8 @@ export type Actividad = {
   participantes: string
   nota: string
   orden: number
+  /** La identidad de su ficha en la plataforma (`?ficha=actividad:<ref>`). */
+  ref?: string
 }
 
 /** La ventana de la línea de tiempo: de octubre de 2026 a octubre de 2027, trece meses. */

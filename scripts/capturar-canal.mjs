@@ -109,7 +109,8 @@ await pagina.goto(`${BASE}/login`, { waitUntil: 'networkidle' })
 await pagina.fill('#email', EMAIL)
 await pagina.fill('#password', CLAVE)
 await pagina.click('button[type="submit"]')
-await pagina.waitForURL(/\/dashboard/, { timeout: 60000 })
+// Quien tiene panel cae en el panel o en la plataforma; el personal de planta, en el canal.
+await pagina.waitForURL(/\/(dashboard|sistema|canal)(\/|$|\?)/, { timeout: 60000 })
 console.log('  sesión iniciada\n')
 
 // --- Páginas ------------------------------------------------------------------

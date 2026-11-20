@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useActionState, useState } from 'react'
 import { useFormStatus } from 'react-dom'
-import type { EstadoFormulario } from '@/app/dashboard/entrevistas/acciones'
+import type { EstadoFormulario } from '@/app/sistema/programa/levantamiento/entrevistas/acciones'
 import { OpcionesArea } from '@/components/ui'
 import {
   ESTADOS_ENTREVISTA,

@@ -1720,3 +1720,11 @@ fieldset:disabled .nivel-opcion {
 .plataforma {
   --color-marca-400: #706a67;
 }
+
+/* El canal adopta el mismo token (20-nov-2026, integración del canal a la
+   plataforma): sus rótulos y fechas en marca-400 sobre blanco tampoco llegaban
+   al 4,5:1, y en el teléfono de planta, con sol o con el brillo bajo, se leen
+   peor que en una pantalla de oficina. */
+.canal {
+  --color-marca-400: #706a67;
+}

@@ -129,6 +129,39 @@ npm run probar:canal   -- --password "<clave>"   # 21 comprobaciones de RLS real
 npm run capturar:canal -- --password "<clave>" --flujo   # iPhone 14 + flujo de mensaje
 ```
 
+🔴 **Las tres suites del canal (`probar:canal`, `probar:bloqueos`, `capturar:canal`) apuntan a PRODUCCIÓN
+por defecto** (leen `NEXT_PUBLIC_SUPABASE_URL`/`…_PUBLISHABLE_KEY`/`SUPABASE_SECRET_KEY`). Contra pruebas se
+corren con esas tres variables sobrescritas con las `SUPABASE_PRUEBAS_*`, `BASE_URL=http://localhost:3005` y
+las cuentas que siembra `node --env-file=.env.local scripts/plataforma/sembrar-canal-pruebas.mjs --clave "<x>"`
+(`--email comunica.pruebas@plataforma.local`; contenido ficticio marcado «(demo)»; `--limpiar` lo borra todo).
+
+### El canal dentro de la plataforma (NUC-CAN, desde el 20 de noviembre de 2026)
+
+Migración `20261120232000_integracion_canal.sql`. Mismas URLs: la app nativa no se recompila.
+
+- **La administración vive en `/sistema/nucleo/canal`** (recurso del módulo: `modulo:reportes`; las
+  casillas `modulo:canal` y `modulo:reportes` no cambiaron): Resumen (cinco métricas del registro,
+  `ui.m_canal_*`), Publicaciones (archivar, restaurar, fijar, oficial —`canal_moderar_publicacion()`— y quién
+  publica o modera —`canal_autorizar()`—), Grupos y Uso (tablas `canal-grupos` y `canal-uso`), y Moderación.
+  🔴 **Todo lo que ve el equipo son cuentas**: `ui.canal_*` y las métricas corren como dueñas, piden la casilla
+  adentro y nunca devuelven el texto de un mensaje ni quién le escribe a quién. No se abre ningún camino nuevo
+  a `mensajes`.
+- **La app suma lo de la plataforma para el trabajador**: «Para ti» en Inicio (sus tareas de `nucleo.tarea` y
+  sus avisos sin leer), la campana con los avisos de `nucleo.notificacion` en Avisos, **Mis tareas**
+  (`/canal/tareas`) y **Mi cargo** (`/canal/yo/cargo`: plaza, unidad, a quién reporta, procesos de su cargo y de
+  su unidad, documentos vigentes generales de esos procesos). Mi cargo sale de `nucleo.mi_cargo()`,
+  `mis_procesos()` y `mis_documentos()`, que **solo responden por `mi_empleado()`**: no reciben a otra persona.
+- **Tocar un aviso** es una acción (`abrirAviso`, POST: la precarga de un enlace no marca nada leído): lo marca
+  leído y va a la ficha en `/sistema` si quien lo toca puede ver el objeto; una tarea, a Mis tareas; si no, a la
+  vista de lectura `/canal/avisos/[id]`.
+- **«Plataforma»** (antes «Panel») lleva a `/sistema` y sale con `tienePlataforma()` de `lib/canal.ts`.
+- 🔴 **`empleados` tiene trigger de columnas** (`a_empleados_proteger_acceso`): «actualizo mi ficha» dejaba a
+  cualquiera darse `puede_publicar`/`es_moderador` o cambiarse nivel y área por la API. Ahora quién publica o
+  modera lo cambia `modulo:reportes` editar; identidad, nivel, área y cuenta, solo el equipo editor o la clave
+  de servicio.
+- El canal adopta el token de contraste de la plataforma (`marca-400` = `#706a67` dentro de `.canal`) y cada
+  ruta del canal tiene su `loading.tsx` (`EsqueletoCanal`).
+
 ## La app de Iberia (`ios/`) — el canal en el App Store
 
 El canal empaquetado para el iPhone (PEN-14661), desde el 23 de octubre de 2026. Va en la misma
@@ -322,7 +355,8 @@ Migración `20261106120000_reportes_y_bloqueos.sql`.
 - **Quien fue reportado no ve quién lo reportó**: `reportes` solo se lee con la casilla
   `modulo:reportes`, y el reporte no cambia nada visible para el autor. Quien reporta tampoco lee
   la tabla: se le confirma y ya.
-- **El equipo los ve en `/dashboard/reportes`** («El canal» en la barra): `modulo:reportes` con ver y
+- **El equipo los ve en Canal › Moderación** (`/sistema/nucleo/canal/moderacion`; `/dashboard/reportes`
+  redirige desde el 20 de noviembre de 2026): `modulo:reportes` con ver y
   editar, de fábrica para Consultor. Por cada uno: qué decía, quién lo escribió, quién lo reportó,
   motivo y fecha. **Marcar revisado** y **Ocultar lo reportado**, que no destruye nada: mensaje y
   comentario pasan a `oculto`, una publicación a `archivado`, y «Restaurar» lo devuelve. Ocultar da
@@ -494,8 +528,8 @@ y una ruedita en vez de piernas.
 - **«No soy yo» abre dónde escribir quién es** (`QuienEres`): el nombre —obligatorio— y el
   área —solo si también está mal—. Queda en `correcciones_padron` como **aviso para Capital
   Humano, no como dato**: el padrón no se toca desde el teléfono, porque de ahí salen los
-  certificados. El equipo lo ve arriba del padrón en `/dashboard/empleados` y lo saca con
-  «Ya se le pasó». Lo que decía el padrón lo congela un trigger —no lo manda el navegador—, y
+  certificados. El equipo lo ve arriba del padrón en `/sistema/personas/padron` (y en la pestaña Padrón de la
+  ficha de la persona) y lo saca con «Ya se le pasó». Lo que decía el padrón lo congela un trigger —no lo manda el navegador—, y
   lo único que cambia en el acto es `matriculas.nombre_corto`: Ajito deja de llamarla por el
   nombre que estaba mal. `probar:adiestramiento` comprueba que solo su dueño la escribe, que
   no se la da por resuelta y que otra persona no la lee.
@@ -681,7 +715,7 @@ Recorre el chat en un iPhone 14 con una cuenta de prueba del equipo: la entrada 
 índice, la fecha, la voz, la memoria, un dibujo, recargar, «Nueva», y que otra persona no
 lea ni escriba en la conversación ajena. Gasta unos centavos.
 
-## El empujón (`/dashboard/adiestramiento/recordatorios`)
+## El empujón (`/sistema/nucleo/formacion/recordatorios`)
 
 El curso es a su ritmo y los gerentes piden que avancen. Entre esas dos cosas hay un
 hueco: doscientas personas que empiezan la lección 0 un martes y no vuelven.
@@ -711,7 +745,7 @@ hueco: doscientas personas que empiezan la lección 0 un martes y no vuelven.
 - **`{enlace}`** es el del curso. El personal —el de `accesos`— se manda desde el padrón
   al matricular; ver abajo.
 
-## El padrón (`/dashboard/empleados`) y el enlace personal
+## El padrón (`/sistema/personas/padron`) y el enlace personal
 
 La mesa de trabajo de las ~200 personas: quién está, quién tiene teléfono, quién está
 matriculado, a quién se le mandó su enlace y **quién ha entrado con él**. Desde ahí se
@@ -844,7 +878,7 @@ toda caja con más de un hijo —`C.I. {cedula}` son dos— y encoge lo que no q
 con `flexShrink: 0` y un espaciador que absorbe.
 
 **Una sola hoja para dos públicos.** `components/certificado-hoja.tsx` la ve el
-trabajador en su teléfono y también sale en `/dashboard/adiestramiento/certificados`,
+trabajador en su teléfono y también sale en `/sistema/nucleo/formacion/certificados/imprimir`,
 que es de donde Boosty imprime los doscientos para que el Gerente de Planta los entregue
 en mano. Si fueran dos maquetas, el papel y la pantalla dirían cosas distintas del mismo
 curso, y el papel es el que queda. Los estilos de impresión están al final de
@@ -991,6 +1025,16 @@ El sistema que reemplaza al dashboard para operar a Iberia (Etapa 1 + rediseño 
   por lo que se ve** (2.5.3): `Desplegable` usa su texto y deja `etiqueta` de `title`; solo uno de icono
   lleva `soloIcono`. ⚠️ Un `sr-only` dentro de una tabla con desplazamiento necesita un padre `relative`:
   si no, se sale del contenedor y ensancha la página en el teléfono.
+- **Formación y padrón (integración del panel viejo, 20-nov-2026)**: el curso de Ajito es NUC-FOR en
+  `/sistema/nucleo/formacion` (Resumen con las métricas `formacion_*`; Avance por área y oficio —cuentas,
+  `ui.formacion_avance()`, con la puerta del tablero— y por persona —`modulo:empleados` · editar—;
+  Certificados, con el lote para imprimir en `/imprimir` y «entregado en mano»; Recordatorios). El padrón es
+  «Padrón y accesos» (`/sistema/personas/padron`, módulo de interfaz `PER-PAD` de `dominios.ts`, no del plan):
+  `TablaDatos` con selección y acciones en lote (`lote`), y la ficha `persona` suma Padrón · Accesos ·
+  Formación con `modulo:empleados` · editar (`lib/plataforma/fichas/padron.ts`). Lo que se hace con el padrón
+  vive una sola vez en `lib/padron-acciones.ts`. Las rutas viejas de `/dashboard` redirigen con sus parámetros.
+  En pruebas, `scripts/plataforma/importar-formacion.mjs [--audios]` copia de producción (solo lectura) el
+  estado del curso: sin el token de WhatsApp, sin respuestas y, de `accesos`, solo el estado (nunca el enlace).
 - **Pruebas, siempre contra el proyecto de PRUEBAS** (`SUPABASE_PRUEBAS_*`, cuentas
   `<rol>.pruebas@plataforma.local`): `dev-pruebas.mjs` (dev en el 3005), `produccion-pruebas.mjs` (build de
   producción en el 3007), `sql-pruebas.mjs` (SQL por la Management API, solo al de pruebas; `--registrar`
@@ -1063,7 +1107,8 @@ Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).
   nada: la API de Supabase es pública.
 - **Producción está en Netlify**, en la cuenta de Iberia, y cada push a `main` despliega.
   Cómo está configurado y qué variables lleva, en `DESPLIEGUE.md`.
-- **Bucket privado**: se descarga por `app/dashboard/archivos/[id]/descargar/route.ts`,
+- **Bucket privado**: se descarga por `app/sistema/programa/levantamiento/archivos/[id]/descargar/route.ts`
+  (las rutas viejas de `/dashboard/archivos/…` redirigen ahí),
   que exige sesión y firma una URL de 60 s.
 - **Y se previsualiza por `[id]/ver`**, que es otra ruta por una diferencia de una palabra:
   `descargar` firma con `{ download: nombre }`, lo que pone `Content-Disposition: attachment`
@@ -1227,7 +1272,24 @@ npm run secciones -- --subir                # y de vuelta a la base, solo las qu
 npm run generar:guias                       # las 3 guías de entrevista adaptadas a Iberia
 ```
 
-## El programa (`/dashboard/programa`)
+## El programa (`/sistema/programa`, PRG)
+
+Desde el 20 de noviembre de 2026 (decisión de Gabriel) **todo lo del panel viejo vive en la plataforma**, en el dominio
+Programa; solo el informe se queda afuera. Tres módulos de `control.modulo`: **PRG-PLN · Plan y seguimiento**
+(`/sistema/programa`: Resumen · Consumos · Línea de tiempo · Calendario · IA), **PRG-LEV · Levantamiento**
+(`/sistema/programa/levantamiento`: Resumen · Entrevistas · Archivos · IA) y **PRG-BIB · Biblioteca**
+(`/sistema/programa/biblioteca`, con el enlace al informe). Las casillas son **las mismas de siempre**
+(`modulo:panel`, `modulo:entrevistas`, `modulo:archivos`, `modulo:programa`, `modulo:calendario`); PRG-PLN sale en el
+menú también con solo el calendario y PRG-LEV con solo el expediente (`RECURSOS_ALTERNOS` de `lib/plataforma/dominios.ts`).
+Las cifras son del registro (`programa_horas_mes` —en horas, contra 107—, `programa_sesiones`, `programa_entregables`,
+`levantamiento_entrevistas`, `levantamiento_archivos`; migración `integracion_programa`). Fichas `entrevista`, `archivo`
+y `actividad` (esta por `calendario_actividades.ref`) en `lib/plataforma/fichas/programa.ts`. 🔒 **La transcripción, las
+notas del consultor y los hallazgos sin validar son «solo Boosty»**: la app solo se los muestra al equipo (`esEditor`).
+⚠️ La RLS de `transcripcion_segmentos` sigue abierta a cualquier sesión (`using (true)`): el perímetro lo pone la app.
+Cada ruta vieja de `/dashboard/**` redirige a la nueva con sus parámetros; `/dashboard` va a Mi día (o a la primera
+pantalla de quien no tiene `modulo:panel`). El layout y la barra del panel viejo se retiraron.
+
+Lo de abajo sigue valiendo tal cual para Consumos (antes `/dashboard/programa`).
 
 En el panel se llama **«Consumos y línea de tiempo»** («Consumos» en la barra) desde el 25 de
 septiembre: «El programa» no decía qué había adentro.
@@ -1323,7 +1385,7 @@ de consumo**. Este módulo es de donde sale ese reporte.
   una fila mensual que mezclara horas que cuentan con horas que no, no se podría leer.
   El script y la pantalla tienen que usar el mismo corte o el reporte dice dos cosas.
 
-## El calendario (`/dashboard/calendario`)
+## El calendario (`/sistema/programa/calendario`)
 
 Lo que viene después de la Fase 1, en un solo calendario: la **Fase 2 · Aliviar** (la línea
 tecnológica, noviembre de 2026 a abril de 2027) y **New Iberia** (desarrollo organizacional y
@@ -1396,7 +1458,9 @@ cambia `scripts/generar-guias.mjs` y se regeneran, igual que la marca y las fich
   macroprocesos y sus N1 es su base, y si la Junta pide después los manuales, eso es otro
   proyecto con el levantamiento ya hecho. Va dicho dentro de las guías.
 
-## El panel (`/dashboard`)
+## El panel (`/dashboard`) — retirado el 20 de noviembre de 2026
+
+Todo se mudó a la plataforma (ver «El programa»). Lo de abajo es historia: las reglas de cada módulo valen allá.
 
 La barra tiene cinco grupos: **Levantamiento** (panel, entrevistas, archivos y «Consumos», que
 es `/dashboard/programa`), **Fase 2 · New Iberia** (el calendario, desde el 28 de octubre de
@@ -1816,7 +1880,7 @@ el inventario y `riesgo` la sección de supuestos y riesgos.
   guarda la cita de cada uno y de la que sale el expediente—, y validar o descartar pasa a ser
   trabajo de sesión, sobre el expediente.
 
-## El levantamiento (`/dashboard/entrevistas`)
+## El levantamiento (`/sistema/programa/levantamiento`)
 
 Las transcripciones se cargan con **`importar:transcripciones`**, no por la interfaz. El
 importador de la interfaz sirve para una suelta, pero deja los hablantes como los nombró

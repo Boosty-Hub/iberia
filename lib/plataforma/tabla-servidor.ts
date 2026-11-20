@@ -25,7 +25,8 @@ export type FuenteTabla = {
   /** El código del módulo (`control.modulo`): ahí se listan sus vistas. */
   modulo: string
   recurso: string
-  accion?: 'ver' | 'crear'
+  /** Lo que exige el recurso. `editar` para las que leen vistas que solo responden al equipo (el padrón). */
+  accion?: 'ver' | 'crear' | 'editar'
   ruta: string
   columnas: Columna[]
   /** La columna que identifica la fila. */
@@ -44,6 +45,12 @@ export type FuenteTabla = {
    * filtros pedían la función tres veces por render.
    */
   enMemoria?: boolean
+  /**
+   * Con `enMemoria`: arma todas las filas en el servidor en vez de leerlas de
+   * una sola consulta (el padrón cruza su vista con la estructura y con las
+   * cuentas por el nombre). Corre con la sesión de quien mira.
+   */
+  leer?: (supabase: Cliente, ctx: ContextoGlobal) => Promise<Fila[]>
   /** La consulta base, con el contexto (fecha, escenario) ya aplicado. */
   consulta: (supabase: Cliente, ctx: ContextoGlobal, select: string, opciones?: { count?: 'exact' }) => Consulta
 }
@@ -97,6 +104,7 @@ function filasDe(f: FuenteTabla, ctx: ContextoGlobal): Promise<Fila[]> {
   if (!p) {
     p = (async () => {
       const supabase = await createClient()
+      if (f.leer) return f.leer(supabase, ctx)
       const { filas } = await escanear((d, h) => f.consulta(supabase, ctx, '*').order(f.claveFila).range(d, h))
       return filas
     })()

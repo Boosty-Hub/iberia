@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { OpcionesArea } from '@/components/ui'
 import { useRef, useState, useTransition } from 'react'
-import { descartarSubida, registrarArchivo } from '@/app/dashboard/archivos/acciones'
+import { descartarSubida, registrarArchivo } from '@/app/sistema/programa/levantamiento/archivos/acciones'
 import { IconoAlerta, IconoCheck, IconoSubir } from '@/components/iconos'
 import { BUCKET_ARCHIVOS } from '@/lib/storage'
 import { createClient } from '@/lib/supabase/client'

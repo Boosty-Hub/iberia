@@ -297,7 +297,7 @@ export async function publicarCertificado(datos: FormData): Promise<{ ok: boolea
  *
  * Lo que escribe queda en `correcciones_padron` como aviso para Capital
  * Humano —el padrón no se toca desde el teléfono: de ahí salen los
- * certificados— y el equipo lo ve en `/dashboard/empleados`. Lo único que
+ * certificados— y el equipo lo ve en `/sistema/personas/padron`. Lo único que
  * cambia en el acto es cómo la llama Ajito: el nombre del padrón era justo el
  * que estaba mal, y seguir diciéndolo en la consigna de al lado sería no haberla
  * oído.

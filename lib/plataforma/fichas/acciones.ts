@@ -2,6 +2,8 @@ import type { Sesion } from '@/lib/auth'
 import type { ResultadoAccionFicha, TipoFicha } from '@/lib/plataforma/ficha-tipos'
 import { ACCIONES_ORGANIZACION } from '@/lib/plataforma/fichas/organizacion-acciones'
 import { manejarDocumento, manejarProceso } from '@/lib/plataforma/fichas/procesos'
+import { manejarPadron } from '@/lib/plataforma/fichas/padron'
+import { manejarActividad } from '@/lib/plataforma/fichas/programa'
 
 /**
  * El registro de lo que se puede hacer desde una ficha, por tipo. Cada módulo
@@ -16,6 +18,10 @@ export type ManejadorFicha = (sesion: Sesion, id: string, accion: string, entrad
 
 export const ACCIONES_FICHA: Partial<Record<TipoFicha, ManejadorFicha>> = {
   ...ACCIONES_ORGANIZACION,
+  // La persona: lo del padrón (`padron.*`) va a su manejador; lo de la estructura, al de Organización.
+  persona: (sesion, id, accion, e) => (accion.startsWith('padron.') ? manejarPadron(sesion, id, accion, e) : ACCIONES_ORGANIZACION.persona!(sesion, id, accion, e)),
   proceso: manejarProceso,
   documento: manejarDocumento,
+  // Programa: estado, fecha confirmada y nota de una actividad del calendario.
+  actividad: manejarActividad,
 }

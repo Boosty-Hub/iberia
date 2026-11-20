@@ -2,7 +2,7 @@
 
 import { useActionState, useMemo, useState, type ReactNode } from 'react'
 import { useFormStatus } from 'react-dom'
-import { actualizarActividad, type EstadoActualizacion } from '@/app/dashboard/calendario/acciones'
+import { actualizarActividad, type EstadoActualizacion } from '@/app/sistema/programa/calendario/acciones'
 import {
   ESTADOS_ACTIVIDAD,
   FRENTE,
@@ -21,9 +21,10 @@ import {
   type Frente,
 } from '@/lib/calendario'
 import { cn } from '@/lib/utils'
+import { BotonFicha } from '@/components/sistema/colaboracion/boton-ficha'
 
 /**
- * La vista del calendario (`/dashboard/calendario`), adaptada del HTML que armó
+ * La vista del calendario (`/sistema/programa/calendario`), adaptada del HTML que armó
  * Gabriel el 28 de octubre de 2026: lo de los próximos 14 días, los frentes en la
  * línea de tiempo y la agenda mes a mes, que se filtra por frente y por
  * responsable. Quien puede editar actualiza cada fila ahí mismo.
@@ -431,7 +432,8 @@ function FilaAgenda({ actividad: a, puedeEditar }: { actividad: Actividad; puede
           <Punto frente={a.frente} />
           <div className="min-w-0">
             <p className="text-sm font-semibold text-marca-900">
-              {a.titulo}
+              {/* En la plataforma, el título abre la ficha de la actividad. */}
+              {a.ref ? <BotonFicha tipo="actividad" id={a.ref}>{a.titulo}</BotonFicha> : a.titulo}
               {a.tipo !== 'actividad' && (
                 <span
                   className={cn(

@@ -223,13 +223,13 @@ const PAGINAS = [
   { nombre: '03-leccion-0', ruta: '/canal/adiestramiento/0', movil: true },
   { nombre: '04-leccion-3', ruta: '/canal/adiestramiento/3', movil: true },
   { nombre: '05-leccion-7', ruta: '/canal/adiestramiento/7', movil: true },
-  { nombre: '06-panel-admin', ruta: '/dashboard/adiestramiento', movil: false },
+  { nombre: '06-panel-admin', ruta: '/sistema/nucleo/formacion', movil: false },
   // La hoja que Boosty manda a imprimir para que el Gerente de Planta la
   // entregue en mano. Es la misma que ve el trabajador en el teléfono.
-  { nombre: '10-certificados', ruta: '/dashboard/adiestramiento/certificados', movil: false },
+  { nombre: '10-certificados', ruta: '/sistema/nucleo/formacion/certificados/imprimir', movil: false },
   // El empujón y la conexión con WhatsApp, que hoy está sin conectar: hay que
   // ver que la página se sostenga apagada, que es como va a estar meses.
-  { nombre: '11-empujon', ruta: '/dashboard/adiestramiento/recordatorios', movil: false },
+  { nombre: '11-empujon', ruta: '/sistema/nucleo/formacion/recordatorios', movil: false },
 ]
 
 await mkdir(SALIDA, { recursive: true })

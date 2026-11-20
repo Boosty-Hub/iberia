@@ -128,7 +128,7 @@ export function puede(sesion: Sesion | null | undefined, recurso: string, accion
  * que lo dice en vez de un bucle de redirecciones.
  */
 export function destinoInicial(sesion: Sesion): string {
-  if (puede(sesion, 'modulo:panel')) return '/dashboard'
+  if (puede(sesion, 'modulo:panel')) return '/sistema'
   if (puede(sesion, 'modulo:canal')) return '/canal'
   const panel = inicioDelPanel(sesion)
   if (panel) return panel
@@ -142,16 +142,17 @@ export function destinoInicial(sesion: Sesion): string {
  * puerta al panel llevaría a una pantalla que la devuelve.
  */
 const PANTALLAS_PANEL: [ruta: string, recurso: string, accion: Accion][] = [
-  ['/dashboard', 'modulo:panel', 'ver'],
-  ['/dashboard/entrevistas', 'modulo:entrevistas', 'ver'],
-  ['/dashboard/archivos', 'modulo:archivos', 'ver'],
-  ['/dashboard/programa', 'modulo:programa', 'ver'],
-  ['/dashboard/calendario', 'modulo:calendario', 'ver'],
-  ['/dashboard/adiestramiento', 'modulo:adiestramiento', 'ver'],
-  ['/dashboard/adiestramiento/certificados', 'modulo:certificados', 'ver'],
-  ['/dashboard/adiestramiento/recordatorios', 'modulo:recordatorios', 'editar'],
-  ['/dashboard/empleados', 'modulo:empleados', 'editar'],
-  ['/dashboard/reportes', 'modulo:reportes', 'ver'],
+  // El panel viejo se mudó a la plataforma (20-nov-2026): su portada es Mi día.
+  ['/sistema', 'modulo:panel', 'ver'],
+  ['/sistema/programa/levantamiento/entrevistas', 'modulo:entrevistas', 'ver'],
+  ['/sistema/programa/levantamiento/archivos', 'modulo:archivos', 'ver'],
+  ['/sistema/programa', 'modulo:programa', 'ver'],
+  ['/sistema/programa/calendario', 'modulo:calendario', 'ver'],
+  ['/sistema/nucleo/formacion', 'modulo:adiestramiento', 'ver'],
+  ['/sistema/nucleo/formacion/certificados', 'modulo:certificados', 'ver'],
+  ['/sistema/nucleo/formacion/recordatorios', 'modulo:recordatorios', 'editar'],
+  ['/sistema/personas/padron', 'modulo:empleados', 'editar'],
+  ['/sistema/nucleo/canal', 'modulo:reportes', 'ver'],
   ['/sistema/administracion/usuarios', 'modulo:usuarios', 'ver'],
   ['/sistema/administracion/roles', 'modulo:roles', 'ver'],
 ]
@@ -186,16 +187,16 @@ export async function requerirPermiso(recurso: string, accion: Accion = 'ver'): 
     // queda en /sistema, en vez de saltar al panel o a «sin acceso».
     if (sesion.vistaComo || recurso.startsWith('sistema:')) redirect('/sistema?aviso=sin-permiso')
     const panel = inicioDelPanel(sesion)
-    redirect(panel === '/dashboard' ? '/dashboard?aviso=sin-permiso' : (panel ?? destinoInicial(sesion)))
+    redirect(panel === '/sistema' ? '/sistema?aviso=sin-permiso' : (panel ?? destinoInicial(sesion)))
   }
   return sesion
 }
 
-/** Exige rol admin o consultor. Los lectores de Iberia caen al dashboard. */
+/** Exige rol admin o consultor. Los lectores de Iberia caen a Mi día, con el aviso. */
 export async function requerirEditor(): Promise<Sesion> {
   const sesion = await requerirSesion()
   if (!ROLES_EDITORES.includes(sesion.perfil.rol as Rol)) {
-    redirect('/dashboard?aviso=solo-lectura')
+    redirect('/sistema?aviso=solo-lectura')
   }
   return sesion
 }
@@ -203,7 +204,7 @@ export async function requerirEditor(): Promise<Sesion> {
 export async function requerirAdmin(): Promise<Sesion> {
   const sesion = await requerirSesion()
   if (sesion.perfil.rol !== 'admin') {
-    redirect('/dashboard?aviso=solo-admin')
+    redirect('/sistema?aviso=solo-admin')
   }
   return sesion
 }

@@ -52,11 +52,11 @@ if (!CLAVE && !(URL_SUPA && CLAVE_PUB && SECRETO)) {
 
 const PAGINAS = [
   { nombre: '01-login', ruta: '/login', publica: true },
-  { nombre: '02-dashboard', ruta: '/dashboard' },
-  { nombre: '03-entrevistas', ruta: '/dashboard/entrevistas' },
-  { nombre: '04-entrevistas-importar', ruta: '/dashboard/entrevistas/importar' },
-  { nombre: '04b-entrevista-nueva', ruta: '/dashboard/entrevistas/nueva' },
-  { nombre: '05-archivos', ruta: '/dashboard/archivos' },
+  { nombre: '02-dashboard', ruta: '/sistema' },
+  { nombre: '03-entrevistas', ruta: '/sistema/programa/levantamiento/entrevistas' },
+  { nombre: '04-entrevistas-importar', ruta: '/sistema/programa/levantamiento/entrevistas/importar' },
+  { nombre: '04b-entrevista-nueva', ruta: '/sistema/programa/levantamiento/entrevistas/nueva' },
+  { nombre: '05-archivos', ruta: '/sistema/programa/levantamiento/archivos' },
   // Sin hallazgos ni editor del informe desde el 25 de septiembre: los hallazgos
   // se leen en el informe y el informe se escribe en las sesiones.
   { nombre: '10-usuarios', ruta: '/sistema/administracion/usuarios' },
@@ -73,10 +73,10 @@ const PAGINAS = [
   { nombre: '11g-informe-ia', ruta: '/informe/ia-en-el-sistema' },
   { nombre: '11h-informe-fichas-tecnicas', ruta: '/informe/fichas-tecnicas' },
   { nombre: '11i-informe-politica', ruta: '/informe/politica-ia' },
-  { nombre: '12-programa', ruta: '/dashboard/programa' },
+  { nombre: '12-programa', ruta: '/sistema/programa/consumos' },
   // La Fase 2 y New Iberia, desde el 28 de octubre de 2026.
-  { nombre: '12b-calendario', ruta: '/dashboard/calendario' },
-  { nombre: '13-empleados', ruta: '/dashboard/empleados' },
+  { nombre: '12b-calendario', ruta: '/sistema/programa/calendario' },
+  { nombre: '13-empleados', ruta: '/sistema/personas/padron' },
 ]
 
 /**
@@ -167,12 +167,13 @@ if (CLAVE) {
   await pagina.fill('#email', EMAIL)
   await pagina.fill('#password', CLAVE)
   await pagina.click('button[type="submit"]')
-  await pagina.waitForURL(/\/dashboard/, { timeout: 30000 })
+  // El panel viejo se mudó a la plataforma (20-nov-2026): se entra a Mi día.
+  await pagina.waitForURL(/\/sistema/, { timeout: 30000 })
   console.log('  sesión iniciada por el formulario')
 } else {
   await contexto.addCookies(await sesionAcunada())
-  await pagina.goto(`${BASE}/dashboard`, { waitUntil: 'networkidle' })
-  if (!/\/dashboard/.test(pagina.url())) {
+  await pagina.goto(`${BASE}/sistema`, { waitUntil: 'networkidle' })
+  if (!/\/sistema/.test(pagina.url())) {
     console.error(`\n✖ La cookie no valió: quedamos en ${pagina.url()}\n`)
     process.exit(1)
   }

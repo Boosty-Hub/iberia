@@ -5,6 +5,7 @@ import { leerEstado } from '@/lib/plataforma/tabla'
 import { consultarPagina, resumir, type FuenteTabla } from '@/lib/plataforma/tabla-servidor'
 import { TablaDatos, type VistaTabla } from '@/components/sistema/ui/tabla-datos'
 import type { MarcaCelda } from '@/lib/ia/niveles'
+import type { LoteTabla } from '@/lib/plataforma/tabla'
 
 /**
  * La forma corta de usar `TablaDatos` desde una página: lee el estado de la URL,
@@ -20,6 +21,7 @@ export async function TablaServidor({
   alAccion,
   marcas,
   vacio,
+  lote,
 }: {
   fuente: FuenteTabla
   sp: Record<string, string | string[] | undefined>
@@ -30,6 +32,8 @@ export async function TablaServidor({
   /** R4 · marcas ⚑ de la IA por fila y columna. */
   marcas?: Record<string, Record<string, MarcaCelda>>
   vacio?: string
+  /** Selección múltiple con acciones en lote (acciones de servidor que reciben las claves). */
+  lote?: LoteTabla
 }) {
   const estado = leerEstado(sp, fuente.columnas, { orden: fuente.orden.columna, dir: fuente.orden.dir, tamano: fuente.tamano })
   const supabase = await createClient()
@@ -68,6 +72,7 @@ export async function TablaServidor({
       alAccion={alAccion}
       marcas={marcas}
       vacio={vacio}
+      lote={lote}
     />
   )
 }

@@ -11,7 +11,7 @@ export default async function LoginPage({ searchParams }: PageProps<'/login'>) {
   const destino =
     destinoParam && destinoParam.startsWith('/') && !destinoParam.startsWith('//')
       ? destinoParam
-      : '/dashboard'
+      : '/'
 
   return (
     <main className="flex flex-1 items-center justify-center pt-[max(3rem,var(--seguro-arriba))] pr-[max(1rem,var(--seguro-der))] pb-[max(3rem,var(--seguro-abajo))] pl-[max(1rem,var(--seguro-izq))]">
