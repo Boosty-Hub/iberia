@@ -58,161 +58,76 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 - 🔴 **El plan gratuito de Supabase pausa el proyecto**: pasó antes del 19/10 y nadie podía entrar.
   Decidir si pasa a Pro (`PENDIENTES.md`).
 
-> **Plataforma Iberia (20/11):** la Etapa 1 está construida en la rama `plataforma/etapa-1`, contra un
-> Supabase de pruebas, **sin commit ni producción**. Ver la sesión 56.
+> **Plataforma Iberia (20/11):** la plataforma entera (Etapa 1, el rediseño y la integración del panel y
+> del canal) está en la rama `plataforma/etapa-1`, probada contra un Supabase de pruebas, **sin push**. En
+> producción solo entró el hotfix de lecturas. Ver la sesión 56.
 
 ---
 
-## 19 y 20 de noviembre · Sesión 56 — el levantamiento ISO, el plan maestro y la Etapa 1 de la plataforma
+## 19 y 20 de noviembre · Sesión 56 — levantamiento ISO, plan maestro y la Plataforma Iberia construida en pruebas
 
-Tres encargos de Gabriel, dos por Telegram y uno en la terminal.
+**Levantamiento ISO (19/11).** La carpeta del SGC del cliente («Procesos Iberia», 10.994 archivos, 22 GB) se movió al
+repositorio y se leyó archivo por archivo. Tanto esa carpeta como el análisis (`levantamiento-iso/`) quedan **fuera de git**,
+excluidos en `.git/info/exclude`. Lo que se encontró:
+- **No hay certificación ISO 9001.**
+- Hubo tres arranques (2002, 2005-08 y 2008); el trabajo de fondo fue entre 2009 y 2013.
+- ISODOCUMENT (2012) fracasó.
+- 🔴 Las presentaciones de inducción traen contraseñas en texto plano.
 
-**1. El levantamiento ISO (19/11).** La carpeta del SGC del cliente, «Procesos Iberia» (10.994
-archivos, 22 GB), se movió al repositorio y se leyó archivo por archivo. **Las dos carpetas están
-fuera de git** (`.git/info/exclude`, no `.gitignore`), igual que `levantamiento-iso/`, donde quedó
-el análisis.
-- **No hay evidencia de certificación ISO 9001.**
-- Hubo tres arranques: 2002-04, 2005-08 y 2008. El trabajo de fondo se hizo entre 2009 y 2013.
-- ISODOCUMENT, implantado en 2012, fracasó y en 2021 se volvió al «esquema manual».
-- 🔴 La carpeta trae **contraseñas en texto plano** en las presentaciones de inducción, además de datos
-  personales.
+**Plan maestro (20/11).** Está en `plataforma/plan/`, fuera de git, y lo escribieron 26 agentes:
+- Contenido: esqueleto, 11 capítulos, anexos A a E y decisiones G-01 a G-13.
+- **D-01:** la plataforma va en la misma app, el mismo repositorio y el mismo Supabase, en `/sistema`.
+- Tamaño: 65 módulos y 11 portales, con IA por niveles de N0 a N4.
+- ⚠️ Un agente publicó por error el cap. 03 como *artifact* privado. Gabriel todavía no dice si se borra.
 
-**2. El plan maestro de la Plataforma Iberia (20/11).** Lo escribieron 26 agentes y está en
-`plataforma/plan/`, fuera de git: esqueleto, once capítulos, anexos A a D, resumen y diez decisiones
-para Gabriel (G-01 a G-10).
-- Decisión D-01: **misma app, mismo repositorio y mismo Supabase, en la ruta `/sistema`**. El programa
-  de la Fase 1 queda dentro, como el dominio PRG.
-- La plataforma tiene 65 módulos y 11 portales. La IA va por niveles, de N0 a N4, con techos.
-- ⚠️ Un agente publicó por error el capítulo 03 como *artifact* privado en claude.ai. Se le preguntó a
-  Gabriel si se borra; todavía no ha contestado.
+**Lo que pidió Gabriel y lo que decidió, el mismo día y por notas de voz:**
+- **Etapa 1 (Anexo D):** procesos y estructura primero; todo editable; un solo sistema de usuarios, roles y permisos; dotación con costos y requisición de personal.
+- **El rediseño (Anexo E):** tras ver la Etapa 1 dijo que no priorizaba el dato. Ahora va una tabla densa con ficha lateral; organigrama y mapas en un lienzo que se mueve y se despliega con clic; tasas BCV en dólar y euro más el paralelo con su brecha; la IA visible.
+  - **Tasas:** la oficial se toma de bcv.org.ve y se verifica contra DolarApi; el paralelo sale de DolarApi.
+  - **Mejoras:** se aplican sobre la marcha, sin preguntar.
+- **Integración:** todo el panel viejo y el canal se integran a la plataforma; solo el informe queda afuera, intacto.
+- **Historial de cambios:** lo ve quien ve el objeto.
 
-**3. La Etapa 1, construida** (pedido de Gabriel por notas de voz: primero procesos, estructura y
-mapas; todo editable; un solo sistema de usuarios, roles y permisos; dotación con costos y requisición
-de personal). El plan de la etapa es el Anexo D:
-- **Supabase de pruebas «Iberia Pruebas»** (`wsqhsjbwkjlqrdxnyadq`, plan gratuito, en la
-  organización de Iberia). Sus claves están en `.env.local` como `SUPABASE_PRUEBAS_*`. Se le aplicaron
-  las 42 migraciones de siempre más once nuevas (`20261120*`), y se expusieron los esquemas `org`,
-  `sgc`, `flujo` y `control`. **Producción no se tocó.**
-- **Un solo sistema de permisos**:
-  - La matriz de siempre ahora incluye recursos `sistema:*`.
-  - Hay un nivel nuevo, `usuario` (rol «Usuario Iberia»), que trabaja en el sistema pero no es del equipo.
-  - Usuarios y roles se mudaron a `/sistema/administracion`; las rutas del panel redirigen.
-- **Pantallas**:
-  - Organización: organigrama vivo con fecha, edición con fecha efectiva, cargos, dotación con plan
-    del año y costos, y conciliación.
-  - Procesos: mapa, árbol, ficha PHVA con ciclo de aprobación, cruce SGC ↔ informe y escenarios de
-    procesos.
-  - Documentos: biblioteca de los 1.307 documentos.
-  - Flujos: requisición de personal digital (II-21-40-001) con su impacto, bandeja de aprobaciones,
-    escenarios de estructura, y rutas, catálogos y auditoría.
-- **Datos importados** desde semillas preparadas por agentes (`plataforma/semillas/`, NDA):
-  - Estructura: 45 unidades, 110 cargos, 106 plazas y 263 ocupaciones; 26 de ellas van por encima de
-    la dotación.
-  - Procesos: 204, de los cuales 47 traen su ficha PHVA.
-  - Documentos: 1.307.
-  - Conciliación: 74 puntos para Capital Humano y Calidad.
-- **Probado de punta a punta en pruebas** con cuentas ficticias: una requisición de cargo nuevo pasó
-  por sus 5 pasos y creó la plaza y los ingresos; un escenario de estructura se aprobó y se publicó con
-  fecha; dos ediciones de proceso y un escenario de procesos se aprobaron desde la bandeja.
+**Lo que se construyó.** Va en commits de la rama `plataforma/etapa-1`, sin push, y se probó **solo contra el Supabase de pruebas**: «Iberia Pruebas», `wsqhsjbwkjlqrdxnyadq`, con sus claves en `.env.local` como `SUPABASE_PRUEBAS_*`.
+
+| Commit | Qué trae |
+|---|---|
+| `56d8532` | Etapa 1: esquemas `org`, `sgc`, `flujo` y `control` con vigencias, escenarios y auditoría encadenada; requisición con impacto y ruta; matriz única con el nivel `usuario` |
+| `5abd12f` | Armazón con barra global y riel con nombres; `TablaServidor`, `FichaObjeto` y `KpiMetrica`; lienzo con React Flow 12.12.1; tasas en `control.tasa_cambio`, solo inserción, con el intermedio de Sectigo, porque el BCV manda la cadena rota |
+| `982912d` | Organización, Procesos y Documentos en el diseño nuevo; línea de tiempo con comentarios y @menciones; notificaciones; tareas; bandeja |
+| `de108d5` | IA visible (esquema `ia`, gobierno, actividad inmutable, 3 capacidades vivas); registro único de métricas (`ui.metrica`); Mi día por rol; Ctrl K |
+| `c7d4adc` | R6: arreglos de la revisión de seguridad independiente, suplencia por ruta, rendimiento, accesibilidad sin violaciones (axe), PDF del subárbol, `pasar-a-produccion.mjs` (simulacro) |
+| `c772687` | Integración en `/sistema` de Programa (consumos, calendario, entrevistas, archivos), Formación, Padrón y accesos y la administración del canal. La app `/canal` suma «Para ti», tareas, avisos y Mi cargo, con las mismas URLs para las apps nativas. `/dashboard` redirige a `/sistema` |
 
 **Lo que se decidió:**
-- La requisición digital **no pide edad, sexo, estatura ni peso**. Iban en el formato y chocan con la
-  no discriminación de la LOTTT. Un requisito físico se pide con su justificación (E1-04).
-- **Los costos son de referencia por cargo**, no el salario de nadie. Los componentes de ley son filas
-  editables con vigencia y quedan «por confirmar». Son perímetro de nómina (`sistema:costos`), sin IA.
-  No se cargó ni un costo ni una tasa: los pone Capital Humano.
-- Nada se borra: lo que cambia se cierra con fecha. La vigencia retroactiva no se permite.
+- La requisición digital no pide edad, sexo, estatura ni peso, porque chocan con la LOTTT.
+- Los costos son **de referencia por cargo**: componentes «por confirmar» con vigencia, en el perímetro de nómina y sin IA. No se cargó ningún costo ni tasa inventados.
+- Suplencia: nadie decide dos pasos de la misma solicitud. Solo las rutas operativas (requisición y ficha de proceso) permiten que administración supla pasos sin cuenta, y queda marcado; las de doble firma no lo permiten.
+- El techo de NUC-DOC-IA-02 es N4 solo para metadatos y N2 para marcar vigente.
 
 **Lo que se rompió o se encontró:**
-- 🔴 Las funciones de publicar (proceso, requisición, escenario) se podían ejecutar con cualquier
-  sesión, porque solo se habían revocado de `authenticated` y no de PUBLIC. Se cerró en la migración
-  `160000`.
-- Las políticas de `flujo.solicitud` y `flujo.paso` se llamaban entre sí en bucle: quien pedía una
-  requisición no la podía abrir. Corregido en la `172000`.
-- ⚠️ **Deriva en producción**: la función `renombrar_hablante` existe en la base pero no en ninguna
-  migración. La usa `scripts/sembrar-contexto.mjs`.
-- ⚠️ El Supabase de producción sigue en el plan gratuito (G-06).
+- 🔴 **En PRODUCCIÓN, desde agosto, cualquier sesión leía por la API las 27.951 líneas de transcripción y los 394 hallazgos con su cita.** Cuentas expuestas: las dos Marthas y las dos de revisión de Apple. Además, quien tenía su ficha enlazada podía darse permiso de publicar o moderar.
+  - **Corregido en producción el 20/11** con autorización de Gabriel (`20261120233000_hotfix_lecturas`). Comprobado: una cuenta lectora pasó de 27.951 a 0.
+  - Efecto pendiente: la portada del informe cuenta «hallazgos validados» con la sesión de quien lee; a las lectoras les da 0.
+- 🔴 **El padrón deja leer cédula, teléfono y correo a cualquier sesión.** En producción hay 4 de cada uno. Se corrige en la rama **antes de mandar enlaces a planta**.
+- 🔴 El Supabase de pruebas nació con el registro público abierto. Se cerró y no hubo intrusos; `importar-base` ahora se detiene si lo encuentra abierto.
+- **La revisión de seguridad independiente encontró 11 fallas, todas corregidas en la rama:**
+  - publicar sin aprobación;
+  - cambiar lo ya enviado;
+  - la auditoría filtraba el paralelo y el perímetro;
+  - un solo admin firmaba toda la cadena;
+  - actividad de IA falsa;
+  - `EXECUTE` abierto a `PUBLIC`.
+- Deriva en producción: `renombrar_hablante` existe sin migración.
+- `db push --include-all` empuja también las migraciones de otros; en pruebas se aplica por la Management API (`scripts/plataforma/sql-pruebas.mjs`).
 
-**El rediseño, el mismo día.**
-- **Qué pidió Gabriel:** que la Etapa 1 «no priorizó el dato» y que se rehiciera la interfaz desde cero.
-- **Lo que se le entregó para decidir:**
-  - el plan, en el Anexo E;
-  - dos modelos navegables, en `plataforma/diseno/`.
-- **Lo que pidió encima:**
-  - mapas y organigrama como lienzo que se mueve con el mouse y despliega cajas con un clic;
-  - dónde se ve la IA operando;
-  - tasas BCV dólar y euro y paralelo, con la brecha diaria.
-- **Lo que decidió:**
-  - la tasa oficial se toma de bcv.org.ve y se verifica contra DolarApi;
-  - el paralelo sale de DolarApi;
-  - se rehace todo el sistema con el diseño nuevo;
-  - las mejoras se aplican sobre la marcha, sin preguntar.
+**Dónde quedamos.** La plataforma está completa en la rama, salvo el seguimiento en curso: privacidad del padrón, portada del informe, comentarios en el programa y Ctrl K para sesiones. Faltan:
+- **Producción:** Supabase en plan pago, cuentas de los aprobadores enlazadas a sus fichas, el OK de Gabriel y correr `pasar-a-produccion.mjs`.
+- **Comercial:** espera las tablas de ventas.
+- **El espejo de JD:** espera de Iberia la VM, la cuenta de DB2 y la tarjeta.
+- **Fecha fija:** la base de conocimiento tiene que estar operando el 18-dic.
 
-**Lo que se construyó, en commits de la rama `plataforma/etapa-1` (sin push):**
-- `56d8532` · la Etapa 1, como base.
-- `5abd12f` · R0.
-  - **Armazón:**
-    - barra con fecha, escenario, Bs/USD, tasas, campana y Ctrl K;
-    - riel de dominios con nombres;
-    - TablaDatos con vistas guardadas, FichaObjeto, Kpi con sello de fuente.
-  - **Lienzo:** React Flow 12.12.1, que rinde igual que la 13 con 1.000 nodos.
-  - **Tasas:**
-    - `control.tasa_cambio` es de solo inserción;
-    - el BCV se lee con el intermedio de Sectigo, porque el sitio manda una cadena rota y Node falla;
-    - la ruta `/api/tasas/capturar` exige secreto.
-- `982912d` · R1, R2 y R3.
-  - **Organización** y **Procesos y Documentos** con el diseño nuevo.
-  - **Trabajo en equipo** (esquema `nucleo`): línea de tiempo con comentarios y @menciones, seguir un objeto, notificaciones, tareas y la bandeja rehecha.
-  - Las pruebas de punta a punta de requisición, escenario y ficha de proceso pasan sobre las pantallas nuevas.
-- `de108d5` · R4 y R5.
-  - **R4 · IA visible** (esquema `ia`):
-    - Gobierno de IA con interruptores, tope de 10 capacidades y tope de gasto.
-    - Actividad de la IA, que no se puede borrar.
-    - Tres capacidades reales:
-      - «Preguntar a la IA», en N1, con citas;
-      - recomendaciones sobre plazas, en N2, con ⚑ en la tabla;
-      - clasificación de documentos, en N2; en N4 solo toca metadatos y se puede deshacer en 12 h.
-    - Las pruebas costaron US$ 0,19.
-  - **R5 · registro único de métricas** (`ui.metrica`, 22): «procesos con ficha» da 46/185 en todas partes. Además:
-    - Mi día por rol, con portadas editables;
-    - Ctrl K completo;
-    - las 85 políticas RLS evalúan `puede()` una vez por consulta, y `ui.procesos` bajó de 0,3 s a 0,08 s.
-
-**Lo que se rompió o se encontró:**
-- 🔴 **El Supabase de pruebas nació con el registro público abierto.** Con el alta que toma el rol de los metadatos, cualquiera se hacía administrador. Se cerró el 20/11; solo había cuentas de prueba. Desde ahora `importar-base` falla si está abierto.
-- La auditoría dejaba leer montos de nómina a quien tenía permiso de auditoría. Corregido en la `200000`.
-- `publicar_escenario` fallaba con versiones del mismo día o programadas. Corregido.
-- Un `db push --include-all` de un agente le quitó el permiso de ejecución a las funciones de bloqueos del canal en pruebas. R3 lo restituyó, y `probar:bloqueos` da 68/68 en pruebas.
-- **Inconsistencia de cifras:** «procesos con ficha» daba 48/205 en Mi día y 46/185 en Procesos. Lo resolvió R5.
-
-**R6 · endurecer**, en el commit siguiente:
-- **Revisión de seguridad independiente:** 4 altos, 4 medios y 3 bajos, todos corregidos en `221000_r6_seguridad` y probados.
-  - Publicar procesos sin aprobación.
-  - Cambiar escenarios y requisiciones ya enviados.
-  - La auditoría filtraba el paralelo y documentos de perímetro.
-  - Un solo admin firmaba toda una cadena.
-  - Actividad de la IA falsa y topes de la IA saltables.
-  - Conciliación a nombre de otro.
-  - Lecturas del paralelo sin registrar.
-  - Función de EXECUTE abierta a PUBLIC.
-  - El secreto de tasas se comparaba sin `timingSafeEqual`.
-- **Suplencia (`222000`):**
-  - Nadie decide dos pasos de la misma solicitud.
-  - La excepción es solo la suplencia de administración en pasos sin cuenta, y solo en rutas que lo permitan (requisición, ficha de proceso). Queda marcada «por suplencia».
-  - Las rutas de doble firma (escenarios, nivel de IA) no la permiten.
-  - La salida de fondo: enlazar las cuentas de los aprobadores antes de producción.
-- **Rendimiento con build de producción:**
-  - TTFB de 450–940 ms a 240–380 ms.
-  - LCP de 0,8–1,3 s a 0,6–0,8 s.
-  - INP de 16–32 ms.
-  - El resto es red Caracas–us-east-1.
-- **Accesibilidad (axe, WCAG 2.2 AA):** de 69 violaciones a 0.
-- **Teléfono:** sin desbordes; un dedo arrastra y dos acercan en el lienzo (falta un equipo real).
-- **PDF del subárbol** con cajetín.
-- **Guion `pasar-a-produccion.mjs`** (simulacro): plan Free, 22 migraciones pendientes, 7 esquemas por exponer.
-- **Suites contra pruebas:** colaboración, r5, r6, lienzo, armazón, IA y bloqueos sin fallos. `probar-permisos` da los 2 fallos conocidos, por datos que pruebas no tiene.
-
-**Dónde quedamos**: el rediseño, de R0 a R6, en la rama. Para producción hacen falta el OK de Gabriel, Supabase en plan pago y correr `pasar-a-produccion.mjs --ejecutar --confirmo`. Lo que falta está en `PENDIENTES.md`, «Plataforma Iberia · Etapa 1».
+Todo, con su dueño, en `PENDIENTES.md`.
 
 ---
 
