@@ -37,10 +37,10 @@ export function BotonBuscar({ compacto = false }: { compacto?: boolean }) {
       type="button"
       onClick={abrirPaleta}
       className={cn(CTL, 'w-full max-w-[420px] min-w-[150px] flex-1 justify-start text-[#c9c6c0]')}
-      aria-label="Buscar en la plataforma (Ctrl K)"
     >
       <IconoLupa className="h-4 w-4 shrink-0" />
       <span className="truncate">Buscar…</span>
+      <span className="sr-only"> en la plataforma</span>
       <kbd className="ml-auto rounded border border-[#5a5853] px-1.5 font-sans text-[10px] text-[#aaa]">Ctrl K</kbd>
     </button>
   )
@@ -229,7 +229,8 @@ export function MenuPersona({
 }) {
   return (
     <Desplegable
-      etiqueta={`Tu cuenta: ${nombre}`}
+      etiqueta={`${iniciales} · tu cuenta: ${nombre}`}
+      soloIcono
       alinear="der"
       ancho="w-64"
       claseBoton="grid h-8 w-8 place-items-center rounded-full bg-[#5a5853] text-xs font-bold text-white hover:bg-[#6a6863] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"

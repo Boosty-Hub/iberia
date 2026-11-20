@@ -96,6 +96,13 @@ export default async function RutaPage({ params }: PageProps<'/sistema/administr
             <input type="checkbox" name="activa" defaultChecked={ruta.activa} className="accent-[var(--color-acento-600)]" />
             Activa
           </label>
+          <label className="flex min-h-10 items-start gap-2 text-sm text-marca-700" title="Solo en pasos cuyo aprobador no tiene cuenta. Queda marcado «por suplencia».">
+            <input type="checkbox" name="permite_suplencia_repetida" defaultChecked={ruta.permite_suplencia_repetida} className="mt-1 accent-[var(--color-acento-600)]" />
+            <span>
+              Una misma persona de administración puede suplir varios pasos sin cuenta
+              <span className="block text-xs text-marca-500">Para rutas operativas. No lo actives en las de doble firma (escenarios, nivel de IA).</span>
+            </span>
+          </label>
           <Enviar clase="btn-primario">Guardar</Enviar>
         </FormAccion>
       )}

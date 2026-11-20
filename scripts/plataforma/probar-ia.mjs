@@ -30,7 +30,27 @@ if (!URL_SUPA || !SECRETO || !URL_SUPA.includes('wsqhsjbwkjlqrdxnyadq')) throw n
 
 const admin = createClient(URL_SUPA, SECRETO, { auth: { persistSession: false } })
 const anon = createClient(URL_SUPA, PUB, { auth: { persistSession: false } })
-const CUENTAS = { admin: 'admin.pruebas@plataforma.local', consultor: 'consultor.pruebas@plataforma.local', lector: 'lector.pruebas@plataforma.local' }
+const CUENTAS = { admin: 'admin.pruebas@plataforma.local', consultor: 'consultor.pruebas@plataforma.local', lector: 'lector.pruebas@plataforma.local', aprobador: 'aprobador.pruebas@plataforma.local' }
+
+// Una «doble aprobación» son dos personas distintas, y ninguna es quien pide
+// (R6 · M1): con admin pidiendo, firman el consultor y una tercera cuenta de
+// pruebas, «aprobador», con el rol Consultor. Se crea sola la primera vez.
+async function asegurarAprobador() {
+  const { data: lista } = await admin.auth.admin.listUsers({ perPage: 200 })
+  let u = lista?.users?.find((x) => x.email === CUENTAS.aprobador)
+  if (!u) {
+    const { data, error } = await admin.auth.admin.createUser({
+      email: CUENTAS.aprobador,
+      email_confirm: true,
+      user_metadata: { nombre_completo: 'Aprobación de pruebas', rol_clave: 'consultor', organizacion: 'boosty' },
+    })
+    if (error) throw new Error(`no se pudo crear ${CUENTAS.aprobador}: ${error.message}`)
+    u = data.user
+  }
+  const { data: rol } = await admin.from('roles').select('id').eq('clave', 'consultor').single()
+  await admin.from('profiles').update({ rol_id: rol.id, activo: true, nombre_completo: 'Aprobación de pruebas' }).eq('id', u.id)
+}
+await asegurarAprobador()
 
 let fallos = 0
 const ok = (cond, texto) => {
@@ -63,6 +83,7 @@ const sLector = await sesion(CUENTAS.lector)
 const cAdmin = cliente(sAdmin)
 const cConsultor = cliente(sConsultor)
 const cLector = cliente(sLector)
+const cAprobador = cliente(await sesion(CUENTAS.aprobador))
 const inicio = new Date().toISOString()
 
 await mkdir('capturas/sistema', { recursive: true })
@@ -115,7 +136,9 @@ try {
   ok(act?.length === 1 && act[0].actor_es_ia === false, 'la decisión quedó en ia.actividad como de una persona')
   const { data: ev } = await admin.schema('nucleo').from('evento').select('tipo').eq('objeto_id', objetivo.objeto_id).in('tipo', ['ia', 'sistema'])
   ok((ev ?? []).some((e) => e.tipo === 'ia') && (ev ?? []).some((e) => e.tipo === 'sistema'), 'la línea de tiempo de la plaza tiene la entrada de la IA y la decisión')
-  const { data: aud } = await admin.schema('control').from('auditoria').select('actor_es_ia').eq('esquema', 'ia').eq('tabla', 'actividad').gte('en', SIN_MODELO ? new Date(Date.now() - 7 * 86_400_000).toISOString() : inicio).eq('actor_es_ia', true).limit(1)
+  const { data: aud } = await admin.schema('control').from('auditoria').select('actor_es_ia').eq('esquema', 'ia').eq('tabla', 'actividad')// Ventana de 7 días: una corrida sin plazas nuevas que proponer no crea
+  // actividad de la IA antes de este punto, y eso no es una falla.
+  .gte('en', new Date(Date.now() - 7 * 86_400_000).toISOString()).eq('actor_es_ia', true).limit(1)
   ok((aud?.length ?? 0) > 0, 'control.auditoria registra la actividad de la IA con actor_es_ia')
 
   // ── 3. Preguntar a la IA, con cita que abre la ficha ────────────────────
@@ -157,14 +180,21 @@ try {
   const subir = async (a) => {
     const { error } = await cAdmin.schema('ia').rpc('pedir_cambio_nivel', { p_codigo: 'NUC-DOC-IA-02', p_nivel: a, p_motivo: `probar-ia: subir a ${a}`, p_evidencia: 'prueba automática' })
     if (error) throw new Error(`pedir ${a}: ${error.message}`)
-    const { data: k } = await admin.schema('ia').from('cambio_nivel').select('solicitud_id').eq('capacidad', 'NUC-DOC-IA-02').eq('estado', 'pendiente').single()
+    const { data: k } = await admin.schema('ia').from('cambio_nivel').select('id, solicitud_id').eq('capacidad', 'NUC-DOC-IA-02').eq('estado', 'pendiente').single()
+    // R6: los aprobadores de `nivel_ia` reciben su aviso, que lleva a la bandeja (no hay ficha).
+    const { data: avisos } = await admin.schema('nucleo').from('notificacion').select('destinatario, enlace, texto').eq('objeto_tipo', 'nivel_ia').eq('objeto_id', k.id)
+    ok((avisos ?? []).some((n) => n.enlace === '/sistema/bandeja' && /^Te toca decidir/.test(n.texto)), `${a}: los aprobadores reciben «Te toca decidir» (${avisos?.length ?? 0} aviso(s))`)
     const { error: propio } = await cAdmin.schema('flujo').rpc('decidir', { p_paso: (await admin.schema('flujo').from('paso').select('id').eq('solicitud_id', k.solicitud_id).eq('orden', 1).single()).data.id, p_decision: 'aprobado', p_comentario: '' })
     ok(Boolean(propio), `${a}: quien pide no firma su propia subida`)
-    for (const orden of [1, 2]) {
-      const { data: paso } = await admin.schema('flujo').from('paso').select('id').eq('solicitud_id', k.solicitud_id).eq('orden', orden).single()
-      const { error: e } = await cConsultor.schema('flujo').rpc('decidir', { p_paso: paso.id, p_decision: 'aprobado', p_comentario: 'probar-ia' })
-      if (e) throw new Error(`decidir paso ${orden}: ${e.message}`)
-    }
+    const paso = async (orden) => (await admin.schema('flujo').from('paso').select('id').eq('solicitud_id', k.solicitud_id).eq('orden', orden).single()).data.id
+    const { error: e1 } = await cConsultor.schema('flujo').rpc('decidir', { p_paso: await paso(1), p_decision: 'aprobado', p_comentario: 'probar-ia' })
+    if (e1) throw new Error(`decidir paso 1: ${e1.message}`)
+    const { error: dosVeces } = await cConsultor.schema('flujo').rpc('decidir', { p_paso: await paso(2), p_decision: 'aprobado', p_comentario: 'probar-ia' })
+    ok(Boolean(dosVeces), `${a}: quien firmó el paso 1 no firma el 2 (doble aprobación = dos personas)`)
+    const { error: e2 } = await cAprobador.schema('flujo').rpc('decidir', { p_paso: await paso(2), p_decision: 'aprobado', p_comentario: 'probar-ia' })
+    if (e2) throw new Error(`decidir paso 2: ${e2.message}`)
+    const { data: cierre } = await admin.schema('nucleo').from('notificacion').select('enlace').eq('objeto_tipo', 'nivel_ia').eq('objeto_id', k.id).like('texto', 'Tu solicitud%')
+    ok((cierre ?? []).some((n) => n.enlace === '/sistema/administracion/ia'), `${a}: quien pidió recibe el cierre, con enlace al Gobierno de IA`)
     const { data: c } = await admin.schema('ia').from('capacidad').select('nivel_actual').eq('codigo', 'NUC-DOC-IA-02').single()
     return c.nivel_actual
   }

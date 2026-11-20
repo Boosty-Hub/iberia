@@ -10,6 +10,15 @@ import { useCallback, useTransition } from 'react'
  */
 export const PARAMS_GLOBALES = ['al', 'esc'] as const
 
+/**
+ * Parámetros que solo lee el navegador (el panel de la ficha): cambiarlos no
+ * pide nada al servidor. Con `router.push` abrir una ficha volvía a pintar la
+ * página entera en el servidor —y la acción que trae la ficha esperaba en cola
+ * detrás—: 1,9 s de la fila al panel. Con `history.pushState`, que Next
+ * sincroniza con `useSearchParams`, solo viaja la ficha (R6).
+ */
+const SOLO_NAVEGADOR = new Set(['ficha'])
+
 export function useContextoUrl() {
   const sp = useSearchParams()
   const ruta = usePathname()
@@ -41,7 +50,12 @@ export function useContextoUrl() {
         else nuevo.set(k, v)
       }
       const q = nuevo.toString()
-      iniciar(() => router[modo](q ? `${ruta}?${q}` : ruta, { scroll: false }))
+      const destino = q ? `${ruta}?${q}` : ruta
+      if (Object.keys(cambios).every((k) => SOLO_NAVEGADOR.has(k))) {
+        window.history[modo === 'push' ? 'pushState' : 'replaceState'](null, '', destino)
+        return
+      }
+      iniciar(() => router[modo](destino, { scroll: false }))
     },
     [sp, ruta, router]
   )

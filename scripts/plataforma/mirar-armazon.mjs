@@ -82,7 +82,7 @@ async function foto(p, nombre, completa = false) {
   await foto(p, '4-agrupar-filtro')
 
   // Guardar una vista personal, verla en la columna y borrarla.
-  await p.getByRole('button', { name: 'Vistas guardadas' }).click()
+  await p.getByTitle('Vistas guardadas').click()
   await p.getByLabel('Nombre de la vista').fill('Prueba · plazas certeza hecho')
   await p.getByRole('button', { name: 'Guardar', exact: true }).click()
   await p.getByText('Vista guardada.').waitFor({ timeout: 20000 })
@@ -98,7 +98,7 @@ async function foto(p, nombre, completa = false) {
   const lineas = csv.split(/\r?\n/)
   console.log(`  CSV: ${descarga.suggestedFilename()} · ${lineas.length - 1} filas · ${lineas[0].replace(/^﻿/, '')}`)
 
-  await p.getByRole('button', { name: 'Vistas guardadas' }).click()
+  await p.getByTitle('Vistas guardadas').click()
   await p.getByRole('button', { name: 'Borrar la vista Prueba · plazas certeza hecho' }).click()
   await p.getByText('Vista borrada.').waitFor({ timeout: 20000 })
   await p.keyboard.press('Escape')

@@ -298,6 +298,33 @@ export type Database = {
         }
         Returns: number
       }
+      historial_tasas: {
+        Args: never
+        Returns: {
+          capturada_en: string
+          creado_por: string | null
+          estado: string
+          fecha_valor: string
+          fuente: string
+          id: number
+          lado: string
+          metodo: string
+          moneda: string
+          motivo: string | null
+          payload: Json | null
+          publicada_en: string | null
+          reemplaza_id: number | null
+          tasa: number
+          tipo: string
+          verificada_con: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "tasa_cambio"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       puede_conciliar: { Args: { p_modulo: string }; Returns: boolean }
       resolver_conciliacion: {
         Args: { p_estado: string; p_id: string; p_resolucion?: string }
@@ -338,6 +365,7 @@ export type Database = {
           id: string
           nombre: string
           orden: number
+          por_suplencia: boolean
           regla: Json | null
           solicitud_id: string
           ve_costos: boolean
@@ -354,6 +382,7 @@ export type Database = {
           id?: string
           nombre: string
           orden: number
+          por_suplencia?: boolean
           regla?: Json | null
           solicitud_id: string
           ve_costos?: boolean
@@ -370,6 +399,7 @@ export type Database = {
           id?: string
           nombre?: string
           orden?: number
+          por_suplencia?: boolean
           regla?: Json | null
           solicitud_id?: string
           ve_costos?: boolean
@@ -390,6 +420,7 @@ export type Database = {
           descripcion: string | null
           id: string
           nombre: string
+          permite_suplencia_repetida: boolean
           tipo_objeto: string
           vigencia: unknown
         }
@@ -398,6 +429,7 @@ export type Database = {
           descripcion?: string | null
           id?: string
           nombre: string
+          permite_suplencia_repetida?: boolean
           tipo_objeto: string
           vigencia?: unknown
         }
@@ -406,6 +438,7 @@ export type Database = {
           descripcion?: string | null
           id?: string
           nombre?: string
+          permite_suplencia_repetida?: boolean
           tipo_objeto?: string
           vigencia?: unknown
         }
@@ -864,6 +897,30 @@ export type Database = {
           },
         ]
       }
+      reserva: {
+        Row: {
+          capacidad: string
+          creado_en: string
+          id: string
+          monto_usd: number
+          perfil: string
+        }
+        Insert: {
+          capacidad: string
+          creado_en?: string
+          id?: string
+          monto_usd: number
+          perfil: string
+        }
+        Update: {
+          capacidad?: string
+          creado_en?: string
+          id?: string
+          monto_usd?: number
+          perfil?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -914,12 +971,20 @@ export type Database = {
       }
       estado: { Args: never; Returns: Json }
       explicar_propuestas: { Args: { p_items: Json }; Returns: number }
+      explicar_propuestas_servicio: {
+        Args: { p_items: Json; p_perfil: string }
+        Returns: number
+      }
       fijar_interruptor: {
         Args: { p_encendido: boolean; p_motivo?: string }
         Returns: boolean
       }
       fijar_tope: { Args: { p_motivo: string; p_usd: number }; Returns: number }
       gastado_hoy: { Args: never; Returns: number }
+      liberar_reserva_servicio: {
+        Args: { p_perfil: string; p_reserva: string }
+        Returns: undefined
+      }
       mis_propuestas: {
         Args: { p_limite?: number }
         Returns: {
@@ -969,6 +1034,33 @@ export type Database = {
           p_resumen: string
           p_tokens_entrada: number
           p_tokens_salida: number
+        }
+        Returns: string
+      }
+      registrar_llamada_servicio: {
+        Args: {
+          p_accion: string
+          p_capacidad: string
+          p_costo_usd: number
+          p_evidencia: Json
+          p_latencia_ms: number
+          p_modelo: string
+          p_objeto_id?: string
+          p_objeto_tipo?: string
+          p_perfil: string
+          p_reserva: string
+          p_resumen: string
+          p_tokens_entrada: number
+          p_tokens_salida: number
+        }
+        Returns: string
+      }
+      reservar_llamada_servicio: {
+        Args: {
+          p_capacidad: string
+          p_perfil: string
+          p_reserva_usd?: number
+          p_tope_persona?: number
         }
         Returns: string
       }

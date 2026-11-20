@@ -185,7 +185,34 @@ de personal). El plan de la etapa es el Anexo D:
 - Un `db push --include-all` de un agente le quitó el permiso de ejecución a las funciones de bloqueos del canal en pruebas. R3 lo restituyó, y `probar:bloqueos` da 68/68 en pruebas.
 - **Inconsistencia de cifras:** «procesos con ficha» daba 48/205 en Mi día y 46/185 en Procesos. Lo resolvió R5.
 
-**Dónde quedamos**: R0 a R5 en la rama. Falta R6 (endurecer). Para producción hacen falta el OK de Gabriel, Supabase en plan pago, las migraciones `20261120*`, exponer `org, sgc, flujo, control, ui, nucleo` y el programador de tasas. Lo que falta está en `PENDIENTES.md`, «Plataforma Iberia · Etapa 1».
+**R6 · endurecer**, en el commit siguiente:
+- **Revisión de seguridad independiente:** 4 altos, 4 medios y 3 bajos, todos corregidos en `221000_r6_seguridad` y probados.
+  - Publicar procesos sin aprobación.
+  - Cambiar escenarios y requisiciones ya enviados.
+  - La auditoría filtraba el paralelo y documentos de perímetro.
+  - Un solo admin firmaba toda una cadena.
+  - Actividad de la IA falsa y topes de la IA saltables.
+  - Conciliación a nombre de otro.
+  - Lecturas del paralelo sin registrar.
+  - Función de EXECUTE abierta a PUBLIC.
+  - El secreto de tasas se comparaba sin `timingSafeEqual`.
+- **Suplencia (`222000`):**
+  - Nadie decide dos pasos de la misma solicitud.
+  - La excepción es solo la suplencia de administración en pasos sin cuenta, y solo en rutas que lo permitan (requisición, ficha de proceso). Queda marcada «por suplencia».
+  - Las rutas de doble firma (escenarios, nivel de IA) no la permiten.
+  - La salida de fondo: enlazar las cuentas de los aprobadores antes de producción.
+- **Rendimiento con build de producción:**
+  - TTFB de 450–940 ms a 240–380 ms.
+  - LCP de 0,8–1,3 s a 0,6–0,8 s.
+  - INP de 16–32 ms.
+  - El resto es red Caracas–us-east-1.
+- **Accesibilidad (axe, WCAG 2.2 AA):** de 69 violaciones a 0.
+- **Teléfono:** sin desbordes; un dedo arrastra y dos acercan en el lienzo (falta un equipo real).
+- **PDF del subárbol** con cajetín.
+- **Guion `pasar-a-produccion.mjs`** (simulacro): plan Free, 22 migraciones pendientes, 7 esquemas por exponer.
+- **Suites contra pruebas:** colaboración, r5, r6, lienzo, armazón, IA y bloqueos sin fallos. `probar-permisos` da los 2 fallos conocidos, por datos que pruebas no tiene.
+
+**Dónde quedamos**: el rediseño, de R0 a R6, en la rama. Para producción hacen falta el OK de Gabriel, Supabase en plan pago y correr `pasar-a-produccion.mjs --ejecutar --confirmo`. Lo que falta está en `PENDIENTES.md`, «Plataforma Iberia · Etapa 1».
 
 ---
 

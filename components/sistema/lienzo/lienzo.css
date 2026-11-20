@@ -12,7 +12,7 @@
   --lz-borde: #e7e5e4;
   --lz-txt: #1e1c1b;
   --lz-txt2: #575251;
-  --lz-txt3: #8d8785;
+  --lz-txt3: #706a67; /* 4,5:1 o más (WCAG AA, R6); era #8d8785 */
   position: relative;
   display: flex;
   gap: 12px;

@@ -261,6 +261,21 @@ export function PanelFicha() {
   const ficha = cargada?.ficha ?? null
   const error = cargada?.valor === valor && !cargada.ficha
 
+  // El foco (R6 · WCAG 2.4.3): al cerrar vuelve a donde estaba (la fila, la caja,
+  // el aviso); en teléfono la ficha tapa la página, así que al abrir entra en ella.
+  const panel = useRef<HTMLElement>(null)
+  const origen = useRef<HTMLElement | null>(null)
+  const abiertaAntes = useRef(false)
+  useEffect(() => {
+    if (valor && !abiertaAntes.current) {
+      const activo = document.activeElement
+      origen.current = activo instanceof HTMLElement && activo !== document.body ? activo : null
+      if (window.matchMedia('(max-width: 900px)').matches) panel.current?.focus()
+    }
+    if (!valor && abiertaAntes.current && origen.current?.isConnected) origen.current.focus()
+    abiertaAntes.current = Boolean(valor)
+  }, [valor])
+
   useEffect(() => {
     if (!valor) return
     const tecla = (e: KeyboardEvent) => {
@@ -275,9 +290,11 @@ export function PanelFicha() {
 
   return (
     <aside
+      ref={panel}
+      tabIndex={-1}
       aria-label="Ficha del objeto"
       data-ficha-objeto
-      className="fixed inset-x-0 top-12 bottom-0 z-30 flex flex-col border-l border-[var(--borde)] bg-white shadow-[-12px_0_30px_rgba(0,0,0,0.06)] min-[901px]:sticky min-[901px]:inset-auto min-[901px]:top-12 min-[901px]:h-[calc(100dvh-3rem)] min-[901px]:w-[420px] min-[901px]:shrink-0 min-[901px]:shadow-none"
+      className="fixed inset-x-0 top-12 bottom-0 z-30 flex flex-col outline-none border-l border-[var(--borde)] bg-white shadow-[-12px_0_30px_rgba(0,0,0,0.06)] min-[901px]:sticky min-[901px]:inset-auto min-[901px]:top-12 min-[901px]:h-[calc(100dvh-3rem)] min-[901px]:w-[420px] min-[901px]:shrink-0 min-[901px]:shadow-none"
     >
       {cargando && !ficha && <p className="p-6 text-center text-sm text-marca-400">Cargando la ficha…</p>}
       {error && !cargando && (

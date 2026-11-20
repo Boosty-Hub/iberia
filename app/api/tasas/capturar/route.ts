@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
 import { capturarTasas } from '@/lib/tasas/capturar.mjs'
 
@@ -9,9 +10,17 @@ import { capturarTasas } from '@/lib/tasas/capturar.mjs'
  *   POST /api/tasas/capturar           → oficial + paralelo
  *   POST /api/tasas/capturar?paralelo  → solo paralelo
  */
+/** Compara en tiempo constante (sobre el SHA-256, que iguala los largos). */
+function mismoSecreto(dado: string | null, secreto: string): boolean {
+  if (!dado) return false
+  const a = createHash('sha256').update(dado).digest()
+  const b = createHash('sha256').update(secreto).digest()
+  return timingSafeEqual(a, b)
+}
+
 export async function POST(req: Request) {
   const secreto = process.env.TASAS_SECRETO
-  if (!secreto || req.headers.get('x-tasas-secreto') !== secreto) return new Response(null, { status: 401 })
+  if (!secreto || !mismoSecreto(req.headers.get('x-tasas-secreto'), secreto)) return new Response(null, { status: 401 })
   const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SECRET_KEY!, { auth: { persistSession: false } })
   const soloParalelo = new URL(req.url).searchParams.has('paralelo')
   const r = await capturarTasas(db, { soloParalelo })

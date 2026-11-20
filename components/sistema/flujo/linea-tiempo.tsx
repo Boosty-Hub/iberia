@@ -109,6 +109,7 @@ function Paso({
           {actual && <Insignia tono="acento">Le toca ahora</Insignia>}
           {p.hito && <Insignia tono="marca">Aprueba el objeto</Insignia>}
           {p.ve_costos && <Insignia tono="neutro">Ve costos</Insignia>}
+          {(p as { por_suplencia?: boolean }).por_suplencia && <Insignia tono="ambar">Por suplencia</Insignia>}
         </div>
         <p className="mt-1 text-xs text-marca-600">
           {ACCION_PASO[p.accion]?.etiqueta ?? p.accion}: {plaza ?? (p.regla?.resolutor === 'rol' ? 'quien tenga el rol' : 'sin plaza resuelta')}

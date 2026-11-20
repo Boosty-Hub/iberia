@@ -44,15 +44,27 @@ const ROLES_EDITORES: Rol[] = ['admin', 'consultor']
 export const obtenerSesion = cache(async (): Promise<Sesion | null> => {
   const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return null
+  // El `sub` del JWT (verificado en local con getClaims, sin red) deja pedir el
+  // perfil y la matriz a la vez que getUser(), que sigue siendo quien decide:
+  // si Auth no confirma al mismo usuario, no hay sesión. Una vuelta a la base
+  // menos en cada página y cada acción (R6). PostgREST valida el mismo token,
+  // así que lo leído en paralelo es lo que ese token ya podía leer.
+  const { data: verificado } = await supabase.auth.getClaims()
+  const sub = verificado?.claims?.sub
+  if (!sub) return null
 
-  const [{ data: perfil }, { data: filas }] = await Promise.all([
-    supabase.from('profiles').select('*, roles(id, clave, nombre, nivel)').eq('id', user.id).maybeSingle(),
+  const [
+    {
+      data: { user },
+    },
+    { data: perfil },
+    { data: filas },
+  ] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase.from('profiles').select('*, roles(id, clave, nombre, nivel)').eq('id', sub).maybeSingle(),
     supabase.rpc('mis_permisos'),
   ])
+  if (!user || user.id !== sub) return null
 
   // Sin perfil o desactivado, el usuario no opera: RLS le negaría todo de
   // cualquier forma, así que se trata como sesión inválida.

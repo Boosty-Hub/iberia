@@ -86,11 +86,12 @@ function CeldaEditable({ v, c, fila, guardar }: { v: unknown; c: Columna; fila: 
           e.stopPropagation()
           setEditando(true)
         }}
-        className="border-b border-dashed border-[#c8ccd2] text-left hover:border-marca-500"
-        aria-label={`Editar ${c.etiqueta}`}
+        className="relative border-b border-dashed border-[#c8ccd2] text-left hover:border-marca-500"
         title={c.ayudaEdicion ?? 'Editar'}
       >
+        {/* El nombre empieza por el valor que se ve (WCAG 2.5.3): «12, editar Dotación». */}
         <Celda v={v} c={c} fila={fila} />
+        <span className="sr-only">, editar {c.etiqueta}</span>
       </button>
     )
   // Con etiquetas, el valor es uno de una lista: se elige, no se teclea.

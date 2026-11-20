@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { Suspense } from 'react'
-import { empleadoActual } from '@/lib/canal'
 import { puede, requerirSesion } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { PESTANAS, type Pestana } from '@/lib/plataforma/dominios'
@@ -36,7 +35,7 @@ export default async function SistemaLayout({ children }: LayoutProps<'/sistema'
   const jar = await cookies()
   const esAdminReal = sesion.rolReal.nivel === 'admin'
 
-  const [modulos, tasas, moneda, escenarios, vistas, pendientes, roles, empleado, resumen] = await Promise.all([
+  const [modulos, tasas, moneda, escenarios, vistas, pendientes, roles, empleado, resumen, ia] = await Promise.all([
     modulosDelPlan(),
     tasasDelDia(sesion),
     leerMoneda(),
@@ -46,9 +45,14 @@ export default async function SistemaLayout({ children }: LayoutProps<'/sistema'
     supabase.schema('ui').from('vista').select('id, nombre, alcance, ruta, parametros, modulo').order('nombre').range(0, 199),
     misPendientes().catch(() => []),
     esAdminReal ? supabase.from('roles').select('id, nombre').order('nombre') : null,
-    puede(sesion, 'modulo:canal') ? empleadoActual() : null,
+    // ¿Tiene ficha en el padrón? (el enlace «El canal»). Con el id de la sesión: sin otro getUser().
+    puede(sesion, 'modulo:canal')
+      ? supabase.from('empleados').select('id').eq('perfil_id', sesion.userId).eq('activo', true).maybeSingle().then((r) => r.data)
+      : null,
     // La campana: la bandeja ya viene en `pendientes`, no se pide dos veces.
     leerResumen(0).catch(() => ({ noLeidas: 0, ultimas: [], porDecidir: 0 })),
+    // El interruptor de la IA de Ctrl K: en la misma tanda, no una vuelta más al final.
+    estadoIa(),
   ])
   const avisos = { ...resumen, porDecidir: pendientes.length }
 
@@ -92,7 +96,7 @@ export default async function SistemaLayout({ children }: LayoutProps<'/sistema'
   const puedeEsc = puede(sesion, 'sistema:escenarios')
 
   return (
-    <div className="flex min-h-dvh flex-1 flex-col bg-[#f4f5f7] text-[13px]">
+    <div className="plataforma flex min-h-dvh flex-1 flex-col bg-[#f4f5f7] text-[13px]">
       <a href="#contenido" className="sr-only z-[70] rounded-lg bg-white px-3 py-2 text-sm font-semibold text-marca-900 focus:not-sr-only focus:fixed focus:top-2 focus:left-2">
         Saltar al contenido
       </a>
@@ -187,7 +191,7 @@ export default async function SistemaLayout({ children }: LayoutProps<'/sistema'
       </div>
 
       <Suspense>
-        <PaletaComandos acciones={acciones} conIa={capacidadViva(await estadoIa(), 'NUC-PRO-IA-01')} />
+        <PaletaComandos acciones={acciones} conIa={capacidadViva(ia, 'NUC-PRO-IA-01')} />
         {/* R4 · el panel «Preguntar a la IA» (lo abren la cabecera, la ficha y Ctrl K). */}
         <PanelPreguntaIa />
       </Suspense>

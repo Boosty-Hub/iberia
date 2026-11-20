@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useTransition } from 'react'
 import { marcarLeidas } from '@/components/sistema/colaboracion/acciones'
-import { abrirFicha } from '@/components/sistema/colaboracion/abrir'
+import { abrirFicha, tieneFicha } from '@/components/sistema/colaboracion/abrir'
 import { FilaNotificacion } from '@/components/sistema/colaboracion/campana'
 import type { Notificacion } from '@/lib/plataforma/colaboracion'
 
@@ -28,7 +28,7 @@ export function ListaNotificaciones({ lista }: { lista: Notificacion[] }) {
                   await marcarLeidas([n.id])
                   avisarCampana()
                 }
-                if (n.objetoTipo && n.objetoId) abrirFicha(router, n.objetoTipo, n.objetoId)
+                if (tieneFicha(n.objetoTipo) && n.objetoId) abrirFicha(router, n.objetoTipo, n.objetoId)
                 else if (n.enlace) router.push(n.enlace)
                 router.refresh()
               })

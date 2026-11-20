@@ -9,6 +9,7 @@ import { responder, type Cita } from '@/lib/ia/preguntar'
 import { revisarPlazas } from '@/lib/ia/plazas'
 import { clasificarDocumentos } from '@/lib/ia/documentos'
 import { COLUMNAS_PROPUESTA, catalogoIa, estadoIa, nombresDe } from '@/lib/ia/servidor'
+import { RESERVA_USD, liberarReserva, registrarLlamada, reservarLlamada } from '@/lib/ia/registro'
 import { capacidadViva, type EstadoIa, type NivelIa, type PropuestaVista } from '@/lib/ia/niveles'
 
 /**
@@ -42,57 +43,43 @@ export async function preguntarIa(pregunta: string): Promise<RespuestaIa> {
   const nada = { respuesta: '', suficiente: false, citas: [], leidos: 0, costoUsd: 0 }
   if (texto.length < 4) return { ...nada, error: 'Escribe la pregunta completa.' }
   if (!puede(sesion, 'sistema:inicio')) return { ...nada, error: 'Tu rol no entra a la plataforma.' }
-  const supabase = await createClient()
-  const ia = supabase.schema('ia')
-  const { data: motivo } = await ia.rpc('motivo_bloqueo', { p_codigo: 'NUC-PRO-IA-01' })
-  if (motivo) return { ...nada, error: motivo }
-
-  const inicioDia = new Date(`${hoyCaracas()}T00:00:00-04:00`).toISOString()
-  const { count } = await ia
-    .from('actividad')
-    .select('id', { count: 'exact', head: true })
-    .eq('capacidad', 'NUC-PRO-IA-01')
-    .eq('pedido_por', sesion.userId)
-    .gte('creado_en', inicioDia)
-  if ((count ?? 0) >= TOPE_PREGUNTAS) return { ...nada, error: `Llegaste a las ${TOPE_PREGUNTAS} preguntas de hoy. Mañana sigues; mientras, la búsqueda (Ctrl K) funciona sin IA.` }
+  // El tope por persona y el del gasto del día se reservan en la base, bajo un
+  // mismo candado (R6 · M2): dos preguntas a la vez ya no pasan las dos.
+  const reserva = await reservarLlamada(sesion.userId, 'NUC-PRO-IA-01', { topePersona: TOPE_PREGUNTAS, reservaUsd: RESERVA_USD.pregunta })
+  if ('error' in reserva) return { ...nada, error: reserva.error }
 
   const r = await responder(texto)
   if ('error' in r) {
-    await ia.rpc('registrar_llamada', {
-      p_capacidad: 'NUC-PRO-IA-01',
-      p_accion: 'error',
-      p_resumen: `Pregunta sin respuesta: ${r.error}`,
-      p_evidencia: [],
-      p_tokens_entrada: r.medida?.tokensEntrada ?? 0,
-      p_tokens_salida: r.medida?.tokensSalida ?? 0,
-      p_costo_usd: r.medida?.costoUsd ?? 0,
-      p_latencia_ms: r.medida?.latenciaMs ?? 0,
-      p_modelo: r.medida?.modelo ?? 'ninguno',
+    await registrarLlamada(sesion.userId, reserva.reserva, {
+      capacidad: 'NUC-PRO-IA-01',
+      accion: 'error',
+      resumen: `Pregunta sin respuesta: ${r.error}`,
+      evidencia: [],
+      medida: r.medida,
     })
     return { ...nada, error: `La IA no pudo responder: ${r.error}` }
   }
-  if (r.medida.modelo) {
-    const { error } = await ia.rpc('registrar_llamada', {
-      p_capacidad: 'NUC-PRO-IA-01',
-      p_accion: 'respondio',
-      p_resumen: `Pregunta: «${texto.slice(0, 280)}» · ${r.citas.length} cita(s)${r.suficiente ? '' : ' · dijo que no le alcanzaban los datos'}`,
+  if (!r.medida.modelo) {
+    // Sin registros a su alcance no se llamó al modelo: se libera la reserva y no se cuenta.
+    await liberarReserva(sesion.userId, reserva.reserva)
+  } else {
+    const { error } = await registrarLlamada(sesion.userId, reserva.reserva, {
+      capacidad: 'NUC-PRO-IA-01',
+      accion: 'respondio',
+      resumen: `Pregunta: «${texto.slice(0, 280)}» · ${r.citas.length} cita(s)${r.suficiente ? '' : ' · dijo que no le alcanzaban los datos'}`,
       // Solo tipo, id y versión: el título se pinta con los permisos de quien mira.
-      p_evidencia: r.citas.map((c) => ({ tipo: c.tipo, id: c.id, campo: 'version', valor: c.version ?? c.fecha, fuente: c.codigo ?? c.tipo })),
-      p_tokens_entrada: r.medida.tokensEntrada,
-      p_tokens_salida: r.medida.tokensSalida,
-      p_costo_usd: r.medida.costoUsd,
-      p_latencia_ms: r.medida.latenciaMs,
-      p_modelo: r.medida.modelo,
+      evidencia: r.citas.map((c) => ({ tipo: c.tipo, id: c.id, campo: 'version', valor: c.version ?? c.fecha, fuente: c.codigo ?? c.tipo })),
+      medida: r.medida,
     })
-    if (error) return { ...nada, error: mensaje(error) }
+    if (error) return { ...nada, error }
   }
   return { respuesta: r.respuesta, suficiente: r.suficiente, citas: r.citas, leidos: r.leidos, costoUsd: r.medida.costoUsd }
 }
 
 // ── NUC-ORG-IA-05 · Revisar plazas ─────────────────────────────────────────
 export async function revisarPlazasIa(): Promise<Resultado> {
-  await requerirPermiso('sistema:estructura', 'editar')
-  const r = await revisarPlazas()
+  const sesion = await requerirPermiso('sistema:estructura', 'editar')
+  const r = await revisarPlazas(sesion.userId)
   if ('error' in r) return { error: r.error.replace(/^.*?ERROR:\s*/, '') }
   revalidatePath('/sistema', 'layout')
   const costo = r.medida ? ` · US$ ${r.medida.costoUsd.toFixed(3)}` : ''
@@ -106,8 +93,8 @@ export async function revisarPlazasIa(): Promise<Resultado> {
 
 // ── NUC-DOC-IA-02 · Clasificar documentos ──────────────────────────────────
 export async function clasificarDocumentosIa(): Promise<Resultado> {
-  await requerirPermiso('sistema:documentos', 'editar')
-  const r = await clasificarDocumentos(8)
+  const sesion = await requerirPermiso('sistema:documentos', 'editar')
+  const r = await clasificarDocumentos(sesion.userId, 8)
   if ('error' in r) return { error: r.error.replace(/^.*?ERROR:\s*/, '') }
   revalidatePath('/sistema', 'layout')
   if (!r.leidos) return { ok: r.aviso ?? 'Nada por clasificar.' }

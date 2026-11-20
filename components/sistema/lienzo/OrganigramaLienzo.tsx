@@ -397,6 +397,7 @@ export function OrganigramaLienzo({
 
   return (
     <Lienzo
+      pdf="organizacion"
       nodos={nodos}
       capas={capas}
       cuerpo={cuerpo}

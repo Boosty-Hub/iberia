@@ -1709,3 +1709,14 @@ fieldset:disabled .nivel-opcion {
     border-color: transparent;
   }
 }
+
+/*
+ * Plataforma Iberia (/sistema) · WCAG 2.2 AA (R6, 20-nov-2026): el gris tenue
+ * (marca-400, #8d8785) da 3,5:1 sobre blanco y no alcanza el 4,5:1 del texto
+ * pequeño, que es casi todo el texto secundario de la plataforma. Dentro de la
+ * plataforma se oscurece a 5,3:1 (4,9:1 sobre el fondo #f4f5f7). El panel y el
+ * canal no cambian.
+ */
+.plataforma {
+  --color-marca-400: #706a67;
+}

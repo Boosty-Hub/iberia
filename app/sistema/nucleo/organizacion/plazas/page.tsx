@@ -63,7 +63,7 @@ export default async function PlazasPage({ searchParams }: PageProps<'/sistema/n
             <>
               <Link
                 href={hrefFiltroIa}
-                aria-pressed={conPropuestas}
+                aria-current={conPropuestas ? 'true' : undefined}
                 className={BOTON_CABECERA + (conPropuestas ? ' border-[#1d4f8f] font-semibold text-[#1d4f8f]' : '')}
                 data-filtro-propuestas
               >

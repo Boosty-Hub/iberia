@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { REGLAS_COMUNES, limpiarDato, pedirJson } from '@/lib/ia/modelo'
+import { RESERVA_USD, registrarLlamada, reservarLlamada } from '@/lib/ia/registro'
 
 /**
  * NUC-DOC-IA-02 · Clasificar documentos de la conciliación.
@@ -45,7 +46,7 @@ export type ResultadoClasificacion = {
   aviso?: string
 }
 
-export async function clasificarDocumentos(limite = 8): Promise<ResultadoClasificacion | { error: string }> {
+export async function clasificarDocumentos(perfil: string, limite = 8): Promise<ResultadoClasificacion | { error: string }> {
   const supabase = await createClient()
   const ia = supabase.schema('ia')
   const { data: candidatos, error } = await ia.rpc('candidatos_clasificacion', { p_limite: limite })
@@ -65,6 +66,10 @@ export async function clasificarDocumentos(limite = 8): Promise<ResultadoClasifi
     )
     .join('\n')
   const lista = (procesos ?? []).map((p) => `<proceso id="${p.ref}">${limpiarDato(p.codigo_sgc, 10)} · ${limpiarDato(p.nombre, 120)}</proceso>`).join('\n')
+
+  // El gasto del día se reserva antes de salir al modelo (R6 · M2).
+  const reserva = await reservarLlamada(perfil, 'NUC-DOC-IA-02', { reservaUsd: RESERVA_USD.lote })
+  if ('error' in reserva) return { error: reserva.error }
 
   const r = await pedirJson<{ items: { documento_id: string; estado: string; familia: string; proceso_ref: string; razon: string; confianza: string }[] }>({
     sistema: SISTEMA,
@@ -96,16 +101,12 @@ export async function clasificarDocumentos(limite = 8): Promise<ResultadoClasifi
     },
   })
   const medida = { tokensEntrada: r.tokensEntrada, tokensSalida: r.tokensSalida, costoUsd: r.costoUsd, latenciaMs: r.latenciaMs, modelo: r.modelo }
-  await ia.rpc('registrar_llamada', {
-    p_capacidad: 'NUC-DOC-IA-02',
-    p_accion: r.ok ? 'explico' : 'error',
-    p_resumen: r.ok ? `Leyó los metadatos de ${candidatos.length} documento(s) de la conciliación para clasificarlos` : `No pudo clasificar: ${r.detalle}`,
-    p_evidencia: candidatos.map((c) => ({ tipo: 'documento', id: c.id, campo: 'codigo', valor: c.codigo, fuente: 'sgc.documento (metadatos)' })),
-    p_tokens_entrada: r.tokensEntrada,
-    p_tokens_salida: r.tokensSalida,
-    p_costo_usd: r.costoUsd,
-    p_latencia_ms: r.latenciaMs,
-    p_modelo: r.modelo ?? 'ninguno',
+  await registrarLlamada(perfil, reserva.reserva, {
+    capacidad: 'NUC-DOC-IA-02',
+    accion: r.ok ? 'explico' : 'error',
+    resumen: r.ok ? `Leyó los metadatos de ${candidatos.length} documento(s) de la conciliación para clasificarlos` : `No pudo clasificar: ${r.detalle}`,
+    evidencia: candidatos.map((c) => ({ tipo: 'documento', id: c.id, campo: 'codigo', valor: c.codigo, fuente: 'sgc.documento (metadatos)' })),
+    medida,
   })
   if (!r.ok) return { error: r.detalle }
 

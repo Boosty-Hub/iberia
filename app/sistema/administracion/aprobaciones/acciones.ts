@@ -32,7 +32,12 @@ export async function guardarRuta(_a: EstadoAccion, fd: FormData): Promise<Estad
   const { data, error } = await supabase
     .schema('flujo')
     .from('ruta')
-    .update({ nombre, descripcion: campo(fd, 'descripcion') || null, activa: fd.get('activa') === 'on' })
+    .update({
+      nombre,
+      descripcion: campo(fd, 'descripcion') || null,
+      activa: fd.get('activa') === 'on',
+      permite_suplencia_repetida: fd.get('permite_suplencia_repetida') === 'on',
+    })
     .eq('id', id)
     .select('id')
   if (error) return { error: mensajeError(error) }

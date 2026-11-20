@@ -30,7 +30,7 @@ import { cn } from '@/lib/utils'
 import { abrirFicha } from './ficha'
 import { ALTO, ANCHO, disponer, type Disposicion, type Punto } from './disposicion'
 import { Arista, Caja, ContextoLienzo, MarcaChip, type AristaOrto, type ContextoCaja, type NodoCaja } from './piezas'
-import { COLOR_TONO, ETIQUETA_DIFF, type AccionMenu, type Capa, type ContextoArbol, type NodoLienzo, type PropsLienzo } from './tipos'
+import { COLOR_TONO, ETIQUETA_DIFF, TEXTO_TONO, type AccionMenu, type Capa, type ContextoArbol, type NodoLienzo, type PropsLienzo } from './tipos'
 
 /**
  * El lienzo: organigrama y mapa de procesos en un solo componente.
@@ -143,6 +143,30 @@ function leerMemoria(clave: string): Set<string> | null {
   } catch {
     return null
   }
+}
+
+/**
+ * «PDF del subárbol»: manda al servidor solo ids —la caja y lo desplegado— y la
+ * fecha y el escenario de la dirección; el servidor vuelve a leer la rama con la
+ * RLS de quien la pide. Se abre en otra pestaña.
+ */
+function pedirPdf(tipo: 'organizacion' | 'procesos', raiz: string | null, abiertos: Set<string> | null) {
+  const sp = new URLSearchParams(window.location.search)
+  const form = document.createElement('form')
+  form.method = 'POST'
+  form.action = '/sistema/pdf/subarbol'
+  form.target = '_blank'
+  const campos: Record<string, string> = { tipo, raiz: raiz ?? '', abiertos: abiertos ? [...abiertos].join(',') : '', al: sp.get('al') ?? '', esc: sp.get('esc') ?? '' }
+  for (const [k, v] of Object.entries(campos)) {
+    const i = document.createElement('input')
+    i.type = 'hidden'
+    i.name = k
+    i.value = v
+    form.appendChild(i)
+  }
+  document.body.appendChild(form)
+  form.submit()
+  form.remove()
 }
 
 function etiquetaAria(n: NodoLienzo, nHijos: number, abierto: boolean, capa: Capa | null): string {
@@ -836,6 +860,11 @@ function VistaLienzo({ c }: { c: Compartido }) {
               <button type="button" className="lz-boton" onClick={() => void exportar()} disabled={exportando}>
                 {exportando ? 'Generando…' : '⇩ PNG'}
               </button>
+              {p.pdf && (
+                <button type="button" className="lz-boton" title="La caja elegida y lo desplegado debajo, con cajetín, impreso en el servidor" onClick={() => pedirPdf(p.pdf!, c.sel, c.abiertos)}>
+                  ⇩ PDF del subárbol
+                </button>
+              )}
               <button type="button" className="lz-boton" title="Ver como lista, con migas" onClick={() => c.setModo('lista')}>
                 Lista
               </button>
@@ -967,8 +996,8 @@ function VistaLista({ c }: { c: Compartido }) {
             c.setSel(id)
             if (nh) setFoco(id)
           }}
-          aria-label={etiquetaAria(n, nh, false, c.capa)}
         >
+          {/* Sin aria-label: el nombre es lo que se lee en la fila (WCAG 2.5.3); lo que no se ve va en sr-only. */}
           <b>{n.titulo}</b>
           {n.subtitulo && <small>{n.subtitulo}</small>}
           <span className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-marca-500">
@@ -976,6 +1005,12 @@ function VistaLista({ c }: { c: Compartido }) {
             <MarcaChip capa={c.capa} nodo={n} />
             {n.diff && <span className={cn('lz-etq', n.diff === 'quitado' && 'quitado')}>{ETIQUETA_DIFF[n.diff]}</span>}
           </span>
+          {(nh > 0 || n.diffTexto) && (
+            <span className="sr-only">
+              {n.diffTexto ? `. ${n.diffTexto}` : ''}
+              {nh ? `. ${nh} ${nh === 1 ? 'dependencia' : 'dependencias'}` : ''}
+            </span>
+          )}
         </button>
         {conMenu && (
           <button type="button" className="lz-boton lz-toque" aria-label={`Cambiar «${n.titulo}»`} onClick={() => c.setMenu(id)}>
@@ -1004,6 +1039,11 @@ function VistaLista({ c }: { c: Compartido }) {
         <button type="button" className="lz-boton lz-toque" onClick={() => c.setModo('lienzo')}>
           Ver lienzo
         </button>
+        {p.pdf && (
+          <button type="button" className="lz-boton lz-toque" onClick={() => pedirPdf(p.pdf!, foco, null)}>
+            ⇩ PDF del subárbol
+          </button>
+        )}
       </div>
       <Leyenda capa={c.capa} escenario={!!p.editable || p.nodos.some((n) => n.diff)} />
       <nav className="my-3 flex flex-wrap items-center gap-1 text-sm text-marca-600" aria-label="Camino">
@@ -1153,7 +1193,7 @@ function Leyenda({ capa, escenario }: { capa: Capa | null; escenario: boolean })
       {capa.leyenda.map((m) => (
         <span key={m.etiqueta}>
           <i style={{ background: COLOR_TONO[m.tono] }} aria-hidden />
-          <span aria-hidden style={{ color: COLOR_TONO[m.tono], fontWeight: 700 }}>
+          <span aria-hidden style={{ color: TEXTO_TONO[m.tono], fontWeight: 700 }}>
             {m.icono}
           </span>
           {m.etiqueta}

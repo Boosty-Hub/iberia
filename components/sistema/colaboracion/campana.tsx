@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { marcarLeidas, resumenNotificaciones } from '@/components/sistema/colaboracion/acciones'
-import { abrirFicha } from '@/components/sistema/colaboracion/abrir'
+import { abrirFicha, tieneFicha } from '@/components/sistema/colaboracion/abrir'
 import { IconoCampanita } from '@/components/sistema/shell/iconos'
 import { Desplegable } from '@/components/sistema/ui/desplegable'
 import { TIPO_NOTIFICACION, type Notificacion, type ResumenNotificaciones } from '@/lib/plataforma/colaboracion'
@@ -47,6 +47,7 @@ export function Campana({ inicial }: { inicial: ResumenNotificaciones }) {
   return (
     <Desplegable
       etiqueta={etiqueta}
+      soloIcono
       alinear="der"
       ancho="w-[min(24rem,calc(100vw-1.5rem))]"
       claseBoton="relative grid h-8 w-8 place-items-center rounded-lg text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-white"
@@ -100,7 +101,7 @@ export function Campana({ inicial }: { inicial: ResumenNotificaciones }) {
                     alAbrir={() => {
                       cerrar()
                       if (!x.leida) marcarLeidas([x.id]).then(refrescar)
-                      if (x.objetoTipo && x.objetoId) abrirFicha(router, x.objetoTipo, x.objetoId)
+                      if (tieneFicha(x.objetoTipo) && x.objetoId) abrirFicha(router, x.objetoTipo, x.objetoId)
                       else router.push(x.enlace ?? '/sistema/notificaciones')
                     }}
                   />

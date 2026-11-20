@@ -83,13 +83,17 @@ export function BarraTasas({ t, enlace, compacta = false }: { t: TasasDelDia | n
 
   const clase = 'group relative flex shrink-0 items-center gap-1.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'
   return enlace ? (
-    <Link href="/sistema/finanzas/tasas" className={clase} aria-label={`Tasas del día: BCV dólar ${tasa(t.usd)} bolívares. Ver el historial`}>
+    <Link href="/sistema/finanzas/tasas" className={clase}>
+      {/* El nombre es lo que se ve (WCAG 2.5.3), con el contexto en sr-only. */}
+      <span className="sr-only">Tasas del día: </span>
       {contenido}
+      <span className="sr-only"> bolívares por dólar. Ver el historial</span>
       {detalle}
     </Link>
   ) : (
-    <span className={clase} tabIndex={0} aria-label={`Tasa BCV dólar ${tasa(t.usd)} bolívares`}>
+    <span className={clase} tabIndex={0} role="note">
       {contenido}
+      <span className="sr-only"> bolívares por dólar</span>
       {detalle}
     </span>
   )
@@ -100,11 +104,12 @@ export function PuntoJd() {
   return (
     <span
       tabIndex={0}
+      role="note"
       className="group relative hidden h-8 shrink-0 items-center gap-1.5 rounded-lg px-1.5 text-xs text-[#cfccc6] focus-visible:outline-2 focus-visible:outline-white lg:inline-flex"
       aria-label="Espejo de JD: sin espejo aún"
     >
       <span className="h-2.5 w-2.5 rounded-full border-2 border-[#8d8785]" aria-hidden />
-      <span aria-hidden>JD</span>
+      <span>JD</span>
       <span
         role="tooltip"
         className="pointer-events-none invisible absolute top-full right-0 z-50 mt-2 w-64 rounded-xl border border-[var(--borde)] bg-white p-3 text-xs leading-relaxed text-marca-700 opacity-0 shadow-xl group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100"

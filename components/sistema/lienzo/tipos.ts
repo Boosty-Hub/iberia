@@ -29,6 +29,20 @@ export const COLOR_TONO: Record<Tono, string> = {
   azul: '#2f6fb0',
 }
 
+/**
+ * El mismo tono para TEXTO (chips, leyenda): con 4,5:1 sobre blanco (WCAG 2.2 AA,
+ * R6). `COLOR_TONO` queda para franjas y puntos, que no son texto.
+ */
+export const TEXTO_TONO: Record<Tono, string> = {
+  verde: '#1a7a50',
+  ambar: '#8a5a12',
+  rojo: '#b42d27',
+  gris: '#6b6562',
+  carbon: '#2f2c2b',
+  morado: '#6b4fb3',
+  azul: '#2f6fb0',
+}
+
 export type Marca = {
   tono: Tono
   /** Un carácter que se lee sin color: ✓ ○ ▲ ≈ … */
@@ -119,4 +133,6 @@ export type PropsLienzo = {
   resumenCambios?: ReactNode
   /** Texto del lado vacío de las migas. */
   ayuda?: string
+  /** «PDF del subárbol» (R6): qué lienzo es, para `/sistema/pdf/subarbol`. */
+  pdf?: 'organizacion' | 'procesos'
 }

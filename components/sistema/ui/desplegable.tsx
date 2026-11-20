@@ -19,10 +19,16 @@ export function Desplegable({
   ancho = 'w-64',
   oscuro = false,
   inicialAbierto = false,
+  soloIcono = false,
 }: {
   boton: ReactNode
-  /** Lo que lee un lector de pantalla del botón. */
+  /**
+   * Qué hace el botón. Si el botón tiene texto, su nombre accesible es ese texto
+   * (WCAG 2.5.3, «la etiqueta en el nombre») y `etiqueta` va de ayuda (`title`);
+   * si es solo un icono (`soloIcono`), `etiqueta` es su nombre.
+   */
   etiqueta: string
+  soloIcono?: boolean
   children: ReactNode | ((cerrar: () => void) => ReactNode)
   alinear?: 'izq' | 'der'
   className?: string
@@ -63,7 +69,8 @@ export function Desplegable({
       <button
         ref={boton_}
         type="button"
-        aria-label={etiqueta}
+        aria-label={soloIcono ? etiqueta : undefined}
+        title={soloIcono ? undefined : etiqueta}
         aria-expanded={abierto}
         aria-controls={id}
         onClick={() => setAbierto((v) => !v)}

@@ -88,11 +88,13 @@ export const TABLA_TASAS: FuenteTabla = {
     { clave: 'metodo', etiqueta: 'Método', filtrable: true, oculta: true, etiquetas: { web: 'Web', xls: 'Excel', api: 'API', manual: 'Manual', cruce: 'Cruce' } },
     { clave: 'motivo', etiqueta: 'Motivo', oculta: true, ancho: 200 },
   ],
+  // Por la RPC y no por la tabla (R6 · M4): la tabla ya no entrega el paralelo,
+  // y la RPC lo da a quien lo puede ver y registra la lectura.
   consulta: (supabase, _ctx, select, opciones) =>
     supabase
       .schema('control')
-      .from('tasa_cambio')
-      .select(select, opciones?.count ? { count: opciones.count } : undefined),
+      .rpc('historial_tasas', undefined, opciones?.count ? { count: opciones.count } : undefined)
+      .select(select),
 }
 
 export const FUENTES: Record<string, FuenteTabla> = {

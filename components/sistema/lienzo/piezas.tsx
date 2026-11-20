@@ -3,7 +3,7 @@
 import { createContext, memo, useContext, type ReactNode } from 'react'
 import { Handle, Position, type Edge, type EdgeProps, type Node, type NodeProps } from '@xyflow/react'
 import { cn } from '@/lib/utils'
-import { COLOR_TONO, ETIQUETA_DIFF, type Capa, type NodoLienzo } from './tipos'
+import { COLOR_TONO, ETIQUETA_DIFF, TEXTO_TONO, type Capa, type NodoLienzo } from './tipos'
 
 /**
  * La caja y la arista del lienzo. Lo que cambia con la interacción (la caja
@@ -33,7 +33,7 @@ export function MarcaChip({ capa, nodo, className }: { capa: Capa | null; nodo: 
   const m = capa?.marca(nodo)
   if (!m) return null
   return (
-    <span className={cn('lz-chip', className)} style={{ color: COLOR_TONO[m.tono], borderColor: `${COLOR_TONO[m.tono]}40` }} title={m.etiqueta}>
+    <span className={cn('lz-chip', className)} style={{ color: TEXTO_TONO[m.tono], borderColor: `${COLOR_TONO[m.tono]}40` }} title={m.etiqueta}>
       <span aria-hidden>{m.icono}</span> {m.corta ?? m.etiqueta}
     </span>
   )

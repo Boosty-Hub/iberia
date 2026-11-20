@@ -285,6 +285,7 @@ export function MapaLienzo({
 
   return (
     <Lienzo
+      pdf="procesos"
       nodos={nodos}
       capas={capas}
       cuerpo={cuerpo}

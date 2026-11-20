@@ -61,11 +61,14 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // getUser() revalida el token contra el servidor de Auth. No usar getSession()
-  // aquí: lee la cookie sin verificarla.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // getClaims() verifica la firma del JWT (ES256, con la JWKS del proyecto en
+  // caché) sin ir al servidor de Auth, y refresca la sesión si venció. Es la
+  // puerta, no la autorización: cada página y acción vuelve a validar con
+  // `getUser()` (`obtenerSesion`) y la base aplica RLS. Con getUser() aquí cada
+  // petición —también cada server action— pagaba una vuelta más a us-east-1
+  // (R6, 20-nov-2026). No usar getSession(): lee la cookie sin verificarla.
+  const { data } = await supabase.auth.getClaims()
+  const user = data?.claims?.sub ? data.claims : null
 
   const { pathname } = request.nextUrl
   const esPublica = RUTAS_PUBLICAS.some(

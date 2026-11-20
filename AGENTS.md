@@ -944,6 +944,61 @@ táctiles menores de 44 px.
 archivos: hasta el 27 de septiembre de 2026 habían quedado 115 sueltos —fotos, audios de
 devoluciones— en 101 carpetas sin dueño. `probar:supabase` falla si vuelve a quedar alguna.
 
+## Plataforma Iberia (`/sistema`)
+
+El sistema que reemplaza al dashboard para operar a Iberia (Etapa 1 + rediseño R0–R6, rama
+`plataforma/etapa-1`). Plan: `plataforma/plan/` (fuera de git; el Anexo E es el rediseño).
+
+- **Armazón** (`app/sistema/layout.tsx`): barra carbón (Ctrl K, «Datos al», Realidad/Escenario, Bs/USD,
+  tasas, punto de JD, «ver como», campana, persona), riel de dominios y columna de módulos (salen de
+  `control.modulo`: el plan es dato), zona de trabajo y panel de la ficha. En teléfono (≤ 900 px) todo
+  eso va en un `<dialog>` (`MenuTelefono`). El layout lee todo **en una sola tanda** (`Promise.all`): una
+  lectura nueva del armazón entra ahí, nunca después.
+- **Contexto en la URL**: `al` (fecha de los datos) y `esc` (escenario) los lee cada página con
+  `leerContexto(sp)` y el menú los arrastra; la moneda, el riel y la columna van en cookies.
+  `ficha=<tipo>:<id>` abre el panel **sin ir al servidor**: `fijar()` de `useContextoUrl` lo cambia con
+  `history.pushState` (`SOLO_NAVEGADOR`), y lo mismo `abrirFicha` del lienzo y de los avisos. Con
+  `router.push` la página entera se volvía a pintar en el servidor antes de traer la ficha (1,9 s → 0,9 s).
+- **Las piezas, una sola vez**: `TablaServidor` + una **fuente** (`lib/plataforma/tablas*.ts`: consulta,
+  columnas, permiso, ficha; `enMemoria` para las chicas) pinta `TablaDatos` con filtros en chips, orden,
+  grupos, totales sobre lo filtrado, vistas (`ui.vista`) y exportación con la misma definición.
+  `FichaObjeto`/`PanelFicha` (la arma `lib/plataforma/fichas.ts` con la RLS de quien mira; Esc cierra y
+  devuelve el foco). `KpiMetrica` (sección de abajo). `Lienzo` (React Flow 12.12 + dagre) para el
+  organigrama (`org.lienzo`) y el mapa (`sgc.lienzo`): la base hace las cuentas y el `diff` del escenario,
+  el lienzo solo dibuja; en teléfono arranca en lista.
+- **Esquemas**: `org` (estructura, escenarios), `sgc` (procesos, documentos), `flujo` (rutas y
+  aprobaciones), `control` (módulos, catálogos, tasas, auditoría), `ui` (vistas, búsqueda, métricas),
+  `nucleo` (línea de tiempo, avisos, tareas), `ia` (capacidades, propuestas, actividad). Las funciones que
+  no se exponen van en `privado`.
+- **Permisos**: recursos `sistema:*` de `lib/permisos.ts` (estructura, escenarios, procesos, documentos,
+  perímetros, dotación, costos 🔒, requisiciones, aprobaciones, catálogos, auditoría, tasas,
+  tasas-paralelo, ia, ia-actividad). La página pide su recurso con `requerirPermiso` y la RLS lo vuelve a
+  preguntar con `puede()`; un aviso solo le llega a quien puede ver el objeto (`privado.puede_ver_objeto_de`;
+  los de `nivel_ia`, que no tiene ficha, llevan a la bandeja — `tieneFicha()`).
+- **Tasas**: `control.tasa_cambio` + `control.tasas_del_dia()` (el paralelo solo con
+  `sistema:tasas-paralelo`, y su lectura queda registrada). Las captura `POST /api/tasas/capturar` con la
+  cabecera `x-tasas-secreto` (`TASAS_SECRETO`); el programador se monta al pasar a producción.
+- **IA**: toda capacidad nace en N0 y sube **un nivel a la vez** por la ruta `nivel_ia` (doble firma),
+  nunca sobre su techo; bajar o apagar es inmediato. Interruptor general y tope diario en Administración ›
+  Gobierno de IA; lo que hace la IA queda en `ia.actividad`, que no se borra. Techo de NUC-DOC-IA-02: N4
+  solo para metadatos internos; el estado vigente, N2.
+- **PDF del subárbol**: el botón de los dos lienzos manda a `POST /sistema/pdf/subarbol` solo ids (la caja
+  elegida y lo desplegado); el servidor relee la rama con la RLS, arma el cajetín (código, versión, datos
+  al, fecha, «Uso interno») y lo imprime con Chromium (Playwright). Sin Chromium (Netlify) responde la
+  misma hoja en HTML para imprimir desde el navegador. Sin costos.
+- **Accesibilidad (WCAG 2.2 AA, R6)**: dentro de `.plataforma` el gris tenue (`marca-400`) es `#706a67`
+  (≥ 4,5:1); el texto de un tono va con `TEXTO_TONO`, no con `COLOR_TONO`. **El nombre de un botón empieza
+  por lo que se ve** (2.5.3): `Desplegable` usa su texto y deja `etiqueta` de `title`; solo uno de icono
+  lleva `soloIcono`. ⚠️ Un `sr-only` dentro de una tabla con desplazamiento necesita un padre `relative`:
+  si no, se sale del contenedor y ensancha la página en el teléfono.
+- **Pruebas, siempre contra el proyecto de PRUEBAS** (`SUPABASE_PRUEBAS_*`, cuentas
+  `<rol>.pruebas@plataforma.local`): `dev-pruebas.mjs` (dev en el 3005), `produccion-pruebas.mjs` (build de
+  producción en el 3007), `sql-pruebas.mjs` (SQL por la Management API, solo al de pruebas; `--registrar`
+  anota la migración), y las suites `probar-colaboracion`, `probar-r5`, `probar-ia`, `probar-lienzo`,
+  `probar-r6` (teclado, teléfono, pellizco, PDF), `mirar-armazon`, `medir-rendimiento` y
+  `medir-accesibilidad` (axe-core). Producción: `pasar-a-produccion.mjs` hace un simulacro de solo lectura
+  y dice qué falta; con `--ejecutar --confirmo`, y el OK de Gabriel, lo hace.
+
 ## Plataforma Iberia · el registro de métricas (`/sistema`, R5)
 
 Desde el 20 de noviembre de 2026. **Cada cifra de la plataforma se define una sola vez**: «procesos con
