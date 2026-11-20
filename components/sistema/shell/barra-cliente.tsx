@@ -2,13 +2,13 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { cerrarSesion } from '@/app/login/actions'
 import { Desplegable } from '@/components/sistema/ui/desplegable'
-import { fijarMoneda, fijarVerComo, misPendientes, type Pendiente } from '@/components/sistema/shell/acciones'
+import { fijarMoneda, fijarVerComo } from '@/components/sistema/shell/acciones'
 import { useContextoUrl } from '@/components/sistema/shell/contexto-url'
-import { IconoCalendarito, IconoCampanita, IconoFlechita, IconoLupa, IconoOjo, IconoRombo } from '@/components/sistema/shell/iconos'
-import { fechaLarga, hace, hoyCaracas, tasa } from '@/lib/plataforma/formato'
+import { IconoCalendarito, IconoFlechita, IconoLupa, IconoOjo, IconoRombo } from '@/components/sistema/shell/iconos'
+import { fechaLarga, hoyCaracas, tasa } from '@/lib/plataforma/formato'
 import { cn } from '@/lib/utils'
 
 /**
@@ -206,71 +206,8 @@ export function VerComo({ roles, activo, rolReal }: { roles: { id: string; nombr
   )
 }
 
-/** La campana: lo que me toca decidir. Se refresca al abrirla y cada 3 minutos. */
-export function Campana({ inicial }: { inicial: Pendiente[] }) {
-  const [lista, setLista] = useState(inicial)
-  useEffect(() => {
-    const t = setInterval(() => {
-      if (document.visibilityState === 'visible') misPendientes().then(setLista).catch(() => {})
-    }, 180_000)
-    return () => clearInterval(t)
-  }, [])
-  const n = lista.length
-  return (
-    <Desplegable
-      etiqueta={n ? `Notificaciones: ${n} por decidir` : 'Notificaciones: nada por decidir'}
-      alinear="der"
-      ancho="w-[min(24rem,calc(100vw-1.5rem))]"
-      claseBoton="relative grid h-8 w-8 place-items-center rounded-lg text-white hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-white"
-      boton={
-        <>
-          <IconoCampanita className="h-5 w-5" />
-          {n > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 min-w-4 rounded-full bg-[#D4332C] px-1 text-center text-[10px] leading-4 font-bold text-white" aria-hidden>
-              {n > 99 ? '99+' : n}
-            </span>
-          )}
-        </>
-      }
-    >
-      {(cerrar) => (
-        <div className="text-sm">
-          <div className="flex items-center justify-between border-b border-[var(--borde)] px-4 py-3">
-            <p className="font-semibold">Notificaciones</p>
-            <button type="button" className="text-xs text-marca-500 hover:text-marca-800" onClick={() => misPendientes().then(setLista)}>
-              Actualizar
-            </button>
-          </div>
-          {!n ? (
-            <p className="px-4 py-6 text-center text-marca-500">No tienes nada por decidir.</p>
-          ) : (
-            <ul>
-              {lista.slice(0, 8).map((p) => (
-                <li key={p.id} className="border-b border-[var(--borde)] last:border-0">
-                  <Link href={p.href ?? '/sistema/bandeja'} onClick={cerrar} className="flex gap-3 px-4 py-2.5 hover:bg-marca-50">
-                    <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-amber-50 text-[11px] font-bold text-amber-800" aria-hidden>
-                      ✓
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block truncate font-medium text-marca-900">{p.titulo}</span>
-                      <span className="block truncate text-xs text-marca-500">
-                        Te toca: {p.paso} · espera {hace(p.desde)}
-                        {p.pidio ? ` · pidió ${p.pidio}` : ''}
-                      </span>
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-          <Link href="/sistema/bandeja" onClick={cerrar} className="block border-t border-[var(--borde)] px-4 py-2.5 text-center text-xs font-semibold text-acento-700 hover:bg-marca-50">
-            Ver todo en Mis aprobaciones{n > 8 ? ` (${n})` : ''}
-          </Link>
-        </div>
-      )}
-    </Desplegable>
-  )
-}
+/** La campana vive en la colaboración (R3): menciones, aprobaciones, lo que sigo y tareas. */
+export { Campana } from '@/components/sistema/colaboracion/campana'
 
 /** La persona: nombre, rol, accesos y salir. */
 export function MenuPersona({

@@ -41,7 +41,7 @@ export async function crearEscenario(_a: EstadoAccion, fd: FormData): Promise<Es
     .rpc('crear_escenario_estructura', { p_nombre: nombre, p_descripcion: campo(fd, 'descripcion') || undefined, p_fecha: hoyCaracas() })
   if (error) return { error: mensajeError(error) }
   revalidatePath(RUTA)
-  redirect(`${RUTA}/${data}`)
+  redirect(`/sistema/nucleo/organizacion?esc=${data}`)
 }
 
 export async function renombrarUnidad(_a: EstadoAccion, fd: FormData): Promise<EstadoAccion> {

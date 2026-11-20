@@ -26,11 +26,12 @@ export async function exportarCsv(tabla: string, consulta: string): Promise<{ no
   const estado = leerEstado(sp, fuente.columnas, { orden: fuente.orden.columna, dir: fuente.orden.dir, tamano: fuente.tamano })
   const ctx = await leerContexto(Object.fromEntries(sp.entries()))
   const { filas, cortado } = await todasLasFilas(fuente, { ...estado, pagina: 1 }, ctx)
-  const cols = estado.columnas.map((c) => fuente.columnas.find((x) => x.clave === c)!).filter(Boolean)
+  const cols = estado.columnas.map((c) => fuente.columnas.find((x) => x.clave === c)!).filter((c) => c && c.tipo !== 'acciones')
 
   const celda = (v: unknown, tipo?: string, etiquetas?: Record<string, string>) => {
     if (v === null || v === undefined) return ''
     if (etiquetas && typeof v === 'string') return etiquetas[v] ?? v
+    if (typeof v === 'boolean') return etiquetas?.[String(v)] ?? (v ? 'Sí' : 'No')
     if (tipo === 'entero') return numero(Number(v), 0)
     if (tipo === 'decimal' || tipo === 'porcentaje') return numero(Number(v), 2)
     if (tipo === 'tasa') return numero(Number(v), 8, 2)

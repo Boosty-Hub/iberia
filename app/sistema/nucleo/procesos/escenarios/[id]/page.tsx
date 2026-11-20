@@ -1,18 +1,19 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { IconoAlerta, IconoAtras, IconoCheck } from '@/components/iconos'
-import { Insignia } from '@/components/ui'
-import { ESTADOS_ESCENARIO, NIVELES, TONO_ESCENARIO, fecha, fechaHora, hoy } from '@/components/sistema/procesos/comun'
+import { ESTADOS_ESCENARIO, NIVELES, fecha, fechaHora, hoy } from '@/components/sistema/procesos/comun'
 import { leerCatalogo, leerFilasDeEscenario, leerPlazas, leerProcesos, leerSolicitudes } from '@/components/sistema/procesos/datos'
 import { ArbolEscenario, EnviarEscenario, type NodoEscenario } from '@/components/sistema/procesos/escenario'
-import { Seccion } from '@/components/sistema/procesos/piezas'
 import { LineaSolicitud } from '@/components/sistema/procesos/vistas'
+import { Segmentos } from '@/components/sistema/procesos/piezas-r2'
+import { MapaLienzo } from '@/components/sistema/lienzo/MapaLienzo'
+import { BOTON_CABECERA, CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
 import { descartarEscenario } from '@/app/sistema/nucleo/procesos/escenarios/acciones'
 import { puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
+import { cn } from '@/lib/utils'
 
-export const metadata: Metadata = { title: 'Escenario de procesos · Plataforma Iberia' }
+export const metadata: Metadata = { title: 'Escenario · Procesos' }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const RUTA = '/sistema/nucleo/procesos/escenarios'
@@ -28,10 +29,19 @@ const CAMPOS: Record<string, string> = {
   orden: 'Orden',
 }
 
+const TONO_ESTADO: Record<string, string> = {
+  borrador: 'bg-[#f1edfa] text-[#5a3f9e]',
+  en_aprobacion: 'bg-[#fdf4e3] text-[#8a5a12]',
+  aprobado: 'bg-[#eaf2fb] text-[#2f5f9a]',
+  publicado: 'bg-[#e7f5ee] text-[#1f6f4b]',
+  descartado: 'bg-[#eef0f3] text-marca-600',
+}
+
 /**
- * Un escenario de procesos: su árbol editable, la comparación contra la
- * realidad de hoy (altas, bajas y cambios, calculada en la base por
- * `sgc.comparar_escenario_procesos`) y el envío a aprobación con fecha.
+ * Un escenario de procesos: el lienzo en modo escenario (en borrador y con
+ * permiso se arrastra para mover y «⋯» agrega, renombra o retira), la lista de
+ * cambios contra la realidad (`sgc.comparar_escenario_procesos`) y el envío a
+ * aprobación con fecha. `?vista=lista` da el árbol en lista (teléfono).
  */
 export default async function EscenarioPage({ params, searchParams }: PageProps<'/sistema/nucleo/procesos/escenarios/[id]'>) {
   await requerirPermiso('sistema:procesos')
@@ -41,8 +51,11 @@ export default async function EscenarioPage({ params, searchParams }: PageProps<
 
   const { data: e } = await supabase.schema('org').from('escenario').select('*').eq('id', id).eq('alcance', 'procesos').maybeSingle()
   if (!e) notFound()
+  const vista = consulta.vista === 'lista' ? 'lista' : 'lienzo'
+  const editable = e.estado === 'borrador' && puede(sesion, 'sistema:escenarios', 'editar') && puede(sesion, 'sistema:procesos', 'editar')
 
-  const [filas, { data: comparacion }, { vigentes }, plazas, catalogo, solicitudes] = await Promise.all([
+  const [filasLienzo, filas, { data: comparacion }, { vigentes }, plazas, catalogo, solicitudes] = await Promise.all([
+    vista === 'lienzo' ? supabase.schema('sgc').rpc('lienzo', { p_fecha: hoy(), p_escenario: id }) : Promise.resolve({ data: null, error: null }),
     leerFilasDeEscenario(supabase, id),
     supabase.schema('sgc').rpc('comparar_escenario_procesos', { p_escenario: id }),
     leerProcesos(supabase),
@@ -55,20 +68,6 @@ export default async function EscenarioPage({ params, searchParams }: PageProps<
   const etiquetaPlaza = new Map(plazas.map((p) => [p.ref, p.etiqueta]))
   const nombreReal = new Map(vigentes.map((v) => [v.ref, v.nombre]))
   const nombreEsc = new Map(filas.map((f) => [f.ref, f.nombre]))
-
-  const editable = e.estado === 'borrador' && puede(sesion, 'sistema:escenarios', 'editar') && puede(sesion, 'sistema:procesos', 'editar')
-  const nodos: NodoEscenario[] = filas.map((f) => ({
-    id: f.id,
-    ref: f.ref,
-    padre_ref: f.padre_ref,
-    nivel: f.nivel,
-    nombre: f.nombre,
-    estado: f.estado,
-    estado_operativo: f.estado_operativo,
-    dueno_plaza_ref: f.dueno_plaza_ref,
-    dueno: (f.dueno_plaza_ref && etiquetaPlaza.get(f.dueno_plaza_ref)) || f.dueno_texto,
-    cambio: cambioDe.get(f.ref) ?? null,
-  }))
 
   const valor = (lado: 'antes' | 'despues', campo: string, j: Record<string, unknown> | null) => {
     if (!j) return '—'
@@ -94,160 +93,164 @@ export default async function EscenarioPage({ params, searchParams }: PageProps<
         return null
     }
   }
-
   const grupos = [
-    { clave: 'alta', titulo: 'Se agregan', lista: cambios.filter((c) => c.cambio === 'alta') },
-    { clave: 'baja', titulo: 'Se retiran', lista: cambios.filter((c) => c.cambio === 'baja') },
-    { clave: 'cambio', titulo: 'Cambian', lista: cambios.filter((c) => c.cambio === 'cambio') },
+    { clave: 'alta', titulo: 'Se agregan', simbolo: '＋', lista: cambios.filter((c) => c.cambio === 'alta') },
+    { clave: 'baja', titulo: 'Se retiran', simbolo: '−', lista: cambios.filter((c) => c.cambio === 'baja') },
+    { clave: 'cambio', titulo: 'Cambian', simbolo: '↻', lista: cambios.filter((c) => c.cambio === 'cambio') },
   ]
   const conBorrador = cambios.filter((c) => c.borrador_abierto)
+  const nodos: NodoEscenario[] = filas.map((f) => ({
+    id: f.id,
+    ref: f.ref,
+    padre_ref: f.padre_ref,
+    nivel: f.nivel,
+    nombre: f.nombre,
+    estado: f.estado,
+    estado_operativo: f.estado_operativo,
+    dueno_plaza_ref: f.dueno_plaza_ref,
+    dueno: (f.dueno_plaza_ref && etiquetaPlaza.get(f.dueno_plaza_ref)) || f.dueno_texto,
+    cambio: cambioDe.get(f.ref) ?? null,
+  }))
+  const raiz = e.proceso_raiz_ref ? (nombreReal.get(e.proceso_raiz_ref) ?? nombreEsc.get(e.proceso_raiz_ref) ?? 'un proceso') : null
 
   return (
     <>
-      <Link href={RUTA} className="mb-4 inline-flex min-h-10 items-center gap-1.5 text-sm text-marca-500 hover:text-acento-700">
-        <IconoAtras className="h-4 w-4" />
-        Escenarios de procesos
-      </Link>
-      <header className="mb-6">
-        <p className="rotulo mb-2">Escenario de procesos</p>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="text-2xl font-bold tracking-tight text-marca-900">{e.nombre}</h1>
-            <p className="mt-1 text-sm text-marca-600">
-              {e.proceso_raiz_ref ? `Copia de «${nombreReal.get(e.proceso_raiz_ref) ?? nombreEsc.get(e.proceso_raiz_ref) ?? 'un proceso'}»` : 'Copia del catálogo completo'} ·
-              tomada el {fecha(e.fecha_base)}
-              {e.vigente_desde && <> · rige desde el {fecha(e.vigente_desde)}</>}
-            </p>
-            {e.descripcion && <p className="mt-1 max-w-2xl text-sm text-marca-700">{e.descripcion}</p>}
-            <Link
-              href={`/sistema/nucleo/procesos?esc=${e.id}`}
-              className="mt-3 inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-[#d9cff0] bg-[#f7f4fd] px-3.5 text-sm font-semibold text-[#6b4fb3] hover:bg-[#f1edfa]"
-            >
-              ◆ {e.estado === 'borrador' ? 'Editar en el mapa' : 'Ver en el mapa'}
+      <CabeceraModulo
+        sesion={sesion}
+        codigo="NUC-PRO"
+        titulo={`Escenario · ${e.nombre}`}
+        migas={[{ etiqueta: 'Escenarios', href: RUTA }, { etiqueta: e.nombre }]}
+        acciones={
+          <>
+            <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-semibold', TONO_ESTADO[e.estado] ?? TONO_ESTADO.descartado)}>{ESTADOS_ESCENARIO[e.estado] ?? e.estado}</span>
+            <Link href={`/sistema/nucleo/procesos?esc=${e.id}`} className={BOTON_CABECERA}>
+              ◆ Abrir en el mapa
             </Link>
-          </div>
-          <Insignia tono={TONO_ESCENARIO[e.estado] ?? 'neutro'}>{ESTADOS_ESCENARIO[e.estado] ?? e.estado}</Insignia>
-        </div>
-      </header>
+          </>
+        }
+        descripcion={
+          <>
+            {raiz ? `Copia de «${raiz}»` : 'Copia del catálogo completo'}, tomada el {fecha(e.fecha_base)}
+            {e.vigente_desde && <> · rige desde el {fecha(e.vigente_desde)}</>}. {e.descripcion}
+          </>
+        }
+      />
 
-      {typeof consulta.error === 'string' && (
-        <p role="alert" className="mb-4 flex items-start gap-2 rounded-xl border border-acento-200 bg-acento-50 px-4 py-3 text-sm text-acento-800">
-          <IconoAlerta className="mt-0.5 h-4 w-4 shrink-0" />
-          {consulta.error}
-        </p>
-      )}
-      {consulta.enviado === '1' && (
-        <p role="status" className="mb-4 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-          <IconoCheck className="mt-0.5 h-4 w-4 shrink-0" />
-          Enviado a aprobación. Al aprobarse, se publica solo con su fecha.
-        </p>
-      )}
+      {typeof consulta.error === 'string' && <p role="alert" className="mb-3 rounded-lg bg-[#fbeceb] px-3 py-2 text-[12.5px] text-[#a3241f]">{consulta.error}</p>}
+      {consulta.enviado === '1' && <p role="status" className="mb-3 rounded-lg bg-[#e7f5ee] px-3 py-2 text-[12.5px] text-[#1f6f4b]">✓ Enviado a aprobación. Al aprobarse, se publica solo con su fecha.</p>}
       {e.estado === 'publicado' && (
-        <p className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+        <p className="mb-3 rounded-lg bg-[#e7f5ee] px-3 py-2 text-[12.5px] text-[#1f6f4b]">
           Publicado el {fechaHora(e.publicado_en)}. El escenario queda cerrado como evidencia; sus cambios ya están en el catálogo
           {e.vigente_desde && e.vigente_desde > hoy() ? ` y entran en vigor el ${fecha(e.vigente_desde)}` : ''}.
         </p>
       )}
 
-      <div className="grid gap-4 xl:grid-cols-5">
-        <div className="xl:col-span-3">
-          <h2 className="mb-3 text-lg font-semibold text-marca-900">Árbol del escenario</h2>
-          {editable ? (
-            <p className="mb-3 text-sm text-marca-600">Renombra, agrega, mueve, retira o cambia el dueño. Nada de esto toca la realidad hasta publicarse.</p>
-          ) : (
-            <p className="mb-3 text-sm text-marca-600">Solo lectura: el escenario {e.estado === 'borrador' ? 'pide permiso de edición' : 'ya no está en edición'}.</p>
+      <Segmentos
+        etiqueta="Cómo ver el escenario"
+        activa={vista}
+        opciones={[
+          { valor: 'lienzo', etiqueta: 'Lienzo', href: `${RUTA}/${id}` },
+          { valor: 'lista', etiqueta: 'Lista', href: `${RUTA}/${id}?vista=lista` },
+        ]}
+      />
+      {vista === 'lienzo' ? (
+        filasLienzo.error ? (
+          <p className="rounded-lg bg-[#fbeceb] px-3 py-2 text-[12.5px] text-[#a3241f]">No se pudo leer el escenario: {filasLienzo.error.message}</p>
+        ) : (
+          <MapaLienzo filas={filasLienzo.data ?? []} estados={catalogo.estados} escenario={{ id: e.id, nombre: e.nombre, editable }} />
+        )
+      ) : (
+        <ArbolEscenario escenario={id} nodos={nodos} plazas={plazas.map((p) => ({ valor: p.ref, etiqueta: p.etiqueta }))} estados={catalogo.estados} editable={editable} />
+      )}
+      <p className="mt-2 text-[11.5px] text-marca-500">
+        {editable
+          ? 'Arrastra un proceso sobre otro para cambiar de dónde cuelga, o usa «⋯» para agregar, renombrar o retirar. Nada toca la realidad hasta que se publique.'
+          : `Solo lectura: el escenario ${e.estado === 'borrador' ? 'pide permiso de edición' : 'ya no está en edición'}.`}
+      </p>
+
+      <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <section className="min-w-0 rounded-xl border border-[var(--borde)] bg-white p-3.5">
+          <h2 className="text-[13px] font-semibold text-marca-900">Cambios contra la realidad de hoy · {cambios.length}</h2>
+          {conBorrador.length > 0 && (
+            <p className="mt-2 rounded-lg bg-[#fdf4e3] px-2.5 py-2 text-[12px] text-[#8a5a12]">
+              ⚠ {conBorrador.length === 1 ? 'Un proceso' : `${conBorrador.length} procesos`} de este escenario {conBorrador.length === 1 ? 'tiene' : 'tienen'} un borrador abierto en la
+              realidad: hay que cerrarlo antes de enviar.
+            </p>
           )}
-          <ArbolEscenario
-            escenario={id}
-            nodos={nodos}
-            plazas={plazas.map((p) => ({ valor: p.ref, etiqueta: p.etiqueta }))}
-            estados={catalogo.estados}
-            editable={editable}
-          />
-        </div>
-
-        <div className="space-y-4 xl:col-span-2">
-          <Seccion titulo={`Comparado con la realidad de hoy (${cambios.length})`}>
-            {conBorrador.length > 0 && (
-              <p className="mb-3 flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                <IconoAlerta className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                {conBorrador.length === 1 ? 'Un proceso' : `${conBorrador.length} procesos`} de este escenario {conBorrador.length === 1 ? 'tiene' : 'tienen'} un
-                borrador abierto en la realidad: hay que cerrarlo antes de enviar.
-              </p>
-            )}
-            {cambios.length === 0 ? (
-              <p className="text-sm text-marca-500">{e.estado === 'publicado' ? 'Ya no hay diferencias: lo publicado es la realidad.' : 'Sin diferencias todavía.'}</p>
-            ) : (
-              <div className="space-y-4">
-                {grupos
-                  .filter((g) => g.lista.length)
-                  .map((g) => (
-                    <div key={g.clave}>
-                      <p className="mb-1.5 text-xs font-semibold tracking-wide text-marca-500 uppercase">
-                        {g.titulo} ({g.lista.length})
-                      </p>
-                      <ul className="divide-y divide-[var(--borde)]">
-                        {g.lista.map((c) => (
-                          <li key={c.ref} className="py-2 text-sm">
-                            <p className="text-marca-800">
-                              {c.nombre} <span className="text-xs text-marca-400">· {NIVELES[c.nivel]}</span>
+          {cambios.length === 0 ? (
+            <p className="py-4 text-center text-[12.5px] text-marca-400">{e.estado === 'publicado' ? 'Ya no hay diferencias: lo publicado es la realidad.' : 'Sin diferencias todavía.'}</p>
+          ) : (
+            <div className="mt-2 grid gap-3 lg:grid-cols-3">
+              {grupos.map((g) => (
+                <div key={g.clave} className="min-w-0">
+                  <p className="mb-1 text-[11px] font-semibold tracking-wide text-marca-500 uppercase">
+                    <span aria-hidden>{g.simbolo}</span> {g.titulo} · {g.lista.length}
+                  </p>
+                  {g.lista.length ? (
+                    <ul className="divide-y divide-[#eef0f3]">
+                      {g.lista.map((c) => (
+                        <li key={c.ref} className="py-1.5 text-[12.5px]">
+                          <p className="text-marca-900">
+                            {c.nombre} <span className="text-[11px] text-marca-400">· {NIVELES[c.nivel]}</span>
+                          </p>
+                          {g.clave === 'alta' && (
+                            <p className="text-[11.5px] text-marca-500">
+                              Bajo «{valor('despues', 'padre', c.despues as Record<string, unknown>)}» · {valor('despues', 'dueno', c.despues as Record<string, unknown>)}
                             </p>
-                            {g.clave === 'alta' && (
-                              <p className="text-xs text-marca-500">
-                                Bajo «{valor('despues', 'padre', c.despues as Record<string, unknown>)}» · {valor('despues', 'dueno', c.despues as Record<string, unknown>)}
-                              </p>
-                            )}
-                            {g.clave === 'cambio' &&
-                              c.campos.map((k) => {
-                                const a = valor('antes', k, c.antes as Record<string, unknown> | null)
-                                const d = valor('despues', k, c.despues as Record<string, unknown>)
-                                return (
-                                  <p key={k} className="mt-0.5 text-xs text-marca-600">
-                                    <span className="font-medium">{CAMPOS[k] ?? k}:</span>{' '}
-                                    {a === null ? (
-                                      'cambia'
-                                    ) : (
-                                      <>
-                                        <span className="line-through decoration-marca-400">{a}</span> → <span className="text-emerald-800">{d}</span>
-                                      </>
-                                    )}
-                                  </p>
-                                )
-                              })}
-                            {c.borrador_abierto && <p className="mt-0.5 text-xs text-amber-800">Tiene un borrador abierto en la realidad.</p>}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-              </div>
-            )}
-          </Seccion>
+                          )}
+                          {g.clave === 'cambio' &&
+                            c.campos.map((k) => {
+                              const a = valor('antes', k, c.antes as Record<string, unknown> | null)
+                              const d = valor('despues', k, c.despues as Record<string, unknown>)
+                              return (
+                                <p key={k} className="text-[11.5px] text-marca-600">
+                                  <span className="font-medium">{CAMPOS[k] ?? k}:</span>{' '}
+                                  {a === null ? 'cambia' : (
+                                    <>
+                                      <span className="line-through decoration-marca-400">{a}</span> → <span className="text-[#1f6f4b]">{d}</span>
+                                    </>
+                                  )}
+                                </p>
+                              )
+                            })}
+                          {c.borrador_abierto && <p className="text-[11.5px] text-[#8a5a12]">⚠ Tiene un borrador abierto en la realidad.</p>}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-[12px] text-marca-400">—</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
+        <div className="flex flex-col gap-3">
           {e.estado === 'borrador' && puede(sesion, 'sistema:escenarios', 'editar') && (
-            <Seccion titulo="Enviar a aprobación">
-              <p className="mb-3 text-xs text-marca-500">
-                Ruta «Escenario de procesos»: revisa la Coordinación del SGC y aprueba la Gerencia de Calidad y Desarrollo. Al aprobarse, se publica con la fecha
-                que elijas y lo de antes queda cerrado, no borrado.
+            <section className="rounded-xl border border-[var(--borde)] bg-white p-3.5">
+              <h2 className="mb-1 text-[13px] font-semibold text-marca-900">Enviar a aprobación</h2>
+              <p className="mb-3 text-[11.5px] text-marca-500">
+                Ruta «Escenario de procesos»: revisa la Coordinación del SGC y aprueba la Gerencia de Calidad y Desarrollo. Al aprobarse, se publica con la fecha que elijas.
               </p>
               <EnviarEscenario escenario={id} hoy={hoy()} cambios={cambios.length} />
-              <form action={descartarEscenario} className="mt-4 border-t border-[var(--borde)] pt-4">
+              <form action={descartarEscenario} className="mt-3 border-t border-[var(--borde)] pt-3">
                 <input type="hidden" name="escenario" value={id} />
                 <button type="submit" className="btn-peligro h-9 px-3 text-xs">
                   Descartar el escenario
                 </button>
               </form>
-            </Seccion>
+            </section>
           )}
-
           {solicitudes.length > 0 && (
-            <Seccion titulo="Aprobación">
+            <section className="rounded-xl border border-[var(--borde)] bg-white p-3.5">
+              <h2 className="mb-2 text-[13px] font-semibold text-marca-900">Aprobación</h2>
               <div className="space-y-3">
                 {solicitudes.map((s) => (
                   <LineaSolicitud key={s.id} solicitud={s} />
                 ))}
               </div>
-            </Seccion>
+            </section>
           )}
         </div>
       </div>

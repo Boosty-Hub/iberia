@@ -6,6 +6,7 @@ import { ESTADO_SOLICITUD, TIPO_OBJETO, enlaceObjeto } from '@/components/sistem
 import { fechaLarga, hace, numero, porcentaje, sumarDias, tasa, variacion } from '@/lib/plataforma/formato'
 import { leerContexto, tasasDelDia } from '@/lib/plataforma/servidor'
 import { misPendientes } from '@/components/sistema/shell/acciones'
+import { MiDiaColaboracion } from '@/components/sistema/colaboracion/mi-dia'
 import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
 import { Kpi } from '@/components/sistema/ui/kpi'
 import { TONO_CHIP } from '@/lib/plataforma/ficha-tipos'
@@ -231,6 +232,8 @@ export default async function MiDiaPage({ searchParams }: PageProps<'/sistema'>)
           )}
         </section>
       </div>
+
+      <MiDiaColaboracion />
     </>
   )
 }

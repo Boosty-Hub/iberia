@@ -9,7 +9,7 @@
  * Sin `'use client'` ni `'use server'`.
  */
 
-export type TipoColumna = 'texto' | 'entero' | 'decimal' | 'tasa' | 'porcentaje' | 'fecha' | 'fechaHora' | 'codigo' | 'insignia'
+export type TipoColumna = 'texto' | 'entero' | 'decimal' | 'tasa' | 'porcentaje' | 'fecha' | 'fechaHora' | 'codigo' | 'insignia' | 'acciones'
 
 export type TonoCelda = 'neutro' | 'verde' | 'ambar' | 'rojo' | 'azul' | 'morado'
 
@@ -31,6 +31,10 @@ export type Columna = {
   oculta?: boolean
   /** Edición en la celda: la página pasa la acción que guarda. */
   editable?: boolean
+  /** Con edición: la celda se edita eligiendo de esta lista en vez de escribir. */
+  opciones?: { valor: string; etiqueta: string }[]
+  /** Con edición: lo que se lee al pasar el mouse por la celda (p. ej. «rige desde hoy»). */
+  ayudaEdicion?: string
   /** Para `insignia`: el tono de cada valor. */
   tonos?: Record<string, TonoCelda>
   /** Texto legible de cada valor, cuando no viene en otra columna. */
@@ -41,7 +45,16 @@ export type Columna = {
   ayuda?: string
   /** Marca de perímetro: la columna existe solo si la base la manda. */
   candado?: boolean
+  /**
+   * Para `acciones`: los botones de la fila. La columna trae, por fila, la lista
+   * de claves que caben (`hijo,mover,ficha`), así que la base decide cuáles se
+   * pintan. `ficha` abre la ficha; `href` es un enlace con `{columna}`; `pide`
+   * pide un texto y llama a `alAccion` de la tabla; las demás abren la ficha.
+   */
+  acciones?: AccionFila[]
 }
+
+export type AccionFila = { clave: string; etiqueta: string; titulo?: string; href?: string; pide?: string }
 
 export type EstadoTabla = {
   q: string

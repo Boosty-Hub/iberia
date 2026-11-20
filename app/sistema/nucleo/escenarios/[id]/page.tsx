@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { descartarEscenario, enviarEscenario } from '../acciones'
-import { IconoAlerta, IconoAtras, IconoCandado, IconoEnviar } from '@/components/iconos'
+import { IconoAlerta, IconoCandado, IconoEnviar } from '@/components/iconos'
+import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
 import { contextoFlujo } from '@/components/sistema/flujo/datos'
 import { DecidirPaso } from '@/components/sistema/flujo/decidir-paso'
 import { EditorEscenario } from '@/components/sistema/flujo/editor-escenario'
@@ -165,15 +166,16 @@ export default async function EscenarioPage({ params, searchParams }: PageProps<
 
   return (
     <>
-      <Link href="/sistema/nucleo/escenarios" className="mb-4 inline-flex min-h-10 items-center gap-1.5 text-sm text-marca-500 hover:text-acento-700">
-        <IconoAtras className="h-4 w-4" />
-        Escenarios
-      </Link>
+      <CabeceraModulo
+        sesion={sesion}
+        codigo="NUC-ORG"
+        titulo={e.nombre}
+        migas={[{ etiqueta: 'Escenarios', href: '/sistema/nucleo/escenarios' }, { etiqueta: e.nombre }]}
+      />
 
       <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="rotulo mb-2">Escenario de estructura</p>
-          <h1 className="text-2xl font-bold tracking-tight text-marca-900">{e.nombre}</h1>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-marca-600">
             <Insignia tono={est.tono}>{est.etiqueta}</Insignia>
             <span>Copia de la estructura del {fecha(e.fecha_base)}</span>

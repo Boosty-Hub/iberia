@@ -4,8 +4,8 @@ import { MapaLienzo } from '@/components/sistema/lienzo/MapaLienzo'
 import { fechaDe, fmtFecha, hoyCaracas } from '@/components/sistema/organizacion/datos'
 import { activarProgramados, leerCatalogo } from '@/components/sistema/procesos/datos'
 import { EsquemaMapa } from '@/components/sistema/procesos/esquema-mapa'
-import { PestanasProcesos } from '@/components/sistema/procesos/piezas'
-import { Aviso, EncabezadoPagina } from '@/components/ui'
+import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
+import { Aviso } from '@/components/ui'
 import { puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 
@@ -43,9 +43,11 @@ export default async function MapaProcesosPage({ searchParams }: PageProps<'/sis
 
   const encabezado = (
     <>
-      <EncabezadoPagina
-        rotulo="Procesos"
-        titulo="Mapa de procesos"
+      <CabeceraModulo
+        sesion={sesion}
+        codigo="NUC-PRO"
+        titulo="Procesos"
+        migas={[{ etiqueta: esc ? `Mapa · escenario «${esc.nombre}»` : 'Mapa' }]}
         descripcion={
           esc ? (
             <>
@@ -60,7 +62,6 @@ export default async function MapaProcesosPage({ searchParams }: PageProps<'/sis
           )
         }
       />
-      <PestanasProcesos activa="mapa" escenarios={verEscenarios} />
       <BarraLienzo
         ruta="/sistema/nucleo/procesos"
         fecha={fecha}

@@ -98,7 +98,7 @@ export function Kpi({
         {titulo}
         {icono}
       </h3>
-      <p className="mt-1.5 text-[24px] leading-none font-bold text-marca-900 tabular-nums">
+      <p className="mt-1.5 text-[24px] leading-none font-bold text-marca-900 tabular-nums [overflow-wrap:anywhere]">
         {valor}
         {unidad && <span className="ml-1 text-[15px] font-semibold text-marca-700">{unidad}</span>}
       </p>

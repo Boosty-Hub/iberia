@@ -579,6 +579,256 @@ export type Database = {
       [_ in never]: never
     }
   }
+  nucleo: {
+    Tables: {
+      evento: {
+        Row: {
+          actor_es_ia: boolean
+          autor: string | null
+          capacidad_ia: string | null
+          creado_en: string
+          datos: Json
+          editado_en: string | null
+          id: string
+          nivel_ia: string | null
+          objeto_id: string
+          objeto_tipo: string
+          oculto: boolean
+          padre_id: string | null
+          texto: string | null
+          tipo: string
+        }
+        Insert: {
+          actor_es_ia?: boolean
+          autor?: string | null
+          capacidad_ia?: string | null
+          creado_en?: string
+          datos?: Json
+          editado_en?: string | null
+          id?: string
+          nivel_ia?: string | null
+          objeto_id: string
+          objeto_tipo: string
+          oculto?: boolean
+          padre_id?: string | null
+          texto?: string | null
+          tipo: string
+        }
+        Update: {
+          actor_es_ia?: boolean
+          autor?: string | null
+          capacidad_ia?: string | null
+          creado_en?: string
+          datos?: Json
+          editado_en?: string | null
+          id?: string
+          nivel_ia?: string | null
+          objeto_id?: string
+          objeto_tipo?: string
+          oculto?: boolean
+          padre_id?: string | null
+          texto?: string | null
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evento_padre_id_fkey"
+            columns: ["padre_id"]
+            isOneToOne: false
+            referencedRelation: "evento"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notificacion: {
+        Row: {
+          actor: string | null
+          creado_en: string
+          destinatario: string
+          detalle: string | null
+          enlace: string | null
+          evento_id: string | null
+          id: string
+          leida_en: string | null
+          objeto_id: string | null
+          objeto_tipo: string | null
+          texto: string
+          tipo: string
+        }
+        Insert: {
+          actor?: string | null
+          creado_en?: string
+          destinatario: string
+          detalle?: string | null
+          enlace?: string | null
+          evento_id?: string | null
+          id?: string
+          leida_en?: string | null
+          objeto_id?: string | null
+          objeto_tipo?: string | null
+          texto: string
+          tipo: string
+        }
+        Update: {
+          actor?: string | null
+          creado_en?: string
+          destinatario?: string
+          detalle?: string | null
+          enlace?: string | null
+          evento_id?: string | null
+          id?: string
+          leida_en?: string | null
+          objeto_id?: string | null
+          objeto_tipo?: string | null
+          texto?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacion_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "evento"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seguimiento: {
+        Row: {
+          creado_en: string
+          objeto_id: string
+          objeto_tipo: string
+          perfil: string
+        }
+        Insert: {
+          creado_en?: string
+          objeto_id: string
+          objeto_tipo: string
+          perfil: string
+        }
+        Update: {
+          creado_en?: string
+          objeto_id?: string
+          objeto_tipo?: string
+          perfil?: string
+        }
+        Relationships: []
+      }
+      tarea: {
+        Row: {
+          asignada_a: string
+          cerrada_en: string | null
+          creada_por: string
+          creado_en: string
+          detalle: string | null
+          estado: string
+          id: string
+          objeto_id: string | null
+          objeto_tipo: string | null
+          titulo: string
+          vence: string | null
+        }
+        Insert: {
+          asignada_a: string
+          cerrada_en?: string | null
+          creada_por?: string
+          creado_en?: string
+          detalle?: string | null
+          estado?: string
+          id?: string
+          objeto_id?: string | null
+          objeto_tipo?: string | null
+          titulo: string
+          vence?: string | null
+        }
+        Update: {
+          asignada_a?: string
+          cerrada_en?: string | null
+          creada_por?: string
+          creado_en?: string
+          detalle?: string | null
+          estado?: string
+          id?: string
+          objeto_id?: string | null
+          objeto_tipo?: string | null
+          titulo?: string
+          vence?: string | null
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      cambios: {
+        Args: { p_id: string; p_limite?: number; p_tipo: string }
+        Returns: {
+          accion: string
+          actor: string
+          actor_nombre: string
+          cambios: Json
+          en: string
+          extra: Json
+          id: number
+          tabla: string
+        }[]
+      }
+      comentar: {
+        Args: {
+          p_id: string
+          p_menciones?: string[]
+          p_padre?: string
+          p_texto: string
+          p_tipo: string
+        }
+        Returns: string
+      }
+      marcar_leidas: { Args: { p_ids?: string[] }; Returns: number }
+      mencionables: {
+        Args: { p_id: string; p_q?: string; p_tipo: string }
+        Returns: {
+          cargo: string
+          id: string
+          nombre: string
+        }[]
+      }
+      no_leidas: { Args: never; Returns: number }
+      nombres: {
+        Args: { p_ids: string[] }
+        Returns: {
+          id: string
+          nombre: string
+        }[]
+      }
+      personas: {
+        Args: { p_q?: string }
+        Returns: {
+          cargo: string
+          id: string
+          nombre: string
+        }[]
+      }
+      puede_ver_objeto: {
+        Args: { p_id: string; p_tipo: string }
+        Returns: boolean
+      }
+      titulos_objetos: {
+        Args: { p_ids: string[]; p_tipos: string[] }
+        Returns: {
+          id: string
+          tipo: string
+          titulo: string
+        }[]
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   org: {
     Tables: {
       cargo: {
@@ -1265,6 +1515,10 @@ export type Database = {
         Args: { p_empleado: string; p_fecha: string; p_req: string }
         Returns: string
       }
+      dependencias: {
+        Args: { p_cargo: string; p_plaza?: string }
+        Returns: Json
+      }
       describir_plazas: {
         Args: { p_refs: string[] }
         Returns: {
@@ -1434,6 +1688,14 @@ export type Database = {
           tipo: string
         }[]
       }
+      paso_actual_requisicion: {
+        Args: { p_req: string }
+        Returns: {
+          desde: string
+          paso: string
+          quien: string
+        }[]
+      }
       perfil_de_plaza: {
         Args: { p_fecha?: string; p_plaza: string }
         Returns: string
@@ -1450,6 +1712,14 @@ export type Database = {
       retirar_componente_costo: {
         Args: { p_fecha: string; p_id: string }
         Returns: undefined
+      }
+      tasa_bcv: {
+        Args: { p_fecha?: string }
+        Returns: {
+          fecha_valor: string
+          fuente: string
+          tasa: number
+        }[]
       }
       terminar_ocupacion: {
         Args: { p_fecha: string; p_id: string; p_motivo?: string }
@@ -4464,6 +4734,41 @@ export type Database = {
         }
         Relationships: []
       }
+      documento_conciliacion: {
+        Row: {
+          decidido_en: string
+          decidido_por: string
+          documento_id: string
+          id: string
+          motivo: string
+          resolucion: string
+        }
+        Insert: {
+          decidido_en?: string
+          decidido_por?: string
+          documento_id: string
+          id?: string
+          motivo: string
+          resolucion: string
+        }
+        Update: {
+          decidido_en?: string
+          decidido_por?: string
+          documento_id?: string
+          id?: string
+          motivo?: string
+          resolucion?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documento_conciliacion_documento_id_fkey"
+            columns: ["documento_id"]
+            isOneToOne: false
+            referencedRelation: "documento"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proceso: {
         Row: {
           area_texto: string | null
@@ -4715,6 +5020,7 @@ export type Database = {
         Returns: undefined
       }
       publicar_proceso: { Args: { p_id: string }; Returns: undefined }
+      xx: { Args: { p: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
@@ -4772,6 +5078,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      alertas_organizacion: { Args: { p_al?: string }; Returns: Json }
       buscar: {
         Args: { p_limite?: number; p_q: string }
         Returns: {
@@ -4784,7 +5091,336 @@ export type Database = {
           titulo: string
         }[]
       }
+      campo_legible: { Args: { p: string }; Returns: string }
+      campos_cambiados: {
+        Args: { p_antes: Json; p_despues: Json }
+        Returns: string
+      }
+      cargos: {
+        Args: { p_al?: string }
+        Returns: {
+          activo: string
+          busqueda: string
+          clave: string
+          dotacion: number
+          familia: string
+          familia_nombre: string
+          id: string
+          n_sinonimos: number
+          nivel: number
+          nombre: string
+          ocupantes: number
+          plazas: number
+          sinonimos: string
+          vacantes: number
+        }[]
+      }
+      componentes_costo: {
+        Args: { p_fecha?: string }
+        Returns: {
+          aplica_a: string
+          base: string
+          base_legal: string
+          desde: string
+          forma: string
+          fuente: string
+          hasta: string
+          id: string
+          moneda: string
+          nombre: string
+          nota: string
+          orden: number
+          piso: string
+          por_confirmar: string
+          tope: number
+          valor: number
+        }[]
+      }
+      conciliacion: {
+        Args: never
+        Returns: {
+          busqueda: string
+          creado_en: string
+          descripcion: string
+          dias: number
+          estado: string
+          fuente: string
+          id: string
+          modulo: string
+          objeto: string
+          resolucion: string
+          responsable: string
+          resuelto_en: string
+          resuelto_por: string
+          tipo: string
+        }[]
+      }
+      conciliacion_documentos: {
+        Args: never
+        Returns: {
+          acciones: string
+          busqueda: string
+          clave: string
+          codigo: string
+          decidido_en: string
+          decidido_por: string
+          detalle: string
+          estado: string
+          id: string
+          motivo: string
+          perimetro: string
+          perimetro_nombre: string
+          prioridad: number
+          proceso: string
+          resolucion: string
+          situacion: string
+          titulo: string
+        }[]
+      }
+      costo_unidades: {
+        Args: { p_fecha?: string }
+        Returns: {
+          busqueda: string
+          costo_usd: number
+          costo_ves: number
+          direccion: string
+          dotacion: number
+          dotacion_sin_costo: number
+          plazas: number
+          plazas_sin_costo: number
+          tasa: number
+          tasa_fecha: string
+          unidad: string
+          unidad_ref: string
+        }[]
+      }
+      costos_cargo: {
+        Args: { p_fecha?: string }
+        Returns: {
+          bonos_usd: number
+          busqueda: string
+          cargo: string
+          cargo_id: string
+          costo_id: string
+          desde: string
+          dotacion: number
+          estado: string
+          familia: string
+          fuente: string
+          hasta: string
+          moneda: string
+          plazas: number
+          por_confirmar: string
+          salario: number
+          tasa: number
+          tasa_fecha: string
+          total_usd: number
+          total_ves: number
+        }[]
+      }
+      cruce_procesos: {
+        Args: never
+        Returns: {
+          busqueda: string
+          codigo_sgc: string
+          confirmado: boolean
+          id: string
+          informe: string
+          informe_area: string
+          informe_codigo: string
+          informe_estado: string
+          informe_macro: string
+          nivel: number
+          nota: string
+          proceso: string
+          proceso_ref: string
+          tipo: string
+        }[]
+      }
+      diff_legible: {
+        Args: { p_accion: string; p_antes: Json; p_despues: Json }
+        Returns: string
+      }
+      documentos: {
+        Args: never
+        Returns: {
+          alias_texto: string
+          busqueda: string
+          codigo: string
+          codigo_repetido: boolean
+          datos_sensibles: boolean
+          destino: string
+          estado: string
+          familia: string
+          fecha: string
+          id: string
+          macro: string
+          macro_ref: string
+          n_alias: number
+          n_archivos: number
+          pendientes: number
+          perimetro: string
+          perimetro_nombre: string
+          proceso: string
+          proceso_ref: string
+          proceso_xx: string
+          proceso_xx_etiqueta: string
+          tipo_etiqueta: string
+          tipo_nombre: string
+          tipo_yy: string
+          titulo: string
+          version: string
+        }[]
+      }
+      dotacion: {
+        Args: { p_al?: string; p_anio?: number }
+        Returns: {
+          aprobada: number
+          busqueda: string
+          cargo: string
+          cargo_id: string
+          clave: string
+          diferencia: number
+          direccion: string
+          direccion_ref: string
+          en_requisicion: number
+          estado_plan: string
+          familia: string
+          ocupada: number
+          plan: number
+          plan_borrador: number
+          por_encima: number
+          unidad: string
+          unidad_ref: string
+          vacantes: number
+        }[]
+      }
+      escenarios: {
+        Args: never
+        Returns: {
+          altas: number
+          bajas: number
+          busqueda: string
+          cambios: number
+          creado_en: string
+          creado_por: string
+          delta_dotacion: number
+          descripcion: string
+          estado: string
+          fecha_base: string
+          id: string
+          nombre: string
+          publicado_en: string
+          vigente_desde: string
+        }[]
+      }
+      escenarios_procesos: {
+        Args: never
+        Returns: {
+          acciones: string
+          altas: number
+          bajas: number
+          borradores_abiertos: number
+          busqueda: string
+          cambios: number
+          creado_en: string
+          descripcion: string
+          estado: string
+          fecha_base: string
+          id: string
+          nombre: string
+          publicado_en: string
+          raiz: string
+          total: number
+          vigente_desde: string
+        }[]
+      }
       etiqueta: { Args: { p_clave: string; p_tipo: string }; Returns: string }
+      fuente_legible: { Args: { p: string }; Returns: string }
+      historial_documentos: {
+        Args: never
+        Returns: {
+          accion: string
+          busqueda: string
+          cambios: string
+          codigo: string
+          documento_id: string
+          en: string
+          estado: string
+          id: number
+          objeto: string
+          objeto_tipo: string
+          quien: string
+        }[]
+      }
+      historial_org: {
+        Args: never
+        Returns: {
+          accion: string
+          actor: string
+          busqueda: string
+          cambios: string
+          en: string
+          id: number
+          objeto: string
+          perimetro: string
+          registro_id: string
+          tabla: string
+          tabla_nombre: string
+        }[]
+      }
+      historial_procesos: {
+        Args: never
+        Returns: {
+          accion: string
+          busqueda: string
+          cambios: string
+          codigo: string
+          en: string
+          estado: string
+          id: number
+          objeto: string
+          objeto_tipo: string
+          quien: string
+          ref: string
+          version: number
+        }[]
+      }
+      parametros_costo: {
+        Args: { p_fecha?: string }
+        Returns: {
+          clave: string
+          desde: string
+          fuente: string
+          id: string
+          nombre: string
+          por_confirmar: string
+          unidad: string
+          valor: number
+        }[]
+      }
+      personas: {
+        Args: { p_al?: string }
+        Returns: {
+          busqueda: string
+          cargo: string
+          cargo_id: string
+          certeza: string
+          desde: string
+          direccion: string
+          empleado_id: string
+          excede: string
+          ficha: string
+          hasta: string
+          id: string
+          nombre: string
+          plaza_ref: string
+          tipo: string
+          tipo_nombre: string
+          unidad: string
+          unidad_ref: string
+        }[]
+      }
       plano: { Args: { p: string }; Returns: string }
       plazas: {
         Args: { p_al?: string; p_escenario?: string }
@@ -4808,6 +5444,102 @@ export type Database = {
           unidad_tipo: string
           vacantes: number
         }[]
+      }
+      procesos: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          acciones: string
+          alerta_sin_indicadores: boolean
+          alerta_vacante: boolean
+          area: string
+          busqueda: string
+          ciclo: string
+          ciclo_version: number
+          codigo: string
+          codigo_dudoso: boolean
+          codigo_informe: string
+          codigo_sgc: string
+          con_nota_ficha: boolean
+          diff: string
+          docs_total: number
+          docs_vigentes: number
+          dueno: string
+          dueno_estado: string
+          dueno_ficha_difiere: boolean
+          dueno_plaza_ref: string
+          estado_operativo: string
+          estado_operativo_nombre: string
+          indicadores: number
+          macro: string
+          macro_ref: string
+          motivo_codigo: string
+          nivel: number
+          nivel_nombre: string
+          nombre: string
+          nombre_arbol: string
+          padre: string
+          padre_ref: string
+          ref: string
+          ruta: string
+          salud: string
+          tiene_ficha: boolean
+          tipo: string
+          tipo_nombre: string
+          version: number
+        }[]
+      }
+      requisiciones: {
+        Args: never
+        Returns: {
+          busqueda: string
+          cantidad: number
+          cargo: string
+          cargo_id: string
+          creado_en: string
+          dias: number
+          esperando_desde: string
+          estado: string
+          fecha_deseada: string
+          fuera_de_plan: string
+          id: string
+          mia: string
+          numero: number
+          origen: string
+          origen_nombre: string
+          paso: string
+          pedida_por: string
+          quien: string
+          unidad: string
+          unidad_ref: string
+        }[]
+      }
+      validacion_procesos: {
+        Args: never
+        Returns: {
+          aprobadas: number
+          avance: number
+          borradores: number
+          busqueda: string
+          codigo: string
+          con_ficha: number
+          dueno: string
+          en_revision: number
+          espera_dias: number
+          etapa: string
+          macro: string
+          macro_ref: string
+          procesos: number
+          siguiente: string
+          sin_ficha: number
+          solicitudes: number
+          tipo: string
+          tipo_nombre: string
+          validados: number
+        }[]
+      }
+      valor_legible: {
+        Args: { p_campo: string; p_valor: Json }
+        Returns: string
       }
     }
     Enums: {
@@ -4941,6 +5673,9 @@ export const Constants = {
     Enums: {},
   },
   flujo: {
+    Enums: {},
+  },
+  nucleo: {
     Enums: {},
   },
   org: {

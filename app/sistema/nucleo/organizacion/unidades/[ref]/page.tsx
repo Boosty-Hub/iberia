@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { IconoAtras } from '@/components/iconos'
+import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
+import { fuenteLegible } from '@/lib/plataforma/fuentes'
 import { Cifras } from '@/components/sistema/organizacion/arbol'
 import {
   aplanar,
@@ -148,7 +149,7 @@ function TarjetaPlaza({
       <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
         <div className="min-w-0">
           <h3 className="text-base font-semibold text-marca-900">
-            <Link href={`/sistema/nucleo/organizacion/cargos/${p.cargo_id}`} className="hover:text-acento-700">
+            <Link href={`/sistema/nucleo/organizacion/cargos?ficha=cargo:${p.cargo_id}`} className="hover:text-acento-700">
               {p.cargo}
             </Link>
           </h3>
@@ -442,10 +443,17 @@ export default async function UnidadPage({ params, searchParams }: PageProps<'/s
 
   return (
     <>
-      <Link href={`/sistema/nucleo/organizacion${fecha !== hoy ? `?fecha=${fecha}` : ''}`} className="mb-4 inline-flex min-h-10 items-center gap-1.5 text-sm text-marca-500 hover:text-acento-700">
-        <IconoAtras className="h-4 w-4" />
-        Estructura
-      </Link>
+      <CabeceraModulo
+        sesion={sesion}
+        codigo="NUC-ORG"
+        titulo={titulo}
+        migas={[{ etiqueta: 'Organigrama', href: '/sistema/nucleo/organizacion' }, { etiqueta: titulo }]}
+        acciones={
+          <Link href={`/sistema/nucleo/organizacion/plazas?ficha=unidad:${ref}`} className="inline-flex h-8 items-center rounded-lg border border-[var(--borde)] bg-white px-2.5 text-xs font-medium text-marca-800 hover:bg-marca-50">
+            Ver su ficha
+          </Link>
+        }
+      />
 
       {nodo && nodo.ruta.length > 0 && (
         <nav aria-label="Dónde está" className="mb-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-marca-500">
@@ -462,7 +470,7 @@ export default async function UnidadPage({ params, searchParams }: PageProps<'/s
 
       <EncabezadoPagina
         rotulo={u ? etiquetaDe(catalogos.tipo_unidad, u.tipo) : 'Unidad'}
-        titulo={titulo}
+        titulo="Editor de la unidad"
         descripcion={
           nodo ? (
             <span className="flex flex-col gap-2">
@@ -707,8 +715,8 @@ export default async function UnidadPage({ params, searchParams }: PageProps<'/s
                   <td className="px-3 py-2 text-marca-900">{v.nombre}</td>
                   <td className="px-3 py-2 text-marca-600">{etiquetaDe(catalogos.tipo_unidad, v.tipo)}</td>
                   <td className="px-3 py-2 text-marca-600">{v.padre_ref ? (nombreDeUnidad.get(v.padre_ref) ?? '—') : 'Ninguna'}</td>
-                  <td className="max-w-[260px] truncate px-3 py-2 text-xs text-marca-500" title={v.fuente ?? undefined}>
-                    {v.fuente?.startsWith('I:\\') ? 'Carga inicial (organigramas)' : (v.fuente ?? '—')}
+                  <td className="max-w-[260px] truncate px-3 py-2 text-xs text-marca-500" title={fuenteLegible(v.fuente) ?? undefined}>
+                    {fuenteLegible(v.fuente) ?? '—'}
                   </td>
                 </tr>
               ))}
@@ -740,8 +748,8 @@ export default async function UnidadPage({ params, searchParams }: PageProps<'/s
                     <td className="px-3 py-2 tabular-nums">{v.dotacion}</td>
                     <td className="px-3 py-2 text-marca-600">{etiquetaDe(catalogos.estado_plaza, v.estado)}</td>
                     <td className="px-3 py-2 text-marca-600">{etiquetaDe(catalogos.tipo_nomina, v.tipo_nomina)}</td>
-                    <td className="max-w-[220px] truncate px-3 py-2 text-xs text-marca-500" title={v.fuente ?? undefined}>
-                      {v.fuente?.startsWith('I:\\') ? 'Carga inicial (organigramas)' : (v.fuente ?? '—')}
+                    <td className="max-w-[220px] truncate px-3 py-2 text-xs text-marca-500" title={fuenteLegible(v.fuente) ?? undefined}>
+                      {fuenteLegible(v.fuente) ?? '—'}
                     </td>
                   </tr>
                 ))}

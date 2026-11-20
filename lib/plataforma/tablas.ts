@@ -1,4 +1,6 @@
 import type { FuenteTabla } from '@/lib/plataforma/tabla-servidor'
+import { FUENTES_ORGANIZACION } from '@/lib/plataforma/tablas-organizacion'
+import { FUENTES_PROCESOS } from '@/lib/plataforma/tablas-procesos'
 
 /**
  * Las fuentes de `TablaDatos`: una por tabla de la plataforma. La página la
@@ -21,7 +23,7 @@ export const TABLA_PLAZAS: FuenteTabla = {
     { clave: 'cargo', etiqueta: 'Cargo', agrupable: true, ancho: 200 },
     { clave: 'unidad_tipo', etiqueta: 'Tipo de unidad', filtrable: true, agrupable: true, oculta: true },
     { clave: 'familia', etiqueta: 'Familia', filtrable: true, agrupable: true, oculta: true },
-    { clave: 'dotacion', etiqueta: 'Dotación', tipo: 'entero', total: true, ayuda: 'Puestos aprobados en la plaza' },
+    { clave: 'dotacion', etiqueta: 'Dotación', tipo: 'entero', total: true, ayuda: 'Puestos aprobados en la plaza', ayudaEdicion: 'Nueva dotación: rige desde hoy (la versión anterior queda cerrada)' },
     { clave: 'ocupadas', etiqueta: 'Ocupadas', tipo: 'entero', total: true, ayuda: 'Titulares al día de los datos' },
     { clave: 'vacantes', etiqueta: 'Vacantes', tipo: 'entero', total: true },
     { clave: 'exceso', etiqueta: 'Por encima', tipo: 'entero', total: true, ayuda: 'Titulares por encima de la dotación' },
@@ -92,6 +94,8 @@ export const TABLA_TASAS: FuenteTabla = {
 }
 
 export const FUENTES: Record<string, FuenteTabla> = {
+  ...FUENTES_ORGANIZACION,
+  ...FUENTES_PROCESOS,
   [TABLA_PLAZAS.id]: TABLA_PLAZAS,
   [TABLA_TASAS.id]: TABLA_TASAS,
 }

@@ -1,12 +1,11 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
-import { IconoAtras } from '@/components/iconos'
 import { datosFormularioRequisicion } from '@/components/sistema/flujo/datos'
 import { ordenarArbol } from '@/components/sistema/flujo/estructura'
 import { hoyCaracas } from '@/components/sistema/flujo/formato'
 import { FormularioRequisicion, type RequisicionInicial } from '@/components/sistema/flujo/formulario-requisicion'
-import { Aviso, EncabezadoPagina } from '@/components/ui'
+import { Aviso } from '@/components/ui'
+import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
 import { puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 
@@ -30,11 +29,17 @@ export default async function EditarRequisicionPage({ params }: PageProps<'/sist
 
   return (
     <>
-      <Link href={`/sistema/nucleo/organizacion/requisiciones/${id}`} className="mb-4 inline-flex min-h-10 items-center gap-1.5 text-sm text-marca-500 hover:text-acento-700">
-        <IconoAtras className="h-4 w-4" />
-        Requisición N.º {q.numero}
-      </Link>
-      <EncabezadoPagina rotulo="Requisición de personal · II-21-40-001" titulo={`Corregir la requisición N.º ${q.numero}`} />
+      <CabeceraModulo
+        sesion={sesion}
+        codigo="NUC-ORG"
+        titulo={`Corregir la requisición N.º ${q.numero}`}
+        migas={[
+          { etiqueta: 'Requisiciones', href: '/sistema/nucleo/organizacion/requisiciones' },
+          { etiqueta: `N.º ${q.numero}`, href: `/sistema/nucleo/organizacion/requisiciones/${id}` },
+          { etiqueta: 'Corregir' },
+        ]}
+        descripcion="Requisición de Personal II-21-40-001."
+      />
       {q.estado === 'devuelta' && <Aviso tono="ambar">Te la devolvieron. Corrige lo que te pidieron y vuelve a enviarla desde su página.</Aviso>}
       <FormularioRequisicion
         {...datos}

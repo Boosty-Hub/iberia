@@ -36,16 +36,16 @@ export async function EsquemaMapa() {
     <>
       <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
         <Metrica valor={porNivel(0)} etiqueta="Macroprocesos" />
-        <Metrica valor={porNivel(1)} sufijo={`+ ${porNivel(2) + porNivel(3)} sub`} etiqueta="Procesos" href="/sistema/nucleo/procesos/arbol" />
-        <Metrica valor={conFicha} sufijo={`de ${vigentes.length}`} etiqueta="Con ficha PHVA" href="/sistema/nucleo/procesos/arbol?ficha=con" />
-        <Metrica valor={sinDueno} etiqueta="Niveles 0-1 sin dueño" href="/sistema/nucleo/procesos/arbol?dueno=sin" />
+        <Metrica valor={porNivel(1)} sufijo={`+ ${porNivel(2) + porNivel(3)} sub`} etiqueta="Procesos" href="/sistema/nucleo/procesos/catalogo" />
+        <Metrica valor={conFicha} sufijo={`de ${vigentes.length}`} etiqueta="Con ficha PHVA" href="/sistema/nucleo/procesos/catalogo?f.tiene_ficha=true" />
+        <Metrica valor={sinDueno} etiqueta="Niveles 0-1 sin dueño" href="/sistema/nucleo/procesos/catalogo?f.dueno_estado=sin_dueno&f.nivel_nombre=Macroproceso&f.nivel_nombre=Proceso" />
       </div>
 
       {(abiertos.size > 0 || nuevos > 0) && (
         <p className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           {abiertos.size} {abiertos.size === 1 ? 'proceso tiene' : 'procesos tienen'} un borrador o una revisión abierta
           {nuevos > 0 && <> ({nuevos} {nuevos === 1 ? 'es nuevo' : 'son nuevos'} y no salen en el mapa hasta aprobarse)</>}.{' '}
-          <Link href="/sistema/nucleo/procesos/arbol?version=abiertos" className="font-semibold underline">
+          <Link href="/sistema/nucleo/procesos/catalogo?f.ciclo=borrador&f.ciclo=en_revision" className="font-semibold underline">
             Verlos en el árbol
           </Link>
         </p>

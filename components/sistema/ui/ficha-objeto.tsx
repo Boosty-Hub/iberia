@@ -6,8 +6,10 @@ import { cargarFicha } from '@/components/sistema/shell/acciones'
 import { useContextoUrl } from '@/components/sistema/shell/contexto-url'
 import { IconoChispa, IconoFlechaAfuera } from '@/components/sistema/shell/iconos'
 import { IconoCerrar } from '@/components/iconos'
+import { LineaTiempoCliente } from '@/components/sistema/colaboracion/linea-tiempo-cliente'
+import { BloquesFicha, FilaAcciones, FilaDato, LeyendaIa } from '@/components/sistema/ui/ficha-edicion'
 import { TONO_CHIP, type Ficha } from '@/lib/plataforma/ficha-tipos'
-import { fechaHora, fechaLarga } from '@/lib/plataforma/formato'
+import { fechaLarga } from '@/lib/plataforma/formato'
 import { cn } from '@/lib/utils'
 
 /**
@@ -17,20 +19,23 @@ import { cn } from '@/lib/utils'
  * con lo que trae la ficha. En un perímetro no hay pestaña de IA.
  */
 
-type ClavePestana = 'datos' | 'relaciones' | 'linea' | 'documentos' | 'aprobaciones' | 'ia'
+type ClavePestana = 'datos' | 'relaciones' | 'linea' | 'documentos' | 'aprobaciones' | 'ia' | `s:${string}`
 
 export function FichaObjeto({
   ficha,
   variante = 'panel',
   alCerrar,
+  alCambiar,
   ranuras,
 }: {
   ficha: Ficha
   variante?: 'panel' | 'pagina'
   alCerrar?: () => void
+  /** Después de una edición o una acción: vuelve a cargar la ficha. */
+  alCambiar?: () => void
   ranuras?: Partial<Record<ClavePestana, ReactNode>>
 }) {
-  const [pestana, setPestana] = useState<ClavePestana>('datos')
+  const [elegida, setPestana] = useState<ClavePestana>('datos')
   const { fijar } = useContextoUrl()
   const titulo = useRef<HTMLHeadingElement>(null)
   useEffect(() => {
@@ -39,8 +44,9 @@ export function FichaObjeto({
 
   const pestanas: { clave: ClavePestana; etiqueta: string; n?: number }[] = [
     { clave: 'datos', etiqueta: 'Datos' },
+    ...(ficha.secciones ?? []).map((s) => ({ clave: `s:${s.clave}` as ClavePestana, etiqueta: s.candado ? `${s.etiqueta} 🔒` : s.etiqueta, n: s.n })),
     { clave: 'relaciones', etiqueta: 'Relaciones', n: ficha.relaciones.length },
-    { clave: 'linea', etiqueta: 'Línea de tiempo', n: ficha.lineaVisible ? ficha.linea.length : undefined },
+    { clave: 'linea', etiqueta: 'Línea de tiempo' },
     { clave: 'documentos', etiqueta: 'Documentos', n: ficha.documentos.length },
     { clave: 'aprobaciones', etiqueta: 'Aprobaciones', n: ficha.aprobaciones.length },
     ...(ficha.perimetro ? [] : [{ clave: 'ia' as const, etiqueta: 'IA' }]),
@@ -48,6 +54,10 @@ export function FichaObjeto({
 
   const abrirOtra = (valor: string) => (variante === 'panel' ? fijar({ ficha: valor }) : undefined)
   const hrefOtra = (valor: string) => `/sistema/ficha/${valor.replace(':', '/')}`
+  const valorFicha = `${ficha.tipo}:${ficha.id}`
+  // Si la ficha nueva no tiene la pestaña que estaba abierta, se vuelve a «Datos».
+  const pestana: ClavePestana = pestanas.some((p) => p.clave === elegida) ? elegida : 'datos'
+  const seccion = pestana.startsWith('s:') ? ficha.secciones?.find((s) => `s:${s.clave}` === pestana) : null
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -84,6 +94,11 @@ export function FichaObjeto({
             </Link>
           )}
         </div>
+        {ficha.acciones?.length ? (
+          <div className="mt-2">
+            <FilaAcciones acciones={ficha.acciones} fichaValor={valorFicha} alCambiar={alCambiar} />
+          </div>
+        ) : null}
       </div>
 
       <div role="tablist" aria-label="Secciones de la ficha" className="flex flex-wrap gap-x-0.5 border-b border-[var(--borde)] px-2">
@@ -111,12 +126,13 @@ export function FichaObjeto({
             {pestana === 'datos' && (
               <dl className="grid grid-cols-[minmax(7rem,35%)_1fr] gap-x-3 gap-y-1.5">
                 {ficha.datos.map((d) => (
-                  <div key={d.etiqueta} className="contents">
-                    <dt className="text-marca-400">{d.etiqueta}</dt>
-                    <dd className={cn('min-w-0 break-words text-marca-800', d.mono && 'font-mono text-[12px]')}>{d.valor}</dd>
-                  </div>
+                  <FilaDato key={d.etiqueta} d={d} fichaValor={valorFicha} alCambiar={alCambiar} />
                 ))}
               </dl>
+            )}
+
+            {seccion && (
+              <BloquesFicha bloques={seccion.bloques} fichaValor={valorFicha} alCambiar={alCambiar} abrirFicha={variante === 'panel' ? abrirOtra : undefined} hrefFicha={hrefOtra} />
             )}
 
             {pestana === 'relaciones' &&
@@ -158,25 +174,8 @@ export function FichaObjeto({
                 <Vacio>Sin relaciones registradas.</Vacio>
               ))}
 
-            {pestana === 'linea' &&
-              (!ficha.lineaVisible ? (
-                <Vacio>El historial lo ve quien tiene el permiso de auditoría.</Vacio>
-              ) : ficha.linea.length ? (
-                <ol className="ml-1 border-l-2 border-[var(--borde)] pl-3">
-                  {ficha.linea.map((e, i) => (
-                    <li key={i} className="relative mb-2.5">
-                      <span className="absolute top-1.5 -left-[17px] h-2 w-2 rounded-full bg-[#2b2a28]" aria-hidden />
-                      <p className="text-marca-800">{e.texto}</p>
-                      <p className="text-[11.5px] text-marca-400">
-                        {fechaHora(e.en)}
-                        {e.quien ? ` · ${e.quien}` : ''}
-                      </p>
-                    </li>
-                  ))}
-                </ol>
-              ) : (
-                <Vacio>Sin cambios registrados.</Vacio>
-              ))}
+            {/* R3: comentarios, @menciones, seguir, decisiones, cambios e IA (`components/sistema/colaboracion`). */}
+            {pestana === 'linea' && <LineaTiempoCliente tipo={ficha.tipo} id={ficha.id} />}
 
             {pestana === 'documentos' &&
               (ficha.documentos.length ? (
@@ -222,15 +221,12 @@ export function FichaObjeto({
               ))}
 
             {pestana === 'ia' && (
-              <div className="rounded-xl border border-[#e6dff7] bg-gradient-to-b from-white to-[#fbf8ff] p-3">
-                <p className="flex items-center gap-1.5 font-semibold text-[#5a3f9e]">
+              <>
+                <p className="mb-2 flex items-center gap-1.5 text-[12px] font-semibold text-[#5a3f9e]">
                   <IconoChispa className="h-4 w-4" /> IA de este módulo
                 </p>
-                <p className="mt-1 text-marca-600">
-                  Todavía no hay capacidades encendidas aquí. Cuando las haya, verás sus propuestas sobre este objeto con su nivel (N1 a N4) y su evidencia, y la decisión
-                  será siempre de una persona.
-                </p>
-              </div>
+                <LeyendaIa />
+              </>
             )}
           </>
         )}
@@ -256,6 +252,8 @@ export function PanelFicha() {
   // hasta que llega la nueva, y nunca se confunde con ella.
   const [cargada, setCargada] = useState<{ valor: string; ficha: Ficha | null } | null>(null)
   const [cargando, iniciar] = useTransition()
+  // Sube con cada edición o acción: vuelve a pedir la ficha sin cambiar de objeto.
+  const [vuelta, setVuelta] = useState(0)
 
   useEffect(() => {
     if (!valor) return
@@ -263,7 +261,7 @@ export function PanelFicha() {
       const r = await cargarFicha(valor).catch(() => ({ ficha: null }))
       setCargada({ valor, ficha: r.ficha })
     })
-  }, [valor])
+  }, [valor, vuelta])
 
   const ficha = cargada?.ficha ?? null
   const error = cargada?.valor === valor && !cargada.ficha
@@ -283,6 +281,7 @@ export function PanelFicha() {
   return (
     <aside
       aria-label="Ficha del objeto"
+      data-ficha-objeto
       className="fixed inset-x-0 top-12 bottom-0 z-30 flex flex-col border-l border-[var(--borde)] bg-white shadow-[-12px_0_30px_rgba(0,0,0,0.06)] min-[901px]:sticky min-[901px]:inset-auto min-[901px]:top-12 min-[901px]:h-[calc(100dvh-3rem)] min-[901px]:w-[420px] min-[901px]:shrink-0 min-[901px]:shadow-none"
     >
       {cargando && !ficha && <p className="p-6 text-center text-sm text-marca-400">Cargando la ficha…</p>}
@@ -296,7 +295,7 @@ export function PanelFicha() {
       )}
       {ficha && (
         <div className={cn('min-h-0 flex-1 transition-opacity', cargando && 'opacity-60')}>
-          <FichaObjeto ficha={ficha} alCerrar={cerrar} />
+          <FichaObjeto ficha={ficha} alCerrar={cerrar} alCambiar={() => setVuelta((n) => n + 1)} />
         </div>
       )}
     </aside>

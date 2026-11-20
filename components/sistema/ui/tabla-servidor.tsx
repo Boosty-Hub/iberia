@@ -16,6 +16,7 @@ export async function TablaServidor({
   sesion,
   ctx,
   alEditar,
+  alAccion,
   vacio,
 }: {
   fuente: FuenteTabla
@@ -23,6 +24,7 @@ export async function TablaServidor({
   sesion: Sesion
   ctx: ContextoGlobal
   alEditar?: (clave: string, columna: string, valor: string) => Promise<{ error?: string } | void>
+  alAccion?: (clave: string, accion: string, texto: string) => Promise<{ error?: string; ficha?: string | null } | void>
   vacio?: string
 }) {
   const estado = leerEstado(sp, fuente.columnas, { orden: fuente.orden.columna, dir: fuente.orden.dir, tamano: fuente.tamano })
@@ -59,6 +61,7 @@ export async function TablaServidor({
       puedeBloquear={esAdmin}
       error={pagina.error}
       alEditar={alEditar}
+      alAccion={alAccion}
       vacio={vacio}
     />
   )

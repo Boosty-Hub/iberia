@@ -8,6 +8,7 @@ import { PESTANAS, type Pestana } from '@/lib/plataforma/dominios'
 import { iniciales } from '@/lib/plataforma/formato'
 import { COOKIE_COLUMNA, COOKIE_RIEL, leerMoneda, modulosDelPlan, modulosVisibles, tasasDelDia } from '@/lib/plataforma/servidor'
 import { misPendientes } from '@/components/sistema/shell/acciones'
+import { leerResumen } from '@/components/sistema/colaboracion/datos'
 import { BandaVerComo, BandasContexto } from '@/components/sistema/shell/bandas'
 import { BotonBuscar, Campana, ControlesContexto, InterruptorMoneda, MenuPersona, VerComo } from '@/components/sistema/shell/barra-cliente'
 import { BarraTasas, PuntoJd } from '@/components/sistema/shell/barra-tasas'
@@ -32,7 +33,7 @@ export default async function SistemaLayout({ children }: LayoutProps<'/sistema'
   const jar = await cookies()
   const esAdminReal = sesion.rolReal.nivel === 'admin'
 
-  const [modulos, tasas, moneda, escenarios, vistas, pendientes, roles, empleado] = await Promise.all([
+  const [modulos, tasas, moneda, escenarios, vistas, pendientes, roles, empleado, resumen] = await Promise.all([
     modulosDelPlan(),
     tasasDelDia(sesion),
     leerMoneda(),
@@ -43,7 +44,10 @@ export default async function SistemaLayout({ children }: LayoutProps<'/sistema'
     misPendientes().catch(() => []),
     esAdminReal ? supabase.from('roles').select('id, nombre').order('nombre') : null,
     puede(sesion, 'modulo:canal') ? empleadoActual() : null,
+    // La campana: la bandeja ya viene en `pendientes`, no se pide dos veces.
+    leerResumen(0).catch(() => ({ noLeidas: 0, ultimas: [], porDecidir: 0 })),
   ])
+  const avisos = { ...resumen, porDecidir: pendientes.length }
 
   const menu = modulosVisibles(sesion, modulos)
   const pestanas: Record<string, Pestana[]> = {}
@@ -139,7 +143,7 @@ export default async function SistemaLayout({ children }: LayoutProps<'/sistema'
         <div className="min-[901px]:hidden">
           <BotonBuscar compacto />
         </div>
-        <Campana inicial={pendientes} />
+        <Campana inicial={avisos} />
         <MenuPersona
           nombre={nombre}
           email={sesion.email}

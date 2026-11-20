@@ -323,7 +323,7 @@ export async function crearCargo(_a: Estado, fd: FormData): Promise<Estado> {
   })
   if (error) return { error: mensajeDeError(error) }
   revalidatePath('/sistema/nucleo/organizacion/cargos')
-  redirect(`/sistema/nucleo/organizacion/cargos/${id}?creado=1`)
+  redirect(`/sistema/nucleo/organizacion/cargos?q=${encodeURIComponent(nombre)}&ficha=cargo:${id}`)
 }
 
 export async function editarCargo(_a: Estado, fd: FormData): Promise<Estado> {

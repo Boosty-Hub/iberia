@@ -1,6 +1,7 @@
 'use client'
 
 import { flexRender, getCoreRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Fragment, useEffect, useMemo, useState, useTransition } from 'react'
 import { useContextoUrl } from '@/components/sistema/shell/contexto-url'
@@ -8,7 +9,7 @@ import { IconoBajar, IconoCandadito, IconoEstrella, IconoFlechita, IconoGente, I
 import { Desplegable } from '@/components/sistema/ui/desplegable'
 import { borrarVista, exportarCsv, guardarVista } from '@/components/sistema/ui/tabla-acciones'
 import { fechaCorta, fechaHora, numero, porcentaje, tasa } from '@/lib/plataforma/formato'
-import { PREFIJO_FILTRO, TAMANOS, consultaDeEstado, type Columna, type EstadoTabla, type TonoCelda } from '@/lib/plataforma/tabla'
+import { PREFIJO_FILTRO, TAMANOS, consultaDeEstado, type AccionFila, type Columna, type EstadoTabla, type TonoCelda } from '@/lib/plataforma/tabla'
 import { cn } from '@/lib/utils'
 
 /**
@@ -41,6 +42,7 @@ function texto(v: unknown, c: Columna, fila: Fila): string {
   if (v === null || v === undefined || v === '') return '—'
   if (c.etiquetaDe && fila[c.etiquetaDe] !== null && fila[c.etiquetaDe] !== undefined) return String(fila[c.etiquetaDe])
   if (c.etiquetas && typeof v === 'string') return c.etiquetas[v] ?? v
+  if (typeof v === 'boolean') return c.etiquetas?.[String(v)] ?? (v ? 'Sí' : 'No')
   switch (c.tipo) {
     case 'entero':
       return numero(Number(v))
@@ -62,7 +64,7 @@ function texto(v: unknown, c: Columna, fila: Fila): string {
 function Celda({ v, c, fila }: { v: unknown; c: Columna; fila: Fila }) {
   const t = texto(v, c, fila)
   if (c.tipo === 'insignia' && t !== '—') {
-    const tono = (typeof v === 'string' && c.tonos?.[v]) || 'neutro'
+    const tono = ((typeof v === 'string' || typeof v === 'boolean') && c.tonos?.[String(v)]) || 'neutro'
     return <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-semibold', TONO[tono])}>{t}</span>
   }
   if (c.tipo === 'codigo') return <span className="font-mono text-[11.5px] text-marca-600">{t}</span>
@@ -84,12 +86,77 @@ function CeldaEditable({ v, c, fila, guardar }: { v: unknown; c: Columna; fila: 
         }}
         className="border-b border-dashed border-[#c8ccd2] text-left hover:border-marca-500"
         aria-label={`Editar ${c.etiqueta}`}
+        title={c.ayudaEdicion ?? 'Editar'}
       >
         <Celda v={v} c={c} fila={fila} />
       </button>
     )
+  // Con etiquetas, el valor es uno de una lista: se elige, no se teclea.
+  if (c.etiquetas)
+    return (
+      <span onClick={(e) => e.stopPropagation()} className="inline-flex flex-col">
+        <select
+          autoFocus
+          value={valor}
+          disabled={pendiente}
+          onChange={(e) => {
+            const nuevo = e.target.value
+            setValor(nuevo)
+            iniciar(async () => {
+              const r = await guardar(nuevo)
+              if (r && r.error) setError(r.error)
+              else setEditando(false)
+            })
+          }}
+          onBlur={() => !pendiente && setEditando(false)}
+          onKeyDown={(e) => {
+            e.stopPropagation()
+            if (e.key === 'Escape') setEditando(false)
+          }}
+          className="h-7 rounded border border-acento-300 bg-white px-1 text-[13px] outline-none focus:ring-2 focus:ring-acento-100"
+          aria-label={`Nuevo valor de ${c.etiqueta}`}
+        >
+          {Object.entries(c.etiquetas).map(([k, et]) => (
+            <option key={k} value={k}>
+              {et}
+            </option>
+          ))}
+        </select>
+        {error && <span className="text-[11px] text-acento-700">{error}</span>}
+      </span>
+    )
   return (
     <span onClick={(e) => e.stopPropagation()} className="inline-flex flex-col">
+      {c.opciones ? (
+        <select
+          autoFocus
+          value={valor}
+          disabled={pendiente}
+          onChange={(e) => {
+            const nuevo = e.target.value
+            setValor(nuevo)
+            iniciar(async () => {
+              const r = await guardar(nuevo)
+              if (r && r.error) setError(r.error)
+              else setEditando(false)
+            })
+          }}
+          onKeyDown={(e) => {
+            e.stopPropagation()
+            if (e.key === 'Escape') setEditando(false)
+          }}
+          onBlur={() => !pendiente && setEditando(false)}
+          className="h-7 w-full min-w-24 rounded border border-acento-300 px-1 text-[13px] outline-none focus:ring-2 focus:ring-acento-100"
+          aria-label={`Nuevo valor de ${c.etiqueta} (Esc cancela)`}
+        >
+          {!c.opciones.some((o) => o.valor === valor) && <option value={valor}>—</option>}
+          {c.opciones.map((o) => (
+            <option key={o.valor} value={o.valor}>
+              {o.etiqueta}
+            </option>
+          ))}
+        </select>
+      ) : (
       <input
         autoFocus
         value={valor}
@@ -108,6 +175,7 @@ function CeldaEditable({ v, c, fila, guardar }: { v: unknown; c: Columna; fila: 
         className="h-7 w-full min-w-24 rounded border border-acento-300 px-1.5 text-[13px] outline-none focus:ring-2 focus:ring-acento-100"
         aria-label={`Nuevo valor de ${c.etiqueta} (Enter guarda, Esc cancela)`}
       />
+      )}
       {error && <span className="text-[11px] text-acento-700">{error}</span>}
     </span>
   )
@@ -130,6 +198,7 @@ export function TablaDatos({
   puedeBloquear,
   error,
   alEditar,
+  alAccion,
   vacio = 'No hay filas con estos filtros.',
 }: {
   id: string
@@ -149,6 +218,8 @@ export function TablaDatos({
   error?: string | null
   /** Edición en la celda: guarda y devuelve el error si lo hay. La fila se identifica por `claveFila`. */
   alEditar?: (clave: string, columna: string, valor: string) => Promise<{ error?: string } | void>
+  /** Las acciones de fila que piden un texto (columna `acciones`). Puede devolver la ficha que hay que abrir. */
+  alAccion?: (clave: string, accion: string, texto: string) => Promise<{ error?: string; ficha?: string | null } | void>
   vacio?: string
 }) {
   const { sp, fijar, pendiente, ruta } = useContextoUrl()
@@ -176,13 +247,22 @@ export function TablaDatos({
         accessorFn: (f: Fila) => f[c.clave],
         header: c.etiqueta,
         cell: (ctx) =>
-          c.editable && alEditar ? (
+          c.tipo === 'acciones' ? (
+            <AccionesFila
+              claves={String(ctx.getValue() ?? '')}
+              acciones={c.acciones ?? []}
+              fila={ctx.row.original}
+              clave={String(ctx.row.original[claveFila])}
+              ficha={ficha ? `${ficha.tipo}:${ctx.row.original[ficha.columna]}` : null}
+              alAccion={alAccion}
+            />
+          ) : c.editable && alEditar ? (
             <CeldaEditable v={ctx.getValue()} c={c} fila={ctx.row.original} guardar={(valor) => alEditar(String(ctx.row.original[claveFila]), c.clave, valor)} />
           ) : (
             <Celda v={ctx.getValue()} c={c} fila={ctx.row.original} />
           ),
       })),
-    [columnas, alEditar, claveFila]
+    [columnas, alEditar, alAccion, claveFila, ficha]
   )
 
   // TanStack devuelve funciones que el compilador de React no memoiza: este
@@ -571,6 +651,89 @@ export function TablaDatos({
         </div>
       </div>
     </div>
+  )
+}
+
+/** Los botones de una fila: la base manda qué claves caben; aquí se pintan. */
+function AccionesFila({
+  claves,
+  acciones,
+  fila,
+  clave,
+  ficha,
+  alAccion,
+}: {
+  claves: string
+  acciones: AccionFila[]
+  fila: Fila
+  clave: string
+  ficha: string | null
+  alAccion?: (clave: string, accion: string, texto: string) => Promise<{ error?: string; ficha?: string | null } | void>
+}) {
+  const { fijar } = useContextoUrl()
+  const [pidiendo, setPidiendo] = useState<AccionFila | null>(null)
+  const [texto, setTexto] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [pendiente, iniciar] = useTransition()
+  const caben = new Set(claves.split(',').filter(Boolean))
+  const lista = acciones.filter((a) => caben.has(a.clave))
+  const BOTON = 'inline-flex h-6 items-center rounded-md border border-[var(--borde)] bg-white px-1.5 text-[11.5px] text-marca-700 hover:bg-marca-50 focus-visible:outline-2 focus-visible:outline-acento-500'
+  if (pidiendo)
+    return (
+      <span onClick={(e) => e.stopPropagation()} className="inline-flex flex-col gap-0.5">
+        <span className="inline-flex items-center gap-1">
+          <input
+            autoFocus
+            value={texto}
+            disabled={pendiente}
+            onChange={(e) => setTexto(e.target.value)}
+            placeholder={pidiendo.pide}
+            onKeyDown={(e) => {
+              e.stopPropagation()
+              if (e.key === 'Escape') setPidiendo(null)
+              if (e.key === 'Enter' && alAccion)
+                iniciar(async () => {
+                  const r = await alAccion(clave, pidiendo.clave, texto)
+                  if (r && r.error) return setError(r.error)
+                  setPidiendo(null)
+                  setTexto('')
+                  if (r && r.ficha) fijar({ ficha: r.ficha })
+                })
+            }}
+            className="h-7 w-52 rounded border border-acento-300 px-1.5 text-[12.5px] outline-none focus:ring-2 focus:ring-acento-100"
+            aria-label={`${pidiendo.pide} (Enter guarda, Esc cancela)`}
+          />
+          <button type="button" className={BOTON} onClick={() => setPidiendo(null)} aria-label="Cancelar">
+            ✕
+          </button>
+        </span>
+        {error && <span className="text-[11px] whitespace-normal text-acento-700">{error}</span>}
+      </span>
+    )
+  return (
+    <span className="inline-flex gap-1" onClick={(e) => e.stopPropagation()}>
+      {lista.map((a) =>
+        a.href ? (
+          <Link key={a.clave} href={a.href.replace(/\{(\w+)\}/g, (_, k: string) => encodeURIComponent(String(fila[k] ?? '')))} className={BOTON} title={a.titulo}>
+            {a.etiqueta}
+          </Link>
+        ) : (
+          <button
+            key={a.clave}
+            type="button"
+            title={a.titulo}
+            className={BOTON}
+            onClick={() => {
+              setError(null)
+              if (a.pide && alAccion) setPidiendo(a)
+              else if (ficha) fijar({ ficha })
+            }}
+          >
+            {a.etiqueta}
+          </button>
+        )
+      )}
+    </span>
   )
 }
 

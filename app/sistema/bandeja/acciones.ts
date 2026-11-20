@@ -45,6 +45,7 @@ export async function decidirPaso(_anterior: EstadoAccion, fd: FormData): Promis
   if (error) return { error: mensajeError(error) }
 
   revalidatePath('/sistema/bandeja')
+  revalidatePath('/sistema')
   revalidatePath('/sistema/nucleo/organizacion/requisiciones', 'layout')
   revalidatePath('/sistema/nucleo/escenarios', 'layout')
   revalidatePath('/sistema/nucleo/procesos', 'layout')
@@ -57,4 +58,41 @@ export async function decidirPaso(_anterior: EstadoAccion, fd: FormData): Promis
         ? 'Devuelto a quien lo pidió, con tu comentario.'
         : 'Rechazado. Quien lo pidió verá tu motivo.'
   return { ok: texto }
+}
+
+/**
+ * Aprobar varias de una vez, **solo del mismo tipo** (Anexo E §8): se vuelve a
+ * leer la bandeja de quien llama y se rechaza lo que no esté en ella, lo que
+ * mezcle tipos o lo que pida datos (el paso «completar» de una requisición).
+ * Cada paso pasa por `flujo.decidir`, que vuelve a preguntar si te toca.
+ */
+export async function aprobarVarios(pasos: string[], comentario: string): Promise<EstadoAccion & { aprobados?: number }> {
+  await requerirSesion()
+  const ids = [...new Set(pasos)].filter((p) => /^[0-9a-f-]{36}$/i.test(p))
+  if (!ids.length) return { error: 'Elige al menos una.' }
+  if (ids.length > 50) return { error: 'De a 50 como máximo.' }
+  const supabase = await createClient()
+  const { data: bandeja, error: e1 } = await supabase.schema('flujo').rpc('bandeja')
+  if (e1) return { error: mensajeError(e1) }
+  const mias = new Map((bandeja ?? []).map((b) => [b.paso_id, b]))
+  const elegidos = ids.map((id) => mias.get(id))
+  if (elegidos.some((b) => !b)) return { error: 'Alguna ya no te toca (la decidió otra persona o cambió de paso). Actualiza la bandeja.' }
+  const tipos = new Set(elegidos.map((b) => b!.tipo_objeto))
+  if (tipos.size > 1) return { error: 'En lote solo se aprueban juntas las del mismo tipo.' }
+  if (elegidos.some((b) => b!.accion === 'completar')) return { error: 'El paso que registra candidato y fecha se decide uno por uno.' }
+
+  let aprobados = 0
+  const fallos: string[] = []
+  for (const b of elegidos) {
+    const { error } = await supabase.schema('flujo').rpc('decidir', { p_paso: b!.paso_id, p_decision: 'aprobado', p_comentario: comentario.trim() || undefined })
+    if (error) fallos.push(`${b!.titulo}: ${mensajeError(error)}`)
+    else aprobados++
+  }
+  revalidatePath('/sistema/bandeja')
+  revalidatePath('/sistema')
+  revalidatePath('/sistema/nucleo/organizacion/requisiciones', 'layout')
+  revalidatePath('/sistema/nucleo/escenarios', 'layout')
+  revalidatePath('/sistema/nucleo/procesos', 'layout')
+  if (fallos.length) return { aprobados, error: `Se aprobaron ${aprobados}; no se pudo con ${fallos.length}: ${fallos.join(' · ')}` }
+  return { aprobados, ok: aprobados === 1 ? 'Aprobada 1.' : `Aprobadas ${aprobados}.` }
 }

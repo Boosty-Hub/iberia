@@ -3,8 +3,8 @@ import { BarraLienzo } from '@/components/sistema/lienzo/BarraLienzo'
 import { OrganigramaLienzo } from '@/components/sistema/lienzo/OrganigramaLienzo'
 import { fechaDe, fmtFecha, hoyCaracas } from '@/components/sistema/organizacion/datos'
 import { EsquemaOrganizacion } from '@/components/sistema/organizacion/esquema'
-import { PestanasOrganizacion } from '@/components/sistema/organizacion/pestanas'
-import { Aviso, EncabezadoPagina } from '@/components/ui'
+import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
+import { Aviso } from '@/components/ui'
 import { puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 
@@ -39,32 +39,28 @@ export default async function OrganizacionPage({ searchParams }: PageProps<'/sis
   const esc = escenario.data && escenario.data.alcance === 'estructura' ? escenario.data : null
   const escAjeno = escPedido && !esc
 
-  const permisos = {
-    dotacion: puede(sesion, 'sistema:dotacion'),
-    requisiciones: puede(sesion, 'sistema:requisiciones'),
-    escenarios: verEscenarios,
-  }
-
   const encabezado = (
     <>
-      <EncabezadoPagina
-        rotulo="Organización"
-        titulo="Organigrama"
+      <CabeceraModulo
+        sesion={sesion}
+        codigo="NUC-ORG"
+        titulo="Organización"
+        migas={[{ etiqueta: esc ? `Organigrama · escenario «${esc.nombre}»` : 'Organigrama' }]}
+        cuentas={conciliacion.count ? { '/sistema/nucleo/conciliacion': conciliacion.count } : undefined}
         descripcion={
           esc ? (
             <>
-              Escenario <strong className="font-semibold text-[#6b4fb3]">«{esc.nombre}»</strong>: lo que cambia sale en morado, con su rótulo.
-              Nada toca la realidad hasta que se apruebe.
+              Escenario <strong className="font-semibold text-[#6b4fb3]">«{esc.nombre}»</strong>: lo que cambia sale en morado, con su rótulo. Arrastra una caja sobre otra para
+              cambiar de quién depende. Nada toca la realidad hasta que se apruebe.
             </>
           ) : (
             <>
-              La estructura de Iberia como regía el <strong className="font-semibold text-marca-800">{fmtFecha(fecha, true)}</strong>: unidades,
-              plazas, dotación aprobada y quién las ocupa. Toca una caja para desplegarla.
+              La estructura de Iberia como regía el <strong className="font-semibold text-marca-800">{fmtFecha(fecha, true)}</strong>: unidades, plazas, dotación aprobada y quién
+              las ocupa. Toca una caja para desplegarla; «Ficha ›» la abre al lado.
             </>
           )
         }
       />
-      <PestanasOrganizacion activa="organigrama" permisos={permisos} conciliacion={conciliacion.count ?? 0} />
       <BarraLienzo
         ruta="/sistema/nucleo/organizacion"
         fecha={fecha}

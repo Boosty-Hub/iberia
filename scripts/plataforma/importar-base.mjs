@@ -35,6 +35,18 @@ if (!cfg.url || !cfg.clave) throw new Error(`Faltan las variables del proyecto d
 const db = createClient(cfg.url, cfg.clave, { auth: { persistSession: false } })
 console.log(`Destino: ${destino} (${new URL(cfg.url).host})`)
 
+// 🔴 El registro público tiene que estar cerrado: el alta toma el rol de los
+// metadatos, así que con el registro abierto cualquiera con la clave pública se
+// crea una cuenta con el rol que quiera. Pasó en el proyecto de pruebas el 20-nov.
+if (env.SUPABASE_ACCESS_TOKEN) {
+  const ref = new URL(cfg.url).hostname.split('.')[0]
+  const r = await fetch(`https://api.supabase.com/v1/projects/${ref}/config/auth`, { headers: { Authorization: `Bearer ${env.SUPABASE_ACCESS_TOKEN}` } })
+  const auth = r.ok ? await r.json() : null
+  if (!auth) console.log('  ⚠️ no se pudo comprobar el registro público')
+  else if (!auth.disable_signup) { console.error('✖ El registro público está ABIERTO en este proyecto. Ciérralo antes de cargar datos.'); process.exit(1) }
+  else console.log('  registro público cerrado ✓')
+}
+
 const RAIZ = path.resolve(import.meta.dirname, '..', '..')
 const MODULOS_CSV = path.join(RAIZ, 'plataforma', 'plan', 'datos', 'modulos.csv')
 

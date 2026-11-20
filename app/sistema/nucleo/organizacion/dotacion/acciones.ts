@@ -13,6 +13,7 @@ import type { Estado } from '@/components/sistema/organizacion/formulario'
  */
 
 const RUTA = '/sistema/nucleo/organizacion/dotacion'
+const COSTOS = '/sistema/nucleo/organizacion/costos'
 
 function texto(fd: FormData, campo: string): string {
   const v = fd.get(campo)
@@ -82,23 +83,6 @@ export async function aprobarPlan(_a: Estado, fd: FormData): Promise<Estado> {
 // Costos · perímetro de nómina
 // -----------------------------------------------------------------------------
 
-export async function fijarTasa(_a: Estado, fd: FormData): Promise<Estado> {
-  await requerirPermiso('sistema:costos', 'editar')
-  const fecha = texto(fd, 'fecha')
-  const valor = numero(fd, 'valor')
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return { error: 'Indica la fecha de la tasa.' }
-  if (fecha > hoyCaracas()) return { error: 'La tasa es la de un día que ya ocurrió: no se carga a futuro.' }
-  if (!valor || valor <= 0) return { error: 'Escribe la tasa en bolívares por dólar, mayor que cero.' }
-  const supabase = await createClient()
-  const { error } = await supabase
-    .schema('org')
-    .from('tasa_cambio')
-    .upsert({ fecha, ves_por_usd: valor, fuente: texto(fd, 'fuente') || 'BCV' }, { onConflict: 'fecha' })
-  if (error) return { error: mensajeDeError(error) }
-  revalidatePath(RUTA)
-  return { ok: `Tasa del ${fmtFecha(fecha)} guardada.` }
-}
-
 export async function fijarCostoReferencia(_a: Estado, fd: FormData): Promise<Estado> {
   await requerirPermiso('sistema:costos', 'editar')
   const supabase = await createClient()
@@ -114,7 +98,7 @@ export async function fijarCostoReferencia(_a: Estado, fd: FormData): Promise<Es
     p_fuente: texto(fd, 'fuente'),
   })
   if (error) return { error: mensajeDeError(error) }
-  revalidatePath(RUTA)
+  revalidatePath(COSTOS)
   return { ok: `Costo de referencia guardado; rige ${desde(fecha)}.` }
 }
 
@@ -141,7 +125,7 @@ export async function editarComponente(_a: Estado, fd: FormData): Promise<Estado
   const c = camposComponente(fd)
   const { error } = await supabase.schema('org').rpc('editar_componente_costo', { p_id: texto(fd, 'id'), ...c })
   if (error) return { error: mensajeDeError(error) }
-  revalidatePath(RUTA)
+  revalidatePath(COSTOS)
   return { ok: `Guardado: la versión nueva rige ${desde(c.p_fecha)}.` }
 }
 
@@ -151,7 +135,7 @@ export async function crearComponente(_a: Estado, fd: FormData): Promise<Estado>
   const c = camposComponente(fd)
   const { error } = await supabase.schema('org').rpc('crear_componente_costo', { p_nombre: texto(fd, 'nombre'), ...c })
   if (error) return { error: mensajeDeError(error) }
-  revalidatePath(RUTA)
+  revalidatePath(COSTOS)
   return { ok: `Componente creado; rige ${desde(c.p_fecha)}.` }
 }
 
@@ -162,7 +146,7 @@ export async function retirarComponente(_a: Estado, fd: FormData): Promise<Estad
   const fecha = texto(fd, 'fecha')
   const { error } = await supabase.schema('org').rpc('retirar_componente_costo', { p_id: texto(fd, 'id'), p_fecha: fecha })
   if (error) return { error: mensajeDeError(error) }
-  revalidatePath(RUTA)
+  revalidatePath(COSTOS)
   return { ok: `El componente deja de aplicar ${desde(fecha)}.` }
 }
 
@@ -178,6 +162,6 @@ export async function fijarParametro(_a: Estado, fd: FormData): Promise<Estado> 
     p_por_confirmar: fd.get('por_confirmar') === 'on',
   })
   if (error) return { error: mensajeDeError(error) }
-  revalidatePath(RUTA)
+  revalidatePath(COSTOS)
   return { ok: `Parámetro guardado; rige ${desde(fecha)}.` }
 }

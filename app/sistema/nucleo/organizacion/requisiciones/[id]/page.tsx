@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { cancelarRequisicion, enviarRequisicion, guardarPropuestaSalarial, registrarIngreso } from '../acciones'
-import { IconoAlerta, IconoAtras, IconoCandado, IconoEditar, IconoEnviar } from '@/components/iconos'
+import { IconoAlerta, IconoCandado, IconoEditar, IconoEnviar } from '@/components/iconos'
+import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
 import { contextoFlujo } from '@/components/sistema/flujo/datos'
 import { DecidirPaso } from '@/components/sistema/flujo/decidir-paso'
 import { CostoRequisicion, ImpactoRequisicion, type Costo, type Impacto } from '@/components/sistema/flujo/impacto'
@@ -94,27 +95,29 @@ export default async function RequisicionPage({ params, searchParams }: PageProp
 
   return (
     <>
-      <Link href="/sistema/nucleo/organizacion/requisiciones" className="mb-4 inline-flex min-h-10 items-center gap-1.5 text-sm text-marca-500 hover:text-acento-700">
-        <IconoAtras className="h-4 w-4" />
-        Requisiciones
-      </Link>
-
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0">
-          <p className="rotulo mb-2">Requisición N.º {q.numero} · II-21-40-001</p>
-          <h1 className="text-2xl font-bold tracking-tight text-marca-900">
-            {cargo}
-            {q.cantidad > 1 && <span className="font-medium text-marca-500"> × {q.cantidad}</span>}
-          </h1>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-marca-600">
+      <CabeceraModulo
+        sesion={sesion}
+        codigo="NUC-ORG"
+        titulo={`${cargo}${q.cantidad > 1 ? ` × ${q.cantidad}` : ''}`}
+        migas={[{ etiqueta: 'Requisiciones', href: '/sistema/nucleo/organizacion/requisiciones' }, { etiqueta: `N.º ${q.numero}` }]}
+        descripcion={
+          <span className="flex flex-wrap items-center gap-2">
             <Insignia tono={est.tono}>{est.etiqueta}</Insignia>
+            <span>Requisición N.º {q.numero} · II-21-40-001</span>
+            <span aria-hidden>·</span>
             <span>{unidad.data?.nombre ?? 'Unidad'}</span>
             <span aria-hidden>·</span>
             <span>{etiqueta('origen_requisicion', q.origen)}</span>
             <span aria-hidden>·</span>
             <span>Creada el {fechaHora(q.creado_en)}</span>
-          </div>
-        </div>
+            <Link href={`/sistema/nucleo/organizacion/requisiciones?ficha=requisicion:${id}`} className="underline decoration-dotted underline-offset-2 hover:text-marca-800">
+              Ver en la tabla
+            </Link>
+          </span>
+        }
+      />
+
+      <div className="mb-4 flex flex-wrap items-start justify-end gap-4">
         <div className="flex flex-wrap gap-2">
           {corregible && (
             <Link href={`/sistema/nucleo/organizacion/requisiciones/${id}/editar`} className="btn-neutro h-10">
@@ -304,6 +307,7 @@ export default async function RequisicionPage({ params, searchParams }: PageProp
                 )}
               </dl>
 
+              <span id="ingreso" className="block scroll-mt-20" />
               {ingresable && (
                 <FormAccion accion={registrarIngreso} className="mt-5 border-t border-[var(--borde)] pt-4">
                   <input type="hidden" name="id" value={id} />
