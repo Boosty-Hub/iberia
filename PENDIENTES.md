@@ -708,12 +708,15 @@ procesos y estructura**. El nombre lo puso Alberto.
 Rama `plataforma/etapa-1`, Supabase de pruebas `wsqhsjbwkjlqrdxnyadq`. El plan está en
 `plataforma/plan/D-etapa-1-procesos-estructura.md`, fuera de git.
 
+> **Desde el 20/11 lo que falta de la plataforma —con su dueño, lo que destraba y su plazo— vive en la hoja de ruta**
+> (`/sistema/programa/hoja-de-ruta`). Al cerrar algo, se marca allá. Esta tabla queda para lo técnico interno del equipo.
+
 | Qué | De quién | Nota |
 |---|---|---|
 | ~~OK de Gabriel para producción~~ ✅ **En producción desde el 20/11** (respaldo previo, 28 migraciones, cargas, tasas programadas con GitHub Actions, `next` 16.4.6). Siguen en pie **Supabase en Pro** (G-06) y **enlazar las cuentas de los aprobadores** (Gerente General, directores, RRHH) a sus fichas | Gabriel | |
 | Rediseño · R6 (endurecer), lo que queda:<br>• `ia.registrar_llamada` a identidad de servidor (lo atiende la revisión de seguridad de R6);<br>• Ctrl K: 1,2 s desde Caracas contra el build de producción (180 ms de pausa + ~0,5 s de la acción, casi todo red a us-east-1); medir otra vez ya en Netlify, que está junto a la base;<br>• pellizco y arrastre en un **teléfono real** (en emulación táctil de Chromium pasan, `probar-r6`);<br>• React Flow (~87 KB) se baja también en el teléfono, que arranca en lista: separar el lienzo con `dynamic()`;<br>• al llevar a producción, la `211000` reescribe 85 políticas: correr todas las suites.<br>~~aviso a los aprobadores de `nivel_ia`~~ ✅ (`20261120220000`) · ~~accesibilidad~~ ✅ axe sin violaciones en 26 análisis · ~~PDF del subárbol~~ ✅ `/sistema/pdf/subarbol` · ~~cap. 04 y NUC-DOC-IA-02~~ ✅ · ~~guion de producción~~ ✅ `pasar-a-produccion.mjs` (simulacro por defecto) | Equipo Boosty | Anexo E §10 |
 | ~~¿Quién ve el historial de cambios de un objeto?~~ ✅ **Decidido por Gabriel el 20/11**: quien ve el objeto; los montos de costos siguen restringidos | — | |
-| **Hoja de ruta de la plataforma a producción** (rama `plataforma/hoja-de-ruta`, probada en pruebas): respaldo (`respaldar-produccion.mjs`), `pasar-a-produccion.mjs --ejecutar --confirmo --acepto-plan-free --solo-migraciones`, `importar-hoja-de-ruta.mjs --destino produccion --confirmo` y después fusionar en `main`. ⚠️ Decidir si lo que falta de la plataforma se lleva desde entonces en la hoja de ruta y no aquí: dos listas se desalinean | Gabriel | La migración antes del código: sin ella la pestaña falla |
+| ~~Hoja de ruta de la plataforma a producción~~ ✅ **En producción desde el 20/11** (respaldo previo, migración `20261121090000`, 12 fases · 19 hitos · 32 pendientes · 10 decisiones). **Decidido:** lo que falta de la plataforma se lleva en la hoja de ruta (`/sistema/programa/hoja-de-ruta`, tabla `control.pendiente_plataforma`); aquí solo queda lo técnico interno | — | |
 | **Base de conocimiento operando al 18 de diciembre** (New Iberia) | Equipo Boosty | Los bloques 1 a 4 del Anexo D, ya en producción |
 | Organigramas 2026 que faltan: Gerencia General, Operaciones, Distribución, Oficina Caracas y Capital Humano | Capital Humano | Hoy van los de 2023, marcados |
 | Tipo de nómina, sede, dirección y centro de costo por ficha | Capital Humano | El importador del padrón los perdió (confidencial y ventas quedaron como «mensual»; el 94 % sin sede) |

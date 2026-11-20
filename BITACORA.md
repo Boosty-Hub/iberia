@@ -68,7 +68,7 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 **Pedido de Gabriel:** un lugar del sistema con todo el plan: qué se ejecutó y qué falta. Procesos y estructura ya están;
 lo que sigue es Comercial, cuando lleguen las tablas de ventas.
 
-**Lo que se construyó** (rama `plataforma/hoja-de-ruta`, sin push; probado solo contra el Supabase de pruebas):
+**Lo que se construyó** (rama `plataforma/hoja-de-ruta`, probada en pruebas y fusionada en `main`):
 - PRG-PLN estrena **Hoja de ruta** y **Módulos**: cifras del registro, fase actual, próximos hitos, la ruta fase por fase
   (SVG del servidor), lo hecho, avance por dominio, «Lo que falta» con dueño y las decisiones G-xx solo para el equipo de
   Boosty. Mi día de admin y consultor lleva «En qué vamos». Cómo funciona: `AGENTS.md`, «La hoja de ruta de la plataforma».
@@ -85,8 +85,9 @@ lo que sigue es Comercial, cuando lleguen las tablas de ventas.
 migración). `importar-base.mjs` reseteaba a planificado NUC-GIA y DAT-SEM al volver a correr: ahora dice lo mismo que la
 migración.
 
-**Dónde quedamos:** falta aplicarla en producción (Gabriel): respaldo, `pasar-a-produccion.mjs --ejecutar --confirmo
---acepto-plan-free --solo-migraciones` y `importar-hoja-de-ruta.mjs --destino produccion --confirmo`.
+**Dónde quedamos:** **en producción el 20/11** con el OK de Gabriel: respaldo `produccion-2026-11-20T22-29-07`, migración
+aplicada con `--solo-migraciones`, carga en producción y fusión en `main`. Lo que falta de la plataforma se lleva desde
+ahora en la hoja de ruta, no en `PENDIENTES.md`.
 
 ---
 
