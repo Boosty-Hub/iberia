@@ -183,8 +183,11 @@ const componentes = [
 console.log('Parámetros y componentes de costo…')
 if (!REVISAR) {
   // Sin clave natural: se cargan solo si la tabla está vacía.
-  const { count: np } = await db.schema('control').from('parametro').select('id', { count: 'exact', head: true })
-  if (!np) await escribir('control', 'parametro', parametros.map((p) => ({ ...p, por_confirmar: true })), 'id')
+  // Por clave: otras migraciones siembran parámetros propios (topes de la IA).
+  for (const p of parametros) {
+    const { data: ya } = await db.schema('control').from('parametro').select('id').eq('clave', p.clave).maybeSingle()
+    if (!ya) await escribir('control', 'parametro', [{ ...p, por_confirmar: true }], 'id')
+  }
   const { count: nc } = await db.schema('org').from('componente_costo').select('id', { count: 'exact', head: true })
   if (!nc) await escribir('org', 'componente_costo', componentes, 'id')
 }

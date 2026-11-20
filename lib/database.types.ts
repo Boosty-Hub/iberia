@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.18"
+    PostgrestVersion: "14.15"
   }
   control: {
     Tables: {
@@ -5223,6 +5223,10 @@ export type Database = {
       registrar_dispositivo: {
         Args: { p_plataforma: string; p_token: string }
         Returns: undefined
+      }
+      renombrar_hablante: {
+        Args: { p_entrevista: string; p_etiqueta: string; p_nombre: string }
+        Returns: number
       }
       reportar_contenido: {
         Args: {
