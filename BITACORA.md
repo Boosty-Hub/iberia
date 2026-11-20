@@ -63,6 +63,33 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 
 ---
 
+## 21 de noviembre · Sesión 57 — la hoja de ruta de la plataforma, como dato
+
+**Pedido de Gabriel:** un lugar del sistema con todo el plan: qué se ejecutó y qué falta. Procesos y estructura ya están;
+lo que sigue es Comercial, cuando lleguen las tablas de ventas.
+
+**Lo que se construyó** (rama `plataforma/hoja-de-ruta`, sin push; probado solo contra el Supabase de pruebas):
+- PRG-PLN estrena **Hoja de ruta** y **Módulos**: cifras del registro, fase actual, próximos hitos, la ruta fase por fase
+  (SVG del servidor), lo hecho, avance por dominio, «Lo que falta» con dueño y las decisiones G-xx solo para el equipo de
+  Boosty. Mi día de admin y consultor lleva «En qué vamos». Cómo funciona: `AGENTS.md`, «La hoja de ruta de la plataforma».
+- Migración `20261121090000_hoja_de_ruta.sql` (aplicada y anotada en pruebas) y carga con `importar-hoja-de-ruta.mjs`:
+  12 fases, 19 hitos, 32 pendientes (6 internos) y 10 decisiones. Módulos al 21-nov: **14 de 65 operando**, 2 en
+  construcción (NUC-NOT, DAT-SEM), 49 planificados.
+
+**Lo que se decidió:**
+- Pestaña propia y no el Resumen: el Resumen habla de horas y calendario de la consultoría, esto de la plataforma.
+- «Solo equipo» = admin o consultor **de la organización Boosty**: con `es_editor()` Alberto habría visto las G-xx.
+- El script no pisa lo editado en la plataforma (sin `--pisar`).
+
+**Lo que se encontró:** la métrica de hitos fallaba con `select *` por la nota interna cerrada por columna (corregido en la
+migración). `importar-base.mjs` reseteaba a planificado NUC-GIA y DAT-SEM al volver a correr: ahora dice lo mismo que la
+migración.
+
+**Dónde quedamos:** falta aplicarla en producción (Gabriel): respaldo, `pasar-a-produccion.mjs --ejecutar --confirmo
+--acepto-plan-free --solo-migraciones` y `importar-hoja-de-ruta.mjs --destino produccion --confirmo`.
+
+---
+
 ## 19 y 20 de noviembre · Sesión 56 — levantamiento ISO, plan maestro y la Plataforma Iberia construida en pruebas
 
 **Levantamiento ISO (19/11).** La carpeta del SGC del cliente («Procesos Iberia», 10.994 archivos, 22 GB) se movió al

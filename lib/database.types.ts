@@ -131,6 +131,152 @@ export type Database = {
         }
         Relationships: []
       }
+      decision_plataforma: {
+        Row: {
+          actualizado_en: string
+          antes_de: string | null
+          codigo: string
+          decidida_en: string | null
+          decision: string | null
+          estado: string
+          fecha_limite: string | null
+          id: string
+          opcion_por_defecto: string | null
+          opciones: string | null
+          orden: number
+          pregunta: string
+          solo_equipo: boolean
+        }
+        Insert: {
+          actualizado_en?: string
+          antes_de?: string | null
+          codigo: string
+          decidida_en?: string | null
+          decision?: string | null
+          estado?: string
+          fecha_limite?: string | null
+          id?: string
+          opcion_por_defecto?: string | null
+          opciones?: string | null
+          orden?: number
+          pregunta: string
+          solo_equipo?: boolean
+        }
+        Update: {
+          actualizado_en?: string
+          antes_de?: string | null
+          codigo?: string
+          decidida_en?: string | null
+          decision?: string | null
+          estado?: string
+          fecha_limite?: string | null
+          id?: string
+          opcion_por_defecto?: string | null
+          opciones?: string | null
+          orden?: number
+          pregunta?: string
+          solo_equipo?: boolean
+        }
+        Relationships: []
+      }
+      fase_plataforma: {
+        Row: {
+          actual: boolean
+          actualizado_en: string
+          clave: string
+          contiene: string | null
+          contratada: boolean
+          criterio_salida: string | null
+          estado: string
+          fin: string | null
+          id: string
+          inicio: string | null
+          nombre: string
+          orden: number
+          periodo_texto: string | null
+          situacion: string | null
+        }
+        Insert: {
+          actual?: boolean
+          actualizado_en?: string
+          clave: string
+          contiene?: string | null
+          contratada?: boolean
+          criterio_salida?: string | null
+          estado?: string
+          fin?: string | null
+          id?: string
+          inicio?: string | null
+          nombre: string
+          orden?: number
+          periodo_texto?: string | null
+          situacion?: string | null
+        }
+        Update: {
+          actual?: boolean
+          actualizado_en?: string
+          clave?: string
+          contiene?: string | null
+          contratada?: boolean
+          criterio_salida?: string | null
+          estado?: string
+          fin?: string | null
+          id?: string
+          inicio?: string | null
+          nombre?: string
+          orden?: number
+          periodo_texto?: string | null
+          situacion?: string | null
+        }
+        Relationships: []
+      }
+      hito_plataforma: {
+        Row: {
+          actualizado_en: string
+          clave: string
+          dueno: string | null
+          estado: string
+          fase: string | null
+          fecha: string | null
+          id: string
+          nota_interna: string | null
+          orden: number
+          titulo: string
+        }
+        Insert: {
+          actualizado_en?: string
+          clave: string
+          dueno?: string | null
+          estado?: string
+          fase?: string | null
+          fecha?: string | null
+          id?: string
+          nota_interna?: string | null
+          orden?: number
+          titulo: string
+        }
+        Update: {
+          actualizado_en?: string
+          clave?: string
+          dueno?: string | null
+          estado?: string
+          fase?: string | null
+          fecha?: string | null
+          id?: string
+          nota_interna?: string | null
+          orden?: number
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hito_plataforma_fase_fkey"
+            columns: ["fase"]
+            isOneToOne: false
+            referencedRelation: "fase_plataforma"
+            referencedColumns: ["clave"]
+          },
+        ]
+      }
       lectura_paralelo: {
         Row: {
           dia: string
@@ -152,38 +298,64 @@ export type Database = {
       modulo: {
         Row: {
           codigo: string
+          construido: string | null
           descripcion: string | null
           dominio: string
+          dueno: string | null
+          en_plan: boolean
           estado: string
           fase: string | null
+          fase_clave: string | null
+          frontera: string | null
           nombre: string
           orden: number
           recurso: string | null
+          ref: string
           ruta: string | null
         }
         Insert: {
           codigo: string
+          construido?: string | null
           descripcion?: string | null
           dominio: string
+          dueno?: string | null
+          en_plan?: boolean
           estado?: string
           fase?: string | null
+          fase_clave?: string | null
+          frontera?: string | null
           nombre: string
           orden?: number
           recurso?: string | null
+          ref?: string
           ruta?: string | null
         }
         Update: {
           codigo?: string
+          construido?: string | null
           descripcion?: string | null
           dominio?: string
+          dueno?: string | null
+          en_plan?: boolean
           estado?: string
           fase?: string | null
+          fase_clave?: string | null
+          frontera?: string | null
           nombre?: string
           orden?: number
           recurso?: string | null
+          ref?: string
           ruta?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "modulo_fase_clave_fkey"
+            columns: ["fase_clave"]
+            isOneToOne: false
+            referencedRelation: "fase_plataforma"
+            referencedColumns: ["clave"]
+          },
+        ]
       }
       parametro: {
         Row: {
@@ -215,6 +387,60 @@ export type Database = {
           unidad?: string
           valor?: number
           vigencia?: unknown
+        }
+        Relationships: []
+      }
+      pendiente_plataforma: {
+        Row: {
+          actualizado_en: string
+          bloquea: string | null
+          clave: string
+          detalle: string | null
+          dueno_cargo: string | null
+          dueno_tipo: string
+          estado: string
+          fecha_limite: string | null
+          fecha_texto: string | null
+          id: string
+          orden: number
+          origen: string | null
+          resuelto_en: string | null
+          solo_equipo: boolean
+          titulo: string
+        }
+        Insert: {
+          actualizado_en?: string
+          bloquea?: string | null
+          clave: string
+          detalle?: string | null
+          dueno_cargo?: string | null
+          dueno_tipo: string
+          estado?: string
+          fecha_limite?: string | null
+          fecha_texto?: string | null
+          id?: string
+          orden?: number
+          origen?: string | null
+          resuelto_en?: string | null
+          solo_equipo?: boolean
+          titulo: string
+        }
+        Update: {
+          actualizado_en?: string
+          bloquea?: string | null
+          clave?: string
+          detalle?: string | null
+          dueno_cargo?: string | null
+          dueno_tipo?: string
+          estado?: string
+          fecha_limite?: string | null
+          fecha_texto?: string | null
+          id?: string
+          orden?: number
+          origen?: string | null
+          resuelto_en?: string | null
+          solo_equipo?: boolean
+          titulo?: string
         }
         Relationships: []
       }
@@ -324,6 +550,13 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      notas_hitos: {
+        Args: never
+        Returns: {
+          id: string
+          nota_interna: string
+        }[]
       }
       puede_conciliar: { Args: { p_modulo: string }; Returns: boolean }
       resolver_conciliacion: {
@@ -6483,6 +6716,33 @@ export type Database = {
         }[]
       }
       m_mis_tareas: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_plataforma_hitos: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_plataforma_modulos: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_plataforma_pendientes: {
         Args: { p_al?: string; p_escenario?: string }
         Returns: {
           calculado_en: string

@@ -3,6 +3,7 @@ import type { Ficha, TipoFicha } from '@/lib/plataforma/ficha-tipos'
 import { fichaDocumento, fichaProceso } from '@/lib/plataforma/fichas/procesos'
 import { cargarFichaOrganizacion, esTipoOrganizacion } from '@/lib/plataforma/fichas/organizacion'
 import { cargarFichaPrograma, esTipoPrograma } from '@/lib/plataforma/fichas/programa'
+import { fichaModulo } from '@/lib/plataforma/fichas/hoja-de-ruta'
 
 /**
  * Arma la ficha de un objeto con la sesión de quien la pide: cada consulta pasa
@@ -24,6 +25,7 @@ const PERMISO: Record<TipoFicha, [string, 'ver' | 'crear']> = {
   entrevista: ['modulo:entrevistas', 'ver'],
   archivo: ['modulo:archivos', 'ver'],
   actividad: ['modulo:calendario', 'ver'],
+  modulo: ['modulo:programa', 'ver'],
 }
 
 export async function cargarFicha(sesion: Sesion, tipo: TipoFicha, id: string): Promise<Ficha | null> {
@@ -41,5 +43,8 @@ export async function cargarFicha(sesion: Sesion, tipo: TipoFicha, id: string): 
       return fichaProceso(sesion, id)
     case 'documento':
       return fichaDocumento(sesion, id)
+    // Hoja de ruta: un módulo del plan.
+    case 'modulo':
+      return fichaModulo(sesion, id)
   }
 }

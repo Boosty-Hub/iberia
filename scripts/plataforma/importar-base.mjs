@@ -128,17 +128,24 @@ function leerCsv(texto) {
   return resto.map((f) => Object.fromEntries(cab.map((k, i) => [k, f[i] ?? ''])))
 }
 
-// Lo que opera hoy o se construye en la Etapa 1, con su ruta y su recurso.
+// Lo que opera hoy (en producción desde el 20-nov-2026) o está a medias, con su ruta y su
+// recurso; lo demás nace planificado. Dice lo mismo que la migración
+// `20261121090000_hoja_de_ruta.sql`. ⚠️ Volver a correr esto pisa el estado que se haya
+// cambiado en la hoja de ruta: el estado se edita allá.
 const EN_ETAPA_1 = {
-  'NUC-IDN': ['en_construccion', '/sistema/administracion/usuarios', 'modulo:usuarios'],
-  'NUC-ORG': ['en_construccion', '/sistema/nucleo/organizacion', 'sistema:estructura'],
-  'NUC-PRO': ['en_construccion', '/sistema/nucleo/procesos', 'sistema:procesos'],
-  'NUC-DOC': ['en_construccion', '/sistema/nucleo/documentos', 'sistema:documentos'],
-  'NUC-FLU': ['en_construccion', '/sistema/bandeja', null],
-  'NUC-AUD': ['en_construccion', '/sistema/administracion/auditoria', 'sistema:auditoria'],
-  'NUC-CFG': ['en_construccion', '/sistema/administracion/catalogos', 'sistema:catalogos'],
+  'NUC-IDN': ['operando', '/sistema/administracion/usuarios', 'modulo:usuarios'],
+  'NUC-ORG': ['operando', '/sistema/nucleo/organizacion', 'sistema:estructura'],
+  'NUC-PRO': ['operando', '/sistema/nucleo/procesos', 'sistema:procesos'],
+  'NUC-DOC': ['operando', '/sistema/nucleo/documentos', 'sistema:documentos'],
+  'NUC-FLU': ['operando', '/sistema/bandeja', null],
+  'NUC-NOT': ['en_construccion', null, null],
+  'NUC-AUD': ['operando', '/sistema/administracion/auditoria', 'sistema:auditoria'],
+  'NUC-CFG': ['operando', '/sistema/administracion/catalogos', 'sistema:catalogos'],
   'NUC-CAN': ['operando', '/sistema/nucleo/canal', 'modulo:reportes'],
   'NUC-FOR': ['operando', '/sistema/nucleo/formacion', 'modulo:adiestramiento'],
+  'NUC-IA': ['operando', null, null],
+  'NUC-GIA': ['operando', '/sistema/administracion/ia', 'sistema:ia'],
+  'DAT-SEM': ['en_construccion', '/sistema/datos/metricas', 'sistema:inicio'],
   'PRG-PLN': ['operando', '/sistema/programa', 'modulo:programa'],
   'PRG-LEV': ['operando', '/sistema/programa/levantamiento', 'modulo:entrevistas'],
   'PRG-BIB': ['operando', '/sistema/programa/biblioteca', null],

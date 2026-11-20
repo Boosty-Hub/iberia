@@ -681,7 +681,12 @@ export function TablaDatos({
                       {r.getVisibleCells().map((cell) => {
                         const c = porClave.get(cell.column.id)!
                         return (
-                          <td key={cell.id} className={cn('h-8 border-b border-[#eef0f3] px-2.5 py-1 whitespace-nowrap text-marca-800', NUMERICAS.has(c.tipo ?? '') && 'text-right tabular-nums')}>
+                          <td
+                            key={cell.id}
+                            // `envolver`: el texto largo parte en renglones en vez de ensanchar la tabla.
+                            style={c.envolver ? { minWidth: c.ancho, maxWidth: Math.round((c.ancho ?? 240) * 1.6) } : undefined}
+                            className={cn('h-8 border-b border-[#eef0f3] px-2.5 py-1 text-marca-800', c.envolver ? 'whitespace-normal' : 'whitespace-nowrap', NUMERICAS.has(c.tipo ?? '') && 'text-right tabular-nums')}
+                          >
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                             {marcas?.[String(f[claveFila])]?.[c.clave] && <MarcaIa marca={marcas[String(f[claveFila])][c.clave]} />}
                           </td>

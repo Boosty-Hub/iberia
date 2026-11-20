@@ -9,6 +9,7 @@ import { KpiMetrica, portadaDe, precargarMetricas } from '@/lib/plataforma/metri
 import { misPendientes } from '@/components/sistema/shell/acciones'
 import { MiDiaColaboracion } from '@/components/sistema/colaboracion/mi-dia'
 import { PropuestasPendientes } from '@/components/sistema/ia/propuestas-pendientes'
+import { EnQueVamos } from '@/components/sistema/programa/en-que-vamos'
 import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
 import { TONO_CHIP } from '@/lib/plataforma/ficha-tipos'
 import { Aviso } from '@/components/ui'
@@ -75,6 +76,9 @@ export default async function MiDiaPage({ searchParams }: PageProps<'/sistema'>)
           <Aviso tono="ambar">Esa sección es exclusiva de los administradores del programa.</Aviso>
         </div>
       )}
+
+      {/* La hoja de ruta de la plataforma, en una línea (administración y consultoría). */}
+      <EnQueVamos sesion={sesion} ctx={ctx} />
 
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <section className="min-w-0 rounded-xl border border-[var(--borde)] bg-white" aria-labelledby="te-toca">

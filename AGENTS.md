@@ -1,6 +1,6 @@
 <!-- BEGIN:nextjs-agent-rules -->
 
-# This is NOT the Next.js you know
+## This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
@@ -1317,6 +1317,34 @@ tienen línea de tiempo (comentarios, menciones, seguir, tareas, recientes) con 
 sesiones —código, título, fecha; nunca la transcripción— con `modulo:entrevistas` · ver.
 Cada ruta vieja de `/dashboard/**` redirige a la nueva con sus parámetros; `/dashboard` va a Mi día (o a la primera
 pantalla de quien no tiene `modulo:panel`). El layout y la barra del panel viejo se retiraron.
+
+### La hoja de ruta de la plataforma (`/sistema/programa/hoja-de-ruta`, desde el 21-nov-2026)
+
+Pedido de Gabriel: «qué hemos ejecutado y qué es lo que falta». Pestañas **Hoja de ruta** y **Módulos** de PRG-PLN (las
+primeras; el Resumen sigue siendo el del programa de consultoría: horas, sesiones, calendario). Migración
+`20261121090000_hoja_de_ruta.sql`.
+
+- **El plan es dato, nunca archivo del repo**: `control.fase_plataforma` (12 fases, una `actual` con su `situacion`),
+  `control.hito_plataforma`, `control.pendiente_plataforma` (dueño `iberia`/`gabriel`/`boosty`, qué destraba, plazo) y
+  `control.decision_plataforma` (las G-xx). `control.modulo` suma `ref` (su ficha `modulo:<ref>`), `en_plan` (FIN-TAS es de
+  interfaz: no cuenta en los 65), `fase_clave`, `frontera`, `dueno` y `construido`. Se cargan con
+  `scripts/plataforma/importar-hoja-de-ruta.mjs` desde `plataforma/plan/datos/*.csv` y `plataforma/semillas/hoja-de-ruta.json`
+  (fuera de git): pruebas por defecto, `--destino produccion --confirmo` para producción, `--revisar` para ver qué haría.
+  🔴 **Sin `--pisar` no reescribe lo que ya existe** (solo completa campos vacíos): lo que se marca en la plataforma manda.
+- **Cifras del registro**: `plataforma_modulos` (con `por_dominio`, de donde salen las barras), `plataforma_hitos` y
+  `plataforma_pendientes`. Mi día de admin y consultor lleva «En qué vamos» (`components/sistema/programa/en-que-vamos.tsx`).
+- 🔒 **«Solo equipo» es `privado.es_equipo_boosty()`: admin o consultor y `profiles.organizacion = 'boosty'`.** No basta
+  `es_editor()`: Alberto es administrador de Iberia. Lo usan las decisiones (todas `solo_equipo`), los pendientes internos y
+  la nota de los hitos, que no sale por la API (privilegio por columna) sino por `control.notas_hitos()`. En la app,
+  `esEquipoBoosty(sesion)` de `lib/plataforma/hoja-de-ruta.ts` (con «ver como», nada interno). ⚠️ Una consulta nueva a
+  `hito_plataforma` nombra sus columnas: `select *` da `42501`.
+- **Escribir pide `modulo:programa` · editar** (acción nueva de la matriz; de fábrica para Consultor; el nivel administrador
+  ya lo puede todo) y va por columnas: estado de fase, estado y fecha de hito, resolver o reabrir un pendiente (la fecha la
+  pone la base), la decisión de una G-xx y el **estado de un módulo** (de `control.modulo`, la API solo escribe `estado`:
+  ruta y recurso deciden el menú). Todo con `control.auditar`.
+- Lo lee Iberia: sin dinero (el script se detiene si un texto visible trae un monto), sin régimen contractual (P, P\*, E) y
+  sin alarmas. `TablaDatos` acepta `envolver` en una columna de texto largo.
+- `scripts/plataforma/mirar.mjs --como iberia` entra como administrador de la organización Iberia (como Alberto).
 
 Lo de abajo sigue valiendo tal cual para Consumos (antes `/dashboard/programa`).
 

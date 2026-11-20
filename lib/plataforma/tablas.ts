@@ -4,6 +4,7 @@ import { FUENTES_PROCESOS } from '@/lib/plataforma/tablas-procesos'
 import { FUENTES_PROGRAMA } from '@/lib/plataforma/tablas-programa'
 import { FUENTES_FORMACION } from '@/lib/plataforma/tablas-formacion'
 import { FUENTES_CANAL } from '@/lib/plataforma/tablas-canal'
+import { FUENTES_HOJA_DE_RUTA } from '@/lib/plataforma/tablas-hoja-de-ruta'
 
 /**
  * Las fuentes de `TablaDatos`: una por tabla de la plataforma. La página la
@@ -106,6 +107,7 @@ export const FUENTES: Record<string, FuenteTabla> = {
   ...FUENTES_PROGRAMA,
   ...FUENTES_FORMACION,
   ...FUENTES_CANAL,
+  ...FUENTES_HOJA_DE_RUTA,
   [TABLA_PLAZAS.id]: TABLA_PLAZAS,
   [TABLA_TASAS.id]: TABLA_TASAS,
 }

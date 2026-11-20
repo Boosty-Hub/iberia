@@ -241,6 +241,9 @@ export const PESTANAS: Record<string, Pestana[]> = {
   ],
   // El programa (PRG): lo que era el panel viejo, con las casillas de siempre.
   'PRG-PLN': [
+    // La hoja de ruta de la plataforma: el plan como dato (fases, hitos, lo que falta y los 65 módulos).
+    { etiqueta: 'Hoja de ruta', href: '/sistema/programa/hoja-de-ruta', recurso: 'modulo:programa' },
+    { etiqueta: 'Módulos', href: '/sistema/programa/hoja-de-ruta/modulos', recurso: 'modulo:programa' },
     { etiqueta: 'Resumen', href: '/sistema/programa', recurso: 'modulo:programa' },
     { etiqueta: 'Consumos', href: '/sistema/programa/consumos', recurso: 'modulo:programa' },
     { etiqueta: 'Línea de tiempo', href: '/sistema/programa/linea', recurso: 'modulo:programa' },

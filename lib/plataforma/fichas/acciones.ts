@@ -4,6 +4,7 @@ import { ACCIONES_ORGANIZACION } from '@/lib/plataforma/fichas/organizacion-acci
 import { manejarDocumento, manejarProceso } from '@/lib/plataforma/fichas/procesos'
 import { manejarPadron } from '@/lib/plataforma/fichas/padron'
 import { manejarActividad } from '@/lib/plataforma/fichas/programa'
+import { manejarModulo } from '@/lib/plataforma/fichas/hoja-de-ruta'
 
 /**
  * El registro de lo que se puede hacer desde una ficha, por tipo. Cada módulo
@@ -24,4 +25,6 @@ export const ACCIONES_FICHA: Partial<Record<TipoFicha, ManejadorFicha>> = {
   documento: manejarDocumento,
   // Programa: estado, fecha confirmada y nota de una actividad del calendario.
   actividad: manejarActividad,
+  // Hoja de ruta: el estado de un módulo del plan.
+  modulo: manejarModulo,
 }

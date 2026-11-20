@@ -9,6 +9,7 @@
  *
  *   node --env-file=.env.local scripts/plataforma/mirar.mjs /sistema /sistema/nucleo/procesos
  *   … --como usuario       # la cuenta de prueba con rol «Usuario Iberia»
+ *   … --como iberia        # administrador de la organización Iberia (como Alberto)
  *   … --base http://localhost:3005 --solo-escritorio
  */
 import { chromium } from 'playwright'
@@ -34,6 +35,8 @@ const CUENTAS = {
   consultor: { email: 'consultor.pruebas@plataforma.local', nombre: 'Consultoría de pruebas', rol: 'consultor' },
   usuario: { email: 'usuario.pruebas@plataforma.local', nombre: 'Usuaria de pruebas', rol: 'usuario-iberia' },
   lector: { email: 'lector.pruebas@plataforma.local', nombre: 'Lectura de pruebas', rol: 'lector' },
+  // Como Alberto: administrador, pero de Iberia. No es del equipo de Boosty (no ve lo «solo equipo»).
+  iberia: { email: 'admin.iberia.pruebas@plataforma.local', nombre: 'Administración Iberia de pruebas', rol: 'administrador', organizacion: 'iberia' },
 }
 const cuenta = CUENTAS[COMO]
 if (!cuenta) throw new Error(`--como debe ser uno de: ${Object.keys(CUENTAS).join(', ')}`)
@@ -48,13 +51,13 @@ async function asegurarCuenta() {
     const { data, error } = await admin.auth.admin.createUser({
       email: cuenta.email,
       email_confirm: true,
-      user_metadata: { nombre_completo: cuenta.nombre, rol_clave: cuenta.rol, organizacion: 'boosty' },
+      user_metadata: { nombre_completo: cuenta.nombre, rol_clave: cuenta.rol, organizacion: cuenta.organizacion ?? 'boosty' },
     })
     if (error) throw new Error(`no se pudo crear ${cuenta.email}: ${error.message}`)
     u = data.user
   }
   const { data: rol } = await admin.from('roles').select('id').eq('clave', cuenta.rol).single()
-  await admin.from('profiles').update({ rol_id: rol.id, activo: true, nombre_completo: cuenta.nombre }).eq('id', u.id)
+  await admin.from('profiles').update({ rol_id: rol.id, activo: true, nombre_completo: cuenta.nombre, organizacion: cuenta.organizacion ?? 'boosty' }).eq('id', u.id)
   return u
 }
 

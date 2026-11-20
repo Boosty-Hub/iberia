@@ -7,6 +7,7 @@
  *
  *   node --env-file=.env.local scripts/plataforma/pasar-a-produccion.mjs
  *   node --env-file=.env.local scripts/plataforma/pasar-a-produccion.mjs --ejecutar --confirmo   # ⚠️ lo hace
+ *   … --ejecutar --confirmo --solo-migraciones   # ya en producción: solo las migraciones pendientes, sin cargas
  *
  * Con `--ejecutar --confirmo` (y solo con el OK de Gabriel, PENDIENTES.md):
  *   1. se niega si el plan es Free (G-06: «no antes de pasar Supabase a Pro») o
@@ -178,6 +179,12 @@ if (faltan.length) {
     body: JSON.stringify({ db_schema: [...expuestos, ...faltan].join(',') }),
   })
   if (!r.ok) throw new Error(`exponer esquemas: HTTP ${r.status}`)
+}
+// `--solo-migraciones`: con la plataforma ya en producción, una migración nueva sale sola,
+// sin volver a correr las cargas iniciales (que pisarían lo editado en la plataforma).
+if (args.includes('--solo-migraciones')) {
+  console.log(`\n✓ Migraciones aplicadas (${plataforma.length}). Sin cargas ni tipos: --solo-migraciones.`)
+  process.exit(0)
 }
 const auth2 = await leer(`/projects/${REF}/config/auth`)
 if (auth2.disable_signup !== true) throw new Error('El registro público se abrió: no se importa nada.')

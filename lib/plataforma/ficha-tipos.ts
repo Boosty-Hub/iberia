@@ -19,6 +19,8 @@ export type TipoFicha =
   | 'entrevista'
   | 'archivo'
   | 'actividad'
+  // Hoja de ruta (PRG-PLN): un módulo del plan, por su `ref` (`lib/plataforma/fichas/hoja-de-ruta.ts`).
+  | 'modulo'
 
 export const TIPOS_FICHA: Record<TipoFicha, string> = {
   unidad: 'Unidad',
@@ -33,6 +35,7 @@ export const TIPOS_FICHA: Record<TipoFicha, string> = {
   entrevista: 'Sesión del levantamiento',
   archivo: 'Archivo del expediente',
   actividad: 'Actividad del calendario',
+  modulo: 'Módulo de la plataforma',
 }
 
 export type TonoFicha = 'neutro' | 'verde' | 'ambar' | 'rojo' | 'azul' | 'morado'

@@ -41,6 +41,8 @@ export type Columna = {
   etiquetas?: Record<string, string>
   /** Ancho mínimo en px. */
   ancho?: number
+  /** Texto largo: la celda parte en renglones (hasta 1,6 × su ancho) en vez de ensanchar la tabla. */
+  envolver?: boolean
   /** Explica la columna (sale al pasar el mouse por el encabezado). */
   ayuda?: string
   /** Marca de perímetro: la columna existe solo si la base la manda. */

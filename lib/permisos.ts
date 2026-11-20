@@ -209,10 +209,10 @@ export const MODULOS: Recurso[] = [
   // las sesiones de trabajo. Ver la migración `informe_de_lectura`.
   {
     clave: 'modulo:programa',
-    nombre: 'Consumos y línea de tiempo',
+    nombre: 'Plan y seguimiento (consumos y hoja de ruta)',
     grupo: 'panel',
-    acciones: ['ver', 'crear', 'eliminar'],
-    detalle: { crear: 'Cargar horas e hitos', eliminar: 'Borrar horas' },
+    acciones: ['ver', 'crear', 'editar', 'eliminar'],
+    detalle: { crear: 'Cargar horas e hitos', editar: 'Actualizar la hoja de ruta: estados, fechas y pendientes', eliminar: 'Borrar horas' },
   },
   {
     clave: 'modulo:calendario',

@@ -190,6 +190,14 @@ const COMPARACION: Record<string, (m: Metrica) => string | null> = {
   },
   levantamiento_entrevistas: (m) => `meta de ~${numero(m.total)} de la cláusula 5 · ${numero(d(m, 'programada'))} programadas · SES y FOR aparte`,
   levantamiento_archivos: (m) => `${numero(d(m, 'confidenciales'))} confidenciales · ${numero(d(m, 'con_sesion'))} vinculados a una sesión`,
+  // PRG-PLN · la hoja de ruta de la plataforma
+  plataforma_modulos: (m) => `${numero(d(m, 'en_construccion'))} en construcción · ${numero(d(m, 'planificado'))} planificados`,
+  plataforma_hitos: (m) => {
+    const s = m.detalle?.siguiente as { titulo?: string; fecha?: string } | null | undefined
+    return `${plural(d(m, 'hechos'), 'cumplido', 'cumplidos')}${s?.fecha ? ` · el siguiente, ${fechaLarga(s.fecha)}` : ''}`
+  },
+  plataforma_pendientes: (m) =>
+    `con dueño en Iberia, de todo lo abierto${d(m, 'con_fecha_30') ? ` · ${numero(d(m, 'con_fecha_30'))} con fecha en 30 días` : ''}`,
   // NUC-FOR · el curso de Ajito
   formacion_matriculados: (m) => `${numero(d(m, 'en_curso'))} en curso · ${numero(d(m, 'sin_empezar'))} sin empezar${d(m, 'sin_matricula') ? ` · a ${numero(d(m, 'sin_matricula'))} les falta` : ''}`,
   formacion_completaron: (m) => (m.total ? `${porcentaje(((m.valor ?? 0) / m.total) * 100, 0)} de los matriculados` : 'Nadie matriculado todavía'),
