@@ -95,7 +95,9 @@ const plataforma = pendientes.filter((f) => f >= DESDE)
 
 // ── El plan ──
 const bloqueos = []
-if (plan === 'free') bloqueos.push('el plan es Free (G-06)')
+// `--acepto-plan-free`: Gabriel ordenó salir en el plan gratis (20-nov-2026). Sin
+// PITR, el respaldo previo es obligatorio (scripts/plataforma/respaldar-produccion.mjs).
+if (plan === 'free' && !args.includes('--acepto-plan-free')) bloqueos.push('el plan es Free (G-06); con la orden de Gabriel, --acepto-plan-free')
 if (!registroCerrado) bloqueos.push('el registro público no está cerrado (o no se pudo leer)')
 if (!Array.isArray(migraciones)) bloqueos.push('no se pudo leer la lista de migraciones aplicadas')
 if (ajenas.length) bloqueos.push('hay migraciones pendientes anteriores a la plataforma')
