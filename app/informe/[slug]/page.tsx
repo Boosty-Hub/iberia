@@ -10,6 +10,7 @@ import {
   type PuntoCircuito,
   type TextosCircuitos,
 } from '@/components/circuitos-informe'
+import { DescargarPdf, GeneradorPdf } from '@/components/informe/descargar-pdf'
 import { IndiceSeccion } from '@/components/informe/indice-seccion'
 import { Markdown } from '@/components/markdown'
 import { MarkdownPlegable } from '@/components/markdown-plegable'
@@ -65,6 +66,13 @@ const CON_CIRCUITOS = new Set(['hallazgos', 'sistemas-datos', 'arquitectura-ia']
  * `lib/rehype-informe.ts`.
  */
 const EN_TARJETAS = new Set(['hallazgos', 'sistemas-datos', 'inventario-sistemas', 'riesgo-continuidad', 'trabas', 'oportunidades'])
+
+/**
+ * Las secciones que se descargan en PDF, cada una por separado (23 de noviembre de 2026,
+ * Gabriel): la arquitectura, la plataforma, la seguridad y la IA dentro del sistema.
+ * Ver `lib/informe-pdf.ts`.
+ */
+const CON_PDF = new Set(['arquitectura-ia', 'plataforma', 'seguridad-operacion', 'ia-en-el-sistema'])
 
 /** Donde aparecen procesos y macroprocesos, y la marca «Nuevo» les sirve. */
 const CON_NUEVOS = new Set(['fichas-procesos'])
@@ -180,6 +188,9 @@ export default async function SeccionInformePage({ params, searchParams }: PageP
     const v = consulta[clave]
     return typeof v === 'string' ? v : undefined
   }
+  const conPdf = CON_PDF.has(seccion.slug) && escrita
+  // `?pdf=1`: la sección cargada en el iframe del botón, que arma el PDF y se lo devuelve.
+  const armandoPdf = conPdf && pedido('pdf') === '1'
 
   // Desde qué ancho sale el índice a su columna: con el dibujo de los
   // circuitos, solo cuando cabe al lado sin encogerlo.
@@ -216,7 +227,7 @@ export default async function SeccionInformePage({ params, searchParams }: PageP
           )}
         >
           <header className="border-b border-[var(--borde)] pb-6">
-            <nav aria-label="Ruta" className="flex flex-wrap items-center gap-x-1 gap-y-2 text-xs">
+            <nav aria-label="Ruta" className="flex flex-wrap items-center gap-x-1 gap-y-2 text-xs" data-pdf-omitir="">
               <Link href="/informe" className="migas-enlace">
                 Informe
               </Link>
@@ -233,9 +244,15 @@ export default async function SeccionInformePage({ params, searchParams }: PageP
               )}
             </nav>
 
-            <h1 className="mt-4 text-[1.75rem] leading-tight font-bold tracking-tight text-balance text-marca-900 sm:text-4xl">
-              {seccion.titulo}
-            </h1>
+            <div className="mt-4 flex flex-wrap items-start justify-between gap-3">
+              <h1 className="w-full min-w-0 text-[1.75rem] sm:w-auto sm:flex-1 leading-tight font-bold tracking-tight text-balance text-marca-900 sm:text-4xl">
+                {seccion.numero && armandoPdf && <span className="mr-2 font-mono text-acento-600">{seccion.numero}</span>}
+                {seccion.titulo}
+              </h1>
+              {conPdf && !armandoPdf && (
+                <DescargarPdf nombreArchivo={`Iberia-${seccion.numero ? `${seccion.numero}-` : ''}${seccion.slug}`} />
+              )}
+            </div>
             {seccion.subtitulo && (
               <p className="mt-3 text-base text-pretty text-marca-600 sm:text-lg">{seccion.subtitulo}</p>
             )}
@@ -285,13 +302,13 @@ export default async function SeccionInformePage({ params, searchParams }: PageP
           {seccion.slug === 'plataforma' && <PlataformaIberia />}
 
           {conLateral && (
-            <div className={cn('mt-6', plegadoOculto)}>
+            <div className={cn('mt-6', plegadoOculto)} data-pdf-omitir="">
               <IndiceSeccion entradas={indice} variante="plegado" />
             </div>
           )}
 
           {/* Solo el dibujo va ancho: la prosa vuelve a la medida de lectura. */}
-          <div className={cn('py-8', conCircuitos && 'mx-auto max-w-[760px]')}>
+          <div className={cn('py-8', conCircuitos && 'mx-auto max-w-[760px]')} data-pdf-abrir="">
             {/* Las oportunidades abren con las tres líneas de intervención; la tecnología y las
                 33 oportunidades siguen en el markdown. */}
             {seccion.slug === 'oportunidades' && <div className="mb-12"><TresLineasIberia /></div>}
@@ -317,7 +334,7 @@ export default async function SeccionInformePage({ params, searchParams }: PageP
             {oportunidades && <GanttNuevaIberia />}
           </div>
 
-          <nav aria-label="Secciones contiguas" className="grid gap-3 border-t border-[var(--borde)] pt-6 sm:grid-cols-2">
+          <nav aria-label="Secciones contiguas" className="grid gap-3 border-t border-[var(--borde)] pt-6 sm:grid-cols-2" data-pdf-omitir="">
             {anterior ? (
               <Link href={rutaDeSeccion(anterior.slug)} className="contigua">
                 <span className="text-xs text-marca-400">← Anterior</span>
@@ -341,6 +358,7 @@ export default async function SeccionInformePage({ params, searchParams }: PageP
               <span className="hidden sm:block" />
             )}
           </nav>
+          {armandoPdf && <GeneradorPdf titulo={seccion.titulo} numero={seccion.numero} />}
         </article>
 
         {conLateral && (

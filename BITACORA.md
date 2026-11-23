@@ -63,6 +63,22 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 
 ---
 
+## 23 de noviembre · Sesión 58 — el PDF de cada sección del informe
+
+**Pedido de Gabriel** (Telegram): un botón arriba para descargar en PDF la arquitectura de IA, la plataforma, la seguridad
+y la IA dentro del sistema. Eligió **un PDF por sección**, cada una por separado.
+
+- **«Descargar PDF»** junto al título de la 10, 11, 12 y 13 (`CON_PDF` en `app/informe/[slug]/page.tsx`). Cómo funciona:
+  `AGENTS.md`, «El PDF de una sección». Se arma en el navegador (Netlify no trae Chromium), con `jspdf` 4.2.1 y
+  `html-to-image` 1.11.13: A4, cortes entre bloques, tablas largas partidas por filas con su cabecera y pie con la página.
+- Probado en local contra producción con `scripts/mirar-pdf-informe.mjs` y revisado hoja por hoja: 13, 8, 11 y 10 hojas,
+  3 a 6 MB, unos 3 s cada una. 🔴 Lo que salió mal en la primera vuelta: los dibujos SVG salían con las cajas en negro
+  (`html-to-image` no lleva el relleno de las clases de Tailwind) y el espejo de la 10 salía cortado con su barra de
+  desplazamiento (el iframe era angosto). Los dos, corregidos.
+- **Límite aceptado**: el texto del PDF es imagen; no se selecciona ni se busca.
+
+---
+
 ## 21 de noviembre · Sesión 57 — la hoja de ruta de la plataforma, como dato
 
 **Pedido de Gabriel:** un lugar del sistema con todo el plan: qué se ejecutó y qué falta. Procesos y estructura ya están;

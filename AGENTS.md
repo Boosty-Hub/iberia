@@ -1633,6 +1633,27 @@ mismo del panel). Antes la hoja iba pegada a la izquierda y a 1920 px dejaba 736
   día; la página decide qué pinta con `CON_CIRCUITOS` y la plataforma aparte, y las dos listas
   tienen que decir lo mismo.
 
+### El PDF de una sección (desde el 23 de noviembre de 2026)
+
+«Descargar PDF», junto al título, en las secciones de `CON_PDF` (`app/informe/[slug]/page.tsx`: hoy la 10, 11, 12 y 13,
+cada una con su propio PDF). Otra sección se suma agregando su slug ahí.
+
+- **Lo arma el navegador, no el servidor**: Netlify no trae Chromium. El botón (`components/informe/descargar-pdf.tsx`)
+  carga la misma sección en un iframe oculto de 1600 px con `?pdf=1`; ahí `GeneradorPdf` llama a `generarPdfSeccion()`
+  (`lib/informe-pdf.ts`) y le devuelve el PDF por `postMessage`. Ancho a propósito: más angosto, el espejo de la 10
+  (1080 px) sale con barra y cortado.
+- **Se parte en bloques**: el encabezado, cada dibujo y cada pieza de la `.prosa`. Las tablas de más de 320 px van por
+  filas y repiten su cabecera; un título no se queda al pie. Cada hoja toma el ancho de su bloque más ancho y se recorta
+  a él, así que la prosa sale a su tamaño aunque el dibujo de arriba sea ancho.
+- Lo que no va en el PDF lleva `data-pdf-omitir` (migas, índice plegado, flechas, el botón); un envoltorio que solo
+  contiene bloques lleva `data-pdf-abrir`.
+- ⚠️ **`html-to-image` no lleva el relleno de las clases de Tailwind en un SVG**: las cajas salían en negro.
+  `fijarColoresSvg()` escribe en la copia los colores ya resueltos (`fill`, `stroke`, `stop-color`…). Un dibujo nuevo
+  con otra propiedad visual se agrega a `PROPIEDADES_SVG`.
+- El texto queda como imagen (no se selecciona); pesa de 3 a 6 MB por sección.
+- Se verifica con `node --env-file=.env.local scripts/mirar-pdf-informe.mjs [--solo <slug>]`, que baja los PDF a
+  `capturas/pdf-informe/`; las hojas se miran renderizándolas a PNG.
+
 ### El orden: primero lo que se encontró
 
 **11 secciones en cuatro partes** (25 de septiembre de 2026, decisión de Gabriel):
