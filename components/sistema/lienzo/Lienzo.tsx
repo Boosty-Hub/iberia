@@ -430,6 +430,10 @@ function VistaLienzo({ c }: { c: Compartido }) {
   const marco = useRef<HTMLDivElement>(null)
   const [compacta, setCompacta] = useState(true)
   const [rev, setRev] = useState(0)
+  // Pantalla completa (24-nov-2026, Gabriel: «solo el lienzo, para ver todo mejor»): el marco tapa el armazón
+  // (`.lz-completa`) y, si el navegador deja, la página pasa a pantalla completa de verdad. La ficha que se abre
+  // desde una caja sigue viéndose encima (`html.lz-pantalla-completa` en lienzo.css).
+  const [completa, setCompleta] = useState(false)
   const { arbol, abiertos, p } = c
   const editable = !!p.editable
 
@@ -822,11 +826,38 @@ function VistaLienzo({ c }: { c: Compartido }) {
 
   const nodoMenu = c.menu ? arbol.porId.get(c.menu) : undefined
 
+  const alternarCompleta = () => {
+    const nueva = !completa
+    setCompleta(nueva)
+    if (nueva) void document.documentElement.requestFullscreen?.().catch(() => {})
+    else if (document.fullscreenElement) void document.exitFullscreen().catch(() => {})
+  }
+  useEffect(() => {
+    if (!completa) return
+    const html = document.documentElement
+    html.classList.add('lz-pantalla-completa')
+    // Esc sale (en pantalla completa de verdad, el navegador la consume y avisa con `fullscreenchange`).
+    const alSalir = () => !document.fullscreenElement && setCompleta(false)
+    const alTecla = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !document.fullscreenElement && !(e.target as HTMLElement).closest?.('input, select, textarea, dialog, [data-ficha-objeto]')) setCompleta(false)
+    }
+    document.addEventListener('fullscreenchange', alSalir)
+    document.addEventListener('keydown', alTecla)
+    const t = setTimeout(() => ajustarLegible(0.4, 300), 250)
+    return () => {
+      html.classList.remove('lz-pantalla-completa')
+      document.removeEventListener('fullscreenchange', alSalir)
+      document.removeEventListener('keydown', alTecla)
+      clearTimeout(t)
+      setTimeout(() => ajustarLegible(0.6, 300), 250)
+    }
+  }, [completa, ajustarLegible])
+
   const migas = c.sel ? [...arbol.ancestros(c.sel)].reverse().concat(c.sel) : []
 
   return (
     <ContextoLienzo.Provider value={contexto}>
-      <div className="lz-marco" ref={marco} onKeyDown={alTeclear}>
+      <div className={cn('lz-marco', completa && 'lz-completa')} ref={marco} onKeyDown={alTeclear}>
         <div className="lz-herramientas">
           <div className="flex flex-wrap items-center gap-2">
             <Buscador c={c} />
@@ -867,6 +898,18 @@ function VistaLienzo({ c }: { c: Compartido }) {
               )}
               <button type="button" className="lz-boton" title="Ver como lista, con migas" onClick={() => c.setModo('lista')}>
                 Lista
+              </button>
+              <button
+                type="button"
+                className={cn('lz-boton', completa && '!border-marca-800 !bg-marca-800 !text-white')}
+                aria-pressed={completa}
+                title={completa ? 'Volver a la pantalla normal (Esc)' : 'Solo el lienzo, a toda la pantalla'}
+                onClick={alternarCompleta}
+              >
+                <svg viewBox="0 0 16 16" className="mr-1 inline-block h-3.5 w-3.5 align-[-2px]" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+                  {completa ? <path d="M6 2v4H2M10 2v4h4M6 14v-4H2M10 14v-4h4" /> : <path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4" />}
+                </svg>
+                {completa ? 'Salir de pantalla completa' : 'Pantalla completa'}
               </button>
             </div>
           </div>

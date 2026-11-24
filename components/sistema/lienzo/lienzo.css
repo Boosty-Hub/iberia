@@ -32,6 +32,33 @@
   background: #fff;
 }
 
+/* Pantalla completa: solo el lienzo, encima del armazón. La ficha que se abre desde una caja va encima. */
+.lz-marco.lz-completa {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  height: 100dvh;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+}
+html.lz-pantalla-completa body { overflow: hidden; }
+/* En pantalla ancha, con la ficha abierta, el lienzo le deja su espacio (no tapa «Salir de pantalla completa»). */
+@media (min-width: 901px) {
+  html.lz-pantalla-completa:has([data-ficha-objeto]) .lz-marco.lz-completa { right: 420px; }
+}
+html.lz-pantalla-completa [data-ficha-objeto] {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0;
+  bottom: 0;
+  left: auto;
+  z-index: 50;
+  width: min(420px, 100vw);
+  height: 100dvh !important;
+  box-shadow: -12px 0 30px rgba(0, 0, 0, 0.12);
+}
+
 .lz-marco .react-flow__pane { cursor: grab; }
 .lz-marco .react-flow__pane.dragging { cursor: grabbing; }
 .lz-marco .react-flow__node { cursor: pointer; border-radius: 11px; }
