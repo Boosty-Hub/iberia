@@ -1132,6 +1132,29 @@ ficha del documento. Migración `20261124020000_documento_archivos.sql`.
   vista previa dibujada (píxeles del lienzo), las rutas, el teléfono y que sin `sistema:perimetros` no se alcanza la
   fila, el objeto ni la ruta de un documento de perímetro.
 
+## Los tutoriales (desde el 24 de noviembre de 2026)
+
+«Ver tutorial» en la cabecera del módulo abre un popup con el video de la pestaña activa (Gabriel: todas las de
+Organización y autoridad y de Procesos; 18 videos de 30 a 60 s, ~29 MB). Migración `20261124030000_tutoriales.sql`.
+
+- **El dato**: `ui.tutorial` (una fila por ruta de pestaña, con `recurso`) y el bucket privado `tutoriales`. Se ve con el
+  permiso de la pestaña: el de Costos muestra cifras del perímetro de nómina. El video llega por
+  `/sistema/tutoriales/video?ruta=…` (enlace firmado de una hora: el navegador pide trozos mientras se ve).
+  `BotonTutorial` sale solo si la pestaña activa tiene video; una pestaña nueva no muestra nada hasta que se grabe.
+- **Se graban, no se editan**: `scripts/plataforma/tutoriales/` (el método de los tutoriales de Security Solution). La app
+  real contra PRUEBAS, en el build de producción del 3007 (`produccion-pruebas.mjs`: sin el indicador de Next), con
+  cursor, subtítulos, portada y resaltado dibujados dentro de la página. Un guion por módulo en `guiones/`.
+  ```
+  node --env-file=.env.local scripts/plataforma/tutoriales/grabar.mjs organizacion [--solo plazas] [--subir]
+  node --env-file=.env.local scripts/plataforma/tutoriales/grabar.mjs procesos --solo-subir --destino produccion --confirmo
+  node --env-file=.env.local scripts/plataforma/tutoriales/probar.mjs [--produccion --email <cuenta del equipo>]
+  ```
+  Antes de subir se mira la hoja de contacto (`capturas/tutoriales/<modulo>/<capitulo>-hoja.jpg`): un subtítulo que no
+  calza con lo que se ve (pasó con «Dependencias» en Plazas) solo se caza mirando.
+- ⚠️ **Si cambia una pantalla, se regraba su capítulo**: el video no se actualiza solo.
+- ⚠️ `addInitScript` corre antes de que exista `document.documentElement`: el estilo se monta con el `body`. Y el
+  contexto lleva `bypassCSP`.
+
 ## Plataforma Iberia · el registro de métricas (`/sistema`, R5)
 
 Desde el 20 de noviembre de 2026. **Cada cifra de la plataforma se define una sola vez**: «procesos con

@@ -11,7 +11,7 @@ export const ANCHO = 1440
 export const ALTO = 900
 export const FRANJA = 84
 
-const UI = `
+export const UI = `
 (() => {
   if (window.__tutUI) return; window.__tutUI = true;
   const css = document.createElement('style');
@@ -36,12 +36,11 @@ const UI = `
     #tut-resaltar { position: fixed; z-index: 2147483644; border: 3px solid #D4332C; border-radius: 12px; pointer-events: none;
       box-shadow: 0 0 0 4000px rgba(28,27,26,.22); transition: all .25s; }
   \`;
-  document.documentElement.appendChild(css);
   const franja = document.createElement('div'); franja.id = 'tut-franja'; franja.style.opacity = '0';
   const cur = document.createElement('div'); cur.id = 'tut-cursor';
   cur.innerHTML = '<svg width="22" height="26" viewBox="0 0 22 26"><path d="M2 2 L2 21 L7 16 L11 24 L14 22.5 L10 14.8 L17 14.8 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>';
   cur.style.left = '720px'; cur.style.top = '420px';
-  const montar = () => { document.body.appendChild(franja); document.body.appendChild(cur); };
+  const montar = () => { document.head.appendChild(css); document.body.appendChild(franja); document.body.appendChild(cur); };
   if (document.body) montar(); else document.addEventListener('DOMContentLoaded', montar);
   addEventListener('mousemove', e => { cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px'; }, true);
   addEventListener('mousedown', e => { const p = document.createElement('div'); p.className = 'tut-pulso';
@@ -149,7 +148,7 @@ export async function grabarCapitulo({ base, cookies, ruta, guion, dir, headed =
   fs.rmSync(dir, { recursive: true, force: true })
   fs.mkdirSync(dir, { recursive: true })
   const nav = await chromium.launch({ headless: !headed })
-  const ctx = await nav.newContext({ viewport: { width: ANCHO, height: ALTO }, recordVideo: { dir, size: { width: ANCHO, height: ALTO } }, locale: 'es-VE', timezoneId: 'America/Caracas' })
+  const ctx = await nav.newContext({ viewport: { width: ANCHO, height: ALTO }, recordVideo: { dir, size: { width: ANCHO, height: ALTO } }, locale: 'es-VE', timezoneId: 'America/Caracas', bypassCSP: true })
   await ctx.addCookies(cookies)
   await ctx.addInitScript(UI)
   const page = await ctx.newPage()
