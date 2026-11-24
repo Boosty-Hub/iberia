@@ -88,9 +88,14 @@ Organización y autoridad y de Procesos; y publicar todo. Cómo funciona cada co
   Plazas no calzaba con la pantalla) y probados uno por uno en producción con la cuenta de Gabriel.
 - **En producción** con el OK de Gabriel («publica todo en main»): respaldo `produccion-2026-11-24T03-18-05` (92 tablas),
   migraciones `20261124010000` a `030000` con `--solo-migraciones`, y `main` hasta `fe1d7f7` (incluye las sesiones 58 y 59).
-- **Dónde quedamos**: Gabriel pidió que toda edición de estructura y procesos sea un escenario con aprobación. Se le mandó
-  el diagnóstico (en estructura casi todo se edita directo; procesos ya va por borrador y ruta) con cuatro fallas a
-  corregir y cuatro decisiones; se espera su respuesta para construirlo (`PENDIENTES.md`).
+- **Toda edición pasa por aprobación** (pedido de Gabriel, en producción el 24/11, respaldo `produccion-2026-11-24T12-51-31`,
+  migraciones `040000` y `050000`, `main` en `94c6597`). Cómo funciona: `AGENTS.md`, «Toda edición pasa por aprobación».
+  **Decidió Gabriel**: borrador de cambios por persona; todo pasa (estructura, personas, cargos, costos, plan, cruce); un solo
+  paso por la casilla «Aprobar cambios», que por ahora tienen **solo los administradores**; sin excepciones; nunca el autor.
+  🔴 **Se encontró y corrigió**: la API dejaba escribir filas reales sin versionar; cerrar una unidad en un escenario dejaba sin
+  jefe a quien le reportaba; publicar dejaba gente en plazas cerradas; publicar pisaba sin avisar lo editado después de la
+  base. El escenario de diseño admite ahora reporta a, estado, nómina, sede y código (y en procesos, los códigos). Pruebas
+  `probar-cambios` 14/14 y `probar-escenarios` 5/5; los tutoriales de Plazas, Cargos y Costos, regrabados con el flujo nuevo.
 
 ---
 
