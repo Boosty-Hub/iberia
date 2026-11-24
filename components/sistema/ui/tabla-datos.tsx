@@ -13,6 +13,7 @@ import { MarcaIa } from '@/components/sistema/ia/nivel-ia'
 import type { MarcaCelda } from '@/lib/ia/niveles'
 import { PREFIJO_FILTRO, TAMANOS, consultaDeEstado, type AccionFila, type Columna, type EstadoTabla, type LoteTabla, type TonoCelda } from '@/lib/plataforma/tabla'
 import { cn } from '@/lib/utils'
+import { avisarPropuesto } from '@/components/sistema/shell/mis-cambios'
 
 /**
  * `TablaDatos` (Anexo E §4): la tabla densa que es la pantalla principal. Todo
@@ -73,7 +74,7 @@ function Celda({ v, c, fila }: { v: unknown; c: Columna; fila: Fila }) {
   return <>{t}</>
 }
 
-function CeldaEditable({ v, c, fila, guardar }: { v: unknown; c: Columna; fila: Fila; guardar: (valor: string) => Promise<{ error?: string } | void> }) {
+function CeldaEditable({ v, c, fila, guardar }: { v: unknown; c: Columna; fila: Fila; guardar: (valor: string) => Promise<{ error?: string; ok?: string } | void> }) {
   const [editando, setEditando] = useState(false)
   const [valor, setValor] = useState(v === null || v === undefined ? '' : String(v))
   const [error, setError] = useState<string | null>(null)
@@ -108,7 +109,10 @@ function CeldaEditable({ v, c, fila, guardar }: { v: unknown; c: Columna; fila: 
             iniciar(async () => {
               const r = await guardar(nuevo)
               if (r && r.error) setError(r.error)
-              else setEditando(false)
+              else {
+                setEditando(false)
+                if (r && r.ok) avisarPropuesto(r.ok)
+              }
             })
           }}
           onBlur={() => !pendiente && setEditando(false)}
@@ -141,7 +145,10 @@ function CeldaEditable({ v, c, fila, guardar }: { v: unknown; c: Columna; fila: 
             iniciar(async () => {
               const r = await guardar(nuevo)
               if (r && r.error) setError(r.error)
-              else setEditando(false)
+              else {
+                setEditando(false)
+                if (r && r.ok) avisarPropuesto(r.ok)
+              }
             })
           }}
           onKeyDown={(e) => {
@@ -172,7 +179,10 @@ function CeldaEditable({ v, c, fila, guardar }: { v: unknown; c: Columna; fila: 
             iniciar(async () => {
               const r = await guardar(valor)
               if (r && r.error) setError(r.error)
-              else setEditando(false)
+              else {
+                setEditando(false)
+                if (r && r.ok) avisarPropuesto(r.ok)
+              }
             })
         }}
         className="h-7 w-full min-w-24 rounded border border-acento-300 px-1.5 text-[13px] outline-none focus:ring-2 focus:ring-acento-100"
@@ -222,7 +232,7 @@ export function TablaDatos({
   puedeBloquear: boolean
   error?: string | null
   /** Edición en la celda: guarda y devuelve el error si lo hay. La fila se identifica por `claveFila`. */
-  alEditar?: (clave: string, columna: string, valor: string) => Promise<{ error?: string } | void>
+  alEditar?: (clave: string, columna: string, valor: string) => Promise<{ error?: string; ok?: string } | void>
   /** Las acciones de fila que piden un texto (columna `acciones`). Puede devolver la ficha que hay que abrir. */
   alAccion?: (clave: string, accion: string, texto: string) => Promise<{ error?: string; ficha?: string | null } | void>
   /** R4 · marcas ⚑ de la IA por fila (`claveFila`) y columna, con su razón. */

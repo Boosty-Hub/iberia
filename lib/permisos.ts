@@ -146,6 +146,14 @@ export const MODULOS: Recurso[] = [
     detalle: { ver: 'Todas, no solo las propias', crear: 'Pedir para su unidad', editar: 'Recursos Humanos: gestionar' },
   },
   {
+    clave: 'sistema:cambios',
+    nombre: 'Aprobar cambios',
+    grupo: 'sistema',
+    acciones: ['ver', 'editar'],
+    detalle: { ver: 'Ver los lotes de cambios de todos', editar: 'Aprobar cambios: estructura, personas, cargos, costos, plan, cruce, escenarios y procesos' },
+    subtitulo: 'Nada entra a la realidad sin la firma de alguien con esta casilla (y nunca la del autor)',
+  },
+  {
     clave: 'sistema:aprobaciones',
     nombre: 'Rutas de aprobación',
     grupo: 'sistema',

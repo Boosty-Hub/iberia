@@ -101,6 +101,7 @@ export const TIPO_OBJETO: Record<string, string> = {
   proceso: 'Ficha de proceso',
   escenario_estructura: 'Escenario de estructura',
   escenario_procesos: 'Escenario de procesos',
+  cambios: 'Cambios a la estructura',
 }
 
 /** A dónde lleva cada objeto de una solicitud. `ref` es la identidad estable del proceso. */
@@ -114,6 +115,8 @@ export function enlaceObjeto(tipo: string, objetoId: string, refProceso?: string
       return `/sistema/nucleo/escenarios/${objetoId}`
     case 'escenario_procesos':
       return `/sistema/nucleo/procesos/escenarios/${objetoId}`
+    case 'cambios':
+      return `/sistema/cambios/${objetoId}`
     case 'nivel_ia':
       return '/sistema/administracion/ia'
     default:

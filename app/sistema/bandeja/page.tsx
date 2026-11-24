@@ -56,13 +56,13 @@ export default async function BandejaPage({ searchParams }: PageProps<'/sistema/
   // Las fichas de proceso se abren por su identidad estable; el impacto sale de cada objeto.
   const procesos = [...porDecidir, ...pedidas].filter((x) => x.tipo_objeto === 'proceso').map((x) => x.objeto_id)
   const reqs = porDecidir.filter((x) => x.tipo_objeto === 'requisicion_personal').map((x) => x.objeto_id)
-  const escs = porDecidir.filter((x) => x.tipo_objeto.startsWith('escenario_')).map((x) => x.objeto_id)
+  const escs = porDecidir.filter((x) => x.tipo_objeto.startsWith('escenario_') || x.tipo_objeto === 'cambios').map((x) => x.objeto_id)
   type Paso = { orden: number; nombre: string; aprobador_perfil: string | null; aprobador_plaza_ref: string | null; decision: string; comentario: string | null }
   const pasoActual = (s: (typeof pedidas)[number]) => ((s.paso ?? []) as unknown as Paso[]).find((p) => p.orden === s.paso_actual)
   const [refs, impactos, escenarios, plazas, nombres] = await Promise.all([
     procesos.length ? supabase.schema('sgc').from('proceso').select('id, ref, version').in('id', procesos) : null,
     reqs.length ? supabase.schema('org').from('requisicion').select('id, cantidad, origen, impacto').in('id', reqs) : null,
-    escs.length ? supabase.schema('org').from('escenario').select('id, alcance, vigente_desde').in('id', escs) : null,
+    escs.length ? supabase.schema('org').from('escenario').select('id, alcance, vigente_desde, cambio(count)').in('id', escs) : null,
     plazasDe(supabase, [...porDecidir.map((p) => p.aprobador_plaza_ref), ...pedidas.map((s) => pasoActual(s)?.aprobador_plaza_ref)]),
     nombresDe(supabase, pedidas.map((s) => pasoActual(s)?.aprobador_perfil)),
   ])
@@ -84,6 +84,11 @@ export default async function BandejaPage({ searchParams }: PageProps<'/sistema/
       return partes.join(' · ')
     }
     if (tipo === 'proceso') return versionDe.get(id) ? `Versión ${versionDe.get(id)} de la ficha` : null
+    if (tipo === 'cambios') {
+      const e = escDe.get(id) as { vigente_desde: string | null; cambio?: { count: number }[] } | undefined
+      const n = e?.cambio?.[0]?.count ?? 0
+      return e ? `${numero(n)} cambio${n === 1 ? '' : 's'}${e.vigente_desde ? ` · rigen desde ${fechaLarga(e.vigente_desde)}` : ''}` : null
+    }
     if (tipo.startsWith('escenario_')) {
       const e = escDe.get(id)
       return e ? `Escenario de ${e.alcance}${e.vigente_desde ? ` · rige desde ${fechaLarga(e.vigente_desde)}` : ''}` : null

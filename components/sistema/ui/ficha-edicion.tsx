@@ -9,6 +9,10 @@ import { useContextoUrl } from '@/components/sistema/shell/contexto-url'
 import { TONO_CHIP, type AccionFicha, type BloqueFicha, type DatoFicha, type ResultadoAccionFicha } from '@/lib/plataforma/ficha-tipos'
 import { fechaHora, hoyCaracas } from '@/lib/plataforma/formato'
 import { cn } from '@/lib/utils'
+import { avisarPropuesto } from '@/components/sistema/shell/mis-cambios'
+
+/** El comienzo del mensaje de `proponer` (lib/plataforma/cambios.ts, que es solo de servidor). */
+const AVISO_PROPUESTO = 'Quedó en tus cambios por aprobar'
 
 /**
  * Lo editable de `FichaObjeto`: los campos que se cambian en la ficha (con su
@@ -33,6 +37,7 @@ export function useTerminar(fichaValor: string, alCambiar?: () => void): AlTermi
   const { fijar } = useContextoUrl()
   return (r) => {
     if (r.error) return
+    if (r.ok?.startsWith(AVISO_PROPUESTO)) avisarPropuesto(r.ok)
     if (r.href) {
       router.push(r.href)
       return

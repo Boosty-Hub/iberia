@@ -170,6 +170,10 @@ export function BandejaDecidir({ filas }: { filas: FilaDecidir[] }) {
                       <button type="button" onClick={() => abrirFicha(router, f.ficha!.tipo, f.ficha!.id)} className="mt-0.5 block max-w-full text-left font-semibold break-words text-marca-900 hover:underline">
                         {f.titulo}
                       </button>
+                    ) : f.hrefModulo ? (
+                      <Link href={f.hrefModulo} className="mt-0.5 block max-w-full font-semibold break-words text-marca-900 hover:underline">
+                        {f.titulo}
+                      </Link>
                     ) : (
                       <p className="mt-0.5 font-semibold break-words text-marca-900">{f.titulo}</p>
                     )}

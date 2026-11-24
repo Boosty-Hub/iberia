@@ -4,7 +4,6 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { puede, requerirPermiso, requerirSesion } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
-import { claveDe } from '@/components/sistema/flujo/estructura'
 import { campo, hoyCaracas, mensajeError, type EstadoAccion } from '@/components/sistema/flujo/formato'
 
 const RUTA = '/sistema/nucleo/organizacion/requisiciones'
@@ -59,15 +58,9 @@ export async function guardarRequisicion(_anterior: EstadoAccion, fd: FormData):
     }
     const nombre = campo(fd, 'cargo_nuevo_nombre')
     if (nombre.length < 3) return { error: 'Escribe el nombre del cargo nuevo.' }
-    const base = claveDe(nombre)
-    const { data: parecidas } = await org.from('cargo').select('clave, nombre').like('clave', `${base}%`)
-    const igual = (parecidas ?? []).find((c) => c.nombre.toLowerCase() === nombre.toLowerCase())
-    if (igual) return { error: `«${igual.nombre}» ya está en el catálogo: elígelo de la lista.` }
-    const usadas = new Set((parecidas ?? []).map((c) => c.clave))
-    let clave = base
-    for (let n = 2; usadas.has(clave); n++) clave = `${base}-${n}`
-    const nuevo = crypto.randomUUID()
-    const { error } = await org.from('cargo').insert({ id: nuevo, clave, nombre, familia: campo(fd, 'cargo_nuevo_familia') || null })
+    // Lo crea la base (`org.crear_cargo_de_requisicion`): la tabla de cargos ya no se escribe por la API, y el cargo entra
+    // con la requisición a su ruta de aprobación.
+    const { data: nuevo, error } = await org.rpc('crear_cargo_de_requisicion', { p_nombre: nombre, p_familia: campo(fd, 'cargo_nuevo_familia') || '' })
     if (error) return { error: `No se pudo crear el cargo: ${mensajeError(error)}` }
     cargoId = nuevo
   }

@@ -1727,6 +1727,44 @@ export type Database = {
           },
         ]
       }
+      cambio: {
+        Row: {
+          args: Json
+          creado_en: string
+          descripcion: string
+          escenario_id: string
+          funcion: string
+          id: string
+          objeto: string | null
+          objeto_ref: string | null
+          orden: number
+          parche: Json | null
+        }
+        Insert: {
+          args?: Json
+          creado_en?: string
+          descripcion: string
+          escenario_id: string
+          funcion: string
+          id?: string
+          objeto?: string | null
+          objeto_ref?: string | null
+          parche?: Json | null
+        }
+        Update: {
+          args?: Json
+          creado_en?: string
+          descripcion?: string
+          escenario_id?: string
+          funcion?: string
+          id?: string
+          objeto?: string | null
+          objeto_ref?: string | null
+          orden?: number
+          parche?: Json | null
+        }
+        Relationships: []
+      }
       escenario: {
         Row: {
           alcance: string
@@ -1740,6 +1778,7 @@ export type Database = {
           proceso_raiz_ref: string | null
           publicado_en: string | null
           vigente_desde: string | null
+          tipo: string
         }
         Insert: {
           alcance: string
@@ -1753,6 +1792,7 @@ export type Database = {
           proceso_raiz_ref?: string | null
           publicado_en?: string | null
           vigente_desde?: string | null
+          tipo?: string
         }
         Update: {
           alcance?: string
@@ -1766,6 +1806,7 @@ export type Database = {
           proceso_raiz_ref?: string | null
           publicado_en?: string | null
           vigente_desde?: string | null
+          tipo?: string
         }
         Relationships: []
       }
@@ -2176,6 +2217,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      proponer_cambio: {
+        Args: { p_funcion: string; p_args: Json; p_descripcion: string; p_parche?: Json; p_objeto?: string; p_objeto_ref?: string }
+        Returns: Json
+      }
+      quitar_cambio: { Args: { p_id: string }; Returns: undefined }
+      descartar_cambios: { Args: { p_esc: string }; Returns: undefined }
+      enviar_cambios: { Args: { p_esc: string; p_vigente_desde: string; p_nota?: string }; Returns: string }
+      crear_cargo_de_requisicion: { Args: { p_nombre: string; p_familia: string }; Returns: string }
       aplicar_requisicion: { Args: { p_req: string }; Returns: undefined }
       aprobar_plan_dotacion: { Args: { p_plan: string }; Returns: undefined }
       asignar_ocupacion: {

@@ -109,6 +109,8 @@ export default async function EscenarioPage({ params, searchParams }: PageProps<
     estado_operativo: f.estado_operativo,
     dueno_plaza_ref: f.dueno_plaza_ref,
     dueno: (f.dueno_plaza_ref && etiquetaPlaza.get(f.dueno_plaza_ref)) || f.dueno_texto,
+    codigo_sgc: f.codigo_sgc,
+    codigo_informe: f.codigo_informe,
     cambio: cambioDe.get(f.ref) ?? null,
   }))
   const raiz = e.proceso_raiz_ref ? (nombreReal.get(e.proceso_raiz_ref) ?? nombreEsc.get(e.proceso_raiz_ref) ?? 'un proceso') : null

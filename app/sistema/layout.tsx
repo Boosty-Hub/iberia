@@ -10,6 +10,7 @@ import { misPendientes } from '@/components/sistema/shell/acciones'
 import { leerResumen } from '@/components/sistema/colaboracion/datos'
 import { BandaVerComo, BandasContexto } from '@/components/sistema/shell/bandas'
 import { BotonBuscar, Campana, ControlesContexto, InterruptorMoneda, MenuPersona, VerComo } from '@/components/sistema/shell/barra-cliente'
+import { MisCambios } from '@/components/sistema/shell/mis-cambios'
 import { BarraTasas, PuntoJd } from '@/components/sistema/shell/barra-tasas'
 import { MenuTelefono } from '@/components/sistema/shell/menu-telefono'
 import { ColumnaModulos, NavegacionTelefono, Riel, type VistaMenu } from '@/components/sistema/shell/navegacion'
@@ -35,7 +36,7 @@ export default async function SistemaLayout({ children }: LayoutProps<'/sistema'
   const jar = await cookies()
   const esAdminReal = sesion.rolReal.nivel === 'admin'
 
-  const [modulos, tasas, moneda, escenarios, vistas, pendientes, roles, empleado, resumen, ia] = await Promise.all([
+  const [modulos, tasas, moneda, escenarios, vistas, pendientes, roles, empleado, resumen, ia, misCambios] = await Promise.all([
     modulosDelPlan(),
     tasasDelDia(sesion),
     leerMoneda(),
@@ -53,6 +54,15 @@ export default async function SistemaLayout({ children }: LayoutProps<'/sistema'
     leerResumen(0).catch(() => ({ noLeidas: 0, ultimas: [], porDecidir: 0 })),
     // El interruptor de la IA de Ctrl K: en la misma tanda, no una vuelta más al final.
     estadoIa(),
+    // «Mis cambios»: lo que tengo en mi borrador sin enviar a aprobación (24-nov-2026).
+    supabase
+      .schema('org')
+      .from('cambio')
+      .select('id, escenario!inner(estado, tipo, creado_por)', { count: 'exact', head: true })
+      .eq('escenario.tipo', 'cambios')
+      .eq('escenario.estado', 'borrador')
+      .eq('escenario.creado_por', sesion.userId)
+      .then((r) => r.count ?? 0, () => 0),
   ])
   const avisos = { ...resumen, porDecidir: pendientes.length }
 
@@ -166,11 +176,15 @@ export default async function SistemaLayout({ children }: LayoutProps<'/sistema'
           <Link
             href="/canal"
             className="hidden h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/25 px-2.5 text-sm font-medium whitespace-nowrap text-white hover:bg-white/10 sm:inline-flex"
+            title="Ir al Portal planta"
           >
             <span aria-hidden>📱</span>
-            Portal planta
+            {/* Por debajo de 1536 px, solo el icono: la barra no da para todo (con «Mis cambios» se desbordaba). */}
+            <span className="hidden 2xl:inline">Portal planta</span>
+            <span className="sr-only 2xl:hidden">Portal planta</span>
           </Link>
         )}
+        <MisCambios inicial={misCambios} />
         <Campana inicial={avisos} />
         <MenuPersona
           nombre={nombre}

@@ -49,10 +49,10 @@ export default async function EscenarioPage({ params, searchParams }: PageProps<
   const hoy = hoyCaracas()
 
   const [unidadesEsc, plazasEsc, cargos, catalogo, real, comparacion, flujo] = await Promise.all([
-    org.from('unidad').select('ref, nombre, tipo, padre_ref, orden').eq('escenario_id', id),
-    org.from('plaza').select('ref, unidad_ref, cargo_id, reporta_a_ref, dotacion, estado').eq('escenario_id', id).range(0, 1999),
+    org.from('unidad').select('ref, nombre, tipo, padre_ref, orden, sede, codigo_organigrama').eq('escenario_id', id),
+    org.from('plaza').select('ref, unidad_ref, cargo_id, reporta_a_ref, dotacion, estado, tipo_nomina, sede').eq('escenario_id', id).range(0, 1999),
     org.from('cargo').select('id, nombre').order('nombre'),
-    supabase.schema('control').from('catalogo').select('tipo, clave, etiqueta').in('tipo', ['tipo_unidad', 'tipo_nomina']).eq('activo', true).order('orden'),
+    supabase.schema('control').from('catalogo').select('tipo, clave, etiqueta').in('tipo', ['tipo_unidad', 'tipo_nomina', 'sede', 'estado_plaza']).eq('activo', true).order('orden'),
     org.rpc('estructura_al', { p_fecha: e.fecha_base }),
     org.rpc('comparar_escenario', { p_escenario: id }),
     contextoFlujo(supabase, 'escenario_estructura', id),
@@ -73,6 +73,9 @@ export default async function EscenarioPage({ params, searchParams }: PageProps<
     cargo: nombreCargo.get(p.cargo_id) ?? 'Cargo',
     reporta_a_ref: p.reporta_a_ref,
     dotacion: p.dotacion,
+    estado: p.estado,
+    tipo_nomina: p.tipo_nomina,
+    sede: p.sede,
     real: realPlaza.get(p.ref)?.dotacion ?? null,
     ocupadas: realPlaza.get(p.ref)?.ocupadas ?? 0,
   }))
@@ -157,6 +160,8 @@ export default async function EscenarioPage({ params, searchParams }: PageProps<
 
   const tipos = (catalogo.data ?? []).filter((c) => c.tipo === 'tipo_unidad').map((c) => ({ clave: c.clave, etiqueta: c.etiqueta }))
   const nominas = (catalogo.data ?? []).filter((c) => c.tipo === 'tipo_nomina').map((c) => ({ clave: c.clave, etiqueta: c.etiqueta }))
+  const sedes = (catalogo.data ?? []).filter((c) => c.tipo === 'sede').map((c) => ({ clave: c.clave, etiqueta: c.etiqueta }))
+  const estados = (catalogo.data ?? []).filter((c) => c.tipo === 'estado_plaza' && c.clave !== 'cerrada').map((c) => ({ clave: c.clave, etiqueta: c.etiqueta }))
   const est = ESTADO_ESCENARIO[e.estado] ?? { etiqueta: e.estado, tono: 'neutro' as const }
   const pestanas = [
     ['diseno', 'Diseño'],
@@ -239,7 +244,7 @@ export default async function EscenarioPage({ params, searchParams }: PageProps<
               {e.estado === 'borrador' ? 'Puedes ver el escenario, pero editarlo pide permiso de editar escenarios.' : 'El escenario ya no está en borrador: se ve, no se edita.'}
             </Aviso>
           )}
-          <EditorEscenario escenario={id} editable={editable} unidades={unidades} plazas={plazas} cargos={cargos.data ?? []} tiposUnidad={tipos} nominas={nominas} />
+          <EditorEscenario escenario={id} editable={editable} unidades={unidades} plazas={plazas} cargos={cargos.data ?? []} tiposUnidad={tipos} nominas={nominas} sedes={sedes} estados={estados} />
         </>
       )}
 

@@ -131,10 +131,21 @@ export async function cerrarUnidad(_a: EstadoAccion, fd: FormData): Promise<Esta
   const org = supabase.schema('org')
   const { count } = await org.from('unidad').select('id', { count: 'exact', head: true }).eq('escenario_id', esc).eq('padre_ref', ref)
   if (count) return { error: `Tiene ${count} unidad(es) debajo: muévelas o ciérralas primero.` }
-  // Lo que reportaba a sus plazas desde otras unidades queda sin jefe en el escenario.
-  const { data: suyas } = await org.from('plaza').select('ref').eq('escenario_id', esc).eq('unidad_ref', ref)
-  const refs = (suyas ?? []).map((p) => p.ref)
-  if (refs.length) await org.from('plaza').update({ reporta_a_ref: null }).eq('escenario_id', esc).in('reporta_a_ref', refs).neq('unidad_ref', ref)
+  // Lo que reportaba a sus plazas desde otras unidades sube al jefe de afuera más cercano (24-nov-2026: antes quedaba
+  // sin jefe). Se sigue la cadena de «reporta a» hasta salir de la unidad que cierra.
+  const { data: suyas } = await org.from('plaza').select('ref, reporta_a_ref').eq('escenario_id', esc).eq('unidad_ref', ref)
+  const jefeDe = new Map((suyas ?? []).map((p) => [p.ref, p.reporta_a_ref]))
+  const afuera = (r: string | null): string | null => {
+    let x = r
+    for (let i = 0; x && jefeDe.has(x) && i < 50; i++) x = jefeDe.get(x) ?? null
+    return x
+  }
+  const { data: externas } = jefeDe.size
+    ? await org.from('plaza').select('ref, reporta_a_ref').eq('escenario_id', esc).in('reporta_a_ref', [...jefeDe.keys()]).neq('unidad_ref', ref)
+    : { data: [] as { ref: string; reporta_a_ref: string | null }[] }
+  for (const x of externas ?? []) {
+    await org.from('plaza').update({ reporta_a_ref: afuera(x.reporta_a_ref) }).eq('escenario_id', esc).eq('ref', x.ref)
+  }
   const { error: e1 } = await org.from('plaza').delete().eq('escenario_id', esc).eq('unidad_ref', ref)
   if (e1) return { error: mensajeError(e1) }
   const { data, error: e2 } = await org.from('unidad').delete().eq('escenario_id', esc).eq('ref', ref).select('id')
@@ -198,6 +209,53 @@ export async function cerrarPlaza(_a: EstadoAccion, fd: FormData): Promise<Estad
   if (e) return { error: mensajeError(e) }
   if (!data?.length) return { error: 'La base no dejó cerrarla.' }
   return listo(esc, 'Plaza cerrada en el escenario.')
+}
+
+/** Una plaza dentro del escenario: a quién reporta, su estado, su nómina y su sede (24-nov-2026). */
+export async function editarPlazaEscenario(_a: EstadoAccion, fd: FormData): Promise<EstadoAccion> {
+  await requerirPermiso('sistema:escenarios', 'editar')
+  const esc = campo(fd, 'escenario')
+  const { supabase, error } = await enBorrador(esc)
+  if (error) return { error }
+  const ref = campo(fd, 'ref')
+  const org = supabase.schema('org')
+  const reporta = campo(fd, 'reporta_a_ref') || null
+  if (reporta === ref) return { error: 'Una plaza no puede reportarse a sí misma.' }
+  if (reporta) {
+    // Sin círculos: la plaza elegida no puede depender (directa o indirectamente) de esta.
+    const { data: todas } = await org.from('plaza').select('ref, reporta_a_ref').eq('escenario_id', esc).range(0, 1999)
+    const jefe = new Map((todas ?? []).map((p) => [p.ref, p.reporta_a_ref]))
+    let x: string | null = reporta
+    for (let i = 0; x && i < 200; i++) {
+      if (x === ref) return { error: 'Esa plaza le reporta (directa o indirectamente) a esta: el reporte quedaría en círculo.' }
+      x = jefe.get(x) ?? null
+    }
+  }
+  const estado = campo(fd, 'estado')
+  if (estado === 'cerrada') return { error: 'Para cerrar la plaza usa el botón de cerrar.' }
+  const cambios = { reporta_a_ref: reporta, tipo_nomina: campo(fd, 'tipo_nomina') || null, sede: campo(fd, 'sede') || null, ...(estado ? { estado } : {}) }
+  const { data, error: e } = await org.from('plaza').update(cambios).eq('escenario_id', esc).eq('ref', ref).select('id')
+  if (e) return { error: mensajeError(e) }
+  if (!data?.length) return { error: 'No se encontró la plaza en el escenario.' }
+  return listo(esc, 'Plaza actualizada en el escenario.')
+}
+
+/** La sede y el código de una unidad dentro del escenario (24-nov-2026). */
+export async function editarUnidadEscenario(_a: EstadoAccion, fd: FormData): Promise<EstadoAccion> {
+  await requerirPermiso('sistema:escenarios', 'editar')
+  const esc = campo(fd, 'escenario')
+  const { supabase, error } = await enBorrador(esc)
+  if (error) return { error }
+  const { data, error: e } = await supabase
+    .schema('org')
+    .from('unidad')
+    .update({ sede: campo(fd, 'sede') || null, codigo_organigrama: campo(fd, 'codigo') || null })
+    .eq('escenario_id', esc)
+    .eq('ref', campo(fd, 'ref'))
+    .select('id')
+  if (e) return { error: mensajeError(e) }
+  if (!data?.length) return { error: 'No se encontró la unidad en el escenario.' }
+  return listo(esc, 'Sede y código actualizados en el escenario.')
 }
 
 export async function enviarEscenario(_a: EstadoAccion, fd: FormData): Promise<EstadoAccion> {

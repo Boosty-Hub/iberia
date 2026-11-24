@@ -83,6 +83,9 @@ export async function editarNodo(_: EstadoEscenario, fd: FormData): Promise<Esta
       padre_ref: nodo.nivel > 0 ? padre : null,
       dueno_plaza_ref: plaza,
       estado_operativo: texto(fd, 'estado_operativo') || 'vigente',
+      // Los códigos también se ensayan en el escenario (24-nov-2026: «todas las ediciones»).
+      codigo_sgc: texto(fd, 'codigo_sgc') || null,
+      codigo_informe: texto(fd, 'codigo_informe') || null,
     })
     .eq('id', id)
     .eq('escenario_id', escenario)

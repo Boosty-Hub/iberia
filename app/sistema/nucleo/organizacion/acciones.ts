@@ -1,18 +1,23 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { puede, requerirPermiso, requerirSesion } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
-import { hoyCaracas, mensajeDeError, VIGENTE_EN, fmtFecha } from '@/components/sistema/organizacion/datos'
+import { hoyCaracas, VIGENTE_EN } from '@/components/sistema/organizacion/datos'
 import type { Estado, PersonaEncontrada } from '@/components/sistema/organizacion/formulario'
+import { nombreCargo, nombrePersona, nombrePlaza, nombreUnidad, proponer } from '@/lib/plataforma/cambios'
+import {
+  editarPlaza as editarPlazaFicha,
+  editarUnidad as editarUnidadFicha,
+  terminarOcupacion as terminarOcupacionFicha,
+  editarCargo as editarCargoFicha,
+} from '@/lib/plataforma/fichas/organizacion-acciones'
 
 /**
- * Las acciones de la estructura. Ninguna escribe en las tablas directamente:
- * llaman a las funciones de la base (`org.editar_unidad`, `org.asignar_ocupacion`…),
- * que cierran la versión vigente y abren la nueva con su fecha, y que rechazan
- * la fecha retroactiva. Cada acción pide el permiso otra vez: no confía en que
- * el botón estuviera escondido.
+ * Las acciones de la estructura. Ninguna escribe en la realidad: proponen el cambio (`lib/plataforma/cambios.ts`), que
+ * queda en el borrador de cambios de quien lo hace y entra cuando se aprueba (24-nov-2026). La base lo simula con la
+ * función de siempre (`org.editar_unidad`, `org.asignar_ocupacion`…), así que el error sale en el acto. Cada acción pide
+ * el permiso otra vez: no confía en que el botón estuviera escondido.
  */
 
 function texto(fd: FormData, campo: string): string {
@@ -43,62 +48,60 @@ function refrescar(ref?: string) {
   if (ref) revalidatePath(`/sistema/nucleo/organizacion/unidades/${ref}`)
 }
 
-const desde = (fecha: string) => (fecha === hoyCaracas() ? 'desde hoy' : `desde el ${fmtFecha(fecha)}`)
+// -----------------------------------------------------------------------------
+// Unidades · todo se propone: entra a la realidad cuando se aprueba el lote (24-nov-2026)
+// -----------------------------------------------------------------------------
 
-// -----------------------------------------------------------------------------
-// Unidades
-// -----------------------------------------------------------------------------
+/** Lo que el formulario cambia respecto de lo vigente, para proponer solo eso. */
+function diferencias(actual: Record<string, unknown>, nuevo: Record<string, unknown>): Record<string, unknown> {
+  const d: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(nuevo)) if ((actual[k] ?? null) !== (v ?? null)) d[k] = v
+  return d
+}
+const resultado = (r: { ok?: string; error?: string; aviso?: string }): Estado => (r.error ? { error: r.error } : { ok: r.ok, aviso: r.aviso })
 
 export async function crearUnidad(_a: Estado, fd: FormData): Promise<Estado> {
   await requerirPermiso('sistema:estructura', 'crear')
   const supabase = await createClient()
   const nombre = texto(fd, 'nombre')
-  const fecha = texto(fd, 'fecha')
-  const { data, error } = await supabase.schema('org').rpc('crear_unidad', {
-    p_clave: claveDe(nombre),
-    p_nombre: nombre,
-    p_tipo: texto(fd, 'tipo'),
-    p_padre_ref: nulo(texto(fd, 'padre_ref')) as string,
-    p_sede: texto(fd, 'sede'),
-    p_fecha: fecha,
-    p_codigo: texto(fd, 'codigo'),
-  })
-  if (error) return { error: mensajeDeError(error) }
-  refrescar(texto(fd, 'padre_ref') || undefined)
-  redirect(`/sistema/nucleo/organizacion/unidades/${data}?creada=1`)
+  const padre = nulo(texto(fd, 'padre_ref'))
+  const r = await proponer(
+    supabase,
+    'crear_unidad',
+    { p_clave: claveDe(nombre), p_nombre: nombre, p_tipo: texto(fd, 'tipo'), p_padre_ref: padre, p_sede: texto(fd, 'sede'), p_codigo: texto(fd, 'codigo'), p_nota: '' },
+    `Unidad nueva «${nombre}», debajo de «${await nombreUnidad(supabase, padre)}»`,
+    { objeto: 'unidad', ref: padre }
+  )
+  refrescar(padre ?? undefined)
+  return resultado(r)
 }
 
 export async function editarUnidad(_a: Estado, fd: FormData): Promise<Estado> {
   await requerirPermiso('sistema:estructura', 'editar')
   const supabase = await createClient()
   const ref = texto(fd, 'ref')
-  const fecha = texto(fd, 'fecha')
-  const { error } = await supabase.schema('org').rpc('editar_unidad', {
-    p_ref: ref,
-    p_fecha: fecha,
-    p_nombre: texto(fd, 'nombre'),
-    p_tipo: texto(fd, 'tipo'),
-    p_padre_ref: nulo(texto(fd, 'padre_ref')) as string,
-    p_sede: texto(fd, 'sede'),
-    p_codigo: texto(fd, 'codigo'),
-    p_certeza: fd.get('confirmar') === 'on' ? 'hecho' : '',
-    p_nota: texto(fd, 'nota'),
-  })
-  if (error) return { error: mensajeDeError(error) }
+  const { data: u } = await supabase.schema('org').from('unidad').select('nombre, tipo, padre_ref, sede, codigo_organigrama').eq('ref', ref).is('escenario_id', null).filter('vigencia', 'cs', VIGENTE_EN(hoyCaracas())).maybeSingle()
+  if (!u) return { error: 'La unidad no está vigente hoy.' }
+  const cambios = diferencias(
+    { nombre: u.nombre, tipo: u.tipo, padre_ref: u.padre_ref, sede: u.sede, codigo: u.codigo_organigrama },
+    { nombre: texto(fd, 'nombre'), tipo: texto(fd, 'tipo'), padre_ref: nulo(texto(fd, 'padre_ref')), sede: nulo(texto(fd, 'sede')), codigo: nulo(texto(fd, 'codigo')) }
+  )
+  if (fd.get('confirmar') === 'on') cambios.certeza = 'hecho'
+  if (!Object.keys(cambios).length) return { error: 'No hay cambios que guardar.' }
+  const r = await editarUnidadFicha(supabase, ref, hoyCaracas(), cambios)
   refrescar(ref)
-  return { ok: `Guardado: la versión nueva rige ${desde(fecha)}. La anterior quedó cerrada en el historial.` }
+  return resultado(r)
 }
 
 export async function cerrarUnidad(_a: Estado, fd: FormData): Promise<Estado> {
   await requerirPermiso('sistema:estructura', 'editar')
   const supabase = await createClient()
   const ref = texto(fd, 'ref')
-  const fecha = texto(fd, 'fecha')
   if (fd.get('confirmo') !== 'on') return { error: 'Marca la casilla para confirmar el cierre.' }
-  const { error } = await supabase.schema('org').rpc('cerrar_unidad', { p_ref: ref, p_fecha: fecha, p_motivo: texto(fd, 'motivo') })
-  if (error) return { error: mensajeDeError(error) }
+  const motivo = texto(fd, 'motivo')
+  const r = await proponer(supabase, 'cerrar_unidad', { p_ref: ref, p_motivo: motivo }, `Cerrar la unidad «${await nombreUnidad(supabase, ref)}»${motivo ? `: ${motivo}` : ''}`, { objeto: 'unidad', ref })
   refrescar(ref)
-  return { ok: `La unidad deja de regir ${desde(fecha)}. Sigue en el historial y en la estructura a fechas anteriores.` }
+  return resultado(r)
 }
 
 // -----------------------------------------------------------------------------
@@ -109,61 +112,59 @@ export async function crearPlaza(_a: Estado, fd: FormData): Promise<Estado> {
   await requerirPermiso('sistema:estructura', 'crear')
   const supabase = await createClient()
   const unidad = texto(fd, 'unidad_ref')
-  const fecha = texto(fd, 'fecha')
-  if (!texto(fd, 'cargo_id')) return { error: 'Elige el cargo de la plaza.' }
-  const { error } = await supabase.schema('org').rpc('crear_plaza', {
-    p_unidad_ref: unidad,
-    p_cargo_id: texto(fd, 'cargo_id'),
-    p_dotacion: entero(fd, 'dotacion') ?? 1,
-    p_reporta_a_ref: nulo(texto(fd, 'reporta_a_ref')) as string,
-    p_tipo_nomina: texto(fd, 'tipo_nomina'),
-    p_sede: texto(fd, 'sede'),
-    p_estado: texto(fd, 'estado') || 'aprobada',
-    p_fecha: fecha,
-    p_nota: texto(fd, 'nota'),
-  })
-  if (error) return { error: mensajeDeError(error) }
+  const cargo = texto(fd, 'cargo_id')
+  if (!cargo) return { error: 'Elige el cargo de la plaza.' }
+  const dotacion = entero(fd, 'dotacion') ?? 1
+  const r = await proponer(
+    supabase,
+    'crear_plaza',
+    {
+      p_unidad_ref: unidad,
+      p_cargo_id: cargo,
+      p_dotacion: dotacion,
+      p_reporta_a_ref: nulo(texto(fd, 'reporta_a_ref')),
+      p_tipo_nomina: texto(fd, 'tipo_nomina'),
+      p_sede: texto(fd, 'sede'),
+      p_estado: texto(fd, 'estado') || 'aprobada',
+      p_nota: texto(fd, 'nota'),
+    },
+    `Plaza nueva de «${await nombreCargo(supabase, cargo)}» en «${await nombreUnidad(supabase, unidad)}», dotación ${dotacion}`,
+    { objeto: 'unidad', ref: unidad }
+  )
   refrescar(unidad)
-  return { ok: `Plaza creada; rige ${desde(fecha)}.` }
+  return resultado(r)
 }
 
 export async function editarPlaza(_a: Estado, fd: FormData): Promise<Estado> {
   await requerirPermiso('sistema:estructura', 'editar')
   const supabase = await createClient()
-  const unidad = texto(fd, 'unidad_actual')
-  const fecha = texto(fd, 'fecha')
-  const { data, error } = await supabase.schema('org').rpc('editar_plaza', {
-    p_ref: texto(fd, 'ref'),
-    p_fecha: fecha,
-    p_dotacion: entero(fd, 'dotacion') ?? 0,
-    p_reporta_a_ref: nulo(texto(fd, 'reporta_a_ref')) as string,
-    p_estado: texto(fd, 'estado'),
-    p_tipo_nomina: texto(fd, 'tipo_nomina'),
-    p_sede: texto(fd, 'sede'),
-    p_unidad_ref: nulo(texto(fd, 'unidad_ref')) as string,
-    p_certeza: fd.get('confirmar') === 'on' ? 'hecho' : '',
-    p_nota: texto(fd, 'nota'),
+  const ref = texto(fd, 'ref')
+  const { data: p } = await supabase.schema('org').from('plaza').select('dotacion, reporta_a_ref, estado, tipo_nomina, sede, unidad_ref').eq('ref', ref).is('escenario_id', null).filter('vigencia', 'cs', VIGENTE_EN(hoyCaracas())).maybeSingle()
+  if (!p) return { error: 'La plaza no está vigente hoy.' }
+  const cambios = diferencias(p, {
+    dotacion: entero(fd, 'dotacion') ?? 0,
+    reporta_a_ref: nulo(texto(fd, 'reporta_a_ref')),
+    estado: texto(fd, 'estado') || p.estado,
+    tipo_nomina: nulo(texto(fd, 'tipo_nomina')),
+    sede: nulo(texto(fd, 'sede')),
+    unidad_ref: nulo(texto(fd, 'unidad_ref')) ?? p.unidad_ref,
   })
-  if (error) return { error: mensajeDeError(error) }
-  refrescar(unidad)
-  const r = (data ?? {}) as { titulares?: number; dotacion?: number; por_encima?: number }
-  return {
-    ok: `Guardado: la versión nueva rige ${desde(fecha)}.`,
-    aviso: r.por_encima
-      ? `La plaza tiene ${r.titulares} titular(es) para una dotación de ${r.dotacion}: ${r.por_encima} queda(n) por encima de la dotación.`
-      : undefined,
-  }
+  if (fd.get('confirmar') === 'on') cambios.certeza = 'hecho'
+  if (!Object.keys(cambios).length) return { error: 'No hay cambios que guardar.' }
+  const r = await editarPlazaFicha(supabase, ref, hoyCaracas(), cambios)
+  refrescar(texto(fd, 'unidad_actual'))
+  return resultado(r)
 }
 
 export async function cerrarPlaza(_a: Estado, fd: FormData): Promise<Estado> {
   await requerirPermiso('sistema:estructura', 'editar')
   const supabase = await createClient()
-  const fecha = texto(fd, 'fecha')
   if (fd.get('confirmo') !== 'on') return { error: 'Marca la casilla para confirmar el cierre.' }
-  const { error } = await supabase.schema('org').rpc('cerrar_plaza', { p_ref: texto(fd, 'ref'), p_fecha: fecha, p_motivo: texto(fd, 'motivo') })
-  if (error) return { error: mensajeDeError(error) }
+  const ref = texto(fd, 'ref')
+  const motivo = texto(fd, 'motivo')
+  const r = await proponer(supabase, 'cerrar_plaza', { p_ref: ref, p_motivo: motivo }, `Cerrar la plaza «${await nombrePlaza(supabase, ref)}»${motivo ? `: ${motivo}` : ''}`, { objeto: 'plaza', ref })
   refrescar(texto(fd, 'unidad_actual'))
-  return { ok: `La plaza deja de regir ${desde(fecha)}.` }
+  return resultado(r)
 }
 
 // -----------------------------------------------------------------------------
@@ -178,50 +179,43 @@ export async function asignarOcupacion(_a: Estado, fd: FormData): Promise<Estado
   const empleado = texto(fd, 'empleado_id')
   if (!empleado) return { error: 'Busca y elige a la persona.' }
   const supabase = await createClient()
-  const fecha = texto(fd, 'fecha')
-  const { error } = await supabase.schema('org').rpc('asignar_ocupacion', {
-    p_plaza_ref: texto(fd, 'plaza_ref'),
-    p_empleado_id: empleado,
-    p_tipo: texto(fd, 'tipo') || 'titular',
-    p_fecha: fecha,
-    p_excede: fd.get('excede') === 'on',
-    p_motivo: texto(fd, 'motivo'),
-  })
-  if (error) return { error: mensajeDeError(error) }
+  const plaza = texto(fd, 'plaza_ref')
+  const tipo = texto(fd, 'tipo') || 'titular'
+  const r = await proponer(
+    supabase,
+    'asignar_ocupacion',
+    { p_plaza_ref: plaza, p_empleado_id: empleado, p_tipo: tipo, p_excede: fd.get('excede') === 'on', p_motivo: texto(fd, 'motivo') },
+    `${await nombrePersona(supabase, empleado)} entra a la plaza «${await nombrePlaza(supabase, plaza)}» como ${tipo}`,
+    { objeto: 'plaza', ref: plaza }
+  )
   refrescar(texto(fd, 'unidad_actual'))
-  return { ok: `Asignada ${desde(fecha)}.` }
+  return resultado(r)
 }
 
 export async function moverOcupacion(_a: Estado, fd: FormData): Promise<Estado> {
   await requerirPermiso('sistema:estructura', 'editar')
   const supabase = await createClient()
-  const fecha = texto(fd, 'fecha')
-  if (!texto(fd, 'plaza_destino')) return { error: 'Elige la plaza de destino.' }
-  const { error } = await supabase.schema('org').rpc('mover_ocupacion', {
-    p_id: texto(fd, 'id'),
-    p_plaza_destino: texto(fd, 'plaza_destino'),
-    p_fecha: fecha,
-    p_tipo: texto(fd, 'tipo'),
-    p_excede: fd.get('excede') === 'on',
-    p_motivo: texto(fd, 'motivo'),
-  })
-  if (error) return { error: mensajeDeError(error) }
+  const destino = texto(fd, 'plaza_destino')
+  if (!destino) return { error: 'Elige la plaza de destino.' }
+  const id = texto(fd, 'id')
+  const { data: o } = await supabase.schema('org').from('ocupacion').select('empleado_id').eq('id', id).maybeSingle()
+  const r = await proponer(
+    supabase,
+    'mover_ocupacion',
+    { p_id: id, p_plaza_destino: destino, p_tipo: texto(fd, 'tipo'), p_excede: fd.get('excede') === 'on', p_motivo: texto(fd, 'motivo') },
+    `Mover a ${await nombrePersona(supabase, o?.empleado_id)} a la plaza «${await nombrePlaza(supabase, destino)}»`,
+    { objeto: 'plaza', ref: destino }
+  )
   refrescar(texto(fd, 'unidad_actual'))
-  return { ok: `Movimiento registrado ${desde(fecha)}.` }
+  return resultado(r)
 }
 
 export async function terminarOcupacion(_a: Estado, fd: FormData): Promise<Estado> {
   await requerirPermiso('sistema:estructura', 'editar')
   const supabase = await createClient()
-  const fecha = texto(fd, 'fecha')
-  const { error } = await supabase.schema('org').rpc('terminar_ocupacion', {
-    p_id: texto(fd, 'id'),
-    p_fecha: fecha,
-    p_motivo: texto(fd, 'motivo'),
-  })
-  if (error) return { error: mensajeDeError(error) }
+  const r = await terminarOcupacionFicha(supabase, texto(fd, 'id'), hoyCaracas(), texto(fd, 'motivo'))
   refrescar(texto(fd, 'unidad_actual'))
-  return { ok: `La ocupación termina ${desde(fecha)}.` }
+  return resultado(r)
 }
 
 /**
@@ -299,55 +293,51 @@ function sinonimosDe(fd: FormData): string[] {
 export async function crearCargo(_a: Estado, fd: FormData): Promise<Estado> {
   await requerirPermiso('sistema:estructura', 'crear')
   const supabase = await createClient()
-  const org = supabase.schema('org')
   const nombre = texto(fd, 'nombre')
   if (nombre.length < 3) return { error: 'El nombre del cargo necesita al menos tres letras.' }
-  const { data: iguales } = await org.from('cargo').select('id').ilike('nombre', nombre)
+  const { data: iguales } = await supabase.schema('org').from('cargo').select('id').ilike('nombre', nombre)
   if (iguales?.length) return { error: 'Ya hay un cargo con ese nombre. Si es otro nombre para el mismo cargo, agrégalo como sinónimo.' }
-
-  const base = claveDe(nombre)
-  const { data: parecidas } = await org.from('cargo').select('clave').like('clave', `${base}%`)
-  const usadas = new Set((parecidas ?? []).map((c) => c.clave))
-  let clave = base
-  for (let n = 2; usadas.has(clave); n++) clave = `${base}-${n}`
-
-  const id = crypto.randomUUID()
-  const { error } = await org.from('cargo').insert({
-    id,
-    clave,
-    nombre,
-    familia: nulo(texto(fd, 'familia')),
-    sinonimos: sinonimosDe(fd),
-    proposito: nulo(texto(fd, 'proposito')),
-    activo: true,
-  })
-  if (error) return { error: mensajeDeError(error) }
+  const r = await proponer(
+    supabase,
+    'crear_cargo',
+    { p_nombre: nombre, p_familia: texto(fd, 'familia'), p_nivel: '', p_sinonimos: sinonimosDe(fd), p_proposito: texto(fd, 'proposito') },
+    `Cargo nuevo «${nombre}»`,
+    { objeto: 'cargo' }
+  )
   revalidatePath('/sistema/nucleo/organizacion/cargos')
-  redirect(`/sistema/nucleo/organizacion/cargos?q=${encodeURIComponent(nombre)}&ficha=cargo:${id}`)
+  return resultado(r)
 }
 
+/** Cada campo que cambió es un cambio propuesto (el formulario puede tocar varios a la vez). */
 export async function editarCargo(_a: Estado, fd: FormData): Promise<Estado> {
   await requerirPermiso('sistema:estructura', 'editar')
   const supabase = await createClient()
-  const org = supabase.schema('org')
   const id = texto(fd, 'id')
-  const nombre = texto(fd, 'nombre')
-  if (nombre.length < 3) return { error: 'El nombre del cargo necesita al menos tres letras.' }
-  const { data: iguales } = await org.from('cargo').select('id').ilike('nombre', nombre).neq('id', id)
-  if (iguales?.length) return { error: 'Ya hay otro cargo con ese nombre.' }
-  const nivel = entero(fd, 'nivel')
-  const { error } = await org
-    .from('cargo')
-    .update({
-      nombre,
-      familia: nulo(texto(fd, 'familia')),
-      nivel,
-      sinonimos: sinonimosDe(fd),
-      proposito: nulo(texto(fd, 'proposito')),
-      activo: fd.get('activo') === 'on',
-    })
-    .eq('id', id)
-  if (error) return { error: mensajeDeError(error) }
+  const { data: c } = await supabase.schema('org').from('cargo').select('nombre, familia, nivel, sinonimos, proposito, activo').eq('id', id).maybeSingle()
+  if (!c) return { error: 'Ese cargo no existe.' }
+  const nuevo: Record<string, string> = {
+    nombre: texto(fd, 'nombre'),
+    familia: texto(fd, 'familia'),
+    nivel: texto(fd, 'nivel'),
+    sinonimos: sinonimosDe(fd).join(';'),
+    proposito: texto(fd, 'proposito'),
+    activo: fd.get('activo') === 'on' ? 'activo' : 'inactivo',
+  }
+  const actual: Record<string, string> = {
+    nombre: c.nombre,
+    familia: c.familia ?? '',
+    nivel: c.nivel === null ? '' : String(c.nivel),
+    sinonimos: (c.sinonimos ?? []).join(';'),
+    proposito: c.proposito ?? '',
+    activo: c.activo ? 'activo' : 'inactivo',
+  }
+  const campos = Object.keys(nuevo).filter((k) => nuevo[k] !== actual[k])
+  if (!campos.length) return { error: 'No hay cambios que guardar.' }
+  let ultimo: { ok?: string; error?: string } = {}
+  for (const k of campos) {
+    ultimo = await editarCargoFicha(supabase, id, k, nuevo[k])
+    if (ultimo.error) return { error: ultimo.error }
+  }
   revalidatePath('/sistema/nucleo/organizacion', 'layout')
-  return { ok: 'Guardado. El cambio queda en la auditoría.' }
+  return resultado(ultimo)
 }

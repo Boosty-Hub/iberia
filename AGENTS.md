@@ -1132,6 +1132,45 @@ ficha del documento. Migración `20261124020000_documento_archivos.sql`.
   vista previa dibujada (píxeles del lienzo), las rutas, el teléfono y que sin `sistema:perimetros` no se alcanza la
   fila, el objeto ni la ruta de un documento de perímetro.
 
+## Toda edición pasa por aprobación (desde el 24 de noviembre de 2026)
+
+Pedido de Gabriel: «las ediciones son escenarios también que tienen que pasar por aprobación», en estructura y en
+procesos. Migraciones `20261124040000_cambios_con_aprobacion.sql` y `20261124050000_escenarios_completos.sql`.
+
+- **Nada entra a la realidad sin firma.** Las pantallas no llaman más a `org.editar_plaza` y compañía: **proponen**
+  (`proponer()` de `lib/plataforma/cambios.ts` → `org.proponer_cambio`). El cambio va al **borrador de cambios** de quien lo
+  hace —un `org.escenario` de tipo `cambios`, uno abierto por persona— como una fila de `org.cambio` con la función de siempre
+  y sus argumentos. Para `editar_unidad` y `editar_plaza` se guarda solo lo que cambia (`parche`) y al ejecutar se completa
+  con el estado del momento: dos cambios a la misma plaza no se pisan.
+- **Al proponer, la base simula el lote entero** contra la realidad de hoy (`org.simular_cambios`) y lo deshace: el error de
+  siempre sale en el acto. **Al aprobarse** (`org.publicar_cambios`), el lote se ejecuta en orden, en la fecha elegida y **a
+  nombre del autor** (`request.jwt.claim.sub`): la auditoría dice quién lo hizo y la solicitud, quién lo aprobó. Si la
+  realidad cambió y ya no cuadra, la firma falla y nada se aplica. Devuelto: vuelve al borrador (si el autor abrió otro, se
+  suman); rechazado: se descarta.
+- **Qué pasa por aquí**: unidades, plazas, dependencias, dotación, movimientos de personas, cargos, costos 🔒, la aprobación
+  del plan de dotación y el cruce SGC ↔ informe. El borrador del plan (sus líneas) sigue siendo un borrador; lo que se propone
+  es aprobarlo. El cargo nuevo de una requisición lo crea `org.crear_cargo_de_requisicion` y entra con la requisición.
+- **Quién aprueba**: un solo paso, por **casilla** (`flujo.ruta_paso.resolutor = 'permiso'`, `permiso =
+  'sistema:cambios:editar'`, «Aprobar cambios» en Roles); el nivel administrador siempre. La misma ruta para los lotes de
+  cambios, los escenarios de estructura y de procesos y las versiones de proceso (decisión de Gabriel). **Quien hizo el cambio
+  no lo aprueba**, aunque sea administrador (`privado.puede_decidir_de`).
+- 🔴 **La realidad ya no se escribe por la API**: sin políticas de insert/update/delete en las filas reales de `org.unidad`,
+  `plaza`, `ocupacion`, `cargo`, `costo_referencia`, `componente_costo`, `control.parametro` y `sgc.proceso_cruce`, y sin
+  EXECUTE para `authenticated` en las funciones directas. Antes, quien tenía «editar» cambiaba filas sin versionar. Las filas
+  de un escenario de diseño siguen con sus políticas «diseñar escenario». Una pantalla nueva que edite la estructura **propone**.
+- **La experiencia**: tras proponer, la celda sigue mostrando la realidad; por eso `avisarPropuesto()` lanza un aviso con
+  enlace y sube el contador **«Mis cambios»** de la barra (`components/sistema/shell/mis-cambios.tsx`). `/sistema/cambios`:
+  el borrador (quitar, enviar con fecha y nota, descartar) y lo enviado; `/sistema/cambios/[id]`: el lote para quien aprueba
+  (se decide en la Bandeja, donde el título lleva al lote).
+- **El escenario de diseño** admite también, por plaza, «reporta a», estado, nómina y sede, y por unidad, sede y código; en
+  procesos, los códigos SGC e informe. `org.comparar_escenario` los ve (antes la nómina, la sede y el código se perdían al
+  publicar). **Enviar y publicar se niegan** (`org.choques_escenario`) si una plaza que cierra tiene gente vigente, o si algo
+  que el escenario cambia se editó en la realidad después de su fecha base (publicar lo habría pisado). Al cerrar una unidad
+  en el escenario, lo que le reportaba sube al jefe de afuera más cercano (antes quedaba sin jefe).
+- **Límite conocido**: una plaza o unidad nueva no existe hasta que se aprueba, así que no se le asigna gente ni se le cuelgan
+  plazas en el mismo lote. Para eso está el escenario de diseño.
+- Pruebas, contra PRUEBAS y con sesiones reales: `scripts/plataforma/probar-cambios.mjs` (14) y `probar-escenarios.mjs` (5).
+
 ## Los tutoriales (desde el 24 de noviembre de 2026)
 
 «Ver tutorial» en la cabecera del módulo abre un popup con el video de la pestaña activa (Gabriel: todas las de

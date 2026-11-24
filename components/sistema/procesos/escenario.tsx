@@ -57,6 +57,8 @@ export type NodoEscenario = {
   estado_operativo: string
   dueno_plaza_ref: string | null
   dueno: string | null
+  codigo_sgc?: string | null
+  codigo_informe?: string | null
   cambio: 'alta' | 'baja' | 'cambio' | null
 }
 
@@ -120,6 +122,14 @@ function PanelNodo({
                 </option>
               ))}
             </select>
+          </label>
+          <label className="block text-xs text-marca-600">
+            Código SGC
+            <input name="codigo_sgc" defaultValue={nodo.codigo_sgc ?? ''} maxLength={30} placeholder="II-xx" className="campo mt-1" />
+          </label>
+          <label className="block text-xs text-marca-600">
+            Código del informe
+            <input name="codigo_informe" defaultValue={nodo.codigo_informe ?? ''} maxLength={30} placeholder="2.2.1" className="campo mt-1" />
           </label>
           <label className="block text-xs text-marca-600">
             Estado operativo

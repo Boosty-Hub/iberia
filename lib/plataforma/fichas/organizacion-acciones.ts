@@ -5,15 +5,13 @@ import { mensajeDeError } from '@/components/sistema/organizacion/datos'
 import type { ResultadoAccionFicha, TipoFicha } from '@/lib/plataforma/ficha-tipos'
 import { fechaLarga, hoyCaracas } from '@/lib/plataforma/formato'
 import type { EntradaAccionFicha, ManejadorFicha } from '@/lib/plataforma/fichas/acciones'
+import { describirParche, nombreCargo, nombrePersona, nombrePlaza, nombreUnidad, proponer } from '@/lib/plataforma/cambios'
 
 /**
- * Lo que se guarda desde las fichas y las tablas de Organización. **Nada se
- * corrige en el sitio**: cada cambio de estructura va por la función de la base
- * (`org.editar_unidad`, `org.editar_plaza`, `org.fijar_costo_referencia`…),
- * que cierra la versión que rige y abre otra desde la fecha, y rechaza la fecha
- * retroactiva. El catálogo de cargos se edita directo con auditoría (Anexo D
- * §4). Cada acción vuelve a pedir su permiso: no confía en que el botón
- * estuviera escondido.
+ * Lo que se edita desde las fichas y las tablas de Organización. **Nada entra a la realidad sin aprobación** (24-nov-2026,
+ * Gabriel): cada edición se propone (`proponer`, `lib/plataforma/cambios.ts`) y queda en el borrador de cambios de quien
+ * la hace; la base la simula con la función de siempre (`org.editar_plaza`…) y, cuando se aprueba el lote, la aplica en
+ * la fecha elegida, cerrando la versión que rige y abriendo otra. Cada acción vuelve a pedir su permiso.
  */
 
 type Cliente = Awaited<ReturnType<typeof createClient>>
@@ -37,61 +35,35 @@ export function aNumero(v: string | undefined): number | null {
 
 type CambiosUnidad = Partial<{ nombre: string; tipo: string; padre_ref: string | null; sede: string | null; codigo: string | null; certeza: string }>
 
-export async function editarUnidad(supabase: Cliente, ref: string, fecha: string, c: CambiosUnidad): Promise<ResultadoAccionFicha> {
-  const org = supabase.schema('org')
-  const { data: u } = await org
+export async function editarUnidad(supabase: Cliente, ref: string, _fecha: string, c: CambiosUnidad): Promise<ResultadoAccionFicha> {
+  const { data: u } = await supabase
+    .schema('org')
     .from('unidad')
-    .select('nombre, tipo, padre_ref, sede, codigo_organigrama, certeza, nota')
+    .select('nombre, tipo, padre_ref, sede, codigo_organigrama, certeza')
     .eq('ref', ref)
     .is('escenario_id', null)
-    .filter('vigencia', 'cs', vigente(fecha))
+    .filter('vigencia', 'cs', vigente(hoyCaracas()))
     .maybeSingle()
-  if (!u) return { error: `La unidad no está vigente el ${fechaLarga(fecha)}.` }
-  const { error } = await org.rpc('editar_unidad', {
-    p_ref: ref,
-    p_fecha: fecha,
-    p_nombre: c.nombre ?? u.nombre,
-    p_tipo: c.tipo ?? u.tipo,
-    p_padre_ref: ('padre_ref' in c ? c.padre_ref : u.padre_ref) as string,
-    p_sede: ('sede' in c ? c.sede : u.sede) ?? '',
-    p_codigo: ('codigo' in c ? c.codigo : u.codigo_organigrama) ?? '',
-    p_certeza: c.certeza ?? '',
-    p_nota: '',
-  })
-  if (error) return { error: mensajeDeError(error) }
-  return { ok: `Guardado: la versión nueva rige ${desde(fecha)}. La anterior quedó en el historial.` }
+  if (!u) return { error: 'La unidad no está vigente hoy.' }
+  const antes = { ...u, codigo: u.codigo_organigrama } as Record<string, unknown>
+  const detalle = await describirParche(supabase, antes, c)
+  return proponer(supabase, 'editar_unidad', { p_ref: ref }, `Unidad «${u.nombre}»: ${detalle}`, { parche: c, objeto: 'unidad', ref })
 }
 
 type CambiosPlaza = Partial<{ dotacion: number; reporta_a_ref: string | null; estado: string; tipo_nomina: string | null; sede: string | null; unidad_ref: string; certeza: string }>
 
-export async function editarPlaza(supabase: Cliente, ref: string, fecha: string, c: CambiosPlaza): Promise<ResultadoAccionFicha> {
-  const org = supabase.schema('org')
-  const { data: p } = await org
+export async function editarPlaza(supabase: Cliente, ref: string, _fecha: string, c: CambiosPlaza): Promise<ResultadoAccionFicha> {
+  const { data: p } = await supabase
+    .schema('org')
     .from('plaza')
     .select('dotacion, reporta_a_ref, estado, tipo_nomina, sede, unidad_ref, certeza')
     .eq('ref', ref)
     .is('escenario_id', null)
-    .filter('vigencia', 'cs', vigente(fecha))
+    .filter('vigencia', 'cs', vigente(hoyCaracas()))
     .maybeSingle()
-  if (!p) return { error: `La plaza no está vigente el ${fechaLarga(fecha)}.` }
-  const { data, error } = await org.rpc('editar_plaza', {
-    p_ref: ref,
-    p_fecha: fecha,
-    p_dotacion: c.dotacion ?? p.dotacion,
-    p_reporta_a_ref: ('reporta_a_ref' in c ? c.reporta_a_ref : p.reporta_a_ref) as string,
-    p_estado: c.estado ?? p.estado,
-    p_tipo_nomina: ('tipo_nomina' in c ? c.tipo_nomina : p.tipo_nomina) ?? '',
-    p_sede: ('sede' in c ? c.sede : p.sede) ?? '',
-    p_unidad_ref: c.unidad_ref ?? p.unidad_ref,
-    p_certeza: c.certeza ?? '',
-    p_nota: '',
-  })
-  if (error) return { error: mensajeDeError(error) }
-  const r = (data ?? {}) as { titulares?: number; dotacion?: number; por_encima?: number }
-  return {
-    ok: `Guardado: la versión nueva rige ${desde(fecha)}.`,
-    aviso: r.por_encima ? `Tiene ${r.titulares} titular(es) para una dotación de ${r.dotacion}: ${r.por_encima} queda(n) por encima.` : undefined,
-  }
+  if (!p) return { error: 'La plaza no está vigente hoy.' }
+  const detalle = await describirParche(supabase, p as Record<string, unknown>, c)
+  return proponer(supabase, 'editar_plaza', { p_ref: ref }, `Plaza «${await nombrePlaza(supabase, ref)}»: ${detalle}`, { parche: c, objeto: 'plaza', ref })
 }
 
 /** La dotación de una plaza dentro de un escenario en borrador (la realidad no se toca). */
@@ -106,10 +78,16 @@ export async function dotacionEnEscenario(supabase: Cliente, esc: string, ref: s
   return { ok: `Dotación en ${dotacion} dentro del escenario.` }
 }
 
-export async function terminarOcupacion(supabase: Cliente, id: string, fecha: string, motivo?: string): Promise<ResultadoAccionFicha> {
-  const { error } = await supabase.schema('org').rpc('terminar_ocupacion', { p_id: id, p_fecha: fecha, p_motivo: motivo ?? '' })
-  if (error) return { error: mensajeDeError(error) }
-  return { ok: `La ocupación termina ${desde(fecha)}.` }
+export async function terminarOcupacion(supabase: Cliente, id: string, _fecha: string, motivo?: string): Promise<ResultadoAccionFicha> {
+  const { data: o } = await supabase.schema('org').from('ocupacion').select('empleado_id, plaza_ref').eq('id', id).maybeSingle()
+  if (!o) return { error: 'Esa ocupación no existe.' }
+  return proponer(
+    supabase,
+    'terminar_ocupacion',
+    { p_id: id, p_motivo: motivo ?? '' },
+    `${await nombrePersona(supabase, o.empleado_id)} deja la plaza «${await nombrePlaza(supabase, o.plaza_ref)}»${motivo ? ` (${motivo})` : ''}`,
+    { objeto: 'ocupacion', ref: o.plaza_ref }
+  )
 }
 
 // -----------------------------------------------------------------------------
@@ -154,10 +132,12 @@ export async function editarCargo(supabase: Cliente, id: string, campo: string, 
     default:
       return { error: 'Ese campo del cargo no se edita.' }
   }
-  const { data, error } = await org.from('cargo').update(cambio).eq('id', id).select('id')
-  if (error) return { error: mensajeDeError(error) }
-  if (!data?.length) return { error: 'La base no dejó guardar: revisa tu permiso.' }
-  return { ok: 'Guardado. El cambio queda en la auditoría.' }
+  const valorBase =
+    campo === 'sinonimos' ? (cambio.sinonimos ?? []).join(';') : campo === 'activo' ? String(cambio.activo) : String(Object.values(cambio)[0] ?? '')
+  const nombre = await nombreCargo(supabase, id)
+  const etiqueta = { nombre: 'nombre', familia: 'familia', nivel: 'nivel', sinonimos: 'sinónimos', proposito: 'propósito', activo: 'estado' }[campo] ?? campo
+  const texto = campo === 'activo' ? (cambio.activo ? 'activo' : 'inactivo') : valorBase || '—'
+  return proponer(supabase, 'editar_cargo', { p_id: id, p_campo: campo, p_valor: valorBase }, `Cargo «${nombre}»: ${etiqueta} → ${texto}`, { objeto: 'cargo', ref: id })
 }
 
 // -----------------------------------------------------------------------------
@@ -170,25 +150,23 @@ export async function fijarCostoCargo(supabase: Cliente, cargo: string, fecha: s
   const salario = c.salario ?? r?.salario_mensual ?? null
   if (salario === null) return { error: 'Primero escribe el salario de referencia del cargo.' }
   if (salario < 0 || (c.bonos ?? 0) < 0) return { error: 'Los montos no pueden ser negativos.' }
-  const { error } = await org.rpc('fijar_costo_referencia', {
-    p_cargo: cargo,
-    p_salario: salario,
-    p_moneda: c.moneda ?? r?.moneda ?? 'VES',
-    p_bonos_usd: c.bonos ?? r?.bonos_usd_mensual ?? 0,
-    p_fecha: fecha,
-    p_fuente: 'Edición en la plataforma',
-  })
-  if (error) return { error: mensajeDeError(error) }
-  return { ok: `Costo de referencia guardado; rige ${desde(fecha)}.` }
+  const moneda = c.moneda ?? r?.moneda ?? 'VES'
+  const bonos = c.bonos ?? r?.bonos_usd_mensual ?? 0
+  return proponer(
+    supabase,
+    'fijar_costo_referencia',
+    { p_cargo: cargo, p_salario: salario, p_moneda: moneda, p_bonos_usd: bonos, p_fuente: 'Edición en la plataforma' },
+    `🔒 Costo de referencia de «${await nombreCargo(supabase, cargo)}»: ${salario} ${moneda} y ${bonos} USD en bonos`,
+    { objeto: 'cargo', ref: cargo }
+  )
 }
 
 export async function editarComponente(supabase: Cliente, id: string, fecha: string, c: Partial<{ valor: number; base_legal: string; por_confirmar: boolean }>): Promise<ResultadoAccionFicha> {
   const org = supabase.schema('org')
   const { data: x } = await org.from('componente_costo').select('*').eq('id', id).maybeSingle()
   if (!x) return { error: 'Ese componente no existe.' }
-  const { error } = await org.rpc('editar_componente_costo', {
+  return proponer(supabase, 'editar_componente_costo', {
     p_id: id,
-    p_fecha: fecha,
     p_forma: x.forma,
     p_valor: c.valor ?? Number(x.valor),
     p_base: x.base,
@@ -200,9 +178,7 @@ export async function editarComponente(supabase: Cliente, id: string, fecha: str
     p_fuente: x.fuente ?? '',
     p_por_confirmar: c.por_confirmar ?? x.por_confirmar,
     p_nota: x.nota ?? '',
-  })
-  if (error) return { error: mensajeDeError(error) }
-  return { ok: `Guardado: la versión nueva del componente rige ${desde(fecha)}.` }
+  }, `🔒 Componente de costo «${x.nombre}»: ${c.valor !== undefined ? `valor ${x.valor} → ${c.valor}` : c.base_legal !== undefined ? 'base legal' : c.por_confirmar !== undefined ? (c.por_confirmar ? 'por confirmar' : 'confirmado') : 'cambio'}`, { objeto: 'componente_costo', ref: id })
 }
 
 // -----------------------------------------------------------------------------
@@ -261,11 +237,8 @@ const unidad: ManejadorFicha = async (sesion, ref, accion, e) => {
       return editarUnidad(supabase, ref, fecha, { codigo: nulo(v) })
     case 'unidad.confirmar':
       return editarUnidad(supabase, ref, fecha, { certeza: 'hecho' })
-    case 'unidad.cerrar': {
-      const { error } = await supabase.schema('org').rpc('cerrar_unidad', { p_ref: ref, p_fecha: fecha, p_motivo: e.motivo ?? '' })
-      if (error) return { error: mensajeDeError(error) }
-      return { ok: `La unidad deja de regir ${desde(fecha)}. Sigue en el historial.` }
-    }
+    case 'unidad.cerrar':
+      return proponer(supabase, 'cerrar_unidad', { p_ref: ref, p_motivo: e.motivo ?? '' }, `Cerrar la unidad «${await nombreUnidad(supabase, ref)}»${e.motivo ? `: ${e.motivo}` : ''}`, { objeto: 'unidad', ref })
   }
   return { error: 'Acción no válida.' }
 }
@@ -294,11 +267,8 @@ const plaza: ManejadorFicha = async (sesion, ref, accion, e) => {
       return editarPlaza(supabase, ref, fecha, { unidad_ref: v })
     case 'plaza.confirmar':
       return editarPlaza(supabase, ref, fecha, { certeza: 'hecho' })
-    case 'plaza.cerrar': {
-      const { error } = await supabase.schema('org').rpc('cerrar_plaza', { p_ref: ref, p_fecha: fecha, p_motivo: e.motivo ?? '' })
-      if (error) return { error: mensajeDeError(error) }
-      return { ok: `La plaza deja de regir ${desde(fecha)}.` }
-    }
+    case 'plaza.cerrar':
+      return proponer(supabase, 'cerrar_plaza', { p_ref: ref, p_motivo: e.motivo ?? '' }, `Cerrar la plaza «${await nombrePlaza(supabase, ref)}»${e.motivo ? `: ${e.motivo}` : ''}`, { objeto: 'plaza', ref })
     case 'ocupacion.terminar':
       if (!e.param) return { error: 'Falta la ocupación.' }
       return terminarOcupacion(supabase, e.param, fecha, e.motivo)
@@ -347,9 +317,13 @@ const persona: ManejadorFicha = async (sesion, id, accion, e) => {
       .range(0, 9)
     const actual = (o ?? []).find((x) => x.tipo === 'titular') ?? o?.[0]
     if (!actual) return { error: 'La persona no ocupa ninguna plaza en esa fecha.' }
-    const { error } = await supabase.schema('org').rpc('mover_ocupacion', { p_id: actual.id, p_plaza_destino: destino, p_fecha: fecha, p_tipo: '', p_excede: false, p_motivo: '' })
-    if (error) return { error: mensajeDeError(error) }
-    return { ok: `Movimiento registrado ${desde(fecha)}.` }
+    return proponer(
+      supabase,
+      'mover_ocupacion',
+      { p_id: actual.id, p_plaza_destino: destino, p_tipo: '', p_excede: false, p_motivo: '' },
+      `Mover a ${await nombrePersona(supabase, id)} a la plaza «${await nombrePlaza(supabase, destino)}»`,
+      { objeto: 'ocupacion', ref: destino }
+    )
   }
   return { error: 'Acción no válida.' }
 }

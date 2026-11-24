@@ -5,6 +5,7 @@ import { puede, requerirSesion } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { hoyCaracas } from '@/lib/plataforma/formato'
 import { aNumero, dotacionEnEscenario, editarCargo, editarComponente, editarPlaza, fijarCostoCargo } from '@/lib/plataforma/fichas/organizacion-acciones'
+import { proponer } from '@/lib/plataforma/cambios'
 import { mensajeDeError } from '@/components/sistema/organizacion/datos'
 
 /**
@@ -13,13 +14,14 @@ import { mensajeDeError } from '@/components/sistema/organizacion/datos'
  * ficha: lo publicado no se corrige en el sitio. Solo funciones async.
  */
 
-type Resultado = { error?: string } | void
+type Resultado = { error?: string; ok?: string } | void
 const RUTA = '/sistema/nucleo/organizacion'
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 function listo(r: { error?: string; ok?: string }, ruta = RUTA): Resultado {
   if (r.error) return { error: r.error }
   revalidatePath(ruta, 'layout')
+  return { ok: r.ok }
 }
 
 /** Plazas: la dotación (en la realidad o, con `?esc=`, dentro del escenario) y el tipo de nómina. */
@@ -110,8 +112,8 @@ export async function fijarParametro(clave: string, valor: string, fecha: string
   if (n === null || n < 0) return { error: 'Escribe un valor positivo.' }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return { error: 'Indica desde qué fecha rige.' }
   const supabase = await createClient()
-  const { error } = await supabase.schema('org').rpc('fijar_parametro', { p_clave: clave, p_valor: n, p_fecha: fecha, p_fuente: 'Edición en la plataforma', p_por_confirmar: porConfirmar })
-  if (error) return { error: mensajeDeError(error) }
+  const r = await proponer(supabase, 'fijar_parametro', { p_clave: clave, p_valor: n, p_fuente: 'Edición en la plataforma', p_por_confirmar: porConfirmar }, `🔒 Parámetro de costo «${clave}» → ${n}${porConfirmar ? ' (por confirmar)' : ''}`, { objeto: 'parametro' })
+  if (r.error) return { error: r.error }
   revalidatePath(`${RUTA}/costos`)
-  return { ok: 'Parámetro guardado.' }
+  return { ok: r.ok }
 }

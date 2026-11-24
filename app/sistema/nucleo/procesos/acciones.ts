@@ -1,5 +1,6 @@
 'use server'
 
+import { proponer } from '@/lib/plataforma/cambios'
 import { revalidatePath } from 'next/cache'
 import { puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
@@ -32,8 +33,8 @@ export async function accionFilaCatalogo(clave: string, accion: string, texto: s
 
 const TIPOS_CRUCE = new Set(['equivalente', 'contiene', 'parcial', 'sin_par'])
 
-/** El cruce SGC ↔ informe, editado en la celda: tipo, confirmado y nota. Directo, con auditoría. */
-export async function editarCeldaCruce(clave: string, columna: string, valor: string): Promise<{ error?: string }> {
+/** El cruce SGC ↔ informe, editado en la celda: tipo, confirmado y nota. Se propone y entra al aprobarse (24-nov-2026). */
+export async function editarCeldaCruce(clave: string, columna: string, valor: string): Promise<{ error?: string; ok?: string }> {
   await requerirPermiso('sistema:procesos', 'editar')
   if (!UUID.test(clave)) return { error: 'Cruce no válido.' }
   let cambio: { tipo?: string; confirmado?: boolean; nota?: string | null }
@@ -46,9 +47,17 @@ export async function editarCeldaCruce(clave: string, columna: string, valor: st
   } else if (columna === 'nota') cambio = { nota: valor.trim().slice(0, 1000) || null }
   else return { error: 'Esa columna no se edita.' }
   const supabase = await createClient()
-  const { data, error } = await supabase.schema('sgc').from('proceso_cruce').update(cambio).eq('id', clave).select('id')
-  if (error) return { error: error.code === '42501' ? 'No tienes permiso para hacer eso.' : error.message }
-  if (!data?.length) return { error: 'No se guardó: el cruce no existe o está fuera de tu alcance.' }
+  const { data: x } = await supabase.schema('sgc').from('proceso_cruce').select('codigo_sgc').eq('id', clave).maybeSingle()
+  if (!x) return { error: 'Ese par del cruce no existe o está fuera de tu alcance.' }
+  const v = Object.values(cambio)[0]
+  const r = await proponer(
+    supabase,
+    'editar_cruce',
+    { p_id: clave, p_campo: columna, p_valor: v === null || v === undefined ? '' : String(v) },
+    `Cruce SGC ${x.codigo_sgc ?? ''} ↔ informe: ${columna} → ${v === true ? 'confirmado' : v === false ? 'por confirmar' : (v ?? '—')}`,
+    { objeto: 'cruce', ref: clave }
+  )
+  if (r.error) return { error: r.error }
   revalidatePath('/sistema/nucleo/procesos/cruce')
-  return {}
+  return { ok: r.ok }
 }

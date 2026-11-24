@@ -9,6 +9,8 @@ import {
   cerrarUnidad,
   moverUnidad,
   renombrarUnidad,
+  editarPlazaEscenario,
+  editarUnidadEscenario,
 } from '@/app/sistema/nucleo/escenarios/acciones'
 import { IconoBasura, IconoCheck, IconoEditar, IconoMas } from '@/components/iconos'
 import { Insignia } from '@/components/ui'
@@ -17,7 +19,7 @@ import { Enviar, FormAccion } from './formulario'
 import { sangria } from './estructura'
 
 type Opcion = { clave: string; etiqueta: string }
-export type UnidadEscenario = { ref: string; nombre: string; tipo: string; padre_ref: string | null; nivel: number }
+export type UnidadEscenario = { ref: string; nombre: string; tipo: string; padre_ref: string | null; nivel: number; sede?: string | null; codigo_organigrama?: string | null }
 export type PlazaEscenario = {
   ref: string
   unidad_ref: string
@@ -25,6 +27,9 @@ export type PlazaEscenario = {
   cargo: string
   reporta_a_ref: string | null
   dotacion: number
+  estado?: string
+  tipo_nomina?: string | null
+  sede?: string | null
   /** Dotación en la realidad a la fecha base; null si la plaza es nueva. */
   real: number | null
   ocupadas: number
@@ -43,6 +48,8 @@ export function EditorEscenario({
   cargos,
   tiposUnidad,
   nominas,
+  sedes = [],
+  estados = [],
 }: {
   escenario: string
   editable: boolean
@@ -51,6 +58,8 @@ export function EditorEscenario({
   cargos: { id: string; nombre: string }[]
   tiposUnidad: Opcion[]
   nominas: Opcion[]
+  sedes?: Opcion[]
+  estados?: Opcion[]
 }) {
   const [abierta, setAbierta] = useState<string | null>(null)
   const tipo = Object.fromEntries(tiposUnidad.map((t) => [t.clave, t.etiqueta]))
@@ -126,6 +135,63 @@ export function EditorEscenario({
                                 <span className="sr-only">Guardar dotación</span>
                               </Enviar>
                             </FormAccion>
+                            <details className="group open:order-last open:basis-full">
+                              <summary className="btn-neutro h-8 cursor-pointer list-none px-2 text-xs">Editar</summary>
+                              <FormAccion accion={editarPlazaEscenario} className="mt-2 grid max-w-2xl gap-2 rounded-xl border border-marca-200/70 bg-white p-3 sm:grid-cols-2" mensajeClase="text-xs">
+                                <input type="hidden" name="escenario" value={escenario} />
+                                <input type="hidden" name="ref" value={p.ref} />
+                                <label className="text-xs font-semibold text-marca-700 sm:col-span-2">
+                                  Reporta a
+                                  <select name="reporta_a_ref" defaultValue={p.reporta_a_ref ?? ''} className="campo mt-1">
+                                    <option value="">Ninguna</option>
+                                    {plazas
+                                      .filter((x) => x.ref !== p.ref)
+                                      .map((x) => (
+                                        <option key={x.ref} value={x.ref}>
+                                          {etiquetaPlaza(x)}
+                                        </option>
+                                      ))}
+                                  </select>
+                                </label>
+                                <label className="text-xs font-semibold text-marca-700">
+                                  Nómina
+                                  <select name="tipo_nomina" defaultValue={p.tipo_nomina ?? ''} className="campo mt-1">
+                                    <option value="">Sin indicar</option>
+                                    {nominas.map((n) => (
+                                      <option key={n.clave} value={n.clave}>
+                                        {n.etiqueta}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </label>
+                                <label className="text-xs font-semibold text-marca-700">
+                                  Sede
+                                  <select name="sede" defaultValue={p.sede ?? ''} className="campo mt-1">
+                                    <option value="">Sin indicar</option>
+                                    {sedes.map((n) => (
+                                      <option key={n.clave} value={n.clave}>
+                                        {n.etiqueta}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </label>
+                                {estados.length > 0 && (
+                                  <label className="text-xs font-semibold text-marca-700">
+                                    Estado
+                                    <select name="estado" defaultValue={p.estado ?? ''} className="campo mt-1">
+                                      {estados.map((n) => (
+                                        <option key={n.clave} value={n.clave}>
+                                          {n.etiqueta}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </label>
+                                )}
+                                <div className="flex items-end sm:col-span-2">
+                                  <Enviar clase="btn-primario">Guardar en el escenario</Enviar>
+                                </div>
+                              </FormAccion>
+                            </details>
                             <FormAccion accion={cerrarPlaza} mensajeClase="mt-0 py-1 text-xs">
                               <input type="hidden" name="escenario" value={escenario} />
                               <input type="hidden" name="ref" value={p.ref} />
@@ -178,6 +244,22 @@ export function EditorEscenario({
                           ))}
                       </select>
                       <Enviar clase="btn-primario">Mover</Enviar>
+                    </FormAccion>
+
+                    <FormAccion accion={editarUnidadEscenario} className="space-y-2">
+                      <input type="hidden" name="escenario" value={escenario} />
+                      <input type="hidden" name="ref" value={u.ref} />
+                      <p className="text-xs font-semibold text-marca-700">Sede y código del organigrama</p>
+                      <select name="sede" defaultValue={u.sede ?? ''} className="campo" aria-label="Sede de la unidad">
+                        <option value="">Sin sede</option>
+                        {sedes.map((x) => (
+                          <option key={x.clave} value={x.clave}>
+                            {x.etiqueta}
+                          </option>
+                        ))}
+                      </select>
+                      <input name="codigo" defaultValue={u.codigo_organigrama ?? ''} maxLength={40} placeholder="II-21-14-0xx" className="campo" aria-label="Código del organigrama" />
+                      <Enviar clase="btn-primario">Guardar</Enviar>
                     </FormAccion>
 
                     <FormAccion accion={agregarPlaza} className="space-y-2">
