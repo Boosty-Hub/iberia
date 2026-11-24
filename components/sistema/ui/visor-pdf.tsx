@@ -10,7 +10,7 @@ import type { PDFDocumentProxy } from 'pdfjs-dist'
  */
 export function VisorPdf({ url }: { url: string }) {
   const [doc, setDoc] = useState<PDFDocumentProxy | null>(null)
-  const [tamanos, setTamanos] = useState<{ w: number; h: number }[]>([])
+  const [primera, setPrimera] = useState<{ w: number; h: number } | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -23,13 +23,11 @@ export function VisorPdf({ url }: { url: string }) {
         const t = pdfjs.getDocument({ url })
         tareaCarga = t
         const cargado = await t.promise
-        const medidas: { w: number; h: number }[] = []
-        for (let i = 1; i <= cargado.numPages; i++) {
-          const v = (await cargado.getPage(i)).getViewport({ scale: 1 })
-          medidas.push({ w: v.width, h: v.height })
-        }
+        // Solo la primera página se mide de entrada: cada otra corrige su proporción al dibujarse. Medirlas todas
+        // antes de mostrar nada tardaba con los manuales de cientos de páginas (y hay una hoja de cálculo de 12.743).
+        const v = (await cargado.getPage(1)).getViewport({ scale: 1 })
         if (!vivo) return
-        setTamanos(medidas)
+        setPrimera({ w: v.width, h: v.height })
         setDoc(cargado)
       } catch {
         if (vivo) setError('No se pudo abrir el PDF.')
@@ -42,17 +40,18 @@ export function VisorPdf({ url }: { url: string }) {
   }, [url])
 
   if (error) return <p className="p-6 text-center text-[13px] text-marca-500">{error}</p>
-  if (!doc) return <p className="p-6 text-center text-[13px] text-marca-500" role="status">Abriendo el documento…</p>
+  if (!doc || !primera) return <p className="p-6 text-center text-[13px] text-marca-500" role="status">Abriendo el documento…</p>
   return (
     <div className="flex flex-col items-center gap-3 p-3 sm:p-4" data-paginas={doc.numPages}>
-      {tamanos.map((t, i) => (
-        <Pagina key={i} doc={doc} numero={i + 1} proporcion={t.h / t.w} anchoPdf={t.w} />
+      {Array.from({ length: doc.numPages }, (_, i) => (
+        <Pagina key={i} doc={doc} numero={i + 1} proporcionInicial={primera.h / primera.w} />
       ))}
     </div>
   )
 }
 
-function Pagina({ doc, numero, proporcion, anchoPdf }: { doc: PDFDocumentProxy; numero: number; proporcion: number; anchoPdf: number }) {
+function Pagina({ doc, numero, proporcionInicial }: { doc: PDFDocumentProxy; numero: number; proporcionInicial: number }) {
+  const [proporcion, setProporcion] = useState(proporcionInicial)
   const caja = useRef<HTMLDivElement>(null)
   const lienzo = useRef<HTMLCanvasElement>(null)
   const [visible, setVisible] = useState(numero <= 2)
@@ -70,6 +69,9 @@ function Pagina({ doc, numero, proporcion, anchoPdf }: { doc: PDFDocumentProxy; 
     let tarea: { cancel: () => void } | null = null
     ;(async () => {
       const pagina = await doc.getPage(numero)
+      const base = pagina.getViewport({ scale: 1 })
+      const anchoPdf = base.width
+      setProporcion(base.height / base.width)
       const ancho = caja.current?.clientWidth ?? anchoPdf
       const escala = (ancho / anchoPdf) * Math.min(window.devicePixelRatio || 1, 2)
       const vista = pagina.getViewport({ scale: escala })
@@ -82,7 +84,7 @@ function Pagina({ doc, numero, proporcion, anchoPdf }: { doc: PDFDocumentProxy; 
       await r.promise.catch(() => {})
     })()
     return () => tarea?.cancel()
-  }, [visible, doc, numero, anchoPdf])
+  }, [visible, doc, numero])
 
   return (
     <div ref={caja} className="relative w-full max-w-[900px] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.15)]" style={{ aspectRatio: `1 / ${proporcion}` }}>
