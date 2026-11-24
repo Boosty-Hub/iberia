@@ -1045,6 +1045,9 @@ El sistema que reemplaza al dashboard para operar a Iberia (Etapa 1 + rediseño 
   devuelve el foco). `KpiMetrica` (sección de abajo). `Lienzo` (React Flow 12.12 + dagre) para el
   organigrama (`org.lienzo`) y el mapa (`sgc.lienzo`): la base hace las cuentas y el `diff` del escenario,
   el lienzo solo dibuja; en teléfono arranca en lista.
+- **La ficha a página completa** (`/sistema/ficha/[tipo]/[id]`) lleva «← Volver» (`BotonVolver`: atrás si se vino de la app,
+  si no al módulo) y las migas Mi día / dominio / módulo / tipo / objeto, con el módulo que calza con su `hrefModulo`
+  (`moduloDeRuta`). La página se lo declara al menú con `RutaDeFicha`, y el riel marca ese dominio (24-nov-2026).
 - **Esquemas**: `org` (estructura, escenarios), `sgc` (procesos, documentos), `flujo` (rutas y
   aprobaciones), `control` (módulos, catálogos, tasas, auditoría), `ui` (vistas, búsqueda, métricas),
   `nucleo` (línea de tiempo, avisos, tareas), `ia` (capacidades, propuestas, actividad). Las funciones que

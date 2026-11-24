@@ -5,6 +5,7 @@ import { useState, useTransition } from 'react'
 import { IndicadorEnlace } from '@/components/indicador-enlace'
 import { fijarColumna, fijarRiel } from '@/components/sistema/shell/acciones'
 import { useContextoUrl } from '@/components/sistema/shell/contexto-url'
+import { useRutaDeFicha } from '@/components/sistema/shell/ruta-de-ficha'
 import { IconoCandadito, IconoDesplegar, IconoDominio, IconoEstrella, IconoFlechaAfuera, IconoGente, IconoPlegar } from '@/components/sistema/shell/iconos'
 import {
   DOMINIOS,
@@ -23,9 +24,11 @@ import { cn } from '@/lib/utils'
 export type ModuloMenu = ModuloPlan & { dominioClave: ClaveDominio }
 export type VistaMenu = { id: string; nombre: string; alcance: 'personal' | 'compartida' | 'bloqueada'; href: string; modulo: string | null }
 
-/** El dominio activo: el del módulo de la ruta, o «Mi día». */
+/** El dominio activo: el del módulo de la ruta (en una ficha a página completa, el de su objeto), o «Mi día». */
 function useActivo(modulos: ModuloMenu[]) {
-  const { ruta } = useContextoUrl()
+  const { ruta: deUrl } = useContextoUrl()
+  const deFicha = useRutaDeFicha()
+  const ruta = deFicha && deUrl.startsWith('/sistema/ficha/') ? deFicha : deUrl
   const modulo = moduloDeRuta(ruta, modulos) as ModuloMenu | null
   return { ruta, modulo, dominio: modulo?.dominioClave ?? ('inicio' as ClaveDominio) }
 }
