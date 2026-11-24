@@ -1,14 +1,7 @@
 import type { Metadata } from 'next'
 import { IconoBuscar, IconoChat, IconoCheck, IconoMas } from '@/components/iconos'
 import { MenuModeracion } from '@/components/canal/menu-moderacion'
-import {
-  NIVELES_EMPLEADO,
-  ORDEN_NIVEL,
-  iniciales,
-  requerirEmpleado,
-  requiereSolicitud,
-  type NivelEmpleado,
-} from '@/lib/canal'
+import { iniciales, type NivelEmpleado, NIVELES_EMPLEADO, ORDEN_NIVEL, requerirEmpleado, requerirSeccion, requiereSolicitud } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
 import { abrirConversacion, responderConexion, solicitarConexion } from './acciones'
 import { legible } from '@/lib/certificado'
@@ -28,6 +21,7 @@ type Persona = {
 }
 
 export default async function GentePage({ searchParams }: PageProps<'/canal/gente'>) {
+  await requerirSeccion('gente')
   const [yo, params] = await Promise.all([requerirEmpleado(), searchParams])
   // Las comas y los paréntesis romperían el filtro `or` de PostgREST; el comodín, el `ilike`.
   const q = typeof params.q === 'string' ? params.q.replace(/[,()*%\\]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60) : ''

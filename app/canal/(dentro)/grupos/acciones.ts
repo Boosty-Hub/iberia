@@ -103,3 +103,39 @@ export async function abrirGrupo(datos: FormData) {
 
   redirect(`/canal/mensajes/${conversacionId}`)
 }
+
+/** El coordinador suma a alguien al grupo. La base lo vuelve a preguntar (`coordino_grupo`). */
+export async function agregarAlGrupo(datos: FormData) {
+  const grupoId = String(datos.get('grupo_id') ?? '')
+  const empleadoId = String(datos.get('empleado_id') ?? '')
+  if (!grupoId || !empleadoId) return
+  await requerirEmpleado()
+  const supabase = await createClient()
+  await supabase
+    .from('grupo_miembros')
+    .upsert({ grupo_id: grupoId, empleado_id: empleadoId, rol: 'miembro' }, { onConflict: 'grupo_id,empleado_id', ignoreDuplicates: true })
+  revalidatePath(`/canal/grupos/${grupoId}`)
+}
+
+/** El coordinador saca a alguien; al salir del grupo sale también de su conversación (trigger en la base). */
+export async function quitarDelGrupo(datos: FormData) {
+  const grupoId = String(datos.get('grupo_id') ?? '')
+  const empleadoId = String(datos.get('empleado_id') ?? '')
+  if (!grupoId || !empleadoId) return
+  await requerirEmpleado()
+  const supabase = await createClient()
+  await supabase.from('grupo_miembros').delete().eq('grupo_id', grupoId).eq('empleado_id', empleadoId)
+  revalidatePath(`/canal/grupos/${grupoId}`)
+}
+
+/** Nombrar o quitar coordinador. */
+export async function cambiarRolEnGrupo(datos: FormData) {
+  const grupoId = String(datos.get('grupo_id') ?? '')
+  const empleadoId = String(datos.get('empleado_id') ?? '')
+  const rol = datos.get('rol') === 'coordinador' ? 'coordinador' : 'miembro'
+  if (!grupoId || !empleadoId) return
+  await requerirEmpleado()
+  const supabase = await createClient()
+  await supabase.from('grupo_miembros').update({ rol }).eq('grupo_id', grupoId).eq('empleado_id', empleadoId)
+  revalidatePath(`/canal/grupos/${grupoId}`)
+}

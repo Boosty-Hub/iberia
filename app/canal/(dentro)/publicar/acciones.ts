@@ -45,6 +45,8 @@ export async function publicar(datos: FormData) {
       estado: 'publicado',
       oficial,
       fijado: datos.get('fijado') === 'si' && oficial,
+      // La casilla «Permitir comentarios» (24-nov-2026): sin marcar, nadie comenta.
+      permite_comentarios: datos.get('comentarios') === 'si',
       publicado_en: new Date().toISOString(),
     })
     .select('id')

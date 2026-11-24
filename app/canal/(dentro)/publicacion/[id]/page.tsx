@@ -14,6 +14,8 @@ import {
 } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
 import { legible } from '@/lib/certificado'
+import { obtenerSesion, puede } from '@/lib/auth'
+import { Comentarios } from './comentarios'
 
 export async function generateMetadata({
   params,
@@ -31,7 +33,7 @@ export async function generateMetadata({
 export default async function PublicacionPage({
   params,
 }: PageProps<'/canal/publicacion/[id]'>) {
-  const [empleado, { id }] = await Promise.all([requerirEmpleado(), params])
+  const [empleado, { id }, sesion] = await Promise.all([requerirEmpleado(), params, obtenerSesion()])
   const supabase = await createClient()
   const ahora = new Date()
 
@@ -140,12 +142,14 @@ export default async function PublicacionPage({
         </div>
       </article>
 
-      {publicacion.permite_comentarios && (
-        <section className="tarjeta-canal mt-3 px-5 py-6 text-center">
-          <p className="text-sm text-marca-500">
-            Los comentarios se habilitan en la próxima versión del canal.
-          </p>
-        </section>
+      {publicacion.permite_comentarios && publicacion.estado === 'publicado' ? (
+        <Comentarios
+          publicacionId={publicacion.id}
+          yo={{ id: empleado.id }}
+          modero={empleado.puede_publicar || empleado.es_moderador || puede(sesion, 'modulo:reportes', 'editar')}
+        />
+      ) : (
+        <p className="mt-3 px-1 text-center text-[12px] text-marca-400">Esta publicación no recibe comentarios.</p>
       )}
     </>
   )

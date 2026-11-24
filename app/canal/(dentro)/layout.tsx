@@ -8,7 +8,7 @@ import { NormasDeUso } from '@/components/normas-de-uso'
 import { VERSION_NORMAS } from '@/lib/normas'
 import { NotificacionesNativas } from '@/components/canal/notificaciones-nativas'
 import { destinoInicial, obtenerSesion, puede } from '@/lib/auth'
-import { iniciales, requerirEmpleado, tienePlataforma } from '@/lib/canal'
+import { iniciales, requerirEmpleado, seccionesActivas, tienePlataforma } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
@@ -56,7 +56,7 @@ export default async function CanalLayout({ children }: LayoutProps<'/canal'>) {
   // Los contadores de la cabecera y del pie. Se preguntan aquí una vez y no en
   // cada pantalla. La campana suma las solicitudes de conexión y los avisos de
   // la plataforma sin leer (`nucleo.notificacion`: la misma campana de /sistema).
-  const [{ data: sinLeer }, { count: solicitudes }, { data: avisos }] = await Promise.all([
+  const [{ data: sinLeer }, { count: solicitudes }, { data: avisos }, activas] = await Promise.all([
     supabase.rpc('mensajes_sin_leer'),
     supabase
       .from('conexiones')
@@ -64,6 +64,7 @@ export default async function CanalLayout({ children }: LayoutProps<'/canal'>) {
       .eq('recibe_id', empleado.id)
       .eq('estado', 'pendiente'),
     supabase.schema('nucleo').rpc('no_leidas'),
+    seccionesActivas(),
   ])
   const enCampana = (solicitudes ?? 0) + (avisos ?? 0)
 
@@ -97,9 +98,10 @@ export default async function CanalLayout({ children }: LayoutProps<'/canal'>) {
                 className="toque gap-1.5 rounded-full px-3 text-[13px] font-semibold text-marca-600 active:bg-marca-100"
               >
                 <IconoPanel className="h-5 w-5" />
-                Plataforma
+                Admin
               </Link>
             )}
+            {activas.has('avisos') && (
             <Link
               href="/canal/avisos"
               aria-label={enCampana > 0 ? `Avisos, ${enCampana} sin ver` : 'Avisos'}
@@ -115,6 +117,7 @@ export default async function CanalLayout({ children }: LayoutProps<'/canal'>) {
                 </span>
               )}
             </Link>
+            )}
 
             <Link href="/canal/yo" aria-label={`${iniciales(empleado.nombre_completo)}, mi perfil`} className="toque w-11">
               <span className="grid h-9 w-9 place-items-center rounded-full bg-oro-300 text-[13px] font-bold text-marca-900">
@@ -131,7 +134,7 @@ export default async function CanalLayout({ children }: LayoutProps<'/canal'>) {
         {children}
       </main>
 
-      <NavInferior mensajesSinLeer={sinLeer ?? 0} />
+      <NavInferior mensajesSinLeer={sinLeer ?? 0} activas={[...activas]} />
 
       {/* Dentro de la app de iOS: el permiso de avisos y el registro del
           teléfono, ya con sesión. En el navegador no hace nada. */}

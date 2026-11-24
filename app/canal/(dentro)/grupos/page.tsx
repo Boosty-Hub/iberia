@@ -1,13 +1,18 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { IconoChat, IconoGrupo, IconoMas } from '@/components/iconos'
-import { requerirEmpleado } from '@/lib/canal'
+import { obtenerSesion, puede } from '@/lib/auth'
+import { requerirEmpleado, requerirSeccion } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
 import { abrirGrupo, crearGrupo, unirmeAGrupo } from './acciones'
 
 export const metadata: Metadata = { title: 'Grupos' }
 
 export default async function GruposPage() {
-  const yo = await requerirEmpleado()
+  await requerirSeccion('grupos')
+  const [yo, sesion] = await Promise.all([requerirEmpleado(), obtenerSesion()])
+  // Crear grupos pide la casilla «Crear grupos en el portal» (24-nov-2026); la base lo vuelve a preguntar.
+  const puedeCrear = puede(sesion, 'modulo:grupos')
   const supabase = await createClient()
 
   // RLS decide qué se ve: los abiertos, más los cerrados donde participo.
@@ -81,13 +86,18 @@ export default async function GruposPage() {
 
                 <div className="mt-3">
                   {miembro ? (
-                    <form action={abrirGrupo}>
-                      <input type="hidden" name="grupo_id" value={grupo.id} />
-                      <button type="submit" className="btn-canal btn-canal-suave w-full">
-                        <IconoChat className="h-4 w-4" />
-                        Abrir conversación
-                      </button>
-                    </form>
+                    <div className="flex gap-2">
+                      <form action={abrirGrupo} className="flex-1">
+                        <input type="hidden" name="grupo_id" value={grupo.id} />
+                        <button type="submit" className="btn-canal btn-canal-suave w-full">
+                          <IconoChat className="h-4 w-4" />
+                          Abrir conversación
+                        </button>
+                      </form>
+                      <Link href={`/canal/grupos/${grupo.id}`} className="btn-canal btn-canal-suave shrink-0 px-4">
+                        Miembros
+                      </Link>
+                    </div>
                   ) : grupo.tipo === 'abierto' ? (
                     <form action={unirmeAGrupo}>
                       <input type="hidden" name="grupo_id" value={grupo.id} />
@@ -108,6 +118,7 @@ export default async function GruposPage() {
         </ul>
       )}
 
+      {puedeCrear && (
       <details className="tarjeta-canal overflow-hidden">
         <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3.5 text-[15px] font-semibold text-marca-800">
           <IconoMas className="h-5 w-5 text-acento-600" />
@@ -158,6 +169,7 @@ export default async function GruposPage() {
           </button>
         </form>
       </details>
+      )}
     </>
   )
 }

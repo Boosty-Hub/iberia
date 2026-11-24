@@ -63,6 +63,25 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 
 ---
 
+## 24 de noviembre · Sesión 59 — el Portal planta
+
+**Pedido de Gabriel** (Telegram, cinco puntos): el portal móvil se llama «Portal planta» y es casilla de Roles; quien
+lo tiene entra directo ahí y el administrador tiene botones para pasar de uno a otro; revisar cómo se crean y llenan los
+grupos; gestionarlos desde el admin con todo lo creado a la vista; casilla para permitir comentarios; prender y apagar
+las secciones del portal; y Tareas como sección principal, con crear y calendario.
+
+- **Lo que se encontró**: cualquiera creaba grupos; en un cerrado no había cómo meter gente; 🔴 la política dejaba a
+  cualquiera meterse a un grupo cerrado con su id; quien salía de un grupo seguía leyendo su conversación; los
+  comentarios no tenían pantalla.
+- **Lo que decidió Gabriel**: el administrador entra al admin y pasa con un botón; casilla «Crear grupos»; el admin lee
+  los mensajes de los grupos (los directos no); secciones prendibles. Cómo quedó: `AGENTS.md`, «Portal planta».
+- **Rama `portal-planta`**, probada solo contra pruebas: migración aplicada allí, reglas de la base probadas con la cuenta
+  de una operaria (7 + 4 casos, todos bien) y `probar-portal-planta.mjs` 13/13. Capturas a 1440 y en teléfono.
+- **Dónde quedamos**: sin publicar. Falta el OK de Gabriel para aplicar la migración en producción y fusionar en `main`
+  (junto con el PDF del informe de la sesión 58).
+
+---
+
 ## 23 de noviembre · Sesión 58 — el PDF de cada sección del informe
 
 **Pedido de Gabriel** (Telegram): un botón arriba para descargar en PDF la arquitectura de IA, la plataforma, la seguridad

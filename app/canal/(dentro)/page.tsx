@@ -6,13 +6,13 @@ import {
   type PublicacionFeed,
 } from '@/components/canal/tarjeta-publicacion'
 import { AvisoPlataforma } from '@/components/canal/aviso-plataforma'
-import { requerirEmpleado, type NivelEmpleado } from '@/lib/canal'
+import { requerirEmpleado, seccionesActivas, type NivelEmpleado } from '@/lib/canal'
 import { avisosDelCanal, misTareasAbiertas } from '@/lib/canal-avisos'
 import { fechaCorta, hoyCaracas } from '@/lib/plataforma/formato'
 import { createClient } from '@/lib/supabase/server'
 
 export default async function CanalPage() {
-  const empleado = await requerirEmpleado()
+  const [empleado, activas] = await Promise.all([requerirEmpleado(), seccionesActivas()])
   const supabase = await createClient()
   const ahora = new Date()
 
@@ -97,7 +97,7 @@ export default async function CanalPage() {
         </section>
       )}
 
-      <TarjetaAdiestramiento empleadoId={empleado.id} />
+      {activas.has('adiestramiento') && <TarjetaAdiestramiento empleadoId={empleado.id} />}
 
       {puedePublicar && (
         <Link

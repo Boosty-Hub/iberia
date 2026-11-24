@@ -171,6 +171,36 @@ Migración `20261120232000_integracion_canal.sql`. Mismas URLs: la app nativa no
 - El canal adopta el token de contraste de la plataforma (`marca-400` = `#706a67` dentro de `.canal`) y cada
   ruta del canal tiene su `loading.tsx` (`EsqueletoCanal`).
 
+### Portal planta (desde el 24 de noviembre de 2026)
+
+El canal se llama **«Portal planta»** en todo lo que se ve (Gabriel). Las rutas siguen en `/canal` porque van
+compiladas en las apps. Migración `20261124010000_portal_planta.sql`.
+
+- **A dónde entra cada quien** (`destinoInicial`): el nivel administrador, al admin (`/sistema`), con el botón
+  «📱 Portal planta» en la barra (en el teléfono, en el menú de la persona); en el portal, «Admin» lo devuelve.
+  Quien tiene `modulo:canal` y no es administrador entra directo al portal; el resto, al admin.
+- **Secciones prendibles** (`canal_modulos`): Tareas, Grupos, Mensajes, Gente, Formación y Avisos se encienden y se
+  apagan en Portal planta › Secciones. Apagada, sale de la barra (`NavInferior` recibe las activas) y su página
+  vuelve al inicio (`requerirSeccion()` de `lib/canal.ts`). Una página nueva del portal llama a `requerirSeccion`
+  con su sección. Inicio y Yo no se apagan. Sin la tabla o si falla la lectura, todas encendidas.
+- **Tareas** va segunda en la barra: las mías de `nucleo.tarea` (asignadas o anotadas por mí), «Nueva tarea» y la
+  vista de calendario del mes (`?vista=calendario&mes=AAAA-MM`).
+- **Grupos**: crearlos pide la casilla `modulo:grupos` (acción «ver»: un rol de nivel lectura como Personal de planta
+  no admite «crear»). Coordina quien lo creó o quien tiene rol `coordinador` (`coordino_grupo()`), y mete, saca y
+  nombra coordinadores desde `/canal/grupos/[id]`. Uno se une solo **a un abierto** (`privado.grupo_abierto`): hasta
+  el 24-nov la política dejaba meterse a cualquier grupo con su id. Quien sale de un grupo sale de su conversación
+  (trigger `grupo_miembro_salida`).
+- 🔒 **El admin lee los mensajes de los GRUPOS** (decisión de Gabriel, 24-nov-2026); los directos, no. Portal planta ›
+  Grupos › Gestionar (`/sistema/nucleo/canal/grupos/[id]`, `ui.canal_grupo`): datos, archivar, miembros y «Ver los
+  mensajes», que pide `modulo:reportes` · editar y **queda registrado** en `canal_grupo_lecturas`. Dentro de cada
+  grupo, el portal avisa que la administración puede leerlo.
+- **Comentarios**: «Permitir comentarios» al publicar (`permite_comentarios`); se comenta solo donde está abierto y
+  publicado (`privado.permite_comentar` en la política «comento»). En la publicación, quien publica o modera oculta y
+  muestra; los demás reportan. El admin los ve todos en Portal planta › Comentarios y abre o cierra los de cada
+  publicación en Publicaciones.
+- `node --env-file=.env.local scripts/plataforma/probar-portal-planta.mjs` recorre todo en pantalla contra pruebas
+  (13 comprobaciones; necesita `sembrar-canal-pruebas.mjs`). `mirar.mjs` suma `--como planta` y `--como comunica`.
+
 ## La app de Iberia (`ios/`) — el canal en el App Store
 
 El canal empaquetado para el iPhone (PEN-14661), desde el 23 de octubre de 2026. Va en la misma

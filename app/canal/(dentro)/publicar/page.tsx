@@ -131,6 +131,21 @@ export default async function PublicarPage() {
             </p>
           </div>
 
+          <label className="flex items-start gap-2.5 rounded-xl bg-marca-50 p-3">
+            <input
+              type="checkbox"
+              name="comentarios"
+              value="si"
+              defaultChecked
+              className="mt-0.5 h-5 w-5 shrink-0 rounded border-marca-300 text-acento-600 focus:ring-acento-500"
+            />
+            <span className="text-[14px] leading-snug text-marca-800">
+              <span className="font-semibold">Permitir comentarios</span>
+              <br />
+              <span className="text-marca-500">La gente puede comentar debajo. Se puede cambiar después desde el admin.</span>
+            </span>
+          </label>
+
           {puedeMarcarOficial && (
             <div className="space-y-2 rounded-xl bg-oro-50 p-3">
               <label className="flex items-start gap-2.5">

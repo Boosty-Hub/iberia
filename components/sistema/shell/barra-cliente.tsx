@@ -253,7 +253,7 @@ export function MenuPersona({
           )}
           {conCanal && (
             <Link href="/canal" className="block rounded-lg px-3 py-2 hover:bg-marca-50">
-              El canal
+              Portal planta
             </Link>
           )}
           <form action={cerrarSesion}>

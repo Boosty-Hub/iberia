@@ -5,23 +5,29 @@ import { usePathname } from 'next/navigation'
 import {
   IconoCasa,
   IconoChat,
+  IconoCheck,
   IconoGrupo,
   IconoPersona,
   IconoUsuarios,
 } from '@/components/iconos'
+import type { SeccionPortal } from '@/lib/canal'
 import { cn } from '@/lib/utils'
 
 type Item = {
   href: string
   etiqueta: string
   Icono: (p: { className?: string }) => React.ReactElement
+  /** La sección que la prende o la apaga desde el admin; sin sección, siempre está. */
+  seccion?: SeccionPortal
 }
 
+// Tareas va segunda, junto a Inicio (24-nov-2026, Gabriel): es lo principal del día a día en planta.
 const ITEMS: Item[] = [
   { href: '/canal', etiqueta: 'Inicio', Icono: IconoCasa },
-  { href: '/canal/grupos', etiqueta: 'Grupos', Icono: IconoGrupo },
-  { href: '/canal/mensajes', etiqueta: 'Mensajes', Icono: IconoChat },
-  { href: '/canal/gente', etiqueta: 'Gente', Icono: IconoUsuarios },
+  { href: '/canal/tareas', etiqueta: 'Tareas', Icono: IconoCheck, seccion: 'tareas' },
+  { href: '/canal/grupos', etiqueta: 'Grupos', Icono: IconoGrupo, seccion: 'grupos' },
+  { href: '/canal/mensajes', etiqueta: 'Mensajes', Icono: IconoChat, seccion: 'mensajes' },
+  { href: '/canal/gente', etiqueta: 'Gente', Icono: IconoUsuarios, seccion: 'gente' },
   { href: '/canal/yo', etiqueta: 'Yo', Icono: IconoPersona },
 ]
 
@@ -29,7 +35,7 @@ const ITEMS: Item[] = [
  * Navegación fija al pie. En el teléfono el pulgar llega abajo, no arriba: por
  * eso la navegación principal vive aquí y no en una barra superior.
  */
-export function NavInferior({ mensajesSinLeer = 0 }: { mensajesSinLeer?: number }) {
+export function NavInferior({ mensajesSinLeer = 0, activas }: { mensajesSinLeer?: number; activas: SeccionPortal[] }) {
   const pathname = usePathname()
 
   const activo = (href: string) =>
@@ -43,7 +49,7 @@ export function NavInferior({ mensajesSinLeer = 0 }: { mensajesSinLeer?: number 
       {/* El alto de las filas es `--nav-alto` (globals.css): lo que se pega
           encima de la navegación suma ese valor y la zona segura. */}
       <ul className="mx-auto flex max-w-lg">
-        {ITEMS.map(({ href, etiqueta, Icono }) => {
+        {ITEMS.filter((i) => !i.seccion || activas.includes(i.seccion)).map(({ href, etiqueta, Icono }) => {
           const esActivo = activo(href)
           return (
             <li key={href} className="flex-1">

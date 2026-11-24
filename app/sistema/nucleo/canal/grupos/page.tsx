@@ -21,9 +21,9 @@ export default async function GruposCanalPage({ searchParams }: PageProps<'/sist
       <CabeceraModulo
         sesion={sesion}
         codigo="NUC-CAN"
-        titulo="Canal"
+        titulo="Portal planta"
         migas={[{ etiqueta: 'Grupos' }]}
-        descripcion="Los grupos los arma la gente desde la app. Aquí se ve quién los coordina y cuánto se usan; lo que se escribe adentro no."
+        descripcion="Los grupos del portal: quién los coordina y cuánto se usan. «Gestionar» abre cada uno: datos, miembros y mensajes (los directos entre dos personas no se leen desde aquí)."
       />
       <div className="mb-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <KpiMetrica clave="canal_grupos" ctx={ctx} sesion={sesion} titulo="Grupos activos" />

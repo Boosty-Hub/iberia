@@ -30,7 +30,7 @@ export default async function UsoCanalPage({ searchParams }: PageProps<'/sistema
       <CabeceraModulo
         sesion={sesion}
         codigo="NUC-CAN"
-        titulo="Canal"
+        titulo="Portal planta"
         migas={[{ etiqueta: 'Uso' }]}
         descripcion="Quién usa el canal, por área, sede y nivel. Son cuentas por grupo: ni nombres ni el contenido de los mensajes."
       />

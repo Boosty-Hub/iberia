@@ -128,8 +128,11 @@ export function puede(sesion: Sesion | null | undefined, recurso: string, accion
  * que lo dice en vez de un bucle de redirecciones.
  */
 export function destinoInicial(sesion: Sesion): string {
-  if (puede(sesion, 'modulo:panel')) return '/sistema'
+  // Portal planta (24-nov-2026, Gabriel): el administrador entra al admin y tiene botones para pasar de uno a
+  // otro; quien tiene el portal y no es administrador entra directo al portal; el resto, al admin.
+  if (sesion.rol.nivel === 'admin') return '/sistema'
   if (puede(sesion, 'modulo:canal')) return '/canal'
+  if (puede(sesion, 'modulo:panel')) return '/sistema'
   const panel = inicioDelPanel(sesion)
   if (panel) return panel
   if (Object.entries(sesion.permisos).some(([r, p]) => r.startsWith('informe:') && p.ver)) return '/informe'

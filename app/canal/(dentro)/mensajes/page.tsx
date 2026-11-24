@@ -1,13 +1,14 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { IconoChat, IconoUsuarios } from '@/components/iconos'
-import { haceCuanto, iniciales, requerirEmpleado } from '@/lib/canal'
+import { haceCuanto, iniciales, requerirEmpleado, requerirSeccion } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
 import { legible } from '@/lib/certificado'
 
 export const metadata: Metadata = { title: 'Mensajes' }
 
 export default async function MensajesPage() {
+  await requerirSeccion('mensajes')
   const yo = await requerirEmpleado()
   const supabase = await createClient()
   const ahora = new Date()

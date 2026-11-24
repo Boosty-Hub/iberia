@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { IconoCampana, IconoCheck, IconoOficial } from '@/components/iconos'
 import { responderConexion } from '@/app/canal/(dentro)/gente/acciones'
-import { haceCuanto, iniciales, requerirEmpleado } from '@/lib/canal'
+import { haceCuanto, iniciales, requerirEmpleado, requerirSeccion } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
 import { avisosDelCanal } from '@/lib/canal-avisos'
 import { AvisoPlataforma } from '@/components/canal/aviso-plataforma'
@@ -12,6 +12,7 @@ import { legible } from '@/lib/certificado'
 export const metadata: Metadata = { title: 'Avisos' }
 
 export default async function AvisosPage() {
+  await requerirSeccion('avisos')
   const yo = await requerirEmpleado()
   const supabase = await createClient()
   const ahora = new Date()

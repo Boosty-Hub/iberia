@@ -236,8 +236,10 @@ export const PESTANAS: Record<string, Pestana[]> = {
     { etiqueta: 'Resumen', href: '/sistema/nucleo/canal', recurso: 'modulo:reportes' },
     { etiqueta: 'Publicaciones', href: '/sistema/nucleo/canal/publicaciones', recurso: 'modulo:reportes' },
     { etiqueta: 'Grupos', href: '/sistema/nucleo/canal/grupos', recurso: 'modulo:reportes' },
+    { etiqueta: 'Comentarios', href: '/sistema/nucleo/canal/comentarios', recurso: 'modulo:reportes' },
     { etiqueta: 'Moderación', href: '/sistema/nucleo/canal/moderacion', recurso: 'modulo:reportes' },
     { etiqueta: 'Uso', href: '/sistema/nucleo/canal/uso', recurso: 'modulo:reportes' },
+    { etiqueta: 'Secciones', href: '/sistema/nucleo/canal/secciones', recurso: 'modulo:reportes' },
   ],
   // El programa (PRG): lo que era el panel viejo, con las casillas de siempre.
   'PRG-PLN': [

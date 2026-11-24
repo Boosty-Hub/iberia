@@ -166,3 +166,25 @@ export function tienePlataforma(sesion: Sesion | null | undefined): boolean {
   if (inicioDelPanel(sesion)) return true
   return Object.entries(sesion.permisos).some(([recurso, p]) => recurso.startsWith('sistema:') && p.ver)
 }
+
+/** Las secciones del Portal planta que se prenden y se apagan desde el admin (`canal_modulos`, 24-nov-2026). */
+export type SeccionPortal = 'tareas' | 'grupos' | 'mensajes' | 'gente' | 'adiestramiento' | 'avisos'
+
+/**
+ * Las secciones encendidas. Sin la tabla (migración sin aplicar) o si falla la lectura, todas: apagar una
+ * sección es una decisión, y un error no la debe tomar por nadie.
+ */
+export async function seccionesActivas(): Promise<Set<SeccionPortal>> {
+  const todas = new Set<SeccionPortal>(['tareas', 'grupos', 'mensajes', 'gente', 'adiestramiento', 'avisos'])
+  const supabase = await createClient()
+  const { data, error } = await supabase.from('canal_modulos' as never).select('clave, activo')
+  if (error || !data) return todas
+  for (const fila of data as { clave: SeccionPortal; activo: boolean }[]) if (!fila.activo) todas.delete(fila.clave)
+  return todas
+}
+
+/** Una página de una sección apagada vuelve al inicio del portal. */
+export async function requerirSeccion(...claves: SeccionPortal[]) {
+  const activas = await seccionesActivas()
+  if (!claves.some((c) => activas.has(c))) redirect('/canal')
+}

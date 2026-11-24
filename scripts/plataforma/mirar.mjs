@@ -37,6 +37,9 @@ const CUENTAS = {
   lector: { email: 'lector.pruebas@plataforma.local', nombre: 'Lectura de pruebas', rol: 'lector' },
   // Como Alberto: administrador, pero de Iberia. No es del equipo de Boosty (no ve lo «solo equipo»).
   iberia: { email: 'admin.iberia.pruebas@plataforma.local', nombre: 'Administración Iberia de pruebas', rol: 'administrador', organizacion: 'iberia' },
+  // Las del canal (las siembra sembrar-canal-pruebas.mjs): una operaria de planta y quien publica y modera.
+  planta: { email: 'canal.pruebas@plataforma.local', nombre: 'Operaria Prueba', rol: 'personal-planta', organizacion: 'iberia' },
+  comunica: { email: 'comunica.pruebas@plataforma.local', nombre: 'Comunicaciones Prueba', rol: 'lector', organizacion: 'iberia' },
 }
 const cuenta = CUENTAS[COMO]
 if (!cuenta) throw new Error(`--como debe ser uno de: ${Object.keys(CUENTAS).join(', ')}`)

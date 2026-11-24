@@ -24,7 +24,7 @@ import {
   type FamiliaOficio,
   type FormaIA,
 } from '@/lib/adiestramiento'
-import { requerirEmpleado } from '@/lib/canal'
+import { requerirEmpleado, requerirSeccion } from '@/lib/canal'
 import { cerrarLeccion } from '@/lib/cerrar-curso'
 import { legible } from '@/lib/certificado'
 import { dibujaEn } from '@/lib/dibujar'
@@ -56,6 +56,7 @@ type Contestada = {
 export default async function LeccionPage({
   params,
 }: PageProps<'/canal/adiestramiento/[numero]'>) {
+  await requerirSeccion('adiestramiento')
   const { numero: crudo } = await params
   const numero = Number(crudo)
   if (!Number.isInteger(numero) || numero < 0) notFound()

@@ -248,10 +248,18 @@ export const MODULOS: Recurso[] = [
   },
   {
     clave: 'modulo:canal',
-    nombre: 'Canal de comunicación',
+    nombre: 'Portal planta',
     grupo: 'panel',
     acciones: ['ver'],
-    subtitulo: 'La app del teléfono; sin esto tampoco se abre el curso',
+    subtitulo: 'La app del teléfono (antes «el canal»). Quien lo tiene y no es administrador entra directo ahí; sin esto tampoco se abre el curso',
+  },
+  {
+    clave: 'modulo:grupos',
+    nombre: 'Crear grupos en el portal',
+    grupo: 'panel',
+    acciones: ['ver'],
+    detalle: { ver: 'Crear grupos en el Portal planta y coordinarlos (meter y sacar gente)' },
+    subtitulo: 'Sin esto se entra a los grupos abiertos, pero no se crean',
   },
   {
     clave: 'modulo:reportes',

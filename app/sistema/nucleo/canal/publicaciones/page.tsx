@@ -10,7 +10,7 @@ import { fechaHora, numero } from '@/lib/plataforma/formato'
 import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
 import { Segmentos } from '@/components/sistema/procesos/piezas-r2'
 import { cn } from '@/lib/utils'
-import { autorizarPersona, moderarPublicacion } from '../acciones'
+import { autorizarPersona, comentariosDePublicacion, moderarPublicacion } from '../acciones'
 
 export const metadata: Metadata = { title: 'Publicaciones · Canal' }
 
@@ -53,7 +53,7 @@ export default async function PublicacionesCanalPage({ searchParams }: PageProps
   const puedeEditar = puede(sesion, 'modulo:reportes', 'editar')
 
   const supabase = await createClient()
-  const [{ data, error }, { data: autorizadas }, { data: candidatas }] = await Promise.all([
+  const [{ data, error }, { data: autorizadas }, { data: candidatas }, { data: permiten }] = await Promise.all([
     supabase.schema('ui').rpc('canal_publicaciones'),
     supabase
       .from('empleados')
@@ -71,7 +71,10 @@ export default async function PublicacionesCanalPage({ searchParams }: PageProps
           .order('nombre_completo')
           .range(0, 11)
       : Promise.resolve({ data: null }),
+    supabase.schema('ui').rpc('canal_publicaciones_permiten' as never),
   ])
+  // Si cada publicación recibe comentarios (24-nov-2026: la casilla «Permitir comentarios»).
+  const permite = new Map(((permiten ?? []) as { id: string; permite_comentarios: boolean }[]).map((x) => [x.id, x.permite_comentarios]))
   const todas = (data ?? []) as Publicacion[]
   const cuenta = (v: Vista) => todas.filter((p) => (v === 'oficial' ? p.oficial : p.estado === v)).length
   const filas = todas.filter((p) => (vista === 'oficial' ? p.oficial : p.estado === vista))
@@ -82,7 +85,7 @@ export default async function PublicacionesCanalPage({ searchParams }: PageProps
       <CabeceraModulo
         sesion={sesion}
         codigo="NUC-CAN"
-        titulo="Canal"
+        titulo="Portal planta"
         migas={[{ etiqueta: 'Publicaciones' }]}
         descripcion="El feed de la app: comunicados, noticias e historias de la gente. Lo oficial se ve siempre, aunque alguien haya bloqueado a quien lo firma."
         acciones={
@@ -125,6 +128,7 @@ export default async function PublicacionesCanalPage({ searchParams }: PageProps
                 <th scope="col" className="px-3 py-2 font-semibold">Fecha</th>
                 <th scope="col" className="px-3 py-2 text-right font-semibold">Lecturas</th>
                 <th scope="col" className="px-3 py-2 text-right font-semibold">Reacciones</th>
+                <th scope="col" className="px-3 py-2 font-semibold">Comentarios</th>
                 <th scope="col" className="px-3 py-2 text-right font-semibold">Reportes</th>
                 {puedeEditar && <th scope="col" className="px-3 py-2 font-semibold">Acciones</th>}
               </tr>
@@ -153,6 +157,24 @@ export default async function PublicacionesCanalPage({ searchParams }: PageProps
                   <td className="px-3 py-2 whitespace-nowrap text-marca-700 tabular-nums">{fechaHora(p.publicado_en ?? p.creado_en)}</td>
                   <td className="px-3 py-2 text-right tabular-nums">{numero(p.lecturas)}</td>
                   <td className="px-3 py-2 text-right tabular-nums">{numero(p.reacciones)}</td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <Link href="/sistema/nucleo/canal/comentarios" className="tabular-nums hover:underline">
+                      {numero(p.comentarios)}
+                    </Link>
+                    <span className={cn('ml-1.5 text-[11px]', permite.get(p.id) ? 'text-[#1f6f4b]' : 'text-marca-500')}>
+                      {permite.get(p.id) ? 'abiertos' : 'cerrados'}
+                    </span>
+                    {puedeEditar && (
+                      <form action={comentariosDePublicacion} className="mt-1">
+                        <input type="hidden" name="id" value={p.id} />
+                        <input type="hidden" name="permite" value={permite.get(p.id) ? 'no' : 'si'} />
+                        <input type="hidden" name="volver" value={volver} />
+                        <button type="submit" className={BOTON} title={`${permite.get(p.id) ? 'Cerrar' : 'Abrir'} los comentarios de: ${p.titulo}`}>
+                          {permite.get(p.id) ? 'Cerrar comentarios' : 'Abrir comentarios'}
+                        </button>
+                      </form>
+                    )}
+                  </td>
                   <td className="px-3 py-2 text-right tabular-nums">
                     {p.reportes_abiertos ? (
                       <Link href="/sistema/nucleo/canal/moderacion" className="font-semibold text-acento-700 hover:underline">

@@ -160,6 +160,17 @@ export default async function SistemaLayout({ children }: LayoutProps<'/sistema'
         <div className="min-[901px]:hidden">
           <BotonBuscar compacto />
         </div>
+        {/* Ir al Portal planta (24-nov-2026): quien tiene ficha y la casilla del portal. En el teléfono va en el menú de la
+            persona (la barra no tiene sitio). En el portal, «Admin» trae de vuelta. */}
+        {empleado && puede(sesion, 'modulo:canal') && (
+          <Link
+            href="/canal"
+            className="hidden h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/25 px-2.5 text-sm font-medium whitespace-nowrap text-white hover:bg-white/10 sm:inline-flex"
+          >
+            <span aria-hidden>📱</span>
+            Portal planta
+          </Link>
+        )}
         <Campana inicial={avisos} />
         <MenuPersona
           nombre={nombre}

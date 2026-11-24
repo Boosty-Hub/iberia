@@ -12,7 +12,7 @@ import {
   type FormaIA,
 } from '@/lib/adiestramiento'
 import { obtenerSesion, puede } from '@/lib/auth'
-import { requerirEmpleado } from '@/lib/canal'
+import { requerirEmpleado, requerirSeccion } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
 import { CLAVES_VOZ, VOCES, vozDe } from '@/lib/voz'
@@ -21,6 +21,7 @@ import { elegirVoz, recorrerCurso } from './acciones'
 export const metadata: Metadata = { title: 'Conoce a Ajito' }
 
 export default async function AdiestramientoPage() {
+  await requerirSeccion('adiestramiento')
   const empleado = await requerirEmpleado()
   const sesion = await obtenerSesion()
   const puedeReiniciar = puede(sesion, 'modulo:adiestramiento', 'editar')

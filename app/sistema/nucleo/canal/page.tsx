@@ -47,7 +47,7 @@ export default async function ResumenCanalPage({ searchParams }: PageProps<'/sis
       <CabeceraModulo
         sesion={sesion}
         codigo="NUC-CAN"
-        titulo="Canal"
+        titulo="Portal planta"
         migas={[{ etiqueta: 'Resumen' }]}
         descripcion="La app de comunicación de toda la planta: el feed, los mensajes, los grupos y la moderación. Las cifras son cuentas; el contenido de los mensajes privados no se lee desde aquí."
         acciones={

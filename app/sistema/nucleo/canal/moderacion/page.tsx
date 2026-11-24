@@ -53,7 +53,7 @@ export default async function ModeracionCanalPage({ searchParams }: PageProps<'/
       <CabeceraModulo
         sesion={sesion}
         codigo="NUC-CAN"
-        titulo="Canal"
+        titulo="Portal planta"
         migas={[{ etiqueta: 'Moderación' }]}
         descripcion="Lo que la gente reportó de las publicaciones, los comentarios y los mensajes, con el texto congelado al momento del reporte. Lo que se oculta no se borra: se puede restaurar."
       />

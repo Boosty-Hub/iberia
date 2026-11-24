@@ -5,7 +5,7 @@ import { IconoAtras } from '@/components/iconos'
 import { ETIQUETA_AVISO } from '@/components/canal/aviso-plataforma'
 import { tieneFicha } from '@/components/sistema/colaboracion/abrir'
 import { aNotificacion, COLUMNAS_NOTIFICACION } from '@/components/sistema/colaboracion/datos'
-import { requerirEmpleado } from '@/lib/canal'
+import { requerirEmpleado, requerirSeccion } from '@/lib/canal'
 import { ETIQUETA_OBJETO, TIPO_NOTIFICACION, hrefFicha, type TipoConLinea } from '@/lib/plataforma/colaboracion'
 import { fechaHora } from '@/lib/plataforma/formato'
 import { createClient } from '@/lib/supabase/server'
@@ -19,6 +19,7 @@ export const metadata: Metadata = { title: 'Aviso' }
  * La RLS solo devuelve los avisos propios; uno ajeno es un 404.
  */
 export default async function AvisoPage({ params }: PageProps<'/canal/avisos/[id]'>) {
+  await requerirSeccion('avisos')
   const [, { id }] = await Promise.all([requerirEmpleado(), params])
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound()
   const supabase = await createClient()

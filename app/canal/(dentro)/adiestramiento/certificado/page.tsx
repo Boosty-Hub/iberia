@@ -6,7 +6,7 @@ import { CertificadoAcciones } from '@/components/canal/certificado-acciones'
 import { CertificadoHoja, fechaLarga } from '@/components/certificado-hoja'
 import { IconoAtras } from '@/components/iconos'
 import { CURSO } from '@/lib/adiestramiento'
-import { requerirEmpleado } from '@/lib/canal'
+import { requerirEmpleado, requerirSeccion } from '@/lib/canal'
 import type { LeccionGuion } from '@/lib/guion'
 import { createClient } from '@/lib/supabase/server'
 import { COLUMNAS_CERTIFICADO, conCedula } from '@/lib/contacto'
@@ -25,6 +25,7 @@ export const metadata: Metadata = { title: 'Tu certificado' }
  * entregaba nada.
  */
 export default async function CertificadoPage() {
+  await requerirSeccion('adiestramiento')
   const empleado = await requerirEmpleado()
   const supabase = await createClient()
 

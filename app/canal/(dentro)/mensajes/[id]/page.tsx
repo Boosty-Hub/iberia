@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { IconoAtras, IconoEnviar } from '@/components/iconos'
 import { BotonDesbloquear } from '@/components/canal/boton-desbloquear'
 import { MenuModeracion } from '@/components/canal/menu-moderacion'
-import { haceCuanto, iniciales, requerirEmpleado } from '@/lib/canal'
+import { haceCuanto, iniciales, requerirEmpleado, requerirSeccion } from '@/lib/canal'
 import { createClient } from '@/lib/supabase/server'
 import { cn } from '@/lib/utils'
 import { enviarMensaje, marcarVisto } from './acciones'
@@ -16,6 +16,7 @@ export default async function ConversacionPage({
   params,
   searchParams,
 }: PageProps<'/canal/mensajes/[id]'>) {
+  await requerirSeccion('mensajes', 'grupos')
   const [yo, { id }, busqueda] = await Promise.all([requerirEmpleado(), params, searchParams])
   const supabase = await createClient()
   const falloEnvio = busqueda.aviso === 'envio'
@@ -25,7 +26,7 @@ export default async function ConversacionPage({
   // igual que si no existiera.
   const { data: conversacion } = await supabase
     .from('conversaciones')
-    .select('id, tipo, grupos(nombre)')
+    .select('id, tipo, grupo_id, grupos(nombre)')
     .eq('id', id)
     .maybeSingle()
 
@@ -78,6 +79,11 @@ export default async function ConversacionPage({
           <p className="truncate text-[12px] text-marca-500">
             {conversacion.tipo === 'grupo' ? 'Grupo de trabajo' : (otro?.cargo ? legible(otro.cargo) : '')}
           </p>
+          {conversacion.tipo === 'grupo' && conversacion.grupo_id && (
+            <Link href={`/canal/grupos/${conversacion.grupo_id}`} className="text-[12px] font-semibold text-acento-700 active:text-acento-800">
+              Ver miembros
+            </Link>
+          )}
         </div>
         {/* Bloquear a la otra persona del hilo directo, o deshacerlo. En un grupo
             se bloquea desde un mensaje suyo. */}
@@ -89,6 +95,14 @@ export default async function ConversacionPage({
           />
         )}
       </header>
+
+      {/* Decisión de Gabriel (24-nov-2026): la administración lee los mensajes de los grupos. Se dice aquí para
+          que nadie se lleve una sorpresa; los mensajes directos no los lee nadie más. */}
+      {conversacion.tipo === 'grupo' && (
+        <p className="mb-2 rounded-xl bg-marca-50 px-3 py-2 text-center text-[12px] leading-relaxed text-marca-500">
+          La administración del portal puede leer los mensajes de este grupo.
+        </p>
+      )}
 
       <div className="flex-1 space-y-2 pb-4">
         {!mensajes?.length ? (

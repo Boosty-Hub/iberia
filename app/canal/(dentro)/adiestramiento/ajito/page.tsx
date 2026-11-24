@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { CharlaAjito, type MensajeVista } from '@/components/canal/charla-ajito'
 import { contextoCharla } from '@/lib/charla'
+import { requerirSeccion } from '@/lib/canal'
 
 export const metadata: Metadata = { title: 'Ajito' }
 
@@ -18,6 +19,7 @@ const MOSTRADOS = 200
  * con la voz del curso, y dibuja si se le pide. Quién entra, en `lib/charla.ts`.
  */
 export default async function AjitoPage({ searchParams }: PageProps<'/canal/adiestramiento/ajito'>) {
+  await requerirSeccion('adiestramiento')
   const ctx = await contextoCharla()
   if (!ctx) notFound()
   const { supabase, matricula, curso } = ctx

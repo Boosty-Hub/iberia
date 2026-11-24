@@ -40,9 +40,16 @@ export const TABLA_CANAL_GRUPOS: FuenteTabla = {
     { clave: 'area', etiqueta: 'Área', filtrable: true, agrupable: true },
     { clave: 'miembros', etiqueta: 'Miembros', tipo: 'entero', total: true },
     { clave: 'coordinadores', etiqueta: 'Coordinan', ancho: 200, ordenable: false },
-    { clave: 'mensajes_30d', etiqueta: 'Mensajes · 30 días', tipo: 'entero', total: true, ayuda: 'Solo la cuenta: el contenido no se lee desde aquí' },
+    { clave: 'mensajes_30d', etiqueta: 'Mensajes · 30 días', tipo: 'entero', total: true, ayuda: 'Los mensajes se leen en «Gestionar»' },
     { clave: 'ultimo_mensaje', etiqueta: 'Último mensaje', tipo: 'fechaHora' },
     { clave: 'creado_en', etiqueta: 'Creado', tipo: 'fecha', oculta: true },
+    {
+      clave: 'acciones',
+      etiqueta: '',
+      tipo: 'acciones',
+      ordenable: false,
+      acciones: [{ clave: 'gestionar', etiqueta: 'Gestionar', titulo: 'Miembros, mensajes y datos del grupo', href: '/sistema/nucleo/canal/grupos/{id}' }],
+    },
   ],
   consulta: (supabase, _ctx, select, opciones) =>
     supabase.schema('ui').rpc('canal_grupos', undefined, opciones?.count ? { count: opciones.count } : undefined).select(select),
