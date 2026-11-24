@@ -8,6 +8,8 @@ import { BotonPreguntarIa } from '@/components/sistema/ia/boton-preguntar'
 import { estadoIa } from '@/lib/ia/servidor'
 import { capacidadViva } from '@/lib/ia/niveles'
 import { cn } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/server'
+import { BotonTutorial, type TutorialMenu } from '@/components/sistema/ui/boton-tutorial'
 
 /**
  * La cabecera de un módulo (Anexo E §3, «zona de trabajo»): migas, título,
@@ -39,7 +41,7 @@ export async function CabeceraModulo({
   cuentas?: Record<string, number>
   descripcion?: ReactNode
 }) {
-  const [modulos, ia] = await Promise.all([modulosDelPlan(), estadoIa()])
+  const [modulos, ia, tutoriales] = await Promise.all([modulosDelPlan(), estadoIa(), tutorialesDe(pestanas ?? PESTANAS[codigo] ?? [])])
   // R4 · «Preguntar a la IA» (NUC-PRO-IA-01): solo con la IA y la capacidad encendidas.
   const preguntar = capacidadViva(ia, 'NUC-PRO-IA-01')
   const m = [...MODULOS_INTERFAZ, ...modulos].find((x) => x.codigo === codigo)
@@ -100,8 +102,9 @@ export async function CabeceraModulo({
             {estado.etiqueta}
           </span>
         )}
-        {(acciones || preguntar) && (
+        {(acciones || preguntar || tutoriales.length > 0) && (
           <div className="ml-auto flex flex-wrap items-center gap-1.5">
+            {tutoriales.length > 0 && <BotonTutorial tutoriales={tutoriales} pestanas={lista} />}
             {preguntar && <BotonPreguntarIa />}
             {acciones}
           </div>
@@ -111,6 +114,21 @@ export async function CabeceraModulo({
       {lista.length > 1 && <PestanasModulo pestanas={lista} cuentas={cuentas} />}
     </div>
   )
+}
+
+/**
+ * Los tutoriales de las pestañas del módulo que quien mira puede abrir (la RLS de `ui.tutorial` pide el permiso de
+ * cada pestaña). Sin la tabla —antes de su migración— no hay botón.
+ */
+async function tutorialesDe(pestanas: Pestana[]): Promise<TutorialMenu[]> {
+  if (!pestanas.length) return []
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .schema('ui')
+    .from('tutorial')
+    .select('ruta, titulo, descripcion, duracion_seg')
+    .in('ruta', pestanas.map((p) => p.href))
+  return error ? [] : (data ?? [])
 }
 
 /** Botón de la cabecera, con el estilo denso del modelo. */

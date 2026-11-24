@@ -6027,6 +6027,45 @@ export type Database = {
         }
         Relationships: []
       }
+      tutorial: {
+        Row: {
+          actualizado_en: string
+          archivo: string
+          descripcion: string | null
+          duracion_seg: number | null
+          modulo: string
+          orden: number
+          poster: string | null
+          recurso: string
+          ruta: string
+          titulo: string
+        }
+        Insert: {
+          actualizado_en?: string
+          archivo: string
+          descripcion?: string | null
+          duracion_seg?: number | null
+          modulo: string
+          orden?: number
+          poster?: string | null
+          recurso: string
+          ruta: string
+          titulo: string
+        }
+        Update: {
+          actualizado_en?: string
+          archivo?: string
+          descripcion?: string | null
+          duracion_seg?: number | null
+          modulo?: string
+          orden?: number
+          poster?: string | null
+          recurso?: string
+          ruta?: string
+          titulo?: string
+        }
+        Relationships: []
+      }
       vista: {
         Row: {
           actualizado_en: string
