@@ -42,8 +42,6 @@ que está en línea.
 
 Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 
-- 🔴 **Subir `next` a 16.4.3**: la versión en producción tiene avisos críticos de ejecución remota
-  de código sin sesión, uno de ellos en `next/og`, que dibuja el certificado. Va en su propio cambio.
 - 🔴 **La respuesta a Apple**: grabar el video desde TestFlight, publicar un correo de soporte y volver
   a enviar la build 3.
 - 🔴 **Los push de `Smarin19` no se despliegan solos en Netlify**: quedan «pending review». Un dueño
@@ -58,8 +56,41 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 - 🔴 **El plan gratuito de Supabase pausa el proyecto**: pasó antes del 19/10 y nadie podía entrar.
   Decidir si pasa a Pro (`PENDIENTES.md`).
 
-> **Plataforma Iberia (20/11):** **en producción** desde el 20/11. Contiene la Etapa 1, el rediseño y la
-> integración del panel y del canal, en `/sistema`; el informe queda aparte. Ver la sesión 56.
+> **Plataforma Iberia:** **en producción** desde el 20/11 (Etapa 1, rediseño, panel y canal en `/sistema`; el informe
+> aparte; ver la sesión 56), con el Portal planta, los documentos y los tutoriales desde el 24/11 (sesiones 59 y 60).
+
+---
+
+## 24 de noviembre · Sesión 60 — documentos, tutoriales, el espejo por dentro y todo a producción
+
+**Pedidos de Gabriel** (Telegram, a lo largo del día): migas en la ficha a página completa; punto verde en el riel;
+archivos de origen descargables y con vista previa; el espejo explicado técnicamente en el informe (AWS o directo a
+Supabase); conexión bidireccional en seguridad; pantalla completa del organigrama; un tutorial en video por pestaña de
+Organización y autoridad y de Procesos; y publicar todo. Cómo funciona cada cosa: `AGENTS.md`.
+
+- **Documentos** («Los archivos de origen de los documentos»): 3.444 PDF optimizados en producción, 537 MB contra 5,4 GB de
+  originales; Storage en 603 MB de 1 GB; 1.144 de 1.307 documentos con algo para ver. **Decidido por Gabriel**: solo PDF,
+  sin capa de Markdown («déjalo como vas»); originales cuando haya Pro. No subieron: 196 archivos de los 45 documentos con
+  datos sensibles (retenidos), 35 de Visio/Publisher/InfoPath, 30 que Word no abrió y 3 que faltan en la copia.
+  🔴 Lo que se encontró al convertir: Word rehacía los campos DATE/TIME y la «Elaboración» salía con la fecha del día (ahora
+  la del último guardado); con PowerShell 5.1 el recorrido COM se quedaba en bucle; un Word muerto no da error en
+  PowerShell; `rewrite_images` de PyMuPDF no tocaba los escaneos; una hoja de cálculo salió de 12.743 páginas (el visor ya
+  no mide todas al abrir).
+- **Informe, en producción** (respaldos `Insumos/Respaldo_Informe_2026-11-24` y `_2310`): en la 11, «Dónde vive hoy el
+  dato de JD», el espejo en siete pasos y las opciones AWS y Supabase con qué se necesita y cómo queda montado (redactado
+  por un agente con la transcripción del 11/11; fuentes verificadas: **AWS DMS no lee Db2 for i**). **Gabriel decidió**:
+  Supabase recomendado y AWS como alternativa; **bidireccional en el dato y de salida en la conexión** —escribir en JD en
+  segundos con la cola y espera larga, leer en segundos (diario), cada 5 a 10 min o de noche—, en la 12 y la 11.
+  ⚠️ Abierto: en esa reunión se pidió IP fija y un webhook del lado de JD (entradas), y en ENT-002 se habló de Amazon.
+- **Pantalla completa** en los lienzos; **pestañas** que no caben ahora avisan con flechas (en Organización y autoridad
+  «Conciliación» e «Historial» quedaban cortadas sin que se notara).
+- **18 tutoriales** grabados con la app real contra pruebas (~29 MB), revisados por hoja de contacto (un subtítulo de
+  Plazas no calzaba con la pantalla) y probados uno por uno en producción con la cuenta de Gabriel.
+- **En producción** con el OK de Gabriel («publica todo en main»): respaldo `produccion-2026-11-24T03-18-05` (92 tablas),
+  migraciones `20261124010000` a `030000` con `--solo-migraciones`, y `main` hasta `fe1d7f7` (incluye las sesiones 58 y 59).
+- **Dónde quedamos**: Gabriel pidió que toda edición de estructura y procesos sea un escenario con aprobación. Se le mandó
+  el diagnóstico (en estructura casi todo se edita directo; procesos ya va por borrador y ruta) con cuatro fallas a
+  corregir y cuatro decisiones; se espera su respuesta para construirlo (`PENDIENTES.md`).
 
 ---
 
@@ -77,8 +108,7 @@ las secciones del portal; y Tareas como sección principal, con crear y calendar
   los mensajes de los grupos (los directos no); secciones prendibles. Cómo quedó: `AGENTS.md`, «Portal planta».
 - **Rama `portal-planta`**, probada solo contra pruebas: migración aplicada allí, reglas de la base probadas con la cuenta
   de una operaria (7 + 4 casos, todos bien) y `probar-portal-planta.mjs` 13/13. Capturas a 1440 y en teléfono.
-- **Dónde quedamos**: sin publicar. Falta el OK de Gabriel para aplicar la migración en producción y fusionar en `main`
-  (junto con el PDF del informe de la sesión 58).
+- **Dónde quedamos**: en producción el 24/11, con la sesión 60.
 
 ---
 
@@ -95,6 +125,7 @@ y la IA dentro del sistema. Eligió **un PDF por sección**, cada una por separa
   (`html-to-image` no lleva el relleno de las clases de Tailwind) y el espejo de la 10 salía cortado con su barra de
   desplazamiento (el iframe era angosto). Los dos, corregidos.
 - **Límite aceptado**: el texto del PDF es imagen; no se selecciona ni se busca.
+- En producción el 24/11, con la sesión 60.
 
 ---
 
@@ -307,83 +338,18 @@ y revisado en línea con sesión. La migración ya estaba aplicada en Supabase.
 
 ## 23 de octubre · Sesión 52 — la app de Iberia para iPhone
 
-Dos tickets: **«Publicar la app de Iberia en Apple» (PEN-14661)** primero, y Google Play
-(PEN-14662) después. **La versión 1.0.0 (build 1) llegó a App Store Connect** y todavía no va a
-revisión. Supabase no se tocó.
+Tickets PEN-14661 (Apple) primero y PEN-14662 (Google Play) después. Cómo funciona: `AGENTS.md`, «La app de Iberia».
+La versión larga de esta entrada: `git show fe1d7f7:BITACORA.md`.
 
-**Lo que se armó** (cómo funciona, en `AGENTS.md`, «La app de Iberia»):
-
-- **La cáscara de Capacitor**, en este mismo repositorio: abre el canal en línea, así que un cambio
-  de la web llega a los teléfonos sin publicar otra versión. `ios/` se generó en Windows, sin Mac,
-  y se ajustó como el de Boosty Desk.
-- **El flujo «App de iOS»** de GitHub Actions, que compila, firma y, si se le pide, sube a App Store
-  Connect. Es la única vía: no hay Mac.
-- **`/privacidad`**, pública, porque Apple exige una política de privacidad que se abra sin cuenta.
-  Es un borrador (`PENDIENTES.md`).
-- Del lado de Apple: el App ID, el perfil «Iberia App Store CI» y la ficha de la app en App Store
-  Connect.
-
-**Lo que se decidió:**
-
-- **La misma cuenta de Apple que Boosty Desk** (Santiago), copiando su configuración.
-- **El identificador es `com.industriasiberia.canal`**, elegido por Santiago.
-- **En la tienda se llama «Industrias Iberia»**: «Iberia» a secas es la aerolínea. Debajo del icono
-  sí dice «Iberia».
-- **Se reutiliza el certificado «Apple Distribution» del equipo**, el mismo que firma Guds Store,
-  en vez de crear uno o revocar otro: el certificado es del equipo, y lo único propio de la app es
-  el perfil.
-- **Capacitor 8.5.3**, por el aviso crítico de `@capacitor/ios` 8.5.0 (GHSA-rvm3-566m-v7fv).
-  Boosty Desk estaba en 8.5.0, y a su sesión se le avisó.
-
-**Lo que se hizo después:**
-
-- **El commit `e9090f7`** («feat(app): la app de Iberia para iPhone con Capacitor»), revisado con
-  cuatro lentes y sin bloqueos, **subido a `main`**. Esta máquina no tiene identidad de git: el
-  commit va como Santiago Marín <api@boosty.digital>.
-- **Los seis secretos, cargados en GitHub.**
-- **El flujo «App de iOS» compiló y firmó** en una corrida sin subir, y en la siguiente **subió la
-  versión 1.0.0 (build 1) a App Store Connect**: «UPLOAD SUCCEEDED».
-
-⚠️ **Lo que no salió: Netlify no publicó `e9090f7`.** Más de 25 minutos después,
-`https://iberiavenezuela.netlify.app/privacidad` seguía redirigiendo al login (307). La causa no
-se pudo ver: esta máquina no tiene `.env.local` —ni el token de Netlify ni el acceso a Supabase—,
-y Netlify no reporta el estado del despliegue en GitHub. *(Resuelto: `/privacidad` salió con el
-deploy del 28/10. Ver la sesión 55.)*
-
-**La segunda parte, la que pasa la guía 4.2 de Apple** — ese día en código y sin commit *(en
-producción desde la sesión 55)*:
-
-- **Avisos push nativos** de dos cosas: un mensaje nuevo en una conversación y un recordatorio del
-  curso. Salen con `after()` y nunca hacen fallar la acción que los dispara.
-- **La tabla `dispositivos`**, con sus funciones `security definer`, en la migración
-  `20261103120000_dispositivos.sql`, **sin aplicar**.
-- **Enlaces universales** (`/.well-known/apple-app-site-association`), para que el enlace personal
-  de WhatsApp abra la app.
-- El número de build sale de `github.run_number`.
-- `npm run probar:apns` confirmó que la clave de APNs del equipo autentica con el bundle id: Apple
-  contestó 400 `BadDeviceToken` a un token inventado, que es lo esperado.
-- **Decidido**: avisan solo esos dos eventos, que era lo recomendado (Santiago no eligió otros). Y
-  **al cerrar sesión se desvincula el teléfono**, para que en un teléfono compartido no le lleguen
-  a otra persona los mensajes de la anterior.
-
-**Lo que se rompió o se encontró:**
-
-- 🔴 **`next` 16.3.0, el que está en producción, tiene avisos críticos** (`npm audit`): ejecución
-  remota de código sin sesión en la optimización de imágenes, en `ImageResponse` de `next/og` —con
-  el que se dibuja el certificado—, en `use cache` y en servidores sobre Windows, más SSRF y
-  envenenamiento de caché. Se arregla con 16.4.3, sin salto de versión mayor, y va en su propio
-  cambio.
-- ⚠️ **GitHub CLI no tenía sesión en la máquina de Santiago**, y sin ella no había push ni se
-  cargaban los secretos. Santiago inició sesión ese mismo día. Para subir el flujo hizo falta
-  además `gh auth refresh -s workflow`: GitHub no deja crear archivos de `.github/workflows/` con
-  un token sin ese permiso.
-- ⚠️ **La API de App Store Connect registra identificadores y crea perfiles, pero no crea la ficha
-  de la app**: responde «does not allow 'CREATE'». Se hizo a mano.
-
-**Dónde quedamos**: aplicar la migración y regenerar los tipos; cargar las cuatro variables
-`APNS_*` en Netlify; aclarar por qué Netlify no publicó. Recién entonces, commit y push de la
-segunda parte, la build 2 y la prueba en un iPhone con TestFlight; después, la cuenta de
-demostración para la revisión de Apple. Todo, con dueño, en `PENDIENTES.md`.
+- **Se armó**: la cáscara de Capacitor 8.5.3 en este repositorio (abre el canal en línea), el flujo «App de iOS» de GitHub
+  Actions (no hay Mac), `/privacidad` pública y, del lado de Apple, App ID, perfil y ficha. La 1.0.0 (build 1) llegó a App
+  Store Connect.
+- **Se decidió**: la cuenta de Apple de Boosty Desk; `com.industriasiberia.canal`; en la tienda «Industrias Iberia» (Iberia
+  a secas es la aerolínea); el certificado «Apple Distribution» del equipo; Capacitor 8.5.3 por GHSA-rvm3-566m-v7fv.
+- **La parte nativa (guía 4.2)**: avisos push de dos eventos, tabla `dispositivos`, enlaces universales y desvincular el
+  teléfono al cerrar sesión. Salió a producción en la sesión 55.
+- ⚠️ La API de App Store Connect no crea la ficha de la app (se hizo a mano); `gh` necesitó `-s workflow`; Netlify no
+  publicó `e9090f7` ese día (salió con el deploy del 28/10).
 
 ---
 

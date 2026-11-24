@@ -728,6 +728,9 @@ Rama `plataforma/etapa-1`, Supabase de pruebas `wsqhsjbwkjlqrdxnyadq`. El plan e
 | El *artifact* del capítulo 03 publicado por error | Gabriel | ¿Se borra? |
 | ~~Privacidad antes de los enlaces a planta~~ ✅ En producción desde el 20/11 (`234000` y `235000`) | — | |
 | ¿Cómo se mandan los enlaces personales (WhatsApp de la empresa o en persona)? Hoy no hay de dónde copiarlos para el envío a mano, porque son una credencial | Gabriel | |
+| **Toda edición como escenario con aprobación** (pedido del 24/11): las cuatro decisiones (agrupar en un borrador de cambios o una solicitud por cambio; qué entra —personas, cargos, costos, plan, cruce—; una ruta o por peso; urgencias) y, decida lo que decida, cuatro fallas: la RLS deja actualizar filas reales sin versionar; cerrar una unidad en escenario deja sin jefe las plazas que le reportaban; publicar no mueve a la gente de una plaza cerrada; publicar pisa sin avisar lo editado en la realidad después de la fecha base | Gabriel → Equipo Boosty | Diagnóstico enviado por Telegram el 24/11 |
+| Sanear los 45 documentos con datos sensibles para subir sus 196 archivos; los originales y los 35 de Visio/Publisher/InfoPath, con Pro (`cargar-documentos.mjs --originales`) | Calidad · Equipo Boosty | Sesión 60 |
+| Espejo: en la reunión del 11/11 se pidió IP fija y un webhook del lado de JD (conexiones de entrada), contra la regla de que el conector solo sale; y en ENT-002 se le dijo a la dirección que el espejo iría en Amazon, y el informe recomienda Supabase | Gabriel | Cerrar el discurso antes del paso 0 |
 
 ---
 
