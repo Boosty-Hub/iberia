@@ -110,6 +110,22 @@ export type BloqueFicha =
   | { tipo: 'texto'; titulo?: string; texto: string; tono?: TonoFicha }
   | { tipo: 'cifras'; titulo?: string; cifras: { etiqueta: string; valor: string; detalle?: string | null; tono?: TonoFicha }[]; sello?: string | null }
   | { tipo: 'acciones'; titulo?: string; acciones: AccionFicha[] }
+  | { tipo: 'archivos'; titulo?: string; archivos: ArchivoFicha[]; vacio?: string }
+
+/**
+ * Un archivo de origen de un documento (`sgc.documento_archivo`). `ver` sirve el PDF en línea para la vista previa;
+ * `descargar`, el PDF como descarga; `original`, el archivo tal cual (cuando el plan lo permita).
+ */
+export type ArchivoFicha = {
+  id: string
+  nombre: string
+  formato: string
+  estado: 'disponible' | 'pendiente_plan' | 'sin_conversion' | 'retenido' | 'falta'
+  detalle?: string | null
+  ver?: string | null
+  descargar?: string | null
+  original?: string | null
+}
 
 /** Una pestaña propia del tipo; con `candado`, es perímetro (solo llega a quien tiene el permiso). */
 export type SeccionFicha = { clave: string; etiqueta: string; candado?: boolean; n?: number; bloques: BloqueFicha[] }

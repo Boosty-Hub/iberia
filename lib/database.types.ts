@@ -5598,6 +5598,62 @@ export type Database = {
           },
         ]
       }
+      documento_archivo: {
+        Row: {
+          actualizado_en: string
+          documento_id: string
+          estado: string
+          formato: string
+          huella: string
+          id: string
+          nombre: string
+          orden: number
+          original_ruta: string | null
+          paginas: number | null
+          pdf_ruta: string | null
+          pdf_tamano: number | null
+          tamano_original: number | null
+        }
+        Insert: {
+          actualizado_en?: string
+          documento_id: string
+          estado: string
+          formato: string
+          huella: string
+          id?: string
+          nombre: string
+          orden?: number
+          original_ruta?: string | null
+          paginas?: number | null
+          pdf_ruta?: string | null
+          pdf_tamano?: number | null
+          tamano_original?: number | null
+        }
+        Update: {
+          actualizado_en?: string
+          documento_id?: string
+          estado?: string
+          formato?: string
+          huella?: string
+          id?: string
+          nombre?: string
+          orden?: number
+          original_ruta?: string | null
+          paginas?: number | null
+          pdf_ruta?: string | null
+          pdf_tamano?: number | null
+          tamano_original?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documento_archivo_documento_id_fkey"
+            columns: ["documento_id"]
+            isOneToOne: false
+            referencedRelation: "documento"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proceso: {
         Row: {
           area_texto: string | null

@@ -16,7 +16,7 @@ import {
   type Ficha as FichaPhva,
 } from '@/components/sistema/procesos/comun'
 import { leerCatalogo } from '@/components/sistema/procesos/datos'
-import { TIPOS_FICHA, type AccionFicha, type BloqueFicha, type DatoFicha, type Ficha, type ResultadoAccionFicha, type SeccionFicha, type TonoFicha } from '@/lib/plataforma/ficha-tipos'
+import { TIPOS_FICHA, type AccionFicha, type ArchivoFicha, type BloqueFicha, type DatoFicha, type Ficha, type ResultadoAccionFicha, type SeccionFicha, type TonoFicha } from '@/lib/plataforma/ficha-tipos'
 import type { EntradaAccionFicha, ManejadorFicha } from '@/lib/plataforma/fichas/acciones'
 import { fechaCorta, hoyCaracas } from '@/lib/plataforma/formato'
 import { ETIQUETAS_ESTADO_DOC, ETIQUETAS_MOTIVO } from '@/lib/plataforma/tablas-procesos'
@@ -642,6 +642,7 @@ export async function fichaDocumento(sesion: Sesion, id: string): Promise<Ficha 
       : Promise.resolve({ data: [] as { ref: string; nombre: string; nivel: number; codigo_sgc: string | null; codigo_informe: string | null }[] }),
     editar ? sgc.rpc('opciones_documentos') : Promise.resolve({ data: [] as { campo: string; valor: string; total: number }[] }),
   ])
+  const archivosCargados = await archivosDeDocumento(supabase, id)
   // La auditoría de la conciliación se guarda con el id de cada decisión: se buscan aparte.
   const { data: idsConc } = await sgc.from('documento_conciliacion').select('id').eq('documento_id', id)
   const histConc = idsConc?.length ? await lineaDe(supabase, sesion, [{ tabla: 'documento_conciliacion', ids: idsConc.map((x) => x.id) }]) : { linea: [], visible: hist.visible }
@@ -739,15 +740,29 @@ export async function fichaDocumento(sesion: Sesion, id: string): Promise<Ficha 
         },
       ],
     })
-  secciones.push({
-    clave: 'origen',
-    etiqueta: 'Archivos de origen',
-    n: archivos.length || undefined,
-    bloques: [
-      { tipo: 'texto', texto: 'Los archivos del levantamiento no están cargados en la plataforma: aquí va solo su nombre, para ubicarlos en el repositorio de Iberia.' },
-      { tipo: 'lista', items: archivos.map((a) => ({ tipo: 'Archivo', titulo: a })), vacio: 'Sin archivo propio: solo citado en un listado o anexo.' },
-    ],
-  })
+  secciones.push(
+    archivosCargados
+      ? {
+          clave: 'origen',
+          etiqueta: 'Archivos de origen',
+          n: archivosCargados.length || undefined,
+          bloques: [
+            ...(archivosCargados.some((a) => a.estado !== 'disponible')
+              ? [{ tipo: 'texto' as const, texto: avisoArchivos(archivosCargados) }]
+              : []),
+            { tipo: 'archivos', archivos: archivosCargados, vacio: 'Sin archivo propio: solo citado en un listado o anexo.' },
+          ],
+        }
+      : {
+          clave: 'origen',
+          etiqueta: 'Archivos de origen',
+          n: archivos.length || undefined,
+          bloques: [
+            { tipo: 'texto', texto: 'Los archivos del levantamiento no están cargados en la plataforma: aquí va solo su nombre, para ubicarlos en el repositorio de Iberia.' },
+            { tipo: 'lista', items: archivos.map((a) => ({ tipo: 'Archivo', titulo: a })), vacio: 'Sin archivo propio: solo citado en un listado o anexo.' },
+          ],
+        }
+  )
 
   const tono: TonoFicha = d.estado === 'vigente' ? 'verde' : d.estado === 'obsoleto' || d.estado === 'retirado' ? 'neutro' : 'ambar'
   return {
@@ -766,6 +781,57 @@ export async function fichaDocumento(sesion: Sesion, id: string): Promise<Ficha 
     lineaVisible: hist.visible,
     perimetro: d.perimetro !== 'general' || d.datos_sensibles,
   }
+}
+
+/**
+ * Los archivos cargados de un documento (`sgc.documento_archivo`, con la RLS de quien mira). `null` si la tabla no
+ * existe todavía (antes de la migración del 24-nov-2026): la ficha vuelve a la lista de nombres.
+ */
+async function archivosDeDocumento(supabase: Awaited<ReturnType<typeof createClient>>, id: string): Promise<ArchivoFicha[] | null> {
+  const { data, error } = await supabase
+    .schema('sgc')
+    .from('documento_archivo')
+    .select('id, nombre, formato, estado, pdf_ruta, pdf_tamano, paginas, original_ruta, tamano_original')
+    .eq('documento_id', id)
+    .order('orden')
+    .range(0, 99)
+  if (error) return null
+  const BASE_ARCHIVO = '/sistema/nucleo/documentos/archivo'
+  return (data ?? []).map((a) => {
+    const disponible = a.estado === 'disponible' && !!a.pdf_ruta
+    const detalle = disponible
+      ? [`${a.formato.toUpperCase()} → PDF`, a.paginas ? `${a.paginas} pág.` : null, a.pdf_tamano ? pesoLegible(a.pdf_tamano) : null].filter(Boolean).join(' · ')
+      : ESTADO_ARCHIVO[a.estado as ArchivoFicha['estado']] ?? a.estado
+    return {
+      id: a.id,
+      nombre: a.nombre,
+      formato: a.formato,
+      estado: a.estado as ArchivoFicha['estado'],
+      detalle,
+      ver: disponible ? `${BASE_ARCHIVO}/${a.id}/ver` : null,
+      descargar: disponible ? `${BASE_ARCHIVO}/${a.id}/descargar` : null,
+      original: a.original_ruta ? `${BASE_ARCHIVO}/${a.id}/descargar?original=1` : null,
+    }
+  })
+}
+
+const ESTADO_ARCHIVO: Record<ArchivoFicha['estado'], string> = {
+  disponible: 'Disponible',
+  pendiente_plan: 'Se carga con la ampliación del almacenamiento',
+  sin_conversion: 'Formato sin vista previa: se carga el original con la ampliación',
+  retenido: 'Trae datos personales: se carga cuando se sanee',
+  falta: 'No está en la copia del repositorio',
+}
+
+function avisoArchivos(xs: ArchivoFicha[]): string {
+  const n = xs.filter((a) => a.estado === 'disponible').length
+  if (!n) return 'Los archivos de este documento todavía no se pueden ver aquí: cada uno dice por qué.'
+  return `${n} de ${xs.length} se pueden ver y descargar en PDF. Los demás dicen por qué todavía no.`
+}
+
+function pesoLegible(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1).replace('.', ',')} MB`
 }
 
 const ESTADOS_DOC = new Set(Object.keys(ETIQUETAS_ESTADO_DOC))

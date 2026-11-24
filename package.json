@@ -73,6 +73,7 @@
     "html-to-image": "1.11.13",
     "jspdf": "4.2.1",
     "next": "16.4.6",
+    "pdfjs-dist": "6.2.108",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-markdown": "^10.1.0",
@@ -89,7 +90,6 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
-    "pdfjs-dist": "^6.2.108",
     "playwright": "^1.62.1",
     "tailwindcss": "^4",
     "typescript": "^5"

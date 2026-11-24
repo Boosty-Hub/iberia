@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition, type ReactNode } from 'react'
 import { ejecutarAccionFicha } from '@/components/sistema/ui/ficha-acciones'
+import { ArchivosFicha } from '@/components/sistema/ui/archivos-ficha'
 import { useContextoUrl } from '@/components/sistema/shell/contexto-url'
 import { TONO_CHIP, type AccionFicha, type BloqueFicha, type DatoFicha, type ResultadoAccionFicha } from '@/lib/plataforma/ficha-tipos'
 import { fechaHora, hoyCaracas } from '@/lib/plataforma/formato'
@@ -301,6 +302,7 @@ export function BloquesFicha({
               {b.sello && <p className="mt-1 text-[10.5px] text-marca-400">{b.sello}</p>}
             </>
           )}
+          {b.tipo === 'archivos' && <ArchivosFicha archivos={b.archivos} vacio={b.vacio} />}
           {b.tipo === 'lista' &&
             (b.items.length ? (
               <ul className="flex flex-col gap-1">
