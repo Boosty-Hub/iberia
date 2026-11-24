@@ -43,6 +43,26 @@ function destinoDominio(clave: ClaveDominio, modulos: ModuloMenu[]): string | nu
 
 const FOCO = 'focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-acento-500'
 
+/**
+ * Cuántos módulos de un dominio están operando (24-nov-2026, Gabriel: «para saber lo que va quedando activo»).
+ * «Mi día» no lleva punto: siempre está.
+ */
+function operandoEn(clave: ClaveDominio, modulos: ModuloMenu[]) {
+  if (clave === 'inicio') return 0
+  return modulos.filter((m) => m.dominioClave === clave && m.estado === 'operando').length
+}
+
+function PuntoDominio({ n, flotante }: { n: number; flotante?: boolean }) {
+  if (!n) return null
+  const texto = n === 1 ? '1 módulo operando' : `${n} módulos operando`
+  return (
+    <span className={cn('flex shrink-0 items-center', flotante ? 'absolute top-1.5 right-2' : 'ml-auto')} title={texto}>
+      <span className="h-[7px] w-[7px] rounded-full" style={{ background: ESTADO_MODULO.operando.color }} aria-hidden />
+      <span className="sr-only">({texto})</span>
+    </span>
+  )
+}
+
 /** El riel de dominios: con nombres por defecto, plegable a solo iconos (cookie `riel`). */
 export function Riel({ modulos, modo: inicial }: { modulos: ModuloMenu[]; modo: 'nombres' | 'iconos' }) {
   const { dominio } = useActivo(modulos)
@@ -85,6 +105,7 @@ export function Riel({ modulos, modo: inicial }: { modulos: ModuloMenu[]; modo: 
               >
                 <IconoDominio clave={d.clave} className="h-[18px] w-[18px] shrink-0" />
                 {conNombres ? <span className="leading-tight">{d.nombre}</span> : <span className="sr-only">{d.nombre}</span>}
+                <PuntoDominio n={operandoEn(d.clave, modulos)} flotante={!conNombres} />
                 {!conNombres && (
                   <span className="pointer-events-none absolute left-full z-50 ml-2 hidden rounded-md bg-[#2b2a28] px-2 py-1 text-xs whitespace-nowrap text-white group-hover:block group-focus-visible:block">
                     {d.nombre}
@@ -297,7 +318,8 @@ export function NavegacionTelefono({ modulos, pestanas, vistas }: { modulos: Mod
             <summary className={cn('flex min-h-11 cursor-pointer list-none items-center gap-3 rounded-xl px-3 text-sm', d.clave === dominio ? 'bg-acento-50 font-semibold text-acento-700' : 'text-marca-700')}>
               <IconoDominio clave={d.clave} className="h-5 w-5 shrink-0" />
               {d.nombre}
-              <span className="ml-auto text-marca-400 transition-transform group-open:rotate-90" aria-hidden>
+              <PuntoDominio n={operandoEn(d.clave, modulos)} />
+              <span className={cn('text-marca-400 transition-transform group-open:rotate-90', !operandoEn(d.clave, modulos) && 'ml-auto')} aria-hidden>
                 ›
               </span>
             </summary>

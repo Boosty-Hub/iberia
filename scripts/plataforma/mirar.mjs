@@ -100,7 +100,7 @@ for (const [nombreTam, w, h] of tamanos) {
     const mal = r.status() >= 400 || errores.length || desborde > 2 || !pagina.url().includes(ruta.split('?')[0])
     if (mal) fallos++
     console.log(`${mal ? '✖' : '✓'} ${nombreTam} ${ruta} → ${r.status()} ${pagina.url().replace(BASE, '')}${desborde > 2 ? ` · desborda ${desborde}px` : ''} · ${archivo}`)
-    for (const e of errores.slice(0, 5)) console.log(`    consola: ${e.slice(0, 300)}`)
+    for (const e of errores.slice(0, 5)) console.log(`    consola: ${e.slice(0, Number(process.env.LARGO_CONSOLA ?? 300))}`)
   }
   await ctx.close()
 }
