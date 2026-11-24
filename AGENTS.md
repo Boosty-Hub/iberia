@@ -1093,6 +1093,45 @@ El sistema que reemplaza al dashboard para operar a Iberia (Etapa 1 + rediseño 
   `medir-accesibilidad` (axe-core). Producción: `pasar-a-produccion.mjs` hace un simulacro de solo lectura
   y dice qué falta; con `--ejecutar --confirmo`, y el OK de Gabriel, lo hace.
 
+## Los archivos de origen de los documentos (NUC-DOC, desde el 24 de noviembre de 2026)
+
+Pedido de Gabriel: que los archivos del levantamiento (`Procesos Iberia/`, fuera de git) se vean y se descarguen desde la
+ficha del documento. Migración `20261124020000_documento_archivos.sql`.
+
+- **Se sube un PDF optimizado, no el original**, mientras producción siga en el plan gratis (1 GB de Storage para todo):
+  los 3.714 archivos pesan 5,4 GB y en PDF optimizado caben en unos pocos cientos de MB. Los originales se suben con el
+  plan de pago (`cargar-documentos.mjs --originales`) y la ficha ofrece entonces «Original».
+- **La cadena** (las herramientas en `scripts/plataforma/documentos-pdf/`, con su `LEEME.md`; los datos y los PDF en
+  `plataforma/_trabajo/documentos-pdf/`, fuera de git): `manifiesto.json` (cada archivo con su
+  huella SHA-256 y los documentos que lo citan) → `word-pdf.ps1` convierte Word, Excel y PowerPoint a PDF con Office
+  (COM, «para pantalla»), en tres tandas paralelas con `vigilante.ps1`, que mata el Word de una tanda si un archivo
+  pasa de 150 s → `comprimir-todo.py` (PyMuPDF) re-muestrea las imágenes a 110 ppp en JPEG 60 y deja `pdf-final/` y
+  `final.json` → `scripts/plataforma/cargar-documentos.mjs` sube y anota.
+  - ⚠️ **Las tandas corren con `pwsh` (PowerShell 7), no con `powershell.exe`**: con la 5.1 el recorrido de los
+    campos por COM se quedaba en bucle.
+  - ⚠️ **Word rehace los campos DATE/TIME al abrir**: una «Elaboración» con campo TIME salía con la fecha de la
+    conversión. `word-pdf.ps1` les pone la fecha en que se guardó el archivo, con su formato, y los congela; los
+    vínculos a la red de Iberia (LINK, INCLUDEPICTURE) se congelan para no esperar a un servidor que no se alcanza.
+  - ⚠️ **En PowerShell, leer una propiedad de un objeto COM muerto no falla: devuelve nulo.** Tras un error se cierra
+    Office y se levanta otro; lo que falló queda en el registro de la tanda y no se reintenta.
+  - ⚠️ **`rewrite_images` de PyMuPDF no hacía nada con los escaneos** (una imagen JPEG de 1664×2160 por página):
+    `comprimir.py` re-muestrea imagen por imagen. Un informe de 9,6 MB quedó en 3 MB y se lee.
+- **Qué sube y qué no** (`cargar-documentos.mjs`): entra lo que cabe en `--presupuesto-mb` (850 por defecto, contando
+  los demás buckets), primero lo de documentos vigentes y lo liviano; lo demás queda `pendiente_plan`. Un archivo de
+  un documento con `datos_sensibles` queda `retenido` (se sanea antes). Visio, Publisher e InfoPath:
+  `sin_conversion`. En el bucket el nombre es la huella (`pdf/<huella>.pdf`), nunca la ruta del repositorio.
+  Idempotente: volver a correrlo sube lo que falte y actualiza las filas.
+- **Quién ve**: la RLS de `sgc.documento_archivo` y la política del bucket `documentos` preguntan por el documento con
+  la sesión de quien mira, así que los perímetros sensibles cierran igual que la ficha. Nadie escribe con su sesión.
+- **La ficha**: pestaña «Archivos de origen» (bloque `archivos`, `components/sistema/ui/archivos-ficha.tsx`). «Ver» abre
+  la vista previa dibujada con **pdf.js** (`visor-pdf.tsx`, página por página al desplazarse): un `iframe` no sirve
+  porque Chrome en Android no muestra PDF dentro de una página y Safari en el iPhone solo pinta la primera hoja.
+  `pdfjs-dist` es dependencia de producción por eso. Las rutas: `/sistema/nucleo/documentos/archivo/[id]/ver` (el PDF en
+  línea, desde el mismo origen) y `/descargar` (enlace firmado de 60 s; `?original=1` para el original).
+- `node --env-file=.env.local scripts/plataforma/probar-documentos-archivos.mjs` lo recorre en pruebas: la pestaña, la
+  vista previa dibujada (píxeles del lienzo), las rutas, el teléfono y que sin `sistema:perimetros` no se alcanza la
+  fila, el objeto ni la ruta de un documento de perímetro.
+
 ## Plataforma Iberia · el registro de métricas (`/sistema`, R5)
 
 Desde el 20 de noviembre de 2026. **Cada cifra de la plataforma se define una sola vez**: «procesos con
