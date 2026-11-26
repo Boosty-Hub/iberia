@@ -182,8 +182,24 @@ export const MODULO_ASISTENTE: ModuloPlan = {
   orden: 0,
 }
 
+/**
+ * Mis archivos (26-nov-2026, pedido de Gabriel): las carpetas de cada quien, personales y compartidas, como un
+ * SharePoint chico. Va en Mi día, junto al asistente, que las cita con «/». Sale con `sistema:archivos` · ver.
+ */
+export const MODULO_ARCHIVOS: ModuloPlan = {
+  codigo: 'MI-ARC',
+  nombre: 'Mis archivos',
+  dominio: 'Mi día',
+  fase: null,
+  estado: 'operando',
+  ruta: '/sistema/archivos',
+  recurso: 'sistema:archivos',
+  descripcion: 'Tus carpetas y archivos, y lo que otros te compartieron. El asistente los usa con «/».',
+  orden: 1,
+}
+
 /** Los módulos que declara la interfaz y no la base: se suman a los del plan. */
-export const MODULOS_INTERFAZ: ModuloPlan[] = [...MODULOS_MI_DIA, MODULO_ASISTENTE, MODULO_PADRON]
+export const MODULOS_INTERFAZ: ModuloPlan[] = [...MODULOS_MI_DIA, MODULO_ASISTENTE, MODULO_ARCHIVOS, MODULO_PADRON]
 
 export const ESTADO_MODULO: Record<EstadoModulo, { etiqueta: string; color: string }> = {
   operando: { etiqueta: 'Operando', color: '#1f8a5b' },
@@ -279,6 +295,10 @@ export const PESTANAS: Record<string, Pestana[]> = {
   ],
   'DAT-SEM': [{ etiqueta: 'Métricas', href: '/sistema/datos/metricas', recurso: 'sistema:inicio' }],
   'FIN-TAS': [{ etiqueta: 'Tasas', href: '/sistema/finanzas/tasas', recurso: 'sistema:tasas' }],
+  'MI-ARC': [
+    { etiqueta: 'Mis carpetas', href: '/sistema/archivos', recurso: 'sistema:archivos' },
+    { etiqueta: 'Compartido conmigo', href: '/sistema/archivos/compartido', recurso: 'sistema:archivos' },
+  ],
   // Asistente de IA (26-nov-2026)
   'MI-ASI': [
     { etiqueta: 'Chats', href: '/sistema/asistente', recurso: 'sistema:asistente' },

@@ -1448,6 +1448,42 @@ python scripts/asistente/extraer-paginas.py && node --env-file=.env.local script
 node --env-file=.env.local scripts/asistente/subir-habilidad.mjs [carpeta] [--destino produccion --confirmo]
 ```
 
+## Mis archivos (`/sistema/archivos`, MI-ARC, desde el 26 de noviembre de 2026)
+
+Pedido de Gabriel: un módulo de archivos como SharePoint, por persona, con carpetas personales y compartidas, que el
+asistente use con «/». Migración `20261126250000_archivos.sql`. Casilla `sistema:archivos` (ver; crear = subir, carpetas
+y compartir); de fábrica la tiene quien tiene el asistente.
+
+- **Las carpetas son `asistente.carpeta`** (dueño, padre, nombre) y **los archivos siguen siendo `asistente.archivo`** con
+  `carpeta_id`. Lo ve su dueño o a quien él se lo comparta (`asistente.compartido`, `tipo` `archivo` o `carpeta`):
+  compartir una carpeta comparte todo lo que cuelga de ella, también lo que se agregue después
+  (`privado.carpeta_compartida_conmigo()` sube por el árbol). Solo el dueño crea, renombra, mueve y borra; el trigger
+  `b_carpeta_arbol` no deja colgar de una carpeta ajena ni hacer ciclos.
+- **Dos orígenes que no son dueños de su objeto** (no lo borran ni cuentan en la cuota): `referencia`, un objeto de otro
+  bucket (`bucket`: documentos, archivos, adiestramiento, adiestramiento-respuestas, canal, tutoriales), que solo crea el
+  servidor; y `biblioteca`, un archivo de Mis archivos adjuntado a un chat (`fuente_id`). 🔴 **Una sesión nunca crea una
+  referencia**: le daría lectura de cualquier objeto por la ruta de descarga, que firma con la clave de servicio. La
+  política «subo archivos» solo admite `subido` al bucket del asistente.
+- **Descargar y ver**: `/sistema/archivos/[id]/descargar` lee la fila con la sesión (la RLS es la autorización) y firma
+  el enlace el servidor, porque cada bucket de origen tiene su política. `?ver=1` sirve los bytes desde el mismo origen,
+  con `sandbox` (un HTML subido no corre con la sesión); la vista previa de PDF es la de los documentos (pdf.js).
+- **«Todo el Storage en las carpetas de Gabriel»** (decisión suya): `scripts/asistente/importar-storage.mjs` crea a nombre
+  de una cuenta el árbol y una `referencia` por objeto, sin copiar bytes: Documentos del SGC con la ruta original de
+  «Procesos Iberia» (del manifiesto local), Expediente por categoría, Curso de Ajito, Respuestas de los trabajadores
+  (una carpeta por persona), Portal planta y Tutoriales como están en su bucket. Idempotente. **El bucket del asistente no
+  entra**: los chats de cada quien no los lee nadie salvo Boosty para soporte, con registro (decisión 9). Lo privado
+  queda con `aviso` (respuestas de los trabajadores, documentos de perímetro sensible, expediente confidencial) y
+  **compartirlo pide «Compartir igual»**; lo que generó el asistente con datos de la plataforma se revisa por linaje,
+  como en el chat.
+- **«/» en el chat** busca, con dos letras o más, carpetas y archivos propios o compartidos (`buscarEnBiblioteca`) y
+  adjunta (`adjuntarDeBiblioteca`: filas `biblioteca` a nombre de quien adjunta, hasta 20 de una carpeta). El motor lee
+  cada archivo de su `bucket`.
+
+```
+node --env-file=.env.local scripts/asistente/importar-storage.mjs [--email <cuenta>] [--revisar] [--destino produccion --confirmo]
+node --env-file=.env.local scripts/asistente/probar-archivos.mjs      # 22 comprobaciones contra pruebas (:3005)
+```
+
 ## Seguridad — no negociable
 
 Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).

@@ -54,11 +54,15 @@ export type Database = {
         Row: {
           anthropic_file_id: string | null
           anthropic_usado_en: string | null
+          aviso: string | null
+          bucket: string
           bytes: number
+          carpeta_id: string | null
           chat_id: string | null
           creado_en: string
           dueno: string
           estado: string
+          fuente_id: string | null
           huella: string | null
           id: string
           mensaje_id: string | null
@@ -71,11 +75,15 @@ export type Database = {
         Insert: {
           anthropic_file_id?: string | null
           anthropic_usado_en?: string | null
+          aviso?: string | null
+          bucket?: string
           bytes?: number
+          carpeta_id?: string | null
           chat_id?: string | null
           creado_en?: string
           dueno?: string
           estado?: string
+          fuente_id?: string | null
           huella?: string | null
           id?: string
           mensaje_id?: string | null
@@ -88,11 +96,15 @@ export type Database = {
         Update: {
           anthropic_file_id?: string | null
           anthropic_usado_en?: string | null
+          aviso?: string | null
+          bucket?: string
           bytes?: number
+          carpeta_id?: string | null
           chat_id?: string | null
           creado_en?: string
           dueno?: string
           estado?: string
+          fuente_id?: string | null
           huella?: string | null
           id?: string
           mensaje_id?: string | null
@@ -104,10 +116,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "archivo_carpeta_id_fkey"
+            columns: ["carpeta_id"]
+            isOneToOne: false
+            referencedRelation: "carpeta"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "archivo_chat_id_fkey"
             columns: ["chat_id"]
             isOneToOne: false
             referencedRelation: "chat"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "archivo_fuente_id_fkey"
+            columns: ["fuente_id"]
+            isOneToOne: false
+            referencedRelation: "archivo"
             referencedColumns: ["id"]
           },
           {
@@ -191,6 +217,38 @@ export type Database = {
           solo_hibrido?: boolean
         }
         Relationships: []
+      }
+      carpeta: {
+        Row: {
+          creado_en: string
+          dueno: string
+          id: string
+          nombre: string
+          padre_id: string | null
+        }
+        Insert: {
+          creado_en?: string
+          dueno?: string
+          id?: string
+          nombre: string
+          padre_id?: string | null
+        }
+        Update: {
+          creado_en?: string
+          dueno?: string
+          id?: string
+          nombre?: string
+          padre_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carpeta_padre_id_fkey"
+            columns: ["padre_id"]
+            isOneToOne: false
+            referencedRelation: "carpeta"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       chat: {
         Row: {
@@ -1339,6 +1397,13 @@ export type Database = {
           rol: string
         }[]
       }
+      personas_con_archivos: {
+        Args: never
+        Returns: {
+          nombre: string
+          perfil_id: string
+        }[]
+      }
       personas_con_asistente: {
         Args: never
         Returns: {
@@ -1361,6 +1426,7 @@ export type Database = {
         Returns: string
       }
       tareas_resumen: { Args: never; Returns: Json }
+      tiene_archivos: { Args: { p_perfil: string }; Returns: boolean }
       tomar_vencidas: {
         Args: { p_ahora?: string; p_limite?: number }
         Returns: {

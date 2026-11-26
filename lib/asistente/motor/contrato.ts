@@ -11,7 +11,9 @@ export type ArchivoTurno = {
   mime: string
   bytes: number
   ruta: string
-  origen: 'subido' | 'generado' | 'microsoft'
+  /** El bucket donde vive (un adjunto de Mis archivos puede venir de otro: documentos, expediente…). */
+  bucket: string
+  origen: 'subido' | 'generado' | 'microsoft' | 'referencia' | 'biblioteca'
   anthropic_file_id: string | null
 }
 

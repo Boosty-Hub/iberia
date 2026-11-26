@@ -25,7 +25,7 @@ export default async function MisArchivosPage({ searchParams }: PageProps<'/sist
   const db = supabase.schema('asistente')
   const [pol, { data: archivos }, { data: htmls }, { data: chats }, { data: conmigo }] = await Promise.all([
     miPolitica(),
-    db.from('archivo').select('id, nombre, origen, bytes, chat_id, creado_en').eq('dueno', sesion.userId).eq('estado', 'listo').order('creado_en', { ascending: false }).limit(500),
+    db.from('archivo').select('id, nombre, origen, bytes, chat_id, creado_en').eq('dueno', sesion.userId).eq('estado', 'listo').in('origen', ['subido', 'generado', 'microsoft']).order('creado_en', { ascending: false }).limit(500),
     db.from('html').select('id, titulo, bytes, chat_id, creado_en, version, tipo').eq('dueno', sesion.userId).order('creado_en', { ascending: false }).limit(500),
     db.from('chat').select('id, titulo'),
     db.from('compartido').select('id, tipo, objeto_id, por, creado_en').eq('con', sesion.userId).order('creado_en', { ascending: false }),

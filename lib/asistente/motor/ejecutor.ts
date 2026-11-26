@@ -146,11 +146,11 @@ async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: Opcione
     // El historial y los archivos del chat.
     const [{ data: mensajes }, { data: archivos }, { data: versiones }, { data: proyecto }, { data: archivosProyecto }, { data: pref }, { data: recuerdos }] = await Promise.all([
       db.schema('asistente').from('mensaje').select('id, rol, texto, adjuntos, bloques, turno_id, creado_en, autor').eq('chat_id', chat.id).order('creado_en'),
-      db.schema('asistente').from('archivo').select('id, nombre, mime, bytes, ruta, origen, anthropic_file_id, mensaje_id, estado').eq('chat_id', chat.id).eq('estado', 'listo'),
+      db.schema('asistente').from('archivo').select('id, nombre, mime, bytes, ruta, bucket, origen, anthropic_file_id, mensaje_id, estado').eq('chat_id', chat.id).eq('estado', 'listo'),
       db.schema('asistente').from('html').select('grupo, titulo, tipo, version').eq('chat_id', chat.id).order('version', { ascending: false }),
       chat.proyecto_id ? db.schema('asistente').from('proyecto').select('nombre, instrucciones').eq('id', chat.proyecto_id).maybeSingle() : Promise.resolve({ data: null }),
       chat.proyecto_id
-        ? db.schema('asistente').from('archivo').select('id, nombre, mime, bytes, ruta, origen, anthropic_file_id, mensaje_id, estado').eq('proyecto_id', chat.proyecto_id).eq('estado', 'listo')
+        ? db.schema('asistente').from('archivo').select('id, nombre, mime, bytes, ruta, bucket, origen, anthropic_file_id, mensaje_id, estado').eq('proyecto_id', chat.proyecto_id).eq('estado', 'listo')
         : Promise.resolve({ data: [] }),
       db.schema('asistente').from('preferencia').select('memoria').eq('perfil_id', turno.solicitante).maybeSingle(),
       chat.compartido ? Promise.resolve({ data: [] }) : db.schema('asistente').from('memoria').select('id, texto').eq('dueno', turno.solicitante).order('usado_en', { ascending: false }).limit(40),
@@ -248,7 +248,7 @@ async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: Opcione
       publicarArtefacto: (x) => publicarArtefacto(db, turno.solicitante, chat.id, x),
       leerArtefacto: (grupo) => leerArtefacto(db, turno.solicitante, chat.id, grupo),
       archivoPorId: async (id) => {
-        const { data } = await db.schema('asistente').from('archivo').select('id, nombre, mime, bytes, ruta, origen, anthropic_file_id').eq('id', id).eq('chat_id', chat.id).eq('estado', 'listo').maybeSingle()
+        const { data } = await db.schema('asistente').from('archivo').select('id, nombre, mime, bytes, ruta, bucket, origen, anthropic_file_id').eq('id', id).eq('chat_id', chat.id).eq('estado', 'listo').maybeSingle()
         return (data as ArchivoTurno | null) ?? null
       },
       modo: investigacion ? 'investigacion' : 'normal',
@@ -364,7 +364,7 @@ async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: Opcione
 /** Sube a la Files API de Anthropic el archivo que está en Storage, una sola vez. */
 async function asegurarEnAnthropic(db: BaseServicio, a: ArchivoTurno): Promise<string> {
   if (a.anthropic_file_id) return a.anthropic_file_id
-  const { data, error } = await db.storage.from('asistente').download(a.ruta)
+  const { data, error } = await db.storage.from(a.bucket || 'asistente').download(a.ruta)
   if (error || !data) throw new Error(`No se pudo leer «${a.nombre}» del almacenamiento.`)
   const subido = await crearAnthropic().beta.files.upload({
     file: await toFile(Buffer.from(await data.arrayBuffer()), a.nombre, { type: a.mime || 'application/octet-stream' }),

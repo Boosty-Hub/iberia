@@ -7,6 +7,7 @@ import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { catalogoModelos, lanzarTurno, miPolitica, tokenDeSesion } from '@/lib/asistente/servidor'
 import { MAX_BYTES_ARCHIVO, dentroDelMaximo, type Esfuerzo } from '@/lib/asistente/tipos'
 import { Emisor } from '@/lib/asistente/motor/emisor'
+import { ORIGEN_PROPIO, borrarCopiaAnthropic } from '@/lib/archivos/servidor'
 
 type Resultado<T> = ({ ok: true } & T) | { ok: false; error: string }
 
@@ -249,16 +250,14 @@ export async function borrarArchivo(tipo: 'archivo' | 'html', id: string): Promi
   const { data: fila } = await tabla.select('id, ruta').eq('id', id).eq('dueno', sesion.userId).maybeSingle()
   if (!fila) return { ok: false, error: 'No es tuyo o ya no existe.' }
   const admin = createAdminClient()
+  // Un adjunto de Mis archivos (`biblioteca`) o una referencia no son dueños de su objeto: se quita la fila y nada más.
+  let propio = true
   if (tipo === 'archivo') {
-    const { data: a } = await admin.schema('asistente').from('archivo').select('anthropic_file_id').eq('id', id).maybeSingle()
-    if (a?.anthropic_file_id) {
-      const { crearAnthropic, BETA_ARCHIVOS } = await import('@/lib/asistente/motor/servicio')
-      await crearAnthropic()
-        .beta.files.delete(a.anthropic_file_id, { betas: [...BETA_ARCHIVOS] })
-        .catch(() => undefined)
-    }
+    const { data: a } = await admin.schema('asistente').from('archivo').select('anthropic_file_id, origen').eq('id', id).maybeSingle()
+    propio = ORIGEN_PROPIO.includes(a?.origen ?? '')
+    if (propio) await borrarCopiaAnthropic(a?.anthropic_file_id ?? null)
   }
-  await supabase.storage.from('asistente').remove([fila.ruta])
+  if (propio) await supabase.storage.from('asistente').remove([fila.ruta])
   const { data: borrado } = await supabase.schema('asistente').from(tipo).delete().eq('id', id).select('id')
   revalidatePath('/sistema/asistente/archivos')
   return borrado?.length ? { ok: true } : { ok: false, error: 'No se pudo borrar.' }

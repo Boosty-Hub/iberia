@@ -208,6 +208,14 @@ export const MODULOS: Recurso[] = [
     subtitulo: 'Habilita el chat de IA; los topes, modelos y excepciones por persona van en Administración › Asistente de IA',
   },
   {
+    clave: 'sistema:archivos',
+    nombre: 'Mis archivos',
+    grupo: 'sistema',
+    acciones: ['ver', 'crear'],
+    detalle: { ver: 'Ver sus carpetas y lo que le compartan', crear: 'Subir archivos, crear carpetas y compartir' },
+    subtitulo: 'Carpetas personales y compartidas; se citan en el asistente con «/». Cada quien ve solo lo suyo y lo que le compartan',
+  },
+  {
     clave: 'sistema:asistente-admin',
     nombre: 'Administrar el asistente de IA',
     grupo: 'sistema',

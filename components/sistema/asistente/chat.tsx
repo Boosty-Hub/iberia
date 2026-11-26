@@ -24,6 +24,7 @@ import {
 } from '@/lib/asistente/tipos'
 import type { ArchivoVista, ChatLista, MensajeVista, TurnoVista } from '@/lib/asistente/datos'
 import { calificar, confirmarSubida, crearChat, detenerTurno, enviarMensaje, prepararSubida, reintentarTurno } from './acciones'
+import { adjuntarDeBiblioteca, buscarEnBiblioteca, type ItemBiblioteca } from '@/components/sistema/archivos/acciones'
 import { borrarMemoria } from './acciones-f3'
 import { CompartirObjeto, PanelCompartirChat } from './compartir'
 import { useRouter } from 'next/navigation'
@@ -139,6 +140,34 @@ export function ChatAsistente(props: {
   // El menú «/»: se abre cuando el texto empieza con «/» y todavía no tiene espacio.
   const consultaAtajo = /^\/[a-z0-9-]*$/i.test(texto) ? texto.slice(1).toLowerCase() : null
   const atajosVisibles = consultaAtajo === null ? [] : props.atajos.filter((a) => a.comando.includes(consultaAtajo) || a.titulo.toLowerCase().includes(consultaAtajo)).slice(0, 8)
+  // «/» también busca en Mis archivos (26-nov-2026): con dos letras o más, carpetas y archivos propios o compartidos.
+  const consultaBiblio = /^\/[^\n]{2,60}$/.test(texto) ? texto.slice(1).trim() : null
+  const [resBiblio, setResBiblio] = useState<{ q: string; items: ItemBiblioteca[] }>({ q: '', items: [] })
+  const biblioteca = consultaBiblio && resBiblio.q === consultaBiblio ? resBiblio.items : []
+  useEffect(() => {
+    if (!consultaBiblio || consultaBiblio.length < 2) return
+    let vigente = true
+    const t = setTimeout(() => void buscarEnBiblioteca(consultaBiblio).then((items) => vigente && setResBiblio({ q: consultaBiblio, items })), 250)
+    return () => {
+      vigente = false
+      clearTimeout(t)
+    }
+  }, [consultaBiblio])
+  const usarDeBiblioteca = async (item: ItemBiblioteca) => {
+    setTexto('')
+    setResBiblio({ q: '', items: [] })
+    const local = crypto.randomUUID()
+    setAdjuntos((a) => [...a, { local, nombre: item.tipo === 'carpeta' ? `📁 ${item.nombre}` : item.nombre, bytes: 0, estado: 'subiendo' }])
+    const r = await adjuntarDeBiblioteca(item.tipo, item.id)
+    if (!r.ok) return setAdjuntos((a) => a.map((x) => (x.local === local ? { ...x, estado: 'error', error: r.error } : x)))
+    setArchivos((m) => {
+      const n = new Map(m)
+      for (const x of r.adjuntos) n.set(x.archivoId, { id: x.archivoId, nombre: x.nombre, mime: x.mime, bytes: x.bytes, origen: 'subido' })
+      return n
+    })
+    setAdjuntos((a) => [...a.filter((x) => x.local !== local), ...r.adjuntos.map((x) => ({ local: crypto.randomUUID(), nombre: x.nombre, bytes: x.bytes, estado: 'listo' as const, archivoId: x.archivoId }))])
+    setTimeout(() => entrada.current?.focus(), 0)
+  }
   const usarAtajo = (a: (typeof props.atajos)[number]) => {
     setTexto(a.instruccion)
     if (a.modelo && disponibles.some((m) => m.id === a.modelo)) elegirModelo(a.modelo)
@@ -600,6 +629,19 @@ export function ChatAsistente(props: {
                 ))}
               </ul>
             )}
+            {biblioteca.length > 0 && (
+              <ul role="listbox" aria-label="Mis archivos" className="mb-1.5 max-h-60 overflow-y-auto rounded-xl border border-[var(--borde)] bg-white p-1 shadow-lg" data-menu-biblioteca>
+                {biblioteca.map((b) => (
+                  <li key={`${b.tipo}-${b.id}`}>
+                    <button type="button" role="option" aria-selected={false} onClick={() => void usarDeBiblioteca(b)} className="flex w-full items-baseline gap-2 rounded-lg px-2.5 py-1.5 text-left hover:bg-marca-50">
+                      <span aria-hidden>{b.tipo === 'carpeta' ? '📁' : '📄'}</span>
+                      <span className="min-w-0 truncate text-[13px] text-marca-800">{b.nombre}</span>
+                      <span className="ml-auto shrink-0 text-[11px] text-marca-400">{b.detalle}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
             <div className="rounded-xl border border-marca-200 bg-white focus-within:border-marca-400">
               <textarea
                 ref={entrada}
@@ -610,6 +652,7 @@ export function ChatAsistente(props: {
                   if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
                     e.preventDefault()
                     if (atajosVisibles.length) usarAtajo(atajosVisibles[0])
+                    else if (biblioteca.length) void usarDeBiblioteca(biblioteca[0])
                     else void enviar()
                   }
                 }}
@@ -620,7 +663,7 @@ export function ChatAsistente(props: {
                   }
                 }}
                 rows={Math.min(8, Math.max(2, texto.split('\n').length))}
-                placeholder={sinHabilitar ? 'El asistente no está disponible para ti.' : 'Escríbele al asistente… («/» para atajos · Enter envía · Mayús+Enter salta de línea)'}
+                placeholder={sinHabilitar ? 'El asistente no está disponible para ti.' : 'Escríbele al asistente… («/» para atajos y tus archivos · Enter envía · Mayús+Enter salta de línea)'}
                 aria-label="Mensaje para el asistente"
                 className="block w-full resize-none rounded-t-xl px-3.5 pt-3 text-[14.5px] text-marca-900 outline-none placeholder:text-marca-400"
               />
