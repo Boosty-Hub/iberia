@@ -11,6 +11,7 @@ import { titularYClasificar } from './titulo'
 import { prepararDatos } from './datos'
 import type { ApiMemoria } from './memoria'
 import { INSTRUCCIONES_INVESTIGACION } from './tareas'
+import { consolidarChat } from './consolidar'
 import type { ArchivoTurno, ArtefactoTurno, ContextoMotor, Precio, ResultadoMotor, TurnoHistorial } from './contrato'
 
 /** Lo que se reserva antes de correr (vive en `tipos.ts`: la pantalla la usa para cerrar el chat al llegar al tope). */
@@ -135,8 +136,9 @@ async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: Opcione
     const puedeMotor = (k: string) => ((caps ?? []) as { capacidad: string; disponible: boolean }[]).find((c) => c.capacidad === k)?.disponible !== false
 
     // El historial y los archivos del chat.
-    const [{ data: mensajes }, { data: archivos }, { data: versiones }, { data: proyecto }, { data: archivosProyecto }, { data: pref }, { data: recuerdos }] = await Promise.all([
-      db.schema('asistente').from('mensaje').select('id, rol, texto, adjuntos, bloques, turno_id, creado_en, autor').eq('chat_id', chat.id).order('creado_en'),
+    const [{ data: mensajesDesc }, { data: archivos }, { data: versiones }, { data: proyecto }, { data: archivosProyecto }, { data: pref }, { data: recuerdos }] = await Promise.all([
+      // Los últimos 300: Supabase corta en 1.000 sin avisar, y lo anterior lo cubre el resumen vivo del chat.
+      db.schema('asistente').from('mensaje').select('id, rol, texto, adjuntos, bloques, turno_id, creado_en, autor').eq('chat_id', chat.id).order('creado_en', { ascending: false }).limit(300),
       db.schema('asistente').from('archivo').select('id, nombre, mime, bytes, ruta, bucket, origen, anthropic_file_id, mensaje_id, estado').eq('chat_id', chat.id).eq('estado', 'listo'),
       db.schema('asistente').from('html').select('grupo, titulo, tipo, version').eq('chat_id', chat.id).order('version', { ascending: false }),
       chat.proyecto_id ? db.schema('asistente').from('proyecto').select('nombre, instrucciones').eq('id', chat.proyecto_id).maybeSingle() : Promise.resolve({ data: null }),
@@ -146,6 +148,7 @@ async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: Opcione
       db.schema('asistente').from('preferencia').select('memoria').eq('perfil_id', turno.solicitante).maybeSingle(),
       chat.compartido ? Promise.resolve({ data: [] }) : db.schema('asistente').from('memoria').select('id, texto').eq('dueno', turno.solicitante).order('usado_en', { ascending: false }).limit(40),
     ])
+    const mensajes = (mensajesDesc ?? []).slice().reverse()
     // La memoria: de quien pregunta, apagable, y nunca en un chat compartido.
     const memoria: ApiMemoria | null =
       chat.compartido || pref?.memoria === false
@@ -160,6 +163,11 @@ async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: Opcione
             olvidar: async (id) => {
               const { data } = await db.schema('asistente').from('memoria').delete().eq('id', id).eq('dueno', turno.solicitante).select('id')
               return !!data?.length
+            },
+            // Solo en los chats de quien pregunta (los suyos y los compartidos con ella), menos este.
+            buscarChats: async (texto) => {
+              const { data } = await db.schema('asistente').rpc('buscar_en_chats', { p_perfil: turno.solicitante, p_texto: texto, p_excluir: chat.id, p_limite: 8 })
+              return ((data ?? []) as { titulo: string; fecha: string; fragmento: string }[]).map((x) => ({ titulo: x.titulo, fecha: x.fecha, fragmento: x.fragmento }))
             },
           }
     // La última versión de cada artefacto del chat.
@@ -193,6 +201,30 @@ async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: Opcione
       }))
     const adjuntos = (propio.adjuntos ?? []).map((id: string) => porId.get(id)).filter(Boolean) as ArchivoTurno[]
 
+    // La memoria del chat (26-nov-2026): con resumen vivo, un chat largo viaja como resumen + lo posterior al resumen,
+    // y al menos los últimos 20 mensajes completos. Así no pierde el hilo ni se vuelve caro.
+    let historialTurno = historial
+    let recuerdo = ''
+    if (chat.resumen && historial.length > 24) {
+      const previos = mensajes.filter((m) => m.creado_en < propio.creado_en)
+      const despues = chat.resumen_hasta ? previos.findIndex((m) => m.creado_en > chat.resumen_hasta!) : previos.length
+      const desde = Math.min(despues < 0 ? previos.length : despues, Math.max(0, previos.length - 20))
+      historialTurno = historial.slice(desde)
+      recuerdo += `\n[Resumen de lo conversado antes en este chat (lo que sigue son los últimos mensajes completos): ${chat.resumen}]`
+    }
+    if (chat.proyecto_id && !chat.compartido) {
+      const { data: otros } = await db
+        .schema('asistente')
+        .from('chat')
+        .select('titulo, resumen, actualizado_en')
+        .eq('proyecto_id', chat.proyecto_id)
+        .neq('id', chat.id)
+        .not('resumen', 'is', null)
+        .order('actualizado_en', { ascending: false })
+        .limit(5)
+      if (otros?.length) recuerdo += `\n[Lo resuelto en otros chats de este proyecto: ${otros.map((o) => `«${o.titulo}» (${String(o.actualizado_en).slice(0, 10)}): ${String(o.resumen).slice(0, 600)}`).join(' | ')}]`
+    }
+
     const precioDe = (id: string): Precio => {
       const m = (modelos ?? []).find((x) => x.id === id || id.startsWith(x.id))
       return m ? { entrada: Number(m.precio_entrada), salida: Number(m.precio_salida), cacheLee: Number(m.precio_cache_lee), cacheEscribe: Number(m.precio_cache_escribe) } : PRECIO_DEFECTO
@@ -221,7 +253,8 @@ async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: Opcione
       sistema:
         instruccionesSistema(config.instrucciones_empresa ?? '', proyecto ? { nombre: proyecto.nombre, instrucciones: proyecto.instrucciones } : null) +
         (investigacion ? INSTRUCCIONES_INVESTIGACION : ''),
-      historial,
+      historial: historialTurno,
+      recuerdo,
       texto: (opciones.nota ?? '') + desde + firmar(propio.autor, propio.texto),
       adjuntos,
       archivosDelChat: [...porId.values()],
@@ -345,6 +378,18 @@ async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: Opcione
     ])
     emisor.emitir({ t: 'fin', turno: turnoId, estado: r.estado, mensaje: mensajeId, error: r.error ?? null })
     await emisor.terminar()
+    if (r.estado === 'listo' && !turno.corrida_id) {
+      const c = await consolidarChat(db, chat.id, turno.solicitante, !chat.compartido && pref?.memoria !== false)
+      if (c.costoUsd) {
+        const { data: t } = await db.schema('asistente').from('turno').select('costo_usd').eq('id', turnoId).single()
+        await db.schema('asistente').from('turno').update({ costo_usd: Math.round((Number(t?.costo_usd ?? 0) + c.costoUsd) * 100000) / 100000 }).eq('id', turnoId)
+      }
+      // Lo aprendido queda a la vista en la respuesta («Guardé en tu memoria», con Deshacer).
+      if (c.aprendidos.length && mensajeId) {
+        const bloques = [...r.bloques, ...c.aprendidos.map((a) => ({ tipo: 'memoria' as const, memoriaId: a.id, texto: a.texto }))]
+        await db.schema('asistente').from('mensaje').update({ bloques: bloques as never }).eq('id', mensajeId)
+      }
+    }
     return false
   } catch (e) {
     console.error('[asistente] turno', turnoId, e)

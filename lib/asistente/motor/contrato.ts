@@ -45,6 +45,8 @@ export type ContextoMotor = {
   datos: Datos | null
   /** La memoria de quien pregunta (fase 3), o null si la apagó o el chat es compartido. */
   memoria: ApiMemoria | null
+  /** El resumen vivo del chat y lo resuelto en otros chats del proyecto (26-nov-2026), para el mensaje del turno. */
+  recuerdo?: string
   senal: AbortSignal
   emitir: (e: EventoTurno) => void
   /** Sube (una vez) un archivo de Storage a la Files API de Anthropic y devuelve su `file_id`. */

@@ -50,7 +50,7 @@ export function PanelAsistente() {
   }, [ruta, abierto, modo])
 
   useEffect(() => {
-    const cargar = () => void datosPanelAsistente().then(setDatos)
+    const cargar = (chat: string | null = null) => void datosPanelAsistente(chat).then(setDatos)
     const preguntar = (e: Event) => {
       const d = (e as CustomEvent<{ pregunta?: string; contexto?: string }>).detail ?? {}
       const contexto = d.contexto?.trim() || pantallaActual()
@@ -60,14 +60,16 @@ export function PanelAsistente() {
       setAbierto(true)
       cargar()
     }
-    const ventana = () => {
+    const ventana = (e: Event) => {
+      const desde = (e as CustomEvent<{ chatId?: string | null }>).detail?.chatId ?? null
       setModo('ventana')
       setMinimizado(false)
-      // Si ya había un chat abierto en el panel, sigue el mismo; si no, uno nuevo.
-      if (!abiertoRef.current) {
+      // Desde un chat abierto, la ventana sigue ese chat. Si ya había uno en el panel, sigue ese; si no, uno nuevo.
+      if (desde || !abiertoRef.current) {
+        setDatos(null)
         setPedido((p) => ({ pregunta: '', contexto: '', n: p.n + 1 }))
-        setChatId(null)
-        cargar()
+        setChatId(desde)
+        cargar(desde)
       }
       setAbierto(true)
     }
@@ -193,21 +195,21 @@ export function PanelAsistente() {
                 politica={datos.politica}
                 modelos={datos.modelos}
                 chats={[]}
-                chatId={null}
-                tituloInicial={null}
-                mensajesIniciales={[]}
-                archivosIniciales={[]}
-                turnoInicial={null}
-                modeloDelChat={null}
-                esfuerzoDelChat={null}
-                proyecto={null}
-                compartido={false}
-                esDueno
-                participantes={[]}
-                fuentesDelChat={[]}
+                chatId={datos.abierto?.id ?? null}
+                tituloInicial={datos.abierto?.titulo ?? null}
+                mensajesIniciales={datos.abierto?.mensajes ?? []}
+                archivosIniciales={datos.abierto?.archivos ?? []}
+                turnoInicial={datos.abierto?.turno ?? null}
+                modeloDelChat={datos.abierto?.modelo ?? null}
+                esfuerzoDelChat={datos.abierto?.esfuerzo ?? null}
+                proyecto={datos.abierto?.proyecto ?? null}
+                compartido={datos.abierto?.compartido ?? false}
+                esDueno={datos.abierto?.esDueno ?? true}
+                participantes={datos.abierto?.participantes ?? []}
+                fuentesDelChat={datos.abierto?.fuentes ?? []}
                 atajos={datos.atajos}
-                tareasProgramadas={[]}
-                deTarea={null}
+                tareasProgramadas={datos.abierto?.tareasProgramadas ?? []}
+                deTarea={datos.abierto?.deTarea ?? null}
                 capacidades={datos.capacidades}
               />
             )}

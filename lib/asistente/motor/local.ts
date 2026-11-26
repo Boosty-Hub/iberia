@@ -15,7 +15,7 @@ import { HERRAMIENTA_ARCHIVOS, HERRAMIENTA_ARTEFACTO, HERRAMIENTA_LEER_ARTEFACTO
 import { ejecutarAnthropic, herramientaArtefacto, mensajeDeError } from './anthropic'
 import { costoDe, sumarUso, usoVacio, type ContextoMotor, type Precio, type ResultadoMotor, type Uso } from './contrato'
 import { NOMBRES_DATOS, herramientaDatos, herramientasDeDatos } from './datos'
-import { HERRAMIENTAS_MEMORIA, NOMBRES_MEMORIA, contextoMemoria, herramientaMemoria } from './memoria'
+import { NOMBRES_MEMORIA, contextoMemoria, herramientaMemoria, herramientasDeMemoria } from './memoria'
 import { HERRAMIENTA_PROPONER_TAREA, herramientaProponerTarea } from './tareas'
 
 type Paso = Extract<Bloque, { tipo: 'paso' }>
@@ -149,14 +149,14 @@ export async function ejecutarLocal(ctx: ContextoMotor, precioDe: (modelo: strin
   const mensajes: Mensaje[] = [
     { role: 'system', content: ctx.sistema + AVISO_LOCAL + (cfg.archivos ? AVISO_ARCHIVOS : AVISO_SIN_ARCHIVOS) },
     ...historial,
-    { role: 'user', content: `${contextoDelTurno()}${lista}${listaDeArtefactos(ctx.artefactos)}${contextoMemoria(ctx.memoria)}\n\n${ctx.texto}` },
+    { role: 'user', content: `${contextoDelTurno()}${lista}${listaDeArtefactos(ctx.artefactos)}${contextoMemoria(ctx.memoria)}${ctx.recuerdo ?? ''}\n\n${ctx.texto}` },
   ]
   const herramientas = [
     herramienta(HERRAMIENTA_ARTEFACTO),
     herramienta(HERRAMIENTA_LEER_ARTEFACTO),
     ...(cfg.archivos ? [herramienta(HERRAMIENTA_ARCHIVOS)] : []),
     ...(ctx.datos ? herramientasDeDatos(ctx.datos) : []).map(herramienta),
-    ...(ctx.memoria ? HERRAMIENTAS_MEMORIA : []).map(herramienta),
+    ...herramientasDeMemoria(ctx.memoria).map(herramienta),
     ...(ctx.puedeProgramar ? [herramienta(HERRAMIENTA_PROPONER_TAREA)] : []),
   ]
 

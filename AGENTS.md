@@ -1426,6 +1426,25 @@ migraciones `20261126100000_asistente` a `…190000_asistente_fase7`, una por fa
   (NUC-PRO-IA-01, NUC-DOC-IA-01, NUC-ORG-IA-01, NUC-ORG-IA-04, NUC-DOC-IA-06, FIN-TAS-IA-01) quedan en N0 con
   `ia.capacidad.absorbida_por = 'NUC-ASI-IA-01'` («Resuelta por el asistente» en el Gobierno de IA). El Gobierno de IA sigue
   siendo la capa de control: interruptor general, niveles con doble aprobación y lo que cambia datos.
+- **La memoria en tres capas** (26-nov-2026, pedido de Gabriel; migración `…270000_asistente_memoria_chats`):
+  1. **Resumen vivo por chat** (`chat.resumen`, `resumen_hasta`, `resumen_mensajes`): después de un turno, desde los 6 mensajes y
+     cada 10 nuevos, Haiku consolida el chat (`motor/consolidar.ts`). Un chat de más de 24 mensajes viaja como resumen + lo
+     posterior + al menos los últimos 20 completos (`ctx.recuerdo`). El ejecutor lee los últimos 300 mensajes: Supabase corta en
+     1.000 sin avisar. En un proyecto, los resúmenes de sus otros chats entran también.
+  2. **Buscar en los chats anteriores** (`buscar_en_mis_chats` → `asistente.buscar_en_chats`, solo servicio): mensajes y
+     resúmenes de los chats donde la persona participa, menos el actual, por texto en español. Va con las herramientas de
+     memoria, así que **nunca desde un chat compartido** ni con la memoria apagada.
+  3. **La memoria aprende sola** (decisión de Gabriel: sin aprobar): la misma llamada de Haiku devuelve hasta 3 hechos estables
+     nuevos, que se guardan con `memoria.aprendido` (filtrados por `PROHIBIDO_EN_MEMORIA`, sin repetir; tope de 40 aprendidos), se
+     marcan «Aprendido» en Mi memoria y se borran ahí. La respuesta suma el bloque «Guardé en tu memoria».
+  `node --env-file=.env.local scripts/asistente/probar-memoria.mjs` (8, contra pruebas).
+- **Al llegar al tope el chat se cierra** (26-nov-2026; migración `…260000_asistente_aviso_cupo`): `estadoCupo()` de
+  `lib/asistente/tipos.ts` hace la misma cuenta que `reservar_turno` con la reserva del modelo (`RESERVA_POR_MODELO`, la usan el
+  ejecutor y la pantalla). Si no cabe con ningún modelo, la caja y «Enviar» se cierran con la hora de renovación; si cabe con uno
+  más liviano o sin «Investigación», lo ofrece. Al renovarse: aviso flotante (y del navegador, si se permitió) y, por el reloj del
+  programador (`avisos_renovados`, cada minuto), aviso en la campana. ⚠️ Las consultas de supabase-js no salen sin `await` o
+  `.then()`: un `void supabase.rpc(…)` no manda nada. `probar-cupo.mjs` (9).
+- **«Abrir en ventana» desde un chat sigue ese chat** (`datosPanelAsistente(chatId)` lo lee como la página del chat).
 - **La excepción por persona abre las pantallas** (`asistente.mi_excepcion()`, en `obtenerSesion`): habilitar a alguien en
   Administración › Asistente de IA › Usuarios sin tocar su rol.
 - **Piloto: el ejecutor en Supabase Edge Functions** (26-nov-2026, pedido de Gabriel: «que todo pase por Supabase»). La

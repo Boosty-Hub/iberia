@@ -4,7 +4,7 @@ import { HERRAMIENTA_ARCHIVOS, HERRAMIENTA_ARTEFACTO, HERRAMIENTA_LEER_ARTEFACTO
 import { ejecutarAnthropic, herramientaArtefacto, mensajeDeError } from './anthropic'
 import { costoDe, sumarUso, usoVacio, type ContextoMotor, type Precio, type ResultadoMotor, type Uso } from './contrato'
 import { NOMBRES_DATOS, herramientaDatos, herramientasDeDatos } from './datos'
-import { HERRAMIENTAS_MEMORIA, NOMBRES_MEMORIA, contextoMemoria, herramientaMemoria } from './memoria'
+import { NOMBRES_MEMORIA, contextoMemoria, herramientaMemoria, herramientasDeMemoria } from './memoria'
 import { HERRAMIENTA_PROPONER_TAREA, herramientaProponerTarea } from './tareas'
 
 type Item = Record<string, unknown>
@@ -117,7 +117,7 @@ export async function ejecutarOpenAI(ctx: ContextoMotor, precioDe: (modelo: stri
   const pasos = new Map<string, Extract<Bloque, { tipo: 'paso' }>>()
   const fuentes = new Map<string, string>()
   const lista = ctx.adjuntos.length ? `\n[Adjuntos de este mensaje: ${ctx.adjuntos.map((a) => a.nombre).join(', ')}]` : ''
-  const entrada: Item[] = [...historialOpenAI(ctx), { role: 'user', content: [{ type: 'input_text', text: `${contextoDelTurno()}${lista}${listaDeArtefactos(ctx.artefactos)}${contextoMemoria(ctx.memoria)}\n\n${ctx.texto}` }] }]
+  const entrada: Item[] = [...historialOpenAI(ctx), { role: 'user', content: [{ type: 'input_text', text: `${contextoDelTurno()}${lista}${listaDeArtefactos(ctx.artefactos)}${contextoMemoria(ctx.memoria)}${ctx.recuerdo ?? ''}\n\n${ctx.texto}` }] }]
 
   try {
     for (let vuelta = 0; vuelta < MAX_VUELTAS; vuelta++) {
@@ -136,7 +136,7 @@ export async function ejecutarOpenAI(ctx: ContextoMotor, precioDe: (modelo: stri
             { type: 'function', name: HERRAMIENTA_LEER_ARTEFACTO.name, description: HERRAMIENTA_LEER_ARTEFACTO.description, parameters: HERRAMIENTA_LEER_ARTEFACTO.input_schema, strict: true },
             { type: 'function', name: HERRAMIENTA_ARCHIVOS.name, description: HERRAMIENTA_ARCHIVOS.description, parameters: HERRAMIENTA_ARCHIVOS.input_schema, strict: true },
             ...(ctx.datos ? herramientasDeDatos(ctx.datos) : []).map((h) => ({ type: 'function', name: h.name, description: h.description, parameters: h.input_schema, strict: true })),
-            ...(ctx.memoria ? HERRAMIENTAS_MEMORIA : []).map((h) => ({ type: 'function', name: h.name, description: h.description, parameters: h.input_schema, strict: true })),
+            ...herramientasDeMemoria(ctx.memoria).map((h) => ({ type: 'function', name: h.name, description: h.description, parameters: h.input_schema, strict: true })),
             ...(ctx.puedeProgramar ? [HERRAMIENTA_PROPONER_TAREA] : []).map((h) => ({ type: 'function', name: h.name, description: h.description, parameters: h.input_schema, strict: true })),
           ],
         },

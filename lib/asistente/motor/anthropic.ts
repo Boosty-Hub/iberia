@@ -4,7 +4,7 @@ import { BETAS_ANTHROPIC, crearAnthropic } from './servicio'
 import { HERRAMIENTA_ARTEFACTO, HERRAMIENTA_LEER_ARTEFACTO, contextoDelTurno, listaDeArtefactos } from './instrucciones'
 import { costoDe, sumarUso, usoVacio, type ContextoMotor, type Precio, type ResultadoMotor, type Uso } from './contrato'
 import { NOMBRES_DATOS, herramientaDatos, herramientasDeDatos } from './datos'
-import { HERRAMIENTAS_MEMORIA, NOMBRES_MEMORIA, contextoMemoria, herramientaMemoria } from './memoria'
+import { NOMBRES_MEMORIA, contextoMemoria, herramientaMemoria, herramientasDeMemoria } from './memoria'
 import { HERRAMIENTA_PROPONER_TAREA, herramientaProponerTarea } from './tareas'
 
 type Msg = Anthropic.Beta.BetaMessageParam
@@ -88,7 +88,7 @@ async function mensajeActual(ctx: ContextoMotor): Promise<Contenido[]> {
   const lista =
     (ctx.adjuntos.length ? `\n[Adjuntos de este mensaje, ya en tu entorno de código: ${ctx.adjuntos.map((a) => a.nombre).join(', ')}]` : '') +
     (ctx.archivosFijos.length ? `\n[Archivos de referencia del proyecto, en tu entorno de código: ${ctx.archivosFijos.map((a) => a.nombre).join(', ')}]` : '')
-  partes.push({ type: 'text', text: `${contextoDelTurno()}${lista}${listaDeArtefactos(ctx.artefactos)}${contextoMemoria(ctx.memoria)}\n\n${ctx.texto}` })
+  partes.push({ type: 'text', text: `${contextoDelTurno()}${lista}${listaDeArtefactos(ctx.artefactos)}${contextoMemoria(ctx.memoria)}${ctx.recuerdo ?? ''}\n\n${ctx.texto}` })
   return partes
 }
 
@@ -173,7 +173,7 @@ export async function ejecutarAnthropic(ctx: ContextoMotor, precioDe: (modelo: s
             { ...HERRAMIENTA_ARTEFACTO, eager_input_streaming: true } as Anthropic.Beta.BetaTool,
             HERRAMIENTA_LEER_ARTEFACTO as Anthropic.Beta.BetaTool,
             ...(ctx.datos ? herramientasDeDatos(ctx.datos) : []).map((h) => h as Anthropic.Beta.BetaTool),
-            ...(ctx.memoria ? HERRAMIENTAS_MEMORIA : []).map((h) => h as Anthropic.Beta.BetaTool),
+            ...herramientasDeMemoria(ctx.memoria).map((h) => h as Anthropic.Beta.BetaTool),
             ...(ctx.puedeProgramar ? [HERRAMIENTA_PROPONER_TAREA as Anthropic.Beta.BetaTool] : []),
           ],
           cache_control: { type: 'ephemeral' },

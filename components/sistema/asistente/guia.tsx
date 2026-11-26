@@ -56,8 +56,12 @@ export async function GuiaAsistente({ sesion }: { sesion: Sesion }) {
           <strong>Artefactos</strong>: tableros, gráficos y documentos que se abren al costado, se actualizan por versiones y se descargan.
         </Item>
         <Item>
-          <strong>Proyectos</strong> (instrucciones y archivos fijos para varios chats), <strong>Mi memoria</strong> (lo que recuerda de cómo trabajas; la puedes corregir o apagar) y{' '}
-          <strong>Dictar</strong> (🎙, hablas y revisas el texto antes de enviar).
+          <strong>Proyectos</strong> (instrucciones y archivos fijos para varios chats; lo resuelto en un chat del proyecto lo saben los demás) y <strong>Dictar</strong> (🎙, hablas y
+          revisas el texto antes de enviar).
+        </Item>
+        <Item>
+          <strong>Memoria</strong>: en un chat largo no pierde el hilo (lleva un resumen vivo); recuerda lo que hablaste en tus otros chats cuando hace falta; y aprende solo cómo trabajas.
+          Lo que aprende lo ves y lo borras en «Mi memoria», o la apagas. Nunca entra en un chat compartido.
         </Item>
         {cap('investigacion') && (
           <Item>

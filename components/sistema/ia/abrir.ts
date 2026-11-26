@@ -20,7 +20,7 @@ export function abrirPreguntaIa(pregunta = '', contexto = '') {
  */
 export const EVENTO_VENTANA_IA = 'asistente-ventana'
 
-export function abrirVentanaAsistente() {
+export function abrirVentanaAsistente(chatId: string | null = null) {
   if (typeof window === 'undefined') return
-  window.dispatchEvent(new CustomEvent(EVENTO_VENTANA_IA))
+  window.dispatchEvent(new CustomEvent(EVENTO_VENTANA_IA, { detail: { chatId } }))
 }

@@ -170,7 +170,7 @@ export function InterruptorMemoria({ encendida }: { encendida: boolean }) {
   )
 }
 
-export function FilaMemoria({ id, texto: t0, origen }: { id: string; texto: string; origen: { id: string; titulo: string } | null }) {
+export function FilaMemoria({ id, texto: t0, origen, aprendido = false }: { id: string; texto: string; origen: { id: string; titulo: string } | null; aprendido?: boolean }) {
   const [texto, setTexto] = useState(t0)
   const [editando, setEditando] = useState(false)
   const { pendiente, correr } = useAccion()
@@ -180,7 +180,14 @@ export function FilaMemoria({ id, texto: t0, origen }: { id: string; texto: stri
         <input className={cn(campo, 'h-9 min-w-0 flex-1')} value={texto} maxLength={500} onChange={(e) => setTexto(e.target.value)} aria-label="Editar el recuerdo" />
       ) : (
         <div className="min-w-0 flex-1">
-          <p className="text-[13.5px] text-marca-900">{texto}</p>
+          <p className="text-[13.5px] text-marca-900">
+            {texto}
+            {aprendido && (
+              <span className="insignia ml-2 align-middle text-[11px]" title="Lo aprendió el asistente de tus conversaciones">
+                Aprendido
+              </span>
+            )}
+          </p>
           {origen && (
             <Link href={`/sistema/asistente/c/${origen.id}`} className="text-[11.5px] text-marca-500 hover:underline">
               De: {origen.titulo}

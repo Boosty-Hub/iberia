@@ -285,6 +285,9 @@ export type Database = {
           modelo: string | null
           motor: string | null
           proyecto_id: string | null
+          resumen: string | null
+          resumen_hasta: string | null
+          resumen_mensajes: number
           tarea_id: string | null
           titulo: string
           titulo_auto: boolean
@@ -302,6 +305,9 @@ export type Database = {
           modelo?: string | null
           motor?: string | null
           proyecto_id?: string | null
+          resumen?: string | null
+          resumen_hasta?: string | null
+          resumen_mensajes?: number
           tarea_id?: string | null
           titulo?: string
           titulo_auto?: boolean
@@ -319,6 +325,9 @@ export type Database = {
           modelo?: string | null
           motor?: string | null
           proyecto_id?: string | null
+          resumen?: string | null
+          resumen_hasta?: string | null
+          resumen_mensajes?: number
           tarea_id?: string | null
           titulo?: string
           titulo_auto?: boolean
@@ -749,6 +758,7 @@ export type Database = {
       }
       memoria: {
         Row: {
+          aprendido: boolean
           creado_en: string
           dueno: string
           id: string
@@ -757,6 +767,7 @@ export type Database = {
           usado_en: string
         }
         Insert: {
+          aprendido?: boolean
           creado_en?: string
           dueno?: string
           id?: string
@@ -765,6 +776,7 @@ export type Database = {
           usado_en?: string
         }
         Update: {
+          aprendido?: boolean
           creado_en?: string
           dueno?: string
           id?: string
@@ -1335,6 +1347,20 @@ export type Database = {
           extracto: string
           pagina: number
           rango: number
+          titulo: string
+        }[]
+      }
+      buscar_en_chats: {
+        Args: {
+          p_excluir?: string
+          p_limite?: number
+          p_perfil: string
+          p_texto: string
+        }
+        Returns: {
+          chat_id: string
+          fecha: string
+          fragmento: string
           titulo: string
         }[]
       }
