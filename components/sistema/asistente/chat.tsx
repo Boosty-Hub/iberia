@@ -24,6 +24,8 @@ import {
 import type { ArchivoVista, ChatLista, MensajeVista, TurnoVista } from '@/lib/asistente/datos'
 import { calificar, confirmarSubida, crearChat, detenerTurno, enviarMensaje, prepararSubida, reintentarTurno } from './acciones'
 import { borrarMemoria } from './acciones-f3'
+import { CompartirObjeto, PanelCompartirChat } from './compartir'
+import { useRouter } from 'next/navigation'
 import { aWavDe16k, formatoDeGrabacion } from '@/lib/wav'
 import { MarkdownChat } from './markdown-chat'
 import { cn } from '@/lib/utils'
@@ -76,6 +78,10 @@ export function ChatAsistente(props: {
   modeloDelChat: string | null
   esfuerzoDelChat: string | null
   proyecto: { id: string; nombre: string } | null
+  compartido: boolean
+  esDueno: boolean
+  participantes: { perfil_id: string; nombre: string; rol: string }[]
+  fuentesDelChat: string[]
   atajos: { id: string; comando: string; titulo: string; instruccion: string; modelo: string | null; esfuerzo: string | null; empresa: boolean }[]
 }) {
   const supabase = useMemo(() => createClient(), [])
@@ -102,6 +108,10 @@ export function ChatAsistente(props: {
   const [listaAbierta, setListaAbierta] = useState(false)
   const [filtro, setFiltro] = useState('')
   const [arrastrando, setArrastrando] = useState(false)
+  const [panelCompartir, setPanelCompartir] = useState(false)
+  const [alAsistente, setAlAsistente] = useState(true)
+  const router = useRouter()
+  const nombreDe = useMemo(() => new Map(props.participantes.map((p) => [p.perfil_id, p.nombre])), [props.participantes])
   const [grabando, setGrabando] = useState<'no' | 'grabando' | 'transcribiendo'>('no')
   const grabadora = useRef<MediaRecorder | null>(null)
   // El menú «/»: se abre cuando el texto empieza con «/» y todavía no tiene espacio.
@@ -211,6 +221,16 @@ export function ChatAsistente(props: {
         void cerrarTurno(e.turno, e.mensaje, e.estado, e.error)
         return
       }
+      if (e.t === 'mensaje') {
+        void supabase
+          .schema('asistente')
+          .from('mensaje')
+          .select('id, rol, texto, bloques, adjuntos, turno_id, autor, calificacion, creado_en')
+          .eq('id', e.id)
+          .maybeSingle()
+          .then(({ data: m }) => m && setMensajes((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m as MensajeVista])))
+        return
+      }
       setTurno((t) => {
         const base: TurnoEnCurso = t && (t.id === e.turno || t.id === 'pendiente') ? { ...t, id: e.turno } : { id: e.turno, estado: 'corriendo', texto: '', pensamiento: '', pasos: [], bloques: [], inicio: Date.now() }
         if (e.t === 'estado') return { ...base, estado: e.estado }
@@ -226,7 +246,7 @@ export function ChatAsistente(props: {
         return base
       })
     },
-    [cerrarTurno]
+    [cerrarTurno, supabase]
   )
   useEffect(() => {
     manejarRef.current = manejar
@@ -332,12 +352,13 @@ export function ChatAsistente(props: {
       }
       await suscribir(id)
       const temporal = `tmp-${crypto.randomUUID()}`
-      setMensajes((m) => [...m, { id: temporal, rol: 'usuario', texto: t, bloques: [], adjuntos: listos.map((a) => a.archivoId!), turno_id: null, calificacion: null, creado_en: new Date().toISOString() }])
+      setMensajes((m) => [...m, { id: temporal, rol: 'usuario', texto: t, bloques: [], adjuntos: listos.map((a) => a.archivoId!), turno_id: null, autor: props.yo.id, calificacion: null, creado_en: new Date().toISOString() }])
       setTexto('')
       setAdjuntos((a) => a.filter((x) => x.estado === 'error'))
-      setTurno({ id: 'pendiente', estado: 'en_cola', texto: '', pensamiento: '', pasos: [], bloques: [], inicio: Date.now() })
+      const paraElAsistente = !props.compartido || alAsistente
+      if (paraElAsistente) setTurno({ id: 'pendiente', estado: 'en_cola', texto: '', pensamiento: '', pasos: [], bloques: [], inicio: Date.now() })
       pegado.current = true
-      const r = await enviarMensaje({ chatId: id, texto: t, adjuntos: listos.map((a) => a.archivoId!), modelo, esfuerzo })
+      const r = await enviarMensaje({ chatId: id, texto: t, adjuntos: listos.map((a) => a.archivoId!), modelo, esfuerzo, alAsistente: paraElAsistente })
       if (!r.ok) {
         setMensajes((m) => m.filter((x) => x.id !== temporal))
         setTexto(t)
@@ -346,7 +367,10 @@ export function ChatAsistente(props: {
         return
       }
       setMensajes((m) => m.map((x) => (x.id === temporal ? { ...x, id: r.mensajeId, turno_id: r.turnoId } : x)))
-      setTurno((x) => (x && x.id === 'pendiente' ? { ...x, id: r.turnoId } : x))
+      if (r.turnoId) {
+        const tid = r.turnoId
+        setTurno((x) => (x && x.id === 'pendiente' ? { ...x, id: tid } : x))
+      }
     } finally {
       setOcupado(false)
       entrada.current?.focus()
@@ -442,12 +466,37 @@ export function ChatAsistente(props: {
           if (!sinHabilitar && e.dataTransfer.files.length) adjuntar(e.dataTransfer.files)
         }}
       >
-        <div className={cn('flex items-center gap-2 border-b border-[var(--borde)] px-3 py-2', !html && 'lg:hidden')}>
-          <button type="button" className="btn-neutro h-8 px-3 text-[12.5px]" onClick={() => setListaAbierta(true)}>
+        <div className="flex items-center gap-2 border-b border-[var(--borde)] px-3 py-2">
+          <button type="button" className={cn('btn-neutro h-8 px-3 text-[12.5px]', !html && 'lg:hidden')} onClick={() => setListaAbierta(true)}>
             ☰ Chats
           </button>
-          <span className="truncate text-[13px] font-semibold text-marca-800">{chats.find((c) => c.id === chatId)?.titulo ?? props.tituloInicial ?? 'Chat nuevo'}</span>
+          <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-marca-800">{chats.find((c) => c.id === chatId)?.titulo ?? props.tituloInicial ?? 'Chat nuevo'}</span>
+          {props.participantes.length > 1 && (
+            <span className="flex -space-x-1.5" aria-label={`En el chat: ${props.participantes.map((p) => p.nombre).join(', ')}`}>
+              {props.participantes.slice(0, 5).map((p) => (
+                <span key={p.perfil_id} title={p.nombre} className="grid h-6 w-6 place-items-center rounded-full border-2 border-white bg-marca-200 text-[10.5px] font-semibold text-marca-800">
+                  {p.nombre.slice(0, 1)}
+                </span>
+              ))}
+            </span>
+          )}
+          {chatId && (props.esDueno || props.compartido) && (
+            <button type="button" className="btn-neutro h-8 px-3 text-[12.5px]" onClick={() => setPanelCompartir((x) => !x)} aria-expanded={panelCompartir}>
+              {props.compartido ? 'Personas' : 'Compartir chat'}
+            </button>
+          )}
         </div>
+        {panelCompartir && chatId && (
+          <PanelCompartirChat
+            chatId={chatId}
+            esDueno={props.esDueno}
+            yo={props.yo.id}
+            participantes={props.participantes}
+            fuentes={props.fuentesDelChat}
+            onCambio={() => router.refresh()}
+            onCerrar={() => setPanelCompartir(false)}
+          />
+        )}
 
         <div ref={lista} onScroll={alDesplazar} className="min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-6">
           <div className="mx-auto flex max-w-3xl flex-col gap-5">
@@ -459,7 +508,7 @@ export function ChatAsistente(props: {
             {mensajes.length === 0 && !turno && <Bienvenida nombre={props.yo.nombre} sinHabilitar={sinHabilitar} onEjemplo={(t) => setTexto(t)} />}
             {mensajes.map((m) =>
               m.rol === 'usuario' ? (
-                <MensajeUsuario key={m.id} m={m} archivos={archivos} />
+                <MensajeUsuario key={m.id} m={m} archivos={archivos} autor={props.compartido && m.autor && m.autor !== props.yo.id ? (nombreDe.get(m.autor) ?? 'Alguien') : null} />
               ) : (
                 <MensajeAsistente key={m.id} m={m} archivos={archivos} onHtml={setHtml} />
               )
@@ -564,6 +613,12 @@ export function ChatAsistente(props: {
                     </option>
                   ))}
                 </select>
+                {props.compartido && (
+                  <label className="inline-flex items-center gap-1.5 text-[12px] text-marca-600">
+                    <input type="checkbox" checked={alAsistente} onChange={(e) => setAlAsistente(e.target.checked)} />
+                    Preguntarle al asistente
+                  </label>
+                )}
                 <span className="flex-1" />
                 {corriendo ? (
                   <button type="button" className="btn-primario h-8 px-3 text-[12.5px]" onClick={detener}>
@@ -626,9 +681,10 @@ function Bienvenida({ nombre, sinHabilitar, onEjemplo }: { nombre: string; sinHa
   )
 }
 
-function MensajeUsuario({ m, archivos }: { m: MensajeVista; archivos: Map<string, ArchivoVista> }) {
+function MensajeUsuario({ m, archivos, autor }: { m: MensajeVista; archivos: Map<string, ArchivoVista>; autor: string | null }) {
   return (
-    <div className="flex justify-end">
+    <div className={cn('flex flex-col', autor ? 'items-start' : 'items-end')}>
+      {autor && <span className="mb-0.5 px-1 text-[11.5px] font-semibold text-marca-500">{autor}{!m.turno_id ? ' · para el grupo' : ''}</span>}
       <div className="max-w-[85%] rounded-2xl rounded-br-md bg-marca-100 px-4 py-2.5 text-[14.5px] whitespace-pre-wrap text-marca-900">
         {m.adjuntos.length > 0 && (
           <div className="mb-1.5 flex flex-wrap gap-1.5">
@@ -688,9 +744,15 @@ function Entregables({ bloques, archivos, onHtml }: { bloques: Bloque[]; archivo
   const artefactos = bloques.map(comoArtefacto).filter((a): a is Abierto => !!a)
   const fuentes = bloques.filter((b): b is Extract<Bloque, { tipo: 'fuente' }> => b.tipo === 'fuente')
   const recuerdos = bloques.filter((b): b is Extract<Bloque, { tipo: 'memoria' }> => b.tipo === 'memoria')
-  if (!archivosB.length && !artefactos.length && !fuentes.length && !recuerdos.length) return null
+  const notas = bloques.filter((b): b is Extract<Bloque, { tipo: 'nota' }> => b.tipo === 'nota')
+  if (!archivosB.length && !artefactos.length && !fuentes.length && !recuerdos.length && !notas.length) return null
   return (
     <div className="mt-3 flex flex-col gap-2">
+      {notas.map((n) => (
+        <p key={n.texto} className="text-[11.5px] text-marca-500 italic">
+          {n.texto}
+        </p>
+      ))}
       {recuerdos.map((r) => (
         <Recuerdo key={r.memoriaId} id={r.memoriaId} texto={r.texto} />
       ))}
@@ -724,6 +786,15 @@ function Entregables({ bloques, archivos, onHtml }: { bloques: Bloque[]; archivo
           <span className="text-[12.5px] font-semibold text-acento-700">Descargar</span>
         </a>
       ))}
+      {archivosB.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {archivosB.map((b) => (
+            <span key={b.archivoId} className="inline-flex items-center gap-1.5 text-[11.5px] text-marca-500">
+              <CompartirObjeto tipo="archivo" id={b.archivoId} /> {b.nombre}
+            </span>
+          ))}
+        </div>
+      )}
       {fuentes.length > 0 && (
         <details className="text-[12px] text-marca-500">
           <summary className="cursor-pointer select-none">{fuentes.length} fuentes de internet</summary>
@@ -899,6 +970,7 @@ function PanelArtefacto({
         <a href={`/sistema/asistente/html/${abierto.id}?descargar=1`} className="btn-neutro h-8 px-2.5 text-[12px]">
           Descargar
         </a>
+        <CompartirObjeto tipo="html" id={abierto.id} />
         <button type="button" className="btn-neutro h-8 px-2.5 text-[12px]" onClick={onCerrar} aria-label="Cerrar el artefacto">
           ✕
         </button>

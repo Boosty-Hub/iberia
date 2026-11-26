@@ -74,6 +74,7 @@ export type Bloque =
   | { tipo: 'fuente'; url: string; titulo: string }
   | { tipo: 'pensamiento'; texto: string }
   | { tipo: 'memoria'; memoriaId: string; texto: string }
+  | { tipo: 'nota'; texto: string }
 
 /** Lo que viaja por Realtime mientras corre un turno (`asistente:chat:<id>`). */
 export type EventoTurno =
@@ -83,6 +84,8 @@ export type EventoTurno =
   | { t: 'paso'; turno: string; paso: Extract<Bloque, { tipo: 'paso' }> }
   | { t: 'bloque'; turno: string; bloque: Bloque }
   | { t: 'fin'; turno: string; estado: EstadoTurno; mensaje: string | null; error?: string | null }
+  /** Un mensaje nuevo de una persona en un chat compartido (los demás lo leen por su id). */
+  | { t: 'mensaje'; turno: string; id: string }
 
 export type ClaseArtefacto = 'html' | 'documento' | 'svg'
 

@@ -6,6 +6,7 @@ import { requerirPermiso } from '@/lib/auth'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { catalogoModelos, lanzarTurno, miPolitica, tokenDeSesion } from '@/lib/asistente/servidor'
 import { MAX_BYTES_ARCHIVO, dentroDelMaximo, type Esfuerzo } from '@/lib/asistente/tipos'
+import { Emisor } from '@/lib/asistente/motor/emisor'
 
 type Resultado<T> = ({ ok: true } & T) | { ok: false; error: string }
 
@@ -33,7 +34,9 @@ export async function enviarMensaje(entrada: {
   adjuntos: string[]
   modelo: string
   esfuerzo: Esfuerzo
-}): Promise<Resultado<{ chatId: string; turnoId: string; mensajeId: string }>> {
+  /** En un chat compartido: false = un mensaje para el grupo, sin preguntarle al asistente (no gasta). */
+  alAsistente?: boolean
+}): Promise<Resultado<{ chatId: string; turnoId: string | null; mensajeId: string }>> {
   const sesion = await requerirPermiso('sistema:asistente')
   const texto = entrada.texto.trim()
   if (!texto && !entrada.adjuntos.length) return { ok: false, error: 'Escribe algo o adjunta un archivo.' }
@@ -70,6 +73,17 @@ export async function enviarMensaje(entrada: {
     if (validos.length !== entrada.adjuntos.length) return { ok: false, error: 'Algún adjunto no terminó de subir. Espera o vuelve a adjuntarlo.' }
   }
 
+  // Un mensaje para el grupo: sin turno y sin gasto; los demás lo ven en vivo.
+  if (entrada.alAsistente === false && entrada.chatId) {
+    const mensajeId = crypto.randomUUID()
+    const { error } = await db.from('mensaje').insert({ id: mensajeId, chat_id: chatId, turno_id: null, rol: 'usuario', autor: sesion.userId, texto, adjuntos: [] })
+    if (error) return { ok: false, error: 'No se pudo enviar.' }
+    const e = new Emisor(chatId)
+    e.emitir({ t: 'mensaje', turno: '', id: mensajeId })
+    await e.terminar()
+    return { ok: true, chatId, turnoId: null, mensajeId }
+  }
+
   const turnoId = crypto.randomUUID()
   const { error: eTurno } = await db.from('turno').insert({ id: turnoId, chat_id: chatId, solicitante: sesion.userId, motor, modelo: modelo.id, esfuerzo })
   if (eTurno) return { ok: false, error: 'No se pudo dejar el turno en cola.' }
@@ -78,6 +92,12 @@ export async function enviarMensaje(entrada: {
     .from('mensaje')
     .insert({ id: mensajeId, chat_id: chatId, turno_id: turnoId, rol: 'usuario', autor: sesion.userId, texto, adjuntos: entrada.adjuntos })
   if (eMensaje) return { ok: false, error: 'No se pudo guardar el mensaje.' }
+  {
+    // Los demás participantes ven el mensaje en el acto (en un chat propio no hay nadie más, y no estorba).
+    const e = new Emisor(chatId)
+    e.emitir({ t: 'mensaje', turno: turnoId, id: mensajeId })
+    void e.terminar()
+  }
 
   if (entrada.adjuntos.length) {
     // El enlace archivo → chat y mensaje lo escribe el servidor (la sesión no actualiza archivos).

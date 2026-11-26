@@ -10,6 +10,7 @@ export type MensajeVista = {
   bloques: Bloque[]
   adjuntos: string[]
   turno_id: string | null
+  autor?: string | null
   calificacion: number | null
   creado_en: string
 }
@@ -29,7 +30,7 @@ export async function leerChat(chatId: string) {
   const db = supabase.schema('asistente')
   const [{ data: chat }, { data: mensajes }, { data: archivos }, { data: turnos }] = await Promise.all([
     db.from('chat').select('id, titulo, dueno, compartido, modelo, esfuerzo, proyecto_id').eq('id', chatId).maybeSingle(),
-    db.from('mensaje').select('id, rol, texto, bloques, adjuntos, turno_id, calificacion, creado_en').eq('chat_id', chatId).order('creado_en', { ascending: false }).limit(200),
+    db.from('mensaje').select('id, rol, texto, bloques, adjuntos, turno_id, autor, calificacion, creado_en').eq('chat_id', chatId).order('creado_en', { ascending: false }).limit(200),
     db.from('archivo').select('id, nombre, mime, bytes, origen').eq('chat_id', chatId),
     db.from('turno').select('id, estado, error, modelo, esfuerzo, creado_en').eq('chat_id', chatId).order('creado_en', { ascending: false }).limit(1),
   ])

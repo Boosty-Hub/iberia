@@ -224,6 +224,36 @@ export type Database = {
           },
         ]
       }
+      compartido: {
+        Row: {
+          con: string
+          creado_en: string
+          id: string
+          linaje: string[]
+          objeto_id: string
+          por: string
+          tipo: string
+        }
+        Insert: {
+          con: string
+          creado_en?: string
+          id?: string
+          linaje?: string[]
+          objeto_id: string
+          por: string
+          tipo: string
+        }
+        Update: {
+          con?: string
+          creado_en?: string
+          id?: string
+          linaje?: string[]
+          objeto_id?: string
+          por?: string
+          tipo?: string
+        }
+        Relationships: []
+      }
       config: {
         Row: {
           actualizado_en: string
@@ -889,6 +919,17 @@ export type Database = {
           turnos: number
         }[]
       }
+      fuentes_del_chat: {
+        Args: { p_chat: string }
+        Returns: {
+          fuente: string
+          veces: number
+        }[]
+      }
+      invitar: {
+        Args: { p_chat: string; p_perfil: string }
+        Returns: undefined
+      }
       leer_para_soporte: {
         Args: { p_chat: string; p_motivo: string; p_ticket?: string }
         Returns: {
@@ -919,6 +960,21 @@ export type Database = {
         }[]
       }
       mi_politica: { Args: never; Returns: Json }
+      participantes: {
+        Args: { p_chat: string }
+        Returns: {
+          nombre: string
+          perfil_id: string
+          rol: string
+        }[]
+      }
+      personas_con_asistente: {
+        Args: never
+        Returns: {
+          nombre: string
+          perfil_id: string
+        }[]
+      }
       plano: { Args: { t: string }; Returns: string }
       politica_de: { Args: { p_perfil: string }; Returns: Json }
       reservar_turno: {

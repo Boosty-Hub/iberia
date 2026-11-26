@@ -1300,6 +1300,19 @@ no use licencias sueltas. **El plan entero (7 fases, 22 decisiones de Gabriel, c
   empresa, que crea `sistema:asistente-admin` · editar): «/» en la caja abre el menú y Enter usa el primero. **Dictado**:
   `MediaRecorder` → `aWavDe16k` → `/sistema/asistente/transcribir` (Azure, `lib/transcribir.ts`, máx. 60 s); el texto
   vuelve a la caja para revisarlo y el audio no se guarda.
+- **Fase 4 · chats compartidos y compartir archivos** (migración `20261126160000_asistente_fase4`). **Invitar** es del
+  dueño del chat, por `asistente.invitar(chat, perfil)` (pide `puede_compartir` y que la otra persona tenga el asistente);
+  cada quien se sale solo y el dueño saca (política «salgo o saco»). Quien entra **ve todo lo que ya había** (decisión P1),
+  pero **cada mensaje nuevo consulta con los permisos y el alcance de quien lo escribe**, y el gasto es suyo (decisiones
+  16 y 17): el turno lleva su `solicitante` y su token. Al invitar, el panel avisa qué fuentes ya trae el chat
+  (`asistente.fuentes_del_chat`); en la respuesta, una nota discreta «Consultado con los permisos de X». **Un turno a la
+  vez por chat**: el ejecutor espera si hay otro corriendo. «Preguntarle al asistente» apagado manda un **mensaje para el
+  grupo**: sin turno ni gasto, y llega en vivo por el broadcast `{t:'mensaje'}`. La memoria personal no entra.
+  **Compartir un archivo o un artefacto** (`asistente.compartido`, `compartirObjeto`) revisa antes su **linaje** —las
+  fuentes que consultó el turno que lo produjo, de `consulta_fuente`— contra `fuentesDePersona()` de quien recibe
+  (`lib/asistente/alcance.ts`, la misma regla que «Ver como»): si le falta alguna, no se comparte y se dice cuál. Lo
+  recibido sale en Mis archivos › «Compartido conmigo»; las políticas de `archivo`, `html` y del bucket lo dejan leer por
+  `privado.compartido_conmigo()`.
 - ⚠️ **Un `next dev` viejo sirve código viejo**: el 26-nov el Resumen mostraba cifras sin formato con el archivo ya
   corregido; reiniciar el dev lo arregló. Y **dos `next dev` en la misma carpeta no conviven** (el del 3001 impide el del
   3005, que muere sin escribir nada en su registro).
@@ -1310,6 +1323,7 @@ node --env-file=.env.local scripts/asistente/sonda-anthropic.mjs <archivo.xlsx> 
 node --env-file=.env.local scripts/asistente/sonda-openai.mjs                                                         # la Responses API
 node --env-file=.env.local scripts/asistente/probar-datos.mjs [--solo datos|redteam|sinpermiso]                         # fase 2 y red team
 node --env-file=.env.local scripts/asistente/probar-f3.mjs [--solo proyecto|memoria|atajos|voz]                         # fase 3 (micrófono falso con voz de Azure)
+node --env-file=.env.local scripts/asistente/probar-f4.mjs                                                            # fase 4: dos sesiones a la vez (dueño e invitado)
 python scripts/asistente/extraer-paginas.py && node --env-file=.env.local scripts/asistente/indexar-documentos.mjs [--destino produccion --confirmo]
 node --env-file=.env.local scripts/asistente/subir-habilidad.mjs [carpeta] [--destino produccion --confirmo]
 ```

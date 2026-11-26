@@ -23,12 +23,24 @@ export default async function MisArchivosPage({ searchParams }: PageProps<'/sist
   const ver = sp.ver === 'subidos' || sp.ver === 'generados' || sp.ver === 'html' ? sp.ver : 'todos'
   const supabase = await createClient()
   const db = supabase.schema('asistente')
-  const [pol, { data: archivos }, { data: htmls }, { data: chats }] = await Promise.all([
+  const [pol, { data: archivos }, { data: htmls }, { data: chats }, { data: conmigo }] = await Promise.all([
     miPolitica(),
     db.from('archivo').select('id, nombre, origen, bytes, chat_id, creado_en').eq('dueno', sesion.userId).eq('estado', 'listo').order('creado_en', { ascending: false }).limit(500),
     db.from('html').select('id, titulo, bytes, chat_id, creado_en, version, tipo').eq('dueno', sesion.userId).order('creado_en', { ascending: false }).limit(500),
     db.from('chat').select('id, titulo'),
+    db.from('compartido').select('id, tipo, objeto_id, por, creado_en').eq('con', sesion.userId).order('creado_en', { ascending: false }),
   ])
+  // Lo que otros me compartieron (la RLS deja leer esas filas por `compartido_conmigo`).
+  const idsArchivo = (conmigo ?? []).filter((c) => c.tipo === 'archivo').map((c) => c.objeto_id)
+  const idsHtml = (conmigo ?? []).filter((c) => c.tipo === 'html').map((c) => c.objeto_id)
+  const [{ data: aCompartidos }, { data: hCompartidos }] = await Promise.all([
+    idsArchivo.length ? db.from('archivo').select('id, nombre, bytes').in('id', idsArchivo) : Promise.resolve({ data: [] }),
+    idsHtml.length ? db.from('html').select('id, titulo, bytes, tipo, version').in('id', idsHtml) : Promise.resolve({ data: [] }),
+  ])
+  const recibidos = [
+    ...(aCompartidos ?? []).map((a) => ({ tipo: 'archivo' as const, id: a.id, nombre: a.nombre, bytes: Number(a.bytes) })),
+    ...(hCompartidos ?? []).map((h) => ({ tipo: 'html' as const, id: h.id, nombre: `${h.titulo} (v${h.version})`, bytes: Number(h.bytes) })),
+  ]
   const tituloChat = new Map((chats ?? []).map((c) => [c.id, c.titulo]))
   const filas: Fila[] = [
     ...(archivos ?? []).map((a) => ({ tipo: 'archivo' as const, id: a.id, nombre: a.nombre, origen: a.origen, bytes: Number(a.bytes), chat_id: a.chat_id, creado_en: a.creado_en })),
@@ -124,6 +136,24 @@ export default async function MisArchivosPage({ searchParams }: PageProps<'/sist
           </table>
         )}
       </section>
+      {recibidos.length > 0 && (
+        <section className="mt-4 rounded-xl border border-[var(--borde)] bg-white">
+          <header className="border-b border-[var(--borde)] px-4 py-2.5">
+            <h2 className="text-[13px] font-semibold text-marca-900">Compartido conmigo</h2>
+          </header>
+          <ul className="px-4 py-2 text-[13px]">
+            {recibidos.map((r) => (
+              <li key={`${r.tipo}-${r.id}`} className="flex items-center gap-2 border-b border-[var(--borde)] py-1.5 last:border-0">
+                <span className="min-w-0 flex-1 truncate text-marca-900">{r.nombre}</span>
+                <span className="text-[12px] text-marca-500">{bytesLegibles(r.bytes)}</span>
+                <a href={r.tipo === 'html' ? `/sistema/asistente/html/${r.id}` : `/sistema/asistente/archivo/${r.id}`} target={r.tipo === 'html' ? '_blank' : undefined} rel="noopener" className="btn-neutro h-7 px-2.5 text-[12px]">
+                  {r.tipo === 'html' ? 'Abrir' : 'Descargar'}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </>
   )
 }

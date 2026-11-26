@@ -48,6 +48,20 @@ export async function ejecutarTurno(turnoId: string, opciones: { token?: string 
 
     // El catálogo de datos (fase 2) se pide mientras se reserva y se lee el chat.
     const promesaDatos = prepararDatos(opciones.token, turnoId)
+    // Un turno a la vez por chat (chats compartidos): este espera a que termine el que va adelante.
+    for (let i = 0; i < 300; i++) {
+      const { data: delante } = await db
+        .schema('asistente')
+        .from('turno')
+        .select('id')
+        .eq('chat_id', chat.id)
+        .eq('estado', 'corriendo')
+        .neq('id', turnoId)
+        .lt('creado_en', turno.creado_en)
+        .limit(1)
+      if (!delante?.length) break
+      await new Promise((r) => setTimeout(r, 2000))
+    }
     const reserva = RESERVA[turno.modelo] ?? 0.8
     const { data: motivo, error: errReserva } = await db.schema('asistente').rpc('reservar_turno', { p_turno: turnoId, p_reserva_usd: reserva })
     if (errReserva) return await cerrarFallido('No se pudo reservar el turno.')
@@ -60,7 +74,7 @@ export async function ejecutarTurno(turnoId: string, opciones: { token?: string 
 
     // El historial y los archivos del chat.
     const [{ data: mensajes }, { data: archivos }, { data: versiones }, { data: proyecto }, { data: archivosProyecto }, { data: pref }, { data: recuerdos }] = await Promise.all([
-      db.schema('asistente').from('mensaje').select('id, rol, texto, adjuntos, bloques, turno_id, creado_en').eq('chat_id', chat.id).order('creado_en'),
+      db.schema('asistente').from('mensaje').select('id, rol, texto, adjuntos, bloques, turno_id, creado_en, autor').eq('chat_id', chat.id).order('creado_en'),
       db.schema('asistente').from('archivo').select('id, nombre, mime, bytes, ruta, origen, anthropic_file_id, mensaje_id, estado').eq('chat_id', chat.id).eq('estado', 'listo'),
       db.schema('asistente').from('html').select('grupo, titulo, tipo, version').eq('chat_id', chat.id).order('version', { ascending: false }),
       chat.proyecto_id ? db.schema('asistente').from('proyecto').select('nombre, instrucciones').eq('id', chat.proyecto_id).maybeSingle() : Promise.resolve({ data: null }),
@@ -89,6 +103,14 @@ export async function ejecutarTurno(turnoId: string, opciones: { token?: string 
     // La última versión de cada artefacto del chat.
     const artefactos: ArtefactoTurno[] = []
     for (const v of versiones ?? []) if (!artefactos.some((x) => x.grupo === v.grupo)) artefactos.push({ grupo: v.grupo, titulo: v.titulo, clase: v.tipo as ClaseArtefacto, version: v.version })
+    // En un chat compartido, cada mensaje lleva el nombre de quien lo escribió.
+    const nombres = new Map<string, string>()
+    if (chat.compartido) {
+      const autores = [...new Set((mensajes ?? []).map((m) => m.autor).filter(Boolean))] as string[]
+      const { data: gente } = autores.length ? await db.from('profiles').select('id, nombre_completo').in('id', autores) : { data: [] }
+      for (const g of gente ?? []) nombres.set(g.id, g.nombre_completo || 'Alguien')
+    }
+    const firmar = (autor: string | null, texto: string) => (chat.compartido && autor ? `[${nombres.get(autor) ?? 'Alguien'}]: ${texto}` : texto)
     const porId = new Map([...(archivos ?? []), ...(archivosProyecto ?? [])].map((a) => [a.id, a as ArchivoTurno & { mensaje_id: string | null }]))
     const propio = (mensajes ?? []).filter((m) => m.rol === 'usuario' && m.turno_id === turnoId).at(-1)
     if (!propio) return await cerrarFallido('No se encontró el mensaje del turno.')
@@ -96,7 +118,7 @@ export async function ejecutarTurno(turnoId: string, opciones: { token?: string 
       .filter((m) => m.creado_en < propio.creado_en)
       .map((m) => ({
         rol: m.rol as 'usuario' | 'asistente',
-        texto: m.texto,
+        texto: m.rol === 'usuario' ? firmar(m.autor, m.texto) : m.texto,
         adjuntos: (m.adjuntos ?? []).map((id: string) => porId.get(id)?.nombre).filter(Boolean) as string[],
         generados: ((m.bloques as Bloque[] | null) ?? []).flatMap((b) =>
           b.tipo === 'archivo' ? [b.nombre] : b.tipo === 'artefacto' ? [`artefacto «${b.titulo}» v${b.version}`] : b.tipo === 'html' ? [`${b.titulo} (HTML)`] : []
@@ -126,7 +148,7 @@ export async function ejecutarTurno(turnoId: string, opciones: { token?: string 
       esfuerzo: turno.esfuerzo as Esfuerzo,
       sistema: instruccionesSistema(config.instrucciones_empresa ?? '', proyecto ? { nombre: proyecto.nombre, instrucciones: proyecto.instrucciones } : null),
       historial,
-      texto: propio.texto,
+      texto: firmar(propio.autor, propio.texto),
       adjuntos,
       archivosDelChat: [...porId.values()],
       archivosFijos: (archivosProyecto ?? []) as ArchivoTurno[],
@@ -162,6 +184,10 @@ export async function ejecutarTurno(turnoId: string, opciones: { token?: string 
       if (t.titulo) await db.schema('asistente').from('chat').update({ titulo: t.titulo, titulo_auto: false }).eq('id', chat.id)
     }
 
+    if (chat.compartido && r.bloques.some((b) => b.tipo === 'paso' && b.herramienta === 'datos')) {
+      const { data: quien } = await db.from('profiles').select('nombre_completo').eq('id', turno.solicitante).maybeSingle()
+      r.bloques.push({ tipo: 'nota', texto: `Consultado con los permisos de ${quien?.nombre_completo || 'quien escribió el mensaje'}.` })
+    }
     const textoFinal = r.texto || (r.estado === 'detenido' ? '_(Detenido.)_' : r.estado === 'fallido' ? '' : '_(Sin respuesta.)_')
     let mensajeId: string | null = null
     if (textoFinal || r.bloques.length) {
