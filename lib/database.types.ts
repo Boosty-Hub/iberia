@@ -1315,6 +1315,7 @@ export type Database = {
           sensible: boolean
         }[]
       }
+      mi_excepcion: { Args: never; Returns: boolean }
       mi_politica: { Args: never; Returns: Json }
       participantes: {
         Args: { p_chat: string }

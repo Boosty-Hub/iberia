@@ -59,10 +59,19 @@ export const obtenerSesion = cache(async (): Promise<Sesion | null> => {
     },
     { data: perfil },
     { data: filas },
+    { data: excepcionAsistente },
   ] = await Promise.all([
     supabase.auth.getUser(),
     supabase.from('profiles').select('*, roles(id, clave, nombre, nivel)').eq('id', sub).maybeSingle(),
     supabase.rpc('mis_permisos'),
+    // La excepción por persona del asistente de IA (habilitarlo o quitárselo a alguien sin tocar su rol).
+    supabase
+      .schema('asistente')
+      .rpc('mi_excepcion')
+      .then(
+        (r) => r,
+        () => ({ data: null })
+      ),
   ])
   if (!user || user.id !== sub) return null
 
@@ -74,6 +83,10 @@ export const obtenerSesion = cache(async (): Promise<Sesion | null> => {
   const permisos: MapaPermisos = {}
   for (const f of filas ?? []) {
     permisos[f.recurso] = { ver: f.ver, crear: f.crear, editar: f.editar, eliminar: f.eliminar }
+  }
+  // La excepción manda sobre la casilla del rol, igual que en la base (`asistente.politica_de`).
+  if (typeof excepcionAsistente === 'boolean') {
+    permisos['sistema:asistente'] = { ...(permisos['sistema:asistente'] ?? { crear: false, editar: false, eliminar: false }), ver: excepcionAsistente }
   }
 
   const rolReal: RolAsignado = (rol as RolAsignado | null) ?? {
