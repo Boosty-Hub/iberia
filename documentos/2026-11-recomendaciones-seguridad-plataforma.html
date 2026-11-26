@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Recomendaciones de seguridad de la Plataforma Iberia · Industrias Iberia</title>
+    <style>
+      :root {
+        --rojo: #d4332c;
+        --rojo-claro: #fdf3f2;
+        --rojo-borde: #f7c8c4;
+        --carbon: #1e1c1b;
+        --carbon-medio: #474342;
+        --gris: #6d6765;
+        --gris-claro: #b8b3b1;
+        --borde: #e4e1e0;
+        --fondo-suave: #f8f7f7;
+        --verde: #1f6f4b;
+        --verde-claro: #e7f5ee;
+        --ambar: #8a5a12;
+        --ambar-claro: #fdf4e3;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; font-size: 10pt; line-height: 1.5; color: var(--carbon-medio); }
+      h1, h2, h3 { color: var(--carbon); margin: 0; }
+      .portada { border-bottom: 3px solid var(--rojo); padding-bottom: 20px; margin-bottom: 26px; }
+      .portada img { height: 34px; width: auto; display: block; margin-bottom: 22px; }
+      .rotulo { font-size: 8pt; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--rojo); margin-bottom: 8px; }
+      .portada h1 { font-size: 21pt; line-height: 1.2; letter-spacing: -0.01em; }
+      .portada .bajada { font-size: 11pt; color: var(--gris); margin-top: 10px; }
+      .portada .ficha { margin-top: 14px; font-size: 9pt; color: var(--gris); }
+      section { margin-bottom: 24px; }
+      section > h2 { font-size: 13pt; margin-bottom: 4px; padding-bottom: 6px; border-bottom: 1px solid var(--borde); }
+      .num { color: var(--rojo); font-family: ui-monospace, monospace; font-size: 10pt; margin-right: 8px; }
+      section > .intro { color: var(--gris); margin: 10px 0 12px; }
+      h3 { font-size: 10.5pt; margin: 14px 0 6px; }
+      p { margin: 0 0 8px; }
+      ul { margin: 0 0 10px; padding-left: 18px; }
+      li { margin-bottom: 4px; }
+      strong { color: var(--carbon); font-weight: 600; }
+      table { width: 100%; border-collapse: collapse; font-size: 9pt; margin: 8px 0 12px; }
+      thead { background: var(--carbon); color: #fff; }
+      th { text-align: left; padding: 6px 8px; font-weight: 600; font-size: 8.5pt; }
+      td { padding: 6px 8px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+      tbody tr:nth-child(even) { background: var(--fondo-suave); }
+      td.clave { width: 30%; font-weight: 600; color: var(--carbon); }
+      .aviso { border: 1px solid var(--rojo-borde); background: var(--rojo-claro); border-left: 3px solid var(--rojo); padding: 10px 14px; margin: 10px 0 12px; break-inside: avoid; }
+      .aviso h3 { color: var(--rojo); margin-top: 0; }
+      .aviso p:last-child, .nota p:last-child { margin-bottom: 0; }
+      .nota { background: var(--fondo-suave); border-left: 3px solid var(--gris-claro); padding: 9px 14px; margin: 10px 0; font-size: 9pt; }
+      .fuente { font-size: 7.5pt; color: var(--gris); }
+      .fuente a, .fuentes a { color: var(--gris); text-decoration: none; word-break: break-all; }
+      .sello { display: inline-block; font-size: 7.5pt; font-weight: 700; padding: 1px 6px; border-radius: 9px; white-space: nowrap; }
+      .si { background: var(--verde-claro); color: var(--verde); }
+      .no { background: var(--ambar-claro); color: var(--ambar); }
+      .salto { break-before: page; }
+      .juntos { break-inside: avoid; }
+      .fuentes { font-size: 8pt; }
+      .fuentes li { margin-bottom: 2px; }
+      footer.cierre { margin-top: 26px; padding-top: 12px; border-top: 1px solid var(--borde); font-size: 8.5pt; color: var(--gris); }
+    </style>
+  </head>
+  <body>
+    <div class="portada">
+      <img src="../public/marca/iberia.png" alt="Industrias Iberia" />
+      <p class="rotulo">Plataforma Iberia · Seguridad y cumplimiento</p>
+      <h1>Recomendaciones de seguridad de la Plataforma Iberia</h1>
+      <p class="bajada">
+        Lo que recomendamos reforzar en la configuración de la plataforma, a partir de la auditoría de sus proveedores
+        tecnológicos (Supabase, Netlify y Resend). Cada punto dice por qué y cuánto cuesta.
+      </p>
+      <p class="ficha">
+        Para: Gerencia de Tecnología de la Información, Industrias Iberia, C.A. · Preparado por Boosty Digital ·
+        26 de noviembre de 2026 · Uso interno
+      </p>
+    </div>
+
+    <section class="juntos">
+      <h2><span class="num">01</span>De dónde salen</h2>
+      <p class="intro">
+        Al revisar la configuración de la instancia de Iberia en las consolas de Supabase y Netlify, el 26 de noviembre de 2026,
+        encontramos lo siguiente:
+      </p>
+      <table class="juntos">
+        <tbody>
+          <tr><td class="clave">Conexión directa a la base</td><td>Abierta a cualquier red y sin SSL obligatorio. La plataforma no la usa: entra por las API, que van cifradas</td></tr>
+          <tr><td class="clave">Contraseñas de la plataforma</td><td>Mínimo de 6 caracteres; sin verificación en dos pasos</td></tr>
+          <tr><td class="clave">Respaldos</td><td>Diarios, 7 días. Sin recuperación a un punto exacto (PITR); los archivos de Storage no entran en el respaldo</td></tr>
+          <tr><td class="clave">Consolas</td><td>La verificación en dos pasos no es obligatoria para quienes administran Supabase y Netlify</td></tr>
+          <tr><td class="clave">Correo</td><td>Resend todavía no está activo: falta el subdominio de Iberia</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="num">02</span>Lo que recomendamos reforzar</h2>
+      <p class="intro">
+        La plataforma ya opera con cifrado, seguridad por fila y cuentas a nombre de Iberia. Estos ajustes la llevan al nivel
+        que una auditoría suele pedir. La mayoría no tiene costo; los que tienen, lo dicen.
+      </p>
+      <table>
+        <thead><tr><th>#</th><th>Qué</th><th>Por qué</th><th>Costo</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Exigir SSL y restringir por red las conexiones directas a la base (Supabase)</td><td>Hoy la conexión directa acepta cualquier red y no obliga SSL. La plataforma no la usa: entra por las API, que ya van cifradas</td><td>Sin costo</td></tr>
+          <tr><td>2</td><td>Exigir verificación en dos pasos en las consolas de Supabase y Netlify</td><td>Quien entra a la consola puede ver la configuración y los datos. Ambos lo permiten exigir desde el plan Pro</td><td>Sin costo</td></tr>
+          <tr><td>3</td><td>Subir el mínimo de las contraseñas de la plataforma a 10 caracteres y ofrecer verificación en dos pasos a los administradores</td><td>Hoy el mínimo es de 6</td><td>Sin costo; la verificación en dos pasos requiere un desarrollo corto</td></tr>
+          <tr><td>4</td><td>Contratar la recuperación a un punto exacto (PITR) en Supabase</td><td>Con respaldos diarios, la pérdida máxima es de hasta 24 horas; con PITR, de 2 minutos</td><td>Desde unos USD 100 al mes</td></tr>
+          <tr><td>5</td><td>Respaldar aparte los archivos de Storage</td><td>Los respaldos de la base no incluyen los archivos</td><td>Bajo: almacenamiento externo</td></tr>
+          <tr><td>6</td><td>Si la auditoría exige los informes SOC 2 o ISO de Supabase, pasar al plan Team</td><td>Con el plan Pro no se pueden descargar</td><td>USD 599 al mes</td></tr>
+          <tr><td>7</td><td>Abrir la cuenta de Resend a nombre de Iberia, con una clave que solo pueda enviar desde su subdominio, y publicar DMARC</td><td>Que el correo de la empresa dependa de una cuenta propia y con el mínimo permiso</td><td>Sin costo en su plan gratuito</td></tr>
+          <tr><td>8</td><td>Registrar quién administra cada consola y revisarlo cada trimestre</td><td>Cambios de personal; la auditoría pregunta quién tiene acceso</td><td>Sin costo</td></tr>
+        </tbody>
+      </table>
+      <p class="fuente">
+        Fuentes: <a href="https://supabase.com/docs/guides/platform/ssl-enforcement">SSL enforcement</a> ·
+        <a href="https://supabase.com/docs/guides/platform/network-restrictions">network restrictions</a> ·
+        <a href="https://supabase.com/docs/guides/platform/mfa/org-mfa-enforcement">MFA de organización</a> ·
+        <a href="https://docs.netlify.com/manage/security/secure-netlify-access/enforce-2fa/">2FA de Netlify</a> ·
+        <a href="https://supabase.com/docs/guides/platform/backups">backups y PITR</a> ·
+        <a href="https://supabase.com/pricing">planes de Supabase</a> ·
+        <a href="https://resend.com/docs/api-reference/api-keys/create-api-key">claves de Resend</a> ·
+        <a href="https://resend.com/docs/dashboard/domains/dmarc">DMARC</a>
+      </p>
+    </section>
+
+    <footer class="cierre">
+      Preparado por Boosty Digital para Industrias Iberia, C.A. · 26 de noviembre de 2026. Complementa el documento
+      «Auditoría de proveedores tecnológicos de la Plataforma Iberia». Los costos son los publicados por cada proveedor en esa
+      fecha.
+    </footer>
+  </body>
+</html>

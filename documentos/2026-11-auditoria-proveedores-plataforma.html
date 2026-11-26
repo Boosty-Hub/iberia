@@ -66,7 +66,7 @@
       <h1>Auditoría de proveedores tecnológicos de la Plataforma Iberia</h1>
       <p class="bajada">
         Quiénes son Supabase, Netlify y Resend, dónde quedan los datos de Industrias Iberia, qué certificaciones y controles
-        tienen, cómo está configurada la instancia de Iberia y qué recomendamos reforzar.
+        tienen, y cómo está configurada la instancia de Iberia.
       </p>
       <p class="ficha">
         Para: Gerencia de Tecnología de la Información, Industrias Iberia, C.A. · Preparado por Boosty Digital ·
@@ -199,8 +199,8 @@
           <tr><td class="clave">Registro de cuentas</td><td>Cerrado: las cuentas solo las crea la administración</td></tr>
           <tr><td class="clave">Archivos</td><td>Buckets privados; descargas por enlace firmado de corta duración</td></tr>
           <tr><td class="clave">Secretos</td><td>Credenciales de integraciones en Vault, cifradas</td></tr>
-          <tr><td class="clave">Conexión directa a la base</td><td>Abierta a cualquier red y sin SSL obligatorio <span class="sello no">a reforzar</span></td></tr>
-          <tr><td class="clave">Contraseñas</td><td>Mínimo de 6 caracteres <span class="sello no">a reforzar</span></td></tr>
+          <tr><td class="clave">Conexión directa a la base</td><td>Abierta a cualquier red y sin SSL obligatorio</td></tr>
+          <tr><td class="clave">Contraseñas</td><td>Mínimo de 6 caracteres</td></tr>
         </tbody>
       </table>
     </section>
@@ -292,36 +292,6 @@
       </ul>
     </section>
 
-    <section class="salto">
-      <h2><span class="num">06</span>Lo que recomendamos reforzar</h2>
-      <p class="intro">
-        La plataforma ya opera con cifrado, seguridad por fila y cuentas a nombre de Iberia. Estos ajustes la llevan al nivel
-        que una auditoría suele pedir. La mayoría no tiene costo; los que tienen, lo dicen.
-      </p>
-      <table>
-        <thead><tr><th>#</th><th>Qué</th><th>Por qué</th><th>Costo</th></tr></thead>
-        <tbody>
-          <tr><td>1</td><td>Exigir SSL y restringir por red las conexiones directas a la base (Supabase)</td><td>Hoy la conexión directa acepta cualquier red y no obliga SSL. La plataforma no la usa: entra por las API, que ya van cifradas</td><td>Sin costo</td></tr>
-          <tr><td>2</td><td>Exigir verificación en dos pasos en las consolas de Supabase y Netlify</td><td>Quien entra a la consola puede ver la configuración y los datos. Ambos lo permiten exigir desde el plan Pro</td><td>Sin costo</td></tr>
-          <tr><td>3</td><td>Subir el mínimo de las contraseñas de la plataforma a 10 caracteres y ofrecer verificación en dos pasos a los administradores</td><td>Hoy el mínimo es de 6</td><td>Sin costo; la verificación en dos pasos requiere un desarrollo corto</td></tr>
-          <tr><td>4</td><td>Contratar la recuperación a un punto exacto (PITR) en Supabase</td><td>Con respaldos diarios, la pérdida máxima es de hasta 24 horas; con PITR, de 2 minutos</td><td>Desde unos USD 100 al mes</td></tr>
-          <tr><td>5</td><td>Respaldar aparte los archivos de Storage</td><td>Los respaldos de la base no incluyen los archivos</td><td>Bajo: almacenamiento externo</td></tr>
-          <tr><td>6</td><td>Si la auditoría exige los informes SOC 2 o ISO de Supabase, pasar al plan Team</td><td>Con el plan Pro no se pueden descargar</td><td>USD 599 al mes</td></tr>
-          <tr><td>7</td><td>Abrir la cuenta de Resend a nombre de Iberia, con una clave que solo pueda enviar desde su subdominio, y publicar DMARC</td><td>Que el correo de la empresa dependa de una cuenta propia y con el mínimo permiso</td><td>Sin costo en su plan gratuito</td></tr>
-          <tr><td>8</td><td>Registrar quién administra cada consola y revisarlo cada trimestre</td><td>Cambios de personal; la auditoría pregunta quién tiene acceso</td><td>Sin costo</td></tr>
-        </tbody>
-      </table>
-      <p class="fuente">
-        Fuentes: <a href="https://supabase.com/docs/guides/platform/ssl-enforcement">SSL enforcement</a> ·
-        <a href="https://supabase.com/docs/guides/platform/network-restrictions">network restrictions</a> ·
-        <a href="https://supabase.com/docs/guides/platform/mfa/org-mfa-enforcement">MFA de organización</a> ·
-        <a href="https://docs.netlify.com/manage/security/secure-netlify-access/enforce-2fa/">2FA de Netlify</a> ·
-        <a href="https://supabase.com/docs/guides/platform/backups">backups y PITR</a> ·
-        <a href="https://supabase.com/pricing">planes de Supabase</a> ·
-        <a href="https://resend.com/docs/api-reference/api-keys/create-api-key">claves de Resend</a> ·
-        <a href="https://resend.com/docs/dashboard/domains/dmarc">DMARC</a>
-      </p>
-    </section>
 
     <!-- ANEXO A -->
     <section class="salto">
