@@ -2,21 +2,28 @@ import { notFound } from 'next/navigation'
 import { requerirPermiso } from '@/lib/auth'
 import { catalogoModelos, miPolitica } from '@/lib/asistente/servidor'
 import { leerChat, leerChats } from '@/lib/asistente/datos'
+import { createClient } from '@/lib/supabase/server'
 import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
 import { ChatAsistente } from '@/components/sistema/asistente/chat'
 
 /** La pantalla del asistente: la lista de chats y el chat abierto (o uno nuevo). Todo se lee en una tanda. */
-export async function PaginaChat({ chatId }: { chatId: string | null }) {
+export async function PaginaChat({ chatId, proyectoId = null }: { chatId: string | null; proyectoId?: string | null }) {
   const sesion = await requerirPermiso('sistema:asistente')
   const [politica, modelos, chats, abierto] = await Promise.all([miPolitica(), catalogoModelos(), leerChats(), chatId ? leerChat(chatId) : Promise.resolve(null)])
   if (chatId && !abierto) notFound()
+  const supabase = await createClient()
+  const idProyecto = abierto?.chat.proyecto_id ?? proyectoId
+  const [{ data: atajos }, { data: proyecto }] = await Promise.all([
+    supabase.schema('asistente').from('atajo').select('id, comando, titulo, instruccion, modelo, esfuerzo, dueno').order('comando'),
+    idProyecto ? supabase.schema('asistente').from('proyecto').select('id, nombre').eq('id', idProyecto).maybeSingle() : Promise.resolve({ data: null }),
+  ])
   const nombre = (sesion.perfil.nombre_completo || sesion.email || '').split(' ')[0]
 
   return (
     <>
       <CabeceraModulo sesion={sesion} codigo="MI-ASI" titulo="Asistente de IA" />
       <ChatAsistente
-        key={chatId ?? 'nuevo'}
+        key={chatId ?? `nuevo-${proyectoId ?? ''}`}
         yo={{ id: sesion.userId, nombre }}
         politica={politica}
         modelos={modelos}
@@ -28,6 +35,8 @@ export async function PaginaChat({ chatId }: { chatId: string | null }) {
         turnoInicial={abierto?.turno ?? null}
         modeloDelChat={abierto?.chat.modelo ?? null}
         esfuerzoDelChat={abierto?.chat.esfuerzo ?? null}
+        proyecto={proyecto ? { id: proyecto.id, nombre: proyecto.nombre } : null}
+        atajos={(atajos ?? []).map((a) => ({ id: a.id, comando: a.comando, titulo: a.titulo, instruccion: a.instruccion, modelo: a.modelo, esfuerzo: a.esfuerzo, empresa: a.dueno === null }))}
       />
     </>
   )

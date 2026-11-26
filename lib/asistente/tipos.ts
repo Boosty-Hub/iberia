@@ -73,6 +73,7 @@ export type Bloque =
   | { tipo: 'html'; htmlId: string; titulo: string; version: number }
   | { tipo: 'fuente'; url: string; titulo: string }
   | { tipo: 'pensamiento'; texto: string }
+  | { tipo: 'memoria'; memoriaId: string; texto: string }
 
 /** Lo que viaja por Realtime mientras corre un turno (`asistente:chat:<id>`). */
 export type EventoTurno =

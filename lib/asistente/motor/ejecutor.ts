@@ -7,6 +7,7 @@ import { ejecutarAnthropic, mensajeDeError } from './anthropic'
 import { ejecutarOpenAI } from './openai'
 import { titularYClasificar } from './titulo'
 import { prepararDatos } from './datos'
+import type { ApiMemoria } from './memoria'
 import type { ArchivoTurno, ArtefactoTurno, ContextoMotor, Precio, ResultadoMotor, TurnoHistorial } from './contrato'
 
 /** Lo que se reserva antes de correr: el peor caso razonable de un turno, por modelo. Al cerrar se cobra lo real. */
@@ -58,15 +59,37 @@ export async function ejecutarTurno(turnoId: string, opciones: { token?: string 
     emisor.emitir({ t: 'estado', turno: turnoId, estado: 'corriendo' })
 
     // El historial y los archivos del chat.
-    const [{ data: mensajes }, { data: archivos }, { data: versiones }] = await Promise.all([
+    const [{ data: mensajes }, { data: archivos }, { data: versiones }, { data: proyecto }, { data: archivosProyecto }, { data: pref }, { data: recuerdos }] = await Promise.all([
       db.schema('asistente').from('mensaje').select('id, rol, texto, adjuntos, bloques, turno_id, creado_en').eq('chat_id', chat.id).order('creado_en'),
       db.schema('asistente').from('archivo').select('id, nombre, mime, bytes, ruta, origen, anthropic_file_id, mensaje_id, estado').eq('chat_id', chat.id).eq('estado', 'listo'),
       db.schema('asistente').from('html').select('grupo, titulo, tipo, version').eq('chat_id', chat.id).order('version', { ascending: false }),
+      chat.proyecto_id ? db.schema('asistente').from('proyecto').select('nombre, instrucciones').eq('id', chat.proyecto_id).maybeSingle() : Promise.resolve({ data: null }),
+      chat.proyecto_id
+        ? db.schema('asistente').from('archivo').select('id, nombre, mime, bytes, ruta, origen, anthropic_file_id, mensaje_id, estado').eq('proyecto_id', chat.proyecto_id).eq('estado', 'listo')
+        : Promise.resolve({ data: [] }),
+      db.schema('asistente').from('preferencia').select('memoria').eq('perfil_id', turno.solicitante).maybeSingle(),
+      chat.compartido ? Promise.resolve({ data: [] }) : db.schema('asistente').from('memoria').select('id, texto').eq('dueno', turno.solicitante).order('usado_en', { ascending: false }).limit(40),
     ])
+    // La memoria: de quien pregunta, apagable, y nunca en un chat compartido.
+    const memoria: ApiMemoria | null =
+      chat.compartido || pref?.memoria === false
+        ? null
+        : {
+            lista: (recuerdos ?? []) as { id: string; texto: string }[],
+            recordar: async (texto) => {
+              const { data, error } = await db.schema('asistente').from('memoria').insert({ dueno: turno.solicitante, texto, origen_chat: chat.id }).select('id, texto').single()
+              if (error || !data) throw new Error('No se pudo guardar en la memoria.')
+              return data
+            },
+            olvidar: async (id) => {
+              const { data } = await db.schema('asistente').from('memoria').delete().eq('id', id).eq('dueno', turno.solicitante).select('id')
+              return !!data?.length
+            },
+          }
     // La última versión de cada artefacto del chat.
     const artefactos: ArtefactoTurno[] = []
     for (const v of versiones ?? []) if (!artefactos.some((x) => x.grupo === v.grupo)) artefactos.push({ grupo: v.grupo, titulo: v.titulo, clase: v.tipo as ClaseArtefacto, version: v.version })
-    const porId = new Map((archivos ?? []).map((a) => [a.id, a as ArchivoTurno & { mensaje_id: string | null }]))
+    const porId = new Map([...(archivos ?? []), ...(archivosProyecto ?? [])].map((a) => [a.id, a as ArchivoTurno & { mensaje_id: string | null }]))
     const propio = (mensajes ?? []).filter((m) => m.rol === 'usuario' && m.turno_id === turnoId).at(-1)
     if (!propio) return await cerrarFallido('No se encontró el mensaje del turno.')
     const historial: TurnoHistorial[] = (mensajes ?? [])
@@ -101,15 +124,17 @@ export async function ejecutarTurno(turnoId: string, opciones: { token?: string 
       turno: turnoId,
       modelo: turno.modelo,
       esfuerzo: turno.esfuerzo as Esfuerzo,
-      sistema: instruccionesSistema(config.instrucciones_empresa ?? ''),
+      sistema: instruccionesSistema(config.instrucciones_empresa ?? '', proyecto ? { nombre: proyecto.nombre, instrucciones: proyecto.instrucciones } : null),
       historial,
       texto: propio.texto,
       adjuntos,
       archivosDelChat: [...porId.values()],
+      archivosFijos: (archivosProyecto ?? []) as ArchivoTurno[],
       contenedorId: chat.contenedor_id,
       contenedorVigente: vigente,
       habilidades: config.habilidades ?? [],
       datos: await promesaDatos,
+      memoria,
       senal: control.signal,
       emitir: (e) => emisor.emitir(e),
       asegurarEnAnthropic: (a) => asegurarEnAnthropic(db, a),

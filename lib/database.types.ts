@@ -65,6 +65,7 @@ export type Database = {
           mime: string
           nombre: string
           origen: string
+          proyecto_id: string | null
           ruta: string
         }
         Insert: {
@@ -81,6 +82,7 @@ export type Database = {
           mime?: string
           nombre: string
           origen: string
+          proyecto_id?: string | null
           ruta: string
         }
         Update: {
@@ -97,6 +99,7 @@ export type Database = {
           mime?: string
           nombre?: string
           origen?: string
+          proyecto_id?: string | null
           ruta?: string
         }
         Relationships: [
@@ -114,7 +117,53 @@ export type Database = {
             referencedRelation: "mensaje"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "archivo_proyecto_id_fkey"
+            columns: ["proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "proyecto"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      atajo: {
+        Row: {
+          actualizado_en: string
+          comando: string
+          creado_en: string
+          creado_por: string | null
+          dueno: string | null
+          esfuerzo: string | null
+          id: string
+          instruccion: string
+          modelo: string | null
+          titulo: string
+        }
+        Insert: {
+          actualizado_en?: string
+          comando: string
+          creado_en?: string
+          creado_por?: string | null
+          dueno?: string | null
+          esfuerzo?: string | null
+          id?: string
+          instruccion: string
+          modelo?: string | null
+          titulo: string
+        }
+        Update: {
+          actualizado_en?: string
+          comando?: string
+          creado_en?: string
+          creado_por?: string | null
+          dueno?: string | null
+          esfuerzo?: string | null
+          id?: string
+          instruccion?: string
+          modelo?: string | null
+          titulo?: string
+        }
+        Relationships: []
       }
       chat: {
         Row: {
@@ -129,6 +178,7 @@ export type Database = {
           id: string
           modelo: string | null
           motor: string | null
+          proyecto_id: string | null
           titulo: string
           titulo_auto: boolean
         }
@@ -144,6 +194,7 @@ export type Database = {
           id?: string
           modelo?: string | null
           motor?: string | null
+          proyecto_id?: string | null
           titulo?: string
           titulo_auto?: boolean
         }
@@ -159,10 +210,19 @@ export type Database = {
           id?: string
           modelo?: string | null
           motor?: string | null
+          proyecto_id?: string | null
           titulo?: string
           titulo_auto?: boolean
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "chat_proyecto_id_fkey"
+            columns: ["proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "proyecto"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       config: {
         Row: {
@@ -399,6 +459,41 @@ export type Database = {
           },
         ]
       }
+      memoria: {
+        Row: {
+          creado_en: string
+          dueno: string
+          id: string
+          origen_chat: string | null
+          texto: string
+          usado_en: string
+        }
+        Insert: {
+          creado_en?: string
+          dueno?: string
+          id?: string
+          origen_chat?: string | null
+          texto: string
+          usado_en?: string
+        }
+        Update: {
+          creado_en?: string
+          dueno?: string
+          id?: string
+          origen_chat?: string | null
+          texto?: string
+          usado_en?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memoria_origen_chat_fkey"
+            columns: ["origen_chat"]
+            isOneToOne: false
+            referencedRelation: "chat"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mensaje: {
         Row: {
           adjuntos: string[]
@@ -614,6 +709,51 @@ export type Database = {
           puede_programar?: boolean | null
           tope_diario_usd?: number | null
           tope_mensual_usd?: number | null
+        }
+        Relationships: []
+      }
+      preferencia: {
+        Row: {
+          actualizado_en: string
+          memoria: boolean
+          perfil_id: string
+        }
+        Insert: {
+          actualizado_en?: string
+          memoria?: boolean
+          perfil_id?: string
+        }
+        Update: {
+          actualizado_en?: string
+          memoria?: boolean
+          perfil_id?: string
+        }
+        Relationships: []
+      }
+      proyecto: {
+        Row: {
+          actualizado_en: string
+          creado_en: string
+          dueno: string
+          id: string
+          instrucciones: string
+          nombre: string
+        }
+        Insert: {
+          actualizado_en?: string
+          creado_en?: string
+          dueno?: string
+          id?: string
+          instrucciones?: string
+          nombre: string
+        }
+        Update: {
+          actualizado_en?: string
+          creado_en?: string
+          dueno?: string
+          id?: string
+          instrucciones?: string
+          nombre?: string
         }
         Relationships: []
       }

@@ -1290,6 +1290,16 @@ no use licencias sueltas. **El plan entero (7 fases, 22 decisiones de Gabriel, c
     archivo) y `indexar-documentos.mjs` (enlaza por `pdf_ruta` o por la huella). En pruebas: 13.517 páginas, 46 MB.
   - Red team del 26-nov (`probar-datos.mjs --solo redteam`, informe en `capturas/asistente/red-team.json`): costos fuera de
     alcance, directo y con rodeo; inyección desde un CSV; pedido de contactos; artefacto que llama a la API. Ninguno pasó.
+- **Fase 3 · proyectos, memoria, atajos y voz** (migración `20261126150000_asistente_fase3`). **Proyecto**
+  (`asistente.proyecto`, de su dueño): sus instrucciones van al `system` después de las de la empresa (que mandan) y sus
+  archivos (`archivo.proyecto_id`) se montan en el contenedor en cada turno (`archivosFijos`). Un chat solo cuelga de un
+  proyecto propio (trigger `b_chat_proyecto`). **Memoria** (`asistente.memoria`, apagable en `asistente.preferencia`): va en
+  el mensaje del turno, no en el `system` (cambia y rompería la caché); el modelo la escribe con `recordar` y la borra con
+  `olvidar` (`motor/memoria.ts`), que rechaza lo que parece cédula, teléfono, correo o contraseña. **Nunca entra a un chat
+  compartido.** El chat muestra «Guardé en tu memoria» con Deshacer. **Atajos** (`asistente.atajo`; `dueno` null = de la
+  empresa, que crea `sistema:asistente-admin` · editar): «/» en la caja abre el menú y Enter usa el primero. **Dictado**:
+  `MediaRecorder` → `aWavDe16k` → `/sistema/asistente/transcribir` (Azure, `lib/transcribir.ts`, máx. 60 s); el texto
+  vuelve a la caja para revisarlo y el audio no se guarda.
 - ⚠️ **Un `next dev` viejo sirve código viejo**: el 26-nov el Resumen mostraba cifras sin formato con el archivo ya
   corregido; reiniciar el dev lo arregló. Y **dos `next dev` en la misma carpeta no conviven** (el del 3001 impide el del
   3005, que muere sin escribir nada en su registro).
@@ -1299,6 +1309,7 @@ node --env-file=.env.local scripts/asistente/probar-chat.mjs [--solo simple|exce
 node --env-file=.env.local scripts/asistente/sonda-anthropic.mjs <archivo.xlsx> [--modelo claude-sonnet-5-5]           # el motor, sin la base
 node --env-file=.env.local scripts/asistente/sonda-openai.mjs                                                         # la Responses API
 node --env-file=.env.local scripts/asistente/probar-datos.mjs [--solo datos|redteam|sinpermiso]                         # fase 2 y red team
+node --env-file=.env.local scripts/asistente/probar-f3.mjs [--solo proyecto|memoria|atajos|voz]                         # fase 3 (micrófono falso con voz de Azure)
 python scripts/asistente/extraer-paginas.py && node --env-file=.env.local scripts/asistente/indexar-documentos.mjs [--destino produccion --confirmo]
 node --env-file=.env.local scripts/asistente/subir-habilidad.mjs [carpeta] [--destino produccion --confirmo]
 ```

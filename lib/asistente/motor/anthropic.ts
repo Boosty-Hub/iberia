@@ -4,6 +4,7 @@ import { BETAS_ANTHROPIC, crearAnthropic } from './servicio'
 import { HERRAMIENTA_ARTEFACTO, HERRAMIENTA_LEER_ARTEFACTO, contextoDelTurno, listaDeArtefactos } from './instrucciones'
 import { costoDe, sumarUso, usoVacio, type ContextoMotor, type Precio, type ResultadoMotor, type Uso } from './contrato'
 import { NOMBRES_DATOS, herramientaDatos, herramientasDeDatos } from './datos'
+import { HERRAMIENTAS_MEMORIA, NOMBRES_MEMORIA, contextoMemoria, herramientaMemoria } from './memoria'
 
 type Msg = Anthropic.Beta.BetaMessageParam
 type Contenido = Anthropic.Beta.BetaContentBlockParam
@@ -22,6 +23,8 @@ const TITULO_HERRAMIENTA: Record<string, { herramienta: Extract<Bloque, { tipo: 
   consultar_tabla: { herramienta: 'datos', titulo: 'Consultando la plataforma' },
   consultar_metrica: { herramienta: 'datos', titulo: 'Consultando una métrica' },
   buscar_documentos: { herramienta: 'datos', titulo: 'Buscando en los documentos' },
+  recordar: { herramienta: 'otra', titulo: 'Guardando en tu memoria' },
+  olvidar: { herramienta: 'otra', titulo: 'Olvidando un recuerdo' },
 }
 
 /** El historial como texto: sin bloques de pensamiento de turnos anteriores (se pueden quitar todos sin romper nada). */
@@ -42,7 +45,7 @@ export function historialAnthropic(ctx: ContextoMotor): Msg[] {
 /** El mensaje de este turno: el contexto, los adjuntos montados en el contenedor (y a la vista si son imagen o PDF chico) y el texto. */
 async function mensajeActual(ctx: ContextoMotor): Promise<Contenido[]> {
   const partes: Contenido[] = []
-  const montar = new Map(ctx.adjuntos.map((a) => [a.id, a]))
+  const montar = new Map([...ctx.archivosFijos, ...ctx.adjuntos].map((a) => [a.id, a]))
   // Contenedor nuevo: se vuelven a montar los archivos que el chat ya tenía.
   if (!ctx.contenedorVigente) for (const a of ctx.archivosDelChat) montar.set(a.id, a)
   for (const a of montar.values()) {
@@ -54,8 +57,10 @@ async function mensajeActual(ctx: ContextoMotor): Promise<Contenido[]> {
     if (/^image\/(png|jpe?g|webp|gif)$/.test(a.mime)) partes.push({ type: 'image', source: { type: 'file', file_id: fileId } })
     else if (a.mime === 'application/pdf' && a.bytes <= 8 * 1024 * 1024) partes.push({ type: 'document', source: { type: 'file', file_id: fileId }, title: a.nombre })
   }
-  const lista = ctx.adjuntos.length ? `\n[Adjuntos de este mensaje, ya en tu entorno de código: ${ctx.adjuntos.map((a) => a.nombre).join(', ')}]` : ''
-  partes.push({ type: 'text', text: `${contextoDelTurno()}${lista}${listaDeArtefactos(ctx.artefactos)}\n\n${ctx.texto}` })
+  const lista =
+    (ctx.adjuntos.length ? `\n[Adjuntos de este mensaje, ya en tu entorno de código: ${ctx.adjuntos.map((a) => a.nombre).join(', ')}]` : '') +
+    (ctx.archivosFijos.length ? `\n[Archivos de referencia del proyecto, en tu entorno de código: ${ctx.archivosFijos.map((a) => a.nombre).join(', ')}]` : '')
+  partes.push({ type: 'text', text: `${contextoDelTurno()}${lista}${listaDeArtefactos(ctx.artefactos)}${contextoMemoria(ctx.memoria)}\n\n${ctx.texto}` })
   return partes
 }
 
@@ -111,6 +116,7 @@ export async function ejecutarAnthropic(ctx: ContextoMotor, precioDe: (modelo: s
             { ...HERRAMIENTA_ARTEFACTO, eager_input_streaming: true } as Anthropic.Beta.BetaTool,
             HERRAMIENTA_LEER_ARTEFACTO as Anthropic.Beta.BetaTool,
             ...(ctx.datos ? herramientasDeDatos(ctx.datos) : []).map((h) => h as Anthropic.Beta.BetaTool),
+            ...(ctx.memoria ? HERRAMIENTAS_MEMORIA : []).map((h) => h as Anthropic.Beta.BetaTool),
           ],
           cache_control: { type: 'ephemeral' },
           messages: mensajes,
@@ -175,6 +181,20 @@ export async function ejecutarAnthropic(ctx: ContextoMotor, precioDe: (modelo: s
             paso.estado = err ? 'error' : 'listo'
             ctx.emitir({ t: 'paso', turno: ctx.turno, paso })
           }
+        } else if (b.type === 'tool_use' && NOMBRES_MEMORIA.has(b.name) && ctx.memoria) {
+          const paso = pasos.get(b.id)
+          const r = await herramientaMemoria(ctx.memoria, b.name, b.input)
+          if (r.bloque) {
+            bloques.push(r.bloque)
+            ctx.emitir({ t: 'bloque', turno: ctx.turno, bloque: r.bloque })
+          }
+          if (paso) {
+            paso.herramienta = 'otra'
+            paso.titulo = r.titulo
+            paso.estado = r.error ? 'error' : 'listo'
+            ctx.emitir({ t: 'paso', turno: ctx.turno, paso })
+          }
+          resultadosHtml.push({ type: 'tool_result', tool_use_id: b.id, content: r.texto, ...(r.error ? { is_error: true } : {}) })
         } else if (b.type === 'tool_use' && NOMBRES_DATOS.has(b.name) && ctx.datos) {
           const paso = pasos.get(b.id)
           const r = await herramientaDatos(ctx.datos, b.name, b.input)

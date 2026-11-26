@@ -1,5 +1,6 @@
 import type { Bloque, ClaseArtefacto, Esfuerzo, EventoTurno } from '../tipos'
 import type { Datos } from './datos'
+import type { ApiMemoria } from './memoria'
 
 export type ArtefactoTurno = { grupo: string; titulo: string; clase: ClaseArtefacto; version: number }
 
@@ -31,6 +32,8 @@ export type ContextoMotor = {
   adjuntos: ArchivoTurno[]
   /** Todos los archivos del chat (para volver a montarlos si el contenedor es nuevo). */
   archivosDelChat: ArchivoTurno[]
+  /** Los archivos del proyecto del chat: se montan en cada turno (pueden haberse sumado después). */
+  archivosFijos: ArchivoTurno[]
   contenedorId: string | null
   /** ¿El contenedor sigue vivo? (vive 30 días desde su último uso; se renueva a los 25). */
   contenedorVigente: boolean
@@ -38,6 +41,8 @@ export type ContextoMotor = {
   habilidades: string[]
   /** Las fuentes de datos de la plataforma que esta persona puede consultar (fase 2), o null. */
   datos: Datos | null
+  /** La memoria de quien pregunta (fase 3), o null si la apagó o el chat es compartido. */
+  memoria: ApiMemoria | null
   senal: AbortSignal
   emitir: (e: EventoTurno) => void
   /** Sube (una vez) un archivo de Storage a la Files API de Anthropic y devuelve su `file_id`. */

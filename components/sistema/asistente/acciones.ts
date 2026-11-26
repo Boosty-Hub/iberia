@@ -101,9 +101,10 @@ export async function enviarMensaje(entrada: {
 }
 
 /** Deja lista la subida de un archivo: revisa la cuota y anota la fila; el navegador sube los bytes directo a Storage. */
-export async function prepararSubida(entrada: { nombre: string; mime: string; bytes: number; chatId: string | null }): Promise<Resultado<{ archivoId: string; ruta: string }>> {
+export async function prepararSubida(entrada: { nombre: string; mime: string; bytes: number; chatId: string | null; proyectoId?: string | null }): Promise<Resultado<{ archivoId: string; ruta: string }>> {
   const sesion = await requerirPermiso('sistema:asistente')
   if (entrada.chatId && !UUID.test(entrada.chatId)) return { ok: false, error: 'Chat no válido.' }
+  if (entrada.proyectoId && !UUID.test(entrada.proyectoId)) return { ok: false, error: 'Proyecto no válido.' }
   if (!(entrada.bytes > 0)) return { ok: false, error: 'El archivo está vacío.' }
   if (entrada.bytes > MAX_BYTES_ARCHIVO) return { ok: false, error: 'El archivo pasa de 100 MB.' }
   const pol = await miPolitica()
@@ -113,12 +114,24 @@ export async function prepararSubida(entrada: { nombre: string; mime: string; by
   }
   const archivoId = crypto.randomUUID()
   const nombre = nombreSeguro(entrada.nombre)
-  const ruta = `${sesion.userId}/${entrada.chatId ?? 'sueltos'}/${archivoId}-${nombre}`
+  const carpeta = entrada.proyectoId ? `proyectos/${entrada.proyectoId}` : (entrada.chatId ?? 'sueltos')
+  const ruta = `${sesion.userId}/${carpeta}/${archivoId}-${nombre}`
   const supabase = await createClient()
   const { error } = await supabase
     .schema('asistente')
     .from('archivo')
-    .insert({ id: archivoId, dueno: sesion.userId, chat_id: entrada.chatId, origen: 'subido', estado: 'subiendo', nombre, mime: entrada.mime || 'application/octet-stream', bytes: entrada.bytes, ruta })
+    .insert({
+      id: archivoId,
+      dueno: sesion.userId,
+      chat_id: entrada.proyectoId ? null : entrada.chatId,
+      proyecto_id: entrada.proyectoId ?? null,
+      origen: 'subido',
+      estado: 'subiendo',
+      nombre,
+      mime: entrada.mime || 'application/octet-stream',
+      bytes: entrada.bytes,
+      ruta,
+    })
   if (error) return { ok: false, error: 'No se pudo preparar la subida.' }
   return { ok: true, archivoId, ruta }
 }
@@ -214,14 +227,16 @@ export async function borrarArchivo(tipo: 'archivo' | 'html', id: string): Promi
  * Crea el chat vacío antes del primer mensaje: así la pantalla se suscribe a su
  * canal antes de que el turno arranque y no se pierde ni la primera palabra.
  */
-export async function crearChat(titulo: string): Promise<Resultado<{ chatId: string }>> {
+export async function crearChat(titulo: string, proyectoId?: string | null): Promise<Resultado<{ chatId: string }>> {
   const sesion = await requerirPermiso('sistema:asistente')
   const pol = await miPolitica()
   if (!pol?.habilitado) return { ok: false, error: 'No tienes el asistente de IA habilitado.' }
+  if (proyectoId && !UUID.test(proyectoId)) return { ok: false, error: 'Proyecto no válido.' }
   const chatId = crypto.randomUUID()
   const supabase = await createClient()
   const t = titulo.replace(/\s+/g, ' ').trim().slice(0, 60) || 'Chat nuevo'
-  const { error } = await supabase.schema('asistente').from('chat').insert({ id: chatId, dueno: sesion.userId, titulo: t })
+  // El trigger `b_chat_proyecto` niega un proyecto ajeno.
+  const { error } = await supabase.schema('asistente').from('chat').insert({ id: chatId, dueno: sesion.userId, titulo: t, proyecto_id: proyectoId ?? null })
   return error ? { ok: false, error: 'No se pudo crear el chat.' } : { ok: true, chatId }
 }
 

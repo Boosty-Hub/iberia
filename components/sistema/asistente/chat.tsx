@@ -23,6 +23,8 @@ import {
 } from '@/lib/asistente/tipos'
 import type { ArchivoVista, ChatLista, MensajeVista, TurnoVista } from '@/lib/asistente/datos'
 import { calificar, confirmarSubida, crearChat, detenerTurno, enviarMensaje, prepararSubida, reintentarTurno } from './acciones'
+import { borrarMemoria } from './acciones-f3'
+import { aWavDe16k, formatoDeGrabacion } from '@/lib/wav'
 import { MarkdownChat } from './markdown-chat'
 import { cn } from '@/lib/utils'
 
@@ -73,6 +75,8 @@ export function ChatAsistente(props: {
   turnoInicial: TurnoVista | null
   modeloDelChat: string | null
   esfuerzoDelChat: string | null
+  proyecto: { id: string; nombre: string } | null
+  atajos: { id: string; comando: string; titulo: string; instruccion: string; modelo: string | null; esfuerzo: string | null; empresa: boolean }[]
 }) {
   const supabase = useMemo(() => createClient(), [])
   const [politica, setPolitica] = useState(props.politica)
@@ -98,6 +102,53 @@ export function ChatAsistente(props: {
   const [listaAbierta, setListaAbierta] = useState(false)
   const [filtro, setFiltro] = useState('')
   const [arrastrando, setArrastrando] = useState(false)
+  const [grabando, setGrabando] = useState<'no' | 'grabando' | 'transcribiendo'>('no')
+  const grabadora = useRef<MediaRecorder | null>(null)
+  // El menú «/»: se abre cuando el texto empieza con «/» y todavía no tiene espacio.
+  const consultaAtajo = /^\/[a-z0-9-]*$/i.test(texto) ? texto.slice(1).toLowerCase() : null
+  const atajosVisibles = consultaAtajo === null ? [] : props.atajos.filter((a) => a.comando.includes(consultaAtajo) || a.titulo.toLowerCase().includes(consultaAtajo)).slice(0, 8)
+  const usarAtajo = (a: (typeof props.atajos)[number]) => {
+    setTexto(a.instruccion)
+    if (a.modelo && disponibles.some((m) => m.id === a.modelo)) elegirModelo(a.modelo)
+    if (a.esfuerzo) setEsfuerzo(a.esfuerzo as Esfuerzo)
+    setTimeout(() => entrada.current?.focus(), 0)
+  }
+  // Dictado: graba, convierte a WAV de 16 kHz y lo transcribe; el texto se revisa antes de enviar.
+  const dictar = async () => {
+    if (grabando === 'grabando') {
+      grabadora.current?.stop()
+      return
+    }
+    try {
+      const flujo = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const formato = formatoDeGrabacion()
+      const g = new MediaRecorder(flujo, formato ? { mimeType: formato } : undefined)
+      const trozos: Blob[] = []
+      g.ondataavailable = (e) => e.data.size && trozos.push(e.data)
+      g.onstop = async () => {
+        flujo.getTracks().forEach((t) => t.stop())
+        setGrabando('transcribiendo')
+        try {
+          const wav = await aWavDe16k(new Blob(trozos, { type: g.mimeType }))
+          const r = await fetch('/sistema/asistente/transcribir', { method: 'POST', body: wav, headers: { 'Content-Type': 'audio/wav' } })
+          const j = (await r.json()) as { texto?: string; error?: string }
+          if (j.texto) setTexto((t) => (t.trim() ? `${t.trim()} ${j.texto}` : j.texto!))
+          else setAviso(j.error ?? 'No se pudo transcribir.')
+        } catch {
+          setAviso('No se pudo transcribir.')
+        } finally {
+          setGrabando('no')
+          entrada.current?.focus()
+        }
+      }
+      grabadora.current = g
+      g.start()
+      setGrabando('grabando')
+      setTimeout(() => g.state === 'recording' && g.stop(), 60_000)
+    } catch {
+      setAviso('No se pudo usar el micrófono. Revisa el permiso del navegador.')
+    }
+  }
 
   const motor = politica?.motor ?? 'anthropic'
   const disponibles = props.modelos.filter((m) => m.proveedor === motor && m.encendido && (politica?.modelos ?? []).includes(m.id))
@@ -271,7 +322,7 @@ export function ChatAsistente(props: {
     try {
       let id = chatId
       if (!id) {
-        const r = await crearChat(t || listos[0]?.nombre || 'Chat nuevo')
+        const r = await crearChat(t || listos[0]?.nombre || 'Chat nuevo', props.proyecto?.id ?? null)
         if (!r.ok) return setAviso(r.error)
         id = r.chatId
         chatIdRef.current = id
@@ -400,6 +451,11 @@ export function ChatAsistente(props: {
 
         <div ref={lista} onScroll={alDesplazar} className="min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-6">
           <div className="mx-auto flex max-w-3xl flex-col gap-5">
+            {props.proyecto && (
+              <Link href={`/sistema/asistente/proyectos/${props.proyecto.id}`} className="self-center rounded-full border border-[var(--borde)] bg-marca-50 px-3 py-1 text-[12px] text-marca-600 hover:bg-marca-100">
+                Proyecto: {props.proyecto.nombre}
+              </Link>
+            )}
             {mensajes.length === 0 && !turno && <Bienvenida nombre={props.yo.nombre} sinHabilitar={sinHabilitar} onEjemplo={(t) => setTexto(t)} />}
             {mensajes.map((m) =>
               m.rol === 'usuario' ? (
@@ -443,6 +499,19 @@ export function ChatAsistente(props: {
                 ))}
               </ul>
             )}
+            {atajosVisibles.length > 0 && (
+              <ul role="listbox" aria-label="Atajos" className="mb-1.5 max-h-60 overflow-y-auto rounded-xl border border-[var(--borde)] bg-white p-1 shadow-lg">
+                {atajosVisibles.map((a) => (
+                  <li key={a.id}>
+                    <button type="button" role="option" aria-selected={false} onClick={() => usarAtajo(a)} className="flex w-full items-baseline gap-2 rounded-lg px-2.5 py-1.5 text-left hover:bg-marca-50">
+                      <span className="font-mono text-[12.5px] text-acento-700">/{a.comando}</span>
+                      <span className="text-[13px] text-marca-800">{a.titulo}</span>
+                      <span className="ml-auto text-[11px] text-marca-400">{a.empresa ? 'Empresa' : 'Mío'}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
             <div className="rounded-xl border border-marca-200 bg-white focus-within:border-marca-400">
               <textarea
                 ref={entrada}
@@ -452,7 +521,8 @@ export function ChatAsistente(props: {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
                     e.preventDefault()
-                    void enviar()
+                    if (atajosVisibles.length) usarAtajo(atajosVisibles[0])
+                    else void enviar()
                   }
                 }}
                 onPaste={(e) => {
@@ -462,7 +532,7 @@ export function ChatAsistente(props: {
                   }
                 }}
                 rows={Math.min(8, Math.max(2, texto.split('\n').length))}
-                placeholder={sinHabilitar ? 'El asistente no está disponible para ti.' : 'Escríbele al asistente… (Enter envía, Mayús+Enter salta de línea)'}
+                placeholder={sinHabilitar ? 'El asistente no está disponible para ti.' : 'Escríbele al asistente… («/» para atajos · Enter envía · Mayús+Enter salta de línea)'}
                 aria-label="Mensaje para el asistente"
                 className="block w-full resize-none rounded-t-xl px-3.5 pt-3 text-[14.5px] text-marca-900 outline-none placeholder:text-marca-400"
               />
@@ -471,6 +541,15 @@ export function ChatAsistente(props: {
                   📎 Adjuntar
                   <input ref={archivoInput} type="file" multiple accept={ACEPTA} className="sr-only" onChange={(e) => e.target.files && (adjuntar(e.target.files), (e.target.value = ''))} />
                 </label>
+                <button
+                  type="button"
+                  disabled={sinHabilitar || grabando === 'transcribiendo'}
+                  onClick={() => void dictar()}
+                  aria-label={grabando === 'grabando' ? 'Detener el dictado' : 'Dictar'}
+                  className={cn('btn-neutro h-8 px-2.5 text-[12.5px]', grabando === 'grabando' && 'border-acento-300 bg-acento-50 text-acento-700')}
+                >
+                  {grabando === 'grabando' ? '● Detener' : grabando === 'transcribiendo' ? 'Transcribiendo…' : '🎙 Dictar'}
+                </button>
                 <select value={modelo} onChange={(e) => elegirModelo(e.target.value)} aria-label="Modelo" className="h-8 rounded-lg border border-[var(--borde)] bg-white px-2 text-[12.5px] text-marca-700">
                   {disponibles.map((m) => (
                     <option key={m.id} value={m.id}>
@@ -608,9 +687,13 @@ function Entregables({ bloques, archivos, onHtml }: { bloques: Bloque[]; archivo
   const archivosB = bloques.filter((b): b is Extract<Bloque, { tipo: 'archivo' }> => b.tipo === 'archivo')
   const artefactos = bloques.map(comoArtefacto).filter((a): a is Abierto => !!a)
   const fuentes = bloques.filter((b): b is Extract<Bloque, { tipo: 'fuente' }> => b.tipo === 'fuente')
-  if (!archivosB.length && !artefactos.length && !fuentes.length) return null
+  const recuerdos = bloques.filter((b): b is Extract<Bloque, { tipo: 'memoria' }> => b.tipo === 'memoria')
+  if (!archivosB.length && !artefactos.length && !fuentes.length && !recuerdos.length) return null
   return (
     <div className="mt-3 flex flex-col gap-2">
+      {recuerdos.map((r) => (
+        <Recuerdo key={r.memoriaId} id={r.memoriaId} texto={r.texto} />
+      ))}
       {artefactos.map((a) => (
         <button key={a.id} type="button" onClick={() => onHtml(a)} className="group/art flex items-center gap-3 rounded-xl border border-[var(--borde)] bg-white px-3 py-2.5 text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:border-marca-300">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-marca-800 text-white" aria-hidden>
@@ -656,6 +739,28 @@ function Entregables({ bloques, archivos, onHtml }: { bloques: Bloque[]; archivo
         </details>
       )}
     </div>
+  )
+}
+
+function Recuerdo({ id, texto }: { id: string; texto: string }) {
+  const [borrado, setBorrado] = useState(false)
+  return (
+    <p className="flex items-center gap-2 rounded-lg bg-marca-50 px-3 py-1.5 text-[12.5px] text-marca-600">
+      <span aria-hidden>🧠</span>
+      <span className={cn('min-w-0 flex-1', borrado && 'line-through opacity-60')}>Guardé en tu memoria: «{texto}»</span>
+      {!borrado && (
+        <button
+          type="button"
+          className="text-[12px] font-semibold text-acento-700 hover:underline"
+          onClick={async () => {
+            const r = await borrarMemoria(id)
+            if (r.ok) setBorrado(true)
+          }}
+        >
+          Deshacer
+        </button>
+      )}
+    </p>
   )
 }
 

@@ -28,6 +28,10 @@ Artefactos (como los de Claude):
 - Tipo documento: Markdown limpio, con títulos y tablas. Tipo svg: un solo <svg> con viewBox.
 - Después de crearlo o actualizarlo, di en una o dos líneas qué muestra o qué cambió. No repitas su contenido en el chat.
 
+Memoria:
+- Si tienes la herramienta recordar, la persona tiene memoria encendida. Guarda solo hechos estables de cómo trabaja (área, cargo, formatos que prefiere, nombres que usa, rutinas), una frase por hecho. Nunca cifras, datos de la plataforma, costos, contraseñas ni datos de otras personas.
+- Usa lo que recuerdas sin anunciarlo en cada respuesta. Si te dice «olvida…», usa olvidar.
+
 Datos de la plataforma:
 - Si tienes las herramientas consultar_tabla, consultar_metrica o buscar_documentos, úsalas para responder con datos de Iberia en vez de suponer. Solo existen las fuentes que el usuario puede ver y que su alcance permite: si no tienes la herramienta o la fuente, di que no tienes acceso a ese dato desde el asistente.
 - Para una cifra que existe como métrica, usa consultar_metrica: es la misma cifra de la pantalla. No cuentes a mano lo que ya está contado.
@@ -37,9 +41,14 @@ Datos de la plataforma:
 - No cambias nada en la plataforma: solo lees. Si te piden un cambio, explica cómo se hace en la pantalla correspondiente.
 - La información se usa solo para responder; no la repitas fuera de contexto ni la mezcles con internet sin decirlo.`
 
-export function instruccionesSistema(empresa: string): string {
+export function instruccionesSistema(empresa: string, proyecto?: { nombre: string; instrucciones: string } | null): string {
   const extra = empresa.trim()
-  return extra ? `${BASE}\n\nInstrucciones de Industrias Iberia para este asistente:\n${extra}` : BASE
+  let s = extra ? `${BASE}\n\nInstrucciones de Industrias Iberia para este asistente:\n${extra}` : BASE
+  if (proyecto) {
+    s += `\n\nEste chat es del proyecto «${proyecto.nombre}» de esta persona.`
+    if (proyecto.instrucciones.trim()) s += ` Sus instrucciones (se suman a las de la empresa; si chocan, mandan las de la empresa):\n${proyecto.instrucciones.trim()}`
+  }
+  return s
 }
 
 /** La línea de contexto del turno: fecha y hora en Caracas (no va en el system, para no romper la caché). */

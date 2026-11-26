@@ -4,6 +4,7 @@ import { HERRAMIENTA_ARCHIVOS, HERRAMIENTA_ARTEFACTO, HERRAMIENTA_LEER_ARTEFACTO
 import { ejecutarAnthropic, herramientaArtefacto, mensajeDeError } from './anthropic'
 import { costoDe, sumarUso, usoVacio, type ContextoMotor, type Precio, type ResultadoMotor, type Uso } from './contrato'
 import { NOMBRES_DATOS, herramientaDatos, herramientasDeDatos } from './datos'
+import { HERRAMIENTAS_MEMORIA, NOMBRES_MEMORIA, contextoMemoria, herramientaMemoria } from './memoria'
 
 type Item = Record<string, unknown>
 const MAX_VUELTAS = 12
@@ -71,7 +72,9 @@ async function correr(cuerpo: Record<string, unknown>, ctx: ContextoMotor, base:
           const paso: Extract<Bloque, { tipo: 'paso' }> =
             it.type === 'web_search_call'
               ? { tipo: 'paso', id, herramienta: 'busqueda', titulo: 'Buscando en internet', estado: 'corriendo' }
-              : NOMBRES_DATOS.has(nombre)
+              : NOMBRES_MEMORIA.has(nombre)
+                ? { tipo: 'paso', id, herramienta: 'otra', titulo: nombre === 'recordar' ? 'Guardando en tu memoria' : 'Olvidando un recuerdo', estado: 'corriendo' }
+                : NOMBRES_DATOS.has(nombre)
                 ? { tipo: 'paso', id, herramienta: 'datos', titulo: 'Consultando la plataforma', estado: 'corriendo' }
                 : nombre === 'artefacto' || nombre === 'leer_artefacto'
                 ? { tipo: 'paso', id, herramienta: 'html', titulo: nombre === 'artefacto' ? 'Creando el artefacto' : 'Leyendo el artefacto', estado: 'corriendo' }
@@ -113,7 +116,7 @@ export async function ejecutarOpenAI(ctx: ContextoMotor, precioDe: (modelo: stri
   const pasos = new Map<string, Extract<Bloque, { tipo: 'paso' }>>()
   const fuentes = new Map<string, string>()
   const lista = ctx.adjuntos.length ? `\n[Adjuntos de este mensaje: ${ctx.adjuntos.map((a) => a.nombre).join(', ')}]` : ''
-  const entrada: Item[] = [...historialOpenAI(ctx), { role: 'user', content: [{ type: 'input_text', text: `${contextoDelTurno()}${lista}${listaDeArtefactos(ctx.artefactos)}\n\n${ctx.texto}` }] }]
+  const entrada: Item[] = [...historialOpenAI(ctx), { role: 'user', content: [{ type: 'input_text', text: `${contextoDelTurno()}${lista}${listaDeArtefactos(ctx.artefactos)}${contextoMemoria(ctx.memoria)}\n\n${ctx.texto}` }] }]
 
   try {
     for (let vuelta = 0; vuelta < MAX_VUELTAS; vuelta++) {
@@ -132,6 +135,7 @@ export async function ejecutarOpenAI(ctx: ContextoMotor, precioDe: (modelo: stri
             { type: 'function', name: HERRAMIENTA_LEER_ARTEFACTO.name, description: HERRAMIENTA_LEER_ARTEFACTO.description, parameters: HERRAMIENTA_LEER_ARTEFACTO.input_schema, strict: true },
             { type: 'function', name: HERRAMIENTA_ARCHIVOS.name, description: HERRAMIENTA_ARCHIVOS.description, parameters: HERRAMIENTA_ARCHIVOS.input_schema, strict: true },
             ...(ctx.datos ? herramientasDeDatos(ctx.datos) : []).map((h) => ({ type: 'function', name: h.name, description: h.description, parameters: h.input_schema, strict: true })),
+            ...(ctx.memoria ? HERRAMIENTAS_MEMORIA : []).map((h) => ({ type: 'function', name: h.name, description: h.description, parameters: h.input_schema, strict: true })),
           ],
         },
         ctx,
@@ -173,7 +177,18 @@ export async function ejecutarOpenAI(ctx: ContextoMotor, precioDe: (modelo: stri
         let salidaHerramienta: string
         try {
           const args = JSON.parse(String(ll.arguments ?? '{}')) as Record<string, unknown>
-          if (NOMBRES_DATOS.has(String(ll.name)) && ctx.datos) {
+          if (NOMBRES_MEMORIA.has(String(ll.name)) && ctx.memoria) {
+            const r = await herramientaMemoria(ctx.memoria, String(ll.name), args)
+            if (r.bloque) {
+              bloques.push(r.bloque)
+              ctx.emitir({ t: 'bloque', turno: ctx.turno, bloque: r.bloque })
+            }
+            if (paso) {
+              paso.titulo = r.titulo
+              if (r.error) paso.estado = 'error'
+            }
+            salidaHerramienta = r.texto
+          } else if (NOMBRES_DATOS.has(String(ll.name)) && ctx.datos) {
             const r = await herramientaDatos(ctx.datos, String(ll.name), args)
             if (paso) {
               paso.herramienta = 'datos'
