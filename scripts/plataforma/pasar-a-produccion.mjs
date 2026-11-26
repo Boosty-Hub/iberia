@@ -40,7 +40,7 @@ if (!TOKEN || !REF) throw new Error('Faltan SUPABASE_ACCESS_TOKEN o SUPABASE_PRO
 if (REF === e.SUPABASE_PRUEBAS_REF) throw new Error('SUPABASE_PROJECT_REF es el de pruebas')
 
 const API = 'https://api.supabase.com/v1'
-const ESQUEMAS = ['org', 'sgc', 'flujo', 'control', 'ui', 'nucleo', 'ia']
+const ESQUEMAS = ['org', 'sgc', 'flujo', 'control', 'ui', 'nucleo', 'ia', 'asistente']
 const DESDE = '20261120' // las migraciones de la plataforma (Etapa 1 y rediseño R0–R6)
 const VARIABLES_NETLIFY = [
   ['TASAS_SECRETO', 'secreta', 'la pide /api/tasas/capturar en la cabecera x-tasas-secreto (sin ella, 401)'],

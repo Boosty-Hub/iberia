@@ -1728,3 +1728,33 @@ fieldset:disabled .nivel-opcion {
 .canal {
   --color-marca-400: #706a67;
 }
+
+/* ── Asistente de IA: las respuestas, más compactas que el informe ─────────── */
+.prosa-chat {
+  @apply text-[14.5px] leading-[1.65] lg:text-[14.5px];
+}
+.prosa-chat > * + * {
+  @apply mt-3;
+}
+.prosa-chat h1 {
+  @apply text-lg;
+}
+.prosa-chat h2 {
+  @apply mt-5 text-base;
+}
+.prosa-chat h3 {
+  @apply mt-4 text-[15px];
+}
+.prosa-chat pre {
+  @apply text-[12.5px];
+}
+.prosa-chat .tabla-chat {
+  @apply max-w-full overflow-x-auto rounded-lg border border-[var(--borde)];
+}
+.prosa-chat .tabla-chat table {
+  @apply text-[13px];
+}
+.prosa-chat .tabla-chat td,
+.prosa-chat .tabla-chat th {
+  @apply px-2.5 py-1.5 whitespace-nowrap;
+}

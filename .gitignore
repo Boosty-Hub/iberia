@@ -91,3 +91,6 @@ desktop.ini
 /android/local.properties
 *.aab
 *.apk
+
+# Lo que deja una compilación local de Netlify (netlify build / deploy --build)
+/.netlify/

@@ -163,8 +163,25 @@ export const RECURSOS_ALTERNOS: Record<string, string[]> = {
   'PRG-LEV': ['modulo:archivos'],
 }
 
+/**
+ * El asistente de IA de cada quien (plan del 26-nov-2026): va en Mi día, porque
+ * es personal y se usa todos los días. Sale con `sistema:asistente` · ver. Su
+ * administración es NUC-IA, en Administración.
+ */
+export const MODULO_ASISTENTE: ModuloPlan = {
+  codigo: 'MI-ASI',
+  nombre: 'Asistente de IA',
+  dominio: 'Mi día',
+  fase: null,
+  estado: 'operando',
+  ruta: '/sistema/asistente',
+  recurso: 'sistema:asistente',
+  descripcion: 'Tu chat de IA dentro de la plataforma: conversa, analiza Excel, genera documentos y tableros.',
+  orden: 0,
+}
+
 /** Los módulos que declara la interfaz y no la base: se suman a los del plan. */
-export const MODULOS_INTERFAZ: ModuloPlan[] = [...MODULOS_MI_DIA, MODULO_PADRON]
+export const MODULOS_INTERFAZ: ModuloPlan[] = [...MODULOS_MI_DIA, MODULO_ASISTENTE, MODULO_PADRON]
 
 export const ESTADO_MODULO: Record<EstadoModulo, { etiqueta: string; color: string }> = {
   operando: { etiqueta: 'Operando', color: '#1f8a5b' },
@@ -260,6 +277,18 @@ export const PESTANAS: Record<string, Pestana[]> = {
   ],
   'DAT-SEM': [{ etiqueta: 'Métricas', href: '/sistema/datos/metricas', recurso: 'sistema:inicio' }],
   'FIN-TAS': [{ etiqueta: 'Tasas', href: '/sistema/finanzas/tasas', recurso: 'sistema:tasas' }],
+  // Asistente de IA (26-nov-2026)
+  'MI-ASI': [
+    { etiqueta: 'Chats', href: '/sistema/asistente', recurso: 'sistema:asistente' },
+    { etiqueta: 'Mis archivos', href: '/sistema/asistente/archivos', recurso: 'sistema:asistente' },
+  ],
+  'NUC-IA': [
+    { etiqueta: 'Resumen', href: '/sistema/administracion/asistente', recurso: 'sistema:asistente-admin' },
+    { etiqueta: 'Motor y modelos', href: '/sistema/administracion/asistente/motor', recurso: 'sistema:asistente-admin' },
+    { etiqueta: 'Usuarios y roles', href: '/sistema/administracion/asistente/usuarios', recurso: 'sistema:asistente-admin' },
+    { etiqueta: 'Instrucciones', href: '/sistema/administracion/asistente/instrucciones', recurso: 'sistema:asistente-admin' },
+    { etiqueta: 'Adopción', href: '/sistema/administracion/asistente/adopcion', recurso: 'sistema:asistente-admin' },
+  ],
   // R4 · IA visible
   'NUC-GIA': [
     { etiqueta: 'Capacidades', href: '/sistema/administracion/ia', recurso: 'sistema:ia' },

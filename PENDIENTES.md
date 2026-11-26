@@ -734,6 +734,24 @@ Rama `plataforma/etapa-1`, Supabase de pruebas `wsqhsjbwkjlqrdxnyadq`. El plan e
 
 ---
 
+## Asistente de IA · fase 1 (desde el 26 de noviembre)
+
+Rama `asistente/fase-1`, probada contra pruebas. El plan y las decisiones, en Claude Docs
+(<https://claude.ai/artifact/LBR5GVKVkj2E8TTXGyba3U>); cómo funciona, en `AGENTS.md`, «El asistente de IA».
+
+| Qué | De quién | Nota |
+|---|---|---|
+| **Paso a producción**, con el OK de Gabriel: respaldo, las tres migraciones `20261126*`, exponer `asistente` en la API (`pasar-a-produccion.mjs` ya lo tiene), subir a 100 MB el límite global por archivo de Storage (hoy 50 MB), cargar en Netlify `ASISTENTE_SECRETO` (secreta, solo producción) y `ASISTENTE_EJECUTOR=netlify` | Equipo Boosty · Gabriel | Después, correr `probar-chat.mjs` contra producción con una cuenta del equipo. **El primer turno largo (un Excel de más de 60 s) es la prueba de que la función de fondo corre en Netlify**: en local se comprobó que se empaqueta con el motor (26/11), pero la compilación local de Netlify no termina en Windows (falla el middleware) |
+| Dar la casilla «Asistente de IA» (Roles) a los roles de los ~20 usuarios administrativos, y sus topes en Administración › Asistente de IA | Gabriel / administración | De fábrica solo la tiene el rol Consultor (y el nivel administrador) |
+| `OPENAI_API_KEY` está dos veces en `.env.local`: dejar una | Equipo Boosty | |
+| Fotos HEIC del iPhone: no se convierten en el navegador todavía; se aceptan JPG, PNG, WebP y GIF | Equipo Boosty | Plan, fase 1 |
+| La habilidad propia `formato-iberia` (plantillas de Word, Excel y PowerPoint con la marca, subidas a la API de habilidades): hoy la marca va por instrucciones (colores y DM Sans) | Equipo Boosty | Plan, fase 1 |
+| El paso a paso de Microsoft 365 para el administrador de Iberia se manda **al terminar la construcción** (Gabriel, 26/11) | Gabriel | Está en el plan, fase 7 |
+| Subdominio y remitente de Resend (P7) | Gabriel | Fase 5 |
+| Red team antes de abrir la fase 2 (consultas a la plataforma) | Equipo Boosty | Plan, fase 2 |
+
+---
+
 ## El dashboard — lo que hay que arreglar
 
 - ~~`/dashboard/hallazgos` da un error de hidratación~~ ✅ **Ya no aparece** (24 de

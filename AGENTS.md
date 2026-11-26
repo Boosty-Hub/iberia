@@ -1222,6 +1222,67 @@ ficha» decía 48/205 en Mi día y 46/185 en Procesos › Resumen porque cada p�
 - `node --env-file=.env.local scripts/plataforma/probar-r5.mjs [--como lector]` comprueba que la misma
   cifra diga lo mismo en Mi día y en su módulo, Ctrl K sin tildes → ficha, «?», «g p» y los tiempos.
 
+## El asistente de IA (`/sistema/asistente`, desde el 26 de noviembre de 2026)
+
+Pedido de Gabriel: un chat de IA como el de Claude web dentro de la plataforma, para que el personal administrativo
+no use licencias sueltas. **El plan entero (7 fases, 22 decisiones de Gabriel, costos) está en Claude Docs**:
+<https://claude.ai/artifact/LBR5GVKVkj2E8TTXGyba3U>. Fase 1 construida en la rama `asistente/fase-1`. Migraciones
+`20261126100000_asistente`, `…110000_asistente_metricas` y `…120000_asistente_artefactos`.
+
+- **Quién lo usa**: la casilla `sistema:asistente` (ver) del rol, con excepciones por persona en
+  `asistente.politica_usuario`. **Topes, espacio, modelos y esfuerzo máximo** por rol (`politica_rol`) o persona; lo vacío
+  hereda de `asistente.config`. `asistente.politica_de(perfil)` resuelve todo en un JSON (la usa el servidor) y
+  `mi_politica()`, la sesión. Lo gobierna `sistema:asistente-admin` en Administración › Asistente de IA (NUC-IA).
+- **Cada turno corre en segundo plano y la pantalla lo recibe en vivo.** La acción `enviarMensaje` guarda primero lo que
+  escribió la persona y deja el turno `en_cola`; `lanzarTurno()` (`lib/asistente/servidor.ts`) lo dispara: en Netlify, a la
+  **función de fondo** `netlify/functions/asistente-turno-background.mts` (hasta 15 min, responde 202 en el acto; el
+  secreto `ASISTENTE_SECRETO` va en la cabecera); en local, dentro de `after()`. El ejecutor
+  (`lib/asistente/motor/ejecutor.ts`) reserva el gasto (`asistente.reservar_turno`, bajo candado: dos turnos a la vez no
+  pasan un tope), llama al motor y manda los eventos por **Realtime Broadcast** al canal privado `asistente:chat:<id>`
+  (política sobre `realtime.messages` con `privado.participo_en_chat`). Lo que no se puede perder —mensaje, archivos,
+  estado— va a la base; si se pierde un evento, la pantalla mira el turno cada 4 s.
+  - 🔴 **`lib/asistente/motor/` no importa nada de Next ni `server-only`, y usa rutas relativas**: lo carga la función de
+    fondo, que no es el servidor de Next (`server-only` lanza fuera de React Server).
+  - ⚠️ **El canal se suscribe antes del primer turno**: para un chat nuevo se crea el chat (`crearChat`), se espera
+    `SUBSCRIBED` y después se envía. El manejador del canal lee el chat y la función por `ref`: con el cierre de la primera
+    versión, un chat recién creado no refrescaba su título.
+- **Motores** (`ContextoMotor` en `motor/contrato.ts`): Anthropic (por defecto; Messages API en streaming, Opus 5.5
+  medio, ejecución de código `code_execution_20260521` con las habilidades `xlsx`, `docx`, `pptx`, `pdf`, búsqueda web
+  `web_search_20250305` —la `20260209` trae su propio entorno de código y no se declara junto al otro—, caché de prompt,
+  `fallbacks: 'default'`) y OpenAI (Responses API con `store: false` e `include: ['reasoning.encrypted_content']`). Con
+  OpenAI, **los archivos los procesa Anthropic** (herramienta `procesar_archivo`, decisión 19). El historial se guarda en
+  formato propio y viaja como texto: sin bloques de pensamiento de turnos anteriores (quitarlos todos no rompe la
+  comprobación de historial de Opus 5.5) y un chat sigue si cambia el motor.
+- **Excel grandes**: el archivo nunca entra al contexto. Va a la Files API una sola vez (`archivo.anthropic_file_id`), se
+  monta en el contenedor (`container_upload`) y el modelo lo procesa con código; lo que deja en `$OUTPUT_DIR` vuelve a
+  Storage como archivo `generado`. El contenedor se reusa por chat (`chat.contenedor_id`, se renueva a los 25 días). Medido
+  el 26-nov: 3.000 filas × 2 hojas con Sonnet, 38 s y US$ 0,07.
+- **Artefactos** (como los de Claude; tabla `asistente.html`, `grupo` = las versiones de uno): herramientas `artefacto`
+  (crear, o actualizar con su id → versión nueva) y `leer_artefacto`. Tipos `html`, `documento` (Markdown) y `svg`. Se
+  abren solos en el panel. **Se sirven aislados** por `/sistema/asistente/html/[id]`: la política de contenido lleva
+  `sandbox allow-scripts` (origen opaco: no lee la sesión aunque se abra suelto) y `connect-src 'none'` (no saca datos);
+  librerías solo de cdn.jsdelivr.net y cdnjs. `?crudo=1` (documentos) y `?descargar=1`.
+- **Archivos**: bucket privado `asistente`, ruta `{perfil}/{chat|sueltos}/…`, hasta 100 MB (el límite global de Storage
+  del proyecto tiene que ser ≥ 100 MB). `prepararSubida` revisa la cuota y anota la fila; el navegador sube directo;
+  `confirmarSubida` lee el tamaño real. Se guarda hasta que el dueño lo borra (decisión 13).
+- **Lo que nadie lee**: el contenido de los chats. La administración ve cifras (`asistente.consumo`, métricas
+  `asistente_*`); **Boosty lee para soporte solo por `asistente.leer_para_soporte(chat, motivo, ticket)`**, que exige
+  `privado.es_equipo_boosty()` y deja la lectura en `asistente.lectura_soporte`. Al pie del chat va el aviso de resguardo
+  (`AVISO_RESGUARDO`, decisión P5).
+- **Gasto**: el del asistente vive en `asistente.turno` (tokens a precio del catálogo `asistente.modelo` + búsquedas a
+  US$ 10 por 1.000), **no** en `ia.actividad`: el tope diario de la IA de la plataforma (US$ 2) es de las capacidades de
+  los módulos. El interruptor general de IA y la capacidad `NUC-ASI-IA-01` sí apagan el asistente. Título y categoría de
+  cada turno los pone Haiku 5.5 (`motor/titulo.ts`); se guarda la categoría, nunca el contenido.
+- ⚠️ **Un `next dev` viejo sirve código viejo**: el 26-nov el Resumen mostraba cifras sin formato con el archivo ya
+  corregido; reiniciar el dev lo arregló. Y **dos `next dev` en la misma carpeta no conviven** (el del 3001 impide el del
+  3005, que muere sin escribir nada en su registro).
+
+```
+node --env-file=.env.local scripts/asistente/probar-chat.mjs [--solo simple|excel|html|puertas] [--excel <ruta.xlsx>]   # contra pruebas (:3005)
+node --env-file=.env.local scripts/asistente/sonda-anthropic.mjs <archivo.xlsx> [--modelo claude-sonnet-5-5]           # el motor, sin la base
+node --env-file=.env.local scripts/asistente/sonda-openai.mjs                                                         # la Responses API
+```
+
 ## Seguridad — no negociable
 
 Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).

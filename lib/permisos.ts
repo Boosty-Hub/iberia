@@ -197,6 +197,22 @@ export const MODULOS: Recurso[] = [
     acciones: ['ver'],
     subtitulo: 'El registro inmutable; lo de cada objeto lo ve quien puede leer el objeto',
   },
+  {
+    clave: 'sistema:asistente',
+    nombre: 'Asistente de IA',
+    grupo: 'sistema',
+    acciones: ['ver'],
+    detalle: { ver: 'Usar el asistente de IA (chat, archivos, HTML)' },
+    subtitulo: 'Habilita el chat de IA; los topes, modelos y excepciones por persona van en Administración › Asistente de IA',
+  },
+  {
+    clave: 'sistema:asistente-admin',
+    nombre: 'Administrar el asistente de IA',
+    grupo: 'sistema',
+    acciones: ['ver', 'editar'],
+    detalle: { ver: 'Consumo, adopción y configuración', editar: 'Motor, modelos, topes, políticas por rol y usuario, instrucciones' },
+    subtitulo: 'NUC-IA · cifras, nunca el contenido de los chats',
+  },
   { clave: 'modulo:panel', nombre: 'Panel', grupo: 'panel', acciones: ['ver'], subtitulo: 'La portada del dashboard' },
   {
     clave: 'modulo:entrevistas',

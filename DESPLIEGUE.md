@@ -31,6 +31,16 @@ un PR de afuera.
 | `OPENAI_API_KEY` | producción · secreta | Los dibujos de Ajito en la lección 4 (`gpt-image-2.5-flare`) y los ejemplos que dibuja `generar:ejemplos`. De la cuenta de OpenAI de Iberia, con la organización verificada —sin eso los modelos de imagen no responden—. Subida el 27 de septiembre. Sin ella, los dos ejercicios de dibujo no dibujan y sale el botón de reintentar |
 | `AZURE_SPEECH_KEY` | producción · secreta | La voz de Ajito, las devoluciones habladas y la transcripción de las notas de voz. Subida el 26 de septiembre, cuando la suscripción de Azure pasó a pago por uso: devolvía 401 porque la prueba gratuita había vencido, no por la clave. Quedó visible en una captura: regenerarla es opcional, y si se hace, va en `.env.local` y en Netlify y se vuelve a desplegar |
 
+### El asistente de IA — ⚠️ todavía sin cargar (rama `asistente/fase-1`)
+
+| Variable | Contexto | Para qué |
+|---|---|---|
+| `ASISTENTE_SECRETO` | producción · secreta | El secreto entre la acción que dispara un turno y la función de fondo `asistente-turno-background`. 32 bytes al azar, en hexadecimal; el de `.env.local` sirve para local |
+| `ASISTENTE_EJECUTOR` | producción | `netlify`: los turnos van a la función de fondo (hasta 15 min). Sin ella, `lanzarTurno()` lo deduce de las variables de Netlify |
+
+Usa además `ANTHROPIC_API_KEY_SALDO`, `OPENAI_API_KEY` y `SUPABASE_SECRET_KEY`, que ya están. ⚠️ El límite global por
+archivo de Storage del proyecto tiene que subir a 100 MB (hoy 50 MB): el bucket `asistente` admite 100 MB.
+
 ### Los avisos de la app de iOS — ⚠️ todavía sin cargar
 
 Las cuatro van **solo en producción**: una vista previa usa la misma base, y con ellas les

@@ -139,6 +139,9 @@ export function valorMetrica(m: Metrica, complemento = false): { valor: string; 
   if (m.unidad === '%') return { valor: porcentaje(v, 2) }
   // Horas (el programa): hasta dos decimales, y la referencia en horas, nunca en dinero.
   if (m.unidad === 'horas') return { valor: `${numero(v, 2, 0)} h`, unidad: m.total !== null ? `de ${numero(m.total)} h` : undefined }
+  // El asistente de IA: dólares con dos decimales, y tiempos en segundos.
+  if (m.unidad === 'USD') return { valor: `US$ ${numero(v, 2)}`, unidad: m.total !== null ? `de US$ ${numero(m.total)}` : undefined }
+  if (m.unidad === 'ms') return { valor: v === null ? '—' : `${numero(Number(v) / 1000, 1)} s` }
   return { valor: numero(v), unidad: m.total !== null ? `de ${numero(m.total)}` : undefined }
 }
 
@@ -198,6 +201,11 @@ const COMPARACION: Record<string, (m: Metrica) => string | null> = {
   },
   plataforma_pendientes: (m) =>
     `con dueño en Iberia, de todo lo abierto${d(m, 'con_fecha_30') ? ` · ${numero(d(m, 'con_fecha_30'))} con fecha en 30 días` : ''}`,
+  // NUC-IA · el asistente de IA
+  asistente_gasto_mes: (m) => `hoy US$ ${numero(Number(m.detalle?.hoy ?? 0), 2)} · ${plural(d(m, 'turnos'), 'turno', 'turnos')} de ${plural(d(m, 'personas'), 'persona', 'personas')}`,
+  asistente_usuarios_activos: (m) => `${plural(d(m, 'semana'), 'persona', 'personas')} en los últimos 7 días`,
+  asistente_turnos_mes: (m) => `${numero(d(m, 'fallidos'))} fallidos · 👍 ${numero(d(m, 'a_favor'))} · 👎 ${numero(d(m, 'en_contra'))}`,
+  asistente_primera_palabra: (m) => (d(m, 'turnos') ? `mediana ${numero(d(m, 'p50') / 1000, 1)} s · ${plural(d(m, 'turnos'), 'turno', 'turnos')} · meta: menos de 2 s` : 'Sin turnos en 7 días'),
   // NUC-FOR · el curso de Ajito
   formacion_matriculados: (m) => `${numero(d(m, 'en_curso'))} en curso · ${numero(d(m, 'sin_empezar'))} sin empezar${d(m, 'sin_matricula') ? ` · a ${numero(d(m, 'sin_matricula'))} les falta` : ''}`,
   formacion_completaron: (m) => (m.total ? `${porcentaje(((m.valor ?? 0) / m.total) * 100, 0)} de los matriculados` : 'Nadie matriculado todavía'),

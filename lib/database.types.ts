@@ -10,7 +10,638 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.15"
+    PostgrestVersion: "14.18"
+  }
+  asistente: {
+    Tables: {
+      archivo: {
+        Row: {
+          anthropic_file_id: string | null
+          anthropic_usado_en: string | null
+          bytes: number
+          chat_id: string | null
+          creado_en: string
+          dueno: string
+          estado: string
+          huella: string | null
+          id: string
+          mensaje_id: string | null
+          mime: string
+          nombre: string
+          origen: string
+          ruta: string
+        }
+        Insert: {
+          anthropic_file_id?: string | null
+          anthropic_usado_en?: string | null
+          bytes?: number
+          chat_id?: string | null
+          creado_en?: string
+          dueno?: string
+          estado?: string
+          huella?: string | null
+          id?: string
+          mensaje_id?: string | null
+          mime?: string
+          nombre: string
+          origen: string
+          ruta: string
+        }
+        Update: {
+          anthropic_file_id?: string | null
+          anthropic_usado_en?: string | null
+          bytes?: number
+          chat_id?: string | null
+          creado_en?: string
+          dueno?: string
+          estado?: string
+          huella?: string | null
+          id?: string
+          mensaje_id?: string | null
+          mime?: string
+          nombre?: string
+          origen?: string
+          ruta?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "archivo_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chat"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "archivo_mensaje_id_fkey"
+            columns: ["mensaje_id"]
+            isOneToOne: false
+            referencedRelation: "mensaje"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat: {
+        Row: {
+          actualizado_en: string
+          archivado: boolean
+          compartido: boolean
+          contenedor_id: string | null
+          contenedor_usado_en: string | null
+          creado_en: string
+          dueno: string
+          esfuerzo: string | null
+          id: string
+          modelo: string | null
+          motor: string | null
+          titulo: string
+          titulo_auto: boolean
+        }
+        Insert: {
+          actualizado_en?: string
+          archivado?: boolean
+          compartido?: boolean
+          contenedor_id?: string | null
+          contenedor_usado_en?: string | null
+          creado_en?: string
+          dueno?: string
+          esfuerzo?: string | null
+          id?: string
+          modelo?: string | null
+          motor?: string | null
+          titulo?: string
+          titulo_auto?: boolean
+        }
+        Update: {
+          actualizado_en?: string
+          archivado?: boolean
+          compartido?: boolean
+          contenedor_id?: string | null
+          contenedor_usado_en?: string | null
+          creado_en?: string
+          dueno?: string
+          esfuerzo?: string | null
+          id?: string
+          modelo?: string | null
+          motor?: string | null
+          titulo?: string
+          titulo_auto?: boolean
+        }
+        Relationships: []
+      }
+      config: {
+        Row: {
+          actualizado_en: string
+          actualizado_por: string | null
+          cuota_mb: number
+          encendido: boolean
+          esfuerzo_defecto: string
+          esfuerzo_max: string
+          id: boolean
+          instrucciones_empresa: string
+          modelo_anthropic: string
+          modelo_openai: string
+          motor: string
+          tope_diario_usd: number
+          tope_mensual_empresa_usd: number
+          tope_mensual_usd: number
+        }
+        Insert: {
+          actualizado_en?: string
+          actualizado_por?: string | null
+          cuota_mb?: number
+          encendido?: boolean
+          esfuerzo_defecto?: string
+          esfuerzo_max?: string
+          id?: boolean
+          instrucciones_empresa?: string
+          modelo_anthropic?: string
+          modelo_openai?: string
+          motor?: string
+          tope_diario_usd?: number
+          tope_mensual_empresa_usd?: number
+          tope_mensual_usd?: number
+        }
+        Update: {
+          actualizado_en?: string
+          actualizado_por?: string | null
+          cuota_mb?: number
+          encendido?: boolean
+          esfuerzo_defecto?: string
+          esfuerzo_max?: string
+          id?: boolean
+          instrucciones_empresa?: string
+          modelo_anthropic?: string
+          modelo_openai?: string
+          motor?: string
+          tope_diario_usd?: number
+          tope_mensual_empresa_usd?: number
+          tope_mensual_usd?: number
+        }
+        Relationships: []
+      }
+      html: {
+        Row: {
+          bytes: number
+          chat_id: string | null
+          creado_en: string
+          dueno: string
+          grupo: string
+          id: string
+          mensaje_id: string | null
+          ruta: string
+          tipo: string
+          titulo: string
+          version: number
+        }
+        Insert: {
+          bytes?: number
+          chat_id?: string | null
+          creado_en?: string
+          dueno: string
+          grupo?: string
+          id?: string
+          mensaje_id?: string | null
+          ruta: string
+          tipo?: string
+          titulo: string
+          version?: number
+        }
+        Update: {
+          bytes?: number
+          chat_id?: string | null
+          creado_en?: string
+          dueno?: string
+          grupo?: string
+          id?: string
+          mensaje_id?: string | null
+          ruta?: string
+          tipo?: string
+          titulo?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "html_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chat"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "html_mensaje_id_fkey"
+            columns: ["mensaje_id"]
+            isOneToOne: false
+            referencedRelation: "mensaje"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lectura_soporte: {
+        Row: {
+          chat_id: string
+          creado_en: string
+          id: string
+          lector: string
+          motivo: string
+          ticket: string | null
+        }
+        Insert: {
+          chat_id: string
+          creado_en?: string
+          id?: string
+          lector: string
+          motivo: string
+          ticket?: string | null
+        }
+        Update: {
+          chat_id?: string
+          creado_en?: string
+          id?: string
+          lector?: string
+          motivo?: string
+          ticket?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lectura_soporte_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chat"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mensaje: {
+        Row: {
+          adjuntos: string[]
+          autor: string | null
+          bloques: Json
+          calificacion: number | null
+          calificacion_nota: string | null
+          chat_id: string
+          creado_en: string
+          id: string
+          rol: string
+          texto: string
+          turno_id: string | null
+        }
+        Insert: {
+          adjuntos?: string[]
+          autor?: string | null
+          bloques?: Json
+          calificacion?: number | null
+          calificacion_nota?: string | null
+          chat_id: string
+          creado_en?: string
+          id?: string
+          rol: string
+          texto?: string
+          turno_id?: string | null
+        }
+        Update: {
+          adjuntos?: string[]
+          autor?: string | null
+          bloques?: Json
+          calificacion?: number | null
+          calificacion_nota?: string | null
+          chat_id?: string
+          creado_en?: string
+          id?: string
+          rol?: string
+          texto?: string
+          turno_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mensaje_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chat"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mensaje_turno_id_fkey"
+            columns: ["turno_id"]
+            isOneToOne: false
+            referencedRelation: "turno"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modelo: {
+        Row: {
+          descripcion: string
+          encendido: boolean
+          esfuerzos: string[]
+          id: string
+          nombre: string
+          orden: number
+          precio_cache_escribe: number
+          precio_cache_lee: number
+          precio_entrada: number
+          precio_salida: number
+          proveedor: string
+          verificado_en: string
+          vision: boolean
+        }
+        Insert: {
+          descripcion?: string
+          encendido?: boolean
+          esfuerzos?: string[]
+          id: string
+          nombre: string
+          orden?: number
+          precio_cache_escribe?: number
+          precio_cache_lee?: number
+          precio_entrada: number
+          precio_salida: number
+          proveedor: string
+          verificado_en: string
+          vision?: boolean
+        }
+        Update: {
+          descripcion?: string
+          encendido?: boolean
+          esfuerzos?: string[]
+          id?: string
+          nombre?: string
+          orden?: number
+          precio_cache_escribe?: number
+          precio_cache_lee?: number
+          precio_entrada?: number
+          precio_salida?: number
+          proveedor?: string
+          verificado_en?: string
+          vision?: boolean
+        }
+        Relationships: []
+      }
+      participante: {
+        Row: {
+          chat_id: string
+          desde: string
+          perfil_id: string
+          rol: string
+        }
+        Insert: {
+          chat_id: string
+          desde?: string
+          perfil_id: string
+          rol?: string
+        }
+        Update: {
+          chat_id?: string
+          desde?: string
+          perfil_id?: string
+          rol?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "participante_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chat"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      politica_rol: {
+        Row: {
+          actualizado_en: string
+          actualizado_por: string | null
+          cuota_mb: number | null
+          esfuerzo_max: string | null
+          modelos: string[] | null
+          puede_compartir: boolean | null
+          puede_programar: boolean | null
+          rol_id: string
+          tope_diario_usd: number | null
+          tope_mensual_usd: number | null
+        }
+        Insert: {
+          actualizado_en?: string
+          actualizado_por?: string | null
+          cuota_mb?: number | null
+          esfuerzo_max?: string | null
+          modelos?: string[] | null
+          puede_compartir?: boolean | null
+          puede_programar?: boolean | null
+          rol_id: string
+          tope_diario_usd?: number | null
+          tope_mensual_usd?: number | null
+        }
+        Update: {
+          actualizado_en?: string
+          actualizado_por?: string | null
+          cuota_mb?: number | null
+          esfuerzo_max?: string | null
+          modelos?: string[] | null
+          puede_compartir?: boolean | null
+          puede_programar?: boolean | null
+          rol_id?: string
+          tope_diario_usd?: number | null
+          tope_mensual_usd?: number | null
+        }
+        Relationships: []
+      }
+      politica_usuario: {
+        Row: {
+          actualizado_en: string
+          actualizado_por: string | null
+          cuota_mb: number | null
+          esfuerzo_max: string | null
+          habilitado: boolean | null
+          modelos: string[] | null
+          nota: string | null
+          perfil_id: string
+          puede_compartir: boolean | null
+          puede_programar: boolean | null
+          tope_diario_usd: number | null
+          tope_mensual_usd: number | null
+        }
+        Insert: {
+          actualizado_en?: string
+          actualizado_por?: string | null
+          cuota_mb?: number | null
+          esfuerzo_max?: string | null
+          habilitado?: boolean | null
+          modelos?: string[] | null
+          nota?: string | null
+          perfil_id: string
+          puede_compartir?: boolean | null
+          puede_programar?: boolean | null
+          tope_diario_usd?: number | null
+          tope_mensual_usd?: number | null
+        }
+        Update: {
+          actualizado_en?: string
+          actualizado_por?: string | null
+          cuota_mb?: number | null
+          esfuerzo_max?: string | null
+          habilitado?: boolean | null
+          modelos?: string[] | null
+          nota?: string | null
+          perfil_id?: string
+          puede_compartir?: boolean | null
+          puede_programar?: boolean | null
+          tope_diario_usd?: number | null
+          tope_mensual_usd?: number | null
+        }
+        Relationships: []
+      }
+      turno: {
+        Row: {
+          busquedas: number
+          categoria: string | null
+          chat_id: string
+          costo_usd: number
+          creado_en: string
+          detener: boolean
+          duracion_ms: number | null
+          empezado_en: string | null
+          error: string | null
+          esfuerzo: string
+          estado: string
+          id: string
+          latido: string | null
+          modelo: string
+          motor: string
+          primer_token_ms: number | null
+          reserva_usd: number
+          segundos_contenedor: number
+          solicitante: string
+          terminado_en: string | null
+          tokens_cache_escribe: number
+          tokens_cache_lee: number
+          tokens_entrada: number
+          tokens_salida: number
+        }
+        Insert: {
+          busquedas?: number
+          categoria?: string | null
+          chat_id: string
+          costo_usd?: number
+          creado_en?: string
+          detener?: boolean
+          duracion_ms?: number | null
+          empezado_en?: string | null
+          error?: string | null
+          esfuerzo: string
+          estado?: string
+          id?: string
+          latido?: string | null
+          modelo: string
+          motor: string
+          primer_token_ms?: number | null
+          reserva_usd?: number
+          segundos_contenedor?: number
+          solicitante?: string
+          terminado_en?: string | null
+          tokens_cache_escribe?: number
+          tokens_cache_lee?: number
+          tokens_entrada?: number
+          tokens_salida?: number
+        }
+        Update: {
+          busquedas?: number
+          categoria?: string | null
+          chat_id?: string
+          costo_usd?: number
+          creado_en?: string
+          detener?: boolean
+          duracion_ms?: number | null
+          empezado_en?: string | null
+          error?: string | null
+          esfuerzo?: string
+          estado?: string
+          id?: string
+          latido?: string | null
+          modelo?: string
+          motor?: string
+          primer_token_ms?: number | null
+          reserva_usd?: number
+          segundos_contenedor?: number
+          solicitante?: string
+          terminado_en?: string | null
+          tokens_cache_escribe?: number
+          tokens_cache_lee?: number
+          tokens_entrada?: number
+          tokens_salida?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "turno_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chat"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      consumo: {
+        Args: { p_desde: string; p_hasta?: string }
+        Returns: {
+          a_favor: number
+          costo_usd: number
+          en_contra: number
+          fallidos: number
+          nombre: string
+          perfil_id: string
+          primer_token_p90_ms: number
+          tokens_entrada: number
+          tokens_salida: number
+          turnos: number
+        }[]
+      }
+      consumo_por: {
+        Args: { p_desde: string; p_eje: string }
+        Returns: {
+          clave: string
+          costo_usd: number
+          primer_token_p90_ms: number
+          turnos: number
+        }[]
+      }
+      leer_para_soporte: {
+        Args: { p_chat: string; p_motivo: string; p_ticket?: string }
+        Returns: {
+          adjuntos: string[]
+          autor: string | null
+          bloques: Json
+          calificacion: number | null
+          calificacion_nota: string | null
+          chat_id: string
+          creado_en: string
+          id: string
+          rol: string
+          texto: string
+          turno_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "mensaje"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      mi_politica: { Args: never; Returns: Json }
+      politica_de: { Args: { p_perfil: string }; Returns: Json }
+      reservar_turno: {
+        Args: { p_reserva_usd: number; p_turno: string }
+        Returns: string
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   control: {
     Tables: {
@@ -686,6 +1317,7 @@ export type Database = {
           id: string
           nombre: string
           orden: number
+          permiso: string | null
           plaza_ref: string | null
           resolutor: string
           rol_id: string | null
@@ -700,6 +1332,7 @@ export type Database = {
           id?: string
           nombre: string
           orden: number
+          permiso?: string | null
           plaza_ref?: string | null
           resolutor: string
           rol_id?: string | null
@@ -714,6 +1347,7 @@ export type Database = {
           id?: string
           nombre?: string
           orden?: number
+          permiso?: string | null
           plaza_ref?: string | null
           resolutor?: string
           rol_id?: string | null
@@ -1596,6 +2230,53 @@ export type Database = {
   }
   org: {
     Tables: {
+      cambio: {
+        Row: {
+          args: Json
+          creado_en: string
+          descripcion: string
+          escenario_id: string
+          funcion: string
+          id: string
+          objeto: string | null
+          objeto_ref: string | null
+          orden: number
+          parche: Json | null
+        }
+        Insert: {
+          args?: Json
+          creado_en?: string
+          descripcion: string
+          escenario_id: string
+          funcion: string
+          id?: string
+          objeto?: string | null
+          objeto_ref?: string | null
+          orden?: never
+          parche?: Json | null
+        }
+        Update: {
+          args?: Json
+          creado_en?: string
+          descripcion?: string
+          escenario_id?: string
+          funcion?: string
+          id?: string
+          objeto?: string | null
+          objeto_ref?: string | null
+          orden?: never
+          parche?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cambio_escenario_id_fkey"
+            columns: ["escenario_id"]
+            isOneToOne: false
+            referencedRelation: "escenario"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cargo: {
         Row: {
           activo: boolean
@@ -1727,44 +2408,6 @@ export type Database = {
           },
         ]
       }
-      cambio: {
-        Row: {
-          args: Json
-          creado_en: string
-          descripcion: string
-          escenario_id: string
-          funcion: string
-          id: string
-          objeto: string | null
-          objeto_ref: string | null
-          orden: number
-          parche: Json | null
-        }
-        Insert: {
-          args?: Json
-          creado_en?: string
-          descripcion: string
-          escenario_id: string
-          funcion: string
-          id?: string
-          objeto?: string | null
-          objeto_ref?: string | null
-          parche?: Json | null
-        }
-        Update: {
-          args?: Json
-          creado_en?: string
-          descripcion?: string
-          escenario_id?: string
-          funcion?: string
-          id?: string
-          objeto?: string | null
-          objeto_ref?: string | null
-          orden?: number
-          parche?: Json | null
-        }
-        Relationships: []
-      }
       escenario: {
         Row: {
           alcance: string
@@ -1777,8 +2420,8 @@ export type Database = {
           nombre: string
           proceso_raiz_ref: string | null
           publicado_en: string | null
-          vigente_desde: string | null
           tipo: string
+          vigente_desde: string | null
         }
         Insert: {
           alcance: string
@@ -1791,8 +2434,8 @@ export type Database = {
           nombre: string
           proceso_raiz_ref?: string | null
           publicado_en?: string | null
-          vigente_desde?: string | null
           tipo?: string
+          vigente_desde?: string | null
         }
         Update: {
           alcance?: string
@@ -1805,8 +2448,8 @@ export type Database = {
           nombre?: string
           proceso_raiz_ref?: string | null
           publicado_en?: string | null
-          vigente_desde?: string | null
           tipo?: string
+          vigente_desde?: string | null
         }
         Relationships: []
       }
@@ -2217,14 +2860,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      proponer_cambio: {
-        Args: { p_funcion: string; p_args: Json; p_descripcion: string; p_parche?: Json; p_objeto?: string; p_objeto_ref?: string }
-        Returns: Json
-      }
-      quitar_cambio: { Args: { p_id: string }; Returns: undefined }
-      descartar_cambios: { Args: { p_esc: string }; Returns: undefined }
-      enviar_cambios: { Args: { p_esc: string; p_vigente_desde: string; p_nota?: string }; Returns: string }
-      crear_cargo_de_requisicion: { Args: { p_nombre: string; p_familia: string }; Returns: string }
       aplicar_requisicion: { Args: { p_req: string }; Returns: undefined }
       aprobar_plan_dotacion: { Args: { p_plan: string }; Returns: undefined }
       asignar_ocupacion: {
@@ -2254,6 +2889,11 @@ export type Database = {
         Args: { p_fecha: string; p_motivo: string; p_ref: string }
         Returns: undefined
       }
+      choques_escenario: {
+        Args: { p_esc: string; p_fecha: string }
+        Returns: string[]
+      }
+      clave_cargo_libre: { Args: { p_nombre: string }; Returns: string }
       comparar_escenario: {
         Args: { p_escenario: string }
         Returns: {
@@ -2276,6 +2916,20 @@ export type Database = {
         Returns: Json
       }
       costo_mensual_servicio: { Args: { p_cargo: string }; Returns: Json }
+      crear_cargo: {
+        Args: {
+          p_familia: string
+          p_nivel: string
+          p_nombre: string
+          p_proposito: string
+          p_sinonimos: string[]
+        }
+        Returns: string
+      }
+      crear_cargo_de_requisicion: {
+        Args: { p_familia: string; p_nombre: string }
+        Returns: string
+      }
       crear_componente_costo: {
         Args: {
           p_aplica_a: string
@@ -2333,6 +2987,7 @@ export type Database = {
         Args: { p_cargo: string; p_plaza?: string }
         Returns: Json
       }
+      descartar_cambios: { Args: { p_esc: string }; Returns: undefined }
       describir_plazas: {
         Args: { p_refs: string[] }
         Returns: {
@@ -2341,9 +2996,14 @@ export type Database = {
           unidad: string
         }[]
       }
+      devolver_cambios: { Args: { p_esc: string }; Returns: undefined }
       direccion_de: {
         Args: { p_fecha?: string; p_unidad: string }
         Returns: string
+      }
+      editar_cargo: {
+        Args: { p_campo: string; p_id: string; p_valor: string }
+        Returns: undefined
       }
       editar_componente_costo: {
         Args: {
@@ -2390,6 +3050,14 @@ export type Database = {
           p_sede: string
           p_tipo: string
         }
+        Returns: string
+      }
+      ejecutar_cambio: {
+        Args: { c: Database["org"]["Tables"]["cambio"]["Row"]; d: string }
+        Returns: undefined
+      }
+      enviar_cambios: {
+        Args: { p_esc: string; p_nota?: string; p_vigente_desde: string }
         Returns: string
       }
       enviar_escenario: {
@@ -2518,7 +3186,20 @@ export type Database = {
         Args: { p_fecha?: string; p_unidad: string }
         Returns: string
       }
+      proponer_cambio: {
+        Args: {
+          p_args: Json
+          p_descripcion: string
+          p_funcion: string
+          p_objeto?: string
+          p_objeto_ref?: string
+          p_parche?: Json
+        }
+        Returns: Json
+      }
+      publicar_cambios: { Args: { p_esc: string }; Returns: undefined }
       publicar_escenario: { Args: { p_esc: string }; Returns: undefined }
+      quitar_cambio: { Args: { p_id: string }; Returns: undefined }
       registrar_candidato: {
         Args: { p_candidato: string; p_fecha: string; p_req: string }
         Returns: undefined
@@ -2526,6 +3207,14 @@ export type Database = {
       retirar_componente_costo: {
         Args: { p_fecha: string; p_id: string }
         Returns: undefined
+      }
+      simular_cambios: {
+        Args: {
+          p_esc: string
+          p_fecha: string
+          p_nuevo: Database["org"]["Tables"]["cambio"]["Row"]
+        }
+        Returns: string
       }
       tasa_bcv: {
         Args: { p_fecha?: string }
@@ -2966,6 +3655,65 @@ export type Database = {
           titulo?: string
           updated_at?: string
           updated_by?: string | null
+        }
+        Relationships: []
+      }
+      canal_grupo_lecturas: {
+        Row: {
+          grupo_id: string
+          id: number
+          leido_en: string
+          leido_por: string
+        }
+        Insert: {
+          grupo_id: string
+          id?: never
+          leido_en?: string
+          leido_por: string
+        }
+        Update: {
+          grupo_id?: string
+          id?: never
+          leido_en?: string
+          leido_por?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "canal_grupo_lecturas_grupo_id_fkey"
+            columns: ["grupo_id"]
+            isOneToOne: false
+            referencedRelation: "grupos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      canal_modulos: {
+        Row: {
+          activo: boolean
+          actualizado_en: string
+          actualizado_por: string | null
+          clave: string
+          descripcion: string | null
+          nombre: string
+          orden: number
+        }
+        Insert: {
+          activo?: boolean
+          actualizado_en?: string
+          actualizado_por?: string | null
+          clave: string
+          descripcion?: string | null
+          nombre: string
+          orden?: number
+        }
+        Update: {
+          activo?: boolean
+          actualizado_en?: string
+          actualizado_por?: string | null
+          clave?: string
+          descripcion?: string | null
+          nombre?: string
+          orden?: number
         }
         Relationships: []
       }
@@ -5506,10 +6254,6 @@ export type Database = {
         Args: { p_plataforma: string; p_token: string }
         Returns: undefined
       }
-      renombrar_hablante: {
-        Args: { p_entrevista: string; p_etiqueta: string; p_nombre: string }
-        Returns: number
-      }
       reportar_contenido: {
         Args: {
           p_contenido: string
@@ -5612,41 +6356,6 @@ export type Database = {
         }
         Relationships: []
       }
-      documento_conciliacion: {
-        Row: {
-          decidido_en: string
-          decidido_por: string
-          documento_id: string
-          id: string
-          motivo: string
-          resolucion: string
-        }
-        Insert: {
-          decidido_en?: string
-          decidido_por?: string
-          documento_id: string
-          id?: string
-          motivo: string
-          resolucion: string
-        }
-        Update: {
-          decidido_en?: string
-          decidido_por?: string
-          documento_id?: string
-          id?: string
-          motivo?: string
-          resolucion?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "documento_conciliacion_documento_id_fkey"
-            columns: ["documento_id"]
-            isOneToOne: false
-            referencedRelation: "documento"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       documento_archivo: {
         Row: {
           actualizado_en: string
@@ -5696,6 +6405,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "documento_archivo_documento_id_fkey"
+            columns: ["documento_id"]
+            isOneToOne: false
+            referencedRelation: "documento"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documento_conciliacion: {
+        Row: {
+          decidido_en: string
+          decidido_por: string
+          documento_id: string
+          id: string
+          motivo: string
+          resolucion: string
+        }
+        Insert: {
+          decidido_en?: string
+          decidido_por?: string
+          documento_id: string
+          id?: string
+          motivo: string
+          resolucion: string
+        }
+        Update: {
+          decidido_en?: string
+          decidido_por?: string
+          documento_id?: string
+          id?: string
+          motivo?: string
+          resolucion?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documento_conciliacion_documento_id_fkey"
             columns: ["documento_id"]
             isOneToOne: false
             referencedRelation: "documento"
@@ -5906,6 +6650,10 @@ export type Database = {
       crear_escenario_procesos: {
         Args: { p_descripcion?: string; p_nombre: string; p_raiz?: string }
         Returns: string
+      }
+      editar_cruce: {
+        Args: { p_campo: string; p_id: string; p_valor: string }
+        Returns: undefined
       }
       enviar_escenario_procesos: {
         Args: { p_esc: string; p_vigente_desde: string }
@@ -6237,9 +6985,46 @@ export type Database = {
         Args: { p_antes: Json; p_despues: Json }
         Returns: string
       }
+      canal_comentario_estado: {
+        Args: { p_comentario: string; p_estado: string }
+        Returns: undefined
+      }
+      canal_comentarios: {
+        Args: never
+        Returns: {
+          autor: string
+          busqueda: string
+          creado_en: string
+          estado: string
+          id: string
+          publicacion: string
+          publicacion_id: string
+          reportes: number
+          texto: string
+        }[]
+      }
+      canal_grupo: {
+        Args: { p_con_mensajes?: boolean; p_grupo: string }
+        Returns: Json
+      }
+      canal_grupo_editar: {
+        Args: {
+          p_activo: boolean
+          p_grupo: string
+          p_nombre: string
+          p_proposito: string
+          p_tipo: string
+        }
+        Returns: undefined
+      }
+      canal_grupo_miembro: {
+        Args: { p_accion: string; p_empleado: string; p_grupo: string }
+        Returns: undefined
+      }
       canal_grupos: {
         Args: never
         Returns: {
+          acciones: string
           activo: boolean
           area: string
           busqueda: string
@@ -6253,6 +7038,23 @@ export type Database = {
           tipo: string
           ultimo_mensaje: string
         }[]
+      }
+      canal_modulo_activar: {
+        Args: { p_activo: boolean; p_clave: string }
+        Returns: undefined
+      }
+      canal_personas: {
+        Args: { p_buscar?: string }
+        Returns: {
+          area: string
+          cargo: string
+          id: string
+          nombre: string
+        }[]
+      }
+      canal_publicacion_comentarios: {
+        Args: { p_permite: boolean; p_publicacion: string }
+        Returns: undefined
       }
       canal_publicaciones: {
         Args: never
@@ -6274,6 +7076,13 @@ export type Database = {
           reportes_abiertos: number
           tipo: string
           titulo: string
+        }[]
+      }
+      canal_publicaciones_permiten: {
+        Args: never
+        Returns: {
+          id: string
+          permite_comentarios: boolean
         }[]
       }
       canal_uso: {
@@ -6668,6 +7477,42 @@ export type Database = {
           quien: string
           ref: string
           version: number
+        }[]
+      }
+      m_asistente_gasto_mes: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_asistente_primera_palabra: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_asistente_turnos_mes: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
+        }[]
+      }
+      m_asistente_usuarios_activos: {
+        Args: { p_al?: string; p_escenario?: string }
+        Returns: {
+          calculado_en: string
+          detalle: Json
+          total: number
+          valor: number
         }[]
       }
       m_brecha_cambiaria: {
@@ -7350,6 +8195,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  asistente: {
+    Enums: {},
+  },
   control: {
     Enums: {},
   },
