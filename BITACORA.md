@@ -58,8 +58,8 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 
 > **Plataforma Iberia:** **en producción** desde el 20/11 (Etapa 1, rediseño, panel y canal en `/sistema`; el informe
 > aparte; ver la sesión 56), con el Portal planta, los documentos y los tutoriales desde el 24/11 (sesiones 59 y 60).
-> **Asistente de IA:** las siete fases construidas y probadas en pruebas el 26/11 (sesión 61), rama `asistente/fase-1`;
-> el paso a producción espera el OK de Gabriel (lista en `PENDIENTES.md`).
+> **Asistente de IA:** las siete fases, las ventanas de 5 horas y «Preguntar a la IA» **en producción desde el 26/11**
+> (sesión 61). Falta lo de Iberia: Microsoft 365, el remitente de Resend y la plantilla de WhatsApp (`PENDIENTES.md`).
 
 ---
 
@@ -99,8 +99,33 @@ publicamos al final». Cómo funciona todo: `AGENTS.md`, «El asistente de IA».
   contra un simulador de Entra y Graph que valida la firma del certificado. El certificado de la app está generado
   (`plataforma/microsoft/`, vence el 25-nov-2028) y el paso a paso para el administrador de Microsoft de Iberia, listo para
   mandar.
-- **Dónde quedamos**: todo en la rama `asistente/fase-1`, sin push y sin producción. El paso a producción, con su lista, en
-  `PENDIENTES.md` («Asistente de IA»): espera el OK de Gabriel. El dev del 3001 se paró para probar en el 3005.
+- **Repaso de Gabriel** (su usuario de prueba con «Usuario Iberia» veía todo Administración): **el menú solo muestra lo que se
+  puede marcar en Roles** (Aprobaciones y Gobierno de IA ganaron su casilla; lo planificado, solo con la hoja de ruta); un rol
+  sin «Panel» caía en `/sin-acceso`; **la excepción por persona no abría las pantallas** (ahora va en la sesión). Recorrido con
+  sus dos cuentas, alcance TODO / LIMITADO / NADA puesto desde el admin (`recorrido-cuentas.mjs`).
+- **Pedidos de la misma tarde**, decididos por Gabriel: **ventanas de 5 horas** (el tope diario se reparte en al menos dos
+  ventanas, 2 de fábrica); **«Preguntar a la IA» abre el asistente al costado** con el contexto de la pantalla, y las seis
+  capacidades que solo respondían preguntas quedan «Resueltas por el asistente» (el Gobierno de IA sigue siendo el control).
+  Quedaron para después, en ese orden: el piloto del ejecutor en **Supabase Edge Functions** (investigado: viable con
+  `EdgeRuntime.waitUntil`, límite de 400 s en Pro) y el **módulo de archivos** tipo SharePoint (personal y compartidas, «/» en el
+  chat).
+- **En producción el 26/11** con el OK de Gabriel («despliega todo y publica todo en main»): respaldo, las 15 migraciones
+  `20261126*`, esquema `asistente` expuesto, Storage a 100 MB por archivo, variables en Netlify, 13.517 páginas indexadas, la
+  habilidad subida y **el reloj montado** (pg_cron, 200). `main` en `3a0ce15`.
+  - ⚠️ **El certificado de Microsoft no cabe en el entorno de Netlify**: AWS Lambda limita a 4 KB todas las variables juntas.
+    Va en Supabase Vault (`subir-certificado-microsoft.mjs`).
+  - 🔴 **El primer recorrido en producción encontró que el chat no respondía**: el `proxy.ts` mandaba a `/login` la llamada
+    interna a la función de fondo (`/.netlify/functions/…`), y como `fetch` sigue redirecciones, el 200 del login pasaba por
+    arrancado y el turno quedaba `en_cola`. En local no se ve (el turno corre en el mismo servidor). El matcher excluye
+    `.netlify/` y quien lanza exige el 202 (`redirect: 'manual'`). Tres turnos atascados se cerraron como fallidos.
+- **Recorrido en producción** con las cuentas de Gabriel (`recorrido-produccion.mjs`), todo bien: las seis pantallas de la
+  administración, «Preguntar a la IA», el Excel en la función de fondo (47 s, US$ 0,095), el usuario con modelo y adjuntos,
+  alcance TODO / LIMITADO / NADA, su uso en % y las URL de administración cerradas. ⚠️ **«Usuario Iberia» solo ve Mi día,
+  Tasas, Panel y el asistente**: el asistente no le da cifras de Plazas, Procesos ni Documentos aunque se encienda el alcance,
+  porque nunca ve más que la persona. La prueba le da esas tres pantallas mientras dura y las devuelve.
+- **Dónde quedamos**: en producción y verificado. Lo que sigue, en `PENDIENTES.md` («Asistente de IA»): lo de Iberia
+  (Microsoft 365, Resend, WhatsApp), dar la casilla y el alcance a los roles reales, el piloto en Edge Functions y el módulo de
+  archivos.
 
 ---
 

@@ -3,7 +3,12 @@
  * línea (26-nov-2026, con su OK). No toca las cuentas (ni clave ni rol). Lo que cambia —el alcance del rol del
  * usuario de prueba y sus fuentes— lo devuelve como estaba. Gasta unos pocos dólares de verdad.
  *
- *   RECORRIDO_CLAVE=… node --env-file=.env.local scripts/asistente/recorrido-produccion.mjs
+ *   RECORRIDO_CLAVE=… node --env-file=.env.local scripts/asistente/recorrido-produccion.mjs [--solo-usuario]
+ *
+ * El alcance del asistente nunca pasa del permiso de la pantalla: si el rol del usuario de prueba no ve Plazas,
+ * Procesos y Documentos, el asistente tampoco, por más fuentes que se enciendan (así estaba «Usuario Iberia» el
+ * 26-nov). Para probar TODO / LIMITADO / NADA, el recorrido le da «ver» de esas tres pantallas mientras dura y al
+ * final deja los permisos del rol como estaban.
  */
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { chromium } from 'playwright'
@@ -36,7 +41,13 @@ const uUsuario = lista.users.find((x) => x.email === USUARIO)
 const { data: perfil } = await db.from('profiles').select('rol_id, roles(nombre, clave)').eq('id', uUsuario.id).single()
 const ROL = { id: perfil.rol_id, nombre: perfil.roles.nombre }
 nota(`usuario de prueba con el rol ${ROL.nombre}`)
-const [{ data: fuentesAntes }, { data: alcanceAntes }] = await Promise.all([A.from('fuente').select('*'), A.from('alcance_rol').select('*').eq('rol_id', ROL.id)])
+const [{ data: fuentesAntes }, { data: alcanceAntes }, { data: permisosAntes }] = await Promise.all([
+  A.from('fuente').select('*'),
+  A.from('alcance_rol').select('*').eq('rol_id', ROL.id),
+  db.from('rol_permisos').select('*').eq('rol_id', ROL.id),
+])
+const SOLO_USUARIO = process.argv.includes('--solo-usuario')
+const PANTALLAS = ['sistema:estructura', 'sistema:procesos', 'sistema:documentos']
 
 const nav = await chromium.launch()
 async function entrar(email) {
@@ -95,6 +106,7 @@ const PREGUNTA = 'Dame en una tabla corta: total de plazas y cuántas están vac
 try {
   // ── El administrador ───────────────────────────────────────────────────────
   const pa = await entrar(ADMIN)
+  if (!SOLO_USUARIO) {
   ok(new URL(pa.url()).pathname.startsWith('/sistema'), 'Gabriel entra por el login de producción')
   ok((await pa.locator('a[href="/sistema/asistente"]').count()) > 0, 've el Asistente de IA en Mi día')
   await foto(pa, 'admin-mi-dia')
@@ -127,7 +139,17 @@ try {
   ok(ex.estado === 'listo' && (gen ?? []).length > 0, `Excel en la función de fondo de Netlify: ${ex.estado}, ${Math.round((ex.duracion_ms ?? 0) / 1000)} s, ${ex.tramos ?? 0} tramo(s) extra, US$ ${Number(ex.costo_usd ?? 0).toFixed(3)} · ${(gen ?? []).map((g) => g.nombre).join(', ')}`)
   await foto(pa, 'admin-excel')
 
+  }
   // ── El usuario, con todo / limitado / nada ─────────────────────────────────
+  const faltan = PANTALLAS.filter((r) => !(permisosAntes ?? []).some((p) => p.recurso === r && p.ver))
+  for (const recurso of faltan) {
+    const ya = (permisosAntes ?? []).find((p) => p.recurso === recurso)
+    const { error } = ya
+      ? await db.from('rol_permisos').update({ ver: true }).eq('rol_id', ROL.id).eq('recurso', recurso)
+      : await db.from('rol_permisos').insert({ rol_id: ROL.id, recurso, ver: true })
+    if (error) throw new Error(`No se pudo dar ${recurso}: ${error.message}`)
+  }
+  if (faltan.length) nota(`durante la prueba, ${ROL.nombre} ve también: ${faltan.join(', ')} (se devuelve al final)`)
   const pu = await entrar(USUARIO)
   const riel = await pu.locator('nav[aria-label="Dominios"]').innerText()
   ok(!/Administración/.test(riel) && (await pu.locator('a[href="/sistema/asistente"]').count()) > 0, 'el usuario entra, ve el asistente y no ve Administración')
@@ -165,7 +187,10 @@ try {
   }
   ok(pa.errores.length === 0 && pu.errores.length === 0, `sin errores de página${[...pa.errores, ...pu.errores][0] ? `: ${[...pa.errores, ...pu.errores][0].slice(0, 140)}` : ''}`)
 } finally {
-  // Producción como estaba: el alcance del rol y las fuentes.
+  // Producción como estaba: los permisos del rol, su alcance y las fuentes.
+  await db.from('rol_permisos').delete().eq('rol_id', ROL.id).in('recurso', PANTALLAS)
+  const devolver = (permisosAntes ?? []).filter((p) => PANTALLAS.includes(p.recurso))
+  if (devolver.length) await db.from('rol_permisos').insert(devolver)
   await A.from('alcance_rol').delete().eq('rol_id', ROL.id)
   if (alcanceAntes?.length) await A.from('alcance_rol').insert(alcanceAntes)
   for (const f of fuentesAntes ?? []) await A.from('fuente').update({ encendida: f.encendida, sensible: f.sensible }).eq('clave', f.clave)
