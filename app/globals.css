@@ -1750,6 +1750,79 @@ fieldset:disabled .nivel-opcion {
 .prosa-chat pre {
   @apply text-[12.5px];
 }
+/* El código en el chat (26-nov-2026): la ventana oscura de terminal, con su barra (lenguaje y «Copiar») y colores de
+   sintaxis de `rehype-highlight` (clases `hljs-*`). Paleta propia, sobria, legible sobre el carbón. */
+.prosa-chat .codigo-chat {
+  @apply my-3 overflow-hidden rounded-xl border border-[#3a3836] bg-[#1c1b1a];
+}
+.prosa-chat .codigo-chat-barra {
+  @apply flex items-center gap-2 border-b border-[#3a3836] bg-[#262524] px-3 py-1.5 text-[11.5px] text-[#b9b4ad];
+}
+.prosa-chat .codigo-chat-luces {
+  @apply flex gap-1.5;
+}
+.prosa-chat .codigo-chat-luces i {
+  @apply block h-2.5 w-2.5 rounded-full bg-[#4a4744];
+}
+.prosa-chat .codigo-chat-luces i:first-child {
+  background: #d4332c;
+}
+.prosa-chat .codigo-chat-lenguaje {
+  @apply flex-1 font-mono tracking-wide;
+}
+.prosa-chat .codigo-chat-copiar {
+  @apply rounded-md border border-[#4a4744] px-2 py-0.5 font-medium text-[#e8e5df] hover:bg-[#3a3836];
+}
+.prosa-chat .codigo-chat pre {
+  @apply m-0 overflow-x-auto rounded-none bg-transparent p-4 font-mono text-[12.5px] leading-relaxed text-[#e8e5df];
+}
+.prosa-chat .codigo-chat pre code {
+  @apply bg-transparent p-0 text-inherit;
+}
+.prosa-chat .hljs-comment,
+.prosa-chat .hljs-quote {
+  color: #8d8785;
+  font-style: italic;
+}
+.prosa-chat .hljs-keyword,
+.prosa-chat .hljs-selector-tag,
+.prosa-chat .hljs-built_in,
+.prosa-chat .hljs-meta .hljs-keyword {
+  color: #ff8a80;
+}
+.prosa-chat .hljs-string,
+.prosa-chat .hljs-regexp,
+.prosa-chat .hljs-attr-value,
+.prosa-chat .hljs-addition {
+  color: #a8d99c;
+}
+.prosa-chat .hljs-number,
+.prosa-chat .hljs-literal,
+.prosa-chat .hljs-symbol {
+  color: #ffd036;
+}
+.prosa-chat .hljs-title,
+.prosa-chat .hljs-title.function_,
+.prosa-chat .hljs-section {
+  color: #8cc8ff;
+}
+.prosa-chat .hljs-type,
+.prosa-chat .hljs-title.class_,
+.prosa-chat .hljs-attr,
+.prosa-chat .hljs-attribute,
+.prosa-chat .hljs-variable,
+.prosa-chat .hljs-template-variable,
+.prosa-chat .hljs-params {
+  color: #f5c38a;
+}
+.prosa-chat .hljs-meta,
+.prosa-chat .hljs-name,
+.prosa-chat .hljs-tag {
+  color: #c3a6ff;
+}
+.prosa-chat .hljs-deletion {
+  color: #ff8a80;
+}
 .prosa-chat .tabla-chat {
   @apply max-w-full overflow-x-auto rounded-lg border border-[var(--borde)];
 }
