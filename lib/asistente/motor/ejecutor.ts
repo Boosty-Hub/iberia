@@ -1,5 +1,5 @@
 import { toFile } from '@anthropic-ai/sdk'
-import type { Bloque, ClaseArtefacto, Esfuerzo, Motor } from '../tipos'
+import { RESERVA_POR_MODELO, type Bloque, type ClaseArtefacto, type Esfuerzo, type Motor } from '../tipos'
 import type { Database } from '../../database.types'
 import { BETA_ARCHIVOS, crearAnthropic, crearServicio, enOtraInvocacion, lanzarRemoto, modoEjecutor, secretoAsistente, tramoMs, urlBase, type BaseServicio } from './servicio'
 import { Emisor } from './emisor'
@@ -13,17 +13,8 @@ import type { ApiMemoria } from './memoria'
 import { INSTRUCCIONES_INVESTIGACION } from './tareas'
 import type { ArchivoTurno, ArtefactoTurno, ContextoMotor, Precio, ResultadoMotor, TurnoHistorial } from './contrato'
 
-/** Lo que se reserva antes de correr: el peor caso razonable de un turno, por modelo. Al cerrar se cobra lo real. */
-// Calibrada el 26-nov-2026 con los turnos medidos en pruebas (p90 con margen): con ventanas de 5 h, una reserva
-// muy alta dejaba sin usar el último tramo de cada ventana. Se recalibra con el primer mes real.
-const RESERVA: Record<string, number> = {
-  'claude-opus-5-5': 0.35,
-  'claude-sonnet-5-5': 0.15,
-  'claude-haiku-5-5': 0.02,
-  'gpt-6.2-astra': 0.8,
-  'gpt-6.2-sol': 0.45,
-  'gpt-6.1-terra': 0.05,
-}
+/** Lo que se reserva antes de correr (vive en `tipos.ts`: la pantalla la usa para cerrar el chat al llegar al tope). */
+const RESERVA = RESERVA_POR_MODELO
 
 const PRECIO_DEFECTO: Precio = { entrada: 4, salida: 20, cacheLee: 0.2, cacheEscribe: 5 }
 

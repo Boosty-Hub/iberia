@@ -21,6 +21,8 @@ import {
   type EventoTurno,
   type ModeloCatalogo,
   type Politica,
+  estadoCupo,
+  type EstadoCupo,
 } from '@/lib/asistente/tipos'
 import type { ArchivoVista, ChatLista, MensajeVista, TurnoVista } from '@/lib/asistente/datos'
 import { calificar, confirmarSubida, crearChat, detenerTurno, enviarMensaje, prepararSubida, reintentarTurno } from './acciones'
@@ -121,6 +123,9 @@ export function ChatAsistente(props: {
   const [texto, setTexto] = useState(props.preguntaInicial?.trim() ?? '')
   const [adjuntos, setAdjuntos] = useState<Adjunto[]>([])
   const [aviso, setAviso] = useState<string | null>(null)
+  const [ahora, setAhora] = useState(() => Date.now())
+  const [renovado, setRenovado] = useState<string | null>(null)
+  const [avisarNavegador, setAvisarNavegador] = useState<'no' | 'pedido'>('no')
   const [ocupado, setOcupado] = useState(false)
   const [html, setHtml] = useState<Abierto | null>(null)
   const archivoInput = useRef<HTMLInputElement>(null)
@@ -386,6 +391,7 @@ export function ChatAsistente(props: {
   const enviar = async () => {
     if (ocupado || (turno && turno.estado !== 'fallido')) return
     const t = texto.trim()
+    if (cupo.tipo !== 'ok' && paraElAsistenteAhora) return
     if (adjuntos.some((a) => a.estado === 'subiendo')) return setAviso('Espera a que terminen de subir los archivos.')
     const listos = adjuntos.filter((a) => a.estado === 'listo' && a.archivoId)
     if (!t && !listos.length) return
@@ -458,6 +464,36 @@ export function ChatAsistente(props: {
   const corriendo = !!turno
   const chatsFiltrados = filtro.trim() ? chats.filter((c) => c.titulo.toLowerCase().includes(filtro.trim().toLowerCase())) : chats
   const sinHabilitar = !politica?.habilitado || !politica.encendido
+  // El cupo (26-nov-2026, Gabriel): al llegar al tope la caja se cierra hasta que se renueve, en vez de dejar mandar
+  // mensajes que se quedan sin respuesta. En un chat compartido se le sigue pudiendo escribir al grupo (no gasta).
+  const cupo: EstadoCupo = politica && !sinHabilitar ? estadoCupo(politica, modelo, investigacion, disponibles.map((m) => m.id), ahora) : { tipo: 'ok' }
+  const paraElAsistenteAhora = !props.compartido || alAsistente
+  const cerradoPorCupo = cupo.tipo === 'bloqueado' && paraElAsistenteAhora
+  // Cerrado por el tope: se anota para el aviso de la campana y, a la hora de la renovación, se vuelve a pedir la
+  // política. Entonces sale un aviso flotante (y uno del navegador, si la persona lo permitió).
+  const claveBloqueo = cupo.tipo === 'bloqueado' ? `${cupo.motivo}|${cupo.renueva ?? ''}` : ''
+  useEffect(() => {
+    if (!claveBloqueo) return
+    const [motivo, renueva] = claveBloqueo.split('|')
+    if (!renueva) return
+    // Las consultas de supabase-js no salen hasta que alguien las espera: sin el then, nunca se mandaba.
+    if (motivo !== 'empresa') supabase.schema('asistente').rpc('anotar_tope', { p_motivo: motivo, p_renueva: renueva }).then(() => undefined)
+    const espera = Math.min(Math.max(1000, Date.parse(renueva) - Date.now() + 3000), 2_000_000_000)
+    const reloj = setTimeout(async () => {
+      const { data: pol } = await supabase.schema('asistente').rpc('mi_politica')
+      setAhora(Date.now())
+      if (!pol) return
+      setPolitica(pol as Politica)
+      const texto = motivo === 'ventana' ? 'Tu ventana de 5 horas se renovó: ya puedes seguir conversando.' : motivo === 'dia' ? 'Tu cupo del día se renovó: ya puedes seguir.' : 'Tu cupo se renovó: ya puedes seguir.'
+      setRenovado(texto)
+      setTimeout(() => setRenovado(null), 12_000)
+      try {
+        if ('Notification' in window && Notification.permission === 'granted') new Notification('Asistente de IA', { body: texto, icon: '/icon.png' })
+      } catch {}
+    }, espera)
+    return () => clearTimeout(reloj)
+  }, [claveBloqueo, supabase])
+
   const pct = (g: number, t: number) => Math.min(100, Math.round((g / Math.max(t, 0.0001)) * 100))
 
   return (
@@ -605,6 +641,20 @@ export function ChatAsistente(props: {
                 {aviso}
               </p>
             )}
+            {renovado && (
+              <div role="alert" className="fixed right-4 bottom-4 z-[70] flex max-w-sm items-start gap-3 rounded-2xl border border-emerald-200 bg-white p-4 shadow-xl" data-cupo-renovado>
+                <span className="mt-0.5 text-[18px]" aria-hidden>
+                  ✅
+                </span>
+                <p className="min-w-0 flex-1 text-[13px] text-marca-800">
+                  <strong className="block text-marca-900">Asistente de IA</strong>
+                  {renovado}
+                </p>
+                <button type="button" aria-label="Cerrar el aviso" className="h-8 w-8 shrink-0 rounded-lg text-marca-500 hover:bg-marca-50" onClick={() => setRenovado(null)}>
+                  ✕
+                </button>
+              </div>
+            )}
             {adjuntos.length > 0 && (
               <ul className="mb-2 flex flex-wrap gap-1.5" aria-label="Adjuntos">
                 {adjuntos.map((a) => (
@@ -645,11 +695,43 @@ export function ChatAsistente(props: {
                 ))}
               </ul>
             )}
+            {cupo.tipo !== 'ok' && paraElAsistenteAhora && (
+              <div role="status" className="mb-1.5 flex flex-wrap items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[12.5px] text-amber-900" data-cupo={cupo.tipo}>
+                <span className="min-w-0 flex-1">
+                  {cupo.texto}
+                  {cupo.tipo === 'bloqueado' && cupo.motivo !== 'empresa' ? ' Te avisamos cuando se renueve.' : ''}
+                </span>
+                {cupo.tipo === 'cambiar' && cupo.quitarInvestigacion && (
+                  <button type="button" className="btn-neutro h-8 px-2.5 text-[12px]" onClick={() => setInvestigacion(false)}>
+                    Quitar «Investigación»
+                  </button>
+                )}
+                {cupo.tipo === 'cambiar' && !cupo.quitarInvestigacion && (
+                  <button type="button" className="btn-neutro h-8 px-2.5 text-[12px]" onClick={() => elegirModelo(cupo.otroModelo)}>
+                    Usar {disponibles.find((m) => m.id === cupo.otroModelo)?.nombre ?? cupo.otroModelo}
+                  </button>
+                )}
+                {cupo.tipo === 'bloqueado' && cupo.motivo !== 'empresa' && avisarNavegador === 'no' && (
+                  <button
+                    type="button"
+                    className="btn-neutro h-8 px-2.5 text-[12px]"
+                    onClick={() => {
+                      setAvisarNavegador('pedido')
+                      try {
+                        if ('Notification' in window && Notification.permission === 'default') void Notification.requestPermission()
+                      } catch {}
+                    }}
+                  >
+                    Avisarme también en el navegador
+                  </button>
+                )}
+              </div>
+            )}
             <div className="rounded-xl border border-marca-200 bg-white focus-within:border-marca-400">
               <textarea
                 ref={entrada}
                 value={texto}
-                disabled={sinHabilitar}
+                disabled={sinHabilitar || cerradoPorCupo}
                 onChange={(e) => setTexto(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
@@ -666,7 +748,7 @@ export function ChatAsistente(props: {
                   }
                 }}
                 rows={Math.min(8, Math.max(2, texto.split('\n').length))}
-                placeholder={sinHabilitar ? 'El asistente no está disponible para ti.' : 'Escríbele al asistente… («/» para atajos y tus archivos · Enter envía · Mayús+Enter salta de línea)'}
+                placeholder={sinHabilitar ? 'El asistente no está disponible para ti.' : cerradoPorCupo && cupo.tipo === 'bloqueado' ? cupo.texto : 'Escríbele al asistente… («/» para atajos y tus archivos · Enter envía · Mayús+Enter salta de línea)'}
                 aria-label="Mensaje para el asistente"
                 className="block w-full resize-none rounded-t-xl px-3.5 pt-3 text-[14.5px] text-marca-900 outline-none placeholder:text-marca-400"
               />
@@ -724,7 +806,7 @@ export function ChatAsistente(props: {
                     ■ Detener
                   </button>
                 ) : (
-                  <button type="button" className="btn-acento h-8 px-4 text-[12.5px]" disabled={ocupado || sinHabilitar || (!texto.trim() && !adjuntos.some((a) => a.estado === 'listo'))} onClick={() => void enviar()}>
+                  <button type="button" className="btn-acento h-8 px-4 text-[12.5px]" disabled={ocupado || sinHabilitar || (cupo.tipo !== 'ok' && paraElAsistenteAhora) || (!texto.trim() && !adjuntos.some((a) => a.estado === 'listo'))} onClick={() => void enviar()}>
                     {ocupado ? <Giro /> : null} Enviar
                   </button>
                 )}

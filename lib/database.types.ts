@@ -191,6 +191,27 @@ export type Database = {
         }
         Relationships: []
       }
+      aviso_renovacion: {
+        Row: {
+          creado_en: string
+          motivo: string
+          perfil_id: string
+          renueva: string
+        }
+        Insert: {
+          creado_en?: string
+          motivo: string
+          perfil_id: string
+          renueva: string
+        }
+        Update: {
+          creado_en?: string
+          motivo?: string
+          perfil_id?: string
+          renueva?: string
+        }
+        Relationships: []
+      }
       capacidad_motor: {
         Row: {
           capacidad: string
@@ -1291,6 +1312,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      anotar_tope: {
+        Args: { p_motivo: string; p_renueva: string }
+        Returns: undefined
+      }
+      avisos_renovados: {
+        Args: { p_ahora?: string }
+        Returns: {
+          motivo: string
+          perfil_id: string
+        }[]
+      }
       borrar_microsoft: { Args: { p_perfil: string }; Returns: undefined }
       buscar_documentos: {
         Args: { p_consulta: string; p_limite?: number }

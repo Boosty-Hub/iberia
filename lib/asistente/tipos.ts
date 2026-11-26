@@ -53,7 +53,71 @@ export type Politica = {
   ventana_renueva: string | null
   gastado_dia_usd: number
   gastado_mes_usd: number
+  tope_empresa_usd?: number
+  gastado_empresa_usd?: number
   usado_bytes: number
+}
+
+/**
+ * Lo que se reserva antes de correr un turno: el peor caso razonable, por modelo (al cerrar se cobra lo real).
+ * Calibrada el 26-nov-2026 con los turnos medidos en pruebas (p90 con margen): con ventanas de 5 h, una reserva muy
+ * alta dejaba sin usar el último tramo de cada ventana. Se recalibra con el primer mes real. La usan el ejecutor y la
+ * pantalla, que cierra el chat cuando ya no cabe un turno.
+ */
+export const RESERVA_POR_MODELO: Record<string, number> = {
+  'claude-opus-5-5': 0.35,
+  'claude-sonnet-5-5': 0.15,
+  'claude-haiku-5-5': 0.02,
+  'gpt-6.2-astra': 0.8,
+  'gpt-6.2-sol': 0.45,
+  'gpt-6.1-terra': 0.05,
+}
+const reservaDe = (m: string) => RESERVA_POR_MODELO[m] ?? 0.35
+
+export type MotivoTope = 'ventana' | 'dia' | 'mes' | 'empresa'
+export type EstadoCupo =
+  | { tipo: 'ok' }
+  /** Con el modelo elegido no cabe, pero con otro más liviano sí. */
+  | { tipo: 'cambiar'; texto: string; otroModelo: string; quitarInvestigacion?: boolean }
+  /** No cabe ningún turno: el chat se cierra hasta que se renueve. */
+  | { tipo: 'bloqueado'; motivo: MotivoTope; renueva: string | null; texto: string }
+
+/**
+ * ¿Cabe un turno más? La misma cuenta que hace `asistente.reservar_turno` en la base (ventana, día, mes y empresa),
+ * con la reserva del modelo elegido (26-nov-2026, Gabriel: que al llegar al tope no se pueda escribir, en vez de
+ * mandar mensajes que se quedan sin respuesta).
+ */
+export function estadoCupo(p: Politica, modelo: string, investigacion: boolean, modelos: string[], ahora = Date.now()): EstadoCupo {
+  const activa = !!p.ventana_renueva && Date.parse(p.ventana_renueva) > ahora
+  const resto = {
+    ventana: Number(p.tope_ventana_usd) - (activa ? Number(p.gastado_ventana_usd) : 0),
+    dia: Number(p.tope_diario_usd) - Number(p.gastado_dia_usd),
+    mes: Number(p.tope_mensual_usd) - Number(p.gastado_mes_usd),
+    empresa: p.tope_empresa_usd == null ? Infinity : Number(p.tope_empresa_usd) - Number(p.gastado_empresa_usd ?? 0),
+  }
+  const necesita = (m: string) => (investigacion ? Math.max(Number(p.tope_investigacion_usd), reservaDe(m)) : reservaDe(m))
+  const falla = (m: string): MotivoTope | null => (['ventana', 'dia', 'mes', 'empresa'] as const).find((k) => necesita(m) > resto[k]) ?? null
+  const motivo = falla(modelo)
+  if (!motivo) return { tipo: 'ok' }
+  const otro = [...modelos].sort((a, b) => reservaDe(a) - reservaDe(b)).find((m) => !falla(m))
+  // Con «Investigación» puede no caber nada, y sin ella sí: se ofrece quitarla en vez de cerrar el chat.
+  if (!otro && investigacion) {
+    const sin = estadoCupo(p, modelo, false, modelos, ahora)
+    if (sin.tipo !== 'bloqueado') return { tipo: 'cambiar', otroModelo: sin.tipo === 'cambiar' ? sin.otroModelo : modelo, quitarInvestigacion: true, texto: 'La investigación profunda no cabe en lo que te queda de cupo; una pregunta normal sí.' }
+  }
+  if (otro) return { tipo: 'cambiar', otroModelo: otro, texto: investigacion ? 'La investigación no cabe en lo que te queda de cupo; prueba sin «Investigación» o con un modelo más liviano.' : 'Con este modelo ya no te alcanza el cupo; con uno más liviano sí.' }
+  // El momento de la renovación, en hora de Caracas (UTC−4, sin horario de verano).
+  const c = new Date(ahora - 4 * 3_600_000)
+  const manana = new Date(Date.UTC(c.getUTCFullYear(), c.getUTCMonth(), c.getUTCDate() + 1, 4)).toISOString()
+  const proximoMes = new Date(Date.UTC(c.getUTCFullYear(), c.getUTCMonth() + 1, 1, 4)).toISOString()
+  const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+  // El tope que cierra para todos los modelos; si son varios, manda el más largo (con el día agotado, la ventana no renueva nada).
+  const final = (['empresa', 'mes', 'dia', 'ventana'] as const).find((k) => modelos.every((x) => necesita(x) > resto[k])) ?? motivo
+  if (final === 'ventana' && activa)
+    return { tipo: 'bloqueado', motivo: 'ventana', renueva: p.ventana_renueva, texto: `Llegaste al tope de esta ventana de 5 horas. Se renueva a las ${horaCaracas(p.ventana_renueva!)}` }
+  if (final === 'dia' || final === 'ventana') return { tipo: 'bloqueado', motivo: 'dia', renueva: manana, texto: 'Llegaste a tu tope de hoy. Se renueva a la medianoche.' }
+  if (final === 'mes') return { tipo: 'bloqueado', motivo: 'mes', renueva: proximoMes, texto: `Llegaste a tu tope del mes. Se renueva el 1 de ${MESES[(c.getUTCMonth() + 1) % 12]}.` }
+  return { tipo: 'bloqueado', motivo: 'empresa', renueva: proximoMes, texto: 'Se alcanzó el tope mensual del asistente para toda la empresa. Avísale a la administración.' }
 }
 
 export type ModeloCatalogo = {

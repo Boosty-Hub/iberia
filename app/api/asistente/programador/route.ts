@@ -32,7 +32,12 @@ export async function POST(peticion: NextRequest) {
     if (error) return NextResponse.json({ error: 'No se pudo leer la cola' }, { status: 500 })
     const corridas = (data ?? []) as { id: string }[]
     for (const c of corridas) await lanzarCorrida(c.id)
-    return NextResponse.json({ corridas: corridas.map((c) => c.id) })
+    // A quien llegó a un tope y ya se le renovó el cupo, un aviso en la campana (26-nov-2026).
+    const { data: renovados } = await createAdminClient().schema('asistente').rpc('avisos_renovados', { p_ahora: ahora })
+    const TEXTO = { ventana: 'Tu ventana de 5 horas del asistente se renovó: ya puedes seguir conversando.', dia: 'Tu cupo del día en el asistente se renovó: ya puedes seguir.', mes: 'Tu cupo del mes en el asistente se renovó: ya puedes seguir.' } as const
+    const avisos = ((renovados ?? []) as { perfil_id: string; motivo: keyof typeof TEXTO }[]).map((r) => ({ destinatario: r.perfil_id, tipo: 'ia', texto: TEXTO[r.motivo] ?? TEXTO.ventana, enlace: '/sistema/asistente' }))
+    if (avisos.length) await createAdminClient().schema('nucleo').from('notificacion').insert(avisos)
+    return NextResponse.json({ corridas: corridas.map((c) => c.id), renovados: avisos.length })
   }
   if (cuerpo?.accion === 'entregar' && cuerpo.corrida && UUID.test(cuerpo.corrida)) {
     await entregarCorrida(cuerpo.corrida, typeof cuerpo.token === 'string' ? cuerpo.token : null)
