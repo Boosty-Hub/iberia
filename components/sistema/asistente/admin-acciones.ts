@@ -37,6 +37,7 @@ export async function guardarConfig(entrada: {
   whatsapp_plantilla?: string | null
   local_url?: string | null
   local_modo?: 'hibrido' | 'adentro'
+  ventanas_por_dia?: number
 }): Promise<R> {
   const sesion = await requerirPermiso('sistema:asistente-admin', 'editar')
   const cambios: Record<string, unknown> = { actualizado_por: sesion.userId, actualizado_en: new Date().toISOString() }
@@ -83,6 +84,18 @@ export async function guardarConfig(entrada: {
   }
   if (entrada.modelo_anthropic !== undefined) cambios.modelo_anthropic = entrada.modelo_anthropic
   if (entrada.modelo_openai !== undefined) cambios.modelo_openai = entrada.modelo_openai
+  if (entrada.ventanas_por_dia !== undefined) {
+    const v = Math.round(Number(entrada.ventanas_por_dia))
+    if (!(v >= 1 && v <= 5)) return { ok: false, error: 'Las ventanas por día van de 1 a 5.' }
+    cambios.ventanas_por_dia = v
+  }
+  // La investigación profunda tiene que caber en una ventana de 5 h (tope diario / ventanas por día).
+  if (entrada.tope_investigacion_usd !== undefined || entrada.ventanas_por_dia !== undefined || entrada.tope_diario_usd !== undefined) {
+    const { data: actual } = await supabase.schema('asistente').from('config').select('tope_investigacion_usd, ventanas_por_dia, tope_diario_usd').eq('id', true).maybeSingle()
+    const inv = Number(entrada.tope_investigacion_usd ?? actual?.tope_investigacion_usd ?? 0)
+    const ventana = Number(entrada.tope_diario_usd ?? actual?.tope_diario_usd ?? 0) / Number(entrada.ventanas_por_dia ?? actual?.ventanas_por_dia ?? 2)
+    if (inv > ventana + 0.0001) return { ok: false, error: `El tope de una investigación (US$ ${inv.toFixed(2)}) no cabe en una ventana de 5 h (US$ ${ventana.toFixed(2)}): bájalo, o sube el tope diario o baja las ventanas por día.` }
+  }
   if (entrada.programador_pausado !== undefined) cambios.programador_pausado = !!entrada.programador_pausado
   if (entrada.max_tareas !== undefined) {
     const v = numeroOk(entrada.max_tareas, 100)
@@ -136,6 +149,7 @@ type CamposPolitica = {
   cuota_mb: number | null
   puede_programar: boolean | null
   max_tareas: number | null
+  ventanas_por_dia: number | null
 }
 
 function limpiar(p: CamposPolitica): CamposPolitica | string {
@@ -153,6 +167,7 @@ function limpiar(p: CamposPolitica): CamposPolitica | string {
     cuota_mb: cuota === null ? null : Math.round(cuota),
     puede_programar: typeof p.puede_programar === 'boolean' ? p.puede_programar : null,
     max_tareas: tareas === null ? null : Math.round(tareas),
+    ventanas_por_dia: p.ventanas_por_dia && p.ventanas_por_dia >= 1 && p.ventanas_por_dia <= 5 ? Math.round(p.ventanas_por_dia) : null,
   }
 }
 

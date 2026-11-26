@@ -28,6 +28,7 @@ export async function leerConfig(): Promise<ConfigVista | null> {
     whatsapp_plantilla: data.whatsapp_plantilla,
     local_url: data.local_url,
     local_modo: data.local_modo as ConfigVista['local_modo'],
+    ventanas_por_dia: data.ventanas_por_dia,
   }
 }
 
@@ -37,7 +38,7 @@ export async function leerModelosAdmin() {
   return data ?? []
 }
 
-const vacia = (): PoliticaFila => ({ modelos: null, esfuerzo_max: null, tope_diario_usd: null, tope_mensual_usd: null, cuota_mb: null, puede_programar: null, max_tareas: null })
+const vacia = (): PoliticaFila => ({ modelos: null, esfuerzo_max: null, tope_diario_usd: null, tope_mensual_usd: null, cuota_mb: null, puede_programar: null, max_tareas: null, ventanas_por_dia: null })
 
 /** Los roles, si tienen la casilla del asistente, cuántas personas activas tienen y su política. */
 export async function leerRolesYPoliticas() {
@@ -62,7 +63,7 @@ export async function leerRolesYPoliticas() {
         habilitado: r.nivel === 'admin' || !!ver.get(r.id),
         personas: porRol.get(r.id) ?? 0,
         politica: p
-          ? { modelos: p.modelos, esfuerzo_max: p.esfuerzo_max as PoliticaFila['esfuerzo_max'], tope_diario_usd: p.tope_diario_usd === null ? null : Number(p.tope_diario_usd), tope_mensual_usd: p.tope_mensual_usd === null ? null : Number(p.tope_mensual_usd), cuota_mb: p.cuota_mb, puede_programar: p.puede_programar, max_tareas: p.max_tareas }
+          ? { modelos: p.modelos, esfuerzo_max: p.esfuerzo_max as PoliticaFila['esfuerzo_max'], tope_diario_usd: p.tope_diario_usd === null ? null : Number(p.tope_diario_usd), tope_mensual_usd: p.tope_mensual_usd === null ? null : Number(p.tope_mensual_usd), cuota_mb: p.cuota_mb, puede_programar: p.puede_programar, max_tareas: p.max_tareas, ventanas_por_dia: p.ventanas_por_dia }
           : vacia(),
       }
     }),
@@ -78,6 +79,7 @@ export async function leerRolesYPoliticas() {
       cuota_mb: e.cuota_mb,
       puede_programar: e.puede_programar,
       max_tareas: e.max_tareas,
+      ventanas_por_dia: e.ventanas_por_dia,
     })),
   }
 }

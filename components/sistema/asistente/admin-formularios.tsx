@@ -49,6 +49,7 @@ export type ConfigVista = {
   whatsapp_plantilla: string | null
   local_url: string | null
   local_modo: 'hibrido' | 'adentro'
+  ventanas_por_dia: number
 }
 
 export function FormMotor({
@@ -128,6 +129,17 @@ export function FormMotor({
           <div />
           <Numero etiqueta="Tope diario por persona (US$)" valor={c.tope_diario_usd} editable={editable} onCambio={(v) => setC({ ...c, tope_diario_usd: v })} />
           <Numero etiqueta="Tope mensual por persona (US$)" valor={c.tope_mensual_usd} editable={editable} onCambio={(v) => setC({ ...c, tope_mensual_usd: v })} />
+          <div className="col-span-2">
+            <label className={rotulo} htmlFor="ventanas">Ventanas de 5 h por día</label>
+            <select id="ventanas" className={cn(campo, 'w-full')} disabled={!editable} value={c.ventanas_por_dia} onChange={(e) => setC({ ...c, ventanas_por_dia: Number(e.target.value) })}>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <option key={n} value={n}>
+                  {n} {n === 1 ? '(sin ventanas: el tope del día de una vez)' : `· hasta US$ ${(c.tope_diario_usd / n).toFixed(2)} por ventana`}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-[11.5px] text-marca-500">Como en Claude web: la ventana arranca con el primer mensaje y se renueva a las 5 horas. Así el tope del día no se gasta en una hora.</p>
+          </div>
           <Numero etiqueta="Espacio por persona (MB)" valor={c.cuota_mb} editable={editable} onCambio={(v) => setC({ ...c, cuota_mb: v })} />
           <div>
             <label className={rotulo} htmlFor="esf-max">Esfuerzo máximo</label>
@@ -201,6 +213,7 @@ export function FormMotor({
                   tope_mensual_usd: c.tope_mensual_usd,
                   cuota_mb: c.cuota_mb,
                   esfuerzo_max: c.esfuerzo_max,
+                  ventanas_por_dia: c.ventanas_por_dia,
                   programador_pausado: c.programador_pausado,
                   max_tareas: c.max_tareas,
                   frecuencia_min_min: c.frecuencia_min_min,
@@ -260,13 +273,14 @@ export type PoliticaFila = {
   cuota_mb: number | null
   puede_programar: boolean | null
   max_tareas: number | null
+  ventanas_por_dia: number | null
 }
 
 function CamposPolitica({ p, set, modelos, editable, herencia }: { p: PoliticaFila; set: (p: PoliticaFila) => void; modelos: { id: string; nombre: string }[]; editable: boolean; herencia: ConfigVista }) {
   const marcados = p.modelos ?? modelos.map((m) => m.id)
   const num = (v: string) => (v === '' ? null : Number(v))
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-7">
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-8">
       <div>
         <label className={rotulo}>Programar tareas</label>
         <select className={cn(campo, 'w-full')} disabled={!editable} value={p.puede_programar === null ? '' : p.puede_programar ? 'si' : 'no'} onChange={(e) => set({ ...p, puede_programar: e.target.value === '' ? null : e.target.value === 'si' })}>
@@ -282,6 +296,17 @@ function CamposPolitica({ p, set, modelos, editable, herencia }: { p: PoliticaFi
       <div>
         <label className={rotulo}>Tope diario (US$)</label>
         <input type="number" min={0} step="0.5" className={cn(campo, 'w-full')} disabled={!editable} placeholder={String(herencia.tope_diario_usd)} value={p.tope_diario_usd ?? ''} onChange={(e) => set({ ...p, tope_diario_usd: num(e.target.value) })} />
+      </div>
+      <div>
+        <label className={rotulo}>Ventanas de 5 h</label>
+        <select className={cn(campo, 'w-full')} disabled={!editable} value={p.ventanas_por_dia ?? ''} onChange={(e) => set({ ...p, ventanas_por_dia: e.target.value ? Number(e.target.value) : null })}>
+          <option value="">Hereda ({herencia.ventanas_por_dia})</option>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <option key={n} value={n}>
+              {n}
+            </option>
+          ))}
+        </select>
       </div>
       <div>
         <label className={rotulo}>Tope mensual (US$)</label>
@@ -375,7 +400,7 @@ export function FormExcepcion({
   const [perfil, setPerfil] = useState(inicial?.perfil_id ?? '')
   const [habilitado, setHabilitado] = useState<boolean | null>(inicial?.habilitado ?? null)
   const [nota, setNota] = useState(inicial?.nota ?? '')
-  const [p, setP] = useState<PoliticaFila>(inicial ?? { modelos: null, esfuerzo_max: null, tope_diario_usd: null, tope_mensual_usd: null, cuota_mb: null, puede_programar: null, max_tareas: null })
+  const [p, setP] = useState<PoliticaFila>(inicial ?? { modelos: null, esfuerzo_max: null, tope_diario_usd: null, tope_mensual_usd: null, cuota_mb: null, puede_programar: null, max_tareas: null, ventanas_por_dia: null })
   const { pendiente, msg, guardar } = useGuardar()
   return (
     <div className="border-b border-[var(--borde)] px-4 py-3 last:border-0">

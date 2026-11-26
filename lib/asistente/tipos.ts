@@ -46,6 +46,11 @@ export type Politica = {
   max_tareas: number
   frecuencia_min_min: number
   tope_investigacion_usd: number
+  /** Ventanas de 5 h (26-nov-2026): el tope del día repartido; la ventana arranca con el primer mensaje. */
+  ventanas_por_dia: number
+  tope_ventana_usd: number
+  gastado_ventana_usd: number
+  ventana_renueva: string | null
   gastado_dia_usd: number
   gastado_mes_usd: number
   usado_bytes: number
@@ -172,6 +177,16 @@ export function describirFrecuencia(f: Pick<Frecuencia, 'frecuencia' | 'hora' | 
   if (dias.length === 5 && dias.every((d, i) => d === i + 1)) return `De lunes a viernes a las ${h}`
   if (dias.length === 7) return `Todos los días a las ${h}`
   return `Cada ${lista(dias.map((d) => DIAS[d]))} a las ${h}`
+}
+
+/**
+ * La hora de Caracas («1:05 p. m.») sin `Intl`: Caracas no tiene horario de verano (UTC−4), y así el
+ * servidor y el navegador escriben lo mismo (con `Intl` la hidratación no cuadra).
+ */
+export function horaCaracas(iso: string): string {
+  const d = new Date(Date.parse(iso) - 4 * 3_600_000)
+  const h = d.getUTCHours()
+  return `${h % 12 === 0 ? 12 : h % 12}:${String(d.getUTCMinutes()).padStart(2, '0')} ${h < 12 ? 'a. m.' : 'p. m.'}`
 }
 
 /** Una fecha en hora de Caracas, corta: «jue 26 nov, 8:00 a. m.». */

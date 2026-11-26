@@ -348,6 +348,7 @@ export type Database = {
           tope_investigacion_usd: number
           tope_mensual_empresa_usd: number
           tope_mensual_usd: number
+          ventanas_por_dia: number
           whatsapp_plantilla: string | null
         }
         Insert: {
@@ -376,6 +377,7 @@ export type Database = {
           tope_investigacion_usd?: number
           tope_mensual_empresa_usd?: number
           tope_mensual_usd?: number
+          ventanas_por_dia?: number
           whatsapp_plantilla?: string | null
         }
         Update: {
@@ -404,6 +406,7 @@ export type Database = {
           tope_investigacion_usd?: number
           tope_mensual_empresa_usd?: number
           tope_mensual_usd?: number
+          ventanas_por_dia?: number
           whatsapp_plantilla?: string | null
         }
         Relationships: []
@@ -872,6 +875,7 @@ export type Database = {
           rol_id: string
           tope_diario_usd: number | null
           tope_mensual_usd: number | null
+          ventanas_por_dia: number | null
         }
         Insert: {
           actualizado_en?: string
@@ -886,6 +890,7 @@ export type Database = {
           rol_id: string
           tope_diario_usd?: number | null
           tope_mensual_usd?: number | null
+          ventanas_por_dia?: number | null
         }
         Update: {
           actualizado_en?: string
@@ -900,6 +905,7 @@ export type Database = {
           rol_id?: string
           tope_diario_usd?: number | null
           tope_mensual_usd?: number | null
+          ventanas_por_dia?: number | null
         }
         Relationships: []
       }
@@ -919,6 +925,7 @@ export type Database = {
           puede_programar: boolean | null
           tope_diario_usd: number | null
           tope_mensual_usd: number | null
+          ventanas_por_dia: number | null
         }
         Insert: {
           actualizado_en?: string
@@ -935,6 +942,7 @@ export type Database = {
           puede_programar?: boolean | null
           tope_diario_usd?: number | null
           tope_mensual_usd?: number | null
+          ventanas_por_dia?: number | null
         }
         Update: {
           actualizado_en?: string
@@ -951,6 +959,7 @@ export type Database = {
           puede_programar?: boolean | null
           tope_diario_usd?: number | null
           tope_mensual_usd?: number | null
+          ventanas_por_dia?: number | null
         }
         Relationships: []
       }
@@ -1372,6 +1381,14 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      ventana_de: {
+        Args: { p_ahora?: string; p_perfil: string }
+        Returns: {
+          gastado: number
+          inicio: string
+          renueva: string
+        }[]
       }
     }
     Enums: {

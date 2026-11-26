@@ -14,13 +14,15 @@ import { INSTRUCCIONES_INVESTIGACION } from './tareas'
 import type { ArchivoTurno, ArtefactoTurno, ContextoMotor, Precio, ResultadoMotor, TurnoHistorial } from './contrato'
 
 /** Lo que se reserva antes de correr: el peor caso razonable de un turno, por modelo. Al cerrar se cobra lo real. */
+// Calibrada el 26-nov-2026 con los turnos medidos en pruebas (p90 con margen): con ventanas de 5 h, una reserva
+// muy alta dejaba sin usar el último tramo de cada ventana. Se recalibra con el primer mes real.
 const RESERVA: Record<string, number> = {
-  'claude-opus-5-5': 0.8,
-  'claude-sonnet-5-5': 0.4,
-  'claude-haiku-5-5': 0.05,
-  'gpt-6.2-astra': 1.2,
-  'gpt-6.2-sol': 0.4,
-  'gpt-6.1-terra': 0.2,
+  'claude-opus-5-5': 0.35,
+  'claude-sonnet-5-5': 0.15,
+  'claude-haiku-5-5': 0.02,
+  'gpt-6.2-astra': 0.8,
+  'gpt-6.2-sol': 0.45,
+  'gpt-6.1-terra': 0.05,
 }
 
 const PRECIO_DEFECTO: Precio = { entrada: 4, salida: 20, cacheLee: 0.2, cacheEscribe: 5 }
@@ -130,7 +132,7 @@ async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: Opcione
       await db.schema('asistente').from('turno').update({ estado: 'corriendo', latido: new Date().toISOString() }).eq('id', turnoId)
     } else {
       // La investigación reserva su propio tope; el resto, el peor caso razonable del modelo.
-      const reserva = investigacion ? Math.max(Number(config.tope_investigacion_usd), RESERVA[turno.modelo] ?? 0.8) : (RESERVA[turno.modelo] ?? 0.8)
+      const reserva = investigacion ? Math.max(Number(config.tope_investigacion_usd), RESERVA[turno.modelo] ?? 0.35) : (RESERVA[turno.modelo] ?? 0.35)
       const { data: motivo, error: errReserva } = await db.schema('asistente').rpc('reservar_turno', { p_turno: turnoId, p_reserva_usd: reserva })
       if (errReserva) return await cerrarFallido('No se pudo reservar el turno.')
       if (motivo) {

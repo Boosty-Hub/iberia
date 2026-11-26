@@ -12,6 +12,7 @@ import {
   ETIQUETA_CLASE,
   bytesLegibles,
   comoArtefacto,
+  horaCaracas,
   dentroDelMaximo,
   type Bloque,
   type ClaseArtefacto,
@@ -406,7 +407,7 @@ export function ChatAsistente(props: {
   const corriendo = !!turno
   const chatsFiltrados = filtro.trim() ? chats.filter((c) => c.titulo.toLowerCase().includes(filtro.trim().toLowerCase())) : chats
   const sinHabilitar = !politica?.habilitado || !politica.encendido
-  const topeDia = politica ? Math.min(100, (politica.gastado_dia_usd / Math.max(politica.tope_diario_usd, 0.01)) * 100) : 0
+  const pct = (g: number, t: number) => Math.min(100, Math.round((g / Math.max(t, 0.0001)) * 100))
 
   return (
     <div className="flex h-[calc(100dvh-196px)] min-h-[520px] gap-3">
@@ -446,22 +447,14 @@ export function ChatAsistente(props: {
           ))}
         </nav>
         {politica && (
-          <div className="border-t border-[var(--borde)] p-3 text-[11.5px] text-marca-500">
-            <div className="flex justify-between">
-              <span>Hoy</span>
-              <span>
-                {usd(politica.gastado_dia_usd)} de {usd(politica.tope_diario_usd)}
-              </span>
-            </div>
-            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-marca-100" aria-hidden>
-              <div className={cn('h-full rounded-full', topeDia > 85 ? 'bg-amber-500' : 'bg-marca-500')} style={{ width: `${topeDia}%` }} />
-            </div>
-            <div className="mt-1.5 flex justify-between">
-              <span>Este mes</span>
-              <span>
-                {usd(politica.gastado_mes_usd)} de {usd(politica.tope_mensual_usd)}
-              </span>
-            </div>
+          <div className="space-y-2 border-t border-[var(--borde)] p-3 text-[11.5px] text-marca-500" data-uso>
+            <Medidor
+              etiqueta="Esta ventana de 5 h"
+              valor={politica.ventana_renueva ? pct(politica.gastado_ventana_usd, politica.tope_ventana_usd) : 0}
+              nota={politica.ventana_renueva ? `Se renueva a las ${horaCaracas(politica.ventana_renueva)}` : 'Arranca con tu próximo mensaje'}
+            />
+            <Medidor etiqueta="Hoy" valor={pct(politica.gastado_dia_usd, politica.tope_diario_usd)} />
+            <Medidor etiqueta="Este mes" valor={pct(politica.gastado_mes_usd, politica.tope_mensual_usd)} />
           </div>
         )}
       </aside>
@@ -1060,6 +1053,22 @@ function PanelArtefacto({
       ) : (
         <iframe key={abierto.id} title={abierto.titulo} src={`/sistema/asistente/html/${abierto.id}`} sandbox="allow-scripts allow-downloads allow-modals" className="min-h-0 w-full flex-1 rounded-b-xl bg-[#f6f7f9]" />
       )}
+    </div>
+  )
+}
+
+/** Cuánto se usó, en %, como en Claude web: sin dólares para la persona. */
+function Medidor({ etiqueta, valor, nota }: { etiqueta: string; valor: number; nota?: string }) {
+  return (
+    <div>
+      <div className="flex justify-between">
+        <span>{etiqueta}</span>
+        <span className={cn(valor >= 85 && 'font-semibold text-amber-700')}>{valor} % usado</span>
+      </div>
+      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-marca-100" role="meter" aria-label={etiqueta} aria-valuemin={0} aria-valuemax={100} aria-valuenow={valor}>
+        <div className={cn('h-full rounded-full', valor >= 85 ? 'bg-amber-500' : 'bg-marca-500')} style={{ width: `${valor}%` }} />
+      </div>
+      {nota && <p className="mt-0.5 text-[11px] text-marca-400">{nota}</p>}
     </div>
   )
 }
