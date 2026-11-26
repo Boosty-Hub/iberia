@@ -8,7 +8,9 @@ import { createAdminClient } from '@/lib/supabase/server'
  *
  *  - Inicio de sesión: código de autorización con PKCE; la plataforma se
  *    autentica ante Entra con una aserción firmada con su CERTIFICADO
- *    (`MICROSOFT_CLAVE_PRIVADA`, `MICROSOFT_CERTIFICADO`), nunca con clave secreta.
+ *    (en Supabase Vault, `asistente.credencial_microsoft()`; en local, también `MICROSOFT_CLAVE_PRIVADA` y
+ *    `MICROSOFT_CERTIFICADO`), nunca con clave secreta. No va en el entorno de Netlify: AWS Lambda limita a 4 KB
+ *    el total de variables y el certificado solo ya pesa ~3,4 KB.
  *  - El token de renovación va cifrado en Vault (`asistente.guardar_microsoft`);
  *    el de acceso vive en memoria del servidor (una hora) y se pide al usarlo.
  *    Microsoft rota el de renovación en cada uso: se guarda el nuevo.
@@ -38,23 +40,45 @@ const b64url = (b: Buffer | string) => Buffer.from(b).toString('base64url')
 export type ConfigMicrosoft = { tenant: string; cliente: string }
 
 /** La app de Iberia en Entra (identificadores en la config) y el certificado (en el entorno). Null si falta algo. */
-export async function configMicrosoft(): Promise<ConfigMicrosoft | null> {
-  if (!process.env.MICROSOFT_CLAVE_PRIVADA || !process.env.MICROSOFT_CERTIFICADO) return null
+type Credencial = { clave: string; certificado: string }
+let credencialCache: { valor: Credencial | null; hasta: number } | null = null
+
+/** La llave privada (PEM) y el certificado (.cer en base64): de Vault, con el entorno de respaldo. Se guarda 10 min en memoria. */
+async function credencial(): Promise<Credencial | null> {
+  if (credencialCache && credencialCache.hasta > Date.now()) return credencialCache.valor
+  let valor: Credencial | null = null
+  const { data } = await createAdminClient().schema('asistente').rpc('credencial_microsoft')
+  const v = data as { clave?: string | null; certificado?: string | null } | null
+  if (v?.clave && v.certificado) valor = { clave: v.clave, certificado: v.certificado }
+  else if (process.env.MICROSOFT_CLAVE_PRIVADA && process.env.MICROSOFT_CERTIFICADO) valor = { clave: process.env.MICROSOFT_CLAVE_PRIVADA, certificado: process.env.MICROSOFT_CERTIFICADO }
+  credencialCache = { valor, hasta: Date.now() + 10 * 60_000 }
+  return valor
+}
+
+/** El certificado público (.cer), para entregárselo a Iberia. */
+export async function certificadoPublico(): Promise<Buffer | null> {
+  const c = await credencial()
+  return c ? Buffer.from(c.certificado, 'base64') : null
+}
+
+export async function configMicrosoft(): Promise<(ConfigMicrosoft & { cred: Credencial }) | null> {
+  const cred = await credencial()
+  if (!cred) return null
   const { data } = await createAdminClient().schema('asistente').from('config').select('microsoft_tenant, microsoft_cliente').eq('id', true).maybeSingle()
-  return data?.microsoft_tenant && data.microsoft_cliente ? { tenant: data.microsoft_tenant, cliente: data.microsoft_cliente } : null
+  return data?.microsoft_tenant && data.microsoft_cliente ? { tenant: data.microsoft_tenant, cliente: data.microsoft_cliente, cred } : null
 }
 
 /** La huella SHA-1 del certificado (la que muestra Entra) y si la llave está. Para el panel. */
-export function estadoCertificado(): { listo: boolean; huella: string | null } {
-  const cer = process.env.MICROSOFT_CERTIFICADO
-  if (!cer) return { listo: false, huella: null }
-  return { listo: !!process.env.MICROSOFT_CLAVE_PRIVADA, huella: createHash('sha1').update(Buffer.from(cer, 'base64')).digest('hex').toUpperCase() }
+export async function estadoCertificado(): Promise<{ listo: boolean; huella: string | null }> {
+  const c = await credencial()
+  if (!c) return { listo: false, huella: null }
+  return { listo: true, huella: createHash('sha1').update(Buffer.from(c.certificado, 'base64')).digest('hex').toUpperCase() }
 }
 
 /** La aserción del cliente (RFC 7523) firmada con la llave privada del certificado. */
-function asercion(cfg: ConfigMicrosoft): string {
-  const der = Buffer.from(process.env.MICROSOFT_CERTIFICADO!, 'base64')
-  const llave = createPrivateKey(Buffer.from(process.env.MICROSOFT_CLAVE_PRIVADA!, 'base64').toString('utf8'))
+function asercion(cfg: ConfigMicrosoft & { cred: Credencial }): string {
+  const der = Buffer.from(cfg.cred.certificado, 'base64')
+  const llave = createPrivateKey(Buffer.from(cfg.cred.clave, 'base64').toString('utf8'))
   const ahora = Math.floor(Date.now() / 1000)
   const cabecera = { alg: 'RS256', typ: 'JWT', x5t: b64url(createHash('sha1').update(der).digest()) }
   const cuerpo = { aud: `${LOGIN()}/${cfg.tenant}/oauth2/v2.0/token`, iss: cfg.cliente, sub: cfg.cliente, jti: randomUUID(), nbf: ahora - 30, iat: ahora, exp: ahora + 600 }
@@ -89,7 +113,7 @@ export async function urlDeAutorizacion(perfilId: string, retorno: string): Prom
 
 type RespuestaToken = { access_token?: string; refresh_token?: string; expires_in?: number; error?: string; error_description?: string }
 
-async function pedirToken(cfg: ConfigMicrosoft, campos: Record<string, string>): Promise<RespuestaToken> {
+async function pedirToken(cfg: ConfigMicrosoft & { cred: Credencial }, campos: Record<string, string>): Promise<RespuestaToken> {
   const r = await fetch(`${LOGIN()}/${cfg.tenant}/oauth2/v2.0/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

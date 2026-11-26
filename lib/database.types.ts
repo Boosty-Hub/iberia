@@ -1274,6 +1274,7 @@ export type Database = {
         }[]
       }
       correr_ahora: { Args: { p_tarea: string }; Returns: string }
+      credencial_microsoft: { Args: never; Returns: Json }
       desconectar_microsoft: { Args: never; Returns: undefined }
       fuentes_del_chat: {
         Args: { p_chat: string }
@@ -1281,6 +1282,10 @@ export type Database = {
           fuente: string
           veces: number
         }[]
+      }
+      guardar_credencial_microsoft: {
+        Args: { p_certificado: string; p_clave: string }
+        Returns: undefined
       }
       guardar_microsoft: {
         Args: {

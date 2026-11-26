@@ -31,14 +31,13 @@ un PR de afuera.
 | `OPENAI_API_KEY` | producción · secreta | Los dibujos de Ajito en la lección 4 (`gpt-image-2.5-flare`) y los ejemplos que dibuja `generar:ejemplos`. De la cuenta de OpenAI de Iberia, con la organización verificada —sin eso los modelos de imagen no responden—. Subida el 27 de septiembre. Sin ella, los dos ejercicios de dibujo no dibujan y sale el botón de reintentar |
 | `AZURE_SPEECH_KEY` | producción · secreta | La voz de Ajito, las devoluciones habladas y la transcripción de las notas de voz. Subida el 26 de septiembre, cuando la suscripción de Azure pasó a pago por uso: devolvía 401 porque la prueba gratuita había vencido, no por la clave. Quedó visible en una captura: regenerarla es opcional, y si se hace, va en `.env.local` y en Netlify y se vuelve a desplegar |
 
-### El asistente de IA — ⚠️ todavía sin cargar (rama `asistente/fase-1`)
+### El asistente de IA — cargadas el 26 de noviembre de 2026
 
 | Variable | Contexto | Para qué |
 |---|---|---|
 | `ASISTENTE_SECRETO` | producción · secreta | El secreto entre la acción que dispara un turno y la función de fondo `asistente-turno-background`. 32 bytes al azar, en hexadecimal; el de `.env.local` sirve para local |
 | `ASISTENTE_EJECUTOR` | producción | `netlify`: los turnos van a la función de fondo (hasta 15 min). Sin ella, `lanzarTurno()` lo deduce de las variables de Netlify |
-| `MICROSOFT_CLAVE_PRIVADA` | producción · secreta | La llave privada del certificado con que la plataforma se autentica ante la app de Iberia en Entra (fase 7). En `.env.local` la dejó `certificado-microsoft.mjs`; vence el 25-nov-2028 |
-| `MICROSOFT_CERTIFICADO` | producción | El certificado público (.cer en base64), para la huella. No es secreto |
+| `MICROSOFT_CLAVE_PRIVADA`, `MICROSOFT_CERTIFICADO` | — (🔴 nunca en Netlify) | El certificado de la app de Microsoft 365 (fase 7) **va en Supabase Vault** (`subir-certificado-microsoft.mjs --destino produccion --confirmo`, cargado el 26-nov): AWS Lambda limita a 4 KB el total de variables de cada función y el certificado solo pesa ~3,4 KB. En `.env.local` quedan de respaldo para local |
 | `ASISTENTE_LOCAL_CLAVE` | producción · secreta, opcional | La clave del servidor de modelos de Iberia (fase 6), si la pide |
 | `ASISTENTE_MS_LOGIN_URL`, `ASISTENTE_GRAPH_URL` | — (🔴 nunca en Netlify) | Solo para la prueba de la fase 7 (el simulador local) |
 | `ASISTENTE_TRAMO_MS` | — (no se carga) | Solo para probar: el tramo tras el que un turno largo guarda su estado y sigue en otra invocación. En Netlify vale 12 min sin la variable |

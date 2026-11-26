@@ -23,7 +23,7 @@ export default async function MicrosoftPage() {
     // Solo la cuenta: quién conectó qué cuenta no se muestra.
     createAdminClient().schema('asistente').from('conexion_microsoft').select('perfil_id', { count: 'exact', head: true }),
   ])
-  const cert = estadoCertificado()
+  const cert = await estadoCertificado()
   const retorno = `${(process.env.NEXT_PUBLIC_SITE_URL || 'https://iberiavenezuela.netlify.app').replace(/\/$/, '')}/api/asistente/microsoft/retorno`
   const listo = cert.listo && !!cfg?.microsoft_tenant && !!cfg?.microsoft_cliente
 
@@ -55,10 +55,10 @@ export default async function MicrosoftPage() {
                       Descargar el .cer
                     </a>{' '}
                     <span className="font-mono text-[11.5px] text-marca-500">huella {cert.huella}</span>
-                    {!cert.listo && <span className="block text-[12px] text-acento-700">Falta la llave privada en el servidor (MICROSOFT_CLAVE_PRIVADA).</span>}
+                    {!cert.listo && <span className="block text-[12px] text-acento-700">Falta la llave privada en el servidor.</span>}
                   </>
                 ) : (
-                  <span className="text-acento-700">Sin certificado en el servidor (MICROSOFT_CERTIFICADO).</span>
+                  <span className="text-acento-700">Sin certificado en el servidor (se carga en Vault con subir-certificado-microsoft.mjs).</span>
                 )}
               </dd>
             </div>
