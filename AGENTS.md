@@ -1535,7 +1535,10 @@ Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).
   administrador. Estuvo abierto hasta el 25 de septiembre de 2026, sin que nadie lo usara;
   `probar:supabase` falla si se vuelve a abrir. La interfaz sin botón de registro no cerraba
   nada: la API de Supabase es pública.
-- **Producción está en Netlify**, en la cuenta de Iberia, y cada push a `main` despliega.
+- **Producción está en Netlify**, en la cuenta de Iberia, y cada push a `main` despliega. ⚠️ **Una pestaña abierta antes de un
+  despliegue tiene el código viejo**: al tocar una acción, «Server Action … was not found» (409). `deploymentId` en
+  `next.config.ts` (el `DEPLOY_ID` de Netlify) hace que Next recargue la página entera al detectar otra versión, y
+  `AvisoVersionNueva` (layout raíz) muestra «Hay una versión nueva · Recargar» si igual llega el error (26-nov-2026).
   Cómo está configurado y qué variables lleva, en `DESPLIEGUE.md`.
 - **Bucket privado**: se descarga por `app/sistema/programa/levantamiento/archivos/[id]/descargar/route.ts`
   (las rutas viejas de `/dashboard/archivos/…` redirigen ahí),

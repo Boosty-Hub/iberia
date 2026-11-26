@@ -92,6 +92,9 @@ cosa: `AGENTS.md` («Mis archivos», «El asistente de IA», «Los tutoriales»,
   LLC»; ojito en la contraseña; el correo no se borra al refrescar ni tras un error. 🔴 **«Salir» cerraba la sesión en todos
   los dispositivos de la persona** (`signOut()` sin alcance): ahora solo la de ese navegador. En producción (`d72a478`),
   `probar-login.mjs` 10/10.
+- **Gabriel vio en Alcance «Server Action … was not found» (409)**: su pestaña era de antes de un despliegue (hubo varios
+  esa tarde). Sin `deploymentId`, Next no se entera de que cambió la versión. Ahora lleva el `DEPLOY_ID` de Netlify y hay un
+  aviso para recargar.
 
 ---
 
