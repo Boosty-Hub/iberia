@@ -231,9 +231,9 @@ export function VerComo({ personas }: { personas: { id: string; nombre: string }
       {filas && (
         <ul className="mt-3 grid gap-1 text-[12.5px] sm:grid-cols-2">
           {filas.map((f) => (
-            <li key={f.clave} className="flex items-center gap-2">
+            <li key={f.clave} className="flex items-start gap-2">
               <span className={cn('insignia shrink-0', ESTADO[f.estado].clase)}>{ESTADO[f.estado].texto}</span>
-              <span className={cn('truncate', f.estado === 'si' ? 'text-marca-900' : 'text-marca-500')}>{f.titulo}</span>
+              <span className={cn('min-w-0 leading-snug', f.estado === 'si' ? 'text-marca-900' : 'text-marca-500')}>{f.titulo}</span>
             </li>
           ))}
         </ul>

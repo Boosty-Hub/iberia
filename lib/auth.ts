@@ -133,6 +133,10 @@ export function destinoInicial(sesion: Sesion): string {
   if (sesion.rol.nivel === 'admin') return '/sistema'
   if (puede(sesion, 'modulo:canal')) return '/canal'
   if (puede(sesion, 'modulo:panel')) return '/sistema'
+  // Cualquier casilla de la plataforma (Estructura, Procesos, el asistente…) abre /sistema: Mi día se abre con
+  // cualquier sesión. Hasta el 26-nov-2026 solo contaba la casilla vieja «Panel», y un rol con módulos de la
+  // plataforma pero sin ella caía en «sin acceso» al entrar (lo encontró Gabriel con una cuenta de prueba).
+  if (Object.entries(sesion.permisos).some(([r, p]) => r.startsWith('sistema:') && (p.ver || p.crear))) return '/sistema'
   const panel = inicioDelPanel(sesion)
   if (panel) return panel
   if (Object.entries(sesion.permisos).some(([r, p]) => r.startsWith('informe:') && p.ver)) return '/informe'
