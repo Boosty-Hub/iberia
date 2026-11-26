@@ -49,7 +49,18 @@ export function BotonBuscar({ compacto = false }: { compacto?: boolean }) {
 export type EscenarioBarra = { id: string; nombre: string; alcance: string }
 
 /** «Datos al» y Realidad / Escenario: viven en la URL (`al`, `esc`). */
-export function ControlesContexto({ escenarios, puedeEscenarios, claro = false }: { escenarios: EscenarioBarra[]; puedeEscenarios: boolean; claro?: boolean }) {
+export function ControlesContexto({
+  escenarios,
+  puedeEscenarios,
+  claro = false,
+  conFecha = true,
+}: {
+  escenarios: EscenarioBarra[]
+  puedeEscenarios: boolean
+  claro?: boolean
+  /** «Datos al» solo para quien tiene módulos con historia por fecha (26-nov-2026). */
+  conFecha?: boolean
+}) {
   const { sp, fijar } = useContextoUrl()
   const hoy = hoyCaracas()
   const al = sp.get('al') ?? hoy
@@ -61,6 +72,7 @@ export function ControlesContexto({ escenarios, puedeEscenarios, claro = false }
 
   return (
     <>
+      {conFecha && (
       <label className={cn(base, 'cursor-text', otroDia && (claro ? 'border-amber-400 bg-amber-50' : 'border-amber-400/80 bg-amber-900/40'))} title="La fecha de los datos que ves">
         <IconoCalendarito className="h-4 w-4 shrink-0 opacity-80" />
         <span className={cn(claro ? '' : 'hidden 2xl:inline')}>Datos al</span>
@@ -74,7 +86,10 @@ export function ControlesContexto({ escenarios, puedeEscenarios, claro = false }
         />
         {otroDia && <span className="sr-only">(no es hoy)</span>}
       </label>
+      )}
 
+      {/* Realidad o escenario, solo con la casilla de escenarios (26-nov-2026): sin ella no hay escenario que elegir. */}
+      {puedeEscenarios && (
       <div className={cn('flex shrink-0 overflow-hidden rounded-lg border', claro ? 'border-[var(--borde)]' : 'border-[#4a4845]')} role="group" aria-label="Realidad o escenario">
         <button
           type="button"
@@ -140,6 +155,7 @@ export function ControlesContexto({ escenarios, puedeEscenarios, claro = false }
           )}
         </Desplegable>
       </div>
+      )}
     </>
   )
 }
