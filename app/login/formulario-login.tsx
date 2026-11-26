@@ -1,9 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { useActionState, useEffect } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import { useFormStatus } from 'react-dom'
+import { CampoClave } from '@/components/campo-clave'
 import { iniciarSesion, type EstadoLogin } from './actions'
+
+// El correo escrito se recuerda en este navegador (26-nov-2026, Gabriel): un refresco o un intento fallido no lo
+// borra. Solo el correo; la contraseña nunca se guarda.
+const CLAVE_CORREO = 'iberia_login_correo'
 
 function BotonEnviar({ entrando }: { entrando: boolean }) {
   const { pending } = useFormStatus()
@@ -16,6 +21,24 @@ function BotonEnviar({ entrando }: { entrando: boolean }) {
 
 export function FormularioLogin({ destino }: { destino: string }) {
   const [estado, accion] = useActionState<EstadoLogin, FormData>(iniciarSesion, {})
+  // Controlado: React limpia los campos no controlados al terminar la acción, y con un error se perdía el correo.
+  const [correo, setCorreo] = useState('')
+  useEffect(() => {
+    try {
+      const guardado = localStorage.getItem(CLAVE_CORREO)
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- se lee después de montar: en el servidor no hay localStorage
+      if (guardado) setCorreo(guardado)
+    } catch {
+      // Sin almacenamiento (ventana privada, bloqueado): se escribe cada vez.
+    }
+  }, [])
+  const cambiarCorreo = (v: string) => {
+    setCorreo(v)
+    try {
+      if (v) localStorage.setItem(CLAVE_CORREO, v)
+      else localStorage.removeItem(CLAVE_CORREO)
+    } catch {}
+  }
 
   // La acción ya no redirige: devuelve a dónde ir y aquí se navega con una carga
   // completa (ver `iniciarSesion`). `replace` para que «atrás» no vuelva al login.
@@ -38,6 +61,8 @@ export function FormularioLogin({ destino }: { destino: string }) {
           autoComplete="email"
           required
           autoFocus
+          value={correo}
+          onChange={(e) => cambiarCorreo(e.target.value)}
           placeholder="nombre@empresa.com"
           className="campo min-h-11"
         />
@@ -56,10 +81,9 @@ export function FormularioLogin({ destino }: { destino: string }) {
             ¿Olvidaste tu contraseña?
           </Link>
         </div>
-        <input
+        <CampoClave
           id="password"
           name="password"
-          type="password"
           autoComplete="current-password"
           required
           placeholder="••••••••"

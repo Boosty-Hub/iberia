@@ -3,6 +3,7 @@
 import { useActionState } from 'react'
 import { useFormStatus } from 'react-dom'
 import { cambiarClave, type EstadoNuevaClave } from '../actions'
+import { CampoClave } from '@/components/campo-clave'
 
 function BotonGuardar() {
   const { pending } = useFormStatus()
@@ -22,10 +23,9 @@ export function FormularioNuevaClave() {
         <label htmlFor="clave" className="etiqueta">
           Contraseña nueva
         </label>
-        <input
+        <CampoClave
           id="clave"
           name="clave"
-          type="password"
           autoComplete="new-password"
           required
           minLength={8}
@@ -39,10 +39,9 @@ export function FormularioNuevaClave() {
         <label htmlFor="repetida" className="etiqueta">
           Repítela
         </label>
-        <input
+        <CampoClave
           id="repetida"
           name="repetida"
-          type="password"
           autoComplete="new-password"
           required
           minLength={8}

@@ -23,18 +23,13 @@ export default async function LoginPage({ searchParams }: PageProps<'/login'>) {
 
         <div className="tarjeta p-6">
           <p className="rotulo mb-3">Acceso restringido</p>
-          <h1 className="mb-1 text-xl font-bold text-marca-900">Entra al programa</h1>
-          <p className="mb-6 text-sm text-marca-600">
-            Las cuentas las provisiona el equipo de Boosty. No hay registro abierto.
-          </p>
+          <h1 className="mb-6 text-xl font-bold text-marca-900">Entra al programa</h1>
 
           <FormularioLogin destino={destino} />
         </div>
 
         <p className="mt-6 text-center text-xs leading-relaxed text-marca-400">
           Información confidencial de Industrias Iberia bajo acuerdo de confidencialidad.
-          <br />
-          Boosty International LLC · Anthropic Partner
         </p>
 
         <nav className="mt-2 flex flex-wrap justify-center gap-x-1 text-xs">

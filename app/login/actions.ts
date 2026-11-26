@@ -155,7 +155,9 @@ export async function cerrarSesion() {
   // En la app de iOS, el teléfono deja de recibir los avisos de esta cuenta. Va
   // antes de salir: después ya no hay sesión con la que borrar lo propio.
   await olvidarEsteTelefono(supabase)
-  await supabase.auth.signOut()
+  // Solo esta sesión: sin `scope: 'local'`, Supabase cierra la sesión de la persona en TODOS sus dispositivos (la
+  // app del teléfono incluida) cuando sale en uno (26-nov-2026).
+  await supabase.auth.signOut({ scope: 'local' })
   revalidatePath('/', 'layout')
   redirect('/login')
 }
