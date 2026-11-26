@@ -113,7 +113,7 @@ export function MatrizPermisos({
 
   const q = filtro.trim().toLowerCase()
   const coincide = (r: Recurso) =>
-    !q || `${r.nombre} ${r.subtitulo ?? ''} ${r.clave}`.toLowerCase().includes(q)
+    !q || `${r.nombre} ${r.subtitulo ?? ''} ${r.clave} ${(r.menu ?? []).join(' ')}`.toLowerCase().includes(q)
 
   const totales = ACCIONES.map((a) => ({
     a,
@@ -207,6 +207,11 @@ export function MatrizPermisos({
                     <tr key={r.clave}>
                       <th scope="row" className="matriz-recurso">
                         <span className="block font-medium text-marca-800">{r.nombre}</span>
+                        {r.menu && r.menu.length > 0 && (
+                          <span className="mt-0.5 block text-xs font-normal text-marca-600" data-menu>
+                            En el menú: {r.menu.join(' · ')}
+                          </span>
+                        )}
                         {(r.subtitulo || r.detalle) && (
                           <span className="mt-0.5 block text-xs font-normal text-marca-400">
                             {[

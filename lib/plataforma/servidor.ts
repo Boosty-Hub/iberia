@@ -25,20 +25,32 @@ export const modulosDelPlan = cache(async (): Promise<ModuloPlan[]> => {
 })
 
 /**
- * Los módulos que esta sesión ve en el menú: los planificados (son el plan, sin
- * pantalla) y los que tienen pantalla si su permiso alcanza. «Mi día» siempre.
+ * Los módulos que esta sesión ve en el menú (26-nov-2026, Gabriel: un usuario de
+ * prueba veía todo Administración):
+ *  - «Mi día» y la Bandeja, siempre (son de cada quien);
+ *  - un módulo con pantalla, si su casilla de Roles alcanza;
+ *  - el plan (planificados, o sin pantalla todavía), solo a quien lee la hoja de
+ *    ruta (`modulo:programa`) o al nivel administrador;
+ *  - un módulo con pantalla y SIN casilla, solo al nivel administrador: todo lo
+ *    que vea alguien más tiene que poder marcarse en Roles.
  */
 export function modulosVisibles(sesion: Sesion, modulos: ModuloPlan[]): (ModuloPlan & { dominioClave: ClaveDominio })[] {
   const todos = [...MODULOS_INTERFAZ, ...modulos]
+  const admin = sesion.rol.nivel === 'admin'
+  const veElPlan = admin || puede(sesion, 'modulo:programa')
   return todos
-    .filter(
-      (m) =>
-        m.estado === 'planificado' ||
-        !m.recurso ||
+    .filter((m) => {
+      if (m.dominio === 'Mi día' && !m.recurso) return true
+      if (m.estado === 'planificado' || !m.ruta) return veElPlan
+      if (!m.recurso) return admin
+      return (
         puede(sesion, m.recurso, m.accion ?? 'ver') ||
         (m.recurso === 'sistema:requisiciones' && puede(sesion, m.recurso, 'crear')) ||
-        (RECURSOS_ALTERNOS[m.codigo] ?? []).some((r) => puede(sesion, r))
-    )
+        (RECURSOS_ALTERNOS[m.codigo] ?? []).some((r) =>
+          r.endsWith(':*') ? Object.entries(sesion.permisos).some(([k, v]) => k.startsWith(r.slice(0, -1)) && v.ver) : puede(sesion, r)
+        )
+      )
+    })
     .map((m) => ({ ...m, dominioClave: m.dominio === 'Mi día' ? ('inicio' as const) : dominioDe(m) }))
     .sort((a, b) => DOMINIOS.findIndex((d) => d.clave === a.dominioClave) - DOMINIOS.findIndex((d) => d.clave === b.dominioClave) || a.orden - b.orden)
 }

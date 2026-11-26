@@ -161,6 +161,8 @@ export const MODULO_PADRON: ModuloPlan = {
 export const RECURSOS_ALTERNOS: Record<string, string[]> = {
   'PRG-PLN': ['modulo:calendario'],
   'PRG-LEV': ['modulo:archivos'],
+  // La Biblioteca: el programa, el calendario, el expediente o alguna sección del informe («informe:*»).
+  'PRG-BIB': ['modulo:calendario', 'modulo:archivos', 'informe:*'],
 }
 
 /**

@@ -80,6 +80,8 @@ export type Recurso = {
   /** Solo el nivel administrador. */
   soloAdmin?: boolean
   subtitulo?: string
+  /** Dónde abre en el menú de /sistema (Dominio › Módulo › pestaña). Lo llena el servidor. */
+  menu?: string[]
 }
 
 export const MODULOS: Recurso[] = [

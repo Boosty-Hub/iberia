@@ -1052,6 +1052,15 @@ El sistema que reemplaza al dashboard para operar a Iberia (Etapa 1 + rediseño 
   aprobaciones), `control` (módulos, catálogos, tasas, auditoría), `ui` (vistas, búsqueda, métricas),
   `nucleo` (línea de tiempo, avisos, tareas), `ia` (capacidades, propuestas, actividad). Las funciones que
   no se exponen van en `privado`.
+- **El menú solo muestra lo que se puede marcar en Roles** (26-nov-2026, Gabriel: un usuario de prueba con «Usuario
+  Iberia» veía todo Administración). `modulosVisibles()` (`lib/plataforma/servidor.ts`): Mi día y la Bandeja, siempre; un
+  módulo con pantalla, si su casilla alcanza (o una de `RECURSOS_ALTERNOS`; `informe:*` = alguna sección del informe); el
+  plan —planificados o sin pantalla— solo a quien lee la hoja de ruta (`modulo:programa`) o al nivel administrador; y un
+  módulo con pantalla **sin** casilla, solo al administrador. 🔴 **Un módulo nuevo con pantalla lleva su `recurso` en
+  `control.modulo` y ese recurso es una casilla de `MODULOS`**: si no, nadie más que el administrador lo ve. Cada casilla de
+  Roles dice dónde abre en el menú («En el menú: …», `conMenu()` en `lib/permisos-servidor.ts`).
+  `node --env-file=.env.local scripts/plataforma/probar-modulos-permisos.mjs [--rol <clave>]` lo comprueba: el código contra
+  la matriz, cada módulo con su casilla, y el menú y las URL directas con una cuenta de prueba del rol.
 - **Permisos**: recursos `sistema:*` de `lib/permisos.ts` (estructura, escenarios, procesos, documentos,
   perímetros, dotación, costos 🔒, requisiciones, aprobaciones, catálogos, auditoría, tasas,
   tasas-paralelo, ia, ia-actividad). La página pide su recurso con `requerirPermiso` y la RLS lo vuelve a
