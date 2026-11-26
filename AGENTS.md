@@ -1202,12 +1202,23 @@ Organización y autoridad y de Procesos; 18 videos de 30 a 60 s, ~29 MB). Migrac
   node --env-file=.env.local scripts/plataforma/tutoriales/grabar.mjs organizacion [--solo plazas] [--subir]
   node --env-file=.env.local scripts/plataforma/tutoriales/grabar.mjs procesos --solo-subir --destino produccion --confirmo
   node --env-file=.env.local scripts/plataforma/tutoriales/probar.mjs [--produccion --email <cuenta del equipo>]
+  node --env-file=.env.local scripts/plataforma/tutoriales/preparar-cuenta.mjs   # la cuenta de los tutoriales del asistente
   ```
   Antes de subir se mira la hoja de contacto (`capturas/tutoriales/<modulo>/<capitulo>-hoja.jpg`): un subtítulo que no
   calza con lo que se ve (pasó con «Dependencias» en Plazas) solo se caza mirando.
 - ⚠️ **Si cambia una pantalla, se regraba su capítulo**: el video no se actualiza solo.
 - ⚠️ `addInitScript` corre antes de que exista `document.documentElement`: el estilo se monta con el `body`. Y el
   contexto lleva `bypassCSP`.
+- **Con voz** (26-nov-2026, decisión de Gabriel: Sebastián, la voz venezolana de Azure; Paola queda para Ajito). Un guion
+  con `export const conVoz = true` (o `--voz`) narra cada subtítulo y la portada (`voz.mjs`: cada frase se sintetiza una
+  vez y se guarda por su huella en `capturas/tutoriales/_voz/`); el subtítulo siguiente espera a que termine la frase, el
+  video arranca cuando sale la portada y `mezclarVoz()` pone cada frase en su segundo con ffmpeg. Los de Organización y
+  Procesos (24-nov) siguen sin voz. Pide `AZURE_SPEECH_KEY` y `AZURE_SPEECH_REGION`.
+- **Los del asistente** (MI-ASI, 7), **Mis archivos** (MI-ARC, 2), **su administración** (NUC-IA, 7) y **Usuarios y Roles**
+  enfocados en habilitar el asistente (NUC-IDN, 2) se graban con la cuenta `tutorial.pruebas@plataforma.local`
+  («Gabriela Rondón», ficticia; `export const cuenta`), que siembra `preparar-cuenta.mjs` con datos ordenados: los de las
+  suites ensucian la de administración. ⚠️ En la lista de Usuarios de pruebas hay correos reales (copias de producción): el
+  guion los oculta del video. Usuarios y Roles usan `EncabezadoPagina`: el botón lo pone `TutorialDeRuta`.
 
 ## Plataforma Iberia · el registro de métricas (`/sistema`, R5)
 

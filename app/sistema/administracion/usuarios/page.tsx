@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/server'
 import { formatFecha } from '@/lib/utils'
 import { ORGANIZACIONES, type Organizacion } from '@/lib/types'
 import { alternarActivo, cambiarRol, desenlazarFicha, eliminarUsuario, enlazarFicha } from './acciones'
+import { TutorialDeRuta } from '@/components/sistema/ui/tutorial-de-ruta'
 
 export const metadata: Metadata = { title: 'Usuarios' }
 
@@ -55,6 +56,7 @@ export default async function UsuariosPage() {
   return (
     <>
       <EncabezadoPagina
+        acciones={<TutorialDeRuta ruta="/sistema/administracion/usuarios" />}
         rotulo="Administración"
         titulo="Usuarios"
         descripcion={

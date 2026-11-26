@@ -16,6 +16,7 @@ import path from 'node:path'
 import { execFileSync } from 'node:child_process'
 import { createClient } from '@supabase/supabase-js'
 import { grabarCapitulo, convertir, sesionDePrueba } from './grabacion.mjs'
+import { mezclarVoz } from './voz.mjs'
 
 const args = process.argv.slice(2)
 const opc = (n, d) => (args.includes(n) ? args[args.indexOf(n) + 1] : d)
@@ -35,11 +36,13 @@ fs.mkdirSync(OUT, { recursive: true })
 const hechos = []
 let fallos = 0
 if (!SOLO_SUBIR) {
-  const cookies = await sesionDePrueba(BASE)
+  const cookies = await sesionDePrueba(BASE, G.cuenta)
   for (const cap of G.capitulos) {
     if (SOLO && cap.id !== SOLO) continue
     console.log(`\n▶ ${cap.id} — ${cap.titulo}`)
-    const r = await grabarCapitulo({ base: BASE, cookies, ruta: cap.ruta, guion: cap.guion, dir: path.join(OUT, '_webm', cap.id), headed: args.includes('--headed') })
+    // Con voz (Sebastián) si el módulo lo pide (`conVoz` en su guion) o con --voz. Los de Organización y Procesos (24-nov) no la llevan.
+    const voz = args.includes('--voz') || G.conVoz === true
+    const r = await grabarCapitulo({ base: BASE, cookies, ruta: cap.ruta, guion: cap.guion, dir: path.join(OUT, '_webm', cap.id), headed: args.includes('--headed'), voz })
     if (r.fallo) {
       const lineas = String(r.fallo.message || r.fallo).split(/\r?\n/).filter(Boolean).slice(0, 3)
       console.error('  ✖ el guion falló:', lineas.join(' | '), '→', path.join(OUT, '_webm', cap.id, 'fallo.png'))
@@ -50,6 +53,7 @@ if (!SOLO_SUBIR) {
     const mp4 = path.join(OUT, cap.id + '.mp4')
     const poster = path.join(OUT, cap.id + '.jpg')
     const info = convertir({ webm: r.webm, inicio: r.inicio, mp4, poster })
+    if (voz) mezclarVoz({ mp4, pistas: r.pistas, inicio: r.inicio })
     // Hoja de contacto: un cuadro cada 6 s, para revisar el capítulo de un vistazo.
     execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', mp4, '-vf', 'fps=1/6,scale=480:-2,tile=4x4', '-frames:v', '1', path.join(OUT, cap.id + '-hoja.jpg')])
     console.log(`  ✓ ${info.duracion.toFixed(1)} s · ${(info.bytes / 1048576).toFixed(1)} MB → ${mp4}`)

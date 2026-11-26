@@ -6,6 +6,7 @@ import fs from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { createClient } from '@supabase/supabase-js'
 import { chromium } from 'playwright'
+import { narrar } from './voz.mjs'
 
 export const ANCHO = 1440
 export const ALTO = 900
@@ -57,9 +58,25 @@ export const UI = `
 })();`
 
 // ── Acciones que se ven en el video ──
-export function acciones(page) {
+// Con `voz`, cada subtítulo (y la portada) se narra con Sebastián: se anota en qué segundo empieza (`pistas`, para
+// mezclarlo después con ffmpeg) y el siguiente subtítulo espera a que termine de hablar el anterior.
+export function acciones(page, { voz = false, t0 = Date.now(), pistas = [], alMostrarPortada } = {}) {
   let pos = { x: 720, y: 420 }
+  let hablaHasta = 0
   const pausa = (ms) => page.waitForTimeout(ms)
+  const esperarVoz = async () => {
+    const falta = hablaHasta - Date.now()
+    if (falta > 0) await pausa(falta)
+  }
+  /** Narra un texto desde ahora; devuelve cuánto dura (ms). */
+  const decir = async (texto) => {
+    if (!voz || !texto) return 0
+    const n = await narrar(texto)
+    pistas.push({ t: (Date.now() - t0) / 1000, archivo: n.archivo })
+    const ms = Math.round(n.duracion * 1000)
+    hablaHasta = Date.now() + ms + 250
+    return ms
+  }
   const moverA = async (x, y) => {
     const pasos = Math.max(8, Math.min(32, Math.round(Math.hypot(x - pos.x, y - pos.y) / 22)))
     await page.mouse.move(x, y, { steps: pasos })
@@ -76,14 +93,22 @@ export function acciones(page) {
   const a = {
     pausa,
     sub: async (txt, ms = 0, etiqueta) => {
+      await esperarVoz()
+      if (voz && txt) await narrar(txt) // se sintetiza antes de mostrarlo: subtítulo y voz salen juntos
       await page.evaluate(([t, e]) => window.__tut.sub(t, e), [txt, etiqueta || null])
-      // El tiempo de lectura sale del largo del texto (unas 15 letras por segundo), con un piso.
-      if (ms !== null) await pausa(ms || Math.max(2200, Math.round((txt || '').length * 62)))
+      const habla = await decir(txt)
+      // El tiempo de lectura sale del largo del texto (unas 15 letras por segundo), con un piso; con voz, lo que dure
+      // la frase. Con `ms` explícito, la acción siguiente corre mientras habla (y el próximo subtítulo la espera).
+      if (ms !== null) await pausa(ms || Math.max(2200, Math.round((txt || '').length * 62), habla + 300))
     },
     portada: async (k, t, d, ms = 3200) => {
+      if (voz) await narrar(`${t}. ${d || ''}`)
       await page.evaluate(([k, t, d]) => window.__tut.portada(k, t, d), [k, t, d || ''])
-      await pausa(ms)
+      alMostrarPortada?.()
+      const habla = await decir(`${t}. ${d || ''}`)
+      await pausa(Math.max(ms, habla + 400))
     },
+    esperarVoz,
     quitarPortada: async () => {
       await page.evaluate(() => window.__tut.quitarPortada())
       await pausa(700)
@@ -144,11 +169,12 @@ export async function sesionDePrueba(base, email = 'admin.pruebas@plataforma.loc
 }
 
 // ── Grabar un capítulo ──
-export async function grabarCapitulo({ base, cookies, ruta, guion, dir, headed = false }) {
+export async function grabarCapitulo({ base, cookies, ruta, guion, dir, headed = false, voz = false, viewport }) {
   fs.rmSync(dir, { recursive: true, force: true })
   fs.mkdirSync(dir, { recursive: true })
   const nav = await chromium.launch({ headless: !headed })
-  const ctx = await nav.newContext({ viewport: { width: ANCHO, height: ALTO }, recordVideo: { dir, size: { width: ANCHO, height: ALTO } }, locale: 'es-VE', timezoneId: 'America/Caracas', bypassCSP: true })
+  const v = viewport ?? { width: ANCHO, height: ALTO }
+  const ctx = await nav.newContext({ viewport: v, recordVideo: { dir, size: v }, locale: 'es-VE', timezoneId: 'America/Caracas', bypassCSP: true })
   await ctx.addCookies(cookies)
   await ctx.addInitScript(UI)
   const page = await ctx.newPage()
@@ -158,11 +184,21 @@ export async function grabarCapitulo({ base, cookies, ruta, guion, dir, headed =
   const t0 = Date.now()
   let inicio = 0
   let fallo = null
+  const pistas = []
   try {
     await page.goto(base + ruta, { waitUntil: 'networkidle', timeout: 90000 })
     await page.waitForFunction(() => !!window.__tut, null, { timeout: 30000 })
     await page.waitForTimeout(800)
-    await guion(page, acciones(page), { marcarInicio: () => (inicio = (Date.now() - t0) / 1000) })
+    // Con voz, el video arranca cuando sale la portada (no mientras se sintetiza su frase).
+    let portadaVista = false
+    const alMostrarPortada = () => {
+      if (voz && !portadaVista) inicio = (Date.now() - t0) / 1000
+      portadaVista = true
+    }
+    const a = acciones(page, { voz, t0, pistas, alMostrarPortada })
+    await guion(page, a, { marcarInicio: () => (inicio = (Date.now() - t0) / 1000) })
+    await a.esperarVoz()
+    await page.waitForTimeout(400)
   } catch (err) {
     fallo = err
     await page.screenshot({ path: dir + '/fallo.png' }).catch(() => {})
@@ -171,7 +207,7 @@ export async function grabarCapitulo({ base, cookies, ruta, guion, dir, headed =
   await ctx.close()
   await nav.close()
   const webm = video ? await video.path() : null
-  return { webm, inicio, errores, fallo }
+  return { webm, inicio, errores, fallo, pistas }
 }
 
 // webm → mp4 H.264 desde la portada (1280 de ancho: se lee igual y pesa menos) + póster.

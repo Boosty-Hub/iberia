@@ -7,6 +7,7 @@ import { puede, requerirPermiso } from '@/lib/auth'
 import { NIVELES, type Nivel } from '@/lib/permisos'
 import { leerInventario } from '@/lib/permisos-servidor'
 import { createClient } from '@/lib/supabase/server'
+import { TutorialDeRuta } from '@/components/sistema/ui/tutorial-de-ruta'
 
 export const metadata: Metadata = { title: 'Roles y permisos' }
 
@@ -38,6 +39,7 @@ export default async function RolesPage({ searchParams }: PageProps<'/sistema/ad
   return (
     <>
       <EncabezadoPagina
+        acciones={<TutorialDeRuta ruta="/sistema/administracion/roles" />}
         rotulo="Administración"
         titulo="Roles y permisos"
         descripcion="Cada rol decide qué puede ver, crear, editar o eliminar la gente que lo tiene: módulo por módulo, sección por sección del informe y lección por lección del curso de Ajito. El nivel es el techo: un rol de solo lectura nunca escribe, aunque se le marque."
