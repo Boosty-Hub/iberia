@@ -15,6 +15,8 @@ export const config = {
      * Todo excepto assets estáticos e imágenes. El informe y el dashboard
      * quedan cubiertos: ninguna ruta de contenido se sirve sin sesión.
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+    // `.netlify/` son las funciones de Netlify (la de fondo del asistente): las llama el servidor con su secreto,
+    // sin sesión de navegador. Hasta el 26-nov-2026 el proxy las mandaba a /login y los turnos se quedaban en cola.
+    '/((?!_next/static|_next/image|\\.netlify/|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
   ],
 }

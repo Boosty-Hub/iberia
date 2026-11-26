@@ -47,9 +47,11 @@ export async function lanzarTurno(turnoId: string, origen: string, token: string
     const r = await fetch(`${base}/.netlify/functions/asistente-turno-background`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-asistente-secreto': secretoAsistente() },
+      // Una función de fondo responde 202 en el acto. Una redirección (p. ej. a /login) no es arrancar: no se sigue.
+      redirect: 'manual',
       body: JSON.stringify({ turno: turnoId, token, ...extra }),
     })
-    if (r.status !== 202 && !r.ok) throw new Error(`No se pudo lanzar el turno (${r.status}).`)
+    if (r.status !== 202) throw new Error(`No se pudo lanzar el turno (${r.status}).`)
     return
   }
   after(async () => {
