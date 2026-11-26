@@ -12,7 +12,7 @@ import { useEffect } from 'react'
  * inyecta en tiempo de ejecución porque lleva el nombre y el correo de la sesión, para que el popup no los pida.
  */
 // La clave del widget solo vale en el dominio de producción: desde otro (localhost, pruebas) el portal responde 403.
-const DOMINIOS = ['iberiavenezuela.netlify.app']
+const DOMINIOS = ['portal.industriasiberia.com', 'iberiavenezuela.netlify.app']
 
 export function SoporteBoosty({ nombre, email }: { nombre: string; email: string }) {
   useEffect(() => {
