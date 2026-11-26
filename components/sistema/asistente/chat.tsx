@@ -92,6 +92,13 @@ export function ChatAsistente(props: {
   deTarea: { nombre: string; tipo: 'tarea' | 'tablero' } | null
   /** Lo que puede el motor activo (fase 6): lo que no, sale apagado con su motivo. */
   capacidades: { capacidad: string; disponible: boolean; motivo: string | null }[]
+  /** En el panel lateral («Preguntar a la IA» desde cualquier pantalla): sin la lista de chats ni cambiar la URL. */
+  compacto?: boolean
+  /** Desde dónde se pregunta (módulo, ficha): viaja con el primer mensaje. */
+  contexto?: string | null
+  /** Una pregunta que llega escrita (Ctrl K): se manda sola. */
+  preguntaInicial?: string | null
+  alCrearChat?: (id: string) => void
 }) {
   const supabase = useMemo(() => createClient(), [])
   const [politica, setPolitica] = useState(props.politica)
@@ -108,7 +115,7 @@ export function ChatAsistente(props: {
       ? { turno: props.turnoInicial.id, error: props.turnoInicial.error ?? (props.turnoInicial.estado === 'detenido' ? 'Detenido.' : 'No se pudo completar.') }
       : null
   )
-  const [texto, setTexto] = useState('')
+  const [texto, setTexto] = useState(props.preguntaInicial?.trim() ?? '')
   const [adjuntos, setAdjuntos] = useState<Adjunto[]>([])
   const [aviso, setAviso] = useState<string | null>(null)
   const [ocupado, setOcupado] = useState(false)
@@ -121,6 +128,7 @@ export function ChatAsistente(props: {
   const [alAsistente, setAlAsistente] = useState(true)
   const [investigacion, setInvestigacion] = useState(false)
   const programadas = useMemo(() => new Set(props.tareasProgramadas), [props.tareasProgramadas])
+  const autoEnvio = useRef(!!props.preguntaInicial?.trim())
   const capacidad = (k: string) => props.capacidades.find((c) => c.capacidad === k) ?? { capacidad: k, disponible: true, motivo: null }
   const sinArchivos = !capacidad('archivos').disponible
   const sinInvestigacion = !capacidad('investigacion').disponible
@@ -361,18 +369,21 @@ export function ChatAsistente(props: {
         id = r.chatId
         chatIdRef.current = id
         setChatId(id)
-        window.history.replaceState(null, '', `/sistema/asistente/c/${id}`)
+        if (!props.compacto) window.history.replaceState(null, '', `/sistema/asistente/c/${id}`)
+        props.alCrearChat?.(id)
         setChats((c) => [{ id: r.chatId, titulo: (t || listos[0]?.nombre || 'Chat nuevo').slice(0, 60), actualizado_en: new Date().toISOString(), compartido: false }, ...c])
       }
       await suscribir(id)
       const temporal = `tmp-${crypto.randomUUID()}`
-      setMensajes((m) => [...m, { id: temporal, rol: 'usuario', texto: t, bloques: [], adjuntos: listos.map((a) => a.archivoId!), turno_id: null, autor: props.yo.id, calificacion: null, creado_en: new Date().toISOString() }])
+      // El contexto de la página (panel lateral) va con el primer mensaje del chat.
+      const contexto = props.contexto && !mensajes.some((m) => m.rol === 'usuario') ? props.contexto : null
+      setMensajes((m) => [...m, { id: temporal, rol: 'usuario', texto: t, bloques: contexto ? [{ tipo: 'nota', texto: `Desde: ${contexto}` }] : [], adjuntos: listos.map((a) => a.archivoId!), turno_id: null, autor: props.yo.id, calificacion: null, creado_en: new Date().toISOString() }])
       setTexto('')
       setAdjuntos((a) => a.filter((x) => x.estado === 'error'))
       const paraElAsistente = !props.compartido || alAsistente
       if (paraElAsistente) setTurno({ id: 'pendiente', estado: 'en_cola', texto: '', pensamiento: '', pasos: [], bloques: [], inicio: Date.now() })
       pegado.current = true
-      const r = await enviarMensaje({ chatId: id, texto: t, adjuntos: listos.map((a) => a.archivoId!), modelo, esfuerzo, alAsistente: paraElAsistente, investigacion: paraElAsistente && investigacion })
+      const r = await enviarMensaje({ chatId: id, texto: t, adjuntos: listos.map((a) => a.archivoId!), modelo, esfuerzo, alAsistente: paraElAsistente, investigacion: paraElAsistente && investigacion, contexto })
       setInvestigacion(false)
       if (!r.ok) {
         setMensajes((m) => m.filter((x) => x.id !== temporal))
@@ -391,6 +402,14 @@ export function ChatAsistente(props: {
       entrada.current?.focus()
     }
   }
+  // La pregunta que llegó escrita (Ctrl K) se manda sola, una vez.
+  useEffect(() => {
+    if (!autoEnvio.current) return
+    autoEnvio.current = false
+    void enviar()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
 
   const detener = async () => {
     if (turno && turno.id !== 'pendiente') await detenerTurno(turno.id)
@@ -410,8 +429,9 @@ export function ChatAsistente(props: {
   const pct = (g: number, t: number) => Math.min(100, Math.round((g / Math.max(t, 0.0001)) * 100))
 
   return (
-    <div className="flex h-[calc(100dvh-196px)] min-h-[520px] gap-3">
+    <div className={cn('flex gap-3', props.compacto ? 'h-full min-h-0' : 'h-[calc(100dvh-196px)] min-h-[520px]')}>
       {/* Lista de chats */}
+      {!props.compacto && (
       <aside
         className={cn(
           'w-64 shrink-0 flex-col rounded-xl border border-[var(--borde)] bg-white',
@@ -458,6 +478,7 @@ export function ChatAsistente(props: {
           </div>
         )}
       </aside>
+      )}
 
       {/* El chat */}
       <section
@@ -474,9 +495,11 @@ export function ChatAsistente(props: {
         }}
       >
         <div className="flex items-center gap-2 border-b border-[var(--borde)] px-3 py-2">
-          <button type="button" className={cn('btn-neutro h-8 px-3 text-[12.5px]', !html && 'lg:hidden')} onClick={() => setListaAbierta(true)}>
-            ☰ Chats
-          </button>
+          {!props.compacto && (
+            <button type="button" className={cn('btn-neutro h-8 px-3 text-[12.5px]', !html && 'lg:hidden')} onClick={() => setListaAbierta(true)}>
+              ☰ Chats
+            </button>
+          )}
           <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-marca-800">{chats.find((c) => c.id === chatId)?.titulo ?? props.tituloInicial ?? 'Chat nuevo'}</span>
           {props.participantes.length > 1 && (
             <span className="flex -space-x-1.5" aria-label={`En el chat: ${props.participantes.map((p) => p.nombre).join(', ')}`}>
@@ -681,6 +704,7 @@ export function ChatAsistente(props: {
       {/* El HTML abierto */}
       {html && (
         <PanelArtefacto
+          compacto={!!props.compacto}
           abierto={html}
           onCambiar={setHtml}
           onCerrar={() => setHtml(null)}
@@ -727,6 +751,13 @@ function MensajeUsuario({ m, archivos, autor }: { m: MensajeVista; archivos: Map
   return (
     <div className={cn('flex flex-col', autor ? 'items-start' : 'items-end')}>
       {autor && <span className="mb-0.5 px-1 text-[11.5px] font-semibold text-marca-500">{autor}{!m.turno_id ? ' · para el grupo' : ''}</span>}
+      {m.bloques
+        .filter((b): b is Extract<Bloque, { tipo: 'nota' }> => b.tipo === 'nota' && b.texto.startsWith('Desde:'))
+        .map((b) => (
+          <span key={b.texto} className="mb-1 max-w-[85%] truncate rounded-full bg-[#f3f1fb] px-2.5 py-0.5 text-[11.5px] text-[#4f4577]" title={b.texto}>
+            ✦ {b.texto}
+          </span>
+        ))}
       <div className="max-w-[85%] rounded-2xl rounded-br-md bg-marca-100 px-4 py-2.5 text-[14.5px] whitespace-pre-wrap text-marca-900">
         {m.adjuntos.length > 0 && (
           <div className="mb-1.5 flex flex-wrap gap-1.5">
@@ -968,7 +999,9 @@ function PanelArtefacto({
   onCambiar,
   onCerrar,
   onActualizar,
+  compacto,
 }: {
+  compacto: boolean
   abierto: Abierto
   onCambiar: (a: Abierto) => void
   onCerrar: () => void
@@ -1008,7 +1041,7 @@ function PanelArtefacto({
   }, [abierto.id, abierto.clase])
   const ultima = versiones[0]?.version ?? abierto.version
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-white xl:static xl:z-auto xl:w-[50%] xl:shrink-0 xl:rounded-xl xl:border xl:border-[var(--borde)]">
+    <div className={cn('fixed inset-0 flex flex-col bg-white', compacto ? 'z-[80]' : 'z-50 xl:static xl:z-auto xl:w-[50%] xl:shrink-0 xl:rounded-xl xl:border xl:border-[var(--borde)]')}>
       <div className="flex flex-wrap items-center gap-2 border-b border-[var(--borde)] px-3 py-2">
         <div className="min-w-0 flex-1 basis-[220px]">
           <p className="truncate text-[13.5px] font-semibold text-marca-900">{abierto.titulo}</p>

@@ -38,6 +38,8 @@ export async function enviarMensaje(entrada: {
   alAsistente?: boolean
   /** Investigación profunda (fase 5): más vueltas, más búsquedas y su propio tope. */
   investigacion?: boolean
+  /** Desde dónde se pregunta («Preguntar a la IA» de una pantalla): va con el mensaje como nota. */
+  contexto?: string | null
 }): Promise<Resultado<{ chatId: string; turnoId: string | null; mensajeId: string }>> {
   const sesion = await requerirPermiso('sistema:asistente')
   const texto = entrada.texto.trim()
@@ -100,7 +102,16 @@ export async function enviarMensaje(entrada: {
   const mensajeId = crypto.randomUUID()
   const { error: eMensaje } = await db
     .from('mensaje')
-    .insert({ id: mensajeId, chat_id: chatId, turno_id: turnoId, rol: 'usuario', autor: sesion.userId, texto, adjuntos: entrada.adjuntos })
+    .insert({
+      id: mensajeId,
+      chat_id: chatId,
+      turno_id: turnoId,
+      rol: 'usuario',
+      autor: sesion.userId,
+      texto,
+      adjuntos: entrada.adjuntos,
+      bloques: entrada.contexto?.trim() ? [{ tipo: 'nota', texto: `Desde: ${entrada.contexto.trim().replace(/\s+/g, ' ').slice(0, 300)}` }] : [],
+    })
   if (eMensaje) return { ok: false, error: 'No se pudo guardar el mensaje.' }
   {
     // Los demás participantes ven el mensaje en el acto (en un chat propio no hay nadie más, y no estorba).

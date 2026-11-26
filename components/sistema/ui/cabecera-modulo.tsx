@@ -6,7 +6,6 @@ import { modulosDelPlan } from '@/lib/plataforma/servidor'
 import { PestanasModulo } from '@/components/sistema/ui/pestanas-modulo'
 import { BotonPreguntarIa } from '@/components/sistema/ia/boton-preguntar'
 import { estadoIa } from '@/lib/ia/servidor'
-import { capacidadViva } from '@/lib/ia/niveles'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/server'
 import { BotonTutorial, type TutorialMenu } from '@/components/sistema/ui/boton-tutorial'
@@ -42,8 +41,8 @@ export async function CabeceraModulo({
   descripcion?: ReactNode
 }) {
   const [modulos, ia, tutoriales] = await Promise.all([modulosDelPlan(), estadoIa(), tutorialesDe(pestanas ?? PESTANAS[codigo] ?? [])])
-  // R4 · «Preguntar a la IA» (NUC-PRO-IA-01): solo con la IA y la capacidad encendidas.
-  const preguntar = capacidadViva(ia, 'NUC-PRO-IA-01')
+  // «Preguntar a la IA» abre el asistente (26-nov-2026): sale para quien lo tiene, con la IA encendida, y no en el propio asistente.
+  const preguntar = !!ia?.general && puede(sesion, 'sistema:asistente') && codigo !== 'MI-ASI'
   const m = [...MODULOS_INTERFAZ, ...modulos].find((x) => x.codigo === codigo)
   const dominio = m ? (m.dominio === 'Mi día' ? DOMINIOS[0] : DOMINIOS.find((d) => d.clave === dominioDe(m))) : null
   const lista = (pestanas ?? PESTANAS[codigo] ?? []).filter(
@@ -105,7 +104,7 @@ export async function CabeceraModulo({
         {(acciones || preguntar || tutoriales.length > 0) && (
           <div className="ml-auto flex flex-wrap items-center gap-1.5">
             {tutoriales.length > 0 && <BotonTutorial tutoriales={tutoriales} pestanas={lista} />}
-            {preguntar && <BotonPreguntarIa />}
+            {preguntar && <BotonPreguntarIa contexto={[m?.nombre ?? titulo, ...(migas ?? []).map((x) => x.etiqueta)].filter(Boolean).join(' › ')} />}
             {acciones}
           </div>
         )}

@@ -282,10 +282,10 @@ export function PaletaComandos({ acciones, conIa = false }: { acciones: AccionPa
         clave: 'ia',
         seccion: 'Preguntar a la IA',
         titulo: `«${texto}»`,
-        detalle: 'Responde con citas, con tu acceso',
+        detalle: 'Le pregunta al asistente de IA, con tu acceso',
         ir: () => {
           cerrar()
-          window.dispatchEvent(new CustomEvent('preguntar-ia', { detail: { pregunta: texto } }))
+          window.dispatchEvent(new CustomEvent('preguntar-ia', { detail: { pregunta: texto, contexto: '' } }))
         },
       })
     if (!conTexto && !f)

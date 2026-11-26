@@ -1390,6 +1390,23 @@ migraciones `20261126100000_asistente` a `…190000_asistente_fase7`, una por fa
     no se lo manda sola a otros destinatarios.
   - `ASISTENTE_MS_LOGIN_URL` y `ASISTENTE_GRAPH_URL` son solo para la prueba: `probar-f7.mjs` levanta un simulador de Entra y Graph
     en el :3999 que valida la firma de la aserción, PKCE, la rotación, la revocación y el usuario no asignado.
+- **Ventanas de 5 horas** (26-nov-2026, migración `…220000_asistente_ventanas`): el tope diario se reparte en ventanas que
+  arrancan con el primer mensaje y se renuevan completas 5 h después (`asistente.ventana_de()`); cabe tope diario / ventanas
+  por día (`ventanas_por_dia`, 2 de fábrica, por rol o persona). `reservar_turno` la revisa bajo candado y dice a qué hora se
+  renueva; las tareas programadas no gastan ventana. La persona ve ventana, día y mes en % (`Medidor`, sin dólares); la hora
+  se escribe con `horaCaracas()` (sin `Intl`). La reserva por turno salió de lo medido (`RESERVA`, Opus 0,35) y la
+  investigación tiene que caber en una ventana (lo valida el panel). ⚠️ **En PRUEBAS el tope diario es US$ 50** (las suites
+  gastan mucho en un día); producción, el de fábrica. `probar-ventanas.mjs` (11).
+- **«Preguntar a la IA» es el asistente** (26-nov-2026, migración `…230000_preguntar_es_el_asistente`): la cabecera de cada
+  módulo, la pestaña IA de una ficha y Ctrl K mandan el evento `preguntar-ia` con `{pregunta, contexto}` y `PanelAsistente`
+  (en el layout de `/sistema`) abre el chat al costado (`ChatAsistente compacto`: sin lista de chats ni cambiar la URL, con
+  «Pantalla completa»). El contexto va con el primer mensaje como nota «Desde: …» y el ejecutor se lo dice al modelo. Sale
+  para quien tiene el asistente y con el interruptor general encendido. Las capacidades que solo respondían preguntas
+  (NUC-PRO-IA-01, NUC-DOC-IA-01, NUC-ORG-IA-01, NUC-ORG-IA-04, NUC-DOC-IA-06, FIN-TAS-IA-01) quedan en N0 con
+  `ia.capacidad.absorbida_por = 'NUC-ASI-IA-01'` («Resuelta por el asistente» en el Gobierno de IA). El Gobierno de IA sigue
+  siendo la capa de control: interruptor general, niveles con doble aprobación y lo que cambia datos.
+- **La excepción por persona abre las pantallas** (`asistente.mi_excepcion()`, en `obtenerSesion`): habilitar a alguien en
+  Administración › Asistente de IA › Usuarios sin tocar su rol.
 - ⚠️ **Un `next dev` viejo sirve código viejo**: el 26-nov el Resumen mostraba cifras sin formato con el archivo ya
   corregido; reiniciar el dev lo arregló. Y **dos `next dev` en la misma carpeta no conviven** (el del 3001 impide el del
   3005, que muere sin escribir nada en su registro).

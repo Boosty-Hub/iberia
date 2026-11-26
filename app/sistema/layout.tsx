@@ -17,9 +17,8 @@ import { ColumnaModulos, NavegacionTelefono, Riel, type VistaMenu } from '@/comp
 import { Desplegable } from '@/components/sistema/ui/desplegable'
 import { PanelFicha } from '@/components/sistema/ui/ficha-objeto'
 import { PaletaComandos, type AccionPaleta } from '@/components/sistema/ui/paleta-comandos'
-import { PanelPreguntaIa } from '@/components/sistema/ia/panel-pregunta'
+import { PanelAsistente } from '@/components/sistema/asistente/panel-asistente'
 import { estadoIa } from '@/lib/ia/servidor'
-import { capacidadViva } from '@/lib/ia/niveles'
 
 /**
  * El armazón de la Plataforma Iberia (Anexo E §3, modelo v2): barra carbón con
@@ -217,9 +216,9 @@ export default async function SistemaLayout({ children }: LayoutProps<'/sistema'
       </div>
 
       <Suspense>
-        <PaletaComandos acciones={acciones} conIa={capacidadViva(ia, 'NUC-PRO-IA-01')} />
-        {/* R4 · el panel «Preguntar a la IA» (lo abren la cabecera, la ficha y Ctrl K). */}
-        <PanelPreguntaIa />
+        <PaletaComandos acciones={acciones} conIa={!!ia?.general && puede(sesion, 'sistema:asistente')} />
+        {/* «Preguntar a la IA» es el asistente, al costado (lo abren la cabecera, la ficha y Ctrl K). */}
+        <PanelAsistente />
       </Suspense>
     </div>
   )

@@ -133,7 +133,14 @@ export default async function GobiernoIaPage() {
                   <tr key={c.codigo} className="border-t border-[#eef0f3] align-top" data-capacidad={c.codigo}>
                     <td className="px-3 py-2 font-mono text-[11px] whitespace-nowrap text-marca-700">{c.codigo}</td>
                     <td className="w-[38%] min-w-[320px] px-3 py-2">
-                      <p className="font-medium text-marca-900">{c.nombre}</p>
+                      <p className="font-medium text-marca-900">
+                        {c.nombre}
+                        {c.absorbida_por && (
+                          <span className="ml-1.5 rounded-full bg-[#f3f1fb] px-2 py-0.5 text-[10.5px] font-semibold text-[#4f4577]" title={c.nota ?? undefined}>
+                            Resuelta por el asistente
+                          </span>
+                        )}
+                      </p>
                       <p className="line-clamp-2 text-[11.5px] text-marca-500" title={c.que_hace}>
                         {ETIQUETA_USO[c.uso]} · {c.que_hace}
                       </p>

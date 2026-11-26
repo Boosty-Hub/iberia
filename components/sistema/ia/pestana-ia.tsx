@@ -27,7 +27,8 @@ export function PestanaIa({ tipo, id, titulo }: { tipo: string; id: string; titu
   const general = Boolean(datos.estado?.general)
   const pendientes = datos.propuestas.filter((p) => p.estado === 'pendiente')
   const decididas = datos.propuestas.filter((p) => p.estado !== 'pendiente')
-  const preguntaViva = datos.capacidades.some((c) => c.codigo === 'NUC-PRO-IA-01' && c.viva) || Boolean(datos.estado?.capacidades['NUC-PRO-IA-01']?.encendida && general)
+  // «Preguntar a la IA» es el asistente (26-nov-2026): el panel dice si la persona no lo tiene.
+  const preguntaViva = true
 
   return (
     <div className="flex flex-col gap-3" data-pestana-ia>
@@ -66,10 +67,10 @@ export function PestanaIa({ tipo, id, titulo }: { tipo: string; id: string; titu
       {general && preguntaViva && (
         <button
           type="button"
-          onClick={() => abrirPreguntaIa(titulo ? `Explícame «${titulo}»: qué es, de qué depende y qué documentos lo rigen.` : '')}
+          onClick={() => abrirPreguntaIa('', `Ficha · ${titulo ?? tipo} (/sistema/ficha/${tipo}/${id})`)}
           className="inline-flex h-8 w-fit items-center gap-1.5 rounded-lg border border-dashed border-[#9d93bd] bg-white px-2.5 text-xs font-medium text-[#4f4577] hover:bg-[#fbfaff]"
         >
-          ✦ Preguntar a la IA sobre esto
+          ✦ Preguntarle al asistente sobre esto
         </button>
       )}
 

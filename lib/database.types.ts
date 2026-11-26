@@ -2372,6 +2372,7 @@ export type Database = {
       }
       capacidad: {
         Row: {
+          absorbida_por: string | null
           actualizado_en: string
           codigo: string
           creado_en: string
@@ -2389,6 +2390,7 @@ export type Database = {
           uso: string
         }
         Insert: {
+          absorbida_por?: string | null
           actualizado_en?: string
           codigo: string
           creado_en?: string
@@ -2406,6 +2408,7 @@ export type Database = {
           uso: string
         }
         Update: {
+          absorbida_por?: string | null
           actualizado_en?: string
           codigo?: string
           creado_en?: string
@@ -2422,7 +2425,15 @@ export type Database = {
           techo?: string
           uso?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "capacidad_absorbida_por_fkey"
+            columns: ["absorbida_por"]
+            isOneToOne: false
+            referencedRelation: "capacidad"
+            referencedColumns: ["codigo"]
+          },
+        ]
       }
       interruptor_general: {
         Row: {

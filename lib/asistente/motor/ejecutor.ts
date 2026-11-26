@@ -223,6 +223,11 @@ async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: Opcione
       if (vueltas % 15 === 0) await db.schema('asistente').from('turno').update({ latido: new Date().toISOString() }).eq('id', turnoId)
     }, 2000)
 
+    // «Preguntar a la IA» desde una pantalla: el modelo sabe desde dónde se pregunta.
+    const notaDesde = ((propio.bloques as Bloque[] | null) ?? []).find((b): b is Extract<Bloque, { tipo: 'nota' }> => b.tipo === 'nota' && b.texto.startsWith('Desde:'))
+    const desde = notaDesde ? `[El usuario pregunta desde la plataforma, en ${notaDesde.texto.slice(7)}. Si la pregunta es sobre eso, búscalo con tus herramientas de datos.]
+
+` : ''
     const vigente = !!chat.contenedor_id && !!chat.contenedor_usado_en && Date.now() - Date.parse(chat.contenedor_usado_en) < 25 * 86_400_000
     const ctx: ContextoMotor = {
       turno: turnoId,
@@ -232,7 +237,7 @@ async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: Opcione
         instruccionesSistema(config.instrucciones_empresa ?? '', proyecto ? { nombre: proyecto.nombre, instrucciones: proyecto.instrucciones } : null) +
         (investigacion ? INSTRUCCIONES_INVESTIGACION : ''),
       historial,
-      texto: (opciones.nota ?? '') + firmar(propio.autor, propio.texto),
+      texto: (opciones.nota ?? '') + desde + firmar(propio.autor, propio.texto),
       adjuntos,
       archivosDelChat: [...porId.values()],
       archivosFijos: (archivosProyecto ?? []) as ArchivoTurno[],

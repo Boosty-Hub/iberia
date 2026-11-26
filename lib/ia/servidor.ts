@@ -44,6 +44,8 @@ export type CapacidadVista = {
   evidencia_para_subir: string | null
   objeto_tipos: string[]
   nota: string | null
+  /** La capacidad que la resolvió (las que solo respondían preguntas: el asistente, NUC-ASI-IA-01). */
+  absorbida_por: string | null
 }
 
 export const catalogoIa = cache(async (): Promise<CapacidadVista[]> => {
@@ -51,7 +53,7 @@ export const catalogoIa = cache(async (): Promise<CapacidadVista[]> => {
   const { data } = await supabase
     .schema('ia')
     .from('capacidad')
-    .select('codigo, modulo, nombre, que_hace, uso, nivel_actual, techo, dueno_cargo, encendida, evidencia_para_subir, objeto_tipos, nota')
+    .select('codigo, modulo, nombre, que_hace, uso, nivel_actual, techo, dueno_cargo, encendida, evidencia_para_subir, objeto_tipos, nota, absorbida_por')
     .order('modulo')
     .order('codigo')
   return (data ?? []) as CapacidadVista[]

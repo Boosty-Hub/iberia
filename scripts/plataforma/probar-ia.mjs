@@ -141,24 +141,26 @@ try {
   .gte('en', new Date(Date.now() - 7 * 86_400_000).toISOString()).eq('actor_es_ia', true).limit(1)
   ok((aud?.length ?? 0) > 0, 'control.auditoria registra la actividad de la IA con actor_es_ia')
 
-  // ── 3. Preguntar a la IA, con cita que abre la ficha ────────────────────
+  // ── 3. Preguntar a la IA: abre el asistente al costado, con el contexto, y responde citando ──
+  // Desde el 26-nov-2026 «Preguntar a la IA» ES el asistente (el panel viejo de NUC-PRO-IA-01 se retiró).
   if (!SIN_MODELO) {
     await pagina.goto(`${BASE}/sistema/nucleo/procesos/catalogo`, { waitUntil: 'networkidle' })
     await pagina.locator('[data-boton-preguntar-ia]').click()
-    const panel = pagina.locator('[data-panel-pregunta-ia]')
-    await panel.locator('textarea').fill('¿Qué registros genera la gestión del Sistema de Gestión de la Calidad?')
-    await panel.getByRole('button', { name: 'Preguntar' }).click()
-    await panel.locator('[data-respuesta-ia], [role="status"]:has-text("⚠")').first().waitFor({ timeout: 180000 })
+    const panel = pagina.locator('[data-panel-asistente]')
+    await panel.getByLabel('Mensaje para el asistente').waitFor({ timeout: 30000 })
+    ok(/Desde: .*Procesos/.test(await panel.locator('header').innerText()), 'el botón abre el asistente al costado, con el contexto de la pantalla')
+    await panel.getByLabel('Modelo').selectOption('claude-sonnet-5-5')
+    await panel.getByLabel('Mensaje para el asistente').fill('¿Qué registros genera la gestión del Sistema de Gestión de la Calidad? Cita los documentos.')
+    await panel.getByRole('button', { name: 'Enviar' }).click()
+    await pagina.waitForTimeout(2000)
+    await pagina.waitForFunction(() => !document.querySelector('[data-panel-asistente] [aria-live=polite]') && (document.querySelectorAll('[data-panel-asistente] [aria-label="Copiar la respuesta"]').length >= 1 || /Reintentar|tope/.test(document.querySelector('[data-panel-asistente]')?.textContent ?? '')), null, { timeout: 240000 })
     await foto('3-respuesta')
-    const citas = await panel.locator('[data-cita-ia]').count()
-    ok(citas > 0, `la respuesta trae ${citas} cita(s)`)
-    if (citas) {
-      const titulo = (await panel.locator('[data-cita-ia]').first().innerText()).split('\n')[0]
-      await panel.locator('[data-cita-ia]').first().click()
-      await pagina.locator('[data-ficha-objeto] h2').first().waitFor({ timeout: 60000 })
-      const abierta = await pagina.locator('[data-ficha-objeto] h2').first().innerText()
-      ok(Boolean(abierta), `la cita abre la ficha «${abierta.slice(0, 60)}» (cita: ${titulo.slice(0, 50)})`)
-      await foto('3b-cita-ficha')
+    ok(new URL(pagina.url()).pathname === '/sistema/nucleo/procesos/catalogo', 'sin salir de la página')
+    const enlaces = await panel.locator('.prosa-chat a[href^="/sistema"]').count()
+    ok(enlaces > 0, `la respuesta cita con ${enlaces} enlace(s) a la plataforma`)
+    if (enlaces) {
+      const href = await panel.locator('.prosa-chat a[href^="/sistema"]').first().getAttribute('href')
+      ok(Boolean(href), `la cita lleva a ${href}`)
     }
   }
 
