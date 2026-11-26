@@ -136,6 +136,7 @@ export type Database = {
           encendido: boolean
           esfuerzo_defecto: string
           esfuerzo_max: string
+          habilidades: string[]
           id: boolean
           instrucciones_empresa: string
           modelo_anthropic: string
@@ -152,6 +153,7 @@ export type Database = {
           encendido?: boolean
           esfuerzo_defecto?: string
           esfuerzo_max?: string
+          habilidades?: string[]
           id?: boolean
           instrucciones_empresa?: string
           modelo_anthropic?: string
@@ -168,6 +170,7 @@ export type Database = {
           encendido?: boolean
           esfuerzo_defecto?: string
           esfuerzo_max?: string
+          habilidades?: string[]
           id?: boolean
           instrucciones_empresa?: string
           modelo_anthropic?: string

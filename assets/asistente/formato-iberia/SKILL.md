@@ -21,7 +21,7 @@ Todo archivo que generes para el usuario sale con la identidad de Industrias Ibe
 Importa el módulo de esta carpeta: copia la ruta de la habilidad y haz `sys.path.insert(0, RUTA)` antes de `import estilo_iberia`.
 
 - **Excel** (`openpyxl`): crea el libro como siempre y al final llama `estilo_iberia.aplicar_excel(wb)`: pone el encabezado en rojo con letra blanca, congela la primera fila, ajusta anchos, alterna el fondo de las filas y formatea números y fechas. Para un resumen, una hoja «Resumen» primero.
-- **Word** (`python-docx`): `doc = estilo_iberia.documento_word('Título', 'Subtítulo opcional')` devuelve un documento con el logo, el título, los estilos y el pie con la página; sigue agregando párrafos y tablas, y para cada tabla llama `estilo_iberia.tabla_word(tabla)`.
+- **Word** (`python-docx`): `doc = estilo_iberia.documento_word('Título', 'Subtítulo opcional')` devuelve un documento con el logo, el título, la fecha, la línea roja, los estilos y el pie con la página (no vuelvas a escribir ni el título ni la fecha); sigue agregando párrafos y tablas, y para cada tabla llama `estilo_iberia.tabla_word(tabla)`.
 - **PowerPoint** (`python-pptx`): `prs = estilo_iberia.presentacion('Título', 'Subtítulo')` devuelve una presentación 16:9 con la portada hecha; agrega láminas con `estilo_iberia.lamina(prs, 'Título de la lámina')`.
 - **PDF**: genera el Word con `documento_word` y conviértelo con LibreOffice si está disponible (`soffice --headless --convert-to pdf`); si no, usa reportlab con los mismos colores, la tipografía y el logo.
 

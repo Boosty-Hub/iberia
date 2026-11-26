@@ -96,7 +96,10 @@ export async function ejecutarAnthropic(ctx: ContextoMotor, precioDe: (modelo: s
           fallbacks: 'default',
           thinking: { type: 'adaptive', display: 'summarized' },
           output_config: { effort: ctx.esfuerzo },
-          container: { ...(contenedor ? { id: contenedor } : {}), skills: HABILIDADES },
+          container: {
+            ...(contenedor ? { id: contenedor } : {}),
+            skills: [...HABILIDADES, ...ctx.habilidades.map((skill_id) => ({ type: 'custom' as const, skill_id, version: 'latest' }))],
+          },
           system: [{ type: 'text', text: ctx.sistema, cache_control: { type: 'ephemeral' } }],
           tools: [
             { type: 'code_execution_20260521', name: 'code_execution' },

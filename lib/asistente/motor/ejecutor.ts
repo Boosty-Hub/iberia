@@ -105,6 +105,7 @@ export async function ejecutarTurno(turnoId: string): Promise<void> {
       archivosDelChat: [...porId.values()],
       contenedorId: chat.contenedor_id,
       contenedorVigente: vigente,
+      habilidades: config.habilidades ?? [],
       senal: control.signal,
       emitir: (e) => emisor.emitir(e),
       asegurarEnAnthropic: (a) => asegurarEnAnthropic(db, a),

@@ -33,6 +33,8 @@ export type ContextoMotor = {
   contenedorId: string | null
   /** ¿El contenedor sigue vivo? (vive 30 días desde su último uso; se renueva a los 25). */
   contenedorVigente: boolean
+  /** Las habilidades propias de Iberia (custom skills) que se montan además de xlsx, docx, pptx y pdf. */
+  habilidades: string[]
   senal: AbortSignal
   emitir: (e: EventoTurno) => void
   /** Sube (una vez) un archivo de Storage a la Files API de Anthropic y devuelve su `file_id`. */

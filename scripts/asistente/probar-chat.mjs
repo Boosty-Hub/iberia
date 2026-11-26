@@ -4,7 +4,7 @@
  * las puertas (otra cuenta no lee ni escucha el chat ajeno). Mide el tiempo
  * hasta la primera palabra. Gasta unos centavos de API.
  *
- *   node --env-file=.env.local scripts/asistente/probar-chat.mjs [--solo simple|excel|html|puertas] [--excel <ruta.xlsx>] [--base http://localhost:3005]
+ *   node --env-file=.env.local scripts/asistente/probar-chat.mjs [--solo simple|excel|html|word|puertas] [--motor openai] [--excel <ruta.xlsx>] [--base http://localhost:3005]
  */
 import { chromium } from 'playwright'
 import { createClient } from '@supabase/supabase-js'
@@ -15,6 +15,10 @@ const opc = (n, d) => (argv.includes(n) ? argv[argv.indexOf(n) + 1] : d)
 const BASE = opc('--base', 'http://localhost:3005')
 const SOLO = opc('--solo', null)
 const EXCEL = opc('--excel', null)
+// Con --motor openai (la configuración de pruebas tiene que tener ese motor activo), cada modelo de Anthropic se cambia por uno de OpenAI.
+const MOTOR = opc('--motor', 'anthropic')
+const EQUIVALE = { 'claude-haiku-5-5': 'gpt-6.1-terra', 'claude-sonnet-5-5': 'gpt-6.2-sol', 'claude-opus-5-5': 'gpt-6.2-sol' }
+const modeloDe = (m) => (MOTOR === 'openai' ? EQUIVALE[m] ?? m : m)
 const URL_SUPA = process.env.SUPABASE_PRUEBAS_URL
 const PUB = process.env.SUPABASE_PRUEBAS_PUBLISHABLE_KEY
 const SECRETO = process.env.SUPABASE_PRUEBAS_SECRET_KEY
@@ -72,7 +76,7 @@ p.on('console', (m) => m.type() === 'error' && errores.push(m.text()))
 
 async function preguntar(texto, { modelo, esfuerzo, archivo, esperar = 'texto', tope = 120_000 } = {}) {
   await p.goto(`${BASE}/sistema/asistente`, { waitUntil: 'networkidle' })
-  if (modelo) await p.getByLabel('Modelo').selectOption(modelo)
+  if (modelo) await p.getByLabel('Modelo').selectOption(modeloDe(modelo))
   if (esfuerzo) await p.getByLabel('Esfuerzo').selectOption(esfuerzo)
   if (archivo) {
     await p.locator('input[type=file]').setInputFiles(archivo)
@@ -161,6 +165,23 @@ if (!SOLO || SOLO === 'html') {
     const versiones = await p.locator('select[aria-label="Versión"] option').allInnerTexts().catch(() => [])
     ok(versiones.length >= 2, `el artefacto se actualizó como versión nueva (${versiones.join(', ') || 'sin selector'})`)
     await p.screenshot({ path: 'capturas/asistente/artefacto-v2.png' })
+  }
+}
+
+if (!SOLO || SOLO === 'word') {
+  const r = await preguntar('Redáctame en Word un memo de una página para la Gerencia General sobre la importancia de registrar las mermas de planta a diario. Usa el formato de Iberia.', {
+    modelo: 'claude-sonnet-5-5',
+    esfuerzo: 'low',
+    esperar: 'archivo',
+    tope: 600_000,
+  })
+  const enlace = p.locator('a:has-text("Descargar")').last()
+  ok((await enlace.count()) > 0, `Word generado · total ${Math.round(r.total / 1000)} s`)
+  if (await enlace.count()) {
+    const [descarga] = await Promise.all([p.waitForEvent('download', { timeout: 30_000 }), enlace.click()])
+    const nombre = await descarga.suggestedFilename()
+    await descarga.saveAs(`capturas/asistente/${nombre}`)
+    ok(nombre.endsWith('.docx'), `se descarga: ${nombre} → capturas/asistente/`)
   }
 }
 

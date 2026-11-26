@@ -58,6 +58,43 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 
 > **Plataforma Iberia:** **en producción** desde el 20/11 (Etapa 1, rediseño, panel y canal en `/sistema`; el informe
 > aparte; ver la sesión 56), con el Portal planta, los documentos y los tutoriales desde el 24/11 (sesiones 59 y 60).
+> **Asistente de IA:** fase 1 construida y probada en pruebas el 26/11 (sesión 61), rama `asistente/fase-1`, sin producción.
+
+---
+
+## 26 de noviembre · Sesión 61 — el asistente de IA, fase 1
+
+**Pedido de Gabriel** (Telegram, notas de voz): un chat de IA como el de Claude web dentro de la plataforma, para que el
+personal administrativo no use licencias sueltas: modelos y esfuerzo, Excel, Word y PDF, HTML de analítica, historial,
+tareas programadas, individual por usuario y con el motor (Anthropic u OpenAI) elegido por la administración. Se
+investigó, se le hicieron tres rondas de preguntas y **el plan quedó en Claude Docs**
+(<https://claude.ai/artifact/LBR5GVKVkj2E8TTXGyba3U>): 7 fases, 22 decisiones y 8 pendientes resueltos casi todos.
+
+- **Decidió Gabriel** (lo completo, en el plan): ~20 usuarios administrativos al arranque, habilitados por la casilla del
+  rol; Anthropic por defecto con **Opus 5.5 medio** y OpenAI como alternativa (**Iberia ya aceptó OpenAI**; queda abierto
+  un motor local); alcance de datos por rol con excepciones por persona; topes diario y mensual por persona y **US$ 600
+  al mes para la empresa**; los archivos siempre por Anthropic; retención para siempre con cuota; **nadie lee los chats
+  salvo Boosty para soporte**, con un aviso de resguardo al pie; chats compartidos donde cada mensaje consulta con los
+  permisos de quien lo escribe; Resend para el correo; Microsoft 365 en la fase 7 (el paso a paso para su
+  administrador, al terminar la construcción). **Después del espejo de JD**: preguntar desde cada ficha y asistentes por área.
+- **A mitad de camino, Gabriel**: los HTML tienen que ser **artefactos como los de Claude** (su gente ya los usa) y se
+  rediseña sin preguntar si algo puede verse más moderno. Hecho: versiones por artefacto, se abren solos, «Actualizar
+  con datos nuevos».
+- **Construido** (cómo funciona: `AGENTS.md`, «El asistente de IA»): migraciones `20261126100000` a `130000`, ejecutor en
+  segundo plano con Realtime, motores de Anthropic y OpenAI, `/sistema/asistente` (chat, adjuntos, artefactos, Mis
+  archivos), Administración › Asistente de IA (resumen con métricas del registro, motor y modelos, usuarios y roles,
+  instrucciones, adopción) y la habilidad propia `formato-iberia` (Word, Excel y PowerPoint con la marca).
+- **Probado contra pruebas** (`probar-chat.mjs`, 19 comprobaciones, con los dos motores): pregunta simple; Excel de
+  3.000 filas y 2 hojas devuelto como Excel (Sonnet, 38–46 s, US$ 0,07); artefacto que se actualiza a versión 2; Word
+  con la marca; y las puertas (otra cuenta no lee, no baja, no escucha el canal ni se sube el tope; sin la casilla no
+  entra). La primera señal del proveedor llega en ~0,6 s. `next build` limpio.
+- **Lo que se encontró**: dos `next dev` en la misma carpeta no conviven (se paró el del 3001 mientras se probaba); un dev
+  viejo servía el formateador de métricas viejo; el canal de Realtime guardaba el manejador viejo y un chat nuevo no
+  refrescaba su título; la búsqueda web `20260209` no se puede declarar junto a la ejecución de código. 🔴 **La compilación
+  local de Netlify no termina en Windows** (falla el middleware, no el asistente): las dos funciones de fondo sí se
+  empaquetaron con el motor. La prueba de que corre más de 60 s es el primer Excel largo en producción.
+- **Dónde quedamos**: fase 1 lista en la rama, sin push y sin producción. El paso a producción, con su lista, en
+  `PENDIENTES.md` («Asistente de IA · fase 1»), espera el OK de Gabriel.
 
 ---
 
