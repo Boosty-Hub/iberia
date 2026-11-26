@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { DM_Sans, Geist_Mono } from 'next/font/google'
 import { PuenteNativo } from '@/components/puente-nativo'
+import { AvisoVersionNueva } from '@/components/aviso-version-nueva'
 import './globals.css'
 
 const geistMono = Geist_Mono({
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         {/* Los avisos tocados y los enlaces que abren la app de iOS. Fuera de la
             app no hace nada. */}
         <PuenteNativo />
+        <AvisoVersionNueva />
       </body>
     </html>
   )

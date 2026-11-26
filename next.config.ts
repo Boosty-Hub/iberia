@@ -1,6 +1,10 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+  // Un id por despliegue (26-nov-2026): una pestaña abierta antes de publicar tenía el código viejo y al tocar algo daba
+  // «Server Action … was not found on the server» (409). Con el id, Next detecta que el servidor es de otro despliegue y
+  // recarga la página entera en vez de fallar. Netlify pone `DEPLOY_ID` al construir; en local no hay y no cambia nada.
+  deploymentId: process.env.DEPLOY_ID || undefined,
   // El indicador flotante de desarrollo se sitúa abajo a la izquierda, justo
   // encima del pie de la barra lateral, y lo tapa.
   devIndicators: false,
