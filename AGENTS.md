@@ -1273,6 +1273,23 @@ no use licencias sueltas. **El plan entero (7 fases, 22 decisiones de Gabriel, c
   US$ 10 por 1.000), **no** en `ia.actividad`: el tope diario de la IA de la plataforma (US$ 2) es de las capacidades de
   los módulos. El interruptor general de IA y la capacidad `NUC-ASI-IA-01` sí apagan el asistente. Título y categoría de
   cada turno los pone Haiku 5.5 (`motor/titulo.ts`); se guarda la categoría, nunca el contenido.
+- **Fase 2 · datos de la plataforma** (migración `20261126140000_asistente_fase2`). El asistente **nunca ve más que la
+  persona**: el ejecutor recibe el token de su sesión (`tokenDeSesion()`, renovado si le quedan menos de 20 min; viaja de
+  servidor a servidor y no se guarda) y cada consulta va a la ruta interna `/api/asistente/fuente` (pública en
+  `sesion.ts`, pero exige `ASISTENTE_SECRETO`), que corre con un cliente de ese token (`clienteDeToken`): la RLS de
+  siempre. Una **fuente** es una tabla de la plataforma (`tabla:<id>`, las mismas `FuenteTabla` de `lib/plataforma/tablas*.ts`
+  vía `consultarPagina(…, cliente)`), las métricas del registro o los documentos del SGC. Se consulta si (1) la persona
+  tiene el permiso de esa pantalla, (2) está en su **alcance** (`asistente.fuente` encendida + `alcance_rol` o la excepción
+  de `alcance_usuario`; `asistente.mi_alcance()`) y (3) la RLS le deja las filas. Lo que no está en `asistente.fuente` está
+  apagado. `FUERA` en `lib/asistente/fuentes.ts` deja fuera el padrón, el avance por persona, el canal y el historial.
+  Cada consulta queda en `asistente.consulta_fuente` (sin contenido). Administración › Asistente de IA › Alcance: la matriz,
+  las excepciones y «Ver como» (calcula sin acuñar sesión).
+  - **Documentos**: `asistente.documento_pagina` (texto por página, `tsvector` en español sobre `asistente.plano()`), con
+    RLS que pregunta por `sgc.documento_archivo` con la sesión de quien busca; `asistente.buscar_documentos()` es security
+    invoker. Se llena con `scripts/asistente/extraer-paginas.py` (PyMuPDF, de los PDF locales, máx. 300 páginas por
+    archivo) y `indexar-documentos.mjs` (enlaza por `pdf_ruta` o por la huella). En pruebas: 13.517 páginas, 46 MB.
+  - Red team del 26-nov (`probar-datos.mjs --solo redteam`, informe en `capturas/asistente/red-team.json`): costos fuera de
+    alcance, directo y con rodeo; inyección desde un CSV; pedido de contactos; artefacto que llama a la API. Ninguno pasó.
 - ⚠️ **Un `next dev` viejo sirve código viejo**: el 26-nov el Resumen mostraba cifras sin formato con el archivo ya
   corregido; reiniciar el dev lo arregló. Y **dos `next dev` en la misma carpeta no conviven** (el del 3001 impide el del
   3005, que muere sin escribir nada en su registro).
@@ -1281,6 +1298,9 @@ no use licencias sueltas. **El plan entero (7 fases, 22 decisiones de Gabriel, c
 node --env-file=.env.local scripts/asistente/probar-chat.mjs [--solo simple|excel|html|puertas] [--excel <ruta.xlsx>]   # contra pruebas (:3005)
 node --env-file=.env.local scripts/asistente/sonda-anthropic.mjs <archivo.xlsx> [--modelo claude-sonnet-5-5]           # el motor, sin la base
 node --env-file=.env.local scripts/asistente/sonda-openai.mjs                                                         # la Responses API
+node --env-file=.env.local scripts/asistente/probar-datos.mjs [--solo datos|redteam|sinpermiso]                         # fase 2 y red team
+python scripts/asistente/extraer-paginas.py && node --env-file=.env.local scripts/asistente/indexar-documentos.mjs [--destino produccion --confirmo]
+node --env-file=.env.local scripts/asistente/subir-habilidad.mjs [carpeta] [--destino produccion --confirmo]
 ```
 
 ## Seguridad — no negociable

@@ -748,7 +748,7 @@ Rama `asistente/fase-1`, probada contra pruebas. El plan y las decisiones, en Cl
 | La habilidad propia `formato-iberia` (plantillas de Word, Excel y PowerPoint con la marca, subidas a la API de habilidades): hoy la marca va por instrucciones (colores y DM Sans) | Equipo Boosty | Plan, fase 1 |
 | El paso a paso de Microsoft 365 para el administrador de Iberia se manda **al terminar la construcción** (Gabriel, 26/11) | Gabriel | Está en el plan, fase 7 |
 | Subdominio y remitente de Resend (P7) | Gabriel | Fase 5 |
-| Red team antes de abrir la fase 2 (consultas a la plataforma) | Equipo Boosty | Plan, fase 2 |
+| ~~Red team antes de abrir la fase 2~~ ✅ 26/11, en pruebas: ningún caso pasó (`probar-datos.mjs --solo redteam`). Al pasar a producción: **indexar los documentos** (`indexar-documentos.mjs --destino produccion --confirmo`), subir la habilidad (`subir-habilidad.mjs --destino produccion --confirmo`) y **encender las fuentes y el alcance por rol** en Administración › Asistente de IA › Alcance (todo nace apagado) | Equipo Boosty · administración | |
 
 ---
 

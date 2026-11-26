@@ -17,6 +17,23 @@ export async function catalogoModelos(): Promise<ModeloCatalogo[]> {
   return (data ?? []) as ModeloCatalogo[]
 }
 
+/**
+ * El token de la sesión de quien pide el turno: con él corren las consultas a
+ * la plataforma (fase 2), con la RLS de siempre. Viaja de servidor a servidor
+ * (nunca se guarda). Si le quedan menos de 20 minutos, se renueva aquí, donde
+ * la renovación puede escribir las cookies del navegador.
+ */
+export async function tokenDeSesion(): Promise<string | null> {
+  const supabase = await createClient()
+  const { data } = await supabase.auth.getSession()
+  let s = data.session
+  if (s?.expires_at && s.expires_at * 1000 - Date.now() < 20 * 60_000) {
+    const { data: nueva } = await supabase.auth.refreshSession()
+    s = nueva.session ?? s
+  }
+  return s?.access_token ?? null
+}
+
 /** ¿Corre en Netlify? Ahí el turno va a la función de fondo (hasta 15 min); en local, en `after()`. */
 function enNetlify(): boolean {
   if (process.env.ASISTENTE_EJECUTOR === 'local') return false
@@ -29,19 +46,19 @@ function enNetlify(): boolean {
  * en el acto y sigue sola; la pantalla se entera por Realtime. En local corre
  * dentro de `after()`: la respuesta ya salió y no hay límite de tiempo.
  */
-export async function lanzarTurno(turnoId: string, origen: string): Promise<void> {
+export async function lanzarTurno(turnoId: string, origen: string, token: string | null): Promise<void> {
   if (enNetlify()) {
     const base = process.env.URL || process.env.NEXT_PUBLIC_SITE_URL || origen
     const r = await fetch(`${base}/.netlify/functions/asistente-turno-background`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-asistente-secreto': secretoAsistente() },
-      body: JSON.stringify({ turno: turnoId }),
+      body: JSON.stringify({ turno: turnoId, token }),
     })
     if (r.status !== 202 && !r.ok) throw new Error(`No se pudo lanzar el turno (${r.status}).`)
     return
   }
   after(async () => {
     const { ejecutarTurno } = await import('@/lib/asistente/motor/ejecutor')
-    await ejecutarTurno(turnoId)
+    await ejecutarTurno(turnoId, { token })
   })
 }

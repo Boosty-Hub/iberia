@@ -14,11 +14,15 @@ export const MarkdownChat = memo(function MarkdownChat({ contenido }: { contenid
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          a: ({ href, children }) => (
-            <a href={href} target="_blank" rel="noopener noreferrer">
-              {children}
-            </a>
-          ),
+          // Los enlaces a la plataforma (fichas, tablas) abren aquí mismo; los de afuera, en otra pestaña.
+          a: ({ href, children }) =>
+            href?.startsWith('/sistema') ? (
+              <a href={href}>{children}</a>
+            ) : (
+              <a href={href} target="_blank" rel="noopener noreferrer">
+                {children}
+              </a>
+            ),
           table: ({ children }) => (
             <div className="tabla-chat">
               <table>{children}</table>

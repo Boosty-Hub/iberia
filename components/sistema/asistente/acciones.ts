@@ -4,7 +4,7 @@ import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { requerirPermiso } from '@/lib/auth'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
-import { catalogoModelos, lanzarTurno, miPolitica } from '@/lib/asistente/servidor'
+import { catalogoModelos, lanzarTurno, miPolitica, tokenDeSesion } from '@/lib/asistente/servidor'
 import { MAX_BYTES_ARCHIVO, dentroDelMaximo, type Esfuerzo } from '@/lib/asistente/tipos'
 
 type Resultado<T> = ({ ok: true } & T) | { ok: false; error: string }
@@ -87,7 +87,7 @@ export async function enviarMensaje(entrada: {
   try {
     const h = await headers()
     const origen = h.get('origin') ?? `https://${h.get('host')}`
-    await lanzarTurno(turnoId, origen)
+    await lanzarTurno(turnoId, origen, await tokenDeSesion())
   } catch (e) {
     await createAdminClient()
       .schema('asistente')
@@ -244,7 +244,7 @@ export async function reintentarTurno(turnoId: string): Promise<Resultado<{ turn
   await createAdminClient().schema('asistente').from('mensaje').update({ turno_id: nuevo }).eq('turno_id', turnoId).eq('rol', 'usuario')
   try {
     const h = await headers()
-    await lanzarTurno(nuevo, h.get('origin') ?? `https://${h.get('host')}`)
+    await lanzarTurno(nuevo, h.get('origin') ?? `https://${h.get('host')}`, await tokenDeSesion())
   } catch {
     return { ok: false, error: 'No se pudo arrancar el turno.' }
   }

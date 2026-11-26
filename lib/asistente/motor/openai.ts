@@ -3,6 +3,7 @@ import { claveOpenAI } from './servicio'
 import { HERRAMIENTA_ARCHIVOS, HERRAMIENTA_ARTEFACTO, HERRAMIENTA_LEER_ARTEFACTO, contextoDelTurno, listaDeArtefactos } from './instrucciones'
 import { ejecutarAnthropic, herramientaArtefacto, mensajeDeError } from './anthropic'
 import { costoDe, sumarUso, usoVacio, type ContextoMotor, type Precio, type ResultadoMotor, type Uso } from './contrato'
+import { NOMBRES_DATOS, herramientaDatos, herramientasDeDatos } from './datos'
 
 type Item = Record<string, unknown>
 const MAX_VUELTAS = 12
@@ -70,7 +71,9 @@ async function correr(cuerpo: Record<string, unknown>, ctx: ContextoMotor, base:
           const paso: Extract<Bloque, { tipo: 'paso' }> =
             it.type === 'web_search_call'
               ? { tipo: 'paso', id, herramienta: 'busqueda', titulo: 'Buscando en internet', estado: 'corriendo' }
-              : nombre === 'artefacto' || nombre === 'leer_artefacto'
+              : NOMBRES_DATOS.has(nombre)
+                ? { tipo: 'paso', id, herramienta: 'datos', titulo: 'Consultando la plataforma', estado: 'corriendo' }
+                : nombre === 'artefacto' || nombre === 'leer_artefacto'
                 ? { tipo: 'paso', id, herramienta: 'html', titulo: nombre === 'artefacto' ? 'Creando el artefacto' : 'Leyendo el artefacto', estado: 'corriendo' }
                 : { tipo: 'paso', id, herramienta: 'archivo', titulo: 'Procesando los archivos', estado: 'corriendo' }
           pasos.set(id, paso)
@@ -128,6 +131,7 @@ export async function ejecutarOpenAI(ctx: ContextoMotor, precioDe: (modelo: stri
             { type: 'function', name: HERRAMIENTA_ARTEFACTO.name, description: HERRAMIENTA_ARTEFACTO.description, parameters: HERRAMIENTA_ARTEFACTO.input_schema, strict: true },
             { type: 'function', name: HERRAMIENTA_LEER_ARTEFACTO.name, description: HERRAMIENTA_LEER_ARTEFACTO.description, parameters: HERRAMIENTA_LEER_ARTEFACTO.input_schema, strict: true },
             { type: 'function', name: HERRAMIENTA_ARCHIVOS.name, description: HERRAMIENTA_ARCHIVOS.description, parameters: HERRAMIENTA_ARCHIVOS.input_schema, strict: true },
+            ...(ctx.datos ? herramientasDeDatos(ctx.datos) : []).map((h) => ({ type: 'function', name: h.name, description: h.description, parameters: h.input_schema, strict: true })),
           ],
         },
         ctx,
@@ -169,7 +173,15 @@ export async function ejecutarOpenAI(ctx: ContextoMotor, precioDe: (modelo: stri
         let salidaHerramienta: string
         try {
           const args = JSON.parse(String(ll.arguments ?? '{}')) as Record<string, unknown>
-          if (ll.name === 'artefacto' || ll.name === 'leer_artefacto') {
+          if (NOMBRES_DATOS.has(String(ll.name)) && ctx.datos) {
+            const r = await herramientaDatos(ctx.datos, String(ll.name), args)
+            if (paso) {
+              paso.herramienta = 'datos'
+              paso.titulo = r.titulo
+              if (r.error) paso.estado = 'error'
+            }
+            salidaHerramienta = r.texto
+          } else if (ll.name === 'artefacto' || ll.name === 'leer_artefacto') {
             const r = await herramientaArtefacto(ctx, String(ll.name), args)
             if (r.bloque) {
               bloques.push(r.bloque)

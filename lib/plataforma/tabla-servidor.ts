@@ -13,7 +13,7 @@ import type { Columna, EstadoTabla } from '@/lib/plataforma/tabla'
  * sesión de quien mira: la RLS decide qué filas existen.
  */
 
-type Cliente = Awaited<ReturnType<typeof createClient>>
+export type Cliente = Awaited<ReturnType<typeof createClient>>
 // El constructor de PostgREST cambia de tipo con cada filtro; aquí se trata como
 // una cadena de métodos.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -96,14 +96,18 @@ export type Fila = Record<string, unknown>
 // -----------------------------------------------------------------------------
 const lecturas = cache(() => new Map<string, Promise<Fila[]>>())
 
-/** Todas las filas de una fuente `enMemoria`, leídas una vez por petición (y contexto). */
-function filasDe(f: FuenteTabla, ctx: ContextoGlobal): Promise<Fila[]> {
+/**
+ * Todas las filas de una fuente `enMemoria`, leídas una vez por petición (y contexto).
+ * `cliente`: el de una sesión que no viene en las cookies (el asistente de IA consulta con el
+ * token de quien pregunta); sin él, la sesión de la petición.
+ */
+function filasDe(f: FuenteTabla, ctx: ContextoGlobal, cliente?: Cliente): Promise<Fila[]> {
   const mapa = lecturas()
-  const k = `${f.id}|${ctx.al}|${ctx.esc ?? ''}`
+  const k = `${f.id}|${ctx.al}|${ctx.esc ?? ''}|${cliente ? 'token' : 'cookies'}`
   let p = mapa.get(k)
   if (!p) {
     p = (async () => {
-      const supabase = await createClient()
+      const supabase = cliente ?? (await createClient())
       if (f.leer) return f.leer(supabase, ctx)
       const { filas } = await escanear((d, h) => f.consulta(supabase, ctx, '*').order(f.claveFila).range(d, h))
       return filas
@@ -152,14 +156,14 @@ function ordenarEnMemoria(filas: Fila[], f: FuenteTabla, e: EstadoTabla): Fila[]
   })
 }
 
-/** Una página de la tabla, con el conteo exacto del total filtrado. */
-export async function consultarPagina(f: FuenteTabla, e: EstadoTabla, ctx: ContextoGlobal) {
+/** Una página de la tabla, con el conteo exacto del total filtrado. `cliente`: ver `filasDe`. */
+export async function consultarPagina(f: FuenteTabla, e: EstadoTabla, ctx: ContextoGlobal, cliente?: Cliente) {
   if (f.enMemoria) {
-    const todas = ordenarEnMemoria(filtrarEnMemoria(await filasDe(f, ctx), f, e), f, e)
+    const todas = ordenarEnMemoria(filtrarEnMemoria(await filasDe(f, ctx, cliente), f, e), f, e)
     const desde = (e.pagina - 1) * e.tamano
     return { filas: todas.slice(desde, desde + e.tamano), total: todas.length, error: null }
   }
-  const supabase = await createClient()
+  const supabase = cliente ?? (await createClient())
   const desde = (e.pagina - 1) * e.tamano
   let q = f.consulta(supabase, ctx, seleccion(f), { count: 'exact' })
   q = ordenar(filtrar(q, f, e), f, e).range(desde, desde + e.tamano - 1)

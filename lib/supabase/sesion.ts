@@ -37,6 +37,10 @@ const RUTAS_PUBLICAS = [
   // La captura de tasas la llama el programador, sin sesión: la ruta exige su
   // propio secreto (`TASAS_SECRETO`) y sin él responde 401.
   '/api/tasas/capturar',
+  // Las fuentes del asistente de IA las pide el ejecutor del turno, sin cookies:
+  // la ruta exige `ASISTENTE_SECRETO` y el token de la sesión de quien pregunta,
+  // con el que corre cada consulta (la RLS de siempre).
+  '/api/asistente/fuente',
 ]
 
 export async function updateSession(request: NextRequest) {

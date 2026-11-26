@@ -3,6 +3,7 @@ import type { Bloque } from '../tipos'
 import { BETAS_ANTHROPIC, crearAnthropic } from './servicio'
 import { HERRAMIENTA_ARTEFACTO, HERRAMIENTA_LEER_ARTEFACTO, contextoDelTurno, listaDeArtefactos } from './instrucciones'
 import { costoDe, sumarUso, usoVacio, type ContextoMotor, type Precio, type ResultadoMotor, type Uso } from './contrato'
+import { NOMBRES_DATOS, herramientaDatos, herramientasDeDatos } from './datos'
 
 type Msg = Anthropic.Beta.BetaMessageParam
 type Contenido = Anthropic.Beta.BetaContentBlockParam
@@ -18,6 +19,9 @@ const TITULO_HERRAMIENTA: Record<string, { herramienta: Extract<Bloque, { tipo: 
   web_fetch: { herramienta: 'busqueda', titulo: 'Leyendo una página' },
   artefacto: { herramienta: 'html', titulo: 'Creando el artefacto' },
   leer_artefacto: { herramienta: 'html', titulo: 'Leyendo el artefacto' },
+  consultar_tabla: { herramienta: 'datos', titulo: 'Consultando la plataforma' },
+  consultar_metrica: { herramienta: 'datos', titulo: 'Consultando una métrica' },
+  buscar_documentos: { herramienta: 'datos', titulo: 'Buscando en los documentos' },
 }
 
 /** El historial como texto: sin bloques de pensamiento de turnos anteriores (se pueden quitar todos sin romper nada). */
@@ -106,6 +110,7 @@ export async function ejecutarAnthropic(ctx: ContextoMotor, precioDe: (modelo: s
             { type: 'web_search_20250305', name: 'web_search', max_uses: 5 },
             { ...HERRAMIENTA_ARTEFACTO, eager_input_streaming: true } as Anthropic.Beta.BetaTool,
             HERRAMIENTA_LEER_ARTEFACTO as Anthropic.Beta.BetaTool,
+            ...(ctx.datos ? herramientasDeDatos(ctx.datos) : []).map((h) => h as Anthropic.Beta.BetaTool),
           ],
           cache_control: { type: 'ephemeral' },
           messages: mensajes,
@@ -170,6 +175,16 @@ export async function ejecutarAnthropic(ctx: ContextoMotor, precioDe: (modelo: s
             paso.estado = err ? 'error' : 'listo'
             ctx.emitir({ t: 'paso', turno: ctx.turno, paso })
           }
+        } else if (b.type === 'tool_use' && NOMBRES_DATOS.has(b.name) && ctx.datos) {
+          const paso = pasos.get(b.id)
+          const r = await herramientaDatos(ctx.datos, b.name, b.input)
+          if (paso) {
+            paso.herramienta = 'datos'
+            paso.titulo = r.titulo
+            paso.estado = r.error ? 'error' : 'listo'
+            ctx.emitir({ t: 'paso', turno: ctx.turno, paso })
+          }
+          resultadosHtml.push({ type: 'tool_result', tool_use_id: b.id, content: r.texto, ...(r.error ? { is_error: true } : {}) })
         } else if (b.type === 'tool_use' && (b.name === 'artefacto' || b.name === 'leer_artefacto')) {
           const paso = pasos.get(b.id)
           const r = await herramientaArtefacto(ctx, b.name, b.input)

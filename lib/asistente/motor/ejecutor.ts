@@ -6,6 +6,7 @@ import { instruccionesSistema } from './instrucciones'
 import { ejecutarAnthropic, mensajeDeError } from './anthropic'
 import { ejecutarOpenAI } from './openai'
 import { titularYClasificar } from './titulo'
+import { prepararDatos } from './datos'
 import type { ArchivoTurno, ArtefactoTurno, ContextoMotor, Precio, ResultadoMotor, TurnoHistorial } from './contrato'
 
 /** Lo que se reserva antes de correr: el peor caso razonable de un turno, por modelo. Al cerrar se cobra lo real. */
@@ -25,7 +26,7 @@ const PRECIO_DEFECTO: Precio = { entrada: 4, salida: 20, cacheLee: 0.2, cacheEsc
  * (producción) y la ruta de desarrollo. Nunca lanza: todo final deja el turno
  * cerrado (listo, detenido o fallido), la reserva liberada y el aviso enviado.
  */
-export async function ejecutarTurno(turnoId: string): Promise<void> {
+export async function ejecutarTurno(turnoId: string, opciones: { token?: string | null } = {}): Promise<void> {
   const db = crearServicio()
   const { data: turno } = await db.schema('asistente').from('turno').select('*').eq('id', turnoId).maybeSingle()
   if (!turno || turno.estado !== 'en_cola') return
@@ -44,6 +45,8 @@ export async function ejecutarTurno(turnoId: string): Promise<void> {
     ])
     if (!chat || !config) return await cerrarFallido('No se encontró el chat.')
 
+    // El catálogo de datos (fase 2) se pide mientras se reserva y se lee el chat.
+    const promesaDatos = prepararDatos(opciones.token, turnoId)
     const reserva = RESERVA[turno.modelo] ?? 0.8
     const { data: motivo, error: errReserva } = await db.schema('asistente').rpc('reservar_turno', { p_turno: turnoId, p_reserva_usd: reserva })
     if (errReserva) return await cerrarFallido('No se pudo reservar el turno.')
@@ -106,6 +109,7 @@ export async function ejecutarTurno(turnoId: string): Promise<void> {
       contenedorId: chat.contenedor_id,
       contenedorVigente: vigente,
       habilidades: config.habilidades ?? [],
+      datos: await promesaDatos,
       senal: control.signal,
       emitir: (e) => emisor.emitir(e),
       asegurarEnAnthropic: (a) => asegurarEnAnthropic(db, a),

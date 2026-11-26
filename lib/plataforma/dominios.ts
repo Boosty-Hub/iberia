@@ -286,6 +286,7 @@ export const PESTANAS: Record<string, Pestana[]> = {
     { etiqueta: 'Resumen', href: '/sistema/administracion/asistente', recurso: 'sistema:asistente-admin' },
     { etiqueta: 'Motor y modelos', href: '/sistema/administracion/asistente/motor', recurso: 'sistema:asistente-admin' },
     { etiqueta: 'Usuarios y roles', href: '/sistema/administracion/asistente/usuarios', recurso: 'sistema:asistente-admin' },
+    { etiqueta: 'Alcance', href: '/sistema/administracion/asistente/alcance', recurso: 'sistema:asistente-admin' },
     { etiqueta: 'Instrucciones', href: '/sistema/administracion/asistente/instrucciones', recurso: 'sistema:asistente-admin' },
     { etiqueta: 'Adopción', href: '/sistema/administracion/asistente/adopcion', recurso: 'sistema:asistente-admin' },
   ],

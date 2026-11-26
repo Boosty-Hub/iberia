@@ -66,7 +66,7 @@ export type ModeloCatalogo = {
  * empezado con un motor sigue con el otro.
  */
 export type Bloque =
-  | { tipo: 'paso'; id: string; herramienta: 'codigo' | 'busqueda' | 'html' | 'archivo' | 'otra'; titulo: string; detalle?: string; estado: 'corriendo' | 'listo' | 'error' }
+  | { tipo: 'paso'; id: string; herramienta: 'codigo' | 'busqueda' | 'html' | 'archivo' | 'datos' | 'otra'; titulo: string; detalle?: string; estado: 'corriendo' | 'listo' | 'error' }
   | { tipo: 'archivo'; archivoId: string; nombre: string; mime: string; bytes: number }
   | { tipo: 'artefacto'; artefactoId: string; grupo: string; titulo: string; version: number; clase: ClaseArtefacto }
   /** Formato viejo (antes de los artefactos): se pinta como un artefacto HTML. */

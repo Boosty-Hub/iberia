@@ -14,6 +14,42 @@ export type Database = {
   }
   asistente: {
     Tables: {
+      alcance_rol: {
+        Row: {
+          fuente: string
+          permitido: boolean
+          rol_id: string
+        }
+        Insert: {
+          fuente: string
+          permitido?: boolean
+          rol_id: string
+        }
+        Update: {
+          fuente?: string
+          permitido?: boolean
+          rol_id?: string
+        }
+        Relationships: []
+      }
+      alcance_usuario: {
+        Row: {
+          fuente: string
+          perfil_id: string
+          permitido: boolean
+        }
+        Insert: {
+          fuente: string
+          perfil_id: string
+          permitido: boolean
+        }
+        Update: {
+          fuente?: string
+          perfil_id?: string
+          permitido?: boolean
+        }
+        Relationships: []
+      }
       archivo: {
         Row: {
           anthropic_file_id: string | null
@@ -179,6 +215,95 @@ export type Database = {
           tope_diario_usd?: number
           tope_mensual_empresa_usd?: number
           tope_mensual_usd?: number
+        }
+        Relationships: []
+      }
+      consulta_fuente: {
+        Row: {
+          creado_en: string
+          filas: number
+          fuente: string
+          id: string
+          parametros: Json
+          perfil_id: string
+          turno_id: string | null
+        }
+        Insert: {
+          creado_en?: string
+          filas?: number
+          fuente: string
+          id?: string
+          parametros?: Json
+          perfil_id: string
+          turno_id?: string | null
+        }
+        Update: {
+          creado_en?: string
+          filas?: number
+          fuente?: string
+          id?: string
+          parametros?: Json
+          perfil_id?: string
+          turno_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consulta_fuente_turno_id_fkey"
+            columns: ["turno_id"]
+            isOneToOne: false
+            referencedRelation: "turno"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documento_pagina: {
+        Row: {
+          archivo_id: string
+          documento_id: string
+          pagina: number
+          texto: string
+          vector: unknown
+        }
+        Insert: {
+          archivo_id: string
+          documento_id: string
+          pagina: number
+          texto: string
+          vector?: unknown
+        }
+        Update: {
+          archivo_id?: string
+          documento_id?: string
+          pagina?: number
+          texto?: string
+          vector?: unknown
+        }
+        Relationships: []
+      }
+      fuente: {
+        Row: {
+          actualizado_en: string
+          actualizado_por: string | null
+          clave: string
+          encendida: boolean
+          nota: string | null
+          sensible: boolean
+        }
+        Insert: {
+          actualizado_en?: string
+          actualizado_por?: string | null
+          clave: string
+          encendida?: boolean
+          nota?: string | null
+          sensible?: boolean
+        }
+        Update: {
+          actualizado_en?: string
+          actualizado_por?: string | null
+          clave?: string
+          encendida?: boolean
+          nota?: string | null
+          sensible?: boolean
         }
         Relationships: []
       }
@@ -586,6 +711,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      buscar_documentos: {
+        Args: { p_consulta: string; p_limite?: number }
+        Returns: {
+          archivo: string
+          archivo_id: string
+          codigo: string
+          documento_id: string
+          estado: string
+          extracto: string
+          pagina: number
+          rango: number
+          titulo: string
+        }[]
+      }
       consumo: {
         Args: { p_desde: string; p_hasta?: string }
         Returns: {
@@ -632,7 +771,15 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      mi_alcance: {
+        Args: never
+        Returns: {
+          fuente: string
+          sensible: boolean
+        }[]
+      }
       mi_politica: { Args: never; Returns: Json }
+      plano: { Args: { t: string }; Returns: string }
       politica_de: { Args: { p_perfil: string }; Returns: Json }
       reservar_turno: {
         Args: { p_reserva_usd: number; p_turno: string }

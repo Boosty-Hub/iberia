@@ -1,4 +1,5 @@
 import type { Bloque, ClaseArtefacto, Esfuerzo, EventoTurno } from '../tipos'
+import type { Datos } from './datos'
 
 export type ArtefactoTurno = { grupo: string; titulo: string; clase: ClaseArtefacto; version: number }
 
@@ -35,6 +36,8 @@ export type ContextoMotor = {
   contenedorVigente: boolean
   /** Las habilidades propias de Iberia (custom skills) que se montan además de xlsx, docx, pptx y pdf. */
   habilidades: string[]
+  /** Las fuentes de datos de la plataforma que esta persona puede consultar (fase 2), o null. */
+  datos: Datos | null
   senal: AbortSignal
   emitir: (e: EventoTurno) => void
   /** Sube (una vez) un archivo de Storage a la Files API de Anthropic y devuelve su `file_id`. */
