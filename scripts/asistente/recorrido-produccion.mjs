@@ -14,7 +14,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { chromium } from 'playwright'
 import { createClient } from '@supabase/supabase-js'
 
-const BASE = 'https://iberiavenezuela.netlify.app'
+const BASE = process.env.RECORRIDO_BASE || 'https://portal.industriasiberia.com'
 const CLAVE = process.env.RECORRIDO_CLAVE
 if (!CLAVE) throw new Error('Falta RECORRIDO_CLAVE')
 const ADMIN = 'gmontiel@spatiumgroup.com'

@@ -24,7 +24,7 @@ export default async function MicrosoftPage() {
     createAdminClient().schema('asistente').from('conexion_microsoft').select('perfil_id', { count: 'exact', head: true }),
   ])
   const cert = await estadoCertificado()
-  const retorno = `${(process.env.NEXT_PUBLIC_SITE_URL || 'https://iberiavenezuela.netlify.app').replace(/\/$/, '')}/api/asistente/microsoft/retorno`
+  const retorno = `${(process.env.NEXT_PUBLIC_SITE_URL || 'https://portal.industriasiberia.com').replace(/\/$/, '')}/api/asistente/microsoft/retorno`
   const listo = cert.listo && !!cfg?.microsoft_tenant && !!cfg?.microsoft_cliente
 
   return (

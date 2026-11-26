@@ -1,7 +1,7 @@
 # Desplegar
 
 **Desplegado desde el 25 de septiembre de 2026** en Netlify:
-**https://iberiavenezuela.netlify.app**. La base es el proyecto real de Supabase, con las
+**https://portal.industriasiberia.com** (dominio propio desde el 26-nov-2026; `iberiavenezuela.netlify.app` sigue respondiendo). La base es el proyecto real de Supabase, con las
 migraciones aplicadas y los buckets con los audios y las fichas.
 
 | | |
@@ -10,7 +10,7 @@ migraciones aplicadas y los buckets con los audios y las fichas.
 | **Sitio** | `iberiavenezuela`, conectado a `Boosty-Hub/iberia`, rama `main`. **Cada push a `main` despliega solo**, con `@netlify/plugin-nextjs` |
 | **Región de las funciones** | **`us-east-1`, la misma de Supabase.** Venía en `us-east-2`. Cada página encadena de 4 a 8 consultas a la base; en otra región la app es lenta por geografía y no por código |
 | **Acceso** | **Público.** El sitio tenía el login de equipo de Netlify activo y respondía 401 a cualquiera que no fuera miembro de la cuenta; se quitó. La app pide su propio inicio de sesión y la RLS cierra la base. ⚠️ La cuenta sigue con ese login como valor de fábrica para los sitios **nuevos** |
-| **Dominio** | Todavía el de Netlify. ⚠️ **Los ~200 enlaces personales llevan el dominio dentro**: cambiarlo después obliga a volver a acuñarlos y mandarlos. Elegir el definitivo antes del primer envío, y al cambiarlo, cambiar `NEXT_PUBLIC_SITE_URL` y las URLs de Supabase. ⚠️ **Y la app de iPhone lo lleva compilado** (`server.url` de `capacitor.config.ts`, desde el 23 de octubre de 2026): cambiarlo es publicar otra versión de la app |
+| **Dominio** | **`portal.industriasiberia.com`, el oficial desde el 26-nov-2026** (decisión de Gabriel): `NEXT_PUBLIC_SITE_URL` en Netlify y el *Site URL* de Supabase Auth lo usan; las *Redirect URLs* de Auth admiten los dos dominios. **`iberiavenezuela.netlify.app` no se apaga**: lo usan los enlaces personales ya enviados y las apps de iPhone y Android, que lo llevan compilado (`server.url`, App Links y Universal Links) hasta que se publique otra versión con el dominio nuevo. La conexión de Microsoft 365 vuelve a `NEXT_PUBLIC_SITE_URL`: Entra debe tener registradas las dos direcciones de retorno |
 
 ---
 
