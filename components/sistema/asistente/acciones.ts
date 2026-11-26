@@ -152,7 +152,7 @@ export async function prepararSubida(entrada: { nombre: string; mime: string; by
   const pol = await miPolitica()
   if (!pol?.habilitado) return { ok: false, error: 'No tienes el asistente de IA habilitado.' }
   if (pol.usado_bytes + entrada.bytes > pol.cuota_mb * 1024 * 1024) {
-    return { ok: false, error: `No te alcanza el espacio: usas ${Math.round(pol.usado_bytes / 1048576)} MB de ${pol.cuota_mb} MB. Borra archivos viejos en «Mis archivos».` }
+    return { ok: false, error: `No te alcanza el espacio: usas ${Math.round(pol.usado_bytes / 1048576)} MB de ${pol.cuota_mb} MB. Borra archivos viejos en «Archivos de chats».` }
   }
   const archivoId = crypto.randomUUID()
   const nombre = nombreSeguro(entrada.nombre)

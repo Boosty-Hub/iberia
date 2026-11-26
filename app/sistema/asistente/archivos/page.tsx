@@ -9,7 +9,7 @@ import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
 import { BorrarArchivo } from '@/components/sistema/asistente/borrar-archivo'
 import { cn } from '@/lib/utils'
 
-export const metadata: Metadata = { title: 'Mis archivos · Asistente de IA' }
+export const metadata: Metadata = { title: 'Archivos de chats · Asistente de IA' }
 
 type Fila = { tipo: 'archivo' | 'html'; id: string; nombre: string; origen: string; bytes: number; chat_id: string | null; creado_en: string; version?: number; clase?: ClaseArtefacto }
 
@@ -20,19 +20,20 @@ type Fila = { tipo: 'archivo' | 'html'; id: string; nombre: string; origen: stri
  */
 export default async function MisArchivosPage({ searchParams }: PageProps<'/sistema/asistente/archivos'>) {
   const [sesion, sp] = await Promise.all([requerirPermiso('sistema:asistente'), searchParams])
-  const ver = sp.ver === 'subidos' || sp.ver === 'generados' || sp.ver === 'html' ? sp.ver : 'todos'
+  // Los artefactos tienen su pestaña desde el 26-nov-2026: aquí, solo los archivos.
+  const ver = sp.ver === 'subidos' || sp.ver === 'generados' ? sp.ver : 'todos'
   const supabase = await createClient()
   const db = supabase.schema('asistente')
   const [pol, { data: archivos }, { data: htmls }, { data: chats }, { data: conmigo }] = await Promise.all([
     miPolitica(),
     db.from('archivo').select('id, nombre, origen, bytes, chat_id, creado_en').eq('dueno', sesion.userId).eq('estado', 'listo').in('origen', ['subido', 'generado', 'microsoft']).order('creado_en', { ascending: false }).limit(500),
-    db.from('html').select('id, titulo, bytes, chat_id, creado_en, version, tipo').eq('dueno', sesion.userId).order('creado_en', { ascending: false }).limit(500),
+    Promise.resolve({ data: [] as { id: string; titulo: string; bytes: number; chat_id: string | null; creado_en: string; version: number; tipo: string }[] }),
     db.from('chat').select('id, titulo'),
     db.from('compartido').select('id, tipo, objeto_id, por, creado_en').eq('con', sesion.userId).order('creado_en', { ascending: false }),
   ])
   // Lo que otros me compartieron (la RLS deja leer esas filas por `compartido_conmigo`).
   const idsArchivo = (conmigo ?? []).filter((c) => c.tipo === 'archivo').map((c) => c.objeto_id)
-  const idsHtml = (conmigo ?? []).filter((c) => c.tipo === 'html').map((c) => c.objeto_id)
+  const idsHtml: string[] = []
   const [{ data: aCompartidos }, { data: hCompartidos }] = await Promise.all([
     idsArchivo.length ? db.from('archivo').select('id, nombre, bytes').in('id', idsArchivo) : Promise.resolve({ data: [] }),
     idsHtml.length ? db.from('html').select('id, titulo, bytes, tipo, version').in('id', idsHtml) : Promise.resolve({ data: [] }),
@@ -46,7 +47,7 @@ export default async function MisArchivosPage({ searchParams }: PageProps<'/sist
     ...(archivos ?? []).map((a) => ({ tipo: 'archivo' as const, id: a.id, nombre: a.nombre, origen: a.origen, bytes: Number(a.bytes), chat_id: a.chat_id, creado_en: a.creado_en })),
     ...(htmls ?? []).map((h) => ({ tipo: 'html' as const, id: h.id, nombre: h.titulo, origen: 'html', bytes: Number(h.bytes), chat_id: h.chat_id, creado_en: h.creado_en, version: h.version, clase: h.tipo as ClaseArtefacto })),
   ]
-    .filter((f) => ver === 'todos' || (ver === 'html' ? f.tipo === 'html' : f.tipo === 'archivo' && f.origen === (ver === 'subidos' ? 'subido' : 'generado')))
+    .filter((f) => ver === 'todos' || (f.tipo === 'archivo' && f.origen === (ver === 'subidos' ? 'subido' : 'generado')))
     .sort((a, b) => b.creado_en.localeCompare(a.creado_en))
   const usado = pol?.usado_bytes ?? 0
   const cuota = (pol?.cuota_mb ?? 0) * 1024 * 1024
@@ -57,10 +58,10 @@ export default async function MisArchivosPage({ searchParams }: PageProps<'/sist
 
   return (
     <>
-      <CabeceraModulo sesion={sesion} codigo="MI-ASI" titulo="Asistente de IA" migas={[{ etiqueta: 'Mis archivos' }]} descripcion="Lo que subiste y lo que el asistente te generó. Se guarda hasta que lo borres." />
+      <CabeceraModulo sesion={sesion} codigo="MI-ASI" titulo="Asistente de IA" migas={[{ etiqueta: 'Archivos de chats' }]} descripcion="Lo que subiste a tus chats y los archivos que te generó el asistente. Los artefactos están en su pestaña; para ordenar en carpetas, usa Mis archivos." />
       <div className="mb-3 flex flex-wrap items-center gap-3">
         <nav aria-label="Qué ver" className="flex flex-wrap gap-1.5">
-          {(['todos', 'subidos', 'generados', 'html'] as const).map((v) => (
+          {(['todos', 'subidos', 'generados'] as const).map((v) => (
             <Link key={v} href={v === 'todos' ? '/sistema/asistente/archivos' : `/sistema/asistente/archivos?ver=${v}`} className={chip(ver === v)} aria-current={ver === v ? 'page' : undefined}>
               {ETIQUETA[v]}
             </Link>

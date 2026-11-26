@@ -47,6 +47,27 @@ export const capitulos = [
     },
   },
   {
+    id: 'artefactos',
+    titulo: 'Artefactos',
+    descripcion: 'Dónde quedan los tableros, gráficos y documentos que crea el asistente, con sus versiones.',
+    ruta: `${B}/artefactos`,
+    recurso: R,
+    async guion(page, a, { marcarInicio }) {
+      marcarInicio()
+      await a.portada(K, 'Artefactos', 'Los tableros y documentos que crea el asistente')
+      await a.quitarPortada()
+      await a.sub('Cuando le pides un tablero, un gráfico o un documento, el asistente crea un artefacto y lo abre al costado del chat.')
+      await a.sub('Todos quedan aquí, cada uno en su última versión: si le pides cambios, guarda una versión nueva.', 600)
+      await a.resaltar(page.locator('[data-artefactos] tbody tr').first(), 2800)
+      await a.sub('Abrir lo muestra en una pestaña aparte; Descargar te lo deja como archivo.', 600)
+      await a.resaltar(page.locator('[data-artefactos] tbody tr').first().getByRole('link', { name: 'Abrir' }), 1800)
+      await a.resaltar(page.locator('[data-artefactos] tbody tr').first().getByRole('link', { name: 'Descargar' }), 1600)
+      await a.sub('Y el nombre del chat te lleva a donde nació, para pedirle cambios. Allí, «Mantener al día» lo vuelve un tablero que se actualiza solo.', 600)
+      await a.resaltar(page.locator('[data-artefactos] tbody tr td').nth(3), 3600)
+      await cierre(a, 'Los artefactos corren aislados: no leen tu sesión ni sacan datos a internet.')
+    },
+  },
+  {
     id: 'proyectos',
     titulo: 'Proyectos',
     descripcion: 'Instrucciones y archivos fijos para varios chats sobre un mismo tema.',
@@ -121,17 +142,17 @@ export const capitulos = [
   },
   {
     id: 'archivos',
-    titulo: 'Archivos del asistente',
-    descripcion: 'Lo que subiste a los chats y lo que el asistente te generó.',
+    titulo: 'Archivos de chats',
+    descripcion: 'Lo que subiste a los chats y los archivos que te generó el asistente.',
     ruta: `${B}/archivos`,
     recurso: R,
     async guion(page, a, { marcarInicio }) {
       marcarInicio()
-      await a.portada(K, 'Archivos del asistente', 'Lo que subiste y lo que te generó')
+      await a.portada(K, 'Archivos de chats', 'Lo que subiste y lo que te generó')
       await a.quitarPortada()
-      await a.sub('Aquí quedan los archivos de tus chats: los que subiste, los que generó el asistente y los artefactos.')
-      await a.sub('Arriba a la derecha ves el espacio que usas de tu cupo. Se guarda hasta que lo borres.', 3200)
-      await cierre(a, 'Para ordenar en carpetas y compartir, usa el módulo Mis archivos: el asistente lo cita con «/».')
+      await a.sub('Aquí quedan los archivos de tus chats: los que subiste y los que te generó el asistente, como un Excel de resumen.')
+      await a.sub('Arriba a la derecha ves el espacio que usas de tu cupo. Se guardan hasta que los borres.', 3200)
+      await cierre(a, 'Para ordenarlos en carpetas y compartirlos, usa el módulo Mis archivos: el asistente lo cita con «/».')
     },
   },
   {

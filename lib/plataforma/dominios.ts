@@ -302,11 +302,12 @@ export const PESTANAS: Record<string, Pestana[]> = {
   // Asistente de IA (26-nov-2026)
   'MI-ASI': [
     { etiqueta: 'Chats', href: '/sistema/asistente', recurso: 'sistema:asistente' },
+    { etiqueta: 'Artefactos', href: '/sistema/asistente/artefactos', recurso: 'sistema:asistente' },
     { etiqueta: 'Proyectos', href: '/sistema/asistente/proyectos', recurso: 'sistema:asistente' },
     { etiqueta: 'Tareas', href: '/sistema/asistente/tareas', recurso: 'sistema:asistente' },
     { etiqueta: 'Atajos', href: '/sistema/asistente/atajos', recurso: 'sistema:asistente' },
     { etiqueta: 'Mi memoria', href: '/sistema/asistente/memoria', recurso: 'sistema:asistente' },
-    { etiqueta: 'Mis archivos', href: '/sistema/asistente/archivos', recurso: 'sistema:asistente' },
+    { etiqueta: 'Archivos de chats', href: '/sistema/asistente/archivos', recurso: 'sistema:asistente' },
     { etiqueta: 'Conexiones', href: '/sistema/asistente/conexiones', recurso: 'sistema:asistente' },
   ],
   'NUC-IA': [
