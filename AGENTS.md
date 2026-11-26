@@ -1226,8 +1226,8 @@ ficha» decía 48/205 en Mi día y 46/185 en Procesos › Resumen porque cada p�
 
 Pedido de Gabriel: un chat de IA como el de Claude web dentro de la plataforma, para que el personal administrativo
 no use licencias sueltas. **El plan entero (7 fases, 22 decisiones de Gabriel, costos) está en Claude Docs**:
-<https://claude.ai/artifact/LBR5GVKVkj2E8TTXGyba3U>. Fase 1 construida en la rama `asistente/fase-1`. Migraciones
-`20261126100000_asistente`, `…110000_asistente_metricas` y `…120000_asistente_artefactos`.
+<https://claude.ai/artifact/LBR5GVKVkj2E8TTXGyba3U>. Las siete fases, construidas en la rama `asistente/fase-1` (26-nov);
+migraciones `20261126100000_asistente` a `…190000_asistente_fase7`, una por fase más métricas, artefactos y habilidades.
 
 - **Quién lo usa**: la casilla `sistema:asistente` (ver) del rol, con excepciones por persona en
   `asistente.politica_usuario`. **Topes, espacio, modelos y esfuerzo máximo** por rol (`politica_rol`) o persona; lo vacío

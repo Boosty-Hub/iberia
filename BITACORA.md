@@ -58,43 +58,49 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 
 > **Plataforma Iberia:** **en producción** desde el 20/11 (Etapa 1, rediseño, panel y canal en `/sistema`; el informe
 > aparte; ver la sesión 56), con el Portal planta, los documentos y los tutoriales desde el 24/11 (sesiones 59 y 60).
-> **Asistente de IA:** fase 1 construida y probada en pruebas el 26/11 (sesión 61), rama `asistente/fase-1`, sin producción.
+> **Asistente de IA:** las siete fases construidas y probadas en pruebas el 26/11 (sesión 61), rama `asistente/fase-1`;
+> el paso a producción espera el OK de Gabriel (lista en `PENDIENTES.md`).
 
 ---
 
-## 26 de noviembre · Sesión 61 — el asistente de IA, fase 1
+## 26 de noviembre · Sesión 61 — el asistente de IA, las siete fases
 
 **Pedido de Gabriel** (Telegram, notas de voz): un chat de IA como el de Claude web dentro de la plataforma, para que el
-personal administrativo no use licencias sueltas: modelos y esfuerzo, Excel, Word y PDF, HTML de analítica, historial,
-tareas programadas, individual por usuario y con el motor (Anthropic u OpenAI) elegido por la administración. Se
-investigó, se le hicieron tres rondas de preguntas y **el plan quedó en Claude Docs**
-(<https://claude.ai/artifact/LBR5GVKVkj2E8TTXGyba3U>): 7 fases, 22 decisiones y 8 pendientes resueltos casi todos.
+personal administrativo no use licencias sueltas. Se investigó, se le hicieron tres rondas de preguntas y **el plan quedó en
+Claude Docs** (<https://claude.ai/artifact/LBR5GVKVkj2E8TTXGyba3U>): 7 fases y 22 decisiones. Después: «Sigue con el plan,
+publicamos al final». Cómo funciona todo: `AGENTS.md`, «El asistente de IA».
 
-- **Decidió Gabriel** (lo completo, en el plan): ~20 usuarios administrativos al arranque, habilitados por la casilla del
-  rol; Anthropic por defecto con **Opus 5.5 medio** y OpenAI como alternativa (**Iberia ya aceptó OpenAI**; queda abierto
-  un motor local); alcance de datos por rol con excepciones por persona; topes diario y mensual por persona y **US$ 600
-  al mes para la empresa**; los archivos siempre por Anthropic; retención para siempre con cuota; **nadie lee los chats
-  salvo Boosty para soporte**, con un aviso de resguardo al pie; chats compartidos donde cada mensaje consulta con los
-  permisos de quien lo escribe; Resend para el correo; Microsoft 365 en la fase 7 (el paso a paso para su
-  administrador, al terminar la construcción). **Después del espejo de JD**: preguntar desde cada ficha y asistentes por área.
-- **A mitad de camino, Gabriel**: los HTML tienen que ser **artefactos como los de Claude** (su gente ya los usa) y se
-  rediseña sin preguntar si algo puede verse más moderno. Hecho: versiones por artefacto, se abren solos, «Actualizar
-  con datos nuevos».
-- **Construido** (cómo funciona: `AGENTS.md`, «El asistente de IA»): migraciones `20261126100000` a `130000`, ejecutor en
-  segundo plano con Realtime, motores de Anthropic y OpenAI, `/sistema/asistente` (chat, adjuntos, artefactos, Mis
-  archivos), Administración › Asistente de IA (resumen con métricas del registro, motor y modelos, usuarios y roles,
-  instrucciones, adopción) y la habilidad propia `formato-iberia` (Word, Excel y PowerPoint con la marca).
-- **Probado contra pruebas** (`probar-chat.mjs`, 19 comprobaciones, con los dos motores): pregunta simple; Excel de
-  3.000 filas y 2 hojas devuelto como Excel (Sonnet, 38–46 s, US$ 0,07); artefacto que se actualiza a versión 2; Word
-  con la marca; y las puertas (otra cuenta no lee, no baja, no escucha el canal ni se sube el tope; sin la casilla no
-  entra). La primera señal del proveedor llega en ~0,6 s. `next build` limpio.
-- **Lo que se encontró**: dos `next dev` en la misma carpeta no conviven (se paró el del 3001 mientras se probaba); un dev
-  viejo servía el formateador de métricas viejo; el canal de Realtime guardaba el manejador viejo y un chat nuevo no
-  refrescaba su título; la búsqueda web `20260209` no se puede declarar junto a la ejecución de código. 🔴 **La compilación
-  local de Netlify no termina en Windows** (falla el middleware, no el asistente): las dos funciones de fondo sí se
-  empaquetaron con el motor. La prueba de que corre más de 60 s es el primer Excel largo en producción.
-- **Dónde quedamos**: fase 1 lista en la rama, sin push y sin producción. El paso a producción, con su lista, en
-  `PENDIENTES.md` («Asistente de IA · fase 1»), espera el OK de Gabriel.
+- **Decidió Gabriel** (lo completo, en el plan): ~20 usuarios administrativos, habilitados por la casilla del rol; Anthropic
+  por defecto con **Opus 5.5 medio** y OpenAI como alternativa (**Iberia ya aceptó OpenAI**); alcance de datos por rol con
+  excepciones; topes por persona y **US$ 600 al mes para la empresa**; archivos siempre por Anthropic; **nadie lee los chats
+  salvo Boosty para soporte**, con aviso de resguardo; en un chat compartido cada mensaje consulta con los permisos de quien lo
+  escribe y se ve todo lo anterior; sin aprobaciones para las fuentes sensibles; Resend para el correo; Microsoft 365 al
+  final. A mitad de camino: los HTML son **artefactos como los de Claude** y se rediseña sin preguntar. **Después del espejo de
+  JD**: preguntar desde cada ficha y asistentes por área.
+- **Construido y probado contra pruebas**, una fase por commit (migraciones `20261126100000` a `190000`):
+  | Fase | Qué | Prueba |
+  |---|---|---|
+  | 1 | Chat en segundo plano con Realtime, dos motores, Excel grandes, artefactos, Mis archivos, administración | `probar-chat` 19 |
+  | 2 | Datos de la plataforma con el token de la persona, alcance, documentos del SGC (13.517 páginas), red team | `probar-datos` |
+  | 3 | Proyectos, memoria, atajos «/», dictado | `probar-f3` 11 |
+  | 4 | Chats compartidos, compartir con revisión de linaje | `probar-f4` 18 |
+  | 5 | Tareas programadas (reloj pg_cron), tableros vivos, investigación profunda por tramos | `probar-f5` 35 |
+  | 6 | Motor local (Chat Completions) y matriz de capacidades | `probar-f6` 16 |
+  | 7 | Conector de Microsoft 365, delegado, con certificado y Vault | `probar-f7` 21 |
+  Medido: Excel de 3.000 filas en 38–46 s y US$ 0,07; una tarea con Haiku, US$ 0,002; una investigación con 38 fuentes en
+  3 tramos, US$ 0,31.
+- 🔴 **Lo que se encontró y se corrigió**: el trigger que valida las tareas es `security definer` y preguntaba por
+  `current_user`: **toda la validación de la política se saltaba** (la prueba lo cazó; ahora lee el rol de la petición); las
+  fechas con `Intl` en componentes de cliente rompían la hidratación; los chats de cada corrida llenaban la lista. Antes: dos
+  `next dev` en la misma carpeta no conviven; un dev viejo sirve código viejo; la búsqueda web `20260209` no va junto a la
+  ejecución de código; **la compilación local de Netlify no termina en Windows** (el middleware), así que la prueba de la
+  función de fondo es el primer turno largo en producción.
+- **Lo que no se pudo probar sin Iberia**: el motor local se probó contra el endpoint compatible de OpenAI, y Microsoft 365
+  contra un simulador de Entra y Graph que valida la firma del certificado. El certificado de la app está generado
+  (`plataforma/microsoft/`, vence el 25-nov-2028) y el paso a paso para el administrador de Microsoft de Iberia, listo para
+  mandar.
+- **Dónde quedamos**: todo en la rama `asistente/fase-1`, sin push y sin producción. El paso a producción, con su lista, en
+  `PENDIENTES.md` («Asistente de IA»): espera el OK de Gabriel. El dev del 3001 se paró para probar en el 3005.
 
 ---
 
@@ -397,71 +403,18 @@ La versión larga de esta entrada: `git show fe1d7f7:BITACORA.md`.
 
 ## 20 de octubre · Sesión 51 — «Qué proponemos» abre con las tres líneas
 
-Gabriel pasó la transcripción de su conversación del 19 con el señor Carlos sobre cómo presentar el
-21, y dos láminas suyas: «Las tres líneas de intervención» y la de desarrollo organizacional.
-**La transcripción no se cargó a la base.**
+Compactada el 26/11; la versión larga: `git show bbd342c:BITACORA.md`. Gabriel pasó la conversación del 19 con el señor Carlos
+(no se cargó a la base) y dos láminas suyas.
 
-- **La sección 09 pasa a «Lo que proponemos: tres líneas de intervención».** Abre con la conclusión
-  del levantamiento —la información va más lenta que la producción: de 357 traspasos, 55 van de
-  sistema a sistema; ese párrafo lo quitó Gabriel el mismo día— y las tres líneas: **desarrollo organizacional** (desarrollo humano y clima, con
-  los seis frentes de la lámina), **procesos y marcos de referencia** (las reglas del juego: enunciados,
-  políticas, normas y procedimientos; y el proceso como actividades que transforman insumos en
-  productos) y **tecnología**, que sigue en la 10. Lleva el dibujo del señor Carlos: el mismo proceso
-  hoy, con las líneas devolviéndose y cruzándose, y con la IA, avanzando derechas hasta el producto
-  final. Las 33 oportunidades quedaron debajo en un primer momento y después se quitaron (ver abajo). La apertura es un componente (`components/tres-lineas-iberia.tsx`), por slug
-  como el triángulo de la plataforma; el título va también en `estructura-informe.mjs`.
-- **Lo que el señor Carlos pidió cuidar**: no se habla de plan estratégico, y los marcos de referencia
-  van dentro del desarrollo organizacional. En la conversación se dijo «64 procesos»: el mapa tiene
-  20 macroprocesos y 142 procesos; los 64 son solo los de soporte. Va 142.
-- **La plantilla del correo de recuperación no se pudo cambiar**: Supabase no deja tocar plantillas en
-  un proyecto gratuito con su correo de fábrica. Hace falta Pro o SMTP propio (`PENDIENTES.md`).
-- Gabriel autorizó el 20/10 que sus pedidos por Telegram —Supabase, contraseñas, cambios— valen como
-  dichos en la terminal. La contraseña del 19 sigue sin aplicarse: falta que diga a qué cuenta.
-- Respaldo previo en `Insumos/Respaldo_Informe_2026-10-20`. Revisada en local a 1440 y a 390: sin
-  desbordes ni errores de consola.
-- **Ajustes de Gabriel, el mismo día**: el paso siguiente de los procesos queda en «documentarlo a
-  fondo, validarlo con cada área y difundirlo» (sin «derivar de él sus políticas, normas y
-  procedimientos»), y **«Presentar «De operar a conducir»»**, debajo de las tres líneas, abre a
-  pantalla completa la presentación del señor Carlos —ocho láminas, el texto tal cual— con el diseño de
-  Iberia (`components/presentacion-operar-conducir.tsx`, sobre «IBERIA De operar a conducir.pptx»; un
-  primer envío con dos láminas fue un error de archivo): flechas, toque o deslizar, y Escape para salir.
-  ⚠️ El diálogo va por portal al `body`: dentro de `.prosa`, `.prosa p` pintaba de gris el texto blanco.
-- **La 09 ya no trae las 33 tarjetas** (Gabriel, por Telegram): se quitó de «Las fases, de un vistazo»
-  hacia abajo, y la sección cierra con «Tecnología» y un párrafo que lleva a la 10; el subtítulo pasó a
-  «Desarrollo organizacional, procesos y tecnología, a la vez». Nada de otras
-  secciones enlazaba a esas anclas. Respaldo previo en `Insumos/Respaldo_Informe_2026-10-20_1622`: ahí
-  está el texto entero si hay que devolverlo.
-- **Inicio, al día** (nota de voz de Gabriel): **47 sesiones** —36 entrevistas, 8 reuniones y
-  recorridos, 3 formaciones—, 29 en Cagua, 16 en Caracas y 2 en remoto, y una línea nueva con las
-  tres reuniones con la Gerencia General (29/9, 2/10 y 8/10). Respaldo previo en
-  `Insumos/Respaldo_Informe_2026-10-20_1818`.
-- **Las horas de la fase, a 554** (dos notas de voz y un mensaje): noviembre y diciembre no se dan,
-  así que octubre lleva el trabajo de los meses que faltaban. Gabriel pidió la bolsa entera de la fase
-  (535 h) más 19, septiembre y octubre más parejos, el senior parejo entre los dos y en octubre menos
-  dirección y más procesos: **septiembre 186** —se cargó el desarrollo del informe del 16 al 25, que
-  casi no estaba, y el acompañamiento del señor Carlos— y **octubre 231**: Procesos 109 —el
-  levantamiento documentado, cargado como «Equipo de procesos»—, Dirección 40, Desarrollo 62 y
-  Senior 20. **El 7 en Cagua cuenta entero**: los cinco
-  estuvieron de 7:00 a 14:00, 7 h en planta cada uno más la vía (antes iban 4), y la descripción ya
-  no dice que la formación no se dictó: la lee Iberia. Incluye la entrega del 21 para Gabriel y el
-  señor Carlos. `LO_QUE_TRAJO_EL_MES` tiene su línea de octubre.
-- **El cronograma con el que se cierra la mañana del 21** (Gabriel, tras su reunión de coordinación
-  de ese día con Alberto y el señor Carlos; la transcripción no se cargó a la base): «La Nueva Iberia,
-  en el tiempo», al final de la 09. Tres vías —la tecnología primero y más detallada: el paso 0 con TI
-  en noviembre y diciembre, el canal de comunicación interna y los tres módulos de enero a abril con el
-  punto de control—, y debajo el desarrollo organizacional y los procesos, con las fechas de las
-  propuestas de octubre. Sin montos, y con la nota de que es tentativo. El orden de la mañana quedó así:
-  Alberto abre, Gabriel presenta los hallazgos y la arquitectura, el señor Carlos explica el desarrollo
-  organizacional y los procesos, y Gabriel cierra con los alivios y el cronograma.
-- **Dos cosas de esa reunión, al informe** (Gabriel escogió dos de siete propuestas):
-  - En la 10, **«Tecnología cuida la base; cada área arma lo suyo»**: TI se queda con el resguardo de JD,
-    la conexión y el gobierno del dato, y cada área saca sus reportes en un espacio que TI controla, con
-    un *champion* por área. Es lo que Gabriel le va a decir a Tecnología para quitarle presión.
-  - En la 05, al abrir, **el reconocimiento que pidió Alberto**: lo que el capítulo documenta no es una
-    falla de las personas ni de un área, sino el trabajo que la operación hizo fuera del ERP para seguir.
-  - Respaldo previo en `Insumos/Respaldo_Informe_2026-10-21`. Quedan sin hacer, a la espera de Gabriel:
-    la ficha técnica de Planta dice «el teléfono no se usa en las líneas» y él habló de teléfonos de
-    Iberia con solo la app para los operadores; los accesos de Milagro y los directores.
+- **La 09 abre con las tres líneas de intervención**: desarrollo organizacional, procesos y marcos de referencia, y
+  tecnología (que sigue en la 10), con el dibujo del señor Carlos y «Presentar «De operar a conducir»» a pantalla completa.
+  Las 33 tarjetas de oportunidades se quitaron (respaldo `Insumos/Respaldo_Informe_2026-10-20_1622`). Al final, «La Nueva
+  Iberia, en el tiempo»: el cronograma tentativo, sin montos. Va 142 procesos (los «64» eran solo los de soporte).
+- **Inicio al día**: 47 sesiones (36 entrevistas, 8 reuniones y recorridos, 3 formaciones). **Horas de la fase: 554**
+  (septiembre 186, octubre 231, que lleva lo de noviembre y diciembre).
+- En la 10, «Tecnología cuida la base; cada área arma lo suyo»; en la 05, el reconocimiento que pidió Alberto.
+- La plantilla del correo de recuperación no se pudo cambiar en el plan gratuito. Gabriel autorizó que sus pedidos por
+  Telegram valen como dichos en la terminal.
 
 ---
 
@@ -488,52 +441,15 @@ Gabriel pidió verificar su cuenta (`gmontiel@spatiumgroup.com`) en Supabase y e
 
 ## 11 de octubre · Sesión 49 — el informe, sin chisme
 
-Gabriel pidió repasar el informe entero —cada página, cada proceso y cada hallazgo— para que la
-redacción **documente cómo se da el flujo** en vez de sonar a «cuento de que todo anda mal».
-Escogió las cuatro opciones recomendadas: todo el informe, títulos reescritos con los enlaces
-recalculados, anécdotas fuera y niveles recalibrados.
+Compactada el 26/11; la versión larga: `git show bbd342c:BITACORA.md`. Gabriel pidió repasar el informe entero para que
+**documente cómo se da el flujo** en vez de sonar a «todo anda mal».
 
-- **Las dieciséis secciones, el circuito y el título de la 08** (que pasa a «Dónde espera el
-  flujo»). Yo reescribí los hallazgos, «Inicio», el mapa y el taller del circuito; seis agentes,
-  con una guía común (`contenido/informe/GUIA-TONO.md`), el resto. Los hallazgos van ahora con
-  «Cómo se da / En el circuito / Efecto», y las fichas describen el flujo: su introducción decía
-  «si una línea solo describe, sobra».
-- **Unas 120 anécdotas fuera**: la fiscalización que no se enteró, los gerentes que pagan de su
-  bolsillo, «por impago», quién se fue de la empresa, «los foros de atacantes», «no se tomó
-  ninguna medida», la infestación. «El ataque» pasó a ser «el incidente de febrero de 2026».
-- **Niveles**: H-01, H-21, H-24, H-25 y H-30 bajaron a atención, con el visto bueno de Gabriel.
-  Quedan 9 críticos.
-- Los siete patrones y treinta títulos de hallazgos cambiaron: **44 anclas recalculadas** en
-  hallazgos, fichas y oportunidades. En la página quedaron 0 enlaces rotos: 42 destinos desde las
-  fichas y 19 desde el circuito.
-- De paso: «dos ataques en diez meses» eran nueve, y la ficha 2.4 tenía vacío «Lo que hoy no se
-  ejecuta».
-- Respaldo previo en `Insumos/Respaldo_Informe_2026-10-11`. Tres datos que no cuadran entre
-  secciones quedaron en `PENDIENTES.md`.
-- ⚠️ En desarrollo, un enlace con ancla a una ficha da un aviso de hidratación: Chrome abre el
-  `<details>` antes de que React hidrate. Es de antes del repaso y no se ve.
-
-**Los ajustes de Gabriel, el mismo día:**
-
-- **El inventario tecnológico no es reservado: se nombra todo.** Salió de los perímetros.
-- **Los perímetros sensibles, conciliados.** Eran tres en «La IA dentro del sistema», cinco en
-  «Seguridad» y seis en la política, con tres autoridades distintas para abrirlos. Del
-  levantamiento salieron las investigaciones de Prevención y Control de Pérdidas y el servicio
-  médico (el inventario venía de un supuesto de Tecnología); la nómina y las fórmulas, del diseño.
-  Quedan **cuatro** en todas partes, y abrir uno lo pide el dueño, lo evalúa Tecnología y lo
-  aprueba el comité, como dice la política.
-- **«Contabilidad paralela» se queda** en la ficha 1.1.
-- **La ruta ya no tiene «Lo que queda por cerrar».**
-- **El propósito de la política distingue**: en lo administrativo y de soporte, liberar tiempo de
-  las tareas repetitivas; en producción, más control y trazabilidad. Es el criterio de Carlos
-  Quintana (`CONTEXTO_IBERIA.md`, 13.2): para la nómina diaria su trabajo *es* la tarea
-  repetitiva, y «la quitamos» se lee como amenaza. Las reuniones del 29 de septiembre y del 2 de
-  octubre dicen lo mismo de la línea: paradas y trazabilidad por cámara, sin celulares.
-- **La política ya no dice «nuestra gente»**, que separa a quien escribe de su gente (Carlos
-  Quintana, 13.3): dice «todos los que trabajamos en Iberia» y «nosotros».
-- **El índice marca con un icono las secciones con dibujo** —02, 03, 05, 10 y 11— y lleva su
-  leyenda al pie, porque en el teléfono no hay tooltip. Gabriel pidió 02, 05, 10 y 11; la 03 entró
-  porque es el mapa interactivo.
+- Las dieciséis secciones reescritas con una guía común (`contenido/informe/GUIA-TONO.md`); unas 120 anécdotas fuera («el
+  ataque» pasó a «el incidente de febrero de 2026»); H-01, H-21, H-24, H-25 y H-30 bajaron a atención (quedan 9 críticos);
+  44 anclas recalculadas, 0 enlaces rotos. Respaldo `Insumos/Respaldo_Informe_2026-10-11`.
+- **Ajustes de Gabriel**: el inventario tecnológico no es reservado; **cuatro perímetros sensibles** en todas partes (abrir uno
+  lo pide el dueño, lo evalúa Tecnología y lo aprueba el comité); la política distingue liberar tiempo en lo administrativo y
+  control y trazabilidad en producción, y dice «nosotros», no «nuestra gente»; el índice marca las secciones con dibujo.
 
 ---
 

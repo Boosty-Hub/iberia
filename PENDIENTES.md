@@ -734,9 +734,9 @@ Rama `plataforma/etapa-1`, Supabase de pruebas `wsqhsjbwkjlqrdxnyadq`. El plan e
 
 ---
 
-## Asistente de IA · fase 1 (desde el 26 de noviembre)
+## Asistente de IA · fases 1 a 7 (desde el 26 de noviembre)
 
-Rama `asistente/fase-1`, probada contra pruebas. El plan y las decisiones, en Claude Docs
+Rama `asistente/fase-1`, las siete fases probadas contra pruebas. El plan y las decisiones, en Claude Docs
 (<https://claude.ai/artifact/LBR5GVKVkj2E8TTXGyba3U>); cómo funciona, en `AGENTS.md`, «El asistente de IA».
 
 | Qué | De quién | Nota |
