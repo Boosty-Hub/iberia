@@ -12,3 +12,15 @@ export function abrirPreguntaIa(pregunta = '', contexto = '') {
   if (typeof window === 'undefined') return
   window.dispatchEvent(new CustomEvent(EVENTO_PREGUNTAR_IA, { detail: { pregunta, contexto } }))
 }
+
+/**
+ * El asistente en una ventana flotante (26-nov-2026, pedido de Gabriel): queda abierta mientras se navega por la
+ * plataforma, y cada mensaje le dice al asistente en qué pantalla está la persona. La abre el botón «Abrir en
+ * ventana» del asistente y el del panel lateral.
+ */
+export const EVENTO_VENTANA_IA = 'asistente-ventana'
+
+export function abrirVentanaAsistente() {
+  if (typeof window === 'undefined') return
+  window.dispatchEvent(new CustomEvent(EVENTO_VENTANA_IA))
+}

@@ -1,103 +1,219 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { EVENTO_PREGUNTAR_IA } from '@/components/sistema/ia/abrir'
+import { usePathname } from 'next/navigation'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { EVENTO_PREGUNTAR_IA, EVENTO_VENTANA_IA } from '@/components/sistema/ia/abrir'
 import { ChatAsistente } from './chat'
 import { datosPanelAsistente, type DatosPanel } from './acciones-panel'
+import { cn } from '@/lib/utils'
+
+/** La pantalla en que está la persona, en palabras: el título de la página, su ruta y la ficha o fecha abiertas. */
+function pantallaActual(): string {
+  if (typeof document === 'undefined') return ''
+  const titulo = document.title.replace(/ · (Plataforma|Programa de IA)[^·]*$/, '').trim()
+  const h1 = document.querySelector('main h1')?.textContent?.trim()
+  const sp = new URLSearchParams(location.search)
+  const extra = [sp.get('ficha') ? `ficha abierta: ${sp.get('ficha')}` : '', sp.get('al') ? `datos al ${sp.get('al')}` : '', sp.get('esc') ? 'en un escenario' : ''].filter(Boolean)
+  return `${h1 && h1 !== titulo ? `${h1} · ` : ''}${titulo} (${location.pathname}${extra.length ? `; ${extra.join('; ')}` : ''})`
+}
 
 /**
- * «Preguntar a la IA» desde cualquier pantalla (26-nov-2026): el asistente al
- * costado, sin salir de la página, con el contexto de dónde se pregunta. Lo
- * abren la cabecera de cada módulo, la pestaña IA de una ficha y Ctrl K (evento
- * `preguntar-ia`). Reemplaza el panel viejo de NUC-PRO-IA-01: el asistente ya
- * responde sobre procesos, estructura y documentos con alcance y citas.
+ * El asistente fuera de su pantalla (26-nov-2026), montado en el layout de `/sistema`:
+ * - **Panel lateral** («Preguntar a la IA» desde la cabecera de un módulo, la pestaña IA de una ficha o Ctrl K, evento
+ *   `preguntar-ia`): se abre al costado con el contexto de dónde se pregunta, que va con el primer mensaje.
+ * - **Ventana flotante** («Abrir en ventana», evento `asistente-ventana`): queda abierta mientras se navega (el layout
+ *   no se desmonta), se mueve y se minimiza, y CADA mensaje le dice al asistente en qué pantalla está la persona.
+ * Pasar de panel a ventana no pierde la conversación: es el mismo chat con otro marco.
  */
 export function PanelAsistente() {
   const [abierto, setAbierto] = useState(false)
+  const [modo, setModo] = useState<'panel' | 'ventana'>('panel')
+  const [minimizado, setMinimizado] = useState(false)
   const [datos, setDatos] = useState<DatosPanel | null>(null)
   const [pedido, setPedido] = useState<{ pregunta: string; contexto: string; n: number }>({ pregunta: '', contexto: '', n: 0 })
   const [chatId, setChatId] = useState<string | null>(null)
+  const [pos, setPos] = useState({ derecha: 20, abajo: 20 })
+  const arrastre = useRef<{ x: number; y: number; derecha: number; abajo: number } | null>(null)
+  const ruta = usePathname()
+  const [aqui, setAqui] = useState('')
+  const abiertoRef = useRef(false)
+  useEffect(() => {
+    abiertoRef.current = abierto
+  }, [abierto])
+
+  // La pantalla actual, para el rótulo de la ventana (el título de la página cambia un instante después de navegar).
+  useEffect(() => {
+    if (!abierto || modo !== 'ventana') return
+    const t = setTimeout(() => setAqui(pantallaActual()), 400)
+    return () => clearTimeout(t)
+  }, [ruta, abierto, modo])
 
   useEffect(() => {
-    const abrir = (e: Event) => {
+    const cargar = () => void datosPanelAsistente().then(setDatos)
+    const preguntar = (e: Event) => {
       const d = (e as CustomEvent<{ pregunta?: string; contexto?: string }>).detail ?? {}
-      const contexto = d.contexto?.trim() || (typeof document !== 'undefined' ? `${document.title.replace(/ · .*$/, '')} (${location.pathname})` : '')
+      const contexto = d.contexto?.trim() || pantallaActual()
       setPedido((p) => ({ pregunta: d.pregunta?.trim() ?? '', contexto, n: p.n + 1 }))
       setChatId(null)
+      setMinimizado(false)
       setAbierto(true)
-      void datosPanelAsistente().then(setDatos)
+      cargar()
     }
-    window.addEventListener(EVENTO_PREGUNTAR_IA, abrir)
-    return () => window.removeEventListener(EVENTO_PREGUNTAR_IA, abrir)
+    const ventana = () => {
+      setModo('ventana')
+      setMinimizado(false)
+      // Si ya había un chat abierto en el panel, sigue el mismo; si no, uno nuevo.
+      if (!abiertoRef.current) {
+        setPedido((p) => ({ pregunta: '', contexto: '', n: p.n + 1 }))
+        setChatId(null)
+        cargar()
+      }
+      setAbierto(true)
+    }
+    window.addEventListener(EVENTO_PREGUNTAR_IA, preguntar)
+    window.addEventListener(EVENTO_VENTANA_IA, ventana)
+    return () => {
+      window.removeEventListener(EVENTO_PREGUNTAR_IA, preguntar)
+      window.removeEventListener(EVENTO_VENTANA_IA, ventana)
+    }
   }, [])
 
   useEffect(() => {
-    if (!abierto) return
+    if (!abierto || modo !== 'panel') return
     const tecla = (e: KeyboardEvent) => e.key === 'Escape' && !document.querySelector('[aria-label="Cerrar el artefacto"]') && setAbierto(false)
     window.addEventListener('keydown', tecla)
     return () => window.removeEventListener('keydown', tecla)
-  }, [abierto])
+  }, [abierto, modo])
+
+  const contextoVivo = useCallback(() => pantallaActual(), [])
+  const cerrar = () => {
+    setAbierto(false)
+    setModo('panel')
+  }
 
   if (!abierto) return null
+  const ventana = modo === 'ventana'
   return (
-    <div className="fixed inset-0 z-[60] flex justify-end" data-panel-asistente>
-      <button type="button" aria-label="Cerrar el asistente" className="absolute inset-0 bg-marca-900/20" onClick={() => setAbierto(false)} />
-      <aside role="dialog" aria-label="Asistente de IA" className="relative flex h-full w-full max-w-[600px] flex-col bg-[#f6f7f9] shadow-2xl">
-        <header className="flex items-center gap-2 border-b border-[var(--borde)] bg-white px-3 py-2">
-          <span className="text-[13px] font-semibold text-marca-900">✦ Asistente de IA</span>
-          {pedido.contexto && (
-            <span className="min-w-0 flex-1 truncate rounded-full bg-[#f3f1fb] px-2.5 py-0.5 text-[11.5px] text-[#4f4577]" title={pedido.contexto}>
-              Desde: {pedido.contexto}
-            </span>
+    <>
+      {ventana && minimizado && (
+        <button
+          type="button"
+          onClick={() => setMinimizado(false)}
+          className="fixed right-5 bottom-5 z-[60] inline-flex h-11 items-center gap-2 rounded-full bg-[#2b2a28] px-4 text-[13px] font-semibold text-white shadow-xl hover:bg-marca-700"
+          data-ventana-minimizada
+        >
+          ✦ Asistente de IA
+        </button>
+      )}
+      <div className={cn('fixed z-[60]', ventana ? 'pointer-events-none inset-0' : 'inset-0 flex justify-end', ventana && minimizado && 'hidden')} data-panel-asistente data-modo={modo}>
+        {!ventana ? <button type="button" aria-label="Cerrar el asistente" className="absolute inset-0 bg-marca-900/20" onClick={cerrar} /> : null}
+        <aside
+          role="dialog"
+          aria-label="Asistente de IA"
+          className={cn(
+            'flex flex-col bg-[#f6f7f9]',
+            ventana
+              ? 'pointer-events-auto absolute inset-0 overflow-hidden border border-[var(--borde)] shadow-2xl sm:inset-auto sm:h-[min(640px,calc(100dvh-90px))] sm:w-[min(440px,calc(100vw-40px))] sm:rounded-2xl'
+              : 'relative h-full w-full max-w-[600px] shadow-2xl'
           )}
-          <span className="flex-1" />
-          <button type="button" className="btn-neutro h-8 px-2.5 text-[12px]" onClick={() => { setChatId(null); setPedido((p) => ({ ...p, pregunta: '', n: p.n + 1 })) }}>
-            Nuevo
-          </button>
-          <Link href={chatId ? `/sistema/asistente/c/${chatId}` : '/sistema/asistente'} className="btn-neutro h-8 px-2.5 text-[12px]" onClick={() => setAbierto(false)}>
-            Pantalla completa
-          </Link>
-          <button type="button" className="btn-neutro h-8 px-2.5 text-[12px]" onClick={() => setAbierto(false)} aria-label="Cerrar el asistente">
-            ✕
-          </button>
-        </header>
-        <div className="min-h-0 flex-1 p-2.5">
-          {!datos ? (
-            <p className="p-4 text-[13px] text-marca-500">Abriendo el asistente…</p>
-          ) : !datos.ok ? (
-            <p className="m-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-[13px] text-amber-900">{datos.motivo}</p>
-          ) : (
-            <ChatAsistente
-              key={pedido.n}
-              compacto
-              contexto={pedido.contexto}
-              preguntaInicial={pedido.pregunta}
-              alCrearChat={setChatId}
-              yo={datos.yo}
-              politica={datos.politica}
-              modelos={datos.modelos}
-              chats={[]}
-              chatId={null}
-              tituloInicial={null}
-              mensajesIniciales={[]}
-              archivosIniciales={[]}
-              turnoInicial={null}
-              modeloDelChat={null}
-              esfuerzoDelChat={null}
-              proyecto={null}
-              compartido={false}
-              esDueno
-              participantes={[]}
-              fuentesDelChat={[]}
-              atajos={datos.atajos}
-              tareasProgramadas={[]}
-              deTarea={null}
-              capacidades={datos.capacidades}
-            />
-          )}
-        </div>
-      </aside>
-    </div>
+          style={ventana ? { right: pos.derecha, bottom: pos.abajo } : undefined}
+        >
+          <header
+            className={cn('flex items-center gap-1.5 border-b border-[var(--borde)] bg-white px-3 py-2', ventana && 'cursor-move select-none sm:touch-none')}
+            onPointerDown={(e) => {
+              if (!ventana || (e.target as HTMLElement).closest('button, a')) return
+              arrastre.current = { x: e.clientX, y: e.clientY, ...pos }
+              ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+            }}
+            onPointerMove={(e) => {
+              const a = arrastre.current
+              if (!a) return
+              setPos({
+                derecha: Math.min(Math.max(0, a.derecha - (e.clientX - a.x)), window.innerWidth - 200),
+                abajo: Math.min(Math.max(0, a.abajo - (e.clientY - a.y)), window.innerHeight - 120),
+              })
+            }}
+            onPointerUp={() => (arrastre.current = null)}
+          >
+            <span className="shrink-0 text-[13px] font-semibold text-marca-900">✦ Asistente</span>
+            {(ventana ? aqui : pedido.contexto) && (
+              <span className="min-w-0 flex-1 truncate rounded-full bg-[#f3f1fb] px-2.5 py-0.5 text-[11.5px] text-[#4f4577]" title={ventana ? aqui : pedido.contexto} data-desde>
+                {ventana ? 'Viendo' : 'Desde'}: {ventana ? aqui : pedido.contexto}
+              </span>
+            )}
+            <span className="flex-1" />
+            {!ventana && (
+              <button type="button" className="btn-neutro h-8 px-2.5 text-[12px]" onClick={() => setModo('ventana')} title="Seguir navegando con el chat abierto">
+                Abrir en ventana
+              </button>
+            )}
+            <button
+              type="button"
+              className="btn-neutro h-8 px-2.5 text-[12px]"
+              onClick={() => {
+                setChatId(null)
+                setPedido((p) => ({ ...p, pregunta: '', n: p.n + 1 }))
+              }}
+            >
+              Nuevo
+            </button>
+            <Link href={chatId ? `/sistema/asistente/c/${chatId}` : '/sistema/asistente'} className="btn-neutro hidden h-8 px-2.5 text-[12px] sm:inline-flex" onClick={cerrar}>
+              {ventana ? (
+                <>
+                  ⤢<span className="sr-only"> Pantalla completa</span>
+                </>
+              ) : (
+                'Pantalla completa'
+              )}
+            </Link>
+            {ventana && (
+              <button type="button" className="btn-neutro h-8 w-8 px-0 text-[13px]" onClick={() => setMinimizado(true)} aria-label="Minimizar el asistente">
+                –
+              </button>
+            )}
+            <button type="button" className="btn-neutro h-8 w-8 px-0 text-[12px]" onClick={cerrar} aria-label="Cerrar el asistente">
+              ✕
+            </button>
+          </header>
+          <div className="min-h-0 flex-1 p-2.5">
+            {!datos ? (
+              <p className="p-4 text-[13px] text-marca-500">Abriendo el asistente…</p>
+            ) : !datos.ok ? (
+              <p className="m-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-[13px] text-amber-900">{datos.motivo}</p>
+            ) : (
+              <ChatAsistente
+                key={pedido.n}
+                compacto
+                contexto={pedido.contexto}
+                contextoVivo={ventana ? contextoVivo : undefined}
+                preguntaInicial={pedido.pregunta}
+                alCrearChat={setChatId}
+                yo={datos.yo}
+                politica={datos.politica}
+                modelos={datos.modelos}
+                chats={[]}
+                chatId={null}
+                tituloInicial={null}
+                mensajesIniciales={[]}
+                archivosIniciales={[]}
+                turnoInicial={null}
+                modeloDelChat={null}
+                esfuerzoDelChat={null}
+                proyecto={null}
+                compartido={false}
+                esDueno
+                participantes={[]}
+                fuentesDelChat={[]}
+                atajos={datos.atajos}
+                tareasProgramadas={[]}
+                deTarea={null}
+                capacidades={datos.capacidades}
+              />
+            )}
+          </div>
+        </aside>
+      </div>
+    </>
   )
 }

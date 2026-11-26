@@ -97,6 +97,8 @@ export function ChatAsistente(props: {
   compacto?: boolean
   /** Desde dónde se pregunta (módulo, ficha): viaja con el primer mensaje. */
   contexto?: string | null
+  /** La ventana flotante: la pantalla en que está la persona AL ENVIAR; viaja con cada mensaje. */
+  contextoVivo?: () => string | null
   /** Una pregunta que llega escrita (Ctrl K): se manda sola. */
   preguntaInicial?: string | null
   alCrearChat?: (id: string) => void
@@ -405,7 +407,8 @@ export function ChatAsistente(props: {
       await suscribir(id)
       const temporal = `tmp-${crypto.randomUUID()}`
       // El contexto de la página (panel lateral) va con el primer mensaje del chat.
-      const contexto = props.contexto && !mensajes.some((m) => m.rol === 'usuario') ? props.contexto : null
+      // En la ventana flotante, con cada mensaje: la persona navega y pregunta por lo que tiene delante.
+      const contexto = props.contextoVivo ? props.contextoVivo() : props.contexto && !mensajes.some((m) => m.rol === 'usuario') ? props.contexto : null
       setMensajes((m) => [...m, { id: temporal, rol: 'usuario', texto: t, bloques: contexto ? [{ tipo: 'nota', texto: `Desde: ${contexto}` }] : [], adjuntos: listos.map((a) => a.archivoId!), turno_id: null, autor: props.yo.id, calificacion: null, creado_en: new Date().toISOString() }])
       setTexto('')
       setAdjuntos((a) => a.filter((x) => x.estado === 'error'))

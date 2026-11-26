@@ -9,6 +9,8 @@ import { estadoIa } from '@/lib/ia/servidor'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/server'
 import { BotonTutorial, type TutorialMenu } from '@/components/sistema/ui/boton-tutorial'
+import { GuiaAsistente } from '@/components/sistema/asistente/guia'
+import { BotonVentanaAsistente } from '@/components/sistema/asistente/boton-ventana'
 
 /**
  * La cabecera de un módulo (Anexo E §3, «zona de trabajo»): migas, título,
@@ -101,8 +103,11 @@ export async function CabeceraModulo({
             {estado.etiqueta}
           </span>
         )}
-        {(acciones || preguntar || tutoriales.length > 0) && (
+        {(acciones || preguntar || tutoriales.length > 0 || codigo === 'MI-ASI') && (
           <div className="ml-auto flex flex-wrap items-center gap-1.5">
+            {/* En el asistente: la guía con el alcance real de quien mira y el chat en ventana flotante (26-nov-2026). */}
+            {codigo === 'MI-ASI' && <GuiaAsistente sesion={sesion} />}
+            {codigo === 'MI-ASI' && <BotonVentanaAsistente />}
             {tutoriales.length > 0 && <BotonTutorial tutoriales={tutoriales} pestanas={lista} />}
             {preguntar && <BotonPreguntarIa contexto={[m?.nombre ?? titulo, ...(migas ?? []).map((x) => x.etiqueta)].filter(Boolean).join(' › ')} />}
             {acciones}
