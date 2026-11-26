@@ -59,7 +59,35 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 > **Plataforma Iberia:** **en producción** desde el 20/11 (Etapa 1, rediseño, panel y canal en `/sistema`; el informe
 > aparte; ver la sesión 56), con el Portal planta, los documentos y los tutoriales desde el 24/11 (sesiones 59 y 60).
 > **Asistente de IA:** las siete fases, las ventanas de 5 horas y «Preguntar a la IA» **en producción desde el 26/11**
-> (sesión 61). Falta lo de Iberia: Microsoft 365, el remitente de Resend y la plantilla de WhatsApp (`PENDIENTES.md`).
+> (sesión 61); Mis archivos, la Guía, la ventana flotante, el widget de soporte y 18 tutoriales con voz, también (sesión 62).
+> Falta lo de Iberia: Microsoft 365, el remitente de Resend y la plantilla de WhatsApp (`PENDIENTES.md`).
+
+---
+
+## 26 de noviembre · Sesión 62 — Mis archivos, Guía, ventana flotante, soporte y tutoriales con voz
+
+**Pedidos de Gabriel** (terminal y Telegram, en la tarde): el piloto del ejecutor en Supabase Edge Functions; un módulo de
+archivos tipo SharePoint (personal y compartidas, «/» en el chat) con **todo el Storage en sus carpetas, sin excepción**;
+un botón «Guía» con el alcance de cada quien; tutoriales con voz del asistente, su administración y Roles; el chat en
+ventana mientras se navega; y el widget de soporte de Boosty. «Continúa el plan, publicamos al final». Cómo funciona cada
+cosa: `AGENTS.md` («Mis archivos», «El asistente de IA», «Los tutoriales», el armazón).
+
+- **Decidió Gabriel**: voz de Sebastián (Paola queda para Ajito); el widget solo en la plataforma y cargado desde el portal
+  (riesgo aceptado: corre con la sesión); **quedarse en Netlify** con Supabase de respaldo, por recomendación (15 min por
+  invocación contra 400 s, un solo despliegue, y las consultas de datos viven en Netlify igual).
+- **Decidido aquí, avisado a Gabriel**: lo privado del Storage (respuestas de los trabajadores, documentos de perímetro
+  sensible, expediente confidencial) queda marcado y compartirlo pide «Compartir igual»; **el bucket del asistente no
+  entra en sus carpetas** (los chats de otros no los lee nadie salvo soporte con registro, su decisión 9).
+- 🔴 **Encontrado y corregido**: en Supabase, escribir el entorno al arrancar tumba el worker sin registro (`WORKER_ERROR`) y
+  falta `Buffer`; la API de despliegue no sube lo que está fuera de la carpeta de la función (el motor se empaqueta); con
+  el widget hay dos `input[type=file]` en la página (las suites excluyen el suyo) y su clave solo vale en el dominio de
+  producción (en local, 403); `importar-storage` paginaba sin orden y en la segunda corrida veía 881 archivos «nuevos» (el
+  índice único evitó duplicados; ahora pagina con orden).
+- **Probado en pruebas**: piloto (chat, Excel de 56 s, artefactos, Word, puertas, investigación en 2 tramos), Mis
+  archivos 22/22, Guía y ventana 10/10, 36 tutoriales.
+- **En producción** con su OK: respaldo `produccion-2026-11-26T19-21-06`, la migración `20261126250000_archivos`, `main` en
+  `fdcf66e`, **3.881 archivos en 381 carpetas de Gabriel** (138 marcados privados), los 18 tutoriales. Recorrido con sus
+  cuentas (`recorrido-produccion-2.mjs`) 13/13, con un ticket de prueba real (PEN-15407), y los 36 tutoriales reproducen.
 
 ---
 

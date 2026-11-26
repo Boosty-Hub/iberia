@@ -70,8 +70,12 @@ async function objetos(bucket, prefijo = '') {
 const limpio = (n) => String(n).replace(/[\\/]/g, '-').replace(/\s+/g, ' ').trim().slice(0, 200) || 'Sin nombre'
 const cache = new Map()
 {
-  const { data } = await A.from('carpeta').select('id, padre_id, nombre').eq('dueno', dueno).limit(20000)
-  for (const c of data ?? []) cache.set(`${c.padre_id ?? ''}|${c.nombre.toLowerCase()}`, c.id)
+  // Supabase corta en 1.000 filas: se pagina, con orden (sin orden, las páginas se pisan y saltan filas).
+  for (let desde = 0; ; desde += 1000) {
+    const { data } = await A.from('carpeta').select('id, padre_id, nombre').eq('dueno', dueno).order('id').range(desde, desde + 999)
+    for (const c of data ?? []) cache.set(`${c.padre_id ?? ''}|${c.nombre.toLowerCase()}`, c.id)
+    if ((data ?? []).length < 1000) break
+  }
 }
 let carpetasNuevas = 0
 async function carpeta(partes) {
@@ -96,7 +100,7 @@ async function carpeta(partes) {
 // ── Lo que ya está importado ───────────────────────────────────────────────────
 const ya = new Set()
 for (let desde = 0; ; desde += 1000) {
-  const { data } = await A.from('archivo').select('bucket, ruta').eq('dueno', dueno).eq('origen', 'referencia').range(desde, desde + 999)
+  const { data } = await A.from('archivo').select('bucket, ruta').eq('dueno', dueno).eq('origen', 'referencia').order('id').range(desde, desde + 999)
   for (const r of data ?? []) ya.add(`${r.bucket}|${r.ruta}`)
   if ((data ?? []).length < 1000) break
 }
