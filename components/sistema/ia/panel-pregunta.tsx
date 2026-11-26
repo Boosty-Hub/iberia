@@ -84,7 +84,7 @@ export function PanelPreguntaIa() {
       role="dialog"
       aria-label="Preguntar a la IA"
       data-panel-pregunta-ia
-      className="fixed inset-x-0 top-12 bottom-0 z-50 flex flex-col border-l border-[var(--borde)] bg-white shadow-[-12px_0_30px_rgba(0,0,0,0.08)] min-[701px]:left-auto min-[701px]:w-[440px]"
+      className="fixed inset-x-0 top-[var(--alto-barra)] bottom-0 z-50 flex flex-col border-l border-[var(--borde)] bg-white shadow-[-12px_0_30px_rgba(0,0,0,0.08)] min-[701px]:left-auto min-[701px]:w-[440px]"
     >
       <header className="flex items-start gap-2 border-b border-[var(--borde)] px-4 py-3">
         <div className="min-w-0 flex-1">

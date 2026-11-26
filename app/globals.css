@@ -76,6 +76,8 @@
      sola vez aquí y todo lo demás las usa: una prueba las sobrescribe para
      simular un iPhone, cosa que Chromium no hace. */
   --seguro-arriba: env(safe-area-inset-top, 0px);
+  /* La barra de /sistema: 48 px más el área segura de arriba (la muesca o la barra de estado del teléfono). */
+  --alto-barra: calc(3rem + var(--seguro-arriba));
   --seguro-abajo: env(safe-area-inset-bottom, 0px);
   --seguro-izq: env(safe-area-inset-left, 0px);
   --seguro-der: env(safe-area-inset-right, 0px);

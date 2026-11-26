@@ -115,9 +115,10 @@ export function PanelAsistente() {
           aria-label="Asistente de IA"
           className={cn(
             'flex flex-col bg-[#f6f7f9]',
+            // En el teléfono ocupa la pantalla: arranca debajo del área segura (la hora y la batería).
             ventana
-              ? 'pointer-events-auto absolute inset-0 overflow-hidden border border-[var(--borde)] shadow-2xl sm:inset-auto sm:h-[min(640px,calc(100dvh-90px))] sm:w-[min(440px,calc(100vw-40px))] sm:rounded-2xl'
-              : 'relative h-full w-full max-w-[600px] shadow-2xl'
+              ? 'pointer-events-auto absolute inset-0 overflow-hidden border border-[var(--borde)] pt-[var(--seguro-arriba)] shadow-2xl sm:inset-auto sm:h-[min(640px,calc(100dvh-90px))] sm:w-[min(440px,calc(100vw-40px))] sm:rounded-2xl sm:pt-0'
+              : 'relative h-full w-full max-w-[600px] pt-[var(--seguro-arriba)] shadow-2xl'
           )}
           style={ventana ? { right: pos.derecha, bottom: pos.abajo } : undefined}
         >

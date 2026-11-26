@@ -117,8 +117,14 @@ export default async function SistemaLayout({ children }: LayoutProps<'/sistema'
         Saltar al contenido
       </a>
 
-      <header className="sticky top-0 z-40 flex h-12 items-center gap-2 bg-[#2b2a28] px-2.5 text-white sm:px-3">
+      {/* En el teléfono (y en la app) la barra baja del área segura: si no, queda debajo de la hora y la batería (26-nov-2026). */}
+      <header className="sticky top-0 z-40 flex h-[var(--alto-barra)] items-center gap-2 bg-[#2b2a28] px-2.5 pt-[var(--seguro-arriba)] text-white sm:px-3">
         <MenuTelefono>
+          <div className="border-b border-[var(--borde)] p-3 min-[480px]:hidden">
+            <div className="inline-flex rounded-lg bg-[#2b2a28] p-1">
+              <BarraTasas t={tasas} enlace={puede(sesion, 'sistema:tasas')} compacta />
+            </div>
+          </div>
           <Suspense>
             {conContexto && (
               <div className="flex flex-col gap-2 border-b border-[var(--borde)] p-3">
@@ -169,7 +175,8 @@ export default async function SistemaLayout({ children }: LayoutProps<'/sistema'
         <div className="hidden sm:flex">
           <BarraTasas t={tasas} enlace={puede(sesion, 'sistema:tasas')} />
         </div>
-        <div className="sm:hidden">
+        {/* Por debajo de 480 px las tasas van en el menú: en la barra no cabían el «Ticket» y la persona. */}
+        <div className="hidden min-[480px]:block sm:hidden">
           <BarraTasas t={tasas} enlace={puede(sesion, 'sistema:tasas')} compacta />
         </div>
         {conFecha && <PuntoJd />}

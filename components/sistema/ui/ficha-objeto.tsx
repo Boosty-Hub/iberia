@@ -294,7 +294,7 @@ export function PanelFicha() {
       tabIndex={-1}
       aria-label="Ficha del objeto"
       data-ficha-objeto
-      className="fixed inset-x-0 top-12 bottom-0 z-30 flex flex-col outline-none border-l border-[var(--borde)] bg-white shadow-[-12px_0_30px_rgba(0,0,0,0.06)] min-[901px]:sticky min-[901px]:inset-auto min-[901px]:top-12 min-[901px]:h-[calc(100dvh-3rem)] min-[901px]:w-[420px] min-[901px]:shrink-0 min-[901px]:shadow-none"
+      className="fixed inset-x-0 top-[var(--alto-barra)] bottom-0 z-30 flex flex-col outline-none border-l border-[var(--borde)] bg-white shadow-[-12px_0_30px_rgba(0,0,0,0.06)] min-[901px]:sticky min-[901px]:inset-auto min-[901px]:top-12 min-[901px]:h-[calc(100dvh-3rem)] min-[901px]:w-[420px] min-[901px]:shrink-0 min-[901px]:shadow-none"
     >
       {cargando && !ficha && <p className="p-6 text-center text-sm text-marca-400">Cargando la ficha…</p>}
       {error && !cargando && (
