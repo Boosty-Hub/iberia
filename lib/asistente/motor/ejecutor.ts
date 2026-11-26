@@ -246,6 +246,10 @@ async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: Opcione
       artefactos,
       publicarArtefacto: (x) => publicarArtefacto(db, turno.solicitante, chat.id, x),
       leerArtefacto: (grupo) => leerArtefacto(db, turno.solicitante, chat.id, grupo),
+      archivoPorId: async (id) => {
+        const { data } = await db.schema('asistente').from('archivo').select('id, nombre, mime, bytes, ruta, origen, anthropic_file_id').eq('id', id).eq('chat_id', chat.id).eq('estado', 'listo').maybeSingle()
+        return (data as ArchivoTurno | null) ?? null
+      },
       modo: investigacion ? 'investigacion' : 'normal',
       puedeProgramar: !turno.corrida_id && puedeMotor('herramientas') && !!(pol as { puede_programar?: boolean } | null)?.puede_programar,
       topeUsd: investigacion ? Number(config.tope_investigacion_usd) : null,

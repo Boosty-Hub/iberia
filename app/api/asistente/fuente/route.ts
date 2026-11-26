@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { FUENTES } from '@/lib/plataforma/tablas'
+import { createAdminClient } from '@/lib/supabase/server'
+import { consultarMicrosoft, type ParteM365 } from '@/lib/asistente/microsoft'
 import { mismoSecreto, secretoAsistente } from '@/lib/asistente/motor/servicio'
 import {
   anotarConsulta,
@@ -56,6 +58,25 @@ export async function POST(peticion: NextRequest) {
     const f = FUENTES[fuente.clave.slice(6)]
     resultado = f ? await consultarTabla(cliente, f, args) : { error: 'No existe esa tabla.' }
     filas = Number(resultado.mostradas ?? 0)
+  } else if (fuente.tipo === 'microsoft') {
+    // Fase 7: a nombre de la persona, con su cuenta de Microsoft. Lo que se trae va al chat como archivo (para el entorno de código).
+    const r = await consultarMicrosoft(yo.uid, fuente.clave as ParteM365, args as Record<string, unknown>)
+    resultado = r.resultado
+    filas = r.filas
+    if (r.archivo && turno) {
+      const admin = createAdminClient()
+      const { data: t } = await admin.schema('asistente').from('turno').select('chat_id').eq('id', turno).maybeSingle()
+      if (t?.chat_id) {
+        const id = crypto.randomUUID()
+        const nombre = r.archivo.nombre.normalize('NFC').replace(/[\\/:*?"<>|\u0000-\u001f]/g, '-').slice(0, 180) || 'archivo'
+        const ruta = `${yo.uid}/${t.chat_id}/microsoft/${id}-${nombre}`
+        const { error: eSubir } = await admin.storage.from('asistente').upload(ruta, r.archivo.bytes, { contentType: r.archivo.mime, upsert: false })
+        if (!eSubir) {
+          await admin.schema('asistente').from('archivo').insert({ id, dueno: yo.uid, chat_id: t.chat_id, origen: 'microsoft', estado: 'listo', nombre, mime: r.archivo.mime, bytes: r.archivo.bytes.length, ruta })
+          resultado = { ...resultado, montar: id }
+        } else resultado = { error: 'No se pudo traer el archivo a la plataforma.' }
+      }
+    }
   } else if (fuente.tipo === 'metricas') {
     resultado = await consultarMetrica(cliente, String(args.clave ?? ''))
     filas = resultado.error ? 0 : 1

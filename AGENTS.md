@@ -1361,6 +1361,26 @@ no use licencias sueltas. **El plan entero (7 fases, 22 decisiones de Gabriel, c
   conexión» (`GET /models`), modelos y la matriz. El motor local se elige solo con servidor y un modelo local encendido.
   ⚠️ **Falta el estudio** (modelo abierto, equipo, costo y la ruta de red: el ejecutor corre en Netlify y el servidor estaría en
   Iberia —túnel cifrado o ejecutor dentro de su red—) y el entorno de código propio del modo todo adentro: ver `PENDIENTES.md`.
+- **Fase 7 · el conector de Microsoft 365** (migración `20261126190000_asistente_fase7`, `lib/asistente/microsoft.ts`).
+  Permisos **delegados**: cada persona conecta su cuenta (Conexiones › «Conectar mi cuenta» →
+  `/api/asistente/microsoft/conectar` → Microsoft → `/api/asistente/microsoft/retorno`) y el asistente lee solo lo que ella ve,
+  solo lectura (`PERMISOS_MICROSOFT`; `Mail.Send` no se pide, decisión 10). Código de autorización con **PKCE**, el `state`
+  atado a la sesión (`asistente.microsoft_estado`, 10 min) y la plataforma se autentica ante Entra con una **aserción firmada con
+  su certificado** (`MICROSOFT_CLAVE_PRIVADA` secreta + `MICROSOFT_CERTIFICADO` público, en el entorno; los genera
+  `certificado-microsoft.mjs` y el `.cer` sale en `plataforma/microsoft/`, fuera de git). Los dos identificadores de la app de
+  Iberia van en `config.microsoft_tenant`/`microsoft_cliente` (Administración › Microsoft 365, que también da la dirección de
+  retorno y el `.cer`). El token de renovación va a **Vault** (`guardar_microsoft`, `renovacion_microsoft`, solo servicio) y rota
+  en cada uso; el de acceso vive en memoria del servidor. `invalid_grant` (Iberia retiró el acceso) borra la conexión.
+  - **Es una fuente más**: `m365:correo`, `m365:calendario`, `m365:archivos`, `m365:teams` en `catalogoFuentes()` (tipo `microsoft`,
+    sin pantalla), nacen apagadas y se dan por rol en Alcance. Las consultas pasan por la misma ruta `/api/asistente/fuente`
+    (`consultarMicrosoft`) y quedan en `consulta_fuente`: ese es su linaje. Herramientas `microsoft_correo`, `_calendario`,
+    `_archivos` (buscar, leer, **traer**) y `_teams`. «Traer» guarda el archivo en el chat (`archivo.origen = 'microsoft'`) y el
+    motor de Anthropic lo **monta en el contenedor a mitad del turno** (`container_upload` junto a los resultados; `ctx.archivoPorId`).
+  - **Compartir** algo con linaje de Microsoft 365 no se revisa contra el alcance de quien recibe (es información de quien
+    comparte) sino que **pide confirmación expresa** (`compartirObjeto(…, confirmado)`, «Compartir igual»). Una tarea programada
+    no se lo manda sola a otros destinatarios.
+  - `ASISTENTE_MS_LOGIN_URL` y `ASISTENTE_GRAPH_URL` son solo para la prueba: `probar-f7.mjs` levanta un simulador de Entra y Graph
+    en el :3999 que valida la firma de la aserción, PKCE, la rotación, la revocación y el usuario no asignado.
 - ⚠️ **Un `next dev` viejo sirve código viejo**: el 26-nov el Resumen mostraba cifras sin formato con el archivo ya
   corregido; reiniciar el dev lo arregló. Y **dos `next dev` en la misma carpeta no conviven** (el del 3001 impide el del
   3005, que muere sin escribir nada en su registro).
@@ -1373,6 +1393,8 @@ node --env-file=.env.local scripts/asistente/probar-datos.mjs [--solo datos|redt
 node --env-file=.env.local scripts/asistente/probar-f3.mjs [--solo proyecto|memoria|atajos|voz]                         # fase 3 (micrófono falso con voz de Azure)
 node --env-file=.env.local scripts/asistente/probar-f5.mjs [--solo programador|fallas|chat|tablero|investigacion]       # fase 5 (ver la cabecera: el dev de pruebas con ASISTENTE_CORREO_DESVIO y ASISTENTE_TRAMO_MS)
 node --env-file=.env.local scripts/asistente/probar-f6.mjs [--url <base /v1>] [--modelo <nombre>]                         # fase 6 (el dev con ASISTENTE_LOCAL_CLAVE; sin servidor de Iberia, contra el endpoint compatible de OpenAI)
+node --env-file=.env.local scripts/asistente/probar-f7.mjs                                                            # fase 7 (el dev con ASISTENTE_MS_LOGIN_URL y ASISTENTE_GRAPH_URL al simulador :3999)
+node scripts/asistente/certificado-microsoft.mjs [--dias 730] [--forzar]                                             # el certificado de la app en Entra (.cer público; la llave, a .env.local)
 node --env-file=.env.local scripts/asistente/montar-programador.mjs [--destino produccion --confirmo [--url …] [--quitar]]  # el reloj (pg_cron)
 node --env-file=.env.local scripts/asistente/probar-f4.mjs                                                            # fase 4: dos sesiones a la vez (dueño e invitado)
 python scripts/asistente/extraer-paginas.py && node --env-file=.env.local scripts/asistente/indexar-documentos.mjs [--destino produccion --confirmo]

@@ -97,7 +97,7 @@ export default async function MisArchivosPage({ searchParams }: PageProps<'/sist
               {filas.map((f) => (
                 <tr key={`${f.tipo}-${f.id}`} className="border-b border-[var(--borde)] last:border-0">
                   <td className="max-w-[320px] truncate px-4 py-2 font-medium text-marca-900">{f.nombre}</td>
-                  <td className="px-3 py-2 text-marca-600">{f.tipo === 'html' ? `Artefacto · ${ETIQUETA_CLASE[f.clase ?? 'html']} · v${f.version}` : f.origen === 'subido' ? 'Subido' : 'Generado'}</td>
+                  <td className="px-3 py-2 text-marca-600">{f.tipo === 'html' ? `Artefacto · ${ETIQUETA_CLASE[f.clase ?? 'html']} · v${f.version}` : f.origen === 'subido' ? 'Subido' : f.origen === 'microsoft' ? 'De Microsoft 365' : 'Generado'}</td>
                   <td className="px-3 py-2 text-right text-marca-600">{bytesLegibles(f.bytes)}</td>
                   <td className="max-w-[220px] truncate px-3 py-2">
                     {f.chat_id && tituloChat.has(f.chat_id) ? (

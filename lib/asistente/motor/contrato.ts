@@ -11,7 +11,7 @@ export type ArchivoTurno = {
   mime: string
   bytes: number
   ruta: string
-  origen: 'subido' | 'generado'
+  origen: 'subido' | 'generado' | 'microsoft'
   anthropic_file_id: string | null
 }
 
@@ -63,6 +63,8 @@ export type ContextoMotor = {
   topeUsd: number | null
   /** Pasado este tiempo, el motor guarda su estado y pide otro tramo (función de fondo de 15 min). Null = sin límite. */
   limiteMs: number | null
+  /** Un archivo del chat por su id (el que trajo una herramienta a mitad del turno, para montarlo). */
+  archivoPorId: (id: string) => Promise<ArchivoTurno | null>
   /** El estado que dejó el tramo anterior, para reanudar. */
   reanudar: unknown | null
 }

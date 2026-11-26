@@ -14,7 +14,7 @@ export type MensajeVista = {
   calificacion: number | null
   creado_en: string
 }
-export type ArchivoVista = { id: string; nombre: string; mime: string; bytes: number; origen: 'subido' | 'generado' }
+export type ArchivoVista = { id: string; nombre: string; mime: string; bytes: number; origen: 'subido' | 'generado' | 'microsoft' }
 export type TurnoVista = { id: string; estado: EstadoTurno; error: string | null; modelo: string; esfuerzo: string; creado_en: string }
 
 /**

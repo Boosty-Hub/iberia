@@ -37,6 +37,10 @@ un PR de afuera.
 |---|---|---|
 | `ASISTENTE_SECRETO` | producción · secreta | El secreto entre la acción que dispara un turno y la función de fondo `asistente-turno-background`. 32 bytes al azar, en hexadecimal; el de `.env.local` sirve para local |
 | `ASISTENTE_EJECUTOR` | producción | `netlify`: los turnos van a la función de fondo (hasta 15 min). Sin ella, `lanzarTurno()` lo deduce de las variables de Netlify |
+| `MICROSOFT_CLAVE_PRIVADA` | producción · secreta | La llave privada del certificado con que la plataforma se autentica ante la app de Iberia en Entra (fase 7). En `.env.local` la dejó `certificado-microsoft.mjs`; vence el 25-nov-2028 |
+| `MICROSOFT_CERTIFICADO` | producción | El certificado público (.cer en base64), para la huella. No es secreto |
+| `ASISTENTE_LOCAL_CLAVE` | producción · secreta, opcional | La clave del servidor de modelos de Iberia (fase 6), si la pide |
+| `ASISTENTE_MS_LOGIN_URL`, `ASISTENTE_GRAPH_URL` | — (🔴 nunca en Netlify) | Solo para la prueba de la fase 7 (el simulador local) |
 | `ASISTENTE_TRAMO_MS` | — (no se carga) | Solo para probar: el tramo tras el que un turno largo guarda su estado y sigue en otra invocación. En Netlify vale 12 min sin la variable |
 | `ASISTENTE_CORREO_DESVIO` | — (🔴 nunca en Netlify) | Solo para el dev de pruebas: manda todo correo de las tareas a esa dirección (`delivered@resend.dev`, la casilla de prueba de Resend) |
 

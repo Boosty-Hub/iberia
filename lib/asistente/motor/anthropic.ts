@@ -44,6 +44,10 @@ const TITULO_HERRAMIENTA: Record<string, { herramienta: Extract<Bloque, { tipo: 
   artefacto: { herramienta: 'html', titulo: 'Creando el artefacto' },
   leer_artefacto: { herramienta: 'html', titulo: 'Leyendo el artefacto' },
   consultar_tabla: { herramienta: 'datos', titulo: 'Consultando la plataforma' },
+  microsoft_correo: { herramienta: 'datos', titulo: 'Leyendo tu correo' },
+  microsoft_calendario: { herramienta: 'datos', titulo: 'Revisando tu calendario' },
+  microsoft_archivos: { herramienta: 'datos', titulo: 'Buscando en OneDrive y SharePoint' },
+  microsoft_teams: { herramienta: 'datos', titulo: 'Leyendo Teams' },
   consultar_metrica: { herramienta: 'datos', titulo: 'Consultando una métrica' },
   buscar_documentos: { herramienta: 'datos', titulo: 'Buscando en los documentos' },
   recordar: { herramienta: 'otra', titulo: 'Guardando en tu memoria' },
@@ -213,6 +217,8 @@ export async function ejecutarAnthropic(ctx: ContextoMotor, precioDe: (modelo: s
       uso = sumarUso(uso, { ...parcial, costoUsd: costoDe(precioDe(modeloServido), parcial) })
 
       const resultadosHtml: Anthropic.Beta.BetaToolResultBlockParam[] = []
+      // Lo que una herramienta trajo a mitad del turno (un Excel de OneDrive) se monta en el contenedor con los resultados.
+      const montajes: Contenido[] = []
       for (const b of final.content) {
         if (b.type === 'text') {
           if (b.text.trim()) textos.push(b.text.trim())
@@ -252,6 +258,13 @@ export async function ejecutarAnthropic(ctx: ContextoMotor, precioDe: (modelo: s
         } else if (b.type === 'tool_use' && NOMBRES_DATOS.has(b.name) && ctx.datos) {
           const paso = pasos.get(b.id)
           const r = await herramientaDatos(ctx.datos, b.name, b.input)
+          if (r.montar) {
+            const a = await ctx.archivoPorId(r.montar)
+            if (a) {
+              montajes.push({ type: 'container_upload', file_id: await ctx.asegurarEnAnthropic(a) })
+              ctx.archivosDelChat.push(a)
+            }
+          }
           if (paso) {
             paso.herramienta = 'datos'
             paso.titulo = r.titulo
@@ -292,7 +305,7 @@ export async function ejecutarAnthropic(ctx: ContextoMotor, precioDe: (modelo: s
         // A los 80 % del tope de la investigación se le pide que cierre (una vez).
         const avisar = !cierre && ctx.topeUsd !== null && uso.costoUsd >= ctx.topeUsd * 0.8
         if (avisar) cierre = true
-        mensajes.push({ role: 'user', content: avisar ? [...resultadosHtml, { type: 'text', text: AVISO_CIERRE }] : resultadosHtml })
+        mensajes.push({ role: 'user', content: [...resultadosHtml, ...montajes, ...(avisar ? [{ type: 'text' as const, text: AVISO_CIERRE }] : [])] })
         continue
       }
       if (final.stop_reason === 'pause_turn') {

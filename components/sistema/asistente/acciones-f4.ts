@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { requerirPermiso } from '@/lib/auth'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { fuentesDePersona } from '@/lib/asistente/alcance'
+import { esMicrosoft } from '@/lib/asistente/fuentes'
+import { PARTES_M365, type ParteM365 } from '@/lib/asistente/microsoft'
 
 type R = { ok: true } | { ok: false; error: string }
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
@@ -33,7 +35,7 @@ export async function sacarDelChat(chatId: string, perfilId: string): Promise<R>
  * plataforma que consultó el turno que lo produjo. Si a quien recibe le falta
  * alguna (por permiso o por alcance), no se comparte y se dice cuál.
  */
-export async function compartirObjeto(tipo: 'archivo' | 'html', id: string, conId: string): Promise<R> {
+export async function compartirObjeto(tipo: 'archivo' | 'html', id: string, conId: string, confirmado = false): Promise<R | { ok: false; error: string; confirmar: true }> {
   const sesion = await requerirPermiso('sistema:asistente')
   if (!UUID.test(id) || !UUID.test(conId) || conId === sesion.userId) return { ok: false, error: 'No válido.' }
   const supabase = await createClient()
@@ -54,10 +56,18 @@ export async function compartirObjeto(tipo: 'archivo' | 'html', id: string, conI
       linaje = [...new Set((q ?? []).map((x) => x.fuente))]
     }
   }
-  if (linaje.length) {
+  // Los datos de la plataforma se revisan contra los permisos de quien recibe.
+  const dePlataforma = linaje.filter((f) => !esMicrosoft(f))
+  if (dePlataforma.length) {
     const suyas = await fuentesDePersona(conId)
-    const faltan = suyas.filter((f) => linaje.includes(f.clave) && f.estado !== 'si')
+    const faltan = suyas.filter((f) => dePlataforma.includes(f.clave) && f.estado !== 'si')
     if (faltan.length) return { ok: false, error: `No se comparte: trae datos de ${faltan.map((f) => `«${f.titulo}»`).join(', ')}, que esa persona no puede ver.` }
+  }
+  // Los de Microsoft 365 son información de quien comparte (su correo, sus archivos): decide él, pero lo confirma.
+  const personales = linaje.filter(esMicrosoft)
+  if (personales.length && !confirmado) {
+    const que = personales.map((f) => PARTES_M365[f as ParteM365]?.replace('Microsoft 365 · ', '').toLowerCase() ?? f).join(', ')
+    return { ok: false, confirmar: true, error: `Contiene datos de tu Microsoft 365 (${que}). Es tu información: si la compartes, esa persona la verá.` }
   }
   const { error } = await admin.schema('asistente').from('compartido').upsert({ tipo, objeto_id: id, con: conId, por: sesion.userId, linaje }, { onConflict: 'tipo,objeto_id,con' })
   revalidatePath('/sistema/asistente/archivos')

@@ -2,6 +2,7 @@ import 'server-only'
 import { createClient as clienteSupabase } from '@supabase/supabase-js'
 import { createAdminClient } from '@/lib/supabase/server'
 import { fuentesDePersona } from '@/lib/asistente/alcance'
+import { esMicrosoft } from '@/lib/asistente/fuentes'
 import { lanzarTurno } from '@/lib/asistente/servidor'
 import { contextoCorrida } from '@/lib/asistente/motor/tareas'
 import { urlBase } from '@/lib/asistente/motor/servicio'
@@ -168,6 +169,11 @@ export async function entregarCorrida(corridaId: string, token: string | null): 
       const { data: polD } = await a.rpc('politica_de', { p_perfil: d })
       if (!(polD as { habilitado?: boolean } | null)?.habilitado) {
         entregas.push({ canal: 'plataforma', a: nombre, estado: 'bloqueada', detalle: 'Ya no tiene el asistente de IA.' })
+        continue
+      }
+      // Lo hecho con su correo o sus archivos de Microsoft es información del dueño: se comparte a mano, con confirmación.
+      if (linaje.some(esMicrosoft)) {
+        entregas.push({ canal: 'plataforma', a: nombre, estado: 'bloqueada', detalle: 'Trae datos de tu Microsoft 365: compártelo a mano si quieres.' })
         continue
       }
       if (linaje.length) {

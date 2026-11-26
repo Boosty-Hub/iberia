@@ -116,7 +116,14 @@ export function CompartirObjeto({ tipo, id }: { tipo: 'archivo' | 'html'; id: st
   const personas = usePersonas(abierto)
   const [elegida, setElegida] = useState('')
   const [msg, setMsg] = useState<{ ok: boolean; texto: string } | null>(null)
+  const [confirmar, setConfirmar] = useState(false)
   const [pendiente, iniciar] = useTransition()
+  const compartir = (confirmado: boolean) =>
+    iniciar(async () => {
+      const r = await compartirObjeto(tipo, id, elegida, confirmado)
+      setConfirmar(!r.ok && 'confirmar' in r && !!r.confirmar)
+      setMsg(r.ok ? { ok: true, texto: 'Compartido.' } : { ok: false, texto: r.error })
+    })
   return (
     <span className="relative inline-flex">
       <button type="button" className="btn-neutro h-8 px-2.5 text-[12px]" onClick={() => setAbierto((x) => !x)} aria-expanded={abierto}>
@@ -125,7 +132,16 @@ export function CompartirObjeto({ tipo, id }: { tipo: 'archivo' | 'html'; id: st
       {abierto && (
         <span className="absolute top-9 right-0 z-30 flex w-[300px] flex-col gap-2 rounded-xl border border-[var(--borde)] bg-white p-3 text-left shadow-xl">
           <span className="text-[12.5px] text-marca-600">Lo verá con sus propios permisos: si el archivo trae datos de una fuente que esa persona no tiene, no se comparte.</span>
-          <select className="h-9 rounded-lg border border-[var(--borde)] bg-white px-2 text-[12.5px]" value={elegida} onChange={(e) => setElegida(e.target.value)} aria-label="Compartir con">
+          <select
+            className="h-9 rounded-lg border border-[var(--borde)] bg-white px-2 text-[12.5px]"
+            value={elegida}
+            onChange={(e) => {
+              setElegida(e.target.value)
+              setConfirmar(false)
+              setMsg(null)
+            }}
+            aria-label="Compartir con"
+          >
             <option value="">{personas ? 'Con…' : 'Cargando…'}</option>
             {(personas ?? []).map((p) => (
               <option key={p.perfil_id} value={p.perfil_id}>
@@ -137,16 +153,16 @@ export function CompartirObjeto({ tipo, id }: { tipo: 'archivo' | 'html'; id: st
             type="button"
             className="btn-acento h-9 px-3 text-[12.5px]"
             disabled={!elegida || pendiente}
-            onClick={() =>
-              iniciar(async () => {
-                const r = await compartirObjeto(tipo, id, elegida)
-                setMsg(r.ok ? { ok: true, texto: 'Compartido.' } : { ok: false, texto: r.error })
-              })
-            }
+            onClick={() => compartir(false)}
           >
             {pendiente ? 'Revisando…' : 'Compartir'}
           </button>
           {msg && <span className={cn('text-[12px]', msg.ok ? 'text-emerald-700' : 'text-acento-700')}>{msg.texto}</span>}
+          {confirmar && (
+            <button type="button" className="btn-peligro h-9 px-3 text-[12.5px]" disabled={pendiente} onClick={() => compartir(true)}>
+              Compartir igual
+            </button>
+          )}
         </span>
       )}
     </span>

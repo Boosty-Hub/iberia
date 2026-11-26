@@ -189,6 +189,10 @@ export async function ejecutarLocal(ctx: ContextoMotor, precioDe: (modelo: strin
             error = !!x.error
           } else if (NOMBRES_DATOS.has(nombre) && ctx.datos) {
             const x = await herramientaDatos(ctx.datos, nombre, args)
+            if (x.montar) {
+              const a = await ctx.archivoPorId(x.montar)
+              if (a) ctx.archivosDelChat.push(a)
+            }
             if (paso) paso.titulo = x.titulo
             salida = x.texto
             error = !!x.error

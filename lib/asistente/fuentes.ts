@@ -1,4 +1,5 @@
 import 'server-only'
+import { PARTES_M365 } from '@/lib/asistente/microsoft'
 import { createClient as clienteSupabase } from '@supabase/supabase-js'
 import type { Database } from '@/lib/database.types'
 import { FUENTES } from '@/lib/plataforma/tablas'
@@ -28,7 +29,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 /** Las tablas que nunca son fuente del asistente aunque existan en la plataforma. */
 const FUERA = new Set(['padron', 'formacion-personas', 'canal-grupos', 'canal-uso', 'entrevistas', 'historial-org'])
 
-export type FuenteAsistente = { clave: string; titulo: string; modulo: string; recurso: string; accion: 'ver' | 'crear' | 'editar'; tipo: 'tabla' | 'metricas' | 'documentos' }
+export type FuenteAsistente = { clave: string; titulo: string; modulo: string; recurso: string; accion: 'ver' | 'crear' | 'editar'; tipo: 'tabla' | 'metricas' | 'documentos' | 'microsoft' }
 
 /** Todas las fuentes posibles (lo que la administración puede encender). */
 export function catalogoFuentes(): FuenteAsistente[] {
@@ -39,8 +40,13 @@ export function catalogoFuentes(): FuenteAsistente[] {
     ...tablas,
     { clave: 'metricas', titulo: 'Métricas del registro (cifras de la plataforma)', modulo: 'DAT-SEM', recurso: '', accion: 'ver', tipo: 'metricas' },
     { clave: 'documentos', titulo: 'Documentos del SGC (texto por página)', modulo: 'NUC-DOC', recurso: 'sistema:documentos', accion: 'ver', tipo: 'documentos' },
+    // Fase 7: la cuenta de Microsoft de cada persona (permisos delegados: solo lo que ella ve en Microsoft).
+    ...Object.entries(PARTES_M365).map(([clave, titulo]) => ({ clave, titulo, modulo: 'M365', recurso: '', accion: 'ver' as const, tipo: 'microsoft' as const })),
   ]
 }
+
+/** ¿Es una fuente de Microsoft 365? Su linaje es información de la persona, no de la plataforma. */
+export const esMicrosoft = (clave: string) => clave.startsWith('m365:')
 
 /** Un cliente de Supabase que actúa como el usuario dueño del token: la RLS de siempre. */
 export function clienteDeToken(token: string): Cliente {
@@ -91,7 +97,13 @@ export async function descripcionCatalogo(cliente: Cliente, fuentes: FuenteAsist
     const { data } = await cliente.schema('ui').from('metrica').select('clave, nombre, unidad, recurso, accion').eq('estado', 'vigente').order('orden')
     metricas = (data ?? []).map((m) => ({ clave: m.clave, nombre: m.nombre, unidad: m.unidad }))
   }
-  return { tablas, metricas, documentos: fuentes.some((f) => f.tipo === 'documentos') }
+  const partes = fuentes.filter((f) => f.tipo === 'microsoft').map((f) => f.clave)
+  let conectado = false
+  if (partes.length) {
+    const { data } = await cliente.schema('asistente').from('conexion_microsoft').select('perfil_id').maybeSingle()
+    conectado = !!data
+  }
+  return { tablas, metricas, documentos: fuentes.some((f) => f.tipo === 'documentos'), microsoft: partes.length ? { partes, conectado } : null }
 }
 
 type Args = { buscar?: string | null; filtros?: { columna: string; valores: string[] }[] | null; orden?: { columna: string; dir: 'asc' | 'desc' } | null; limite?: number | null }

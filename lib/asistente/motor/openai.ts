@@ -192,6 +192,10 @@ export async function ejecutarOpenAI(ctx: ContextoMotor, precioDe: (modelo: stri
             salidaHerramienta = r.texto
           } else if (NOMBRES_DATOS.has(String(ll.name)) && ctx.datos) {
             const r = await herramientaDatos(ctx.datos, String(ll.name), args)
+            if (r.montar) {
+              const a = await ctx.archivoPorId(r.montar)
+              if (a) ctx.archivosDelChat.push(a)
+            }
             if (paso) {
               paso.herramienta = 'datos'
               paso.titulo = r.titulo

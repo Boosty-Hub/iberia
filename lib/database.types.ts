@@ -291,6 +291,36 @@ export type Database = {
         }
         Relationships: []
       }
+      conexion_microsoft: {
+        Row: {
+          conectado_en: string
+          cuenta: string
+          nombre: string | null
+          perfil_id: string
+          renovado_en: string | null
+          secreto_id: string
+          usado_en: string | null
+        }
+        Insert: {
+          conectado_en?: string
+          cuenta: string
+          nombre?: string | null
+          perfil_id: string
+          renovado_en?: string | null
+          secreto_id: string
+          usado_en?: string | null
+        }
+        Update: {
+          conectado_en?: string
+          cuenta?: string
+          nombre?: string | null
+          perfil_id?: string
+          renovado_en?: string | null
+          secreto_id?: string
+          usado_en?: string | null
+        }
+        Relationships: []
+      }
       config: {
         Row: {
           actualizado_en: string
@@ -308,6 +338,8 @@ export type Database = {
           local_modo: string
           local_url: string | null
           max_tareas: number
+          microsoft_cliente: string | null
+          microsoft_tenant: string | null
           modelo_anthropic: string
           modelo_openai: string
           motor: string
@@ -334,6 +366,8 @@ export type Database = {
           local_modo?: string
           local_url?: string | null
           max_tareas?: number
+          microsoft_cliente?: string | null
+          microsoft_tenant?: string | null
           modelo_anthropic?: string
           modelo_openai?: string
           motor?: string
@@ -360,6 +394,8 @@ export type Database = {
           local_modo?: string
           local_url?: string | null
           max_tareas?: number
+          microsoft_cliente?: string | null
+          microsoft_tenant?: string | null
           modelo_anthropic?: string
           modelo_openai?: string
           motor?: string
@@ -720,6 +756,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      microsoft_estado: {
+        Row: {
+          creado_en: string
+          estado: string
+          perfil_id: string
+          verificador: string
+        }
+        Insert: {
+          creado_en?: string
+          estado: string
+          perfil_id: string
+          verificador: string
+        }
+        Update: {
+          creado_en?: string
+          estado?: string
+          perfil_id?: string
+          verificador?: string
+        }
+        Relationships: []
       }
       modelo: {
         Row: {
@@ -1167,6 +1224,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      borrar_microsoft: { Args: { p_perfil: string }; Returns: undefined }
       buscar_documentos: {
         Args: { p_consulta: string; p_limite?: number }
         Returns: {
@@ -1207,12 +1265,22 @@ export type Database = {
         }[]
       }
       correr_ahora: { Args: { p_tarea: string }; Returns: string }
+      desconectar_microsoft: { Args: never; Returns: undefined }
       fuentes_del_chat: {
         Args: { p_chat: string }
         Returns: {
           fuente: string
           veces: number
         }[]
+      }
+      guardar_microsoft: {
+        Args: {
+          p_cuenta: string
+          p_nombre: string
+          p_perfil: string
+          p_renovacion: string
+        }
+        Returns: undefined
       }
       invitar: {
         Args: { p_chat: string; p_perfil: string }
@@ -1272,6 +1340,7 @@ export type Database = {
         }
         Returns: string
       }
+      renovacion_microsoft: { Args: { p_perfil: string }; Returns: string }
       reservar_turno: {
         Args: { p_reserva_usd: number; p_turno: string }
         Returns: string
