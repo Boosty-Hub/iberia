@@ -1522,6 +1522,11 @@ Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).
   PKCE y `token_hash`) → `/login/nueva-clave` la cambia con `updateUser`. El enlace vuelve al
   origen de la petición, que tiene que estar en las URLs de redirección de Auth. ⚠️ **Sin SMTP
   propio el correo solo le llega al equipo de la organización de Supabase**, no a Iberia.
+- **El login** (26-nov-2026, para salir en vivo): sin textos de Boosty; el correo escrito se recuerda en el navegador
+  (`localStorage`, nunca la contraseña) y es un campo controlado, porque React limpia los no controlados al terminar la
+  acción y un intento fallido lo borraba; la contraseña lleva el ojito (`CampoClave`, también en «nueva contraseña»).
+  🔴 **«Salir» es `signOut({ scope: 'local' })`**: sin el alcance, Supabase cierra la sesión de la persona en todos sus
+  dispositivos, la app del teléfono incluida. `node --env-file=.env.local scripts/probar-login.mjs [--base …] [--email …]`.
 - **Sin registro abierto**: las cuentas se crean desde `/dashboard/usuarios`, desde el
   padrón al acuñar un enlace, o con `npm run crear:usuario` — las tres por la API de
   administrador. 🔴 **Y el registro de Supabase está cerrado (`disable_signup`)**, que es lo

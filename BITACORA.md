@@ -88,6 +88,10 @@ cosa: `AGENTS.md` («Mis archivos», «El asistente de IA», «Los tutoriales»,
 - **En producción** con su OK: respaldo `produccion-2026-11-26T19-21-06`, la migración `20261126250000_archivos`, `main` en
   `fdcf66e`, **3.881 archivos en 381 carpetas de Gabriel** (138 marcados privados), los 18 tutoriales. Recorrido con sus
   cuentas (`recorrido-produccion-2.mjs`) 13/13, con un ticket de prueba real (PEN-15407), y los 36 tutoriales reproducen.
+- **El login, para salir en vivo** (pedido de Gabriel): fuera «las cuentas las provisiona Boosty» y «Boosty International
+  LLC»; ojito en la contraseña; el correo no se borra al refrescar ni tras un error. 🔴 **«Salir» cerraba la sesión en todos
+  los dispositivos de la persona** (`signOut()` sin alcance): ahora solo la de ese navegador. En producción (`d72a478`),
+  `probar-login.mjs` 10/10.
 
 ---
 
