@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Auditoría de proveedores de la Plataforma Iberia · Industrias Iberia</title>
+    <style>
+      :root {
+        --rojo: #d4332c;
+        --rojo-claro: #fdf3f2;
+        --rojo-borde: #f7c8c4;
+        --carbon: #1e1c1b;
+        --carbon-medio: #474342;
+        --gris: #6d6765;
+        --gris-claro: #b8b3b1;
+        --borde: #e4e1e0;
+        --fondo-suave: #f8f7f7;
+        --verde: #1f6f4b;
+        --verde-claro: #e7f5ee;
+        --ambar: #8a5a12;
+        --ambar-claro: #fdf4e3;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; font-size: 10pt; line-height: 1.5; color: var(--carbon-medio); }
+      h1, h2, h3 { color: var(--carbon); margin: 0; }
+      .portada { border-bottom: 3px solid var(--rojo); padding-bottom: 20px; margin-bottom: 26px; }
+      .portada img { height: 34px; width: auto; display: block; margin-bottom: 22px; }
+      .rotulo { font-size: 8pt; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--rojo); margin-bottom: 8px; }
+      .portada h1 { font-size: 21pt; line-height: 1.2; letter-spacing: -0.01em; }
+      .portada .bajada { font-size: 11pt; color: var(--gris); margin-top: 10px; }
+      .portada .ficha { margin-top: 14px; font-size: 9pt; color: var(--gris); }
+      section { margin-bottom: 24px; }
+      section > h2 { font-size: 13pt; margin-bottom: 4px; padding-bottom: 6px; border-bottom: 1px solid var(--borde); }
+      .num { color: var(--rojo); font-family: ui-monospace, monospace; font-size: 10pt; margin-right: 8px; }
+      section > .intro { color: var(--gris); margin: 10px 0 12px; }
+      h3 { font-size: 10.5pt; margin: 14px 0 6px; }
+      p { margin: 0 0 8px; }
+      ul { margin: 0 0 10px; padding-left: 18px; }
+      li { margin-bottom: 4px; }
+      strong { color: var(--carbon); font-weight: 600; }
+      table { width: 100%; border-collapse: collapse; font-size: 9pt; margin: 8px 0 12px; }
+      thead { background: var(--carbon); color: #fff; }
+      th { text-align: left; padding: 6px 8px; font-weight: 600; font-size: 8.5pt; }
+      td { padding: 6px 8px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+      tbody tr:nth-child(even) { background: var(--fondo-suave); }
+      td.clave { width: 30%; font-weight: 600; color: var(--carbon); }
+      .aviso { border: 1px solid var(--rojo-borde); background: var(--rojo-claro); border-left: 3px solid var(--rojo); padding: 10px 14px; margin: 10px 0 12px; break-inside: avoid; }
+      .aviso h3 { color: var(--rojo); margin-top: 0; }
+      .aviso p:last-child, .nota p:last-child { margin-bottom: 0; }
+      .nota { background: var(--fondo-suave); border-left: 3px solid var(--gris-claro); padding: 9px 14px; margin: 10px 0; font-size: 9pt; }
+      .fuente { font-size: 7.5pt; color: var(--gris); }
+      .fuente a, .fuentes a { color: var(--gris); text-decoration: none; word-break: break-all; }
+      .sello { display: inline-block; font-size: 7.5pt; font-weight: 700; padding: 1px 6px; border-radius: 9px; white-space: nowrap; }
+      .si { background: var(--verde-claro); color: var(--verde); }
+      .no { background: var(--ambar-claro); color: var(--ambar); }
+      .salto { break-before: page; }
+      .juntos { break-inside: avoid; }
+      .fuentes { font-size: 8pt; }
+      .fuentes li { margin-bottom: 2px; }
+      footer.cierre { margin-top: 26px; padding-top: 12px; border-top: 1px solid var(--borde); font-size: 8.5pt; color: var(--gris); }
+    </style>
+  </head>
+  <body>
+    <div class="portada">
+      <img src="../public/marca/iberia.png" alt="Industrias Iberia" />
+      <p class="rotulo">Plataforma Iberia · Seguridad y cumplimiento</p>
+      <h1>Auditoría de proveedores tecnológicos de la Plataforma Iberia</h1>
+      <p class="bajada">
+        Quiénes son Supabase, Netlify y Resend, dónde quedan los datos de Industrias Iberia, qué certificaciones y controles
+        tienen, cómo está configurada la instancia de Iberia y qué recomendamos reforzar.
+      </p>
+      <p class="ficha">
+        Para: Gerencia de Tecnología de la Información, Industrias Iberia, C.A. · Preparado por Boosty Digital ·
+        26 de noviembre de 2026 · Uso interno
+      </p>
+    </div>
+
+    <!-- ================================================================== -->
+    <section>
+      <h2><span class="num">01</span>Resumen</h2>
+      <p class="intro">
+        La Plataforma Iberia (<strong>portal.industriasiberia.com</strong>) se apoya en tres proveedores de servicios en la nube.
+        Las cuentas de Supabase y de Netlify están a nombre de Industrias Iberia. La base de datos, los archivos, los respaldos y
+        las funciones del servidor están en Amazon Web Services, región <strong>us-east-1 (norte de Virginia, Estados Unidos)</strong>.
+        Toda la comunicación va cifrada.
+      </p>
+      <table>
+        <thead>
+          <tr><th>Proveedor</th><th>Qué hace en la plataforma</th><th>Empresa</th><th>Dónde quedan los datos de Iberia</th><th>Certificaciones</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Supabase</strong></td>
+            <td>Base de datos, usuarios y acceso, archivos, tiempo real</td>
+            <td>Supabase Pte. Ltd. (Singapur)</td>
+            <td>AWS us-east-1, norte de Virginia, EE. UU. Los registros de actividad se guardan en la Unión Europea</td>
+            <td>SOC 2 Type 2 · ISO/IEC 27001:2022</td>
+          </tr>
+          <tr>
+            <td><strong>Netlify</strong></td>
+            <td>Publica el sitio, sirve las páginas y ejecuta las funciones del servidor</td>
+            <td>Netlify, Inc. (Delaware; sede en San Francisco, EE. UU.)</td>
+            <td>Funciones en AWS us-east-1. Páginas estáticas desde su red de distribución global</td>
+            <td>SOC 2 Type 2 · ISO 27001 · ISO 27018 · PCI DSS 4.0</td>
+          </tr>
+          <tr>
+            <td><strong>Resend</strong></td>
+            <td>Correo de notificaciones. <em>Aún no activo</em>: falta verificar el subdominio de Iberia</td>
+            <td>Plus Five Five, Inc. (San Francisco, EE. UU.)</td>
+            <td>Estados Unidos (AWS)</td>
+            <td>SOC 2 Type II</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="nota">
+        <p>
+          Todo lo de este documento se verificó el 26 de noviembre de 2026 en las páginas oficiales de cada proveedor; cada dato
+          lleva su fuente. La configuración de la instancia de Iberia se leyó ese mismo día de las consolas de Supabase y
+          Netlify. Lo que no se pudo confirmar se dice expresamente.
+        </p>
+      </div>
+    </section>
+
+    <!-- ================================================================== -->
+    <section class="juntos">
+      <h2><span class="num">02</span>Por dónde pasan los datos</h2>
+      <p class="intro">El recorrido de una consulta, desde que una persona abre la plataforma.</p>
+      <table>
+        <thead><tr><th>Paso</th><th>Dónde ocurre</th><th>Protección</th></tr></thead>
+        <tbody>
+          <tr><td>1. La persona entra a portal.industriasiberia.com</td><td>Red de distribución de Netlify</td><td>HTTPS obligatorio (TLS)</td></tr>
+          <tr><td>2. El servidor arma la página o atiende la acción</td><td>Funciones de Netlify sobre AWS, us-east-1</td><td>Claves en variables de entorno secretas, nunca en el navegador</td></tr>
+          <tr><td>3. Se leen o escriben datos</td><td>Supabase sobre AWS, us-east-1</td><td>Cada consulta pasa con la sesión de la persona y la seguridad por fila (RLS) de la base</td></tr>
+          <tr><td>4. Archivos (documentos, adjuntos)</td><td>Supabase Storage, us-east-1</td><td>Buckets privados; descarga por enlace firmado de 60 segundos</td></tr>
+          <tr><td>5. Correo de notificaciones (cuando se active)</td><td>Resend, EE. UU.</td><td>TLS 1.3; dominio autenticado con SPF y DKIM</td></tr>
+          <tr><td>6. Asistente de IA y voz</td><td>Anthropic, OpenAI y Microsoft Azure (anexo A)</td><td>API comerciales sin entrenamiento con los datos del cliente</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ================================================================== -->
+    <section class="salto">
+      <h2><span class="num">03</span>Supabase · base de datos, acceso y archivos</h2>
+
+      <h3>La empresa</h3>
+      <ul>
+        <li>Contrata <strong>Supabase Pte. Ltd.</strong>, sociedad de Singapur (65 Chulia Street #38-02/03, OCBC Centre). Su filial Supabase, Inc. (Delaware, EE. UU.) presta soporte técnico. El contrato se rige por las leyes de California. <span class="fuente">(<a href="https://supabase.com/terms">supabase.com/terms</a>)</span></li>
+        <li>Fundada en 2020 por Paul Copplestone (director ejecutivo) y Ant Wilson (director técnico), en Y Combinator. Empresa privada y de trabajo remoto. <span class="fuente">(<a href="https://www.ycombinator.com/companies/supabase">ycombinator.com/companies/supabase</a>)</span></li>
+        <li>En abril de 2025 levantó USD 200 millones en su Serie D, con una valoración de USD 2.000 millones (Accel, Coatue, Y Combinator y otros). <span class="fuente">(<a href="https://fortune.com/2025/04/22/exclusive-supabase-raises-200-million-series-d-at-2-billion-valuation/">Fortune, 22-abr-2025</a>)</span></li>
+      </ul>
+
+      <h3>Dónde están los datos</h3>
+      <ul>
+        <li>Los proyectos corren en <strong>AWS</strong>. La región <strong>us-east-1</strong> es «East US (North Virginia)» y no se puede cambiar después de crear el proyecto. <span class="fuente">(<a href="https://supabase.com/docs/guides/platform/regions">docs · regions</a>)</span></li>
+        <li>En esa región quedan la base de datos, los usuarios (Auth), los archivos (Storage) y los respaldos. Fuera de ella: los registros de actividad (centros de datos de la Unión Europea), el acceso del soporte cuando se le pide, la entrega de archivos por su red global y los datos de facturación. <span class="fuente">(<a href="https://supabase.com/legal/privacy-resources/data-residency-and-transfers-faq">data residency FAQ</a>)</span></li>
+        <li>La protección contra ataques de denegación de servicio en el borde la da Cloudflare. <span class="fuente">(<a href="https://supabase.com/security">supabase.com/security</a>)</span></li>
+      </ul>
+
+      <h3>Certificaciones</h3>
+      <ul>
+        <li><strong>SOC 2 Type 2</strong>, auditado cada año por un tercero independiente. <span class="fuente">(<a href="https://supabase.com/docs/guides/security/soc-2-compliance">docs · SOC 2</a>)</span></li>
+        <li><strong>ISO/IEC 27001:2022</strong>, anunciado el 22 de abril de 2026, sobre base de datos, Auth, Storage, Realtime, Edge Functions y Data API. <span class="fuente">(<a href="https://supabase.com/blog/supabase-is-now-iso-27001-certified">blog · ISO 27001</a>)</span></li>
+        <li>⚠️ El informe SOC 2 y el certificado ISO se descargan desde el plan <strong>Team</strong>; con el plan <strong>Pro</strong>, el de Iberia, no están disponibles para descarga. <span class="fuente">(<a href="https://supabase.com/pricing">supabase.com/pricing</a>)</span></li>
+        <li>No declara PCI propio; HIPAA exige plan Team, complemento HIPAA y acuerdo BAA firmado (no aplica a Iberia). <span class="fuente">(<a href="https://supabase.com/docs/guides/deployment/shared-responsibility-model">modelo de responsabilidad compartida</a>)</span></li>
+      </ul>
+
+      <h3>Controles de seguridad</h3>
+      <ul>
+        <li>Cifrado en reposo <strong>AES-256</strong>; llaves protegidas por HSM con validación FIPS 140-2. <span class="fuente">(<a href="https://supabase.com/security">security</a> · <a href="https://supabase.com/legal/privacy-resources/data-residency-and-transfers-faq">FAQ</a>)</span></li>
+        <li>Cifrado en tránsito en las API: solo <strong>TLS 1.2 y 1.3</strong>. <span class="fuente">(<a href="https://supabase.com/docs/guides/security/tls">docs · TLS</a>)</span></li>
+        <li>Secretos en <strong>Vault</strong>: cifrado autenticado con llave única por proyecto, que nunca se guarda en la base. <span class="fuente">(<a href="https://supabase.com/docs/guides/database/vault">docs · Vault</a>)</span></li>
+        <li>El personal de Supabase accede a los datos solo cuando el cliente pide soporte o ante incidentes, limitado al proyecto y registrado. <span class="fuente">(<a href="https://supabase.com/legal/privacy-resources/data-residency-and-transfers-faq">FAQ</a>)</span></li>
+        <li>Pruebas de penetración periódicas con expertos externos; programa de divulgación de vulnerabilidades en HackerOne, con respuesta en 5 días hábiles. <span class="fuente">(<a href="https://supabase.com/security">security</a> · <a href="https://supabase.com/.well-known/security.txt">security.txt</a>)</span></li>
+      </ul>
+
+      <h3>Respaldos y continuidad</h3>
+      <ul>
+        <li>Plan Pro: respaldos diarios guardados <strong>7 días</strong>. La recuperación a un punto exacto (PITR) es un complemento: pérdida máxima de 2 minutos, desde unos USD 100 al mes. <span class="fuente">(<a href="https://supabase.com/docs/guides/platform/backups">docs · backups</a>)</span></li>
+        <li>Los respaldos de la base <strong>no incluyen los archivos de Storage</strong>, solo sus metadatos. <span class="fuente">(<a href="https://supabase.com/docs/guides/platform/backups">docs · backups</a>)</span></li>
+        <li>El compromiso de disponibilidad (99,9 % mensual con créditos) es solo del plan Enterprise; Pro no tiene SLA. Estado en vivo: <a href="https://status.supabase.com">status.supabase.com</a>. <span class="fuente">(<a href="https://supabase.com/sla">supabase.com/sla</a>)</span></li>
+      </ul>
+
+      <h3>Tratamiento de datos</h3>
+      <ul>
+        <li>Acuerdo de tratamiento de datos (DPA) incluido en los términos, con cláusulas contractuales tipo; aviso de incidentes «sin demora indebida y, de ser posible, en 48 horas». <span class="fuente">(<a href="https://supabase.com/legal/dpa">supabase.com/legal/dpa</a>)</span></li>
+        <li>Al terminar el contrato, el cliente puede pedir sus datos por 30 días; después se borran todas las copias. <span class="fuente">(<a href="https://supabase.com/legal/dpa">DPA</a>)</span></li>
+        <li>Subprocesadores publicados (AWS, Google, Cloudflare y otros), con aviso de cambios a 30 días. <span class="fuente">(<a href="https://supabase.com/legal/subprocessors">supabase.com/legal/subprocessors</a>)</span></li>
+        <li>Responsabilidad compartida: Supabase responde por la infraestructura y los respaldos; el cliente, por accesos, datos, reglas de seguridad por fila y esquema. <span class="fuente">(<a href="https://supabase.com/docs/guides/deployment/shared-responsibility-model">modelo de responsabilidad compartida</a>)</span></li>
+      </ul>
+
+      <h3>La instancia de Iberia</h3>
+      <table class="juntos">
+        <tbody>
+          <tr><td class="clave">Organización y plan</td><td>«Industrias Iberia, C.A», plan Pro</td></tr>
+          <tr><td class="clave">Proyecto</td><td>«Iberia Project», creado el 11 de agosto de 2026</td></tr>
+          <tr><td class="clave">Región</td><td>us-east-1, norte de Virginia (AWS)</td></tr>
+          <tr><td class="clave">Motor y capacidad</td><td>PostgreSQL 17.6 · cómputo Small (2 vCPU compartidos, 2 GB de memoria)</td></tr>
+          <tr><td class="clave">Respaldos</td><td>Diarios físicos, 7 días <span class="sello si">activo</span> · PITR <span class="sello no">no contratado</span></td></tr>
+          <tr><td class="clave">Seguridad por fila (RLS)</td><td>Activa en todas las tablas: cada consulta solo ve lo que su rol permite</td></tr>
+          <tr><td class="clave">Registro de cuentas</td><td>Cerrado: las cuentas solo las crea la administración</td></tr>
+          <tr><td class="clave">Archivos</td><td>Buckets privados; descargas por enlace firmado de corta duración</td></tr>
+          <tr><td class="clave">Secretos</td><td>Credenciales de integraciones en Vault, cifradas</td></tr>
+          <tr><td class="clave">Conexión directa a la base</td><td>Abierta a cualquier red y sin SSL obligatorio <span class="sello no">a reforzar</span></td></tr>
+          <tr><td class="clave">Contraseñas</td><td>Mínimo de 6 caracteres <span class="sello no">a reforzar</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="salto">
+      <h2><span class="num">04</span>Netlify · publicación del sitio y funciones del servidor</h2>
+
+      <h3>La empresa</h3>
+      <ul>
+        <li><strong>Netlify, Inc.</strong>, sociedad de Delaware con sede en San Francisco (101 2nd Street). Contrato bajo la ley de California. <span class="fuente">(<a href="https://www.netlify.com/legal/self-serve-subscription-agreement/">acuerdo de suscripción</a> · <a href="https://www.netlify.com/privacy/">privacidad</a>)</span></li>
+        <li>Fundada en 2014; su cofundador y director ejecutivo es Mathias Biilmann. Empresa privada con USD 212 millones levantados (Andreessen Horowitz, Bessemer, Kleiner Perkins y otros). <span class="fuente">(<a href="https://www.netlify.com/about/">netlify.com/about</a>)</span></li>
+        <li>En noviembre de 2021 levantó USD 105 millones en su Serie D, con una valoración de USD 2.000 millones. <span class="fuente">(<a href="https://www.netlify.com/press/netlify-raises-usd105-million-to-transform-development-for-the-modern-web">nota de prensa</a>)</span></li>
+      </ul>
+
+      <h3>Dónde corre</h3>
+      <ul>
+        <li>Las páginas estáticas se sirven desde su red de distribución global, que la página de producto describe con más de 70 ubicaciones; lo que cambia por persona (las funciones) no se guarda en esa red. <span class="fuente">(<a href="https://docs.netlify.com/build/caching/caching-overview/">docs · caching</a> · <a href="https://www.netlify.com/platform/core/edge/">edge</a>)</span></li>
+        <li>Su infraestructura de cómputo y almacenamiento es <strong>AWS</strong>, en EE. UU. <span class="fuente">(subprocesadores, en el <a href="https://www.netlify.com/trust-center/">Trust Center</a>)</span></li>
+        <li>Las funciones del servidor corren en la región que se elija; las de Iberia están en <strong>us-east-1</strong>, la misma de la base de datos. Las funciones de fondo, como las del asistente, corren hasta 15 minutos. <span class="fuente">(<a href="https://docs.netlify.com/build/functions/configuration/">docs · functions</a> · <a href="https://docs.netlify.com/build/functions/background-functions/">background functions</a>)</span></li>
+        <li>Certificados HTTPS de Let's Encrypt, emitidos y renovados automáticamente; mitigación automática de denegación de servicio en las capas 3, 4 y 7. <span class="fuente">(<a href="https://docs.netlify.com/manage/domains/secure-domains-with-https/https-ssl/">docs · HTTPS</a> · <a href="https://www.netlify.com/security/">security</a>)</span></li>
+      </ul>
+
+      <h3>Certificaciones</h3>
+      <ul>
+        <li><strong>SOC 2 Tipo 2, ISO 27001, ISO 27018, PCI DSS v4.0 y HIPAA</strong>, con auditorías anuales de terceros independientes. <span class="fuente">(<a href="https://www.netlify.com/security/">netlify.com/security</a>)</span></li>
+        <li>El certificado ISO y el acuerdo de tratamiento de datos se descargan libres del Trust Center; el informe SOC 2 y los demás, a solicitud con sesión iniciada. <span class="fuente">(<a href="https://www.netlify.com/trust-center/">Trust Center</a>)</span></li>
+      </ul>
+
+      <h3>Controles de seguridad</h3>
+      <ul>
+        <li>Cifrado en tránsito con <strong>TLS 1.2</strong> como mínimo y en reposo con <strong>AES-256</strong>. <span class="fuente">(<a href="https://www.netlify.com/security/">security</a>)</span></li>
+        <li>Las variables marcadas como secretas son de solo escritura (no se pueden volver a leer) y el escaneo de secretos detiene la publicación si encuentra una clave en el código. <span class="fuente">(<a href="https://docs.netlify.com/build/environment-variables/secrets-controller/">docs · secrets</a>)</span></li>
+        <li>El dueño del equipo puede <strong>exigir la verificación en dos pasos</strong> desde el plan Pro; el registro de auditoría del equipo también está en Pro. El inicio de sesión único (SSO) es solo de Enterprise. <span class="fuente">(<a href="https://docs.netlify.com/manage/security/secure-netlify-access/enforce-2fa/">docs · 2FA</a> · <a href="https://docs.netlify.com/manage/accounts-and-billing/team-management/team-audit-log/">audit log</a>)</span></li>
+        <li>Programa público de recompensas por vulnerabilidades en HackerOne. <span class="fuente">(<a href="https://hackerone.com/netlify/">hackerone.com/netlify</a>)</span></li>
+      </ul>
+
+      <h3>Continuidad y tratamiento de datos</h3>
+      <ul>
+        <li>Cada publicación es atómica y se puede volver a la anterior al instante. El compromiso de disponibilidad (99,99 %) es solo de Enterprise; Pro no tiene SLA. Estado en vivo: <a href="https://www.netlifystatus.com/">netlifystatus.com</a>. <span class="fuente">(<a href="https://docs.netlify.com/deploy/manage-deploys/manage-deploys-overview/">docs · deploys</a> · <a href="https://www.netlify.com/pricing/">pricing</a>)</span></li>
+        <li>Acuerdo de tratamiento de datos (DPA) incorporado al contrato, con cláusulas contractuales tipo y Data Privacy Framework. <span class="fuente">(<a href="https://www.netlify.com/gdpr-ccpa/">GDPR</a> · <a href="https://www.netlify.com/pdf/netlify-dpa.pdf">DPA</a>)</span></li>
+        <li>Los registros de las funciones se guardan hasta 7 días, según el plan. El contrato deja los respaldos del contenido a cargo del cliente: en Iberia, el código vive en GitHub y los datos en Supabase. <span class="fuente">(<a href="https://docs.netlify.com/manage/monitoring/logs/">docs · logs</a> · <a href="https://www.netlify.com/legal/self-serve-subscription-agreement/">acuerdo</a>)</span></li>
+      </ul>
+
+      <h3>La instancia de Iberia</h3>
+      <table class="juntos">
+        <tbody>
+          <tr><td class="clave">Equipo y plan</td><td>«Industrias Iberia», plan Pro</td></tr>
+          <tr><td class="clave">Sitio</td><td>Creado el 17 de agosto de 2026</td></tr>
+          <tr><td class="clave">Dominio</td><td>portal.industriasiberia.com (oficial) · iberiavenezuela.netlify.app (se mantiene para enlaces ya enviados y las apps)</td></tr>
+          <tr><td class="clave">HTTPS</td><td>Obligatorio, certificado automático</td></tr>
+          <tr><td class="clave">Región de las funciones</td><td>us-east-1, la misma de la base de datos</td></tr>
+          <tr><td class="clave">Publicación</td><td>Automática desde el repositorio privado en GitHub, rama principal</td></tr>
+          <tr><td class="clave">Credenciales</td><td>Variables de entorno; nunca en el código ni en el navegador</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ================================================================== -->
+    <section class="salto">
+      <h2><span class="num">05</span>Resend · correo de notificaciones</h2>
+      <div class="nota"><p><strong>Estado:</strong> la integración está construida pero no envía nada hasta que se verifique el subdominio de correo de Iberia con sus registros DNS.</p></div>
+
+      <h3>La empresa</h3>
+      <ul>
+        <li><strong>Plus Five Five, Inc.</strong>, que opera como Resend, con domicilio en 2261 Market Street #5039, San Francisco, California. Términos bajo la ley de California. <span class="fuente">(<a href="https://resend.com/legal/dpa">resend.com/legal/dpa</a> · <a href="https://resend.com/legal/terms-of-service">términos</a>)</span></li>
+        <li>Fundada por Zeno Rocha, Bu Kinoshita y Jonni Lundy; plataforma lanzada en 2023, en Y Combinator. Empresa privada. <span class="fuente">(<a href="https://resend.com/about">resend.com/about</a>)</span></li>
+        <li>En diciembre de 2024 levantó USD 18 millones en su Serie A, liderada por Andreessen Horowitz. <span class="fuente">(<a href="https://resend.com/blog/series-a">resend.com/blog/series-a</a>)</span></li>
+      </ul>
+
+      <h3>Dónde están los datos</h3>
+      <ul>
+        <li>Corre en <strong>AWS</strong>, con el tráfico de su API protegido por Cloudflare. <span class="fuente">(<a href="https://resend.com/legal/subprocessors">subprocesadores</a> · <a href="https://resend.com/handbook/engineering/what-is-our-tech-stack">stack técnico</a>)</span></li>
+        <li>La región de envío se elige por dominio (us-east-1, Irlanda, São Paulo o Tokio), pero el contenido, los registros y la cuenta se guardan en <strong>Estados Unidos</strong> sea cual sea la región. <span class="fuente">(<a href="https://resend.com/docs/dashboard/domains/regions">docs · regions</a>)</span></li>
+      </ul>
+
+      <h3>Certificaciones y controles</h3>
+      <ul>
+        <li><strong>SOC 2 Type II</strong> (auditor Advantage Partners, periodo 1-feb-2025 a 1-feb-2026); el informe se descarga desde la consola. No tiene ISO 27001 ni HIPAA. <span class="fuente">(<a href="https://resend.com/security/soc-2">security · SOC 2</a> · <a href="https://resend.com/security">security</a>)</span></li>
+        <li>Cifrado en tránsito <strong>TLS 1.3</strong> y en reposo <strong>AES-256</strong>; pruebas de penetración externas al menos una vez al año. <span class="fuente">(<a href="https://resend.com/security">resend.com/security</a>)</span></li>
+        <li>El dominio se autentica con SPF y DKIM antes de enviar; DMARC recomendado. Las claves de la API pueden limitarse a «solo enviar» desde un dominio. <span class="fuente">(<a href="https://resend.com/docs/dashboard/domains/introduction">docs · domains</a> · <a href="https://resend.com/docs/api-reference/api-keys/create-api-key">API keys</a>)</span></li>
+        <li>La verificación en dos pasos (MFA) existe pero la activa cada usuario: no se puede exigir a todo el equipo. <span class="fuente">(<a href="https://resend.com/docs/dashboard/settings/team">docs · team</a>)</span></li>
+      </ul>
+
+      <h3>Continuidad y tratamiento de datos</h3>
+      <ul>
+        <li>Sin compromiso de disponibilidad fuera del plan Enterprise (99,99 %). Estado en vivo: <a href="https://resend-status.com">resend-status.com</a>. <span class="fuente">(<a href="https://resend.com/pricing">resend.com/pricing</a>)</span></li>
+        <li>DPA vigente desde que se crea la cuenta, con cláusulas contractuales tipo y Data Privacy Framework. <span class="fuente">(<a href="https://resend.com/legal/dpa">DPA</a>)</span></li>
+        <li>Guarda el contenido y los registros de los correos <strong>30 días</strong> (planes sin Enterprise); al terminar el servicio, borra en un máximo de 90 días. <span class="fuente">(<a href="https://resend.com/docs/knowledge-base/account-quotas-and-limits">docs · límites</a> · <a href="https://resend.com/legal/dpa">DPA</a>)</span></li>
+      </ul>
+    </section>
+
+    <section class="salto">
+      <h2><span class="num">06</span>Lo que recomendamos reforzar</h2>
+      <p class="intro">
+        La plataforma ya opera con cifrado, seguridad por fila y cuentas a nombre de Iberia. Estos ajustes la llevan al nivel
+        que una auditoría suele pedir. La mayoría no tiene costo; los que tienen, lo dicen.
+      </p>
+      <table>
+        <thead><tr><th>#</th><th>Qué</th><th>Por qué</th><th>Costo</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Exigir SSL y restringir por red las conexiones directas a la base (Supabase)</td><td>Hoy la conexión directa acepta cualquier red y no obliga SSL. La plataforma no la usa: entra por las API, que ya van cifradas</td><td>Sin costo</td></tr>
+          <tr><td>2</td><td>Exigir verificación en dos pasos en las consolas de Supabase y Netlify</td><td>Quien entra a la consola puede ver la configuración y los datos. Ambos lo permiten exigir desde el plan Pro</td><td>Sin costo</td></tr>
+          <tr><td>3</td><td>Subir el mínimo de las contraseñas de la plataforma a 10 caracteres y ofrecer verificación en dos pasos a los administradores</td><td>Hoy el mínimo es de 6</td><td>Sin costo; la verificación en dos pasos requiere un desarrollo corto</td></tr>
+          <tr><td>4</td><td>Contratar la recuperación a un punto exacto (PITR) en Supabase</td><td>Con respaldos diarios, la pérdida máxima es de hasta 24 horas; con PITR, de 2 minutos</td><td>Desde unos USD 100 al mes</td></tr>
+          <tr><td>5</td><td>Respaldar aparte los archivos de Storage</td><td>Los respaldos de la base no incluyen los archivos</td><td>Bajo: almacenamiento externo</td></tr>
+          <tr><td>6</td><td>Si la auditoría exige los informes SOC 2 o ISO de Supabase, pasar al plan Team</td><td>Con el plan Pro no se pueden descargar</td><td>USD 599 al mes</td></tr>
+          <tr><td>7</td><td>Abrir la cuenta de Resend a nombre de Iberia, con una clave que solo pueda enviar desde su subdominio, y publicar DMARC</td><td>Que el correo de la empresa dependa de una cuenta propia y con el mínimo permiso</td><td>Sin costo en su plan gratuito</td></tr>
+          <tr><td>8</td><td>Registrar quién administra cada consola y revisarlo cada trimestre</td><td>Cambios de personal; la auditoría pregunta quién tiene acceso</td><td>Sin costo</td></tr>
+        </tbody>
+      </table>
+      <p class="fuente">
+        Fuentes: <a href="https://supabase.com/docs/guides/platform/ssl-enforcement">SSL enforcement</a> ·
+        <a href="https://supabase.com/docs/guides/platform/network-restrictions">network restrictions</a> ·
+        <a href="https://supabase.com/docs/guides/platform/mfa/org-mfa-enforcement">MFA de organización</a> ·
+        <a href="https://docs.netlify.com/manage/security/secure-netlify-access/enforce-2fa/">2FA de Netlify</a> ·
+        <a href="https://supabase.com/docs/guides/platform/backups">backups y PITR</a> ·
+        <a href="https://supabase.com/pricing">planes de Supabase</a> ·
+        <a href="https://resend.com/docs/api-reference/api-keys/create-api-key">claves de Resend</a> ·
+        <a href="https://resend.com/docs/dashboard/domains/dmarc">DMARC</a>
+      </p>
+    </section>
+
+    <!-- ANEXO A -->
+    <section class="salto">
+      <h2><span class="num">A</span>Anexo · proveedores de IA y voz</h2>
+      <p class="intro">El asistente de IA y la voz del curso usan además estos servicios. Ninguno entrena modelos con los datos de Iberia en las condiciones comerciales de su API.</p>
+      <table>
+        <thead><tr><th>Proveedor</th><th>Uso</th><th>Entrenamiento</th><th>Retención</th><th>Certificaciones</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Anthropic</strong><br />Anthropic, PBC · San Francisco</td>
+            <td>Motor principal del asistente (Claude); archivos y ejecución de código</td>
+            <td>No entrena con el contenido del cliente <span class="fuente">(<a href="https://www.anthropic.com/legal/commercial-terms">términos comerciales</a>)</span></td>
+            <td>Entradas y salidas: se borran en 30 días. Archivos subidos: hasta que se borren <span class="fuente">(<a href="https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data">privacy</a> · <a href="https://platform.claude.com/docs/en/build-with-claude/files">Files API</a>)</span></td>
+            <td>SOC 2 Type II, ISO 27001:2022, ISO/IEC 42001:2023 <span class="fuente">(<a href="https://trust.anthropic.com/">trust.anthropic.com</a>)</span></td>
+          </tr>
+          <tr>
+            <td><strong>OpenAI</strong><br />OpenAI OpCo, LLC · San Francisco</td>
+            <td>Motor alternativo del asistente</td>
+            <td>No usa el contenido del cliente salvo autorización expresa <span class="fuente">(<a href="https://openai.com/policies/services-agreement/">services agreement</a>)</span></td>
+            <td>Registros de abuso hasta 30 días; la plataforma pide no guardar estado (<em>store=false</em>) <span class="fuente">(<a href="https://developers.openai.com/api/docs/guides/your-data">your data</a>)</span></td>
+            <td>SOC 2 Type 2, ISO/IEC 27001:2022, 42001:2023 <span class="fuente">(<a href="https://trust.openai.com/">trust.openai.com</a>)</span></td>
+          </tr>
+          <tr>
+            <td><strong>Microsoft</strong><br />Microsoft Corporation · Redmond</td>
+            <td>Azure AI Speech: dictado y voz sintética, región West US 3</td>
+            <td>No usa los datos para mejorar sus modelos de voz <span class="fuente">(<a href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-encryption-of-data-at-rest">Speech · cifrado</a>)</span></td>
+            <td>Dictado y voz en tiempo real: no guarda audio ni texto <span class="fuente">(<a href="https://learn.microsoft.com/en-us/azure/ai-foundry/responsible-ai/speech-service/speech-to-text/data-privacy-security">STT</a> · <a href="https://learn.microsoft.com/en-us/azure/ai-foundry/responsible-ai/speech-service/text-to-speech/data-privacy-security">TTS</a>)</span></td>
+            <td>Azure: SOC 2 Type 2, ISO/IEC 27001:2022 <span class="fuente">(<a href="https://learn.microsoft.com/en-us/azure/compliance/offerings/offering-soc-2">SOC 2</a>)</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="nota">
+        <p>
+          Anthropic procesa por defecto en su región «global» y guarda en EE. UU.; puede limitarse a EE. UU. con un recargo del
+          10 %. Los archivos de su Files API no tienen vencimiento automático: la plataforma borra la copia cuando la persona borra
+          el archivo. <span class="fuente">(<a href="https://platform.claude.com/docs/en/manage-claude/data-residency">data residency</a>)</span>
+        </p>
+      </div>
+    </section>
+
+    <footer class="cierre">
+      Preparado por Boosty Digital para Industrias Iberia, C.A. · 26 de noviembre de 2026. Las fuentes se consultaron en esa
+      fecha en las páginas oficiales de cada proveedor; los proveedores pueden cambiar sus condiciones, y lo que aquí se cita
+      vale a esa fecha. Los informes SOC 2 completos y los certificados ISO los entrega cada proveedor desde su portal.
+    </footer>
+  </body>
