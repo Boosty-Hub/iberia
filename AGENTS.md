@@ -1033,6 +1033,10 @@ El sistema que reemplaza al dashboard para operar a Iberia (Etapa 1 + rediseño 
   `control.modulo`: el plan es dato), zona de trabajo y panel de la ficha. En teléfono (≤ 900 px) todo
   eso va en un `<dialog>` (`MenuTelefono`). El layout lee todo **en una sola tanda** (`Promise.all`): una
   lectura nueva del armazón entra ahí, nunca después.
+- **La barra sigue a los permisos** (26-nov-2026, Gabriel): «Datos al» y el punto de JD salen solo con algún módulo con
+  historia por fecha (estructura, procesos, documentos, escenarios, dotación, costos, requisiciones, auditoría);
+  Realidad/Escenario, con `sistema:escenarios`; Bs/USD, con costos, dotación o requisiciones. Buscar, las tasas, la
+  campana, el soporte y la persona, siempre. Un control nuevo en la barra se amarra igual (`app/sistema/layout.tsx`).
 - **Soporte de Boosty** (26-nov-2026): el botón «Ticket» (`SoporteBoosty`, `components/sistema/shell/soporte-boosty.tsx`) va en la
   barra antes del menú de la persona, con su nombre y correo, y abre el popup de tickets de portal.boosty.digital (Shadow DOM, con
   grabación de pantalla). Solo en `/sistema` (ni el Portal planta ni las apps) y **solo en el dominio de producción**: la clave

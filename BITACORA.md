@@ -95,6 +95,9 @@ cosa: `AGENTS.md` («Mis archivos», «El asistente de IA», «Los tutoriales»,
 - **Gabriel vio en Alcance «Server Action … was not found» (409)**: su pestaña era de antes de un despliegue (hubo varios
   esa tarde). Sin `deploymentId`, Next no se entera de que cambió la versión. Ahora lleva el `DEPLOY_ID` de Netlify y hay un
   aviso para recargar.
+- **La barra, amarrada a los permisos** (Gabriel: a un usuario le salían «Datos al», Realidad/Escenario y Bs/USD sin tener
+  esos módulos). En producción (`0ce9d5a`), andreto ve buscar, tasas, campana, «Ticket» y su persona. El «Ticket» que no
+  le veía era de una pestaña anterior al despliegue del widget.
 
 ---
 
