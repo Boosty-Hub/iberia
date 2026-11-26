@@ -36,6 +36,8 @@ export async function enviarMensaje(entrada: {
   esfuerzo: Esfuerzo
   /** En un chat compartido: false = un mensaje para el grupo, sin preguntarle al asistente (no gasta). */
   alAsistente?: boolean
+  /** Investigación profunda (fase 5): más vueltas, más búsquedas y su propio tope. */
+  investigacion?: boolean
 }): Promise<Resultado<{ chatId: string; turnoId: string | null; mensajeId: string }>> {
   const sesion = await requerirPermiso('sistema:asistente')
   const texto = entrada.texto.trim()
@@ -85,7 +87,7 @@ export async function enviarMensaje(entrada: {
   }
 
   const turnoId = crypto.randomUUID()
-  const { error: eTurno } = await db.from('turno').insert({ id: turnoId, chat_id: chatId, solicitante: sesion.userId, motor, modelo: modelo.id, esfuerzo })
+  const { error: eTurno } = await db.from('turno').insert({ id: turnoId, chat_id: chatId, solicitante: sesion.userId, motor, modelo: modelo.id, esfuerzo, modo: entrada.investigacion ? 'investigacion' : 'normal' })
   if (eTurno) return { ok: false, error: 'No se pudo dejar el turno en cola.' }
   const mensajeId = crypto.randomUUID()
   const { error: eMensaje } = await db

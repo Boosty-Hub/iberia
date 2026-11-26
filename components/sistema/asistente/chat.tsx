@@ -28,6 +28,7 @@ import { CompartirObjeto, PanelCompartirChat } from './compartir'
 import { useRouter } from 'next/navigation'
 import { aWavDe16k, formatoDeGrabacion } from '@/lib/wav'
 import { MarkdownChat } from './markdown-chat'
+import { MantenerAlDia, TarjetaPropuesta } from './tareas-chat'
 import { cn } from '@/lib/utils'
 
 type Paso = Extract<Bloque, { tipo: 'paso' }>
@@ -83,6 +84,10 @@ export function ChatAsistente(props: {
   participantes: { perfil_id: string; nombre: string; rol: string }[]
   fuentesDelChat: string[]
   atajos: { id: string; comando: string; titulo: string; instruccion: string; modelo: string | null; esfuerzo: string | null; empresa: boolean }[]
+  /** Los mensajes de este chat cuya propuesta de tarea ya se programó. */
+  tareasProgramadas: string[]
+  /** Si el chat es el resultado de una tarea programada. */
+  deTarea: { nombre: string; tipo: 'tarea' | 'tablero' } | null
 }) {
   const supabase = useMemo(() => createClient(), [])
   const [politica, setPolitica] = useState(props.politica)
@@ -110,6 +115,8 @@ export function ChatAsistente(props: {
   const [arrastrando, setArrastrando] = useState(false)
   const [panelCompartir, setPanelCompartir] = useState(false)
   const [alAsistente, setAlAsistente] = useState(true)
+  const [investigacion, setInvestigacion] = useState(false)
+  const programadas = useMemo(() => new Set(props.tareasProgramadas), [props.tareasProgramadas])
   const router = useRouter()
   const nombreDe = useMemo(() => new Map(props.participantes.map((p) => [p.perfil_id, p.nombre])), [props.participantes])
   const [grabando, setGrabando] = useState<'no' | 'grabando' | 'transcribiendo'>('no')
@@ -358,7 +365,8 @@ export function ChatAsistente(props: {
       const paraElAsistente = !props.compartido || alAsistente
       if (paraElAsistente) setTurno({ id: 'pendiente', estado: 'en_cola', texto: '', pensamiento: '', pasos: [], bloques: [], inicio: Date.now() })
       pegado.current = true
-      const r = await enviarMensaje({ chatId: id, texto: t, adjuntos: listos.map((a) => a.archivoId!), modelo, esfuerzo, alAsistente: paraElAsistente })
+      const r = await enviarMensaje({ chatId: id, texto: t, adjuntos: listos.map((a) => a.archivoId!), modelo, esfuerzo, alAsistente: paraElAsistente, investigacion: paraElAsistente && investigacion })
+      setInvestigacion(false)
       if (!r.ok) {
         setMensajes((m) => m.filter((x) => x.id !== temporal))
         setTexto(t)
@@ -486,6 +494,15 @@ export function ChatAsistente(props: {
             </button>
           )}
         </div>
+        {props.deTarea && (
+          <p className="flex flex-wrap items-center gap-2 border-b border-[var(--borde)] bg-marca-50 px-3 py-1.5 text-[12px] text-marca-600">
+            <span aria-hidden>⏱</span>
+            Resultado de {props.deTarea.tipo === 'tablero' ? 'el tablero vivo' : 'la tarea programada'} «{props.deTarea.nombre}», hecho con tus permisos de ese día.
+            <Link href="/sistema/asistente/tareas" className="font-semibold text-acento-700 hover:underline">
+              Ver tareas
+            </Link>
+          </p>
+        )}
         {panelCompartir && chatId && (
           <PanelCompartirChat
             chatId={chatId}
@@ -510,7 +527,7 @@ export function ChatAsistente(props: {
               m.rol === 'usuario' ? (
                 <MensajeUsuario key={m.id} m={m} archivos={archivos} autor={props.compartido && m.autor && m.autor !== props.yo.id ? (nombreDe.get(m.autor) ?? 'Alguien') : null} />
               ) : (
-                <MensajeAsistente key={m.id} m={m} archivos={archivos} onHtml={setHtml} />
+                <MensajeAsistente key={m.id} m={m} archivos={archivos} onHtml={setHtml} chatId={chatId} programadas={programadas} />
               )
             )}
             {turno && <TurnoVivo turno={turno} archivos={archivos} onHtml={setHtml} />}
@@ -613,6 +630,16 @@ export function ChatAsistente(props: {
                     </option>
                   ))}
                 </select>
+                <button
+                  type="button"
+                  aria-pressed={investigacion}
+                  disabled={sinHabilitar || (props.compartido && !alAsistente)}
+                  onClick={() => setInvestigacion((x) => !x)}
+                  title="Investiga a fondo en internet, la plataforma y tus archivos, y entrega un informe con fuentes. Puede tardar varios minutos."
+                  className={cn('btn-neutro h-8 px-2.5 text-[12.5px]', investigacion && 'border-acento-300 bg-acento-50 text-acento-700')}
+                >
+                  🔎 Investigación
+                </button>
                 {props.compartido && (
                   <label className="inline-flex items-center gap-1.5 text-[12px] text-marca-600">
                     <input type="checkbox" checked={alAsistente} onChange={(e) => setAlAsistente(e.target.checked)} />
@@ -631,6 +658,12 @@ export function ChatAsistente(props: {
                 )}
               </div>
             </div>
+            {investigacion && (
+              <p className="mt-1.5 text-center text-[11.5px] text-acento-700">
+                Investigación profunda: arma un plan, busca a fondo y entrega un informe con fuentes. Puede tardar varios minutos
+                {politica?.tope_investigacion_usd ? ` y gastar hasta ${usd(politica.tope_investigacion_usd)}` : ''}; te aviso al terminar.
+              </p>
+            )}
             <p className="mt-1.5 text-center text-[11px] text-marca-400">{AVISO_RESGUARDO}</p>
           </div>
         </div>
@@ -739,15 +772,33 @@ function Pensamiento({ texto }: { texto: string }) {
   )
 }
 
-function Entregables({ bloques, archivos, onHtml }: { bloques: Bloque[]; archivos: Map<string, ArchivoVista>; onHtml: (h: Abierto) => void }) {
+function Entregables({
+  bloques,
+  archivos,
+  onHtml,
+  chatId,
+  mensajeId,
+  programada,
+}: {
+  bloques: Bloque[]
+  archivos: Map<string, ArchivoVista>
+  onHtml: (h: Abierto) => void
+  chatId: string | null
+  mensajeId: string | null
+  programada: boolean
+}) {
+  const propuestas = bloques.filter((b): b is Extract<Bloque, { tipo: 'propuesta_tarea' }> => b.tipo === 'propuesta_tarea')
   const archivosB = bloques.filter((b): b is Extract<Bloque, { tipo: 'archivo' }> => b.tipo === 'archivo')
   const artefactos = bloques.map(comoArtefacto).filter((a): a is Abierto => !!a)
   const fuentes = bloques.filter((b): b is Extract<Bloque, { tipo: 'fuente' }> => b.tipo === 'fuente')
   const recuerdos = bloques.filter((b): b is Extract<Bloque, { tipo: 'memoria' }> => b.tipo === 'memoria')
   const notas = bloques.filter((b): b is Extract<Bloque, { tipo: 'nota' }> => b.tipo === 'nota')
-  if (!archivosB.length && !artefactos.length && !fuentes.length && !recuerdos.length && !notas.length) return null
+  if (!archivosB.length && !artefactos.length && !fuentes.length && !recuerdos.length && !notas.length && !propuestas.length) return null
   return (
     <div className="mt-3 flex flex-col gap-2">
+      {propuestas.map((p, i) => (
+        <TarjetaPropuesta key={`${p.propuesta.nombre}-${i}`} propuesta={p.propuesta} chatId={chatId} mensajeId={mensajeId} programada={programada} />
+      ))}
       {notas.map((n) => (
         <p key={n.texto} className="text-[11.5px] text-marca-500 italic">
           {n.texto}
@@ -835,7 +886,19 @@ function Recuerdo({ id, texto }: { id: string; texto: string }) {
   )
 }
 
-function MensajeAsistente({ m, archivos, onHtml }: { m: MensajeVista; archivos: Map<string, ArchivoVista>; onHtml: (h: Abierto) => void }) {
+function MensajeAsistente({
+  m,
+  archivos,
+  onHtml,
+  chatId,
+  programadas,
+}: {
+  m: MensajeVista
+  archivos: Map<string, ArchivoVista>
+  onHtml: (h: Abierto) => void
+  chatId: string | null
+  programadas: Set<string>
+}) {
   const [voto, setVoto] = useState<number | null>(m.calificacion)
   const [copiado, setCopiado] = useState(false)
   const pasos = m.bloques.filter((b): b is Paso => b.tipo === 'paso')
@@ -850,7 +913,7 @@ function MensajeAsistente({ m, archivos, onHtml }: { m: MensajeVista; archivos: 
       <Pasos pasos={pasos} />
       <Pensamiento texto={pensamiento} />
       <MarkdownChat contenido={m.texto} />
-      <Entregables bloques={m.bloques} archivos={archivos} onHtml={onHtml} />
+      <Entregables bloques={m.bloques} archivos={archivos} onHtml={onHtml} chatId={chatId} mensajeId={m.id} programada={programadas.has(m.id)} />
       <div className="mt-1.5 flex gap-1 text-[12px] text-marca-400 opacity-70 group-hover:opacity-100">
         <button type="button" aria-label="Copiar la respuesta" className="rounded px-1.5 py-0.5 hover:bg-marca-100 hover:text-marca-700" onClick={async () => { await navigator.clipboard.writeText(m.texto); setCopiado(true); setTimeout(() => setCopiado(false), 1500) }}>
           {copiado ? 'Copiado' : 'Copiar'}
@@ -886,7 +949,7 @@ function TurnoVivo({ turno, archivos, onHtml }: { turno: TurnoEnCurso; archivos:
         <MarkdownChat contenido={turno.texto} />
       )}
       {turno.pensamiento && sinTexto && <p className="mt-1.5 line-clamp-3 border-l-2 border-marca-200 pl-3 text-[12.5px] text-marca-400">{turno.pensamiento.slice(-400)}</p>}
-      <Entregables bloques={turno.bloques} archivos={archivos} onHtml={onHtml} />
+      <Entregables bloques={turno.bloques} archivos={archivos} onHtml={onHtml} chatId={null} mensajeId={null} programada={false} />
     </div>
   )
 }
@@ -938,7 +1001,7 @@ function PanelArtefacto({
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-white xl:static xl:z-auto xl:w-[50%] xl:shrink-0 xl:rounded-xl xl:border xl:border-[var(--borde)]">
       <div className="flex flex-wrap items-center gap-2 border-b border-[var(--borde)] px-3 py-2">
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 basis-[220px]">
           <p className="truncate text-[13.5px] font-semibold text-marca-900">{abierto.titulo}</p>
           <p className="text-[11.5px] text-marca-500">{ETIQUETA_CLASE[abierto.clase]}{abierto.version < ultima ? ' · versión anterior' : ''}</p>
         </div>
@@ -970,6 +1033,7 @@ function PanelArtefacto({
         <a href={`/sistema/asistente/html/${abierto.id}?descargar=1`} className="btn-neutro h-8 px-2.5 text-[12px]">
           Descargar
         </a>
+        <MantenerAlDia htmlId={abierto.id} />
         <CompartirObjeto tipo="html" id={abierto.id} />
         <button type="button" className="btn-neutro h-8 px-2.5 text-[12px]" onClick={onCerrar} aria-label="Cerrar el artefacto">
           ✕

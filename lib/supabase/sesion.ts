@@ -41,6 +41,7 @@ const RUTAS_PUBLICAS = [
   // la ruta exige `ASISTENTE_SECRETO` y el token de la sesión de quien pregunta,
   // con el que corre cada consulta (la RLS de siempre).
   '/api/asistente/fuente',
+  '/api/asistente/programador',
 ]
 
 export async function updateSession(request: NextRequest) {

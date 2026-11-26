@@ -17,10 +17,21 @@ export type MensajeVista = {
 export type ArchivoVista = { id: string; nombre: string; mime: string; bytes: number; origen: 'subido' | 'generado' }
 export type TurnoVista = { id: string; estado: EstadoTurno; error: string | null; modelo: string; esfuerzo: string; creado_en: string }
 
-/** Los chats de quien mira, los más recientes primero (la RLS deja solo los suyos). */
+/**
+ * Los chats de quien mira, los más recientes primero (la RLS deja solo los suyos).
+ * Sin los de las corridas de tareas: llegan por la campana y por Tareas › Historial,
+ * y una tarea diaria llenaría la lista en una semana.
+ */
 export async function leerChats(limite = 100): Promise<ChatLista[]> {
   const supabase = await createClient()
-  const { data } = await supabase.schema('asistente').from('chat').select('id, titulo, actualizado_en, compartido').eq('archivado', false).order('actualizado_en', { ascending: false }).limit(limite)
+  const { data } = await supabase
+    .schema('asistente')
+    .from('chat')
+    .select('id, titulo, actualizado_en, compartido')
+    .eq('archivado', false)
+    .is('tarea_id', null)
+    .order('actualizado_en', { ascending: false })
+    .limit(limite)
   return (data ?? []) as ChatLista[]
 }
 
@@ -29,7 +40,7 @@ export async function leerChat(chatId: string) {
   const supabase = await createClient()
   const db = supabase.schema('asistente')
   const [{ data: chat }, { data: mensajes }, { data: archivos }, { data: turnos }] = await Promise.all([
-    db.from('chat').select('id, titulo, dueno, compartido, modelo, esfuerzo, proyecto_id').eq('id', chatId).maybeSingle(),
+    db.from('chat').select('id, titulo, dueno, compartido, modelo, esfuerzo, proyecto_id, tarea_id').eq('id', chatId).maybeSingle(),
     db.from('mensaje').select('id, rol, texto, bloques, adjuntos, turno_id, autor, calificacion, creado_en').eq('chat_id', chatId).order('creado_en', { ascending: false }).limit(200),
     db.from('archivo').select('id, nombre, mime, bytes, origen').eq('chat_id', chatId),
     db.from('turno').select('id, estado, error, modelo, esfuerzo, creado_en').eq('chat_id', chatId).order('creado_en', { ascending: false }).limit(1),

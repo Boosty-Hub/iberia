@@ -37,8 +37,14 @@ un PR de afuera.
 |---|---|---|
 | `ASISTENTE_SECRETO` | producción · secreta | El secreto entre la acción que dispara un turno y la función de fondo `asistente-turno-background`. 32 bytes al azar, en hexadecimal; el de `.env.local` sirve para local |
 | `ASISTENTE_EJECUTOR` | producción | `netlify`: los turnos van a la función de fondo (hasta 15 min). Sin ella, `lanzarTurno()` lo deduce de las variables de Netlify |
+| `ASISTENTE_TRAMO_MS` | — (no se carga) | Solo para probar: el tramo tras el que un turno largo guarda su estado y sigue en otra invocación. En Netlify vale 12 min sin la variable |
+| `ASISTENTE_CORREO_DESVIO` | — (🔴 nunca en Netlify) | Solo para el dev de pruebas: manda todo correo de las tareas a esa dirección (`delivered@resend.dev`, la casilla de prueba de Resend) |
 
-Usa además `ANTHROPIC_API_KEY_SALDO`, `OPENAI_API_KEY` y `SUPABASE_SECRET_KEY`, que ya están. ⚠️ El límite global por
+Usa además `ANTHROPIC_API_KEY_SALDO`, `OPENAI_API_KEY`, `RESEND_API_KEY` y `SUPABASE_SECRET_KEY`, que ya están.
+**El reloj de las tareas programadas (fase 5)** no es una variable: es un trabajo de pg_cron que se monta una vez con
+`node --env-file=.env.local scripts/asistente/montar-programador.mjs --destino produccion --confirmo` (guarda
+`ASISTENTE_SECRETO` en Vault y llama cada minuto a `/api/asistente/programador`; tiene que ser **el mismo** secreto que el de
+Netlify). El remitente del correo se pone en Administración › Asistente de IA › Motor cuando Resend verifique el dominio de Iberia. ⚠️ El límite global por
 archivo de Storage del proyecto tiene que subir a 100 MB (hoy 50 MB): el bucket `asistente` admite 100 MB.
 
 ### Los avisos de la app de iOS — ⚠️ todavía sin cargar

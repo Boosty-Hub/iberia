@@ -179,6 +179,7 @@ export type Database = {
           modelo: string | null
           motor: string | null
           proyecto_id: string | null
+          tarea_id: string | null
           titulo: string
           titulo_auto: boolean
         }
@@ -195,6 +196,7 @@ export type Database = {
           modelo?: string | null
           motor?: string | null
           proyecto_id?: string | null
+          tarea_id?: string | null
           titulo?: string
           titulo_auto?: boolean
         }
@@ -211,6 +213,7 @@ export type Database = {
           modelo?: string | null
           motor?: string | null
           proyecto_id?: string | null
+          tarea_id?: string | null
           titulo?: string
           titulo_auto?: boolean
         }
@@ -220,6 +223,13 @@ export type Database = {
             columns: ["proyecto_id"]
             isOneToOne: false
             referencedRelation: "proyecto"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_tarea_id_fkey"
+            columns: ["tarea_id"]
+            isOneToOne: false
+            referencedRelation: "tarea"
             referencedColumns: ["id"]
           },
         ]
@@ -258,53 +268,74 @@ export type Database = {
         Row: {
           actualizado_en: string
           actualizado_por: string | null
+          correo_nombre: string
+          correo_remitente: string | null
           cuota_mb: number
           encendido: boolean
           esfuerzo_defecto: string
           esfuerzo_max: string
+          frecuencia_min_min: number
           habilidades: string[]
           id: boolean
           instrucciones_empresa: string
+          max_tareas: number
           modelo_anthropic: string
           modelo_openai: string
           motor: string
+          programador_pausado: boolean
           tope_diario_usd: number
+          tope_investigacion_usd: number
           tope_mensual_empresa_usd: number
           tope_mensual_usd: number
+          whatsapp_plantilla: string | null
         }
         Insert: {
           actualizado_en?: string
           actualizado_por?: string | null
+          correo_nombre?: string
+          correo_remitente?: string | null
           cuota_mb?: number
           encendido?: boolean
           esfuerzo_defecto?: string
           esfuerzo_max?: string
+          frecuencia_min_min?: number
           habilidades?: string[]
           id?: boolean
           instrucciones_empresa?: string
+          max_tareas?: number
           modelo_anthropic?: string
           modelo_openai?: string
           motor?: string
+          programador_pausado?: boolean
           tope_diario_usd?: number
+          tope_investigacion_usd?: number
           tope_mensual_empresa_usd?: number
           tope_mensual_usd?: number
+          whatsapp_plantilla?: string | null
         }
         Update: {
           actualizado_en?: string
           actualizado_por?: string | null
+          correo_nombre?: string
+          correo_remitente?: string | null
           cuota_mb?: number
           encendido?: boolean
           esfuerzo_defecto?: string
           esfuerzo_max?: string
+          frecuencia_min_min?: number
           habilidades?: string[]
           id?: boolean
           instrucciones_empresa?: string
+          max_tareas?: number
           modelo_anthropic?: string
           modelo_openai?: string
           motor?: string
+          programador_pausado?: boolean
           tope_diario_usd?: number
+          tope_investigacion_usd?: number
           tope_mensual_empresa_usd?: number
           tope_mensual_usd?: number
+          whatsapp_plantilla?: string | null
         }
         Relationships: []
       }
@@ -339,6 +370,82 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "consulta_fuente_turno_id_fkey"
+            columns: ["turno_id"]
+            isOneToOne: false
+            referencedRelation: "turno"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corrida: {
+        Row: {
+          chat_id: string | null
+          creado_en: string
+          dueno: string
+          empezado_en: string | null
+          entregas: Json
+          error: string | null
+          estado: string
+          id: string
+          intento: number
+          manual: boolean
+          programada_para: string
+          reintentar_en: string | null
+          tarea_id: string
+          terminado_en: string | null
+          turno_id: string | null
+        }
+        Insert: {
+          chat_id?: string | null
+          creado_en?: string
+          dueno: string
+          empezado_en?: string | null
+          entregas?: Json
+          error?: string | null
+          estado?: string
+          id?: string
+          intento?: number
+          manual?: boolean
+          programada_para: string
+          reintentar_en?: string | null
+          tarea_id: string
+          terminado_en?: string | null
+          turno_id?: string | null
+        }
+        Update: {
+          chat_id?: string | null
+          creado_en?: string
+          dueno?: string
+          empezado_en?: string | null
+          entregas?: Json
+          error?: string | null
+          estado?: string
+          id?: string
+          intento?: number
+          manual?: boolean
+          programada_para?: string
+          reintentar_en?: string | null
+          tarea_id?: string
+          terminado_en?: string | null
+          turno_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corrida_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chat"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corrida_tarea_id_fkey"
+            columns: ["tarea_id"]
+            isOneToOne: false
+            referencedRelation: "tarea"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corrida_turno_id_fkey"
             columns: ["turno_id"]
             isOneToOne: false
             referencedRelation: "turno"
@@ -664,6 +771,8 @@ export type Database = {
           actualizado_por: string | null
           cuota_mb: number | null
           esfuerzo_max: string | null
+          frecuencia_min_min: number | null
+          max_tareas: number | null
           modelos: string[] | null
           puede_compartir: boolean | null
           puede_programar: boolean | null
@@ -676,6 +785,8 @@ export type Database = {
           actualizado_por?: string | null
           cuota_mb?: number | null
           esfuerzo_max?: string | null
+          frecuencia_min_min?: number | null
+          max_tareas?: number | null
           modelos?: string[] | null
           puede_compartir?: boolean | null
           puede_programar?: boolean | null
@@ -688,6 +799,8 @@ export type Database = {
           actualizado_por?: string | null
           cuota_mb?: number | null
           esfuerzo_max?: string | null
+          frecuencia_min_min?: number | null
+          max_tareas?: number | null
           modelos?: string[] | null
           puede_compartir?: boolean | null
           puede_programar?: boolean | null
@@ -703,7 +816,9 @@ export type Database = {
           actualizado_por: string | null
           cuota_mb: number | null
           esfuerzo_max: string | null
+          frecuencia_min_min: number | null
           habilitado: boolean | null
+          max_tareas: number | null
           modelos: string[] | null
           nota: string | null
           perfil_id: string
@@ -717,7 +832,9 @@ export type Database = {
           actualizado_por?: string | null
           cuota_mb?: number | null
           esfuerzo_max?: string | null
+          frecuencia_min_min?: number | null
           habilitado?: boolean | null
+          max_tareas?: number | null
           modelos?: string[] | null
           nota?: string | null
           perfil_id: string
@@ -731,7 +848,9 @@ export type Database = {
           actualizado_por?: string | null
           cuota_mb?: number | null
           esfuerzo_max?: string | null
+          frecuencia_min_min?: number | null
           habilitado?: boolean | null
+          max_tareas?: number | null
           modelos?: string[] | null
           nota?: string | null
           perfil_id?: string
@@ -787,11 +906,125 @@ export type Database = {
         }
         Relationships: []
       }
+      tarea: {
+        Row: {
+          actualizado_en: string
+          cada_horas: number | null
+          canales: string[]
+          creado_en: string
+          destinatarios: string[]
+          dia_mes: number | null
+          dias: number[]
+          dueno: string
+          en_mi_dia: boolean
+          esfuerzo: string | null
+          estado: string
+          fallas_seguidas: number
+          frecuencia: string
+          fuentes_usadas: string[]
+          hora: string
+          html_grupo: string | null
+          id: string
+          instruccion: string
+          modelo: string | null
+          nombre: string
+          origen_chat: string | null
+          origen_mensaje: string | null
+          pausada_motivo: string | null
+          proxima_en: string | null
+          proyecto_id: string | null
+          tipo: string
+          ultima_en: string | null
+        }
+        Insert: {
+          actualizado_en?: string
+          cada_horas?: number | null
+          canales?: string[]
+          creado_en?: string
+          destinatarios?: string[]
+          dia_mes?: number | null
+          dias?: number[]
+          dueno?: string
+          en_mi_dia?: boolean
+          esfuerzo?: string | null
+          estado?: string
+          fallas_seguidas?: number
+          frecuencia: string
+          fuentes_usadas?: string[]
+          hora?: string
+          html_grupo?: string | null
+          id?: string
+          instruccion: string
+          modelo?: string | null
+          nombre: string
+          origen_chat?: string | null
+          origen_mensaje?: string | null
+          pausada_motivo?: string | null
+          proxima_en?: string | null
+          proyecto_id?: string | null
+          tipo?: string
+          ultima_en?: string | null
+        }
+        Update: {
+          actualizado_en?: string
+          cada_horas?: number | null
+          canales?: string[]
+          creado_en?: string
+          destinatarios?: string[]
+          dia_mes?: number | null
+          dias?: number[]
+          dueno?: string
+          en_mi_dia?: boolean
+          esfuerzo?: string | null
+          estado?: string
+          fallas_seguidas?: number
+          frecuencia?: string
+          fuentes_usadas?: string[]
+          hora?: string
+          html_grupo?: string | null
+          id?: string
+          instruccion?: string
+          modelo?: string | null
+          nombre?: string
+          origen_chat?: string | null
+          origen_mensaje?: string | null
+          pausada_motivo?: string | null
+          proxima_en?: string | null
+          proyecto_id?: string | null
+          tipo?: string
+          ultima_en?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tarea_origen_chat_fkey"
+            columns: ["origen_chat"]
+            isOneToOne: false
+            referencedRelation: "chat"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarea_origen_mensaje_fkey"
+            columns: ["origen_mensaje"]
+            isOneToOne: false
+            referencedRelation: "mensaje"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarea_proyecto_id_fkey"
+            columns: ["proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "proyecto"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       turno: {
         Row: {
           busquedas: number
           categoria: string | null
           chat_id: string
+          continuacion: Json | null
+          corrida_id: string | null
           costo_usd: number
           creado_en: string
           detener: boolean
@@ -803,6 +1036,7 @@ export type Database = {
           id: string
           latido: string | null
           modelo: string
+          modo: string
           motor: string
           primer_token_ms: number | null
           reserva_usd: number
@@ -813,11 +1047,14 @@ export type Database = {
           tokens_cache_lee: number
           tokens_entrada: number
           tokens_salida: number
+          tramos: number
         }
         Insert: {
           busquedas?: number
           categoria?: string | null
           chat_id: string
+          continuacion?: Json | null
+          corrida_id?: string | null
           costo_usd?: number
           creado_en?: string
           detener?: boolean
@@ -829,6 +1066,7 @@ export type Database = {
           id?: string
           latido?: string | null
           modelo: string
+          modo?: string
           motor: string
           primer_token_ms?: number | null
           reserva_usd?: number
@@ -839,11 +1077,14 @@ export type Database = {
           tokens_cache_lee?: number
           tokens_entrada?: number
           tokens_salida?: number
+          tramos?: number
         }
         Update: {
           busquedas?: number
           categoria?: string | null
           chat_id?: string
+          continuacion?: Json | null
+          corrida_id?: string | null
           costo_usd?: number
           creado_en?: string
           detener?: boolean
@@ -855,6 +1096,7 @@ export type Database = {
           id?: string
           latido?: string | null
           modelo?: string
+          modo?: string
           motor?: string
           primer_token_ms?: number | null
           reserva_usd?: number
@@ -865,6 +1107,7 @@ export type Database = {
           tokens_cache_lee?: number
           tokens_entrada?: number
           tokens_salida?: number
+          tramos?: number
         }
         Relationships: [
           {
@@ -872,6 +1115,13 @@ export type Database = {
             columns: ["chat_id"]
             isOneToOne: false
             referencedRelation: "chat"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "turno_corrida_id_fkey"
+            columns: ["corrida_id"]
+            isOneToOne: false
+            referencedRelation: "corrida"
             referencedColumns: ["id"]
           },
         ]
@@ -919,6 +1169,7 @@ export type Database = {
           turnos: number
         }[]
       }
+      correr_ahora: { Args: { p_tarea: string }; Returns: string }
       fuentes_del_chat: {
         Args: { p_chat: string }
         Returns: {
@@ -977,9 +1228,43 @@ export type Database = {
       }
       plano: { Args: { t: string }; Returns: string }
       politica_de: { Args: { p_perfil: string }; Returns: Json }
+      proxima_ejecucion: {
+        Args: {
+          p_desde: string
+          t: Database["asistente"]["Tables"]["tarea"]["Row"]
+        }
+        Returns: string
+      }
       reservar_turno: {
         Args: { p_reserva_usd: number; p_turno: string }
         Returns: string
+      }
+      tareas_resumen: { Args: never; Returns: Json }
+      tomar_vencidas: {
+        Args: { p_ahora?: string; p_limite?: number }
+        Returns: {
+          chat_id: string | null
+          creado_en: string
+          dueno: string
+          empezado_en: string | null
+          entregas: Json
+          error: string | null
+          estado: string
+          id: string
+          intento: number
+          manual: boolean
+          programada_para: string
+          reintentar_en: string | null
+          tarea_id: string
+          terminado_en: string | null
+          turno_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "corrida"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
     }
     Enums: {

@@ -2,7 +2,8 @@ import 'server-only'
 import { after } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import type { ModeloCatalogo, Politica } from '@/lib/asistente/tipos'
-import { secretoAsistente } from '@/lib/asistente/motor/servicio'
+import { enNetlify, secretoAsistente } from '@/lib/asistente/motor/servicio'
+import type { OpcionesTurno } from '@/lib/asistente/motor/ejecutor'
 
 /** La política efectiva de quien tiene la sesión (habilitación, modelos, topes, gasto). */
 export async function miPolitica(): Promise<Politica | null> {
@@ -34,31 +35,25 @@ export async function tokenDeSesion(): Promise<string | null> {
   return s?.access_token ?? null
 }
 
-/** ¿Corre en Netlify? Ahí el turno va a la función de fondo (hasta 15 min); en local, en `after()`. */
-function enNetlify(): boolean {
-  if (process.env.ASISTENTE_EJECUTOR === 'local') return false
-  if (process.env.ASISTENTE_EJECUTOR === 'netlify') return true
-  return !!(process.env.NETLIFY || process.env.SITE_ID || process.env.DEPLOY_URL)
-}
 
 /**
  * Dispara el turno sin esperarlo. En Netlify, la función de fondo responde 202
  * en el acto y sigue sola; la pantalla se entera por Realtime. En local corre
  * dentro de `after()`: la respuesta ya salió y no hay límite de tiempo.
  */
-export async function lanzarTurno(turnoId: string, origen: string, token: string | null): Promise<void> {
+export async function lanzarTurno(turnoId: string, origen: string, token: string | null, extra: Omit<OpcionesTurno, 'token'> = {}): Promise<void> {
   if (enNetlify()) {
     const base = process.env.URL || process.env.NEXT_PUBLIC_SITE_URL || origen
     const r = await fetch(`${base}/.netlify/functions/asistente-turno-background`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-asistente-secreto': secretoAsistente() },
-      body: JSON.stringify({ turno: turnoId, token }),
+      body: JSON.stringify({ turno: turnoId, token, ...extra }),
     })
     if (r.status !== 202 && !r.ok) throw new Error(`No se pudo lanzar el turno (${r.status}).`)
     return
   }
   after(async () => {
     const { ejecutarTurno } = await import('@/lib/asistente/motor/ejecutor')
-    await ejecutarTurno(turnoId, { token })
+    await ejecutarTurno(turnoId, { token, ...extra })
   })
 }

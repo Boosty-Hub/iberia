@@ -40,6 +40,13 @@ export type ConfigVista = {
   cuota_mb: number
   esfuerzo_max: Esfuerzo
   instrucciones_empresa: string
+  programador_pausado: boolean
+  max_tareas: number
+  frecuencia_min_min: number
+  tope_investigacion_usd: number
+  correo_remitente: string | null
+  correo_nombre: string
+  whatsapp_plantilla: string | null
 }
 
 export function FormMotor({
@@ -133,6 +140,46 @@ export function FormMotor({
         </div>
       </section>
 
+      <section className="rounded-xl border border-[var(--borde)] bg-white p-4 lg:col-span-2">
+        <h2 className="text-[14px] font-semibold text-marca-900">Tareas programadas e investigación</h2>
+        <p className="mt-0.5 text-[12.5px] text-marca-500">
+          Las tareas corren a nombre de su dueño, con sus permisos de ese día y contra sus topes. Lo de abajo vale para quien no tiene otro valor en su rol o en su excepción.
+        </p>
+        <label className="mt-3 flex items-center gap-2.5 text-[13px] text-marca-800">
+          <input type="checkbox" disabled={!editable} checked={c.programador_pausado} onChange={(e) => setC({ ...c, programador_pausado: e.target.checked })} />
+          Pausar todas las tareas programadas de la empresa
+        </label>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Numero etiqueta="Máximo de tareas activas por persona" valor={c.max_tareas} editable={editable} onCambio={(v) => setC({ ...c, max_tareas: v })} />
+          <div>
+            <label className={rotulo} htmlFor="frec-min">Frecuencia máxima</label>
+            <select id="frec-min" className={cn(campo, 'w-full')} disabled={!editable} value={c.frecuencia_min_min} onChange={(e) => setC({ ...c, frecuencia_min_min: Number(e.target.value) })}>
+              {[60, 120, 240, 360, 720, 1440].map((m) => (
+                <option key={m} value={m}>
+                  {m === 1440 ? 'Una vez al día' : `Una vez cada ${m / 60} ${m === 60 ? 'hora' : 'horas'}`}
+                </option>
+              ))}
+            </select>
+          </div>
+          <Numero etiqueta="Tope por investigación profunda (US$)" valor={c.tope_investigacion_usd} editable={editable} onCambio={(v) => setC({ ...c, tope_investigacion_usd: v })} />
+          <div />
+          <div>
+            <label className={rotulo} htmlFor="correo-rem">Remitente del correo (verificado en Resend)</label>
+            <input id="correo-rem" className={cn(campo, 'w-full')} disabled={!editable} placeholder="asistente@…iberia" value={c.correo_remitente ?? ''} onChange={(e) => setC({ ...c, correo_remitente: e.target.value })} />
+            <p className="mt-1 text-[11.5px] text-marca-500">{c.correo_remitente ? 'El correo sale desde aquí.' : 'Vacío: el canal de correo queda pendiente.'}</p>
+          </div>
+          <div>
+            <label className={rotulo} htmlFor="correo-nom">Nombre del remitente</label>
+            <input id="correo-nom" className={cn(campo, 'w-full')} disabled={!editable} maxLength={80} value={c.correo_nombre} onChange={(e) => setC({ ...c, correo_nombre: e.target.value })} />
+          </div>
+          <div>
+            <label className={rotulo} htmlFor="wa-plantilla">Plantilla de WhatsApp (aprobada por Meta)</label>
+            <input id="wa-plantilla" className={cn(campo, 'w-full font-mono')} disabled={!editable} placeholder="resultado_asistente" value={c.whatsapp_plantilla ?? ''} onChange={(e) => setC({ ...c, whatsapp_plantilla: e.target.value })} />
+            <p className="mt-1 text-[11.5px] text-marca-500">Usa la conexión de WhatsApp de la plataforma. Parámetros: nombre, tarea y enlace.</p>
+          </div>
+        </div>
+      </section>
+
       {editable && (
         <div className="flex items-center gap-3 lg:col-span-2">
           <button
@@ -152,6 +199,13 @@ export function FormMotor({
                   tope_mensual_usd: c.tope_mensual_usd,
                   cuota_mb: c.cuota_mb,
                   esfuerzo_max: c.esfuerzo_max,
+                  programador_pausado: c.programador_pausado,
+                  max_tareas: c.max_tareas,
+                  frecuencia_min_min: c.frecuencia_min_min,
+                  tope_investigacion_usd: c.tope_investigacion_usd,
+                  correo_remitente: c.correo_remitente,
+                  correo_nombre: c.correo_nombre,
+                  whatsapp_plantilla: c.whatsapp_plantilla,
                 })
               )
             }
@@ -202,13 +256,27 @@ export type PoliticaFila = {
   tope_diario_usd: number | null
   tope_mensual_usd: number | null
   cuota_mb: number | null
+  puede_programar: boolean | null
+  max_tareas: number | null
 }
 
 function CamposPolitica({ p, set, modelos, editable, herencia }: { p: PoliticaFila; set: (p: PoliticaFila) => void; modelos: { id: string; nombre: string }[]; editable: boolean; herencia: ConfigVista }) {
   const marcados = p.modelos ?? modelos.map((m) => m.id)
   const num = (v: string) => (v === '' ? null : Number(v))
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-7">
+      <div>
+        <label className={rotulo}>Programar tareas</label>
+        <select className={cn(campo, 'w-full')} disabled={!editable} value={p.puede_programar === null ? '' : p.puede_programar ? 'si' : 'no'} onChange={(e) => set({ ...p, puede_programar: e.target.value === '' ? null : e.target.value === 'si' })}>
+          <option value="">Hereda (sí)</option>
+          <option value="si">Sí</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+      <div>
+        <label className={rotulo}>Tareas activas</label>
+        <input type="number" min={0} max={100} step="1" className={cn(campo, 'w-full')} disabled={!editable} placeholder={String(herencia.max_tareas)} value={p.max_tareas ?? ''} onChange={(e) => set({ ...p, max_tareas: num(e.target.value) })} />
+      </div>
       <div>
         <label className={rotulo}>Tope diario (US$)</label>
         <input type="number" min={0} step="0.5" className={cn(campo, 'w-full')} disabled={!editable} placeholder={String(herencia.tope_diario_usd)} value={p.tope_diario_usd ?? ''} onChange={(e) => set({ ...p, tope_diario_usd: num(e.target.value) })} />
@@ -305,7 +373,7 @@ export function FormExcepcion({
   const [perfil, setPerfil] = useState(inicial?.perfil_id ?? '')
   const [habilitado, setHabilitado] = useState<boolean | null>(inicial?.habilitado ?? null)
   const [nota, setNota] = useState(inicial?.nota ?? '')
-  const [p, setP] = useState<PoliticaFila>(inicial ?? { modelos: null, esfuerzo_max: null, tope_diario_usd: null, tope_mensual_usd: null, cuota_mb: null })
+  const [p, setP] = useState<PoliticaFila>(inicial ?? { modelos: null, esfuerzo_max: null, tope_diario_usd: null, tope_mensual_usd: null, cuota_mb: null, puede_programar: null, max_tareas: null })
   const { pendiente, msg, guardar } = useGuardar()
   return (
     <div className="border-b border-[var(--borde)] px-4 py-3 last:border-0">

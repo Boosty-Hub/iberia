@@ -52,3 +52,15 @@ export function mismoSecreto(a: string | null | undefined, b: string): boolean {
 /** Las betas que usa el motor de Anthropic. */
 export const BETAS_ANTHROPIC = ['code-execution-2025-08-25', 'files-api-2025-04-14', 'skills-2025-10-02', 'server-side-fallback-2026-07-01'] as const
 export const BETA_ARCHIVOS = ['files-api-2025-04-14'] as const
+
+/** La dirección de la plataforma, para las rutas internas (fuentes, programador). */
+export function urlBase(): string {
+  return (process.env.ASISTENTE_URL_BASE || process.env.URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, '')
+}
+
+/** ¿Corre en Netlify? Ahí el turno va a la función de fondo (15 min) y se parte en tramos. */
+export function enNetlify(): boolean {
+  if (process.env.ASISTENTE_EJECUTOR === 'local') return false
+  if (process.env.ASISTENTE_EJECUTOR === 'netlify') return true
+  return !!(process.env.NETLIFY || process.env.SITE_ID || process.env.DEPLOY_URL)
+}

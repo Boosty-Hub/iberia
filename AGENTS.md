@@ -1313,6 +1313,41 @@ no use licencias sueltas. **El plan entero (7 fases, 22 decisiones de Gabriel, c
   (`lib/asistente/alcance.ts`, la misma regla que «Ver como»): si le falta alguna, no se comparte y se dice cuál. Lo
   recibido sale en Mis archivos › «Compartido conmigo»; las políticas de `archivo`, `html` y del bucket lo dejan leer por
   `privado.compartido_conmigo()`.
+- **Fase 5 · tareas programadas, tableros vivos e investigación profunda** (migración `20261126170000_asistente_fase5`).
+  Una **tarea** (`asistente.tarea`) es una instrucción que corre sola a su hora de **Caracas** (`horas` cada 1–12, `diaria`,
+  `semanal` con días ISO, `mensual` día 1–28); `asistente.proxima_ejecucion()` calcula la próxima y el trigger `b_tarea` valida
+  contra la política (`puede_programar`, `max_tareas`, `frecuencia_min_min`, modelos, proyecto propio, destinatarios con el
+  asistente) y protege lo que lleva la cuenta (`fallas_seguidas`, `fuentes_usadas`, `ultima_en`). 🔴 **`b_tarea` es security
+  definer: adentro `current_user` es la dueña de la función**, así que «¿viene de una sesión?» se pregunta con
+  `current_setting('role', true) = 'authenticated'`; con `current_user` toda la validación se saltaba (cazado en la prueba).
+  - **El reloj**: pg_cron llama cada minuto a `/api/asistente/programador` (`{accion:'tick'}`, con `ASISTENTE_SECRETO`; se monta con
+    `montar-programador.mjs`). `asistente.tomar_vencidas()` toma bajo candado lo vencido y los reintentos y adelanta la próxima
+    **desde ahora** (un reloj caído corre una vez, no N). Fuera de producción `tick` acepta `ahora`: así se prueban semanas en minutos.
+  - **Cada corrida** (`asistente.corrida`) la arma `lanzarCorrida()` (`lib/asistente/programador.ts`): un chat «Tarea · nombre ·
+    fecha» (`chat.tarea_id`; no sale en la lista de chats, se llega por la campana y por Tareas › Historial), el turno a nombre
+    del dueño (gasta contra **sus** topes) y una **sesión acuñada** para esa corrida (enlace mágico con la clave de servicio,
+    nunca sale del servidor), que se cierra (`signOut(…, 'local')`) al entregar: corre con sus permisos de ese día. Si desde la
+    corrida anterior perdió una fuente que usaba (`fuentes_usadas` contra `fuentesDePersona`), la nota del turno lo dice y el
+    resultado empieza por eso.
+  - **Al terminar**, el ejecutor avisa a la misma ruta (`{accion:'entregar'}`) y `entregarCorrida()` hace la cuenta: sin saldo,
+    `saltada` y aviso; falla, reintento único a los 5 min (no en «Correr ahora»); **tres fallas seguidas pausan** la tarea y
+    avisan. Si salió bien: aviso en la campana; **destinatarios** con la revisión de linaje de la fase 4 (entran al chat de la
+    corrida o quedan `bloqueada` y se le avisa al dueño); **correo** por Resend (`config.correo_remitente`; vacío = `pendiente`)
+    con un resumen y el enlace —**adjuntos solo si el resultado no consultó la plataforma**—; **WhatsApp** con
+    `config.whatsapp_plantilla` sobre la conexión de `ajustes_whatsapp` (`pendiente` mientras no exista). Todo queda en
+    `corrida.entregas` (sin contenido).
+  - **La IA propone, la persona decide**: el modelo tiene `proponer_tarea` (no escribe nada; deja el bloque `propuesta_tarea`) y el
+    chat pinta la tarjeta con «Programar» y «Ajustar antes» (`/sistema/asistente/tareas?desde=<mensaje>`). Nunca dentro de una corrida.
+  - **Tablero vivo**: «Mantener al día» en el panel del artefacto crea una tarea `tablero` con `html_grupo`; cada corrida le agrega
+    una versión al **mismo** grupo (el ejecutor deja publicar en un grupo de otro chat del mismo dueño). Con `en_mi_dia`, Mi día
+    lo muestra en «Mis tableros» (`components/sistema/asistente/mis-tableros.tsx`) con «Datos al» y una vista previa a escala.
+  - **Investigación profunda** (`turno.modo = 'investigacion'`, el botón «Investigación» de la caja): más vueltas (60), más
+    búsquedas (20), instrucciones de plan, informe y fuentes, y su tope (`config.tope_investigacion_usd`, que también es lo que
+    reserva; al 80 % se le pide cerrar). **Un turno largo se parte en tramos**: pasado `TRAMO_MS` (12 min en Netlify), el motor de
+    Anthropic devuelve `continuar` con su estado, el ejecutor lo guarda en `turno.continuacion` y se relanza (otra invocación de la
+    función de fondo; en local, en la misma); el último de 4 tramos corre sin límite. OpenAI no se parte en tramos.
+  - ⚠️ **Fechas en un componente de cliente**: `Intl` no escribe igual en Node que en el navegador y rompe la hidratación. Las de
+    Tareas llegan escritas desde el servidor (`fechaCaracas`).
 - ⚠️ **Un `next dev` viejo sirve código viejo**: el 26-nov el Resumen mostraba cifras sin formato con el archivo ya
   corregido; reiniciar el dev lo arregló. Y **dos `next dev` en la misma carpeta no conviven** (el del 3001 impide el del
   3005, que muere sin escribir nada en su registro).
@@ -1323,6 +1358,8 @@ node --env-file=.env.local scripts/asistente/sonda-anthropic.mjs <archivo.xlsx> 
 node --env-file=.env.local scripts/asistente/sonda-openai.mjs                                                         # la Responses API
 node --env-file=.env.local scripts/asistente/probar-datos.mjs [--solo datos|redteam|sinpermiso]                         # fase 2 y red team
 node --env-file=.env.local scripts/asistente/probar-f3.mjs [--solo proyecto|memoria|atajos|voz]                         # fase 3 (micrófono falso con voz de Azure)
+node --env-file=.env.local scripts/asistente/probar-f5.mjs [--solo programador|fallas|chat|tablero|investigacion]       # fase 5 (ver la cabecera: el dev de pruebas con ASISTENTE_CORREO_DESVIO y ASISTENTE_TRAMO_MS)
+node --env-file=.env.local scripts/asistente/montar-programador.mjs [--destino produccion --confirmo [--url …] [--quitar]]  # el reloj (pg_cron)
 node --env-file=.env.local scripts/asistente/probar-f4.mjs                                                            # fase 4: dos sesiones a la vez (dueño e invitado)
 python scripts/asistente/extraer-paginas.py && node --env-file=.env.local scripts/asistente/indexar-documentos.mjs [--destino produccion --confirmo]
 node --env-file=.env.local scripts/asistente/subir-habilidad.mjs [carpeta] [--destino produccion --confirmo]

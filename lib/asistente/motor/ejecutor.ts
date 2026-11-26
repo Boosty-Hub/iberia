@@ -1,6 +1,7 @@
 import { toFile } from '@anthropic-ai/sdk'
 import type { Bloque, ClaseArtefacto, Esfuerzo, Motor } from '../tipos'
-import { BETA_ARCHIVOS, crearAnthropic, crearServicio, type BaseServicio } from './servicio'
+import type { Database } from '../../database.types'
+import { BETA_ARCHIVOS, crearAnthropic, crearServicio, enNetlify, secretoAsistente, urlBase, type BaseServicio } from './servicio'
 import { Emisor } from './emisor'
 import { instruccionesSistema } from './instrucciones'
 import { ejecutarAnthropic, mensajeDeError } from './anthropic'
@@ -8,6 +9,7 @@ import { ejecutarOpenAI } from './openai'
 import { titularYClasificar } from './titulo'
 import { prepararDatos } from './datos'
 import type { ApiMemoria } from './memoria'
+import { INSTRUCCIONES_INVESTIGACION } from './tareas'
 import type { ArchivoTurno, ArtefactoTurno, ContextoMotor, Precio, ResultadoMotor, TurnoHistorial } from './contrato'
 
 /** Lo que se reserva antes de correr: el peor caso razonable de un turno, por modelo. Al cerrar se cobra lo real. */
@@ -22,21 +24,76 @@ const RESERVA: Record<string, number> = {
 
 const PRECIO_DEFECTO: Precio = { entrada: 4, salida: 20, cacheLee: 0.2, cacheEscribe: 5 }
 
+/** El tramo de la función de fondo: pasado esto, el turno guarda su estado y sigue en otra invocación. */
+const TRAMO_MS = Number(process.env.ASISTENTE_TRAMO_MS) || (enNetlify() ? 12 * 60_000 : 0)
+const MAX_TRAMOS = 4
+
+export type OpcionesTurno = {
+  token?: string | null
+  /** Lo que se antepone al mensaje en este turno (la nota de una corrida programada). */
+  nota?: string | null
+  /** La sesión se acuñó para esta corrida: se cierra al terminar. */
+  efimero?: boolean
+}
+
+/** Un turno partido en tramos sigue en otra invocación (en local, en esta misma). */
+async function relanzar(turnoId: string, opciones: OpcionesTurno) {
+  if (enNetlify()) {
+    const r = await fetch(`${urlBase()}/.netlify/functions/asistente-turno-background`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-asistente-secreto': secretoAsistente() },
+      body: JSON.stringify({ turno: turnoId, token: opciones.token ?? null, efimero: !!opciones.efimero }),
+    })
+    if (r.status !== 202 && !r.ok) throw new Error(`No se pudo lanzar el tramo siguiente (${r.status}).`)
+    return
+  }
+  await ejecutarTurno(turnoId, opciones)
+}
+
+/** Al terminar el turno de una corrida programada, el programador entrega (canales, avisos, reintentos). */
+async function avisarProgramador(corrida: string, opciones: OpcionesTurno) {
+  try {
+    await fetch(`${urlBase()}/api/asistente/programador`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-asistente-secreto': secretoAsistente() },
+      body: JSON.stringify({ accion: 'entregar', corrida, token: opciones.efimero ? opciones.token ?? null : null }),
+    })
+  } catch (e) {
+    console.error('[asistente] no se pudo avisar al programador', corrida, e)
+  }
+}
+
 /**
  * Corre un turno de punta a punta. Lo llaman la función de fondo de Netlify
  * (producción) y la ruta de desarrollo. Nunca lanza: todo final deja el turno
  * cerrado (listo, detenido o fallido), la reserva liberada y el aviso enviado.
  */
-export async function ejecutarTurno(turnoId: string, opciones: { token?: string | null } = {}): Promise<void> {
+export async function ejecutarTurno(turnoId: string, opciones: OpcionesTurno = {}): Promise<void> {
   const db = crearServicio()
   const { data: turno } = await db.schema('asistente').from('turno').select('*').eq('id', turnoId).maybeSingle()
   if (!turno || turno.estado !== 'en_cola') return
+  let siguio = false
+  try {
+    siguio = await correrTurno(db, turno, opciones)
+  } finally {
+    if (!siguio && turno.corrida_id) await avisarProgramador(turno.corrida_id, opciones)
+  }
+}
+
+type FilaTurno = Database['asistente']['Tables']['turno']['Row']
+
+/** Devuelve true si el turno siguió en otro tramo (todavía no terminó). */
+async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: OpcionesTurno): Promise<boolean> {
+  const turnoId = turno.id
   const emisor = new Emisor(turno.chat_id)
   const cerrarFallido = async (error: string) => {
-    await db.schema('asistente').from('turno').update({ estado: 'fallido', error, reserva_usd: 0, terminado_en: new Date().toISOString() }).eq('id', turnoId)
+    await db.schema('asistente').from('turno').update({ estado: 'fallido', error, reserva_usd: 0, continuacion: null, terminado_en: new Date().toISOString() }).eq('id', turnoId)
     emisor.emitir({ t: 'fin', turno: turnoId, estado: 'fallido', mensaje: null, error })
     await emisor.terminar()
+    return false
   }
+  const reanuda = turno.continuacion !== null && turno.continuacion !== undefined
+  const investigacion = turno.modo === 'investigacion'
 
   try {
     const [{ data: chat }, { data: config }, { data: modelos }] = await Promise.all([
@@ -45,11 +102,16 @@ export async function ejecutarTurno(turnoId: string, opciones: { token?: string 
       db.schema('asistente').from('modelo').select('*'),
     ])
     if (!chat || !config) return await cerrarFallido('No se encontró el chat.')
+    // Una corrida programada: su tarea (nombre y, si es un tablero, el artefacto que mantiene).
+    const { data: corrida } = turno.corrida_id
+      ? await db.schema('asistente').from('corrida').select('id, tarea:tarea_id (nombre, html_grupo)').eq('id', turno.corrida_id).maybeSingle()
+      : { data: null }
+    const tarea = (corrida?.tarea ?? null) as { nombre: string; html_grupo: string | null } | null
 
     // El catálogo de datos (fase 2) se pide mientras se reserva y se lee el chat.
     const promesaDatos = prepararDatos(opciones.token, turnoId)
     // Un turno a la vez por chat (chats compartidos): este espera a que termine el que va adelante.
-    for (let i = 0; i < 300; i++) {
+    for (let i = 0; i < (reanuda ? 0 : 300); i++) {
       const { data: delante } = await db
         .schema('asistente')
         .from('turno')
@@ -62,15 +124,22 @@ export async function ejecutarTurno(turnoId: string, opciones: { token?: string 
       if (!delante?.length) break
       await new Promise((r) => setTimeout(r, 2000))
     }
-    const reserva = RESERVA[turno.modelo] ?? 0.8
-    const { data: motivo, error: errReserva } = await db.schema('asistente').rpc('reservar_turno', { p_turno: turnoId, p_reserva_usd: reserva })
-    if (errReserva) return await cerrarFallido('No se pudo reservar el turno.')
-    if (motivo) {
-      emisor.emitir({ t: 'fin', turno: turnoId, estado: 'fallido', mensaje: null, error: motivo as string })
-      await emisor.terminar()
-      return
+    if (reanuda) {
+      // El tramo siguiente: la reserva ya está hecha.
+      await db.schema('asistente').from('turno').update({ estado: 'corriendo', latido: new Date().toISOString() }).eq('id', turnoId)
+    } else {
+      // La investigación reserva su propio tope; el resto, el peor caso razonable del modelo.
+      const reserva = investigacion ? Math.max(Number(config.tope_investigacion_usd), RESERVA[turno.modelo] ?? 0.8) : (RESERVA[turno.modelo] ?? 0.8)
+      const { data: motivo, error: errReserva } = await db.schema('asistente').rpc('reservar_turno', { p_turno: turnoId, p_reserva_usd: reserva })
+      if (errReserva) return await cerrarFallido('No se pudo reservar el turno.')
+      if (motivo) {
+        emisor.emitir({ t: 'fin', turno: turnoId, estado: 'fallido', mensaje: null, error: motivo as string })
+        await emisor.terminar()
+        return false
+      }
     }
     emisor.emitir({ t: 'estado', turno: turnoId, estado: 'corriendo' })
+    const { data: pol } = await db.schema('asistente').rpc('politica_de', { p_perfil: turno.solicitante })
 
     // El historial y los archivos del chat.
     const [{ data: mensajes }, { data: archivos }, { data: versiones }, { data: proyecto }, { data: archivosProyecto }, { data: pref }, { data: recuerdos }] = await Promise.all([
@@ -103,6 +172,11 @@ export async function ejecutarTurno(turnoId: string, opciones: { token?: string 
     // La última versión de cada artefacto del chat.
     const artefactos: ArtefactoTurno[] = []
     for (const v of versiones ?? []) if (!artefactos.some((x) => x.grupo === v.grupo)) artefactos.push({ grupo: v.grupo, titulo: v.titulo, clase: v.tipo as ClaseArtefacto, version: v.version })
+    // Un tablero vivo: el artefacto que mantiene viene de otro chat (del mismo dueño).
+    if (tarea?.html_grupo && !artefactos.some((x) => x.grupo === tarea.html_grupo)) {
+      const { data: t } = await db.schema('asistente').from('html').select('grupo, titulo, tipo, version').eq('grupo', tarea.html_grupo).eq('dueno', turno.solicitante).order('version', { ascending: false }).limit(1).maybeSingle()
+      if (t) artefactos.push({ grupo: t.grupo, titulo: t.titulo, clase: t.tipo as ClaseArtefacto, version: t.version })
+    }
     // En un chat compartido, cada mensaje lleva el nombre de quien lo escribió.
     const nombres = new Map<string, string>()
     if (chat.compartido) {
@@ -146,9 +220,11 @@ export async function ejecutarTurno(turnoId: string, opciones: { token?: string 
       turno: turnoId,
       modelo: turno.modelo,
       esfuerzo: turno.esfuerzo as Esfuerzo,
-      sistema: instruccionesSistema(config.instrucciones_empresa ?? '', proyecto ? { nombre: proyecto.nombre, instrucciones: proyecto.instrucciones } : null),
+      sistema:
+        instruccionesSistema(config.instrucciones_empresa ?? '', proyecto ? { nombre: proyecto.nombre, instrucciones: proyecto.instrucciones } : null) +
+        (investigacion ? INSTRUCCIONES_INVESTIGACION : ''),
       historial,
-      texto: firmar(propio.autor, propio.texto),
+      texto: (opciones.nota ?? '') + firmar(propio.autor, propio.texto),
       adjuntos,
       archivosDelChat: [...porId.values()],
       archivosFijos: (archivosProyecto ?? []) as ArchivoTurno[],
@@ -163,7 +239,13 @@ export async function ejecutarTurno(turnoId: string, opciones: { token?: string 
       guardarGenerado: (fileId) => guardarGenerado(db, chat.dueno, chat.id, turno.solicitante, fileId),
       artefactos,
       publicarArtefacto: (x) => publicarArtefacto(db, turno.solicitante, chat.id, x),
-      leerArtefacto: (grupo) => leerArtefacto(db, chat.id, grupo),
+      leerArtefacto: (grupo) => leerArtefacto(db, turno.solicitante, chat.id, grupo),
+      modo: investigacion ? 'investigacion' : 'normal',
+      puedeProgramar: !turno.corrida_id && !!(pol as { puede_programar?: boolean } | null)?.puede_programar,
+      topeUsd: investigacion ? Number(config.tope_investigacion_usd) : null,
+      // Solo el motor de Anthropic se parte en tramos; el último tramo corre sin límite.
+      limiteMs: turno.motor === 'anthropic' && TRAMO_MS > 0 && turno.tramos < MAX_TRAMOS - 1 ? TRAMO_MS : null,
+      reanudar: reanuda ? turno.continuacion : null,
     }
 
     const inicio = Date.now()
@@ -172,6 +254,18 @@ export async function ejecutarTurno(turnoId: string, opciones: { token?: string 
       r = (turno.motor as Motor) === 'anthropic' ? await ejecutarAnthropic(ctx, precioDe) : await ejecutarOpenAI(ctx, precioDe, turno.motor as Motor)
     } finally {
       clearInterval(vigia)
+    }
+
+    if (r.estado === 'continuar') {
+      // Se acabó el tramo: el estado del motor queda en el turno y sigue en otra invocación.
+      await db
+        .schema('asistente')
+        .from('turno')
+        .update({ estado: 'en_cola', continuacion: r.continuacion as never, tramos: turno.tramos + 1, latido: new Date().toISOString(), duracion_ms: (turno.duracion_ms ?? 0) + Date.now() - inicio })
+        .eq('id', turnoId)
+      await emisor.terminar()
+      await relanzar(turnoId, opciones)
+      return true
     }
 
     // El título del chat y la categoría del turno (Haiku, barato), solo la primera vez o cuando haga falta.
@@ -220,9 +314,10 @@ export async function ejecutarTurno(turnoId: string, opciones: { token?: string 
           busquedas: r.uso.busquedas,
           costo_usd: Math.round((r.uso.costoUsd + extra) * 100000) / 100000,
           reserva_usd: 0,
+          continuacion: null,
           categoria,
           primer_token_ms: r.primerTokenMs,
-          duracion_ms: Date.now() - inicio,
+          duracion_ms: (turno.duracion_ms ?? 0) + Date.now() - inicio,
           terminado_en: new Date().toISOString(),
         })
         .eq('id', turnoId),
@@ -239,9 +334,10 @@ export async function ejecutarTurno(turnoId: string, opciones: { token?: string 
     ])
     emisor.emitir({ t: 'fin', turno: turnoId, estado: r.estado, mensaje: mensajeId, error: r.error ?? null })
     await emisor.terminar()
+    return false
   } catch (e) {
     console.error('[asistente] turno', turnoId, e)
-    await cerrarFallido(mensajeDeError(e))
+    return await cerrarFallido(mensajeDeError(e))
   }
 }
 
@@ -312,7 +408,14 @@ async function publicarArtefacto(
   let grupo = a.grupo
   let version = 1
   if (grupo) {
-    const { data: previos } = await db.schema('asistente').from('html').select('version').eq('chat_id', chat).eq('grupo', grupo).order('version', { ascending: false }).limit(1)
+    const { data: previos } = await db
+      .schema('asistente')
+      .from('html')
+      .select('version')
+      .eq('grupo', grupo)
+      .or(`chat_id.eq.${chat},dueno.eq.${solicitante}`)
+      .order('version', { ascending: false })
+      .limit(1)
     if (previos?.length) version = previos[0].version + 1
     else grupo = null
   }
@@ -327,8 +430,16 @@ async function publicarArtefacto(
   return { tipo: 'artefacto', artefactoId: id, grupo, titulo: a.titulo, version, clase: a.clase }
 }
 
-async function leerArtefacto(db: BaseServicio, chat: string, grupo: string): Promise<string | null> {
-  const { data: v } = await db.schema('asistente').from('html').select('ruta').eq('chat_id', chat).eq('grupo', grupo).order('version', { ascending: false }).limit(1).maybeSingle()
+async function leerArtefacto(db: BaseServicio, solicitante: string, chat: string, grupo: string): Promise<string | null> {
+  const { data: v } = await db
+    .schema('asistente')
+    .from('html')
+    .select('ruta')
+    .eq('grupo', grupo)
+    .or(`chat_id.eq.${chat},dueno.eq.${solicitante}`)
+    .order('version', { ascending: false })
+    .limit(1)
+    .maybeSingle()
   if (!v) return null
   const { data } = await db.storage.from('asistente').download(v.ruta)
   return data ? await data.text() : null

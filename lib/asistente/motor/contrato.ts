@@ -55,6 +55,16 @@ export type ContextoMotor = {
   publicarArtefacto: (a: { grupo: string | null; titulo: string; clase: ClaseArtefacto; contenido: string }) => Promise<Extract<Bloque, { tipo: 'artefacto' }>>
   /** El contenido de la última versión de un artefacto del chat. */
   leerArtefacto: (grupo: string) => Promise<string | null>
+  /** Fase 5: el modo del turno. La investigación profunda tiene más vueltas, más búsquedas y su propio tope. */
+  modo: 'normal' | 'investigacion'
+  /** ¿Puede proponer tareas programadas? (política, y nunca dentro de una corrida programada). */
+  puedeProgramar: boolean
+  /** El tope en USD de este turno (investigación profunda), o null. */
+  topeUsd: number | null
+  /** Pasado este tiempo, el motor guarda su estado y pide otro tramo (función de fondo de 15 min). Null = sin límite. */
+  limiteMs: number | null
+  /** El estado que dejó el tramo anterior, para reanudar. */
+  reanudar: unknown | null
 }
 
 export type Uso = { entrada: number; salida: number; cacheLee: number; cacheEscribe: number; busquedas: number; costoUsd: number }
@@ -66,8 +76,10 @@ export type ResultadoMotor = {
   contenedorId: string | null
   modeloServido: string
   primerTokenMs: number | null
-  estado: 'listo' | 'detenido' | 'fallido'
+  estado: 'listo' | 'detenido' | 'fallido' | 'continuar'
   error?: string
+  /** Con estado «continuar»: lo que hace falta para seguir en otro tramo. */
+  continuacion?: unknown
 }
 
 export function usoVacio(): Uso {

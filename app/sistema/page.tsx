@@ -10,6 +10,7 @@ import { misPendientes } from '@/components/sistema/shell/acciones'
 import { MiDiaColaboracion } from '@/components/sistema/colaboracion/mi-dia'
 import { PropuestasPendientes } from '@/components/sistema/ia/propuestas-pendientes'
 import { EnQueVamos } from '@/components/sistema/programa/en-que-vamos'
+import { MisTableros } from '@/components/sistema/asistente/mis-tableros'
 import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
 import { TONO_CHIP } from '@/lib/plataforma/ficha-tipos'
 import { Aviso } from '@/components/ui'
@@ -79,6 +80,9 @@ export default async function MiDiaPage({ searchParams }: PageProps<'/sistema'>)
 
       {/* La hoja de ruta de la plataforma, en una línea (administración y consultoría). */}
       <EnQueVamos sesion={sesion} ctx={ctx} />
+
+      {/* Los tableros vivos y tareas que la persona fijó (asistente de IA, fase 5). */}
+      <MisTableros sesion={sesion} />
 
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <section className="min-w-0 rounded-xl border border-[var(--borde)] bg-white" aria-labelledby="te-toca">

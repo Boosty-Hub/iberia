@@ -5,6 +5,7 @@ import { ejecutarAnthropic, herramientaArtefacto, mensajeDeError } from './anthr
 import { costoDe, sumarUso, usoVacio, type ContextoMotor, type Precio, type ResultadoMotor, type Uso } from './contrato'
 import { NOMBRES_DATOS, herramientaDatos, herramientasDeDatos } from './datos'
 import { HERRAMIENTAS_MEMORIA, NOMBRES_MEMORIA, contextoMemoria, herramientaMemoria } from './memoria'
+import { HERRAMIENTA_PROPONER_TAREA, herramientaProponerTarea } from './tareas'
 
 type Item = Record<string, unknown>
 const MAX_VUELTAS = 12
@@ -136,6 +137,7 @@ export async function ejecutarOpenAI(ctx: ContextoMotor, precioDe: (modelo: stri
             { type: 'function', name: HERRAMIENTA_ARCHIVOS.name, description: HERRAMIENTA_ARCHIVOS.description, parameters: HERRAMIENTA_ARCHIVOS.input_schema, strict: true },
             ...(ctx.datos ? herramientasDeDatos(ctx.datos) : []).map((h) => ({ type: 'function', name: h.name, description: h.description, parameters: h.input_schema, strict: true })),
             ...(ctx.memoria ? HERRAMIENTAS_MEMORIA : []).map((h) => ({ type: 'function', name: h.name, description: h.description, parameters: h.input_schema, strict: true })),
+            ...(ctx.puedeProgramar ? [HERRAMIENTA_PROPONER_TAREA] : []).map((h) => ({ type: 'function', name: h.name, description: h.description, parameters: h.input_schema, strict: true })),
           ],
         },
         ctx,
@@ -196,6 +198,14 @@ export async function ejecutarOpenAI(ctx: ContextoMotor, precioDe: (modelo: stri
               if (r.error) paso.estado = 'error'
             }
             salidaHerramienta = r.texto
+          } else if (ll.name === 'proponer_tarea' && ctx.puedeProgramar) {
+            const r = await herramientaProponerTarea(args)
+            if (r.bloque) {
+              bloques.push(r.bloque)
+              ctx.emitir({ t: 'bloque', turno: ctx.turno, bloque: r.bloque })
+            }
+            if (r.error && paso) paso.estado = 'error'
+            salidaHerramienta = r.texto
           } else if (ll.name === 'artefacto' || ll.name === 'leer_artefacto') {
             const r = await herramientaArtefacto(ctx, String(ll.name), args)
             if (r.bloque) {
@@ -219,6 +229,11 @@ export async function ejecutarOpenAI(ctx: ContextoMotor, precioDe: (modelo: stri
                 adjuntos: elegidos,
                 contenedorId: contenedor,
                 contenedorVigente: vigente,
+                modo: 'normal',
+                puedeProgramar: false,
+                topeUsd: null,
+                limiteMs: null,
+                reanudar: null,
                 // Lo que escribe el procesador no es la respuesta: no se transmite como texto.
                 emitir: (e) => {
                   if (e.t !== 'texto') ctx.emitir(e)

@@ -16,9 +16,9 @@ import { mismoSecreto, secretoAsistente } from '../../lib/asistente/motor/servic
 const ejecutar = async (req: Request) => {
   if (req.method !== 'POST') return new Response('Método no permitido', { status: 405 })
   if (!mismoSecreto(req.headers.get('x-asistente-secreto'), secretoAsistente())) return new Response('No autorizado', { status: 401 })
-  const { turno, token } = (await req.json().catch(() => ({}))) as { turno?: string; token?: string | null }
+  const { turno, token, nota, efimero } = (await req.json().catch(() => ({}))) as { turno?: string; token?: string | null; nota?: string | null; efimero?: boolean }
   if (!turno || !/^[0-9a-f-]{36}$/.test(turno)) return new Response('Falta el turno', { status: 400 })
-  await ejecutarTurno(turno, { token: typeof token === 'string' ? token : null })
+  await ejecutarTurno(turno, { token: typeof token === 'string' ? token : null, nota: typeof nota === 'string' ? nota.slice(0, 2000) : null, efimero: efimero === true })
   return new Response(null, { status: 202 })
 }
 

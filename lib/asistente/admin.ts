@@ -19,6 +19,13 @@ export async function leerConfig(): Promise<ConfigVista | null> {
     cuota_mb: data.cuota_mb,
     esfuerzo_max: data.esfuerzo_max as ConfigVista['esfuerzo_max'],
     instrucciones_empresa: data.instrucciones_empresa,
+    programador_pausado: data.programador_pausado,
+    max_tareas: data.max_tareas,
+    frecuencia_min_min: data.frecuencia_min_min,
+    tope_investigacion_usd: Number(data.tope_investigacion_usd),
+    correo_remitente: data.correo_remitente,
+    correo_nombre: data.correo_nombre,
+    whatsapp_plantilla: data.whatsapp_plantilla,
   }
 }
 
@@ -28,7 +35,7 @@ export async function leerModelosAdmin() {
   return data ?? []
 }
 
-const vacia = (): PoliticaFila => ({ modelos: null, esfuerzo_max: null, tope_diario_usd: null, tope_mensual_usd: null, cuota_mb: null })
+const vacia = (): PoliticaFila => ({ modelos: null, esfuerzo_max: null, tope_diario_usd: null, tope_mensual_usd: null, cuota_mb: null, puede_programar: null, max_tareas: null })
 
 /** Los roles, si tienen la casilla del asistente, cuántas personas activas tienen y su política. */
 export async function leerRolesYPoliticas() {
@@ -53,7 +60,7 @@ export async function leerRolesYPoliticas() {
         habilitado: r.nivel === 'admin' || !!ver.get(r.id),
         personas: porRol.get(r.id) ?? 0,
         politica: p
-          ? { modelos: p.modelos, esfuerzo_max: p.esfuerzo_max as PoliticaFila['esfuerzo_max'], tope_diario_usd: p.tope_diario_usd === null ? null : Number(p.tope_diario_usd), tope_mensual_usd: p.tope_mensual_usd === null ? null : Number(p.tope_mensual_usd), cuota_mb: p.cuota_mb }
+          ? { modelos: p.modelos, esfuerzo_max: p.esfuerzo_max as PoliticaFila['esfuerzo_max'], tope_diario_usd: p.tope_diario_usd === null ? null : Number(p.tope_diario_usd), tope_mensual_usd: p.tope_mensual_usd === null ? null : Number(p.tope_mensual_usd), cuota_mb: p.cuota_mb, puede_programar: p.puede_programar, max_tareas: p.max_tareas }
           : vacia(),
       }
     }),
@@ -67,6 +74,8 @@ export async function leerRolesYPoliticas() {
       tope_diario_usd: e.tope_diario_usd === null ? null : Number(e.tope_diario_usd),
       tope_mensual_usd: e.tope_mensual_usd === null ? null : Number(e.tope_mensual_usd),
       cuota_mb: e.cuota_mb,
+      puede_programar: e.puede_programar,
+      max_tareas: e.max_tareas,
     })),
   }
 }

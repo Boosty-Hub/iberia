@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { puede, requerirPermiso } from '@/lib/auth'
 import { leerConfig, leerModelosAdmin } from '@/lib/asistente/admin'
+import { createClient } from '@/lib/supabase/server'
 import { claveAnthropic } from '@/lib/clave-anthropic'
 import { numero } from '@/lib/plataforma/formato'
 import { ETIQUETA_ESFUERZO, type Esfuerzo } from '@/lib/asistente/tipos'
@@ -18,12 +19,21 @@ export const metadata: Metadata = { title: 'Motor y modelos · Asistente de IA' 
 export default async function MotorPage() {
   const sesion = await requerirPermiso('sistema:asistente-admin')
   const editable = puede(sesion, 'sistema:asistente-admin', 'editar')
-  const [config, modelos] = await Promise.all([leerConfig(), leerModelosAdmin()])
+  const supabase = await createClient()
+  const [config, modelos, { data: tareas }] = await Promise.all([leerConfig(), leerModelosAdmin(), supabase.schema('asistente').rpc('tareas_resumen')])
+  const t = tareas as { activas: number; pausadas: number; tableros: number; corridas_mes: number; fallidas_mes: number; pausado: boolean } | null
   const claves = { anthropic: !!claveAnthropic().clave, openai: !!process.env.OPENAI_API_KEY?.trim() }
 
   return (
     <>
       <CabeceraModulo sesion={sesion} codigo="NUC-IA" titulo="Asistente de IA" migas={[{ etiqueta: 'Motor y modelos' }]} />
+      {t && (
+        <p className="mb-3 rounded-xl border border-[var(--borde)] bg-white px-4 py-2.5 text-[12.5px] text-marca-600">
+          <span className="font-semibold text-marca-900">Tareas programadas:</span> {numero(t.activas)} activas ({numero(t.tableros)} tableros vivos) · {numero(t.pausadas)} pausadas · {numero(t.corridas_mes)} corridas este mes
+          {t.fallidas_mes > 0 && <>, {numero(t.fallidas_mes)} fallidas</>}
+          {t.pausado && <span className="ml-1 font-semibold text-amber-700">· El programador está pausado.</span>} Solo cuentas: las instrucciones no se leen.
+        </p>
+      )}
       {config && <FormMotor config={config} modelos={modelos.map((m) => ({ id: m.id, nombre: m.nombre, proveedor: m.proveedor, encendido: m.encendido }))} claves={claves} editable={editable} />}
 
       <section className="relative mt-4 overflow-x-auto rounded-xl border border-[var(--borde)] bg-white">

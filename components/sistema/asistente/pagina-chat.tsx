@@ -14,11 +14,13 @@ export async function PaginaChat({ chatId, proyectoId = null }: { chatId: string
   if (chatId && !abierto) notFound()
   const supabase = await createClient()
   const idProyecto = abierto?.chat.proyecto_id ?? proyectoId
-  const [{ data: atajos }, { data: proyecto }, { data: participantes }, { data: fuentesChat }] = await Promise.all([
+  const [{ data: atajos }, { data: proyecto }, { data: participantes }, { data: fuentesChat }, { data: tareasChat }, { data: deTarea }] = await Promise.all([
     supabase.schema('asistente').from('atajo').select('id, comando, titulo, instruccion, modelo, esfuerzo, dueno').order('comando'),
     idProyecto ? supabase.schema('asistente').from('proyecto').select('id, nombre').eq('id', idProyecto).maybeSingle() : Promise.resolve({ data: null }),
     chatId ? supabase.schema('asistente').rpc('participantes', { p_chat: chatId }) : Promise.resolve({ data: [] }),
     chatId ? supabase.schema('asistente').rpc('fuentes_del_chat', { p_chat: chatId }) : Promise.resolve({ data: [] }),
+    chatId ? supabase.schema('asistente').from('tarea').select('origen_mensaje').eq('origen_chat', chatId) : Promise.resolve({ data: [] }),
+    abierto?.chat.tarea_id ? supabase.schema('asistente').from('tarea').select('nombre, tipo').eq('id', abierto.chat.tarea_id).maybeSingle() : Promise.resolve({ data: null }),
   ])
   const titulos = new Map(catalogoFuentes().map((f) => [f.clave, f.titulo]))
   const nombre = (sesion.perfil.nombre_completo || sesion.email || '').split(' ')[0]
@@ -44,6 +46,8 @@ export async function PaginaChat({ chatId, proyectoId = null }: { chatId: string
         esDueno={!abierto || abierto.chat.dueno === sesion.userId}
         participantes={(participantes ?? []) as { perfil_id: string; nombre: string; rol: string }[]}
         fuentesDelChat={((fuentesChat ?? []) as { fuente: string }[]).map((f) => titulos.get(f.fuente) ?? f.fuente)}
+        tareasProgramadas={((tareasChat ?? []) as { origen_mensaje: string | null }[]).map((t) => t.origen_mensaje).filter((x): x is string => !!x)}
+        deTarea={deTarea ? { nombre: deTarea.nombre, tipo: deTarea.tipo as 'tarea' | 'tablero' } : abierto?.chat.tarea_id ? { nombre: 'una tarea', tipo: 'tarea' } : null}
         atajos={(atajos ?? []).map((a) => ({ id: a.id, comando: a.comando, titulo: a.titulo, instruccion: a.instruccion, modelo: a.modelo, esfuerzo: a.esfuerzo, empresa: a.dueno === null }))}
       />
     </>

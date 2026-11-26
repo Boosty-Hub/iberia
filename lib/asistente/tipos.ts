@@ -43,6 +43,9 @@ export type Politica = {
   cuota_mb: number
   puede_compartir: boolean
   puede_programar: boolean
+  max_tareas: number
+  frecuencia_min_min: number
+  tope_investigacion_usd: number
   gastado_dia_usd: number
   gastado_mes_usd: number
   usado_bytes: number
@@ -75,6 +78,8 @@ export type Bloque =
   | { tipo: 'pensamiento'; texto: string }
   | { tipo: 'memoria'; memoriaId: string; texto: string }
   | { tipo: 'nota'; texto: string }
+  /** Una tarea programada que propuso el modelo; existe solo si la persona la confirma (fase 5). */
+  | { tipo: 'propuesta_tarea'; propuesta: PropuestaTarea }
 
 /** Lo que viaja por Realtime mientras corre un turno (`asistente:chat:<id>`). */
 export type EventoTurno =
@@ -134,4 +139,43 @@ export function bytesLegibles(n: number): string {
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`
   if (n < 1024 * 1024 * 1024) return `${(n / 1024 / 1024).toFixed(1).replace('.', ',')} MB`
   return `${(n / 1024 / 1024 / 1024).toFixed(2).replace('.', ',')} GB`
+}
+
+/** Lo que define cuándo corre una tarea programada (siempre en hora de Caracas). */
+export type Frecuencia = {
+  frecuencia: 'horas' | 'diaria' | 'semanal' | 'mensual'
+  hora: string
+  dias: number[]
+  dia_mes: number | null
+  cada_horas: number | null
+}
+
+export type CanalTarea = 'plataforma' | 'correo' | 'whatsapp'
+
+export type PropuestaTarea = Frecuencia & { nombre: string; instruccion: string; canales: CanalTarea[] }
+
+export const ETIQUETA_CANAL: Record<CanalTarea, string> = { plataforma: 'Plataforma', correo: 'Correo', whatsapp: 'WhatsApp' }
+
+const DIAS = ['', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo']
+
+function lista(xs: string[]): string {
+  return xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} y ${xs.at(-1)}`
+}
+
+/** «Cada lunes a las 8:00», «Todos los días a las 18:30», «El 1 de cada mes a las 9:00», «Cada 6 horas». */
+export function describirFrecuencia(f: Pick<Frecuencia, 'frecuencia' | 'hora' | 'dias' | 'dia_mes' | 'cada_horas'>): string {
+  const h = (f.hora ?? '08:00').slice(0, 5).replace(/^0(\d)/, '$1')
+  if (f.frecuencia === 'horas') return `Cada ${f.cada_horas} ${f.cada_horas === 1 ? 'hora' : 'horas'}, desde las ${h}`
+  if (f.frecuencia === 'diaria') return `Todos los días a las ${h}`
+  if (f.frecuencia === 'mensual') return `El ${f.dia_mes} de cada mes a las ${h}`
+  const dias = [...(f.dias ?? [])].sort()
+  if (dias.length === 5 && dias.every((d, i) => d === i + 1)) return `De lunes a viernes a las ${h}`
+  if (dias.length === 7) return `Todos los días a las ${h}`
+  return `Cada ${lista(dias.map((d) => DIAS[d]))} a las ${h}`
+}
+
+/** Una fecha en hora de Caracas, corta: «jue 26 nov, 8:00 a. m.». */
+export function fechaCaracas(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Intl.DateTimeFormat('es-VE', { timeZone: 'America/Caracas', weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }).format(new Date(iso))
 }

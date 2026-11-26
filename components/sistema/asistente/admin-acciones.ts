@@ -27,6 +27,13 @@ export async function guardarConfig(entrada: {
   cuota_mb?: number
   esfuerzo_max?: Esfuerzo
   instrucciones_empresa?: string
+  programador_pausado?: boolean
+  max_tareas?: number
+  frecuencia_min_min?: number
+  tope_investigacion_usd?: number
+  correo_remitente?: string | null
+  correo_nombre?: string
+  whatsapp_plantilla?: string | null
 }): Promise<R> {
   const sesion = await requerirPermiso('sistema:asistente-admin', 'editar')
   const cambios: Record<string, unknown> = { actualizado_por: sesion.userId, actualizado_en: new Date().toISOString() }
@@ -55,6 +62,33 @@ export async function guardarConfig(entrada: {
   }
   if (entrada.modelo_anthropic !== undefined) cambios.modelo_anthropic = entrada.modelo_anthropic
   if (entrada.modelo_openai !== undefined) cambios.modelo_openai = entrada.modelo_openai
+  if (entrada.programador_pausado !== undefined) cambios.programador_pausado = !!entrada.programador_pausado
+  if (entrada.max_tareas !== undefined) {
+    const v = numeroOk(entrada.max_tareas, 100)
+    if (v === null || Number.isNaN(v)) return { ok: false, error: 'El máximo de tareas va de 0 a 100.' }
+    cambios.max_tareas = Math.round(v)
+  }
+  if (entrada.frecuencia_min_min !== undefined) {
+    const v = Math.round(Number(entrada.frecuencia_min_min))
+    if (!Number.isFinite(v) || v < 60 || v > 10080) return { ok: false, error: 'La frecuencia mínima va de 1 hora a 1 semana.' }
+    cambios.frecuencia_min_min = v
+  }
+  if (entrada.tope_investigacion_usd !== undefined) {
+    const v = numeroOk(entrada.tope_investigacion_usd, 100)
+    if (v === null || Number.isNaN(v)) return { ok: false, error: 'El tope de la investigación va de 0 a 100 US$.' }
+    cambios.tope_investigacion_usd = v
+  }
+  if (entrada.correo_remitente !== undefined) {
+    const v = entrada.correo_remitente?.trim() || null
+    if (v && !/^[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+$/.test(v)) return { ok: false, error: 'El remitente tiene que ser una dirección de correo.' }
+    cambios.correo_remitente = v
+  }
+  if (entrada.correo_nombre !== undefined) cambios.correo_nombre = entrada.correo_nombre.trim().slice(0, 80) || 'Asistente de IA · Iberia'
+  if (entrada.whatsapp_plantilla !== undefined) {
+    const v = entrada.whatsapp_plantilla?.trim() || null
+    if (v && !/^[a-z0-9_]{1,512}$/.test(v)) return { ok: false, error: 'La plantilla de WhatsApp va en minúsculas, números y guion bajo.' }
+    cambios.whatsapp_plantilla = v
+  }
   if (entrada.instrucciones_empresa !== undefined) {
     if (entrada.instrucciones_empresa.length > 20000) return { ok: false, error: 'Las instrucciones pasan de 20.000 caracteres.' }
     cambios.instrucciones_empresa = entrada.instrucciones_empresa
@@ -80,13 +114,16 @@ type CamposPolitica = {
   tope_diario_usd: number | null
   tope_mensual_usd: number | null
   cuota_mb: number | null
+  puede_programar: boolean | null
+  max_tareas: number | null
 }
 
 function limpiar(p: CamposPolitica): CamposPolitica | string {
   const diario = numeroOk(p.tope_diario_usd, 100000)
   const mensual = numeroOk(p.tope_mensual_usd, 100000)
   const cuota = numeroOk(p.cuota_mb, 1_000_000)
-  if ([diario, mensual, cuota].some((v) => Number.isNaN(v))) return 'Revisa los números.'
+  const tareas = numeroOk(p.max_tareas, 100)
+  if ([diario, mensual, cuota, tareas].some((v) => Number.isNaN(v))) return 'Revisa los números.'
   if (p.esfuerzo_max && !ESFUERZOS.includes(p.esfuerzo_max)) return 'Esfuerzo no válido.'
   return {
     modelos: p.modelos && p.modelos.length ? p.modelos.slice(0, 20) : null,
@@ -94,6 +131,8 @@ function limpiar(p: CamposPolitica): CamposPolitica | string {
     tope_diario_usd: diario,
     tope_mensual_usd: mensual,
     cuota_mb: cuota === null ? null : Math.round(cuota),
+    puede_programar: typeof p.puede_programar === 'boolean' ? p.puede_programar : null,
+    max_tareas: tareas === null ? null : Math.round(tareas),
   }
 }
 

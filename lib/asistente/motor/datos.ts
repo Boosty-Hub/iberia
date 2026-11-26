@@ -5,7 +5,7 @@
  * puede consultar y cada consulta, con el token de su sesión. Sin Next ni
  * `server-only`: lo carga la función de fondo.
  */
-import { secretoAsistente } from './servicio'
+import { secretoAsistente, urlBase } from './servicio'
 
 export type CatalogoDatos = {
   fuentes: { clave: string; sensible: boolean }[]
@@ -19,9 +19,7 @@ export type Datos = {
   consultar: (fuente: string, args: Record<string, unknown>) => Promise<{ resultado: Record<string, unknown>; sensible?: boolean }>
 }
 
-function base(): string {
-  return (process.env.ASISTENTE_URL_BASE || process.env.URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, '')
-}
+const base = urlBase
 
 async function pedir(cuerpo: Record<string, unknown>) {
   const r = await fetch(`${base()}/api/asistente/fuente`, {
