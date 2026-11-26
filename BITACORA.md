@@ -24,7 +24,7 @@ que está en línea.
 |---|---|
 | **Fase** | 1 · Entender · **día 92 de 153**. Contrato `CONT-2026-08-0002`, firmado el 6/7 de agosto |
 | **Calendario** | **La entrega y cierre de la Fase 1 estaba agendada para el miércoles 21 de octubre**, con los directores. ⚠️ **Esta bitácora no tiene la entrada de ese día**: falta pasar cómo salió. `/dashboard/programa` dice que levantamiento, inventario y arquitectura vencen el 21 |
-| **Dashboard** | En línea desde el 25/9 en `iberiavenezuela.netlify.app` (Netlify de Iberia). Roles y permisos configurables. **Tres cuentas de Iberia desde el 27/9**, cada una enlazada a su ficha: Alberto (Administrador), Martha Fuentes (Lector Iberia) y Martha Álvarez (Marketing) |
+| **Dashboard** | En línea desde el 25/9 en Netlify de Iberia; **desde el 26/11 el dominio oficial es `portal.industriasiberia.com`** (`iberiavenezuela.netlify.app` sigue respondiendo). Roles y permisos configurables. **Tres cuentas de Iberia desde el 27/9**, cada una enlazada a su ficha: Alberto (Administrador), Martha Fuentes (Lector Iberia) y Martha Álvarez (Marketing) |
 | **Levantamiento** | 42 sesiones grabadas · 27.951 turnos · **36 entrevistas de ~25**: a las 33 se suman la de Alberto (29/9) y las de Flaviano y Gustavo (7/10), las tres sin cargar a propósito · ENT-029 sin hacer · los 20 macroprocesos cubiertos |
 | **Hallazgos** | 394, todos con cita textual · 37 de 42 sesiones cosechadas · 🔴 **solo 2 validados** |
 | **Informe** | 16 secciones con el documento técnico y la política de IA en borrador, **terminado y publicado el 9/10**, formal y sin atribuciones. **Repasado el 11/10 para que documente el flujo y no suene a chisme**: 9 hallazgos críticos de 42. Construcción por **fases 2, 3 y 4**. **«Qué proponemos» abre desde el 20/10 con las tres líneas de intervención** (sección 09). Ninguna sección se genera: se corrigen con `npm run secciones` |
@@ -98,6 +98,17 @@ cosa: `AGENTS.md` («Mis archivos», «El asistente de IA», «Los tutoriales»,
 - **La barra, amarrada a los permisos** (Gabriel: a un usuario le salían «Datos al», Realidad/Escenario y Bs/USD sin tener
   esos módulos). En producción (`0ce9d5a`), andreto ve buscar, tasas, campana, «Ticket» y su persona. El «Ticket» que no
   le veía era de una pestaña anterior al despliegue del widget.
+- **Lo que siguió esa noche, en producción**: la pestaña Artefactos (`d6b8d6e`); el chat se cierra al llegar al tope y avisa
+  al renovarse (`fd218c7`); la memoria en tres capas, que aprende sola sin aprobar, decisión de Gabriel (`4eb9600`); en el
+  teléfono la barra no queda debajo de la hora (`7e8ec0b`); el código sale en una ventana de terminal, para IT (`c54892a`).
+- **`portal.industriasiberia.com` es el dominio oficial** (Gabriel, 26/11; `6e008f4`): `NEXT_PUBLIC_SITE_URL` y el *Site URL*
+  de Supabase Auth. `iberiavenezuela.netlify.app` sigue para los enlaces ya enviados y las apps. Recorrido en el dominio nuevo
+  11/11. Se le pasó a Gabriel el texto para IT: registrar en Entra las dos direcciones de retorno de Microsoft 365.
+- **Auditoría de proveedores para Tecnología de Iberia** (pedido de Gabriel, tras el audio de IT preguntando dónde está
+  alojado y quién lo cuida): `documentos/2026-11-auditoria-proveedores-plataforma.pdf`, 9 páginas, con Supabase, Netlify y
+  Resend investigados con fuente oficial, la instancia leída de las consolas, 8 recomendaciones y un anexo de IA y voz.
+  🔴 **Lo que encontró**: la base acepta conexiones directas desde cualquier red y sin SSL obligatorio, el mínimo de las
+  contraseñas es 6, sin PITR ni SMTP propio. Los cuatro ajustes sin costo esperan el OK de Gabriel (`PENDIENTES.md`).
 
 ---
 
