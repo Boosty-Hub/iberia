@@ -6,7 +6,7 @@ import { claveAnthropic } from '@/lib/clave-anthropic'
 import { numero } from '@/lib/plataforma/formato'
 import { ETIQUETA_ESFUERZO, type Esfuerzo } from '@/lib/asistente/tipos'
 import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
-import { FormMotor, InterruptorModelo } from '@/components/sistema/asistente/admin-formularios'
+import { FormMotor, InterruptorModelo, PanelMotorLocal } from '@/components/sistema/asistente/admin-formularios'
 
 export const metadata: Metadata = { title: 'Motor y modelos · Asistente de IA' }
 
@@ -20,7 +20,12 @@ export default async function MotorPage() {
   const sesion = await requerirPermiso('sistema:asistente-admin')
   const editable = puede(sesion, 'sistema:asistente-admin', 'editar')
   const supabase = await createClient()
-  const [config, modelos, { data: tareas }] = await Promise.all([leerConfig(), leerModelosAdmin(), supabase.schema('asistente').rpc('tareas_resumen')])
+  const [config, modelos, { data: tareas }, { data: capacidades }] = await Promise.all([
+    leerConfig(),
+    leerModelosAdmin(),
+    supabase.schema('asistente').rpc('tareas_resumen'),
+    supabase.schema('asistente').from('capacidad_motor').select('capacidad, disponible, solo_hibrido, motivo, orden').eq('motor', 'local').order('orden'),
+  ])
   const t = tareas as { activas: number; pausadas: number; tableros: number; corridas_mes: number; fallidas_mes: number; pausado: boolean } | null
   const claves = { anthropic: !!claveAnthropic().clave, openai: !!process.env.OPENAI_API_KEY?.trim() }
 
@@ -30,11 +35,22 @@ export default async function MotorPage() {
       {t && (
         <p className="mb-3 rounded-xl border border-[var(--borde)] bg-white px-4 py-2.5 text-[12.5px] text-marca-600">
           <span className="font-semibold text-marca-900">Tareas programadas:</span> {numero(t.activas)} activas ({numero(t.tableros)} tableros vivos) · {numero(t.pausadas)} pausadas · {numero(t.corridas_mes)} corridas este mes
-          {t.fallidas_mes > 0 && <>, {numero(t.fallidas_mes)} fallidas</>}
-          {t.pausado && <span className="ml-1 font-semibold text-amber-700">· El programador está pausado.</span>} Solo cuentas: las instrucciones no se leen.
+          {t.fallidas_mes > 0 && <>, {numero(t.fallidas_mes)} fallidas</>}.
+          {t.pausado && <span className="ml-1 font-semibold text-amber-700">El programador está pausado.</span>}{' '}
+          <span className="text-marca-500">Solo cuentas: las instrucciones no se leen.</span>
         </p>
       )}
       {config && <FormMotor config={config} modelos={modelos.map((m) => ({ id: m.id, nombre: m.nombre, proveedor: m.proveedor, encendido: m.encendido }))} claves={claves} editable={editable} />}
+
+      {config && (
+        <PanelMotorLocal
+          config={config}
+          modelos={modelos.filter((m) => m.proveedor === 'local').map((m) => ({ id: m.id, nombre: m.nombre, nombre_api: m.nombre_api, precio_entrada: Number(m.precio_entrada), precio_salida: Number(m.precio_salida), encendido: m.encendido }))}
+          capacidades={capacidades ?? []}
+          editable={editable}
+          conClave={!!process.env.ASISTENTE_LOCAL_CLAVE?.trim()}
+        />
+      )}
 
       <section className="relative mt-4 overflow-x-auto rounded-xl border border-[var(--borde)] bg-white">
         <header className="border-b border-[var(--borde)] px-4 py-2.5">

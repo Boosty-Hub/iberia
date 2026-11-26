@@ -1348,6 +1348,19 @@ no use licencias sueltas. **El plan entero (7 fases, 22 decisiones de Gabriel, c
     función de fondo; en local, en la misma); el último de 4 tramos corre sin límite. OpenAI no se parte en tramos.
   - ⚠️ **Fechas en un componente de cliente**: `Intl` no escribe igual en Node que en el navegador y rompe la hidratación. Las de
     Tareas llegan escritas desde el servidor (`fechaCaracas`).
+- **Fase 6 · el motor local** (migración `20261126180000_asistente_fase6`). Un servidor de modelos de Iberia con **Chat
+  Completions** compatible con OpenAI (Ollama, vLLM, llama.cpp; la Responses API no la hablan todos): `motor/local.ts`, con
+  las mismas herramientas (artefactos, datos, memoria, `proponer_tarea`) y, en modo híbrido, `procesar_archivo` por Anthropic.
+  La dirección va en `config.local_url` y el modo en `config.local_modo` (`hibrido` | `adentro`); la clave, si la pide, en el
+  entorno (`ASISTENTE_LOCAL_CLAVE`), nunca en una tabla. Los modelos locales los da de alta la administración (`modelo.nombre_api`
+  es como los llama el servidor, «qwen3:32b»; el precio es el costo estimado de operar el equipo, para que los topes cuenten).
+  **Lo que cada motor puede es dato**: `asistente.capacidad_motor` + `asistente.capacidades(motor)` (con el modo resuelto). El
+  ejecutor no le ofrece al modelo lo apagado (herramientas de la plataforma apagadas de fábrica en el local hasta probarlas), el
+  chat lo apaga con su motivo (Adjuntar, Investigación, y el pie «Motor local de Iberia · sin …») y `enviarMensaje` lo vuelve a
+  revisar. La administración solo cambia las filas del motor local. Administración › Motor: dirección, modo, «Probar
+  conexión» (`GET /models`), modelos y la matriz. El motor local se elige solo con servidor y un modelo local encendido.
+  ⚠️ **Falta el estudio** (modelo abierto, equipo, costo y la ruta de red: el ejecutor corre en Netlify y el servidor estaría en
+  Iberia —túnel cifrado o ejecutor dentro de su red—) y el entorno de código propio del modo todo adentro: ver `PENDIENTES.md`.
 - ⚠️ **Un `next dev` viejo sirve código viejo**: el 26-nov el Resumen mostraba cifras sin formato con el archivo ya
   corregido; reiniciar el dev lo arregló. Y **dos `next dev` en la misma carpeta no conviven** (el del 3001 impide el del
   3005, que muere sin escribir nada en su registro).
@@ -1359,6 +1372,7 @@ node --env-file=.env.local scripts/asistente/sonda-openai.mjs                   
 node --env-file=.env.local scripts/asistente/probar-datos.mjs [--solo datos|redteam|sinpermiso]                         # fase 2 y red team
 node --env-file=.env.local scripts/asistente/probar-f3.mjs [--solo proyecto|memoria|atajos|voz]                         # fase 3 (micrófono falso con voz de Azure)
 node --env-file=.env.local scripts/asistente/probar-f5.mjs [--solo programador|fallas|chat|tablero|investigacion]       # fase 5 (ver la cabecera: el dev de pruebas con ASISTENTE_CORREO_DESVIO y ASISTENTE_TRAMO_MS)
+node --env-file=.env.local scripts/asistente/probar-f6.mjs [--url <base /v1>] [--modelo <nombre>]                         # fase 6 (el dev con ASISTENTE_LOCAL_CLAVE; sin servidor de Iberia, contra el endpoint compatible de OpenAI)
 node --env-file=.env.local scripts/asistente/montar-programador.mjs [--destino produccion --confirmo [--url …] [--quitar]]  # el reloj (pg_cron)
 node --env-file=.env.local scripts/asistente/probar-f4.mjs                                                            # fase 4: dos sesiones a la vez (dueño e invitado)
 python scripts/asistente/extraer-paginas.py && node --env-file=.env.local scripts/asistente/indexar-documentos.mjs [--destino produccion --confirmo]

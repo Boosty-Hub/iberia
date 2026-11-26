@@ -54,6 +54,14 @@ export async function enviarMensaje(entrada: {
   let modelo = modelos.find((m) => m.id === entrada.modelo && m.proveedor === motor && m.encendido && pol.modelos.includes(m.id))
   if (!modelo) modelo = modelos.find((m) => m.id === pol.modelo_defecto && pol.modelos.includes(m.id)) ?? modelos.find((m) => m.proveedor === motor && m.encendido && pol.modelos.includes(m.id))
   if (!modelo) return { ok: false, error: 'No tienes ningún modelo habilitado para el motor activo.' }
+  // Lo que el motor activo no puede (fase 6): la pantalla lo apaga y aquí se vuelve a revisar.
+  if (motor === 'local' && (entrada.investigacion || entrada.adjuntos.length)) {
+    const supa = await createClient()
+    const { data: caps } = await supa.schema('asistente').rpc('capacidades', {})
+    const cap = (k: string) => ((caps ?? []) as { capacidad: string; disponible: boolean; motivo: string | null }[]).find((c) => c.capacidad === k)
+    if (entrada.investigacion && !cap('investigacion')?.disponible) return { ok: false, error: `La investigación profunda no está disponible con el motor local: ${cap('investigacion')?.motivo ?? ''}` }
+    if (entrada.adjuntos.length && !cap('archivos')?.disponible) return { ok: false, error: `Con el motor local no se procesan archivos: ${cap('archivos')?.motivo ?? ''}` }
+  }
   let esfuerzo: Esfuerzo = modelo.esfuerzos.includes(entrada.esfuerzo) ? entrada.esfuerzo : pol.esfuerzo_defecto
   if (!dentroDelMaximo(esfuerzo, pol.esfuerzo_max)) esfuerzo = pol.esfuerzo_max
   if (!modelo.esfuerzos.includes(esfuerzo)) esfuerzo = modelo.esfuerzos.includes('medium') ? 'medium' : modelo.esfuerzos[0]

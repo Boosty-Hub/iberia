@@ -65,6 +65,7 @@ function mimeDe(f: File): string {
 }
 
 const usd = (n: number) => `US$ ${n.toFixed(2).replace('.', ',')}`
+const ETIQUETA_CAPACIDAD: Record<string, string> = { herramientas: 'datos de la plataforma', archivos: 'archivos', busqueda: 'internet', investigacion: 'investigación profunda' }
 
 export function ChatAsistente(props: {
   yo: { id: string; nombre: string }
@@ -88,6 +89,8 @@ export function ChatAsistente(props: {
   tareasProgramadas: string[]
   /** Si el chat es el resultado de una tarea programada. */
   deTarea: { nombre: string; tipo: 'tarea' | 'tablero' } | null
+  /** Lo que puede el motor activo (fase 6): lo que no, sale apagado con su motivo. */
+  capacidades: { capacidad: string; disponible: boolean; motivo: string | null }[]
 }) {
   const supabase = useMemo(() => createClient(), [])
   const [politica, setPolitica] = useState(props.politica)
@@ -117,6 +120,9 @@ export function ChatAsistente(props: {
   const [alAsistente, setAlAsistente] = useState(true)
   const [investigacion, setInvestigacion] = useState(false)
   const programadas = useMemo(() => new Set(props.tareasProgramadas), [props.tareasProgramadas])
+  const capacidad = (k: string) => props.capacidades.find((c) => c.capacidad === k) ?? { capacidad: k, disponible: true, motivo: null }
+  const sinArchivos = !capacidad('archivos').disponible
+  const sinInvestigacion = !capacidad('investigacion').disponible
   const router = useRouter()
   const nombreDe = useMemo(() => new Map(props.participantes.map((p) => [p.perfil_id, p.nombre])), [props.participantes])
   const [grabando, setGrabando] = useState<'no' | 'grabando' | 'transcribiendo'>('no')
@@ -603,9 +609,13 @@ export function ChatAsistente(props: {
                 className="block w-full resize-none rounded-t-xl px-3.5 pt-3 text-[14.5px] text-marca-900 outline-none placeholder:text-marca-400"
               />
               <div className="flex flex-wrap items-center gap-1.5 px-2 pb-2">
-                <label className={cn('btn-neutro h-8 cursor-pointer px-2.5 text-[12.5px]', sinHabilitar && 'pointer-events-none opacity-50')}>
+                <label
+                  className={cn('btn-neutro h-8 cursor-pointer px-2.5 text-[12.5px]', (sinHabilitar || sinArchivos) && 'pointer-events-none opacity-50')}
+                  title={sinArchivos ? capacidad('archivos').motivo ?? undefined : undefined}
+                  aria-disabled={sinArchivos || undefined}
+                >
                   📎 Adjuntar
-                  <input ref={archivoInput} type="file" multiple accept={ACEPTA} className="sr-only" onChange={(e) => e.target.files && (adjuntar(e.target.files), (e.target.value = ''))} />
+                  <input ref={archivoInput} type="file" multiple accept={ACEPTA} disabled={sinHabilitar || sinArchivos} className="sr-only" onChange={(e) => e.target.files && (adjuntar(e.target.files), (e.target.value = ''))} />
                 </label>
                 <button
                   type="button"
@@ -633,9 +643,9 @@ export function ChatAsistente(props: {
                 <button
                   type="button"
                   aria-pressed={investigacion}
-                  disabled={sinHabilitar || (props.compartido && !alAsistente)}
+                  disabled={sinHabilitar || sinInvestigacion || (props.compartido && !alAsistente)}
                   onClick={() => setInvestigacion((x) => !x)}
-                  title="Investiga a fondo en internet, la plataforma y tus archivos, y entrega un informe con fuentes. Puede tardar varios minutos."
+                  title={sinInvestigacion ? capacidad('investigacion').motivo ?? undefined : 'Investiga a fondo en internet, la plataforma y tus archivos, y entrega un informe con fuentes. Puede tardar varios minutos.'}
                   className={cn('btn-neutro h-8 px-2.5 text-[12.5px]', investigacion && 'border-acento-300 bg-acento-50 text-acento-700')}
                 >
                   🔎 Investigación
@@ -662,6 +672,12 @@ export function ChatAsistente(props: {
               <p className="mt-1.5 text-center text-[11.5px] text-acento-700">
                 Investigación profunda: arma un plan, busca a fondo y entrega un informe con fuentes. Puede tardar varios minutos
                 {politica?.tope_investigacion_usd ? ` y gastar hasta ${usd(politica.tope_investigacion_usd)}` : ''}; te aviso al terminar.
+              </p>
+            )}
+            {politica?.motor === 'local' && (
+              <p className="mt-1.5 text-center text-[11.5px] text-marca-500" data-motor-local>
+                Motor local de Iberia
+                {props.capacidades.filter((c) => !c.disponible).length > 0 && <> · sin {props.capacidades.filter((c) => !c.disponible).map((c) => ETIQUETA_CAPACIDAD[c.capacidad] ?? c.capacidad).join(', ')}</>}
               </p>
             )}
             <p className="mt-1.5 text-center text-[11px] text-marca-400">{AVISO_RESGUARDO}</p>

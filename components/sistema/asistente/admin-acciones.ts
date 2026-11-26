@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { ESFUERZOS, type Esfuerzo, type Motor } from '@/lib/asistente/tipos'
+import { modelosDelServidor } from '@/lib/asistente/motor/local'
 
 type R = { ok: true } | { ok: false; error: string }
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
@@ -34,11 +35,31 @@ export async function guardarConfig(entrada: {
   correo_remitente?: string | null
   correo_nombre?: string
   whatsapp_plantilla?: string | null
+  local_url?: string | null
+  local_modo?: 'hibrido' | 'adentro'
 }): Promise<R> {
   const sesion = await requerirPermiso('sistema:asistente-admin', 'editar')
   const cambios: Record<string, unknown> = { actualizado_por: sesion.userId, actualizado_en: new Date().toISOString() }
+  const supabase = await createClient()
+  if (entrada.local_url !== undefined) {
+    const v = entrada.local_url?.trim().replace(/\/$/, '') || null
+    if (v && !/^https?:\/\/[^\s]+$/.test(v)) return { ok: false, error: 'La dirección del servidor local empieza por http:// o https://.' }
+    cambios.local_url = v
+  }
+  if (entrada.local_modo !== undefined) {
+    if (!['hibrido', 'adentro'].includes(entrada.local_modo)) return { ok: false, error: 'Modo no válido.' }
+    cambios.local_modo = entrada.local_modo
+  }
   if (entrada.motor !== undefined) {
-    if (!['anthropic', 'openai'].includes(entrada.motor)) return { ok: false, error: 'El motor local llega en la fase 6.' }
+    if (!['anthropic', 'openai', 'local'].includes(entrada.motor)) return { ok: false, error: 'Motor no válido.' }
+    if (entrada.motor === 'local') {
+      // El motor local se enciende solo con su servidor y al menos un modelo local encendido.
+      const { data: cfg } = await supabase.schema('asistente').from('config').select('local_url').eq('id', true).maybeSingle()
+      const url = cambios.local_url !== undefined ? cambios.local_url : cfg?.local_url
+      const { count } = await supabase.schema('asistente').from('modelo').select('id', { count: 'exact', head: true }).eq('proveedor', 'local').eq('encendido', true)
+      if (!url) return { ok: false, error: 'Para usar el motor local falta la dirección de su servidor.' }
+      if (!count) return { ok: false, error: 'Para usar el motor local falta al menos un modelo local encendido.' }
+    }
     cambios.motor = entrada.motor
   }
   if (entrada.encendido !== undefined) cambios.encendido = !!entrada.encendido
@@ -93,7 +114,6 @@ export async function guardarConfig(entrada: {
     if (entrada.instrucciones_empresa.length > 20000) return { ok: false, error: 'Las instrucciones pasan de 20.000 caracteres.' }
     cambios.instrucciones_empresa = entrada.instrucciones_empresa
   }
-  const supabase = await createClient()
   const { data, error } = await supabase.schema('asistente').from('config').update(cambios as never).eq('id', true).select('id')
   revalidatePath('/sistema/administracion/asistente', 'layout')
   if (error || !data?.length) return { ok: false, error: 'No se pudo guardar (¿tienes la casilla para editar?).' }
@@ -170,4 +190,59 @@ export async function quitarPoliticaUsuario(perfilId: string): Promise<R> {
   const { error } = await supabase.schema('asistente').from('politica_usuario').delete().eq('perfil_id', perfilId)
   revalidatePath('/sistema/administracion/asistente/usuarios')
   return error ? { ok: false, error: 'No se pudo quitar la excepción.' } : { ok: true }
+}
+
+// ── Motor local (fase 6) ─────────────────────────────────────────────────────
+
+/** Le pregunta al servidor de modelos qué modelos tiene: si responde, la red y la clave sirven. */
+export async function probarMotorLocal(url: string): Promise<{ ok: true; modelos: string[] } | { ok: false; error: string }> {
+  await requerirPermiso('sistema:asistente-admin', 'editar')
+  const v = url.trim().replace(/\/$/, '')
+  if (!/^https?:\/\/[^\s]+$/.test(v)) return { ok: false, error: 'La dirección empieza por http:// o https://.' }
+  return modelosDelServidor(v, process.env.ASISTENTE_LOCAL_CLAVE?.trim() || null)
+}
+
+/** Da de alta un modelo del motor local. El precio es el costo estimado de operar el equipo, para que el tope cuente. */
+export async function agregarModeloLocal(m: { id: string; nombre: string; nombreApi: string; precioEntrada: number; precioSalida: number }): Promise<R> {
+  await requerirPermiso('sistema:asistente-admin', 'editar')
+  const id = m.id.trim().toLowerCase()
+  if (!/^[a-z0-9][a-z0-9._:-]{1,80}$/.test(id)) return { ok: false, error: 'El id va en minúsculas, sin espacios (por ejemplo local-qwen3-32b).' }
+  if (!m.nombre.trim()) return { ok: false, error: 'Falta el nombre.' }
+  const pe = numeroOk(m.precioEntrada, 1000)
+  const ps = numeroOk(m.precioSalida, 1000)
+  if (pe === null || ps === null || Number.isNaN(pe) || Number.isNaN(ps)) return { ok: false, error: 'Revisa los costos (US$ por millón de tokens, 0 si no se cuenta).' }
+  const supabase = await createClient()
+  const { error } = await supabase.schema('asistente').from('modelo').insert({
+    id,
+    proveedor: 'local',
+    nombre: m.nombre.trim().slice(0, 80),
+    descripcion: 'Motor local de Iberia.',
+    nombre_api: m.nombreApi.trim() || null,
+    precio_entrada: pe,
+    precio_salida: ps,
+    esfuerzos: ['medium'],
+    vision: false,
+    encendido: true,
+    orden: 50,
+    verificado_en: new Date().toISOString().slice(0, 10),
+  })
+  revalidatePath('/sistema/administracion/asistente/motor')
+  return error ? { ok: false, error: /duplicate|unique/.test(error.message) ? 'Ya existe un modelo con ese id.' : 'No se pudo agregar el modelo.' } : { ok: true }
+}
+
+export async function quitarModeloLocal(id: string): Promise<R> {
+  await requerirPermiso('sistema:asistente-admin', 'editar')
+  const supabase = await createClient()
+  const { data } = await supabase.schema('asistente').from('modelo').delete().eq('id', id).eq('proveedor', 'local').select('id')
+  revalidatePath('/sistema/administracion/asistente/motor')
+  return data?.length ? { ok: true } : { ok: false, error: 'No se pudo quitar (¿lo usa algún turno?).' }
+}
+
+/** Enciende o apaga una capacidad del motor local (por ejemplo, las herramientas, después de probarlas). */
+export async function cambiarCapacidadLocal(capacidad: string, disponible: boolean): Promise<R> {
+  await requerirPermiso('sistema:asistente-admin', 'editar')
+  const supabase = await createClient()
+  const { data } = await supabase.schema('asistente').from('capacidad_motor').update({ disponible }).eq('motor', 'local').eq('capacidad', capacidad).select('capacidad')
+  revalidatePath('/sistema/administracion/asistente/motor')
+  return data?.length ? { ok: true } : { ok: false, error: 'No se pudo cambiar.' }
 }

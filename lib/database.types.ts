@@ -165,6 +165,33 @@ export type Database = {
         }
         Relationships: []
       }
+      capacidad_motor: {
+        Row: {
+          capacidad: string
+          disponible: boolean
+          motivo: string | null
+          motor: string
+          orden: number
+          solo_hibrido: boolean
+        }
+        Insert: {
+          capacidad: string
+          disponible: boolean
+          motivo?: string | null
+          motor: string
+          orden?: number
+          solo_hibrido?: boolean
+        }
+        Update: {
+          capacidad?: string
+          disponible?: boolean
+          motivo?: string | null
+          motor?: string
+          orden?: number
+          solo_hibrido?: boolean
+        }
+        Relationships: []
+      }
       chat: {
         Row: {
           actualizado_en: string
@@ -278,6 +305,8 @@ export type Database = {
           habilidades: string[]
           id: boolean
           instrucciones_empresa: string
+          local_modo: string
+          local_url: string | null
           max_tareas: number
           modelo_anthropic: string
           modelo_openai: string
@@ -302,6 +331,8 @@ export type Database = {
           habilidades?: string[]
           id?: boolean
           instrucciones_empresa?: string
+          local_modo?: string
+          local_url?: string | null
           max_tareas?: number
           modelo_anthropic?: string
           modelo_openai?: string
@@ -326,6 +357,8 @@ export type Database = {
           habilidades?: string[]
           id?: boolean
           instrucciones_empresa?: string
+          local_modo?: string
+          local_url?: string | null
           max_tareas?: number
           modelo_anthropic?: string
           modelo_openai?: string
@@ -695,6 +728,7 @@ export type Database = {
           esfuerzos: string[]
           id: string
           nombre: string
+          nombre_api: string | null
           orden: number
           precio_cache_escribe: number
           precio_cache_lee: number
@@ -710,6 +744,7 @@ export type Database = {
           esfuerzos?: string[]
           id: string
           nombre: string
+          nombre_api?: string | null
           orden?: number
           precio_cache_escribe?: number
           precio_cache_lee?: number
@@ -725,6 +760,7 @@ export type Database = {
           esfuerzos?: string[]
           id?: string
           nombre?: string
+          nombre_api?: string | null
           orden?: number
           precio_cache_escribe?: number
           precio_cache_lee?: number
@@ -1145,6 +1181,7 @@ export type Database = {
           titulo: string
         }[]
       }
+      capacidades: { Args: { p_motor?: string }; Returns: Json }
       consumo: {
         Args: { p_desde: string; p_hasta?: string }
         Returns: {

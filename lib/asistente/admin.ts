@@ -26,6 +26,8 @@ export async function leerConfig(): Promise<ConfigVista | null> {
     correo_remitente: data.correo_remitente,
     correo_nombre: data.correo_nombre,
     whatsapp_plantilla: data.whatsapp_plantilla,
+    local_url: data.local_url,
+    local_modo: data.local_modo as ConfigVista['local_modo'],
   }
 }
 

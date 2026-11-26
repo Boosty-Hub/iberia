@@ -6,6 +6,7 @@ import { Emisor } from './emisor'
 import { instruccionesSistema } from './instrucciones'
 import { ejecutarAnthropic, mensajeDeError } from './anthropic'
 import { ejecutarOpenAI } from './openai'
+import { ejecutarLocal } from './local'
 import { titularYClasificar } from './titulo'
 import { prepararDatos } from './datos'
 import type { ApiMemoria } from './memoria'
@@ -139,7 +140,12 @@ async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: Opcione
       }
     }
     emisor.emitir({ t: 'estado', turno: turnoId, estado: 'corriendo' })
-    const { data: pol } = await db.schema('asistente').rpc('politica_de', { p_perfil: turno.solicitante })
+    const [{ data: pol }, { data: caps }] = await Promise.all([
+      db.schema('asistente').rpc('politica_de', { p_perfil: turno.solicitante }),
+      db.schema('asistente').rpc('capacidades', { p_motor: turno.motor }),
+    ])
+    // Lo que el motor no puede (fase 6, la matriz de capacidades) ni se le ofrece.
+    const puedeMotor = (k: string) => ((caps ?? []) as { capacidad: string; disponible: boolean }[]).find((c) => c.capacidad === k)?.disponible !== false
 
     // El historial y los archivos del chat.
     const [{ data: mensajes }, { data: archivos }, { data: versiones }, { data: proyecto }, { data: archivosProyecto }, { data: pref }, { data: recuerdos }] = await Promise.all([
@@ -231,8 +237,8 @@ async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: Opcione
       contenedorId: chat.contenedor_id,
       contenedorVigente: vigente,
       habilidades: config.habilidades ?? [],
-      datos: await promesaDatos,
-      memoria,
+      datos: puedeMotor('herramientas') ? await promesaDatos : null,
+      memoria: puedeMotor('herramientas') ? memoria : null,
       senal: control.signal,
       emitir: (e) => emisor.emitir(e),
       asegurarEnAnthropic: (a) => asegurarEnAnthropic(db, a),
@@ -241,7 +247,7 @@ async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: Opcione
       publicarArtefacto: (x) => publicarArtefacto(db, turno.solicitante, chat.id, x),
       leerArtefacto: (grupo) => leerArtefacto(db, turno.solicitante, chat.id, grupo),
       modo: investigacion ? 'investigacion' : 'normal',
-      puedeProgramar: !turno.corrida_id && !!(pol as { puede_programar?: boolean } | null)?.puede_programar,
+      puedeProgramar: !turno.corrida_id && puedeMotor('herramientas') && !!(pol as { puede_programar?: boolean } | null)?.puede_programar,
       topeUsd: investigacion ? Number(config.tope_investigacion_usd) : null,
       // Solo el motor de Anthropic se parte en tramos; el último tramo corre sin límite.
       limiteMs: turno.motor === 'anthropic' && TRAMO_MS > 0 && turno.tramos < MAX_TRAMOS - 1 ? TRAMO_MS : null,
@@ -251,7 +257,12 @@ async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: Opcione
     const inicio = Date.now()
     let r: ResultadoMotor
     try {
-      r = (turno.motor as Motor) === 'anthropic' ? await ejecutarAnthropic(ctx, precioDe) : await ejecutarOpenAI(ctx, precioDe, turno.motor as Motor)
+      if ((turno.motor as Motor) === 'anthropic') r = await ejecutarAnthropic(ctx, precioDe)
+      else if ((turno.motor as Motor) === 'local') {
+        if (!config.local_url) throw new Error('El motor local no está configurado (falta la dirección del servidor de modelos).')
+        const nombreApi = (modelos ?? []).find((m) => m.id === turno.modelo)?.nombre_api || turno.modelo
+        r = await ejecutarLocal(ctx, precioDe, { url: config.local_url, clave: process.env.ASISTENTE_LOCAL_CLAVE?.trim() || null, modelo: nombreApi, archivos: puedeMotor('archivos') })
+      } else r = await ejecutarOpenAI(ctx, precioDe, turno.motor as Motor)
     } finally {
       clearInterval(vigia)
     }

@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { ESFUERZOS, ETIQUETA_ESFUERZO, type Esfuerzo, type Motor } from '@/lib/asistente/tipos'
-import { encenderModelo, guardarConfig, guardarPoliticaRol, guardarPoliticaUsuario, quitarPoliticaUsuario } from './admin-acciones'
+import { agregarModeloLocal, cambiarCapacidadLocal, probarMotorLocal, quitarModeloLocal, encenderModelo, guardarConfig, guardarPoliticaRol, guardarPoliticaUsuario, quitarPoliticaUsuario } from './admin-acciones'
 import { cn } from '@/lib/utils'
 
 const campo = 'h-9 rounded-lg border border-[var(--borde)] bg-white px-2.5 text-[13px] text-marca-900 outline-none focus:border-marca-400 disabled:bg-marca-50'
@@ -47,6 +47,8 @@ export type ConfigVista = {
   correo_remitente: string | null
   correo_nombre: string
   whatsapp_plantilla: string | null
+  local_url: string | null
+  local_modo: 'hibrido' | 'adentro'
 }
 
 export function FormMotor({
@@ -71,11 +73,11 @@ export function FormMotor({
         <p className="mt-0.5 text-[12.5px] text-marca-500">El proveedor que contesta en todos los chats. Los archivos se procesan siempre con Anthropic (decisión 19).</p>
         <div className="mt-3 flex flex-col gap-2">
           {(['anthropic', 'openai', 'local'] as const).map((m) => (
-            <label key={m} className={cn('flex items-center gap-2.5 rounded-lg border px-3 py-2 text-[13px]', c.motor === m ? 'border-marca-800 bg-marca-50' : 'border-[var(--borde)]', m === 'local' && 'opacity-60')}>
-              <input type="radio" name="motor" disabled={!editable || m === 'local'} checked={c.motor === m} onChange={() => setC({ ...c, motor: m })} />
+            <label key={m} className={cn('flex items-center gap-2.5 rounded-lg border px-3 py-2 text-[13px]', c.motor === m ? 'border-marca-800 bg-marca-50' : 'border-[var(--borde)]', m === 'local' && !config.local_url && 'opacity-60')}>
+              <input type="radio" name="motor" disabled={!editable || (m === 'local' && !config.local_url)} checked={c.motor === m} onChange={() => setC({ ...c, motor: m })} />
               <span className="flex-1 font-medium text-marca-900">{m === 'anthropic' ? 'Anthropic (Claude)' : m === 'openai' ? 'OpenAI' : 'Local'}</span>
               <span className="text-[12px] text-marca-500">
-                {m === 'local' ? 'Fase 6' : (m === 'anthropic' ? claves.anthropic : claves.openai) ? 'Clave configurada' : '⚠ Falta la clave'}
+                {m === 'local' ? (config.local_url ? 'Servidor de Iberia' : 'Configura su servidor abajo') : (m === 'anthropic' ? claves.anthropic : claves.openai) ? 'Clave configurada' : '⚠ Falta la clave'}
               </span>
             </label>
           ))}
@@ -450,6 +452,151 @@ export function FormInstrucciones({ inicial, editable }: { inicial: string; edit
           </button>
         )}
       </div>
+    </section>
+  )
+}
+
+// ── Motor local (fase 6) ─────────────────────────────────────────────────────
+
+const ETIQUETA_CAP: Record<string, string> = {
+  conversar: 'Conversar y razonar',
+  herramientas: 'Herramientas de la plataforma (fuentes, memoria, tareas)',
+  archivos: 'Archivos (Excel, Word, PDF) y código',
+  busqueda: 'Búsqueda en internet',
+  investigacion: 'Investigación profunda',
+}
+
+export function PanelMotorLocal({
+  config,
+  modelos,
+  capacidades,
+  editable,
+  conClave,
+}: {
+  config: ConfigVista
+  modelos: { id: string; nombre: string; nombre_api: string | null; precio_entrada: number; precio_salida: number; encendido: boolean }[]
+  capacidades: { capacidad: string; disponible: boolean; solo_hibrido: boolean; motivo: string | null }[]
+  editable: boolean
+  conClave: boolean
+}) {
+  const [url, setUrl] = useState(config.local_url ?? '')
+  const [modo, setModo] = useState(config.local_modo)
+  const [prueba, setPrueba] = useState<{ ok: boolean; texto: string } | null>(null)
+  const [nuevo, setNuevo] = useState({ id: '', nombre: '', nombreApi: '', precioEntrada: 0, precioSalida: 0 })
+  const { pendiente, msg, guardar } = useGuardar()
+  return (
+    <section className="mt-4 rounded-xl border border-[var(--borde)] bg-white p-4" aria-labelledby="motor-local">
+      <h2 id="motor-local" className="text-[14px] font-semibold text-marca-900">Motor local</h2>
+      <p className="mt-0.5 text-[12.5px] text-marca-500">
+        Un servidor de modelos en la infraestructura de Iberia con API compatible con OpenAI (Ollama, vLLM, llama.cpp). La clave, si la pide, va en el entorno del servidor (
+        <code className="text-[11.5px]">ASISTENTE_LOCAL_CLAVE</code>: {conClave ? 'configurada' : 'sin configurar'}), nunca aquí.
+      </p>
+      <div className="mt-3 grid gap-3 lg:grid-cols-[1fr_auto]">
+        <div>
+          <label className={rotulo} htmlFor="local-url">Dirección del servidor (termina en /v1)</label>
+          <input id="local-url" className={cn(campo, 'w-full font-mono')} disabled={!editable} placeholder="https://ia.iberia.interna/v1" value={url} onChange={(e) => setUrl(e.target.value)} />
+        </div>
+        <fieldset>
+          <legend className={rotulo}>Modo</legend>
+          <div className="flex gap-3 text-[13px] text-marca-800">
+            <label className="inline-flex items-center gap-1.5" title="Conversación y fuentes en el modelo local; los archivos los procesa Anthropic y salen de Iberia.">
+              <input type="radio" name="local-modo" disabled={!editable} checked={modo === 'hibrido'} onChange={() => setModo('hibrido')} /> Híbrido
+            </label>
+            <label className="inline-flex items-center gap-1.5" title="Nada sale de Iberia; sin archivos mientras no haya un entorno de código propio.">
+              <input type="radio" name="local-modo" disabled={!editable} checked={modo === 'adentro'} onChange={() => setModo('adentro')} /> Todo adentro
+            </label>
+          </div>
+        </fieldset>
+      </div>
+      {editable && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <button type="button" className="btn-acento h-9 px-4 text-[13px]" disabled={pendiente} onClick={() => guardar(() => guardarConfig({ local_url: url || null, local_modo: modo }))}>
+            Guardar
+          </button>
+          <button
+            type="button"
+            className="btn-neutro h-9 px-3 text-[13px]"
+            disabled={pendiente || !url}
+            onClick={async () => {
+              setPrueba(null)
+              const r = await probarMotorLocal(url)
+              setPrueba(r.ok ? { ok: true, texto: r.modelos.length ? `Responde. Modelos: ${r.modelos.slice(0, 12).join(', ')}${r.modelos.length > 12 ? '…' : ''}` : 'Responde, pero no lista modelos.' } : { ok: false, texto: r.error })
+            }}
+          >
+            Probar conexión
+          </button>
+          <Estado pendiente={pendiente} msg={msg} />
+          {prueba && <span className={cn('text-[12px]', prueba.ok ? 'text-emerald-700' : 'text-acento-700')}>{prueba.texto}</span>}
+        </div>
+      )}
+
+      <h3 className="mt-5 text-[13px] font-semibold text-marca-900">Qué puede hacer</h3>
+      <ul className="mt-1.5 divide-y divide-[var(--borde)] rounded-lg border border-[var(--borde)] text-[13px]">
+        {capacidades.map((k) => {
+          const efectiva = k.disponible && (!k.solo_hibrido || modo === 'hibrido')
+          return (
+            <li key={k.capacidad} className="flex flex-wrap items-center gap-2 px-3 py-2">
+              <span className={cn('rounded px-1.5 py-px text-[11px] font-semibold', efectiva ? 'bg-emerald-50 text-emerald-800' : 'bg-marca-100 text-marca-700')}>{efectiva ? 'Sí' : 'No'}</span>
+              <span className="min-w-0 flex-1 text-marca-900">
+                {ETIQUETA_CAP[k.capacidad] ?? k.capacidad}
+                {k.motivo && <span className="block text-[12px] text-marca-500">{k.solo_hibrido && modo !== 'hibrido' ? 'En modo todo adentro no hay entorno de código para archivos (hace falta uno propio).' : k.motivo}</span>}
+              </span>
+              {editable && k.capacidad === 'herramientas' && (
+                <label className="inline-flex items-center gap-1.5 text-[12px] text-marca-700">
+                  <input type="checkbox" checked={k.disponible} onChange={(e) => guardar(() => cambiarCapacidadLocal('herramientas', e.target.checked))} /> Encendidas (después de probarlas con el modelo)
+                </label>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+
+      <h3 className="mt-5 text-[13px] font-semibold text-marca-900">Modelos locales</h3>
+      {modelos.length === 0 && <p className="mt-1 text-[12.5px] text-marca-500">Ninguno todavía.</p>}
+      <ul className="mt-1.5 space-y-1 text-[13px]">
+        {modelos.map((m) => (
+          <li key={m.id} className="flex flex-wrap items-center gap-2">
+            <span className="font-medium text-marca-900">{m.nombre}</span>
+            <span className="font-mono text-[11.5px] text-marca-400">{m.nombre_api ?? m.id}</span>
+            <span className="text-[12px] text-marca-500">
+              US$ {m.precio_entrada} / {m.precio_salida} por millón
+            </span>
+            {editable && (
+              <button type="button" className="btn-neutro h-7 px-2 text-[12px]" onClick={() => guardar(() => quitarModeloLocal(m.id))}>
+                Quitar
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+      {editable && (
+        <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_120px_120px_auto] lg:items-end">
+          <div>
+            <label className={rotulo} htmlFor="ml-id">Id</label>
+            <input id="ml-id" className={cn(campo, 'w-full font-mono')} placeholder="local-qwen3-32b" value={nuevo.id} onChange={(e) => setNuevo({ ...nuevo, id: e.target.value })} />
+          </div>
+          <div>
+            <label className={rotulo} htmlFor="ml-nombre">Nombre</label>
+            <input id="ml-nombre" className={cn(campo, 'w-full')} placeholder="Qwen 3 32B (local)" value={nuevo.nombre} onChange={(e) => setNuevo({ ...nuevo, nombre: e.target.value })} />
+          </div>
+          <div>
+            <label className={rotulo} htmlFor="ml-api">Nombre en el servidor</label>
+            <input id="ml-api" className={cn(campo, 'w-full font-mono')} placeholder="qwen3:32b" value={nuevo.nombreApi} onChange={(e) => setNuevo({ ...nuevo, nombreApi: e.target.value })} />
+          </div>
+          <div>
+            <label className={rotulo} htmlFor="ml-pe">Costo entrada</label>
+            <input id="ml-pe" type="number" min={0} step="0.01" className={cn(campo, 'w-full')} value={nuevo.precioEntrada} onChange={(e) => setNuevo({ ...nuevo, precioEntrada: Number(e.target.value) })} />
+          </div>
+          <div>
+            <label className={rotulo} htmlFor="ml-ps">Costo salida</label>
+            <input id="ml-ps" type="number" min={0} step="0.01" className={cn(campo, 'w-full')} value={nuevo.precioSalida} onChange={(e) => setNuevo({ ...nuevo, precioSalida: Number(e.target.value) })} />
+          </div>
+          <button type="button" className="btn-neutro h-9 px-3 text-[13px]" disabled={pendiente || !nuevo.id || !nuevo.nombre} onClick={() => guardar(() => agregarModeloLocal(nuevo))}>
+            Agregar modelo
+          </button>
+          <p className="text-[11.5px] text-marca-500 sm:col-span-2 lg:col-span-6">El costo es el estimado de operar el equipo (US$ por millón de tokens), para que los topes cuenten; 0 si no se cuenta.</p>
+        </div>
+      )}
     </section>
   )
 }
