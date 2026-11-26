@@ -10,6 +10,7 @@ import { misPendientes } from '@/components/sistema/shell/acciones'
 import { leerResumen } from '@/components/sistema/colaboracion/datos'
 import { BandaVerComo, BandasContexto } from '@/components/sistema/shell/bandas'
 import { BotonBuscar, Campana, ControlesContexto, InterruptorMoneda, MenuPersona, VerComo } from '@/components/sistema/shell/barra-cliente'
+import { SoporteBoosty } from '@/components/sistema/shell/soporte-boosty'
 import { MisCambios } from '@/components/sistema/shell/mis-cambios'
 import { BarraTasas, PuntoJd } from '@/components/sistema/shell/barra-tasas'
 import { MenuTelefono } from '@/components/sistema/shell/menu-telefono'
@@ -185,6 +186,8 @@ export default async function SistemaLayout({ children }: LayoutProps<'/sistema'
         )}
         <MisCambios inicial={misCambios} />
         <Campana inicial={avisos} />
+        {/* El soporte de Boosty: el botón «Ticket», justo antes del menú de la persona (con la persona real, no el «ver como»). */}
+        <SoporteBoosty nombre={nombre} email={sesion.email} />
         <MenuPersona
           nombre={nombre}
           email={sesion.email}

@@ -58,9 +58,49 @@ export function urlBase(): string {
   return (process.env.ASISTENTE_URL_BASE || process.env.URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, '')
 }
 
-/** ¿Corre en Netlify? Ahí el turno va a la función de fondo (15 min) y se parte en tramos. */
-export function enNetlify(): boolean {
-  if (process.env.ASISTENTE_EJECUTOR === 'local') return false
-  if (process.env.ASISTENTE_EJECUTOR === 'netlify') return true
-  return !!(process.env.NETLIFY || process.env.SITE_ID || process.env.DEPLOY_URL)
+/**
+ * Dónde corre el turno:
+ * - `netlify`: la función de fondo de Netlify (15 min por invocación; tramos de 12).
+ * - `supabase`: la Edge Function `asistente-turno` (piloto del 26-nov-2026; 400 s por invocación en Pro, tramos de 4 min).
+ * - `local`: dentro de `after()` del servidor de Next, sin límite (desarrollo).
+ * `ASISTENTE_EJECUTOR` lo fija; sin ella, Netlify si se está en Netlify, y si no, local.
+ */
+export type ModoEjecutor = 'netlify' | 'supabase' | 'local'
+export function modoEjecutor(): ModoEjecutor {
+  const e = process.env.ASISTENTE_EJECUTOR
+  if (e === 'local' || e === 'netlify' || e === 'supabase') return e
+  return process.env.NETLIFY || process.env.SITE_ID || process.env.DEPLOY_URL ? 'netlify' : 'local'
+}
+
+/** El turno corre fuera del servidor de Next (en otra invocación, con tope de tiempo y por tramos). */
+export function enOtraInvocacion(): boolean {
+  return modoEjecutor() !== 'local'
+}
+
+/** Lo que dura un tramo antes de guardar el estado y seguir en otra invocación (0 = sin tramos). */
+export function tramoMs(): number {
+  const fijo = Number(process.env.ASISTENTE_TRAMO_MS)
+  if (fijo > 0) return fijo
+  const modo = modoEjecutor()
+  return modo === 'netlify' ? 12 * 60_000 : modo === 'supabase' ? 4 * 60_000 : 0
+}
+
+/**
+ * Lanza un turno (o su tramo siguiente) en el ejecutor remoto. Los dos responden 202 en el acto y siguen solos.
+ * Una redirección (p. ej. a /login) no es arrancar: no se sigue (pasó el 26-nov-2026 con el proxy de Next).
+ */
+export async function lanzarRemoto(cuerpo: Record<string, unknown>, base: string = urlBase()): Promise<void> {
+  const modo = modoEjecutor()
+  if (modo === 'local') throw new Error('lanzarRemoto no aplica con el ejecutor local')
+  const url =
+    modo === 'supabase'
+      ? `${(process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '')}/functions/v1/asistente-turno`
+      : `${base.replace(/\/$/, '')}/.netlify/functions/asistente-turno-background`
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-asistente-secreto': secretoAsistente() },
+    redirect: 'manual',
+    body: JSON.stringify(cuerpo),
+  })
+  if (r.status !== 202) throw new Error(`No se pudo lanzar el turno en ${modo} (${r.status}).`)
 }

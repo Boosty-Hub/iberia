@@ -1,7 +1,7 @@
 import { toFile } from '@anthropic-ai/sdk'
 import type { Bloque, ClaseArtefacto, Esfuerzo, Motor } from '../tipos'
 import type { Database } from '../../database.types'
-import { BETA_ARCHIVOS, crearAnthropic, crearServicio, enNetlify, secretoAsistente, urlBase, type BaseServicio } from './servicio'
+import { BETA_ARCHIVOS, crearAnthropic, crearServicio, enOtraInvocacion, lanzarRemoto, modoEjecutor, secretoAsistente, tramoMs, urlBase, type BaseServicio } from './servicio'
 import { Emisor } from './emisor'
 import { instruccionesSistema } from './instrucciones'
 import { ejecutarAnthropic, mensajeDeError } from './anthropic'
@@ -27,9 +27,11 @@ const RESERVA: Record<string, number> = {
 
 const PRECIO_DEFECTO: Precio = { entrada: 4, salida: 20, cacheLee: 0.2, cacheEscribe: 5 }
 
-/** El tramo de la función de fondo: pasado esto, el turno guarda su estado y sigue en otra invocación. */
-const TRAMO_MS = Number(process.env.ASISTENTE_TRAMO_MS) || (enNetlify() ? 12 * 60_000 : 0)
-const MAX_TRAMOS = 4
+/** El tramo del ejecutor remoto: pasado esto, el turno guarda su estado y sigue en otra invocación. */
+const TRAMO_MS = tramoMs()
+// En Supabase cada invocación aguanta 400 s (no 15 min): más tramos, y ninguno sin límite.
+const MAX_TRAMOS = modoEjecutor() === 'supabase' ? 8 : 4
+const ULTIMO_SIN_LIMITE = modoEjecutor() !== 'supabase'
 
 export type OpcionesTurno = {
   token?: string | null
@@ -41,17 +43,7 @@ export type OpcionesTurno = {
 
 /** Un turno partido en tramos sigue en otra invocación (en local, en esta misma). */
 async function relanzar(turnoId: string, opciones: OpcionesTurno) {
-  if (enNetlify()) {
-    const r = await fetch(`${urlBase()}/.netlify/functions/asistente-turno-background`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-asistente-secreto': secretoAsistente() },
-      // Una función de fondo responde 202 en el acto. Una redirección (p. ej. a /login) no es arrancar: no se sigue.
-      redirect: 'manual',
-      body: JSON.stringify({ turno: turnoId, token: opciones.token ?? null, efimero: !!opciones.efimero }),
-    })
-    if (r.status !== 202) throw new Error(`No se pudo lanzar el tramo siguiente (${r.status}).`)
-    return
-  }
+  if (enOtraInvocacion()) return lanzarRemoto({ turno: turnoId, token: opciones.token ?? null, efimero: !!opciones.efimero })
   await ejecutarTurno(turnoId, opciones)
 }
 
@@ -262,8 +254,8 @@ async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: Opcione
       modo: investigacion ? 'investigacion' : 'normal',
       puedeProgramar: !turno.corrida_id && puedeMotor('herramientas') && !!(pol as { puede_programar?: boolean } | null)?.puede_programar,
       topeUsd: investigacion ? Number(config.tope_investigacion_usd) : null,
-      // Solo el motor de Anthropic se parte en tramos; el último tramo corre sin límite.
-      limiteMs: turno.motor === 'anthropic' && TRAMO_MS > 0 && turno.tramos < MAX_TRAMOS - 1 ? TRAMO_MS : null,
+      // Solo el motor de Anthropic se parte en tramos; en Netlify el último tramo corre sin límite.
+      limiteMs: turno.motor === 'anthropic' && TRAMO_MS > 0 && (turno.tramos < MAX_TRAMOS - 1 || !ULTIMO_SIN_LIMITE) ? TRAMO_MS : null,
       reanudar: reanuda ? turno.continuacion : null,
     }
 
@@ -280,6 +272,10 @@ async function correrTurno(db: BaseServicio, turno: FilaTurno, opciones: Opcione
       clearInterval(vigia)
     }
 
+    if (r.estado === 'continuar' && turno.tramos + 1 >= MAX_TRAMOS) {
+      // En Supabase ningún tramo corre sin límite: pasado el último, el turno se cierra con lo que haya.
+      r = { ...r, estado: 'fallido', error: `El turno pasó el tiempo máximo (${MAX_TRAMOS} tramos de ${Math.round(TRAMO_MS / 60_000)} min).` } as ResultadoMotor
+    }
     if (r.estado === 'continuar') {
       // Se acabó el tramo: el estado del motor queda en el turno y sigue en otra invocación.
       await db

@@ -131,7 +131,7 @@ try {
   await foto(pa, 'admin-panel-preguntar')
   // Un Excel largo: la prueba de que la función de fondo de Netlify corre.
   await pa.goto(`${BASE}/sistema/asistente`, { waitUntil: 'networkidle' })
-  await pa.locator('input[type=file]').setInputFiles('capturas/asistente/ventas-onedrive.xlsx')
+  await pa.locator('input[type=file]:not(.bw-file-input)').setInputFiles('capturas/asistente/ventas-onedrive.xlsx')
   await pa.waitForSelector('text=ventas-onedrive.xlsx', { timeout: 60_000 })
   await pa.waitForTimeout(3000)
   const ex = await preguntar(pa, uAdmin.id, 'Analiza el Excel adjunto: ventas por zona y por producto, con un resumen en Excel para descargar.', 'claude-sonnet-5-5')
@@ -155,7 +155,7 @@ try {
   ok(!/Administración/.test(riel) && (await pu.locator('a[href="/sistema/asistente"]').count()) > 0, 'el usuario entra, ve el asistente y no ve Administración')
   await pu.goto(`${BASE}/sistema/asistente`, { waitUntil: 'networkidle' })
   const modelos = await pu.getByLabel('Modelo').locator('option').allInnerTexts()
-  ok(modelos.length >= 2 && !(await pu.locator('input[type=file]').isDisabled()), `puede cambiar de modelo (${modelos.join(', ')}) y adjuntar`)
+  ok(modelos.length >= 2 && !(await pu.locator('input[type=file]:not(.bw-file-input)').isDisabled()), `puede cambiar de modelo (${modelos.join(', ')}) y adjuntar`)
   await foto(pu, 'usuario-chat')
 
   const total = await marcarAlcance(pa, (t) => !/Microsoft 365/.test(t))

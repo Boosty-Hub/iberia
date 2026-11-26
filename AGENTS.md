@@ -1033,6 +1033,12 @@ El sistema que reemplaza al dashboard para operar a Iberia (Etapa 1 + rediseño 
   `control.modulo`: el plan es dato), zona de trabajo y panel de la ficha. En teléfono (≤ 900 px) todo
   eso va en un `<dialog>` (`MenuTelefono`). El layout lee todo **en una sola tanda** (`Promise.all`): una
   lectura nueva del armazón entra ahí, nunca después.
+- **Soporte de Boosty** (26-nov-2026): el botón «Ticket» (`SoporteBoosty`, `components/sistema/shell/soporte-boosty.tsx`) va en la
+  barra antes del menú de la persona, con su nombre y correo, y abre el popup de tickets de portal.boosty.digital (Shadow DOM, con
+  grabación de pantalla). Solo en `/sistema` (ni el Portal planta ni las apps) y **solo en el dominio de producción**: la clave
+  del widget no vale en otro (localhost responde 403). ⚠️ Riesgo aceptado por Gabriel: el script se carga del portal y corre con la
+  sesión de quien está dentro; si Iberia lo pide, se pasa a una copia fija revisada. Las pruebas que buscan `input[type=file]`
+  excluyen el del widget (`:not(.bw-file-input)`).
 - **Contexto en la URL**: `al` (fecha de los datos) y `esc` (escenario) los lee cada página con
   `leerContexto(sp)` y el menú los arrastra; la moneda, el riel y la columna van en cookies.
   `ficha=<tipo>:<id>` abre el panel **sin ir al servidor**: `fijar()` de `useContextoUrl` lo cambia con
@@ -1407,6 +1413,20 @@ migraciones `20261126100000_asistente` a `…190000_asistente_fase7`, una por fa
   siendo la capa de control: interruptor general, niveles con doble aprobación y lo que cambia datos.
 - **La excepción por persona abre las pantallas** (`asistente.mi_excepcion()`, en `obtenerSesion`): habilitar a alguien en
   Administración › Asistente de IA › Usuarios sin tocar su rol.
+- **Piloto: el ejecutor en Supabase Edge Functions** (26-nov-2026, pedido de Gabriel: «que todo pase por Supabase»). La
+  función `asistente-turno` (`supabase/functions/asistente-turno/`) corre el mismo `lib/asistente/motor/`: responde 202 y sigue
+  con `EdgeRuntime.waitUntil`. `ASISTENTE_EJECUTOR` elige dónde corre (`netlify` | `supabase` | `local`, `modoEjecutor()` de
+  `motor/servicio.ts`); `lanzarRemoto()` lanza el turno y el tramo siguiente en cualquiera de los dos. En Supabase una invocación
+  aguanta 400 s (Pro): tramos de 4 min, hasta 8, **y ninguno sin límite** (pasado el último, el turno se cierra fallido).
+  - **El motor se empaqueta** (`deno bundle`, vía `_entrada.ts`) en `motor.js`, que no va a git: la API de despliegue solo sube la
+    carpeta de la función. Se despliega con `scripts/asistente/desplegar-edge.mjs`, que también carga los secretos por la
+    Management API (pruebas por defecto; producción con `--destino produccion --confirmo` y el OK de Gabriel).
+  - ⚠️ **En Supabase no se escribe en el entorno al arrancar**: tumbaba el worker (`WORKER_ERROR`, sin registro). `entorno.ts` arma
+    un `process` propio con los nombres de Next (los secretos no pueden empezar por `SUPABASE_`: la clave de servicio va como
+    `ASISTENTE_CLAVE_SERVICIO`) y pone `Buffer` de `node:buffer` (el motor lo usa para subir archivos; sin él, «Buffer is not defined»).
+  - ⚠️ **La función le pregunta los datos a la plataforma** (`/api/asistente/fuente`, `ASISTENTE_URL_BASE`): con el dev de pruebas en
+    localhost no la alcanza, así que en el piloto las herramientas de datos fallan; lo demás corre. Pasar las fuentes a la función
+    es el paso siguiente si se adopta.
 - ⚠️ **Un `next dev` viejo sirve código viejo**: el 26-nov el Resumen mostraba cifras sin formato con el archivo ya
   corregido; reiniciar el dev lo arregló. Y **dos `next dev` en la misma carpeta no conviven** (el del 3001 impide el del
   3005, que muere sin escribir nada en su registro).
@@ -1422,6 +1442,7 @@ node --env-file=.env.local scripts/asistente/probar-f6.mjs [--url <base /v1>] [-
 node --env-file=.env.local scripts/asistente/probar-f7.mjs                                                            # fase 7 (el dev con ASISTENTE_MS_LOGIN_URL y ASISTENTE_GRAPH_URL al simulador :3999)
 node scripts/asistente/certificado-microsoft.mjs [--dias 730] [--forzar]                                             # el certificado de la app en Entra (.cer público; la llave, a .env.local)
 node --env-file=.env.local scripts/asistente/montar-programador.mjs [--destino produccion --confirmo [--url …] [--quitar]]  # el reloj (pg_cron)
+node --env-file=.env.local scripts/asistente/desplegar-edge.mjs [--url-base https://…] [--solo-secretos] [--destino produccion --confirmo]  # piloto en Edge Functions
 node --env-file=.env.local scripts/asistente/probar-f4.mjs                                                            # fase 4: dos sesiones a la vez (dueño e invitado)
 python scripts/asistente/extraer-paginas.py && node --env-file=.env.local scripts/asistente/indexar-documentos.mjs [--destino produccion --confirmo]
 node --env-file=.env.local scripts/asistente/subir-habilidad.mjs [carpeta] [--destino produccion --confirmo]

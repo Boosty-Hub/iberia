@@ -79,7 +79,7 @@ async function preguntar(texto, { modelo, esfuerzo, archivo, esperar = 'texto', 
   if (modelo) await p.getByLabel('Modelo').selectOption(modeloDe(modelo))
   if (esfuerzo) await p.getByLabel('Esfuerzo').selectOption(esfuerzo)
   if (archivo) {
-    await p.locator('input[type=file]').setInputFiles(archivo)
+    await p.locator('input[type=file]:not(.bw-file-input)').setInputFiles(archivo)
     await p.waitForFunction(() => !document.querySelector('[aria-label="Adjuntos"] .animate-spin'), null, { timeout: 120_000 })
   }
   await p.getByLabel('Mensaje para el asistente').fill(texto)

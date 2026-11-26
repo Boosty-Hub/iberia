@@ -116,7 +116,7 @@ try {
 
   // 5. Híbrido: un archivo lo procesa Anthropic.
   writeFileSync('capturas/asistente/numeros.csv', 'n\n1\n2\n3\n')
-  await p.locator('input[type=file]').setInputFiles('capturas/asistente/numeros.csv')
+  await p.locator('input[type=file]:not(.bw-file-input)').setInputFiles('capturas/asistente/numeros.csv')
   await p.waitForSelector('text=numeros.csv', { timeout: 30_000 })
   await p.waitForTimeout(1500)
   await enviar('Suma la columna n del archivo adjunto y dime el total en una línea.')
@@ -131,7 +131,7 @@ try {
   const { data: caps } = await admin.schema('asistente').rpc('capacidades', {})
   ok(caps.find((x) => x.capacidad === 'archivos')?.disponible === false, 'en modo todo adentro, archivos sale apagado con su motivo')
   await p.goto(`${BASE}/sistema/asistente`, { waitUntil: 'networkidle' })
-  ok(await p.locator('input[type=file]').isDisabled(), 'y el chat no deja adjuntar')
+  ok(await p.locator('input[type=file]:not(.bw-file-input)').isDisabled(), 'y el chat no deja adjuntar')
 
   // 7. El servidor no responde: un mensaje claro.
   await A.from('config').update({ local_url: 'http://127.0.0.1:9/v1', local_modo: 'hibrido' }).eq('id', true)

@@ -94,3 +94,6 @@ desktop.ini
 
 # Lo que deja una compilación local de Netlify (netlify build / deploy --build)
 /.netlify/
+
+# El motor del asistente empaquetado para la Edge Function (se genera al desplegar)
+supabase/functions/asistente-turno/motor.js
