@@ -84,6 +84,10 @@ Resend y deja todos los correos listos con diseño». Cómo funciona: `AGENTS.md
 - 🔴 **Encontrado antes de que pasara**: Safe Links de Microsoft abre los enlaces de los correos antes que la persona, y
   `/auth/confirmar` gasta el `token_hash` con un GET. Los correos van ahora a `/auth/continuar`, que lo usa al tocar el botón
   (`probar-continuar.mjs` 8/8 en pruebas). En producción (`1688135`).
+- **Microsoft 365 para todos los que tienen el asistente** (Gabriel) y, a pedido suyo, **el «/» con pestaña Microsoft 365** y lo traído
+  guardado en Mis archivos › Microsoft 365 («que ya se quede en la plataforma»; sin duplicar, se actualiza si cambió). 🔴 De paso: tras
+  «Desconectar», otra instancia del servidor seguía con el token viejo; ahora va atado a la conexión. `probar-m365-archivos` 15/15;
+  respaldo `produccion-2026-11-27T19-25-32`, migración `20261127100000`, `main` en `63aa96a`, revisado en producción.
 
 ---
 
@@ -269,8 +273,7 @@ y la IA dentro del sistema. Eligió **un PDF por sección**, cada una por separa
   3 a 6 MB, unos 3 s cada una. 🔴 Lo que salió mal en la primera vuelta: los dibujos SVG salían con las cajas en negro
   (`html-to-image` no lleva el relleno de las clases de Tailwind) y el espejo de la 10 salía cortado con su barra de
   desplazamiento (el iframe era angosto). Los dos, corregidos.
-- **Límite aceptado**: el texto del PDF es imagen; no se selecciona ni se busca.
-- En producción el 24/11, con la sesión 60.
+- **Límite aceptado**: el texto del PDF es imagen; no se selecciona ni se busca. En producción el 24/11, con la sesión 60.
 
 ---
 
