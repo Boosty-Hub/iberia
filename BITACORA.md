@@ -88,6 +88,10 @@ Resend y deja todos los correos listos con diseño». Cómo funciona: `AGENTS.md
   guardado en Mis archivos › Microsoft 365 («que ya se quede en la plataforma»; sin duplicar, se actualiza si cambió). 🔴 De paso: tras
   «Desconectar», otra instancia del servidor seguía con el token viejo; ahora va atado a la conexión. `probar-m365-archivos` 15/15;
   respaldo `produccion-2026-11-27T19-25-32`, migración `20261127100000`, `main` en `63aa96a`, revisado en producción.
+- **Jhonhy conectó su cuenta** (consentimiento dado; las 8 partes responden, comprobado sin leer contenido). Pedidos de Gabriel por
+  voz, en la rama `asistente/microsoft-agenda` y publicados con su OK: **Agenda** (semana, «Hoy» en Mi día, To Do en Tareas; Outlook
+  en vivo; To Do espera que Iberia agregue `Tasks.Read`), **botón flotante** del asistente y «Preguntar a la IA» sólido (el punteado
+  «parecía en construcción»). 🔴 Dos renovaciones del token en paralelo podían borrar la conexión: ahora una por persona.
 
 ---
 
@@ -489,15 +493,10 @@ y revisado en línea con sesión. La migración ya estaba aplicada en Supabase.
 Tickets PEN-14661 (Apple) primero y PEN-14662 (Google Play) después. Cómo funciona: `AGENTS.md`, «La app de Iberia».
 La versión larga de esta entrada: `git show fe1d7f7:BITACORA.md`.
 
-- **Se armó**: la cáscara de Capacitor 8.5.3 en este repositorio (abre el canal en línea), el flujo «App de iOS» de GitHub
-  Actions (no hay Mac), `/privacidad` pública y, del lado de Apple, App ID, perfil y ficha. La 1.0.0 (build 1) llegó a App
-  Store Connect.
-- **Se decidió**: la cuenta de Apple de Boosty Desk; `com.industriasiberia.canal`; en la tienda «Industrias Iberia» (Iberia
-  a secas es la aerolínea); el certificado «Apple Distribution» del equipo; Capacitor 8.5.3 por GHSA-rvm3-566m-v7fv.
-- **La parte nativa (guía 4.2)**: avisos push de dos eventos, tabla `dispositivos`, enlaces universales y desvincular el
-  teléfono al cerrar sesión. Salió a producción en la sesión 55.
-- ⚠️ La API de App Store Connect no crea la ficha de la app (se hizo a mano); `gh` necesitó `-s workflow`; Netlify no
-  publicó `e9090f7` ese día (salió con el deploy del 28/10).
+- **Se armó**: Capacitor 8.5.3 (abre el canal en línea), el flujo «App de iOS» de GitHub Actions, `/privacidad` y App ID,
+  perfil y ficha en Apple (la build 1 llegó a App Store Connect); la parte nativa (guía 4.2) salió en la sesión 55. **Se
+  decidió**: la cuenta de Boosty Desk, `com.industriasiberia.canal`, «Industrias Iberia» en la tienda, el certificado del equipo.
+- ⚠️ La API de App Store Connect no crea la ficha (a mano); `gh` necesitó `-s workflow`; `e9090f7` salió con el deploy del 28/10.
 
 ---
 
