@@ -1417,7 +1417,18 @@ migraciones `20261126100000_asistente` a `…190000_asistente_fase7`, una por fa
     Graph (OneDrive, SharePoint y los archivos de Teams), solo archivos, con de dónde viene y si ya está en Mis archivos. Sin la cuenta
     conectada, ofrece conectarla. `node --env-file=.env.local scripts/asistente/probar-m365-archivos.mjs` (15, simulador :3999, sin modelo).
   - ⚠️ **El token en memoria va atado a la conexión** (`conectado_en`): rutas y acciones de Next pueden ser instancias distintas del
-    módulo, y tras «Desconectar» o reconectar una de ellas seguía con el token anterior.
+    módulo, y tras «Desconectar» o reconectar una de ellas seguía con el token anterior. **Y se renueva una sola vez a la vez por
+    persona** (`renovando`): dos renovaciones en paralelo con el mismo token de renovación podían borrar la conexión.
+  - **La agenda** (27-nov-2026, pedido de Gabriel; `lib/asistente/microsoft-agenda.ts`, `lib/plataforma/agenda.ts`,
+    `components/sistema/agenda/`): pestaña **Agenda** de Mi día (`/sistema/agenda`, la semana; en el teléfono, lista por día), **«Hoy»**
+    en Mi día y **Microsoft To Do** en Tareas. Junta las tareas de la plataforma con fecha y, con `m365:calendario` en el alcance y la
+    cuenta conectada, las reuniones de Outlook (`calendarView` en hora de Venezuela; sin los «libre» de día completo) y las tareas
+    abiertas de To Do. **Se lee en vivo, no se copia** y es solo lectura (cada una abre en Outlook o To Do). To Do pide `Tasks.Read`,
+    que **no se pide en el inicio de sesión** (un permiso sin consentir rompería todas las conexiones): se mira en el `scp` del token, y
+    si Tecnología lo agrega con consentimiento, aparece solo. `node --env-file=.env.local scripts/asistente/probar-agenda.mjs` (14, simulador).
+- **El botón flotante del asistente** (27-nov-2026): `PanelAsistente conBoton`, a media altura en el borde derecho de toda `/sistema`
+  menos el asistente mismo, para quien tiene el asistente con la IA encendida; abre el panel con el contexto de la pantalla. El
+  «✦ Preguntar a la IA» de las cabeceras pasó a botón sólido carbón (con el borde punteado parecía «en construcción»).
   - **Compartir** algo con linaje de Microsoft 365 no se revisa contra el alcance de quien recibe (es información de quien
     comparte) sino que **pide confirmación expresa** (`compartirObjeto(…, confirmado)`, «Compartir igual»). Una tarea programada
     no se lo manda sola a otros destinatarios.

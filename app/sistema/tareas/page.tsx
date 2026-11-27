@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import Link from 'next/link'
 import { requerirSesion } from '@/lib/auth'
 import { leerTareas } from '@/components/sistema/colaboracion/datos'
 import { ListaTareas, TareaRapida } from '@/components/sistema/colaboracion/tareas'
 import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
+import { TareasDeTodo } from '@/components/sistema/agenda/todo'
 import { vencida } from '@/lib/plataforma/colaboracion'
 import { numero } from '@/lib/plataforma/formato'
 import { cn } from '@/lib/utils'
@@ -74,6 +76,9 @@ export default async function TareasPage({ searchParams }: PageProps<'/sistema/t
           <p className="mt-2 px-1 text-[11.5px] text-marca-500">
             Una tarea sobre un objeto —una plaza, un proceso, una requisición— se crea desde su ficha, en «Línea de tiempo › Tarea»: solo se le puede asignar a quien puede ver ese objeto.
           </p>
+          <Suspense fallback={null}>
+            <TareasDeTodo sesion={sesion} />
+          </Suspense>
         </aside>
       </div>
     </>

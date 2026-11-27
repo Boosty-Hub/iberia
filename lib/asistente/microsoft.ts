@@ -29,7 +29,7 @@ export const PERMISOS_MICROSOFT = ['offline_access', 'User.Read', 'Mail.Read', '
 
 export const PARTES_M365 = {
   'm365:correo': 'Microsoft 365 · Correo de Outlook',
-  'm365:calendario': 'Microsoft 365 · Calendario',
+  'm365:calendario': 'Microsoft 365 · Calendario y tareas de To Do',
   'm365:archivos': 'Microsoft 365 · OneDrive y SharePoint',
   'm365:teams': 'Microsoft 365 · Chats y canales de Teams',
 } as const
@@ -165,6 +165,19 @@ export async function tokenDeAcceso(perfilId: string): Promise<string | null> {
   }
   const c = cache.get(perfilId)
   if (c && c.vence > Date.now() && c.conexion === conexion.conectado_en) return c.token
+  // Una sola renovación a la vez por persona: la agenda pide calendario y To Do en paralelo, y dos renovaciones con
+  // el mismo token de renovación hacían que la segunda fallara y borrara la conexión.
+  const enVuelo = renovando.get(perfilId)
+  if (enVuelo) return enVuelo
+  const p = renovar(perfilId, conexion.conectado_en).finally(() => renovando.delete(perfilId))
+  renovando.set(perfilId, p)
+  return p
+}
+
+const renovando = new Map<string, Promise<string | null>>()
+
+async function renovar(perfilId: string, conectadoEn: string): Promise<string | null> {
+  const admin = createAdminClient().schema('asistente')
   const cfg = await configMicrosoft()
   if (!cfg) return null
   const { data: renovacion } = await admin.rpc('renovacion_microsoft', { p_perfil: perfilId })
@@ -177,7 +190,7 @@ export async function tokenDeAcceso(perfilId: string): Promise<string | null> {
   }
   if (t.refresh_token) await admin.rpc('guardar_microsoft', { p_perfil: perfilId, p_cuenta: null as never, p_nombre: null as never, p_renovacion: t.refresh_token })
   await admin.from('conexion_microsoft').update({ usado_en: new Date().toISOString() }).eq('perfil_id', perfilId)
-  cache.set(perfilId, { token: t.access_token, vence: Date.now() + ((t.expires_in ?? 3600) - 120) * 1000, conexion: conexion.conectado_en })
+  cache.set(perfilId, { token: t.access_token, vence: Date.now() + ((t.expires_in ?? 3600) - 120) * 1000, conexion: conectadoEn })
   return t.access_token
 }
 

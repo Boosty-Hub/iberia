@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import Link from 'next/link'
 import { puede, requerirSesion } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
@@ -10,6 +11,7 @@ import { misPendientes } from '@/components/sistema/shell/acciones'
 import { MiDiaColaboracion } from '@/components/sistema/colaboracion/mi-dia'
 import { PropuestasPendientes } from '@/components/sistema/ia/propuestas-pendientes'
 import { EnQueVamos } from '@/components/sistema/programa/en-que-vamos'
+import { HoyEnAgenda } from '@/components/sistema/agenda/hoy'
 import { MisTableros } from '@/components/sistema/asistente/mis-tableros'
 import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
 import { TONO_CHIP } from '@/lib/plataforma/ficha-tipos'
@@ -83,6 +85,11 @@ export default async function MiDiaPage({ searchParams }: PageProps<'/sistema'>)
 
       {/* Los tableros vivos y tareas que la persona fijó (asistente de IA, fase 5). */}
       <MisTableros sesion={sesion} />
+
+      {/* Hoy: las tareas del día y, con Microsoft 365 conectado, las reuniones de Outlook y las tareas de To Do. */}
+      <Suspense fallback={<div className="mb-3 h-24 animate-pulse rounded-xl border border-[var(--borde)] bg-white" />}>
+        <HoyEnAgenda sesion={sesion} />
+      </Suspense>
 
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <section className="min-w-0 rounded-xl border border-[var(--borde)] bg-white" aria-labelledby="te-toca">

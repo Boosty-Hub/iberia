@@ -26,7 +26,7 @@ function pantallaActual(): string {
  *   no se desmonta), se mueve y se minimiza, y CADA mensaje le dice al asistente en qué pantalla está la persona.
  * Pasar de panel a ventana no pierde la conversación: es el mismo chat con otro marco.
  */
-export function PanelAsistente() {
+export function PanelAsistente({ conBoton = false }: { conBoton?: boolean }) {
   const [abierto, setAbierto] = useState(false)
   const [modo, setModo] = useState<'panel' | 'ventana'>('panel')
   const [minimizado, setMinimizado] = useState(false)
@@ -94,7 +94,26 @@ export function PanelAsistente() {
     setModo('panel')
   }
 
-  if (!abierto) return null
+  if (!abierto) {
+    // El botón flotante (27-nov-2026, pedido de Gabriel): a media altura en el borde derecho, en toda la plataforma
+    // menos en el asistente mismo, para abrirlo desde donde se esté. Abre el panel con el contexto de la pantalla.
+    if (!conBoton || ruta.startsWith('/sistema/asistente')) return null
+    return (
+      <button
+        type="button"
+        onClick={() => window.dispatchEvent(new CustomEvent(EVENTO_PREGUNTAR_IA, { detail: { pregunta: '', contexto: '' } }))}
+        aria-label="Abrir el asistente de IA"
+        title="Asistente de IA"
+        data-boton-asistente-flotante
+        className="group fixed top-1/2 right-0 z-[55] flex -translate-y-1/2 flex-col items-center gap-1.5 rounded-l-xl bg-[#2b2a28] px-1.5 py-3 text-white shadow-lg transition-[padding] hover:bg-marca-700 hover:pr-2.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-acento-500 print:hidden"
+      >
+        <span aria-hidden className="text-[15px] leading-none text-[#ffd036]">
+          ✦
+        </span>
+        <span className="hidden text-[11.5px] font-semibold tracking-wide [writing-mode:vertical-rl] sm:block">Asistente</span>
+      </button>
+    )
+  }
   const ventana = modo === 'ventana'
   return (
     <>

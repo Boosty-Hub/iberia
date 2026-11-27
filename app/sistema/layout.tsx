@@ -239,7 +239,7 @@ export default async function SistemaLayout({ children }: LayoutProps<'/sistema'
       <Suspense>
         <PaletaComandos acciones={acciones} conIa={!!ia?.general && puede(sesion, 'sistema:asistente')} />
         {/* «Preguntar a la IA» es el asistente, al costado (lo abren la cabecera, la ficha y Ctrl K). */}
-        <PanelAsistente />
+        <PanelAsistente conBoton={!!ia?.general && puede(sesion, 'sistema:asistente')} />
       </Suspense>
     </div>
   )

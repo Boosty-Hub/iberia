@@ -221,6 +221,7 @@ export const PESTANAS: Record<string, Pestana[]> = {
     { etiqueta: 'Mi día', href: '/sistema' },
     { etiqueta: 'Bandeja', href: '/sistema/bandeja' },
     { etiqueta: 'Tareas', href: '/sistema/tareas' },
+    { etiqueta: 'Agenda', href: '/sistema/agenda' },
     { etiqueta: 'Notificaciones', href: '/sistema/notificaciones' },
   ],
   'NUC-ORG': [
