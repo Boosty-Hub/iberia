@@ -7,6 +7,7 @@ import { lanzarTurno } from '@/lib/asistente/servidor'
 import { contextoCorrida } from '@/lib/asistente/motor/tareas'
 import { urlBase } from '@/lib/asistente/motor/servicio'
 import { AVISO_RESGUARDO, dentroDelMaximo, type Esfuerzo, type Politica } from '@/lib/asistente/tipos'
+import { correoIberia } from '@/lib/correo/diseno'
 import { estaLista, mandarPlantilla, type Conexion } from '@/lib/whatsapp'
 
 /**
@@ -286,14 +287,15 @@ export function correoHtml(nombre: string, texto: string, url: string, conDatos:
     .replace(/\n{3,}/g, '\n\n')
     .trim()
   const resumen = plano.length > 700 ? `${plano.slice(0, 700).replace(/\s+\S*$/, '')}…` : plano
-  return `<!doctype html><html lang="es"><body style="margin:0;background:#f6f7f9;font-family:Arial,Helvetica,sans-serif;color:#2b2a28">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f7f9;padding:24px 12px"><tr><td align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:1px solid #e6e4e1;border-radius:16px">
-<tr><td style="padding:24px 28px 8px"><div style="font-size:12px;color:#706a67;letter-spacing:.04em;text-transform:uppercase">Asistente de IA · Plataforma Iberia</div>
-<h1 style="margin:8px 0 0;font-size:20px;line-height:1.3;color:#2b2a28">${escapar(nombre)}</h1></td></tr>
-<tr><td style="padding:8px 28px 0;font-size:14px;line-height:1.6;white-space:pre-line">${escapar(resumen) || 'La tarea terminó.'}</td></tr>
-<tr><td style="padding:20px 28px"><a href="${escapar(url)}" style="display:inline-block;background:#d4332c;color:#ffffff;text-decoration:none;font-weight:bold;font-size:14px;padding:11px 18px;border-radius:10px">Abrir en la plataforma</a>
-${conDatos ? '<div style="margin-top:10px;font-size:12px;color:#706a67">Trae datos de la plataforma: el detalle y los archivos se abren con tu sesión.</div>' : ''}</td></tr>
-<tr><td style="padding:0 28px 22px;font-size:11px;color:#706a67;border-top:1px solid #efedea;padding-top:14px">${escapar(AVISO_RESGUARDO)}</td></tr>
-</table></td></tr></table></body></html>`
+  // Un párrafo por bloque del resumen; los saltos sueltos, como <br>.
+  const parrafos = (resumen || 'La tarea terminó.').split(/\n{2,}/).map((p) => escapar(p).replace(/\n/g, '<br>'))
+  return correoIberia({
+    preencabezado: resumen.slice(0, 140) || 'La tarea programada terminó.',
+    rotulo: 'Asistente de IA · Tarea programada',
+    titulo: nombre,
+    parrafos,
+    boton: { texto: 'Ver el resultado completo', url: escapar(url) },
+    nota: `${conDatos ? 'Trae datos de la plataforma: el detalle y los archivos se abren con tu sesión. ' : ''}${escapar(AVISO_RESGUARDO)}`,
+    pie: 'Este correo lo envía el asistente de IA de la Plataforma Iberia porque programaste esta tarea o te incluyeron en ella. Es automático: si lo respondes, nadie lo va a leer.',
+  })
 }

@@ -1518,6 +1518,27 @@ node --env-file=.env.local scripts/asistente/importar-storage.mjs [--email <cuen
 node --env-file=.env.local scripts/asistente/probar-archivos.mjs      # 22 comprobaciones contra pruebas (:3005)
 ```
 
+## Los correos (desde el 27 de noviembre de 2026)
+
+Pedido de Gabriel: «conecta todo lo de Resend y deja todos los correos listos con diseño».
+
+- **Salen por Resend, desde `portal.industriasiberia.com`** (dominio verificado con los DNS de Iberia). Supabase Auth usa
+  el SMTP de Resend (`smtp.resend.com:465`, usuario `resend`, la `RESEND_API_KEY` —de solo envío— de contraseña; remitente
+  `notificaciones@portal.industriasiberia.com`, «Plataforma Iberia»; 60 correos por hora). Las tareas del asistente mandan
+  por la API con `asistente.config.correo_remitente` (la misma dirección, «Asistente de IA · Plataforma Iberia»).
+- **Un solo diseño** (`lib/correo/diseno.ts`, `correoIberia()`): HTML de correo con tablas y estilos en línea, el logo
+  desde el dominio público, modo claro siempre. Lo usan las 13 plantillas de Auth (`lib/correo/plantillas-auth.ts`) y el
+  correo de las tareas (`correoHtml` de `lib/asistente/programador.ts`). Sin imports y solo sintaxis que se borra: Node lo
+  carga directo.
+- **Las plantillas de Auth se aplican desde el repo, no desde el panel de Supabase** (lo que se toque allá se pisa):
+  `scripts/correo/plantillas-auth.mjs` (`--vista` deja HTML y PNG en `capturas/correos/`; `--muestras <correo>` las manda
+  con datos de ejemplo; `--aplicar [--destino produccion --confirmo]` pone asuntos, plantillas, SMTP, el límite y los avisos
+  de seguridad de contraseña y correo cambiados). Los textos dicen «vence en 1 hora»: es `mailer_otp_exp`.
+- 🔴 **Los enlaces de los correos van a `/auth/continuar`, que no usa el enlace al abrirse: lo usa el botón** (POST,
+  `usarEnlace`). Microsoft 365 (Safe Links / Defender) abre cada enlace de un correo antes que la persona; con un GET que
+  consume el `token_hash`, a la gente de Iberia le llegaría «el enlace venció» sin haberlo tocado. `siguiente` solo admite
+  rutas internas. `node --env-file=.env.local scripts/correo/probar-continuar.mjs` (8, contra pruebas en el :3005).
+
 ## Seguridad — no negociable
 
 Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).
@@ -1541,10 +1562,9 @@ Todo el contenido es material de Iberia bajo NDA (sección 09 de la propuesta).
   provisionar usuarios. Nunca para leer datos por cuenta de un usuario.
 - **Recuperar la contraseña** (19 de octubre de 2026): «¿Olvidaste tu contraseña?» en el login
   → `/login/recuperar` pide el correo y **contesta siempre lo mismo**, exista o no la cuenta →
-  Supabase manda el enlace → `/auth/confirmar` abre la sesión de recuperación (acepta `code` de
-  PKCE y `token_hash`) → `/login/nueva-clave` la cambia con `updateUser`. El enlace vuelve al
-  origen de la petición, que tiene que estar en las URLs de redirección de Auth. ⚠️ **Sin SMTP
-  propio el correo solo le llega al equipo de la organización de Supabase**, no a Iberia.
+  Supabase manda el enlace → **`/auth/continuar`** (desde el 27-nov-2026; ver «Los correos») abre
+  la sesión de recuperación al tocar «Continuar» → `/login/nueva-clave` la cambia con `updateUser`.
+  `/auth/confirmar` (GET, `code` de PKCE o `token_hash`) queda para los enlaces viejos.
 - **El login** (26-nov-2026, para salir en vivo): sin textos de Boosty; el correo escrito se recuerda en el navegador
   (`localStorage`, nunca la contraseña) y es un campo controlado, porque React limpia los no controlados al terminar la
   acción y un intento fallido lo borraba; la contraseña lleva el ojito (`CampoClave`, también en «nueva contraseña»).
