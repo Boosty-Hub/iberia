@@ -128,7 +128,7 @@ async function pedirToken(cfg: ConfigMicrosoft & { cred: Credencial }, campos: R
   return (await r.json().catch(() => ({ error: 'respuesta_invalida' }))) as RespuestaToken
 }
 
-const cache = new Map<string, { token: string; vence: number }>()
+const cache = new Map<string, { token: string; vence: number; conexion: string }>()
 
 /** El regreso de Microsoft: comprueba el estado contra la sesión, canjea el código y guarda la conexión. */
 export async function completarConexion(perfilId: string, codigo: string, estado: string, retorno: string): Promise<{ ok: true; cuenta: string } | { ok: false; error: string }> {
@@ -143,17 +143,30 @@ export async function completarConexion(perfilId: string, codigo: string, estado
   const cuenta = String(yo?.mail || yo?.userPrincipalName || '')
   const { error } = await admin.schema('asistente').rpc('guardar_microsoft', { p_perfil: perfilId, p_cuenta: cuenta, p_nombre: yo?.displayName ?? null, p_renovacion: t.refresh_token })
   if (error) return { ok: false, error: 'No se pudo guardar la conexión.' }
-  cache.set(perfilId, { token: t.access_token, vence: Date.now() + ((t.expires_in ?? 3600) - 120) * 1000 })
+  // No se guarda el token de acceso aquí: la primera consulta lo pide con la renovación recién guardada y queda
+  // atado a esta conexión (ver `tokenDeAcceso`).
+  cache.delete(perfilId)
   return { ok: true, cuenta }
 }
 
-/** El token de acceso de la persona, renovado si hace falta. Null = no está conectada (o Microsoft retiró el acceso). */
-async function tokenDeAcceso(perfilId: string): Promise<string | null> {
+/**
+ * El token de acceso de la persona, renovado si hace falta. Null = no está conectada (o Microsoft retiró el acceso).
+ *
+ * ⚠️ El token en memoria vale solo para la conexión que lo pidió (`conectado_en`): las rutas y las acciones de Next
+ * pueden correr en instancias distintas del módulo, y sin esa marca, tras «Desconectar» una de ellas seguía usando
+ * el token de antes hasta que vencía (o, tras reconectar, uno que ya no servía).
+ */
+export async function tokenDeAcceso(perfilId: string): Promise<string | null> {
+  const admin = createAdminClient().schema('asistente')
+  const { data: conexion } = await admin.from('conexion_microsoft').select('conectado_en').eq('perfil_id', perfilId).maybeSingle()
+  if (!conexion) {
+    cache.delete(perfilId)
+    return null
+  }
   const c = cache.get(perfilId)
-  if (c && c.vence > Date.now()) return c.token
+  if (c && c.vence > Date.now() && c.conexion === conexion.conectado_en) return c.token
   const cfg = await configMicrosoft()
   if (!cfg) return null
-  const admin = createAdminClient().schema('asistente')
   const { data: renovacion } = await admin.rpc('renovacion_microsoft', { p_perfil: perfilId })
   if (!renovacion) return null
   const t = await pedirToken(cfg, { grant_type: 'refresh_token', refresh_token: renovacion as string })
@@ -164,7 +177,7 @@ async function tokenDeAcceso(perfilId: string): Promise<string | null> {
   }
   if (t.refresh_token) await admin.rpc('guardar_microsoft', { p_perfil: perfilId, p_cuenta: null as never, p_nombre: null as never, p_renovacion: t.refresh_token })
   await admin.from('conexion_microsoft').update({ usado_en: new Date().toISOString() }).eq('perfil_id', perfilId)
-  cache.set(perfilId, { token: t.access_token, vence: Date.now() + ((t.expires_in ?? 3600) - 120) * 1000 })
+  cache.set(perfilId, { token: t.access_token, vence: Date.now() + ((t.expires_in ?? 3600) - 120) * 1000, conexion: conexion.conectado_en })
   return t.access_token
 }
 
@@ -174,7 +187,7 @@ export function olvidarToken(perfilId: string) {
 
 const SIN_CONEXION = { error: 'No tienes tu cuenta de Microsoft conectada (o se venció). Conéctala en [Conexiones](/sistema/asistente/conexiones) y vuelve a pedirlo.' }
 
-async function graph(token: string, ruta: string, init: RequestInit & { prefer?: string } = {}) {
+export async function graph(token: string, ruta: string, init: RequestInit & { prefer?: string } = {}) {
   const r = await fetch(`${GRAPH()}${ruta}`, {
     ...init,
     headers: { Authorization: `Bearer ${token}`, ...(init.prefer ? { Prefer: init.prefer } : {}), ...(init.body ? { 'Content-Type': 'application/json' } : {}) },

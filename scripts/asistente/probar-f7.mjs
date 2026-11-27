@@ -247,7 +247,8 @@ try {
   await esperarFin(3)
   t = await ultimo()
   ;({ data: m } = await A.from('mensaje').select('texto, bloques').eq('turno_id', t).eq('rol', 'asistente').single())
-  const { data: traido } = await A.from('archivo').select('nombre, origen').eq('chat_id', chat).eq('origen', 'microsoft')
+  // Desde el 27-nov-2026 lo traído queda en Mis archivos › Microsoft 365 y al chat va un adjunto que apunta a esa copia.
+  const { data: traido } = await A.from('archivo').select('nombre, origen, fuente_id').eq('chat_id', chat).eq('origen', 'biblioteca').not('fuente_id', 'is', null)
   ok((traido ?? []).length === 1 && m.bloques.some((b) => b.tipo === 'paso' && b.herramienta === 'codigo') && /\d/.test(m.texto), `el Excel de OneDrive llega al entorno de código y se procesa: «${m.texto.slice(0, 100).replace(/\n/g, ' ')}»`)
 
   // 8. Compartir lo hecho con su correo pide confirmación.

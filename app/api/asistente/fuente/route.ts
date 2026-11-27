@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { FUENTES } from '@/lib/plataforma/tablas'
 import { createAdminClient } from '@/lib/supabase/server'
 import { consultarMicrosoft, type ParteM365 } from '@/lib/asistente/microsoft'
+import { guardarDeMicrosoft } from '@/lib/asistente/microsoft-archivos'
 import { mismoSecreto, secretoAsistente } from '@/lib/asistente/motor/servicio'
 import {
   anotarConsulta,
@@ -58,8 +59,28 @@ export async function POST(peticion: NextRequest) {
     const f = FUENTES[fuente.clave.slice(6)]
     resultado = f ? await consultarTabla(cliente, f, args) : { error: 'No existe esa tabla.' }
     filas = Number(resultado.mostradas ?? 0)
+  } else if (fuente.tipo === 'microsoft' && fuente.clave === 'm365:archivos' && (args as Record<string, unknown>).accion === 'traer') {
+    // «Traer» (27-nov-2026): el archivo queda en Mis archivos › Microsoft 365 (sin duplicar) y al chat va un adjunto
+    // que apunta a esa copia, para montarlo en el entorno de código. La consulta la anota `guardarDeMicrosoft`.
+    const g = await guardarDeMicrosoft(yo.uid, String((args as Record<string, unknown>).id ?? ''), turno)
+    filas = g.ok ? 1 : 0
+    resultado = g.ok ? { nombre: g.archivo.nombre, bytes: g.archivo.bytes, guardado: 'Quedó en Mis archivos › Microsoft 365.', nota: 'Ya está en tu entorno de código: trabájalo con código como un adjunto.' } : { error: g.error }
+    if (g.ok && turno) {
+      const admin = createAdminClient()
+      const { data: t } = await admin.schema('asistente').from('turno').select('chat_id').eq('id', turno).maybeSingle()
+      if (t?.chat_id) {
+        const id = crypto.randomUUID()
+        const a = g.archivo
+        const { error } = await admin
+          .schema('asistente')
+          .from('archivo')
+          .insert({ id, dueno: yo.uid, chat_id: t.chat_id, origen: 'biblioteca', estado: 'listo', nombre: a.nombre, mime: a.mime, bytes: a.bytes, bucket: a.bucket, ruta: a.ruta, fuente_id: a.id })
+        if (!error) resultado = { ...resultado, montar: id }
+      }
+    }
+    return NextResponse.json({ resultado, sensible: fuente.sensible })
   } else if (fuente.tipo === 'microsoft') {
-    // Fase 7: a nombre de la persona, con su cuenta de Microsoft. Lo que se trae va al chat como archivo (para el entorno de código).
+    // Fase 7: a nombre de la persona, con su cuenta de Microsoft.
     const r = await consultarMicrosoft(yo.uid, fuente.clave as ParteM365, args as Record<string, unknown>)
     resultado = r.resultado
     filas = r.filas

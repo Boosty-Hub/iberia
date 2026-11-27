@@ -67,6 +67,9 @@ export type Database = {
           id: string
           mensaje_id: string | null
           mime: string
+          ms_enlace: string | null
+          ms_item: string | null
+          ms_modificado: string | null
           nombre: string
           origen: string
           proyecto_id: string | null
@@ -88,6 +91,9 @@ export type Database = {
           id?: string
           mensaje_id?: string | null
           mime?: string
+          ms_enlace?: string | null
+          ms_item?: string | null
+          ms_modificado?: string | null
           nombre: string
           origen: string
           proyecto_id?: string | null
@@ -109,6 +115,9 @@ export type Database = {
           id?: string
           mensaje_id?: string | null
           mime?: string
+          ms_enlace?: string | null
+          ms_item?: string | null
+          ms_modificado?: string | null
           nombre?: string
           origen?: string
           proyecto_id?: string | null

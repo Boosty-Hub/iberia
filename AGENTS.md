@@ -1404,8 +1404,20 @@ migraciones `20261126100000_asistente` a `…190000_asistente_fase7`, una por fa
   - **Es una fuente más**: `m365:correo`, `m365:calendario`, `m365:archivos`, `m365:teams` en `catalogoFuentes()` (tipo `microsoft`,
     sin pantalla), nacen apagadas y se dan por rol en Alcance. Las consultas pasan por la misma ruta `/api/asistente/fuente`
     (`consultarMicrosoft`) y quedan en `consulta_fuente`: ese es su linaje. Herramientas `microsoft_correo`, `_calendario`,
-    `_archivos` (buscar, leer, **traer**) y `_teams`. «Traer» guarda el archivo en el chat (`archivo.origen = 'microsoft'`) y el
-    motor de Anthropic lo **monta en el contenedor a mitad del turno** (`container_upload` junto a los resultados; `ctx.archivoPorId`).
+    `_archivos` (buscar, leer, **traer**) y `_teams`. «Traer» deja el archivo en Mis archivos (abajo) y al chat va un adjunto
+    `biblioteca` que apunta a esa copia; el motor de Anthropic lo **monta en el contenedor a mitad del turno** (`container_upload`
+    junto a los resultados; `ctx.archivoPorId`).
+  - **Lo traído de Microsoft se queda en Mis archivos** (27-nov-2026, Gabriel: «cada vez que llame a un archivo, que ya se quede
+    en la plataforma»; migración `20261127100000_archivos_microsoft`, `lib/asistente/microsoft-archivos.ts`). Carpeta «Microsoft 365»
+    en la raíz de cada persona; la fila es `origen = 'microsoft'` con `ms_item` (`driveId:itemId`), `ms_modificado` y `ms_enlace`,
+    única por persona y elemento. Volver a traerlo con la misma fecha usa la copia; si cambió, reemplaza los bytes, actualiza los
+    adjuntos de chats que apuntaban a ella y borra los viejos. Cuenta en su espacio.
+  - **El «/» del chat tiene dos pestañas**: Mis archivos y **Microsoft 365** (con `m365:archivos` en su alcance y la casilla de Mis
+    archivos; `components/sistema/asistente/acciones-m365.ts`). Sin texto, recientes y compartidos conmigo; con texto, la búsqueda de
+    Graph (OneDrive, SharePoint y los archivos de Teams), solo archivos, con de dónde viene y si ya está en Mis archivos. Sin la cuenta
+    conectada, ofrece conectarla. `node --env-file=.env.local scripts/asistente/probar-m365-archivos.mjs` (15, simulador :3999, sin modelo).
+  - ⚠️ **El token en memoria va atado a la conexión** (`conectado_en`): rutas y acciones de Next pueden ser instancias distintas del
+    módulo, y tras «Desconectar» o reconectar una de ellas seguía con el token anterior.
   - **Compartir** algo con linaje de Microsoft 365 no se revisa contra el alcance de quien recibe (es información de quien
     comparte) sino que **pide confirmación expresa** (`compartirObjeto(…, confirmado)`, «Compartir igual»). Una tarea programada
     no se lo manda sola a otros destinatarios.

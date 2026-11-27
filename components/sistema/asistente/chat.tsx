@@ -27,6 +27,8 @@ import {
 import type { ArchivoVista, ChatLista, MensajeVista, TurnoVista } from '@/lib/asistente/datos'
 import { calificar, confirmarSubida, crearChat, detenerTurno, enviarMensaje, prepararSubida, reintentarTurno } from './acciones'
 import { adjuntarDeBiblioteca, buscarEnBiblioteca, type ItemBiblioteca } from '@/components/sistema/archivos/acciones'
+import { buscarEnMicrosoft, estadoArchivosMicrosoft, traerDeMicrosoft, type EstadoM365 } from './acciones-m365'
+import type { ItemMicrosoft } from '@/lib/asistente/microsoft-archivos'
 import { borrarMemoria } from './acciones-f3'
 import { CompartirObjeto, PanelCompartirChat } from './compartir'
 import { useRouter } from 'next/navigation'
@@ -166,6 +168,57 @@ export function ChatAsistente(props: {
     const local = crypto.randomUUID()
     setAdjuntos((a) => [...a, { local, nombre: item.tipo === 'carpeta' ? `📁 ${item.nombre}` : item.nombre, bytes: 0, estado: 'subiendo' }])
     const r = await adjuntarDeBiblioteca(item.tipo, item.id)
+    if (!r.ok) return setAdjuntos((a) => a.map((x) => (x.local === local ? { ...x, estado: 'error', error: r.error } : x)))
+    setArchivos((m) => {
+      const n = new Map(m)
+      for (const x of r.adjuntos) n.set(x.archivoId, { id: x.archivoId, nombre: x.nombre, mime: x.mime, bytes: x.bytes, origen: 'subido' })
+      return n
+    })
+    setAdjuntos((a) => [...a.filter((x) => x.local !== local), ...r.adjuntos.map((x) => ({ local: crypto.randomUUID(), nombre: x.nombre, bytes: x.bytes, estado: 'listo' as const, archivoId: x.archivoId }))])
+    setTimeout(() => entrada.current?.focus(), 0)
+  }
+  // «/» con dos pestañas (27-nov-2026): Mis archivos y Microsoft 365. La segunda sale con `m365:archivos` en el alcance;
+  // sin texto muestra recientes y compartidos, con texto busca en OneDrive, SharePoint y Teams. Lo elegido queda en
+  // Mis archivos › Microsoft 365 y se adjunta.
+  const menuArchivos = !sinArchivos && /^\/[^\n]{0,60}$/.test(texto) ? texto.slice(1).trim() : null
+  const [pestanaArchivos, setPestanaArchivos] = useState<'plataforma' | 'microsoft'>('plataforma')
+  const [m365, setM365] = useState<EstadoM365 | null>(null)
+  const [resM365, setResM365] = useState<{ q: string; cargando: boolean; items: ItemMicrosoft[]; error?: string; sinConexion?: boolean } | null>(null)
+  const abiertoMenu = menuArchivos !== null
+  useEffect(() => {
+    if (!abiertoMenu || m365) return
+    let vigente = true
+    void estadoArchivosMicrosoft()
+      .then((e) => vigente && setM365(e))
+      .catch(() => vigente && setM365({ disponible: false, conectado: false }))
+    return () => {
+      vigente = false
+    }
+  }, [abiertoMenu, m365])
+  const enMicrosoft = menuArchivos !== null && pestanaArchivos === 'microsoft' && !!m365?.disponible && m365.conectado
+  useEffect(() => {
+    if (!enMicrosoft || menuArchivos === null) return
+    let vigente = true
+    setResM365((r) => ({ q: menuArchivos, cargando: true, items: r?.items ?? [] }))
+    const t = setTimeout(
+      () =>
+        void buscarEnMicrosoft(menuArchivos).then(
+          (r) => vigente && setResM365(r.ok ? { q: menuArchivos, cargando: false, items: r.items } : { q: menuArchivos, cargando: false, items: [], error: r.error, sinConexion: r.sinConexion })
+        ),
+      menuArchivos ? 400 : 0
+    )
+    return () => {
+      vigente = false
+      clearTimeout(t)
+    }
+  }, [enMicrosoft, menuArchivos])
+  const itemsM365 = enMicrosoft && resM365 && !resM365.error ? resM365.items : []
+  const usarDeMicrosoft = async (item: ItemMicrosoft) => {
+    setTexto('')
+    setResM365(null)
+    const local = crypto.randomUUID()
+    setAdjuntos((a) => [...a, { local, nombre: item.nombre, bytes: item.bytes ?? 0, estado: 'subiendo' }])
+    const r = await traerDeMicrosoft(item.id)
     if (!r.ok) return setAdjuntos((a) => a.map((x) => (x.local === local ? { ...x, estado: 'error', error: r.error } : x)))
     setArchivos((m) => {
       const n = new Map(m)
@@ -682,18 +735,94 @@ export function ChatAsistente(props: {
                 ))}
               </ul>
             )}
-            {biblioteca.length > 0 && (
-              <ul role="listbox" aria-label="Mis archivos" className="mb-1.5 max-h-60 overflow-y-auto rounded-xl border border-[var(--borde)] bg-white p-1 shadow-lg" data-menu-biblioteca>
-                {biblioteca.map((b) => (
-                  <li key={`${b.tipo}-${b.id}`}>
-                    <button type="button" role="option" aria-selected={false} onClick={() => void usarDeBiblioteca(b)} className="flex w-full items-baseline gap-2 rounded-lg px-2.5 py-1.5 text-left hover:bg-marca-50">
-                      <span aria-hidden>{b.tipo === 'carpeta' ? '📁' : '📄'}</span>
-                      <span className="min-w-0 truncate text-[13px] text-marca-800">{b.nombre}</span>
-                      <span className="ml-auto shrink-0 text-[11px] text-marca-400">{b.detalle}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
+            {menuArchivos !== null && (biblioteca.length > 0 || !!m365?.disponible) && (
+              <div className="mb-1.5 rounded-xl border border-[var(--borde)] bg-white shadow-lg" data-menu-archivos>
+                {m365?.disponible && (
+                  <div role="tablist" aria-label="Dónde buscar" className="flex gap-1 border-b border-[var(--borde)] px-1.5 pt-1.5">
+                    {(
+                      [
+                        ['plataforma', 'Mis archivos'],
+                        ['microsoft', 'Microsoft 365'],
+                      ] as const
+                    ).map(([clave, etiqueta]) => (
+                      <button
+                        key={clave}
+                        type="button"
+                        role="tab"
+                        aria-selected={pestanaArchivos === clave}
+                        data-pestana-archivos={clave}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => setPestanaArchivos(clave)}
+                        className={cn('-mb-px rounded-t-lg border-b-2 px-3 py-1.5 text-[12.5px] font-medium', pestanaArchivos === clave ? 'border-acento-600 text-marca-900' : 'border-transparent text-marca-500 hover:text-marca-800')}
+                      >
+                        {clave === 'microsoft' && (
+                          <span className="mr-1.5 inline-grid h-3 w-3 grid-cols-2 gap-px align-[-1px]" aria-hidden>
+                            <span className="bg-[#f25022]" />
+                            <span className="bg-[#7fba00]" />
+                            <span className="bg-[#00a4ef]" />
+                            <span className="bg-[#ffb900]" />
+                          </span>
+                        )}
+                        {etiqueta}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {pestanaArchivos === 'microsoft' && m365?.disponible ? (
+                  !m365.conectado || resM365?.sinConexion ? (
+                    <p className="px-3 py-2.5 text-[12.5px] text-marca-600" data-m365-sin-conexion>
+                      Conecta tu cuenta de Microsoft para ver aquí tus archivos de OneDrive, SharePoint y Teams.{' '}
+                      <Link href="/sistema/asistente/conexiones" className="font-semibold text-acento-700 hover:underline">
+                        Conectar mi cuenta
+                      </Link>
+                    </p>
+                  ) : resM365?.error ? (
+                    <p role="alert" className="px-3 py-2.5 text-[12.5px] text-acento-700">
+                      {resM365.error}
+                    </p>
+                  ) : itemsM365.length ? (
+                    <ul role="listbox" aria-label="Microsoft 365" className="max-h-64 overflow-y-auto p-1" data-menu-m365>
+                      {!menuArchivos && <li className="px-2.5 pt-1 pb-0.5 text-[11px] font-semibold tracking-wide text-marca-400 uppercase">Recientes y compartidos contigo</li>}
+                      {itemsM365.map((m) => (
+                        <li key={m.id}>
+                          <button type="button" role="option" aria-selected={false} onClick={() => void usarDeMicrosoft(m)} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left hover:bg-marca-50">
+                            <span aria-hidden>📄</span>
+                            <span className="min-w-0 flex-1">
+                              <span className="block truncate text-[13px] text-marca-800">{m.nombre}</span>
+                              <span className="block truncate text-[11px] text-marca-400">
+                                {[m.lugar, m.modificado ? new Date(m.modificado).toLocaleDateString('es-VE', { timeZone: 'America/Caracas', day: 'numeric', month: 'short', year: 'numeric' }) : null, m.bytes !== null ? bytesLegibles(m.bytes) : null].filter(Boolean).join(' · ')}
+                              </span>
+                            </span>
+                            {m.enPlataforma && (
+                              <span className={cn('shrink-0 rounded-full px-2 py-0.5 text-[10.5px]', m.enPlataforma === 'igual' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800')}>
+                                {m.enPlataforma === 'igual' ? 'Ya en Mis archivos' : 'Cambió: se actualiza'}
+                              </span>
+                            )}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="px-3 py-2.5 text-[12.5px] text-marca-500">
+                      {resM365?.cargando || !resM365 ? 'Buscando en tu Microsoft 365…' : menuArchivos ? `Nada en tu Microsoft 365 con «${menuArchivos}».` : 'No hay archivos recientes en tu Microsoft 365.'}
+                    </p>
+                  )
+                ) : biblioteca.length ? (
+                  <ul role="listbox" aria-label="Mis archivos" className="max-h-60 overflow-y-auto p-1" data-menu-biblioteca>
+                    {biblioteca.map((b) => (
+                      <li key={`${b.tipo}-${b.id}`}>
+                        <button type="button" role="option" aria-selected={false} onClick={() => void usarDeBiblioteca(b)} className="flex w-full items-baseline gap-2 rounded-lg px-2.5 py-1.5 text-left hover:bg-marca-50">
+                          <span aria-hidden>{b.tipo === 'carpeta' ? '📁' : '📄'}</span>
+                          <span className="min-w-0 truncate text-[13px] text-marca-800">{b.nombre}</span>
+                          <span className="ml-auto shrink-0 text-[11px] text-marca-400">{b.detalle}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="px-3 py-2.5 text-[12.5px] text-marca-500">{(menuArchivos ?? '').length < 2 ? 'Escribe al menos dos letras para buscar en Mis archivos.' : `Nada en Mis archivos con «${menuArchivos}».`}</p>
+                )}
+              </div>
             )}
             {cupo.tipo !== 'ok' && paraElAsistenteAhora && (
               <div role="status" className="mb-1.5 flex flex-wrap items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[12.5px] text-amber-900" data-cupo={cupo.tipo}>
@@ -736,7 +865,9 @@ export function ChatAsistente(props: {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
                     e.preventDefault()
-                    if (atajosVisibles.length) usarAtajo(atajosVisibles[0])
+                    if (enMicrosoft) {
+                      if (itemsM365.length) void usarDeMicrosoft(itemsM365[0])
+                    } else if (atajosVisibles.length) usarAtajo(atajosVisibles[0])
                     else if (biblioteca.length) void usarDeBiblioteca(biblioteca[0])
                     else void enviar()
                   }

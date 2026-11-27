@@ -135,7 +135,7 @@ export function herramientasDeDatos(d: Datos) {
     if (m.partes.includes('m365:archivos'))
       h.push({
         name: 'microsoft_archivos',
-        description: `Los archivos de OneDrive y SharePoint que la persona puede ver. accion «buscar»: por palabras. accion «leer»: el texto de un archivo de texto (txt, csv, md). accion «traer»: trae un Excel, Word, PDF o PowerPoint a tu entorno de código para trabajarlo como un adjunto. El id sale de «buscar».${aviso}`,
+        description: `Los archivos de OneDrive y SharePoint que la persona puede ver. accion «buscar»: por palabras. accion «leer»: el texto de un archivo de texto (txt, csv, md). accion «traer»: trae un Excel, Word, PDF o PowerPoint a tu entorno de código para trabajarlo como un adjunto, y queda guardado en Mis archivos › Microsoft 365 de la persona (si ya estaba y no cambió, se usa esa copia). El id sale de «buscar».${aviso}`,
         input_schema: {
           type: 'object',
           properties: {
