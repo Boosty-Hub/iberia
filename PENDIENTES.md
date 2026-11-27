@@ -49,15 +49,9 @@ entregable 2. El resto no se ha vuelto a revisar desde el 9, y lo que salió el 
   la organización «Iberia Org» está en plan **gratuito**, que pausa tras días sin actividad, y
   pausado nadie entra. **Gabriel**: decidir si pasa a Pro para que no se vuelva a pausar antes
   del 21.
-- **Recuperar la contraseña** · ✅ en producción (`/login/recuperar` responde). Falta: 1) que la
-  plantilla «Reset password» —hoy `{{ .ConfirmationURL }}`, en inglés y que solo sirve en el mismo
-  navegador donde se pidió— apunte a
-  `{{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=recovery&siguiente=/login/nueva-clave`
-  (así sirve aunque el correo se abra en otro equipo). ⚠️ **Supabase no deja cambiarla en plan
-  gratuito con su correo de fábrica** (lo rechazó el 20/10): sale sola con el punto de arriba o con
-  el SMTP; la versión en español está lista para aplicarla. 2) **SMTP propio**: el correo de fábrica
-  de Supabase solo le llega al equipo de la organización, con un tope de 2 por hora. **Gabriel**:
-  Pro o un proveedor de correo con sus credenciales.
+- ~~**Recuperar la contraseña**: plantilla en español y SMTP propio~~ ✅ 27/11: SMTP de Resend,
+  60 por hora, y las plantillas de Auth en español con enlace por `token_hash` a `/auth/continuar`
+  (`AGENTS.md`, «Los correos»). Probado con un correo real a Gabriel.
 
 *Armado el 9 de octubre revisando la base, y trabajado ese mismo día: **el informe quedó
 terminado y publicado**. Lo de abajo junta lo que está repartido en el resto del archivo; el
@@ -746,8 +740,8 @@ Rama `plataforma/etapa-1`, Supabase de pruebas `wsqhsjbwkjlqrdxnyadq`. El plan e
 | `OPENAI_API_KEY` está dos veces en `.env.local`: dejar una | Equipo Boosty | |
 | Fotos HEIC del iPhone: no se convierten en el navegador todavía; se aceptan JPG, PNG, WebP y GIF | Equipo Boosty | Plan, fase 1 |
 | La habilidad propia `formato-iberia` (plantillas de Word, Excel y PowerPoint con la marca, subidas a la API de habilidades): hoy la marca va por instrucciones (colores y DM Sans) | Equipo Boosty | Plan, fase 1 |
-| **Microsoft 365 (fase 7)**: construido y probado contra un simulador (26/11). Falta lo de Iberia: el administrador de Microsoft registra la app con el paso a paso (va con el `.cer` de `plataforma/microsoft/` y la dirección de retorno de producción) y devuelve los dos identificadores, que se ponen en Administración › Microsoft 365. El certificado ya está en Supabase Vault de producción (26/11; no cabe en el entorno de Netlify). Después: encender las cuatro fuentes `m365:*` por rol en Alcance y probar con un usuario asignado (resumir el correo de un día) y uno no asignado | Gabriel → TI de Iberia · equipo Boosty | Plan, fase 7 |
-| Subdominio y remitente de Resend (P7): verificar el dominio en Resend (registros DNS de Iberia) y ponerlo en Administración › Asistente de IA › Motor › «Remitente del correo». Mientras, el canal de correo de las tareas queda «pendiente» y no se manda nada | Gabriel · TI de Iberia | Fase 5, construida el 26/11; probada con la casilla de prueba de Resend |
+| **Microsoft 365 (fase 7)**: la app de Iberia ya está registrada y configurada en producción (27/11: cliente y directorio en Administración › Microsoft 365; Entra acepta el certificado). 🔴 **Falta que Jhonhy Polanco agregue en Entra la dirección de retorno `https://portal.industriasiberia.com/api/asistente/microsoft/retorno`** (registraron la de `iberiavenezuela.netlify.app`), y que confirme el «Grant admin consent» y a quién asignó (pedido por correo el 27/11). Después: encender las cuatro fuentes `m365:*` por rol en Alcance y probar con un usuario asignado (resumir el correo de un día) y uno no asignado | TI de Iberia (Jhonhy) → equipo Boosty | Plan, fase 7 |
+| ~~Subdominio y remitente de Resend (P7)~~ ✅ 27/11: dominio `portal.industriasiberia.com` verificado, remitente `notificaciones@` en las tareas y SMTP de Supabase Auth por Resend, con las plantillas en español (`AGENTS.md`, «Los correos») | — | |
 | **Motor local (fase 6)**: el adaptador, la matriz de capacidades y el panel están construidos y probados contra un endpoint compatible (26/11). Falta el **estudio** —qué modelo abierto, qué equipo, cuánto cuesta operarlo con el uso real de las fases 1 a 5, y la ruta de red (túnel cifrado y autenticado hasta el servidor de Iberia, o el ejecutor del motor local dentro de su red)— y, para el modo todo adentro, un entorno de código propio (contenedor aislado con Python, sin red) y la prueba de tráfico de que nada sale | Equipo Boosty · TI de Iberia | Fase 6. Hoy no hay cifras que poner sin inventarlas |
 | Plantilla de WhatsApp para los resultados de las tareas (parámetros: nombre, tarea, enlace), aprobada por Meta en la cuenta de Iberia, y su nombre en Motor › «Plantilla de WhatsApp». Usa la conexión de `ajustes_whatsapp`, que sigue en trámite | Gabriel · Martha Fuentes | Fase 5 |
 | ~~Montar el reloj~~ ✅ 26/11 (pg_cron en producción, 200). Falta **la primera investigación profunda en producción**, que es la prueba de que el turno sigue en otra invocación de la función de fondo (en local, 3 tramos de 20 s) | Equipo Boosty | Fase 5 |

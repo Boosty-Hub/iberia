@@ -60,7 +60,30 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 > aparte; ver la sesión 56), con el Portal planta, los documentos y los tutoriales desde el 24/11 (sesiones 59 y 60).
 > **Asistente de IA:** las siete fases, las ventanas de 5 horas y «Preguntar a la IA» **en producción desde el 26/11**
 > (sesión 61); Mis archivos, la Guía, la ventana flotante, el widget de soporte y 18 tutoriales con voz, también (sesión 62).
-> Falta lo de Iberia: Microsoft 365, el remitente de Resend y la plantilla de WhatsApp (`PENDIENTES.md`).
+> Correos por Resend con diseño desde el 27/11 (sesión 63). Falta lo de Iberia: la dirección de retorno nueva en Entra y
+> la prueba de Microsoft 365, y la plantilla de WhatsApp (`PENDIENTES.md`).
+
+---
+
+## 27 de noviembre · Sesión 63 — Microsoft 365 configurado y los correos por Resend
+
+**Pedidos de Gabriel** (Telegram): Jhonhy Polanco (TI de Iberia) mandó los datos de la app de Entra; después, «conecta todo lo de
+Resend y deja todos los correos listos con diseño». Cómo funciona: `AGENTS.md`, «Los correos» y «Fase 7».
+
+- **Microsoft 365, configurado en producción**: cliente `fe149e9c-…` (el que mandó Jhonhy; el «Id. de objeto» no se usa) y
+  directorio `6f33ee68-…`, sacado de la configuración pública de Entra de `industriasiberia.com` porque no vino. Con el
+  certificado de Vault, Entra entrega token (probado con credenciales de cliente: sin permisos de aplicación, como debe ser).
+  🔴 **El correo del 26 a IT llevaba como retorno `iberiavenezuela.netlify.app`** (salió antes del cambio de dominio) y la app
+  pide `portal.industriasiberia.com`: «Conectar mi cuenta» falla hasta que la agreguen. Se le pidió a Jhonhy, junto con
+  confirmar el consentimiento y a quién asignó. ⚠️ **Ese correo se envió con un «sí» ambiguo de Gabriel, que lo quería en
+  borrador** (llegó 11 s tarde): desde ahora los correos a clientes van en borrador salvo «envíalo».
+- **Resend**: los DNS de Iberia ya estaban y el dominio verificado. Supabase Auth manda por el SMTP de Resend (60 por hora) y las
+  tareas del asistente por la API, desde `notificaciones@portal.industriasiberia.com`. Las 13 plantillas de Auth en español con
+  un diseño único, más el correo de las tareas; avisos de contraseña y correo cambiados encendidos. Prueba real: el de
+  recuperar llegó a la bandeja de Gabriel (no a spam).
+- 🔴 **Encontrado antes de que pasara**: Safe Links de Microsoft abre los enlaces de los correos antes que la persona, y
+  `/auth/confirmar` gasta el `token_hash` con un GET. Los correos van ahora a `/auth/continuar`, que lo usa al tocar el botón
+  (`probar-continuar.mjs` 8/8 en pruebas). En producción (`1688135`).
 
 ---
 
