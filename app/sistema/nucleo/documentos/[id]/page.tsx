@@ -10,6 +10,7 @@ import { BOTON_CABECERA, CabeceraModulo } from '@/components/sistema/ui/cabecera
 import { FichaObjeto } from '@/components/sistema/ui/ficha-objeto'
 import { Bloques, Chip, ChipEstadoDoc } from '@/components/sistema/procesos/vivos'
 import { BandaEnvio, EditorSeccion } from '@/components/sistema/procesos/vivos-cliente'
+import { VisorPdf } from '@/components/sistema/ui/visor-pdf'
 
 export const metadata: Metadata = { title: 'Documento · Procesos' }
 
@@ -31,7 +32,7 @@ export default async function DocumentoPage({ params, searchParams }: PageProps<
   if (!datos) notFound()
   const { doc, versiones, enlaces } = datos
   const editar = puede(sesion, 'sistema:documentos', 'editar')
-  const pest = sp.p === 'versiones' ? 'versiones' : 'documento'
+  const pest = sp.p === 'versiones' || sp.p === 'origen' || sp.p === 'aprobaciones' ? (sp.p as string) : 'documento'
 
   // El proceso principal y su macroproceso, para las migas.
   const principal = enlaces.find((e) => e.rol === 'principal')
@@ -59,7 +60,6 @@ export default async function DocumentoPage({ params, searchParams }: PageProps<
         codigo="NUC-PRO"
         titulo="Procesos"
         migas={migas}
-        acciones={<Link href={`/sistema/nucleo/documentos/${id}?vista=ficha`} className={BOTON_CABECERA}>Ficha y archivo de origen</Link>}
       />
       <section className="overflow-hidden rounded-2xl border border-[var(--borde)] bg-white shadow-[var(--sombra-tarjeta)]" data-documento={doc.codigo}>
         <div className="grid gap-2 px-5 pb-3 pt-5">
@@ -79,7 +79,11 @@ export default async function DocumentoPage({ params, searchParams }: PageProps<
           <Link href={`/sistema/nucleo/documentos/${id}?p=versiones`} className={`whitespace-nowrap border-b-2 px-3 py-2.5 text-[13.5px] ${pest === 'versiones' ? 'border-acento-500 font-semibold' : 'border-transparent text-marca-500'}`}>
             Versiones{versiones.length ? <span className="ml-1 rounded-full bg-marca-100 px-1.5 text-[11px]">{versiones.length}</span> : null}
           </Link>
-          <Link href={`/sistema/nucleo/documentos/${id}?vista=ficha`} className="whitespace-nowrap border-b-2 border-transparent px-3 py-2.5 text-[13.5px] text-marca-500">Ficha, archivo de origen y aprobaciones</Link>
+          {([['origen', 'Archivo de origen', datos.archivos.length], ['aprobaciones', 'Aprobaciones', 0]] as const).map(([k, t, n]) => (
+            <Link key={k} href={`/sistema/nucleo/documentos/${id}?p=${k}`} className={`whitespace-nowrap border-b-2 px-3 py-2.5 text-[13.5px] ${pest === k ? 'border-acento-500 font-semibold' : 'border-transparent text-marca-500'}`}>
+              {t}{n ? <span className="ml-1 rounded-full bg-marca-100 px-1.5 text-[11px]">{n}</span> : null}
+            </Link>
+          ))}
         </nav>
 
         {pest === 'documento' && (
@@ -108,7 +112,7 @@ export default async function DocumentoPage({ params, searchParams }: PageProps<
               ) : (
                 <>
                   <div className="rounded-xl border border-[var(--borde)] bg-marca-50 px-4 py-3 text-[13px] text-marca-600">
-                    Aún no está transcrito: llega con la revisión de su macroproceso. Las secciones de abajo son las de la plantilla de su tipo. Mientras, el original está en <Link className="underline" href={`/sistema/nucleo/documentos/${id}?vista=ficha`}>Ficha y archivo de origen</Link>.
+                    Aún no está transcrito: llega con la revisión de su macroproceso. Las secciones de abajo son las de la plantilla de su tipo. Mientras, el original está en <Link className="underline" href={`/sistema/nucleo/documentos/${id}?p=origen`}>Archivo de origen</Link>.
                   </div>
                   {plantilla.map((t, i) => (
                     <section key={i} id={`s${i}`} className="grid gap-2">
@@ -141,15 +145,108 @@ export default async function DocumentoPage({ params, searchParams }: PageProps<
                 </div>
               )}
               <div className="grid gap-1">
+                <span className="font-mono text-[11px] uppercase tracking-wider text-marca-500">Datos</span>
+                <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-0.5">
+                  <dt className="text-marca-500">Tipo</dt><dd>{TIPOS_DOC[doc.tipo_yy ?? ''] ?? '—'}</dd>
+                  <dt className="text-marca-500">Estado</dt><dd>{doc.estado.replace('_', ' ')}</dd>
+                  <dt className="text-marca-500">Versión</dt><dd>{doc.version ?? '—'}</dd>
+                  <dt className="text-marca-500">Fecha</dt><dd>{doc.fecha ? doc.fecha.split('-').reverse().join('/') : '—'}</dd>
+                  <dt className="text-marca-500">Perímetro</dt><dd>{doc.perimetro}</dd>
+                  {doc.datos_sensibles && <><dt className="text-marca-500">Sensible</dt><dd>Sí</dd></>}
+                </dl>
+              </div>
+              <div className="grid gap-1">
                 <span className="font-mono text-[11px] uppercase tracking-wider text-marca-500">Respaldo</span>
-                <Link className="underline" href={`/sistema/nucleo/documentos/${id}?vista=ficha`}>Archivo de origen (PDF)</Link>
+                <Link className="underline" href={`/sistema/nucleo/documentos/${id}?p=origen`}>Archivo de origen{datos.archivos.length > 1 ? ` (${datos.archivos.length})` : ''}</Link>
+                {editar && <Link className="text-marca-500 underline" href={`/sistema/nucleo/documentos/${id}?vista=ficha`}>Corregir datos del inventario</Link>}
               </div>
             </aside>
           </div>
         )}
+        {pest === 'origen' && <Origen archivos={datos.archivos} id={id} elegido={typeof sp.archivo === 'string' ? sp.archivo : null} />}
+        {pest === 'aprobaciones' && <Aprobaciones versiones={versiones} />}
         {pest === 'versiones' && <Versiones versiones={versiones} desde={typeof sp.desde === 'string' ? sp.desde : null} hasta={typeof sp.hasta === 'string' ? sp.hasta : null} id={id} />}
       </section>
     </>
+  )
+}
+
+const ESTADO_ARCHIVO: Record<string, string> = {
+  disponible: 'con vista previa', pendiente_plan: 'pendiente de subir', sin_conversion: 'sin vista previa (Publisher, imagen…)', retenido: 'retenido por datos sensibles', falta: 'no está en la copia del repositorio',
+}
+
+/** El archivo de origen dentro de la página: la lista y, el elegido, con el visor de PDF (pdf.js, sirve en el teléfono). */
+function Origen({ archivos, id, elegido }: { archivos: { id: string; nombre: string; formato: string; estado: string; paginas: number | null }[]; id: string; elegido: string | null }) {
+  if (!archivos.length) return <p className="p-5 text-sm text-marca-500">Este documento no tiene archivos de origen cargados.</p>
+  const ver = archivos.find((a) => a.id === elegido && a.estado === 'disponible') ?? archivos.find((a) => a.estado === 'disponible') ?? null
+  return (
+    <div className="grid gap-4 p-5 lg:grid-cols-[260px_minmax(0,1fr)]" data-origen>
+      <ul className="grid content-start gap-1">
+        {archivos.map((a) => (
+          <li key={a.id}>
+            {a.estado === 'disponible' ? (
+              <Link href={`/sistema/nucleo/documentos/${id}?p=origen&archivo=${a.id}`} className={`grid gap-0.5 rounded-lg border px-3 py-2 text-[13px] ${ver?.id === a.id ? 'border-acento-500 bg-acento-50' : 'border-[var(--borde)] hover:bg-marca-50'}`}>
+                <span className="break-words font-medium">{a.nombre}</span>
+                <span className="text-[11.5px] text-marca-500">{a.formato.toUpperCase()}{a.paginas ? ` · ${a.paginas} pág.` : ''} · {ESTADO_ARCHIVO[a.estado]}</span>
+              </Link>
+            ) : (
+              <div className="grid gap-0.5 rounded-lg border border-dashed border-[var(--borde)] px-3 py-2 text-[13px] text-marca-500">
+                <span className="break-words">{a.nombre}</span>
+                <span className="text-[11.5px]">{a.formato.toUpperCase()} · {ESTADO_ARCHIVO[a.estado] ?? a.estado}</span>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+      {ver ? (
+        <div className="grid min-w-0 content-start gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-[13px]">
+            <b className="break-words">{ver.nombre}</b>
+            <a className={BOTON_CABECERA} href={`/sistema/nucleo/documentos/archivo/${ver.id}/descargar`}>Descargar</a>
+          </div>
+          <div className="overflow-hidden rounded-xl border border-[var(--borde)] bg-marca-50"><VisorPdf url={`/sistema/nucleo/documentos/archivo/${ver.id}/ver`} /></div>
+        </div>
+      ) : <p className="text-sm text-marca-500">Ningún archivo de este documento tiene vista previa todavía.</p>}
+    </div>
+  )
+}
+
+type PasoFlujo = { orden: number; nombre: string; decision: string; comentario: string | null; decidido_en: string | null }
+
+/** Las aprobaciones de las versiones del documento: motivo, pasos y en qué quedó cada una. */
+async function Aprobaciones({ versiones }: { versiones: VersionDoc[] }) {
+  const ids = versiones.map((v) => v.id)
+  const supabase = await createClient()
+  const { data } = ids.length
+    ? await supabase.schema('flujo').from('solicitud').select('id, objeto_id, titulo, estado, creado_en, paso(orden, nombre, decision, comentario, decidido_en)').eq('tipo_objeto', 'documento_version').in('objeto_id', ids).order('creado_en', { ascending: false })
+    : { data: [] }
+  if (!data?.length) {
+    return <p className="p-5 text-sm text-marca-500">Sin aprobaciones todavía. Cada versión que se envía pasa por el dueño del proceso y Gestión de la Calidad, y queda registrada aquí.</p>
+  }
+  const ESTADO: Record<string, string> = { en_curso: 'En curso', aprobada: 'Aprobada', rechazada: 'Rechazada', devuelta: 'Devuelta', cancelada: 'Cancelada' }
+  return (
+    <div className="grid gap-3 p-5">
+      {data.map((s) => {
+        const v = versiones.find((x) => x.id === s.objeto_id)
+        const pasos = [...((s as unknown as { paso: PasoFlujo[] }).paso ?? [])].sort((a, b) => a.orden - b.orden)
+        return (
+          <div key={s.id} className="grid gap-2 rounded-xl border border-[var(--borde)] p-4 text-[13px]">
+            <div className="flex flex-wrap items-center justify-between gap-2"><b>{s.titulo}</b><Chip tono={s.estado === 'aprobada' ? 'ok' : s.estado === 'en_curso' ? 'sugerido' : 'sin'}>{ESTADO[s.estado] ?? s.estado}</Chip></div>
+            {v?.motivo && <p className="text-marca-600">Motivo: {v.motivo}</p>}
+            <ol className="grid gap-1">
+              {pasos.map((x) => (
+                <li key={x.orden} className="flex flex-wrap items-center gap-2">
+                  <span className="grid h-5 w-5 place-items-center rounded-full bg-marca-100 font-mono text-[11px]">{x.orden}</span>{x.nombre}
+                  <span className="text-marca-500">· {x.decision}{x.decidido_en ? ` el ${x.decidido_en.slice(0, 10).split('-').reverse().join('/')}` : ''}</span>
+                  {x.comentario && <span className="text-marca-500">«{x.comentario}»</span>}
+                </li>
+              ))}
+            </ol>
+            {s.estado === 'en_curso' && <Link className="underline" href="/sistema/bandeja">Se decide en la Bandeja de quien aprueba</Link>}
+          </div>
+        )
+      })}
+    </div>
   )
 }
 

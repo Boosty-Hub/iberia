@@ -346,10 +346,13 @@ export function esExterno(href: string): boolean {
  * El módulo activo para una ruta: la ruta o pestaña más larga que calce. Así
  * `/sistema/nucleo/escenarios/…` es de Organización aunque no viva debajo de ella.
  */
+/** Rutas que cuentan como de un módulo sin ser su pestaña: los documentos se abren dentro de Procesos (28-nov-2026). */
+const RUTAS_EXTRA: Record<string, string[]> = { 'NUC-PRO': ['/sistema/nucleo/documentos'] }
+
 export function moduloDeRuta(ruta: string, modulos: ModuloPlan[]): ModuloPlan | null {
   const candidatos: [string, ModuloPlan][] = []
   for (const m of modulos) {
-    const propias = [hrefModulo(m), ...(PESTANAS[m.codigo] ?? []).map((p) => p.href)]
+    const propias = [hrefModulo(m), ...(PESTANAS[m.codigo] ?? []).map((p) => p.href), ...(RUTAS_EXTRA[m.codigo] ?? [])]
     for (const h of propias) if (h.startsWith('/sistema')) candidatos.push([h, m])
   }
   const calza = candidatos
@@ -376,5 +379,7 @@ export const HERRAMIENTAS_SGC: (Pestana & { descripcion: string })[] = [
   { etiqueta: 'Escenarios', href: '/sistema/nucleo/procesos/escenarios', recurso: 'sistema:escenarios', descripcion: 'Cambios al mapa en simulación, antes de aplicarlos.' },
   { etiqueta: 'Validación', href: '/sistema/nucleo/procesos/validacion', recurso: 'sistema:procesos', descripcion: 'Procesos sin dueño, sin caracterización o con datos incompletos.' },
   { etiqueta: 'Historial', href: '/sistema/nucleo/procesos/historial', recurso: 'sistema:auditoria', descripcion: 'Quién cambió qué y cuándo en los procesos.' },
-  { etiqueta: 'Biblioteca de documentos', href: '/sistema/nucleo/documentos', recurso: 'sistema:documentos', descripcion: 'El inventario de documentos del SGC con sus metadatos y su conciliación.' },
+  { etiqueta: 'Inventario de documentos', href: '/sistema/nucleo/documentos', recurso: 'sistema:documentos', descripcion: 'Los documentos del SGC en una tabla, con sus metadatos, filtros y exportación.' },
+  { etiqueta: 'Conciliación de documentos', href: '/sistema/nucleo/documentos/conciliacion', recurso: 'sistema:documentos', descripcion: 'Documentos sin estado claro, obsoletos, códigos reutilizados y datos sensibles por decidir.' },
+  { etiqueta: 'Historial de documentos', href: '/sistema/nucleo/documentos/historial', recurso: 'sistema:auditoria', descripcion: 'Quién cambió qué y cuándo en el inventario de documentos.' },
 ]

@@ -34,12 +34,17 @@ export const modulosDelPlan = cache(async (): Promise<ModuloPlan[]> => {
  *  - un módulo con pantalla y SIN casilla, solo al nivel administrador: todo lo
  *    que vea alguien más tiene que poder marcarse en Roles.
  */
+const OCULTOS_DEL_MENU = new Set(['NUC-DOC'])
+
 export function modulosVisibles(sesion: Sesion, modulos: ModuloPlan[]): (ModuloPlan & { dominioClave: ClaveDominio })[] {
   const todos = [...MODULOS_INTERFAZ, ...modulos]
   const admin = sesion.rol.nivel === 'admin'
   const veElPlan = admin || puede(sesion, 'modulo:programa')
   return todos
     .filter((m) => {
+      // Rediseño de Procesos (28-nov-2026, Gabriel): «todo debe estar amarrado en los mapas de procesos». Los
+      // documentos se abren desde su proceso; el inventario y la conciliación, en Herramientas del SGC.
+      if (OCULTOS_DEL_MENU.has(m.codigo)) return false
       if (m.dominio === 'Mi día' && !m.recurso) return true
       if (m.estado === 'planificado' || !m.ruta) return veElPlan
       if (!m.recurso) return admin
