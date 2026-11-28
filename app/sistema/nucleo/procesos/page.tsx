@@ -8,6 +8,7 @@ import { CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
 import { Aviso } from '@/components/ui'
 import { puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
+import { MapaProcesos } from './mapa-procesos'
 
 export const metadata: Metadata = { title: 'Mapa de procesos · Plataforma Iberia' }
 
@@ -24,6 +25,9 @@ export const metadata: Metadata = { title: 'Mapa de procesos · Plataforma Iberi
  */
 export default async function MapaProcesosPage({ searchParams }: PageProps<'/sistema/nucleo/procesos'>) {
   const [sesion, sp] = await Promise.all([requerirPermiso('sistema:procesos'), searchParams])
+  // Desde el 28-nov-2026 el mapa por macroprocesos (rediseño) es la entrada; el lienzo y el esquema quedan en
+  // Herramientas del SGC (`?vista=lienzo|esquema`, o con un escenario).
+  if (sp.vista !== 'lienzo' && sp.vista !== 'esquema' && typeof sp.esc !== 'string') return <MapaProcesos sesion={sesion} />
   const supabase = await createClient()
   await activarProgramados(supabase)
   const hoy = hoyCaracas()

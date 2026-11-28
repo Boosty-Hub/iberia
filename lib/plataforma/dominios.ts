@@ -237,15 +237,9 @@ export const PESTANAS: Record<string, Pestana[]> = {
     { etiqueta: 'Conciliación', href: '/sistema/nucleo/conciliacion', recurso: 'sistema:estructura' },
     { etiqueta: 'Historial', href: '/sistema/nucleo/organizacion/historial', recurso: 'sistema:auditoria' },
   ],
-  'NUC-PRO': [
-    { etiqueta: 'Resumen', href: '/sistema/nucleo/procesos/resumen', recurso: 'sistema:procesos' },
-    { etiqueta: 'Mapa', href: '/sistema/nucleo/procesos', recurso: 'sistema:procesos' },
-    { etiqueta: 'Catálogo', href: '/sistema/nucleo/procesos/catalogo', recurso: 'sistema:procesos' },
-    { etiqueta: 'Cruce SGC ↔ informe', href: '/sistema/nucleo/procesos/cruce', recurso: 'sistema:procesos' },
-    { etiqueta: 'Escenarios', href: '/sistema/nucleo/procesos/escenarios', recurso: 'sistema:escenarios' },
-    { etiqueta: 'Validación', href: '/sistema/nucleo/procesos/validacion', recurso: 'sistema:procesos' },
-    { etiqueta: 'Historial', href: '/sistema/nucleo/procesos/historial', recurso: 'sistema:auditoria' },
-  ],
+  // Desde el 28-nov-2026 (rediseño, Gabriel): todo se desprende del mapa; sin pestañas. Lo técnico vive en
+  // Herramientas del SGC (`HERRAMIENTAS_SGC`), un botón discreto de la cabecera.
+  'NUC-PRO': [{ etiqueta: 'Mapa', href: '/sistema/nucleo/procesos', recurso: 'sistema:procesos' }],
   'NUC-DOC': [
     { etiqueta: 'Resumen', href: '/sistema/nucleo/documentos/resumen', recurso: 'sistema:documentos' },
     { etiqueta: 'Biblioteca', href: '/sistema/nucleo/documentos', recurso: 'sistema:documentos' },
@@ -372,3 +366,15 @@ export function pestanaDeRuta(ruta: string, pestanas: Pestana[]): Pestana | null
       .sort((a, b) => b.href.length - a.href.length)[0] ?? null
   )
 }
+
+/** Lo que antes eran pestañas de Procesos: herramientas de quien administra el SGC (rediseño del 28-nov-2026). */
+export const HERRAMIENTAS_SGC: (Pestana & { descripcion: string })[] = [
+  { etiqueta: 'Resumen', href: '/sistema/nucleo/procesos/resumen', recurso: 'sistema:procesos', descripcion: 'Cifras del mapa y de la documentación.' },
+  { etiqueta: 'Catálogo', href: '/sistema/nucleo/procesos/catalogo', recurso: 'sistema:procesos', descripcion: 'Todos los procesos en una tabla, con filtros y exportación.' },
+  { etiqueta: 'Lienzo del mapa', href: '/sistema/nucleo/procesos?vista=lienzo', recurso: 'sistema:procesos', descripcion: 'El mapa en cuatro niveles como diagrama, con fecha y escenarios.' },
+  { etiqueta: 'Cruce SGC ↔ mapa', href: '/sistema/nucleo/procesos/cruce', recurso: 'sistema:procesos', descripcion: 'La correspondencia entre los códigos viejos del SGC (II-XX, 2012) y el mapa 1.1–3.8.' },
+  { etiqueta: 'Escenarios', href: '/sistema/nucleo/procesos/escenarios', recurso: 'sistema:escenarios', descripcion: 'Cambios al mapa en simulación, antes de aplicarlos.' },
+  { etiqueta: 'Validación', href: '/sistema/nucleo/procesos/validacion', recurso: 'sistema:procesos', descripcion: 'Procesos sin dueño, sin caracterización o con datos incompletos.' },
+  { etiqueta: 'Historial', href: '/sistema/nucleo/procesos/historial', recurso: 'sistema:auditoria', descripcion: 'Quién cambió qué y cuándo en los procesos.' },
+  { etiqueta: 'Biblioteca de documentos', href: '/sistema/nucleo/documentos', recurso: 'sistema:documentos', descripcion: 'El inventario de documentos del SGC con sus metadatos y su conciliación.' },
+]

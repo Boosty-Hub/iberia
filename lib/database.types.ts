@@ -7351,6 +7351,115 @@ export type Database = {
           },
         ]
       }
+      documento_proceso: {
+        Row: {
+          confianza: string | null
+          creado_en: string
+          decidido_en: string | null
+          decidido_por: string | null
+          documento_id: string
+          estado: string
+          id: string
+          origen: string
+          proceso_ref: string
+          razon: string | null
+          rol: string
+        }
+        Insert: {
+          confianza?: string | null
+          creado_en?: string
+          decidido_en?: string | null
+          decidido_por?: string | null
+          documento_id: string
+          estado?: string
+          id?: string
+          origen?: string
+          proceso_ref: string
+          razon?: string | null
+          rol?: string
+        }
+        Update: {
+          confianza?: string | null
+          creado_en?: string
+          decidido_en?: string | null
+          decidido_por?: string | null
+          documento_id?: string
+          estado?: string
+          id?: string
+          origen?: string
+          proceso_ref?: string
+          razon?: string | null
+          rol?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documento_proceso_documento_id_fkey"
+            columns: ["documento_id"]
+            isOneToOne: false
+            referencedRelation: "documento"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documento_version: {
+        Row: {
+          archivo_ruta: string | null
+          contenido: Json
+          creado_en: string
+          creado_por: string | null
+          documento_id: string
+          estado: string
+          etiqueta: string | null
+          fecha: string | null
+          id: string
+          motivo: string | null
+          numero: number
+          origen: string
+          reemplazada_en: string | null
+          vigente_desde: string | null
+        }
+        Insert: {
+          archivo_ruta?: string | null
+          contenido?: Json
+          creado_en?: string
+          creado_por?: string | null
+          documento_id: string
+          estado: string
+          etiqueta?: string | null
+          fecha?: string | null
+          id?: string
+          motivo?: string | null
+          numero: number
+          origen?: string
+          reemplazada_en?: string | null
+          vigente_desde?: string | null
+        }
+        Update: {
+          archivo_ruta?: string | null
+          contenido?: Json
+          creado_en?: string
+          creado_por?: string | null
+          documento_id?: string
+          estado?: string
+          etiqueta?: string | null
+          fecha?: string | null
+          id?: string
+          motivo?: string | null
+          numero?: number
+          origen?: string
+          reemplazada_en?: string | null
+          vigente_desde?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documento_version_documento_id_fkey"
+            columns: ["documento_id"]
+            isOneToOne: false
+            referencedRelation: "documento"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proceso: {
         Row: {
           area_texto: string | null
@@ -7543,6 +7652,14 @@ export type Database = {
           ref: string
         }[]
       }
+      confirmar_enlace: {
+        Args: { p_id: string; p_proceso?: string }
+        Returns: undefined
+      }
+      confirmar_enlaces_proceso: {
+        Args: { p_proceso: string }
+        Returns: number
+      }
       conteo_documentos: {
         Args: never
         Returns: {
@@ -7555,9 +7672,18 @@ export type Database = {
         Args: { p_descripcion?: string; p_nombre: string; p_raiz?: string }
         Returns: string
       }
+      descartar_borrador_documento: {
+        Args: { p_version: string }
+        Returns: undefined
+      }
+      descartar_enlace: { Args: { p_id: string }; Returns: undefined }
       editar_cruce: {
         Args: { p_campo: string; p_id: string; p_valor: string }
         Returns: undefined
+      }
+      enviar_documento: {
+        Args: { p_motivo?: string; p_version: string }
+        Returns: string
       }
       enviar_escenario_procesos: {
         Args: { p_esc: string; p_vigente_desde: string }
@@ -7565,6 +7691,16 @@ export type Database = {
       }
       enviar_proceso: { Args: { p_id: string }; Returns: string }
       ficha_llena: { Args: { p_ficha: Json }; Returns: boolean }
+      guardar_seccion_documento: {
+        Args: {
+          p_bloques: Json
+          p_documento: string
+          p_motivo?: string
+          p_seccion: number
+          p_titulo: string
+        }
+        Returns: string
+      }
       lienzo: {
         Args: { p_escenario?: string; p_fecha?: string }
         Returns: {
@@ -7601,6 +7737,7 @@ export type Database = {
         }[]
       }
       plano: { Args: { p: string }; Returns: string }
+      publicar_documento_version: { Args: { p_id: string }; Returns: undefined }
       publicar_escenario_procesos: {
         Args: { p_esc: string }
         Returns: undefined
