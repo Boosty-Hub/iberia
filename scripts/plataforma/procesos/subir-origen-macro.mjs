@@ -3,7 +3,9 @@
  * esos no estaban en el manifiesto del 24-nov, así que no tenían PDF. Para cada archivo del documento:
  *   - .pdf: se sube tal cual;
  *   - Word, Excel y PowerPoint: se convierte con Office (`documentos-pdf/word-pdf.ps1`, el mismo de la carga grande);
- *   - Publisher, imágenes y lo demás: se anota `sin_conversion` (sube el original con el plan de pago).
+ *   - Visio y Publisher: se convierte con LibreOffice (`soffice --headless`, instalado el 28-nov-2026 a pedido de
+ *     Gabriel para poder ver los Visio);
+ *   - imágenes y lo demás: se anota `sin_conversion` (sube el original con el plan de pago).
  * Al bucket `documentos` como `pdf/<huella>.pdf` y a `sgc.documento_archivo`, igual que `cargar-documentos.mjs`.
  *
  *   node --env-file=.env.local scripts/plataforma/procesos/subir-origen-macro.mjs --macro 1.1 [--revisar] [--destino produccion --confirmo]
@@ -48,6 +50,8 @@ const manifiesto = existsSync(path.join(CARGA, 'manifiesto.json')) ? JSON.parse(
 const pdfDeHuella = new Map(manifiesto.filter((a) => a.pdf).map((a) => [a.hash, path.join(CARGA, 'pdf-final', a.pdf)]))
 console.log(`${altas.length} dados de alta y ${inventario.length} del inventario`)
 const OFFICE = new Set(['.doc', '.docx', '.rtf', '.xls', '.xlsx', '.ppt', '.pptx'])
+const LIBRE = new Set(['.vsd', '.vsdx', '.pub'])
+const SOFFICE = ['C:/Program Files/LibreOffice/program/soffice.exe', 'C:/Program Files (x86)/LibreOffice/program/soffice.exe'].find((x) => existsSync(x))
 const tareas = []
 for (const d of docs) {
   for (const [orden, ruta] of (d.archivos ?? []).entries()) {
@@ -64,6 +68,7 @@ for (const d of docs) {
     else if (existsSync(t.pdf)) t.estado = 'disponible'
     else if (ext === '.pdf') { t.estado = 'disponible'; if (!revisar && !existsSync(t.pdf)) await copyFile(src, t.pdf) }
     else if (OFFICE.has(ext)) t.estado = 'convertir'
+    else if (LIBRE.has(ext) && SOFFICE) t.estado = 'convertir_libre'
     else t.estado = 'sin_conversion'
     tareas.push(t)
   }
@@ -78,6 +83,16 @@ if (porConvertir.length && !revisar) {
   const r = spawnSync('pwsh', ['-NoProfile', '-File', path.resolve('scripts/plataforma/documentos-pdf/word-pdf.ps1'), '-Lista', lista, '-Base', BASE, '-Salida', TRABAJO], { stdio: 'inherit', timeout: 20 * 60_000 })
   if (r.status !== 0) console.warn('El convertidor terminó con errores; lo que no convirtió queda pendiente.')
 }
+// Visio y Publisher: uno por uno con LibreOffice (deja <nombre>.pdf en una carpeta propia; se renombra a la huella).
+for (const t of tareas.filter((x) => x.estado === 'convertir_libre' && !existsSync(x.pdf))) {
+  if (revisar) continue
+  const dir = path.join(TRABAJO, `libre-${t.huella.slice(0, 12)}`)
+  await mkdir(dir, { recursive: true })
+  spawnSync(SOFFICE, ['--headless', '--convert-to', 'pdf', '--outdir', dir, t.src], { stdio: 'ignore', timeout: 3 * 60_000 })
+  const hecho = path.join(dir, `${path.basename(t.src, path.extname(t.src))}.pdf`)
+  if (existsSync(hecho)) await copyFile(hecho, t.pdf)
+}
+for (const t of tareas) if (t.estado === 'convertir_libre') t.estado = existsSync(t.pdf) ? 'disponible' : 'sin_conversion'
 for (const t of tareas) if (t.estado === 'convertir') t.estado = existsSync(t.pdf) ? 'disponible' : 'pendiente_plan'
 
 for (const t of tareas) {
