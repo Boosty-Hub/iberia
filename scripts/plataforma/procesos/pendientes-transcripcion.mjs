@@ -28,7 +28,7 @@ const nombre = (r) => r.split(barra).pop().split('/').pop()
 const lista = []
 for (const d of docs) {
   const hechos = new Set([...vs, ...rs].filter((x) => x.documento_id === d.id && x.archivo_ruta).map((x) => nombre(x.archivo_ruta)))
-  for (const a of as.filter((x) => x.documento_id === d.id && x.transcripcion)) hechos.add(a.nombre)
+  for (const a of as.filter((x) => x.documento_id === d.id && x.transcripcion?.startsWith('Mismo contenido'))) hechos.add(a.nombre)
   for (const ruta of d.archivos ?? []) {
     if (hechos.has(nombre(ruta))) continue
     const txt = 'levantamiento-iso/texto/' + ruta.split(barra).join('/') + '.txt'
