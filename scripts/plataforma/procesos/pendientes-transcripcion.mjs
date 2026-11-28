@@ -31,6 +31,7 @@ for (const d of docs) {
   for (const a of as.filter((x) => x.documento_id === d.id && x.transcripcion?.startsWith('Mismo contenido'))) hechos.add(a.nombre)
   for (const ruta of d.archivos ?? []) {
     if (hechos.has(nombre(ruta))) continue
+    if (/\.lnk$/i.test(ruta)) continue // un acceso directo de Windows no tiene contenido propio
     const txt = 'levantamiento-iso/texto/' + ruta.split(barra).join('/') + '.txt'
     lista.push({ documento_id: d.id, codigo: d.codigo, titulo: d.titulo, tipo_yy: d.tipo_yy, archivo: ruta, texto: existsSync(txt) ? txt : null })
   }
