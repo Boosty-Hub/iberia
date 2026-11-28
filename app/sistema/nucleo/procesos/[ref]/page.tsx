@@ -179,7 +179,7 @@ function Valor({ v }: { v: unknown }): ReactNode {
 /** La caracterización con los campos de la cláusula 4.4.1 de ISO 9001; cada campo dice de dónde salió. */
 function Caracterizacion({ ficha, refProceso, editable }: { ficha: Ficha; refProceso: string; editable: boolean }) {
   const Campo = ({ titulo, iso, clave, inicial, ayuda, children }: { titulo: string; iso: string; clave?: string; inicial?: string; ayuda?: string; children: ReactNode }) => {
-    const cuerpo = <CampoVista titulo={titulo} iso={iso}>{children}</CampoVista>
+    const cuerpo = <CampoVista titulo={titulo} iso={iso} vacio={!!clave && !(inicial ?? '').trim()}>{children}</CampoVista>
     return editable && clave ? <EditorCampo refProceso={refProceso} clave={clave} titulo={titulo} inicial={inicial ?? ''} ayuda={ayuda}>{cuerpo}</EditorCampo> : cuerpo
   }
   const f = ficha.fuentes ?? {}
@@ -235,13 +235,14 @@ function Caracterizacion({ ficha, refProceso, editable }: { ficha: Ficha; refPro
   )
 }
 
-function CampoVista({ titulo, iso, children }: { titulo: string; iso: string; children: ReactNode }) {
+function CampoVista({ titulo, iso, vacio, children }: { titulo: string; iso: string; vacio?: boolean; children: ReactNode }) {
   return (
-    <details className="group/campo rounded-xl border border-[var(--borde)] bg-white" data-seccion-caracterizacion>
+    <details className={`group/campo rounded-xl border ${vacio ? 'border-oro-400 bg-oro-50' : 'border-[var(--borde)] bg-white'}`} data-seccion-caracterizacion data-vacio={vacio ? '' : undefined}>
       <summary className="flex cursor-pointer list-none items-baseline gap-2 py-2.5 pl-3 pr-28 font-mono text-[11px] uppercase tracking-wider text-marca-600 marker:hidden [&::-webkit-details-marker]:hidden">
         <span aria-hidden className="inline-block transition group-open/campo:rotate-90">›</span>
         <span>{titulo}</span>
         {iso && <span className="normal-case tracking-normal text-marca-400">ISO {iso}</span>}
+        {vacio && <span className="rounded-full bg-oro-200 px-2 py-0.5 font-sans text-[10.5px] font-semibold normal-case tracking-normal text-oro-900">Falta</span>}
       </summary>
       <div className="grid gap-1.5 px-3 pb-3">{children}</div>
     </details>

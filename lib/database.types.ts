@@ -7401,6 +7401,59 @@ export type Database = {
           },
         ]
       }
+      documento_registro: {
+        Row: {
+          archivo_ruta: string | null
+          contenido: Json
+          creado_en: string
+          creado_por: string | null
+          documento_id: string
+          editado_en: string | null
+          editado_por: string | null
+          fecha: string | null
+          id: string
+          nota: string | null
+          origen: string
+          titulo: string
+        }
+        Insert: {
+          archivo_ruta?: string | null
+          contenido?: Json
+          creado_en?: string
+          creado_por?: string | null
+          documento_id: string
+          editado_en?: string | null
+          editado_por?: string | null
+          fecha?: string | null
+          id?: string
+          nota?: string | null
+          origen?: string
+          titulo: string
+        }
+        Update: {
+          archivo_ruta?: string | null
+          contenido?: Json
+          creado_en?: string
+          creado_por?: string | null
+          documento_id?: string
+          editado_en?: string | null
+          editado_por?: string | null
+          fecha?: string | null
+          id?: string
+          nota?: string | null
+          origen?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documento_registro_documento_id_fkey"
+            columns: ["documento_id"]
+            isOneToOne: false
+            referencedRelation: "documento"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documento_version: {
         Row: {
           archivo_ruta: string | null
@@ -7679,6 +7732,15 @@ export type Database = {
       descartar_enlace: { Args: { p_id: string }; Returns: undefined }
       editar_cruce: {
         Args: { p_campo: string; p_id: string; p_valor: string }
+        Returns: undefined
+      }
+      editar_registro: {
+        Args: {
+          p_bloques: Json
+          p_id: string
+          p_seccion: number
+          p_titulo: string
+        }
         Returns: undefined
       }
       enviar_documento: {

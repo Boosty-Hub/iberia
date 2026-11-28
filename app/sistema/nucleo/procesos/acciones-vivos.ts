@@ -222,3 +222,17 @@ export async function crearSubproceso(ref: string, nombre: string): Promise<Resu
   revalidatePath('/sistema/nucleo/procesos', 'layout')
   return { ok: 'Subproceso creado como borrador: aparece cuando se apruebe.' }
 }
+
+
+/** Corrige una sección de un registro (formato lleno transcrito). La versión anterior queda en la auditoría. */
+export async function editarRegistro(documento: string, registro: string, seccion: number, titulo: string, bloques: unknown): Promise<Resultado> {
+  const sesion = await requerirPermiso('sistema:documentos')
+  if (!puede(sesion, 'sistema:documentos', 'editar')) return { error: 'No tienes permiso para editar documentos.' }
+  if (!UUID.test(registro) || !Number.isInteger(seccion)) return { error: 'Registro no válido.' }
+  if (!Array.isArray(bloques) || bloques.some((b) => !b || typeof b !== 'object' || !TIPOS_BLOQUE.has((b as { tipo?: string }).tipo ?? ''))) return { error: 'La sección viene mal formada.' }
+  const supabase = await createClient()
+  const { error } = await supabase.schema('sgc').rpc('editar_registro', { p_id: registro, p_seccion: seccion, p_titulo: titulo.trim().slice(0, 300), p_bloques: bloques as Json })
+  if (error) return { error: mensaje(error) }
+  revalidatePath(`/sistema/nucleo/documentos/${documento}`)
+  return { ok: 'Registro corregido. La versión anterior queda en el historial.' }
+}

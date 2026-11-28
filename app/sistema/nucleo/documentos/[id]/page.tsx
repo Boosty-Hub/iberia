@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { puede, requerirPermiso } from '@/lib/auth'
 import { compararVersiones } from '@/lib/plataforma/comparar-texto'
 import { fichaDocumento } from '@/lib/plataforma/fichas/procesos'
-import { leerDocumentoVivo, PLANTILLAS, TIPOS_DOC, versionDeLectura, type VersionDoc } from '@/lib/plataforma/procesos-vivos'
+import { leerDocumentoVivo, PLANTILLAS, TIPOS_DOC, versionDeLectura, type Contenido, type VersionDoc } from '@/lib/plataforma/procesos-vivos'
 import { createClient } from '@/lib/supabase/server'
 import { BOTON_CABECERA, CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
 import { FichaObjeto } from '@/components/sistema/ui/ficha-objeto'
@@ -32,7 +32,7 @@ export default async function DocumentoPage({ params, searchParams }: PageProps<
   if (!datos) notFound()
   const { doc, versiones, enlaces } = datos
   const editar = puede(sesion, 'sistema:documentos', 'editar')
-  const pest = sp.p === 'versiones' || sp.p === 'origen' || sp.p === 'aprobaciones' ? (sp.p as string) : 'documento'
+  const pest = ['versiones', 'registros', 'origen', 'aprobaciones'].includes(sp.p as string) ? (sp.p as string) : 'documento'
 
   // El proceso principal y su macroproceso, para las migas.
   const principal = enlaces.find((e) => e.rol === 'principal')
@@ -79,7 +79,7 @@ export default async function DocumentoPage({ params, searchParams }: PageProps<
           <Link href={`/sistema/nucleo/documentos/${id}?p=versiones`} className={`whitespace-nowrap border-b-2 px-3 py-2.5 text-[13.5px] ${pest === 'versiones' ? 'border-acento-500 font-semibold' : 'border-transparent text-marca-500'}`}>
             Versiones{versiones.length ? <span className="ml-1 rounded-full bg-marca-100 px-1.5 text-[11px]">{versiones.length}</span> : null}
           </Link>
-          {([['origen', 'Archivo de origen', datos.archivos.length], ['aprobaciones', 'Aprobaciones', 0]] as const).map(([k, t, n]) => (
+          {([['registros', 'Registros', datos.registros.length], ['origen', 'Archivo de origen', datos.archivos.length], ['aprobaciones', 'Aprobaciones', 0]] as const).filter(([k, , n]) => k !== 'registros' || n > 0).map(([k, t, n]) => (
             <Link key={k} href={`/sistema/nucleo/documentos/${id}?p=${k}`} className={`whitespace-nowrap border-b-2 px-3 py-2.5 text-[13.5px] ${pest === k ? 'border-acento-500 font-semibold' : 'border-transparent text-marca-500'}`}>
               {t}{n ? <span className="ml-1 rounded-full bg-marca-100 px-1.5 text-[11px]">{n}</span> : null}
             </Link>
@@ -163,7 +163,8 @@ export default async function DocumentoPage({ params, searchParams }: PageProps<
             </aside>
           </div>
         )}
-        {pest === 'origen' && <Origen archivos={datos.archivos} id={id} elegido={typeof sp.archivo === 'string' ? sp.archivo : null} />}
+        {pest === 'registros' && <Registros registros={datos.registros} id={id} editar={editar} enlaceDe={enlaceDe} archivos={datos.archivos} />}
+        {pest === 'origen' && <Origen archivos={datos.archivos} id={id} elegido={typeof sp.archivo === 'string' ? sp.archivo : null} transcritoEn={transcritoEn(versiones, datos.registros)} />}
         {pest === 'aprobaciones' && <Aprobaciones versiones={versiones} />}
         {pest === 'versiones' && <Versiones versiones={versiones} desde={typeof sp.desde === 'string' ? sp.desde : null} hasta={typeof sp.hasta === 'string' ? sp.hasta : null} id={id} />}
       </section>
@@ -176,7 +177,51 @@ const ESTADO_ARCHIVO: Record<string, string> = {
 }
 
 /** El archivo de origen dentro de la página: la lista y, el elegido, con el visor de PDF (pdf.js, sirve en el teléfono). */
-function Origen({ archivos, id, elegido }: { archivos: { id: string; nombre: string; formato: string; estado: string; paginas: number | null }[]; id: string; elegido: string | null }) {
+const nombreDe = (ruta: string | null) => (ruta ?? '').split(/[\\/]/).pop() ?? ''
+
+/** Dónde quedó transcrito cada archivo de origen (por su nombre): en una versión del documento o en un registro. */
+function transcritoEn(versiones: VersionDoc[], registros: { id: string; titulo: string; archivo_ruta: string | null }[]) {
+  const m = new Map<string, { texto: string; href: string }>()
+  for (const v of versiones) if (v.archivo_ruta) m.set(nombreDe(v.archivo_ruta), { texto: `Transcrito en el documento · ${v.etiqueta ?? `versión ${v.numero}`}`, href: '?p=versiones' })
+  for (const r of registros) if (r.archivo_ruta) m.set(nombreDe(r.archivo_ruta), { texto: `Transcrito como registro · ${r.titulo}`, href: `?p=registros#r-${r.id}` })
+  return m
+}
+
+/** Los formatos llenos del documento, transcritos: cada uno desplegable, editable y con su archivo de origen al lado. */
+function Registros({ registros, id, editar, enlaceDe, archivos }: { registros: { id: string; titulo: string; fecha: string | null; contenido: Contenido; archivo_ruta: string | null; nota: string | null; editado_en: string | null }[]; id: string; editar: boolean; enlaceDe: (c: string) => string | null; archivos: { id: string; nombre: string; estado: string }[] }) {
+  return (
+    <div className="grid gap-3 p-5" data-registros>
+      <p className="text-[13px] text-marca-500">Los formatos llenos que trae el archivo de origen, transcritos en la plataforma. Cada corrección queda en el historial con la versión anterior.</p>
+      {registros.map((r) => {
+        const archivo = archivos.find((a) => a.nombre === nombreDe(r.archivo_ruta) && a.estado === 'disponible')
+        return (
+          <details key={r.id} id={`r-${r.id}`} className="group/reg rounded-xl border border-[var(--borde)]" open={registros.length === 1}>
+            <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 py-3 [&::-webkit-details-marker]:hidden">
+              <span className="flex items-center gap-2 font-semibold"><span aria-hidden className="text-marca-400 transition group-open/reg:rotate-90">›</span>{r.titulo}</span>
+              <span className="flex items-center gap-2 text-[12px] text-marca-500">
+                {r.fecha ? r.fecha.split('-').reverse().join('/') : ''}{r.editado_en ? ' · corregido' : ''}
+                {archivo && <Link className="underline" href={`/sistema/nucleo/documentos/${id}?p=origen&archivo=${archivo.id}`}>ver original</Link>}
+              </span>
+            </summary>
+            <div className="grid gap-5 border-t border-[var(--borde)] px-4 py-4">
+              {r.contenido.secciones.map((s, i) => {
+                const cuerpo = (
+                  <section className="grid gap-2">
+                    <h3 className="text-[14.5px] font-bold">{s.titulo}</h3>
+                    {s.bloques.length ? <Bloques bloques={s.bloques} enlaceDe={enlaceDe} /> : <p className="text-[13px] text-marca-400">(Vacío en el original.)</p>}
+                  </section>
+                )
+                return editar ? <EditorSeccion key={i} documento={id} indice={i} seccion={s} registro={r.id}>{cuerpo}</EditorSeccion> : <div key={i}>{cuerpo}</div>
+              })}
+            </div>
+          </details>
+        )
+      })}
+    </div>
+  )
+}
+
+function Origen({ archivos, id, elegido, transcritoEn }: { archivos: { id: string; nombre: string; formato: string; estado: string; paginas: number | null }[]; id: string; elegido: string | null; transcritoEn: Map<string, { texto: string; href: string }> }) {
   if (!archivos.length) return <p className="p-5 text-sm text-marca-500">Este documento no tiene archivos de origen cargados.</p>
   const ver = archivos.find((a) => a.id === elegido && a.estado === 'disponible') ?? archivos.find((a) => a.estado === 'disponible') ?? null
   return (
@@ -188,6 +233,7 @@ function Origen({ archivos, id, elegido }: { archivos: { id: string; nombre: str
               <Link href={`/sistema/nucleo/documentos/${id}?p=origen&archivo=${a.id}`} className={`grid gap-0.5 rounded-lg border px-3 py-2 text-[13px] ${ver?.id === a.id ? 'border-acento-500 bg-acento-50' : 'border-[var(--borde)] hover:bg-marca-50'}`}>
                 <span className="break-words font-medium">{a.nombre}</span>
                 <span className="text-[11.5px] text-marca-500">{a.formato.toUpperCase()}{a.paginas ? ` · ${a.paginas} pág.` : ''} · {ESTADO_ARCHIVO[a.estado]}</span>
+                <span className={`text-[11.5px] font-medium ${transcritoEn.get(a.nombre) ? 'text-[#1f7a4d]' : 'text-oro-800'}`}>{transcritoEn.get(a.nombre) ? `✓ ${transcritoEn.get(a.nombre)!.texto}` : 'Falta transcribir'}</span>
               </Link>
             ) : (
               <div className="grid gap-0.5 rounded-lg border border-dashed border-[var(--borde)] px-3 py-2 text-[13px] text-marca-500">
@@ -202,7 +248,10 @@ function Origen({ archivos, id, elegido }: { archivos: { id: string; nombre: str
         <div className="grid min-w-0 content-start gap-2">
           <div className="flex flex-wrap items-center justify-between gap-2 text-[13px]">
             <b className="break-words">{ver.nombre}</b>
-            <a className={BOTON_CABECERA} href={`/sistema/nucleo/documentos/archivo/${ver.id}/descargar`}>Descargar</a>
+            <span className="flex flex-wrap gap-2">
+              {transcritoEn.get(ver.nombre) && <Link className={BOTON_CABECERA} href={`/sistema/nucleo/documentos/${id}${transcritoEn.get(ver.nombre)!.href}`}>Ver la transcripción</Link>}
+              <a className={BOTON_CABECERA} href={`/sistema/nucleo/documentos/archivo/${ver.id}/descargar`}>Descargar</a>
+            </span>
           </div>
           <div className="overflow-hidden rounded-xl border border-[var(--borde)] bg-marca-50"><VisorPdf url={`/sistema/nucleo/documentos/archivo/${ver.id}/ver`} /></div>
         </div>

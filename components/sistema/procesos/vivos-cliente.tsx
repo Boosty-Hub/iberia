@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useMemo, useRef, useState, useTransition } from 'react'
-import { confirmarEnlace, confirmarEnlacesProceso, descartarBorrador, descartarCaracterizacion, descartarEnlace, enviarCaracterizacion, enviarDocumento, guardarCampoProceso, guardarSeccion, crearSubproceso, moverProceso, renombrarProceso } from '@/app/sistema/nucleo/procesos/acciones-vivos'
+import { confirmarEnlace, confirmarEnlacesProceso, descartarBorrador, descartarCaracterizacion, descartarEnlace, enviarCaracterizacion, enviarDocumento, guardarCampoProceso, guardarSeccion, crearSubproceso, editarRegistro, moverProceso, renombrarProceso } from '@/app/sistema/nucleo/procesos/acciones-vivos'
 import type { Bloque, IndiceBusqueda, Seccion } from '@/lib/plataforma/procesos-vivos'
 
 const sinTildes = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
@@ -172,7 +172,7 @@ export function aBloques(texto: string): Bloque[] {
 }
 
 /** Botón «Editar sección» y su editor en el sitio. Al guardar, el cambio va al borrador de quien edita. */
-export function EditorSeccion({ documento, indice, seccion, children }: { documento: string; indice: number; seccion: Seccion; children: React.ReactNode }) {
+export function EditorSeccion({ documento, indice, seccion, registro, children }: { documento: string; indice: number; seccion: Seccion; registro?: string; children: React.ReactNode }) {
   const [editando, setEditando] = useState(false)
   const [titulo, setTitulo] = useState(seccion.titulo)
   const [texto, setTexto] = useState(() => aTexto(seccion.bloques))
@@ -186,7 +186,7 @@ export function EditorSeccion({ documento, indice, seccion, children }: { docume
         <button
           type="button"
           onClick={() => setEditando(true)}
-          className="absolute right-0 top-0 rounded-md border border-[var(--borde)] bg-white px-2 py-0.5 text-[11.5px] font-medium text-marca-600 opacity-0 transition group-hover:opacity-100 focus:opacity-100"
+          className="absolute right-0 top-0 rounded-md border border-[var(--borde)] bg-white px-2 py-0.5 text-[11.5px] font-medium text-marca-700 hover:border-acento-200 hover:text-acento-700"
         >
           ✎ Editar sección
         </button>
@@ -208,16 +208,16 @@ export function EditorSeccion({ documento, indice, seccion, children }: { docume
           disabled={pendiente}
           onClick={() =>
             empezar(async () => {
-              const r = await guardarSeccion(documento, indice, titulo, aBloques(texto))
+              const r = registro ? await editarRegistro(documento, registro, indice, titulo, aBloques(texto)) : await guardarSeccion(documento, indice, titulo, aBloques(texto))
               if (r.error) setError(r.error)
               else { setEditando(false); router.refresh() }
             })
           }
           className="btn-acento h-8 px-3 text-xs"
         >
-          {pendiente ? 'Guardando…' : 'Guardar en mi borrador'}
+          {pendiente ? 'Guardando…' : registro ? 'Guardar corrección' : 'Guardar en mi borrador'}
         </button>
-        <span className="text-[11.5px] text-marca-500">La versión vigente no cambia hasta que se apruebe.</span>
+        <span className="text-[11.5px] text-marca-500">{registro ? 'La versión anterior queda en el historial.' : 'La versión vigente no cambia hasta que se apruebe.'}</span>
       </div>
     </div>
   )

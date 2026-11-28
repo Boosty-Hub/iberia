@@ -189,6 +189,7 @@ export type VersionDoc = {
   creadoPor: string | null
   creadoEn: string
   vigenteDesde: string | null
+  archivo_ruta: string | null
 }
 
 export function aContenido(j: Json | null): Contenido {
@@ -198,18 +199,20 @@ export function aContenido(j: Json | null): Contenido {
 
 export async function leerDocumentoVivo(supabase: Cliente, id: string) {
   const sgc = supabase.schema('sgc')
-  const [{ data: doc }, { data: versiones }, { data: enlaces }, { data: archivos }] = await Promise.all([
+  const [{ data: doc }, { data: versiones }, { data: enlaces }, { data: archivos }, { data: registros }] = await Promise.all([
     sgc.from('documento').select('id, codigo, titulo, tipo_yy, estado, version, fecha, proceso_ref, perimetro, datos_sensibles, alias').eq('id', id).maybeSingle(),
-    sgc.from('documento_version').select('id, numero, etiqueta, fecha, estado, contenido, origen, motivo, creado_por, creado_en, vigente_desde').eq('documento_id', id).order('numero', { ascending: false }),
+    sgc.from('documento_version').select('id, numero, etiqueta, fecha, estado, contenido, origen, motivo, creado_por, creado_en, vigente_desde, archivo_ruta').eq('documento_id', id).order('numero', { ascending: false }),
     sgc.from('documento_proceso').select('id, proceso_ref, rol, estado, confianza, razon').eq('documento_id', id).neq('estado', 'descartado'),
     sgc.from('documento_archivo').select('id, nombre, formato, estado, paginas').eq('documento_id', id).order('orden'),
+    sgc.from('documento_registro').select('id, titulo, fecha, contenido, archivo_ruta, nota, editado_en').eq('documento_id', id).order('fecha', { ascending: false, nullsFirst: false }),
   ])
   if (!doc) return null
   const vs: VersionDoc[] = (versiones ?? []).map((v) => ({
     id: v.id, numero: v.numero, etiqueta: v.etiqueta, fecha: v.fecha, estado: v.estado as VersionDoc['estado'], contenido: aContenido(v.contenido),
-    origen: v.origen, motivo: v.motivo, creadoPor: v.creado_por, creadoEn: v.creado_en, vigenteDesde: v.vigente_desde,
+    origen: v.origen, motivo: v.motivo, creadoPor: v.creado_por, creadoEn: v.creado_en, vigenteDesde: v.vigente_desde, archivo_ruta: v.archivo_ruta,
   }))
-  return { doc, versiones: vs, enlaces: enlaces ?? [], archivos: archivos ?? [] }
+  const rs = (registros ?? []).map((r) => ({ ...r, contenido: aContenido(r.contenido) }))
+  return { doc, versiones: vs, enlaces: enlaces ?? [], archivos: archivos ?? [], registros: rs }
 }
 
 /** Qué versión se lee: la vigente; si no hay, la transcripción por validar más reciente; si no, la histórica más nueva. */
