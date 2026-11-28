@@ -178,8 +178,13 @@ function Caracterizacion({ ficha }: { ficha: Ficha }) {
       </div>
     )
   }
+  const brechas = Array.isArray(ficha.brechas) ? (ficha.brechas as string[]) : []
   return (
     <div className="grid gap-4">
+      {typeof ficha.estado_hoy === 'string' && (
+        <Campo titulo="Cómo se hace hoy" iso=""><p className="max-w-[72ch] text-[14px] leading-relaxed">{ficha.estado_hoy}</p><Fuente texto={f.estado_hoy} /></Campo>
+      )}
+      {typeof ficha.dueno === 'string' && <Campo titulo="Dueño del proceso" iso="4.4.1 e)"><p className="text-[14px]">{ficha.dueno}</p><Fuente texto={f.dueno} /></Campo>}
       {CAMPOS_CARACTERIZACION.filter((c) => c.clave !== 'indicadores').map((c) => {
         if (c.clave === 'actividades') {
           if (Array.isArray(act)) return <Campo key={c.clave} titulo={c.titulo} iso={c.iso}><Valor v={act} /><Fuente texto={f[c.clave]} /></Campo>
@@ -187,7 +192,7 @@ function Caracterizacion({ ficha }: { ficha: Ficha }) {
           return (
             <Campo key={c.clave} titulo="Actividades · ciclo PHVA" iso={c.iso}>
               {fases.length ? (
-                <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="grid gap-2 sm:grid-cols-2">
                   {fases.map((k) => (
                     <div key={k} className="rounded-lg border border-[var(--borde)] p-2.5 text-[12.5px]">
                       <b className="mb-1 block capitalize">{k}</b>
@@ -202,6 +207,12 @@ function Caracterizacion({ ficha }: { ficha: Ficha }) {
         }
         return <Campo key={c.clave} titulo={c.titulo} iso={c.iso}><Valor v={ficha[c.clave]} /><Fuente texto={f[c.clave]} /></Campo>
       })}
+      {brechas.length > 0 && (
+        <section className="grid gap-1.5 rounded-xl bg-acento-50 p-3">
+          <h3 className="font-mono text-[11px] uppercase tracking-wider text-acento-700">Brechas encontradas en la revisión</h3>
+          <ul className="grid list-disc gap-1 pl-5 text-[13.5px]">{brechas.map((b, i) => <li key={i}>{b}</li>)}</ul>
+        </section>
+      )}
     </div>
   )
 }
