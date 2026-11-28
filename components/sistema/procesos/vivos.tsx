@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import {
-  activos, estadoDocumental, ETIQUETA_ESTADO_DOC, NIVELES_DOC, principales, TIPOS_DOC,
+  activos, estadoDocumental, ETIQUETA_ESTADO_DOC, nivelDe, NIVELES_DOC, principales, TIPOS_DOC,
   type Bloque, type DocEnlazado, type Mapa, type ProcesoMapa,
 } from '@/lib/plataforma/procesos-vivos'
 import { BotonesEnlace } from './vivos-cliente'
@@ -106,7 +106,7 @@ export function EscaleraDocumentos({ docs, tambien, compacto, editar, refProceso
   return (
     <div className="grid content-start gap-2.5">
       {NIVELES_DOC.map((n) => {
-        const xs = docs.filter((d) => (n.tipos as readonly string[]).includes(d.tipo ?? ''))
+        const xs = docs.filter((d) => nivelDe(d.tipo) === n.clave)
         if (!xs.length) return null
         const vis = compacto ? xs.slice(0, 6) : xs
         return (

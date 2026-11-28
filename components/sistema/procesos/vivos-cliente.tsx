@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useMemo, useRef, useState, useTransition } from 'react'
-import { confirmarEnlace, confirmarEnlacesProceso, descartarBorrador, descartarEnlace, enviarDocumento, guardarSeccion } from '@/app/sistema/nucleo/procesos/acciones-vivos'
+import { confirmarEnlace, confirmarEnlacesProceso, descartarBorrador, descartarCaracterizacion, descartarEnlace, enviarCaracterizacion, enviarDocumento, guardarCampoProceso, guardarSeccion } from '@/app/sistema/nucleo/procesos/acciones-vivos'
 import type { Bloque, IndiceBusqueda, Seccion } from '@/lib/plataforma/procesos-vivos'
 
 const sinTildes = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
@@ -259,6 +259,82 @@ export function BandaEnvio({ documento, version, tipo }: { documento: string; ve
               onClick={() => empezar(async () => { const r = await enviarDocumento(documento, version, motivo); setMsg(r); if (!r.error) { setAbierto(false); router.refresh() } })}
               className="btn-acento h-8 px-3 text-xs"
             >
+              {pendiente ? 'Enviando…' : 'Enviar'}
+            </button>
+          </span>
+        </div>
+      )}
+      {msg?.error && <p className="w-full text-xs text-acento-700">{msg.error}</p>}
+      {msg?.ok && <p className="w-full text-xs">{msg.ok}</p>}
+    </div>
+  )
+}
+
+// ── La caracterización del proceso, editada campo por campo ─────────────────
+
+/** Un campo de la caracterización con su lápiz: al guardar va al borrador del proceso (se abre solo). */
+export function EditorCampo({ refProceso, clave, titulo, inicial, ayuda, children }: { refProceso: string; clave: string; titulo: string; inicial: string; ayuda?: string; children: React.ReactNode }) {
+  const [editando, setEditando] = useState(false)
+  const [texto, setTexto] = useState(inicial)
+  const [pendiente, empezar] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
+  if (!editando) {
+    return (
+      <div className="group relative" data-campo={clave}>
+        {children}
+        <button type="button" onClick={() => setEditando(true)} className="absolute right-0 top-0 rounded-md border border-[var(--borde)] bg-white px-2 py-0.5 text-[11.5px] font-medium text-marca-600 opacity-0 transition group-hover:opacity-100 focus:opacity-100">
+          ✎ Editar
+        </button>
+      </div>
+    )
+  }
+  return (
+    <div className="grid gap-2 rounded-xl p-3 ring-2 ring-acento-200" data-editor-campo={clave}>
+      <span className="font-mono text-[11px] uppercase tracking-wider text-marca-500">{titulo}</span>
+      <textarea value={texto} onChange={(e) => setTexto(e.target.value)} rows={Math.min(16, Math.max(3, texto.split('\n').length + 1))} className="campo py-2 text-sm leading-relaxed" aria-label={titulo} />
+      {ayuda && <p className="text-[11.5px] text-marca-500">{ayuda}</p>}
+      {error && <p className="text-xs text-acento-700">{error}</p>}
+      <div className="flex flex-wrap items-center gap-2">
+        <button type="button" onClick={() => { setEditando(false); setError(null); setTexto(inicial) }} className="btn-neutro h-8 px-3 text-xs">Cancelar</button>
+        <button
+          type="button"
+          disabled={pendiente}
+          onClick={() => empezar(async () => { const r = await guardarCampoProceso(refProceso, clave, texto); if (r.error) setError(r.error); else { setEditando(false); router.refresh() } })}
+          className="btn-acento h-8 px-3 text-xs"
+        >
+          {pendiente ? 'Guardando…' : 'Guardar en el borrador'}
+        </button>
+        <span className="text-[11.5px] text-marca-500">La caracterización vigente no cambia hasta que se apruebe.</span>
+      </div>
+    </div>
+  )
+}
+
+/** El borrador de la caracterización: enviarlo a revisión (con motivo) o descartarlo. */
+export function BandaCaracterizacion({ refProceso, version, nota, puedeDescartar }: { refProceso: string; version: number; nota: string | null; puedeDescartar: boolean }) {
+  const [abierto, setAbierto] = useState(false)
+  const [motivo, setMotivo] = useState(nota ?? '')
+  const [pendiente, empezar] = useTransition()
+  const [msg, setMsg] = useState<{ error?: string; ok?: string } | null>(null)
+  const router = useRouter()
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-oro-50 px-4 py-3 text-[13px] text-oro-900" data-propuesta-caracterizacion>
+      <span><b>Borrador de la caracterización (v{version}).</b> {nota ?? ''} Pasa el mouse sobre un campo para editarlo. Nadie más lo ve como vigente hasta que se apruebe.</span>
+      {!abierto ? (
+        <span className="flex gap-2">
+          {puedeDescartar && (
+            <button type="button" disabled={pendiente} onClick={() => empezar(async () => { const r = await descartarCaracterizacion(refProceso); setMsg(r); if (!r.error) router.refresh() })} className="btn-neutro h-8 px-3 text-xs">Descartar</button>
+          )}
+          <button type="button" onClick={() => setAbierto(true)} className="btn-acento h-8 px-3 text-xs">Enviar a revisión</button>
+        </span>
+      ) : (
+        <div className="grid w-full gap-2">
+          <label className="text-xs font-medium" htmlFor="motivo-caracterizacion">Motivo del cambio</label>
+          <textarea id="motivo-caracterizacion" value={motivo} onChange={(e) => setMotivo(e.target.value)} rows={2} className="campo py-2 text-sm text-marca-800" />
+          <span className="flex gap-2">
+            <button type="button" onClick={() => setAbierto(false)} className="btn-neutro h-8 px-3 text-xs">Cancelar</button>
+            <button type="button" disabled={pendiente} onClick={() => empezar(async () => { const r = await enviarCaracterizacion(refProceso, motivo); setMsg(r); if (!r.error) { setAbierto(false); router.refresh() } })} className="btn-acento h-8 px-3 text-xs">
               {pendiente ? 'Enviando…' : 'Enviar'}
             </button>
           </span>

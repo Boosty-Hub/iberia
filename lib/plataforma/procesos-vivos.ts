@@ -28,7 +28,7 @@ export const NIVELES_DOC = [
   { clave: 'hace', nombre: 'Instrucciones y procedimientos operacionales', nota: 'cómo se hace', tipos: ['31', '23', '35'] },
   { clave: 'controla', nombre: 'Métodos de análisis y especificaciones', nota: 'cómo se controla', tipos: ['33', '32'] },
   { clave: 'queda', nombre: 'Formatos y registros', nota: 'dónde queda', tipos: ['40'] },
-  { clave: 'otros', nombre: 'Caracterizaciones, diagramas y organigramas', nota: 'antecedentes', tipos: ['11', '14', '34', '36'] },
+  { clave: 'otros', nombre: 'Caracterizaciones, presentaciones y otros', nota: 'antecedentes', tipos: ['11', '14', '34', '36'] },
 ] as const
 
 export const ETIQUETA_ESTADO_DOC: Record<string, string> = {
@@ -254,3 +254,8 @@ export const CAMPOS_CARACTERIZACION = [
   { clave: 'evaluacion', titulo: 'Cómo se evalúa', iso: '4.4.1 g)' },
   { clave: 'mejora', titulo: 'Cómo se mejora', iso: '4.4.1 h)' },
 ] as const
+
+/** El escalón de un documento por su tipo. Lo que no tiene tipo (presentaciones, minutas sin código…) va a «otros»: si no, se contaba y no se veía. */
+export function nivelDe(tipo: string | null): (typeof NIVELES_DOC)[number]['clave'] {
+  return NIVELES_DOC.find((n) => (n.tipos as readonly string[]).includes(tipo ?? ''))?.clave ?? 'otros'
+}

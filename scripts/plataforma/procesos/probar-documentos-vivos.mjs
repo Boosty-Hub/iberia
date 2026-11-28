@@ -42,6 +42,23 @@ await p.locator('[data-proceso="1.1.1"] a').first().click()
 await p.waitForSelector('[data-proceso-pagina="1.1.1"]')
 ok(await p.locator('[data-propuesta-caracterizacion]').count() === 1, 'el proceso 1.1.1 muestra la caracterización propuesta')
 ok((await p.locator('main').innerText()).includes('ISO 4.4.1'), 'la caracterización trae los campos de la cláusula 4.4.1')
+// La caracterización se edita en la misma página: un campo al borrador.
+const { data: p111 } = await sgc.from('proceso').select('ref').eq('codigo_informe', '1.1.1').is('escenario_id', null).eq('estado', 'vigente').maybeSingle()
+const refProc = p111?.ref
+const { data: fichaAntes } = await sgc.from('proceso').select('id, ficha').eq('ref', refProc).is('escenario_id', null).eq('estado', 'borrador').maybeSingle()
+await p.locator('[data-campo="recursos"]').hover()
+await p.locator('[data-campo="recursos"] > button').click()
+const campo = p.getByLabel('Recursos', { exact: true })
+await campo.fill(`${await campo.inputValue()}
+Recurso agregado por la prueba automática`)
+await p.getByRole('button', { name: 'Guardar en el borrador' }).click()
+await p.waitForSelector('[data-editor-campo]', { state: 'detached', timeout: 30000 })
+await p.waitForSelector('li:has-text("Recurso agregado por la prueba automática")', { timeout: 30000 })
+ok(true, 'un campo de la caracterización se guarda en el borrador desde la página')
+const { data: bp } = await sgc.from('proceso').select('ficha').eq('ref', refProc).is('escenario_id', null).eq('estado', 'borrador').maybeSingle()
+ok((bp?.ficha?.recursos ?? []).includes('Recurso agregado por la prueba automática'), 'la base guardó el cambio en el borrador del proceso')
+// Deja la propuesta como estaba (la caracterización cargada de la revisión del macroproceso).
+if (fichaAntes) { const { error: er } = await sgc.from('proceso').update({ ficha: fichaAntes.ficha }).eq('id', fichaAntes.id); if (er) console.warn('no se pudo restaurar:', er.message) }
 
 // 3 · Documento: editar una sección → borrador
 await p.goto(`${BASE}/sistema/nucleo/documentos/${doc.id}`, { waitUntil: 'networkidle' })

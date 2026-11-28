@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/server'
 import { BOTON_CABECERA, CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
 import { FichaObjeto } from '@/components/sistema/ui/ficha-objeto'
 import { Chip, EscaleraDocumentos } from '@/components/sistema/procesos/vivos'
-import { BotonConfirmarTodos } from '@/components/sistema/procesos/vivos-cliente'
+import { BandaCaracterizacion, BotonConfirmarTodos, EditorCampo } from '@/components/sistema/procesos/vivos-cliente'
 
 export const metadata: Metadata = { title: 'Proceso · Procesos' }
 
@@ -25,6 +25,7 @@ const PESTANAS_PROCESO = [
   { clave: 'documentos', etiqueta: 'Documentos' },
   { clave: 'indicadores', etiqueta: 'Indicadores' },
   { clave: 'versiones', etiqueta: 'Versiones' },
+  { clave: 'aprobaciones', etiqueta: 'Aprobaciones' },
 ] as const
 
 /**
@@ -70,6 +71,7 @@ export default async function ProcesoPage({ params, searchParams }: PageProps<'/
         migas={migas.map((m) => (m.href ? m : { etiqueta: m.etiqueta }))}
         acciones={
           <>
+            {editar && <Link href={`/sistema/nucleo/procesos/${ref}?vista=ficha`} className={BOTON_CABECERA} title="Renombrar, mover o crear un subproceso">Mover o renombrar</Link>}
             <Link href={`/sistema/nucleo/procesos/${ref}/imprimir`} className={BOTON_CABECERA}>Imprimir</Link>
             <Link href="/sistema/nucleo/procesos/herramientas" className={BOTON_CABECERA}>Herramientas del SGC</Link>
           </>
@@ -82,7 +84,6 @@ export default async function ProcesoPage({ params, searchParams }: PageProps<'/
           </span>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="text-xl font-bold">{p.nombre}</h1>
-            {editar && <Link href={`/sistema/nucleo/procesos/${ref}?vista=ficha`} className={BOTON_CABECERA}>Proponer cambio</Link>}
           </div>
           <div className="flex flex-wrap gap-1.5">
             <Chip tono={e.tono}>{e.texto}</Chip>
@@ -100,20 +101,19 @@ export default async function ProcesoPage({ params, searchParams }: PageProps<'/
               </Link>
             )
           })}
-          <Link href={`/sistema/nucleo/procesos/${ref}?vista=ficha`} className="whitespace-nowrap border-b-2 border-transparent px-3 py-2.5 text-[13.5px] text-marca-500 hover:text-marca-800">Ficha completa y aprobaciones</Link>
         </nav>
 
         {pest === 'caracterizacion' && (
           <div className="grid gap-5 p-5 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
             <div className="grid content-start gap-4">
-              {propuesta && (
-                <div className="rounded-xl bg-oro-50 px-4 py-3 text-[13px] text-oro-900" data-propuesta-caracterizacion>
-                  <b>Caracterización propuesta (v{propuesta.version}).</b> {propuesta.nota ?? 'Armada a partir de los documentos y del levantamiento.'}{' '}
-                  {propuesta.estado === 'borrador' ? 'Falta enviarla a revisión: la aprueban el dueño del proceso y Gestión de la Calidad.' : 'Está en revisión.'}
-                  {editar && propuesta.estado === 'borrador' && <> <Link className="font-semibold underline" href={`/sistema/nucleo/procesos/${ref}?vista=ficha`}>Revisar y enviar</Link></>}
-                </div>
+              {propuesta?.estado === 'borrador' && editar && (
+                <BandaCaracterizacion refProceso={ref} version={propuesta.version} nota={propuesta.nota} puedeDescartar={puede(sesion, 'sistema:procesos', 'eliminar')} />
               )}
-              <Caracterizacion ficha={ficha} />
+              {propuesta?.estado === 'en_revision' && (
+                <div className="rounded-xl bg-[#e8f0fa] px-4 py-3 text-[13px] text-[#2c5d9c]"><b>Versión {propuesta.version} en revisión.</b> {propuesta.nota ?? ''} Se decide en la Bandeja de quien aprueba.</div>
+              )}
+              {!propuesta && editar && <p className="text-[12.5px] text-marca-500">Pasa el mouse sobre un campo para editarlo: el cambio abre un borrador que se envía a revisión.</p>}
+              <Caracterizacion ficha={ficha} refProceso={ref} editable={editar && propuesta?.estado !== 'en_revision'} />
             </div>
             <div className="grid content-start gap-2">
               {sugeridos > 0 && editar && (
@@ -137,7 +137,8 @@ export default async function ProcesoPage({ params, searchParams }: PageProps<'/
             <EscaleraDocumentos docs={docs} tambien={tambien} editar={editar} refProceso={ref} />
           </div>
         )}
-        {pest === 'indicadores' && <Indicadores ficha={ficha} />}
+        {pest === 'indicadores' && <Indicadores ficha={ficha} refProceso={ref} editable={editar && propuesta?.estado !== 'en_revision'} />}
+        {pest === 'aprobaciones' && <AprobacionesProceso ids={(versiones ?? []).map((v) => v.id)} />}
         {pest === 'versiones' && (
           <div className="grid gap-2 p-5">
             {(versiones ?? []).map((v) => (
@@ -166,11 +167,15 @@ function Valor({ v }: { v: unknown }): ReactNode {
 }
 
 /** La caracterización con los campos de la cláusula 4.4.1 de ISO 9001; cada campo dice de dónde salió. */
-function Caracterizacion({ ficha }: { ficha: Ficha }) {
+function Caracterizacion({ ficha, refProceso, editable }: { ficha: Ficha; refProceso: string; editable: boolean }) {
+  const Campo = ({ titulo, iso, clave, inicial, ayuda, children }: { titulo: string; iso: string; clave?: string; inicial?: string; ayuda?: string; children: ReactNode }) => {
+    const cuerpo = <CampoVista titulo={titulo} iso={iso}>{children}</CampoVista>
+    return editable && clave ? <EditorCampo refProceso={refProceso} clave={clave} titulo={titulo} inicial={inicial ?? ''} ayuda={ayuda}>{cuerpo}</EditorCampo> : cuerpo
+  }
   const f = ficha.fuentes ?? {}
   const act = ficha.actividades as Record<string, string[]> | string[] | undefined
   const vacia = !Object.keys(ficha).filter((k) => k !== 'fuentes' && k !== 'origen').length
-  if (vacia) {
+  if (vacia && !editable) {
     return (
       <div className="grid justify-items-center gap-2 rounded-xl border border-dashed border-[var(--borde)] p-8 text-center text-sm text-marca-500">
         <b className="text-marca-800">Este proceso todavía no tiene caracterización escrita.</b>
@@ -182,22 +187,21 @@ function Caracterizacion({ ficha }: { ficha: Ficha }) {
   return (
     <div className="grid gap-4">
       {typeof ficha.estado_hoy === 'string' && (
-        <Campo titulo="Cómo se hace hoy" iso=""><p className="max-w-[72ch] text-[14px] leading-relaxed">{ficha.estado_hoy}</p><Fuente texto={f.estado_hoy} /></Campo>
+        <Campo titulo="Cómo se hace hoy" iso="" clave="estado_hoy" inicial={ficha.estado_hoy as string}><p className="max-w-[72ch] text-[14px] leading-relaxed">{ficha.estado_hoy}</p><Fuente texto={f.estado_hoy} /></Campo>
       )}
-      {typeof ficha.dueno === 'string' && <Campo titulo="Dueño del proceso" iso="4.4.1 e)"><p className="text-[14px]">{ficha.dueno}</p><Fuente texto={f.dueno} /></Campo>}
+      {(typeof ficha.dueno === 'string' || editable) && <Campo titulo="Dueño del proceso" iso="4.4.1 e)" clave="dueno" inicial={(ficha.dueno as string) ?? ''}><Valor v={ficha.dueno} /><Fuente texto={f.dueno} /></Campo>}
       {CAMPOS_CARACTERIZACION.filter((c) => c.clave !== 'indicadores').map((c) => {
         if (c.clave === 'actividades') {
-          if (Array.isArray(act)) return <Campo key={c.clave} titulo={c.titulo} iso={c.iso}><Valor v={act} /><Fuente texto={f[c.clave]} /></Campo>
-          const fases = act ? (['planificar', 'hacer', 'verificar', 'actuar'] as const) : []
+          if (Array.isArray(act)) return <Campo key={c.clave} titulo={c.titulo} iso={c.iso} clave="actividades.hacer" inicial={act.join('\n')} ayuda="Un renglón por actividad."><Valor v={act} /><Fuente texto={f[c.clave]} /></Campo>
+          const fases = act || editable ? (['planificar', 'hacer', 'verificar', 'actuar'] as const) : []
           return (
             <Campo key={c.clave} titulo="Actividades · ciclo PHVA" iso={c.iso}>
               {fases.length ? (
                 <div className="grid gap-2 sm:grid-cols-2">
                   {fases.map((k) => (
-                    <div key={k} className="rounded-lg border border-[var(--borde)] p-2.5 text-[12.5px]">
-                      <b className="mb-1 block capitalize">{k}</b>
-                      <Valor v={act?.[k]} />
-                    </div>
+                    <Campo key={k} titulo={k[0].toUpperCase() + k.slice(1)} iso="" clave={`actividades.${k}`} inicial={(act?.[k] ?? []).join('\n')} ayuda="Un renglón por actividad.">
+                      <div className="rounded-lg border border-[var(--borde)] p-2.5 text-[12.5px]"><Valor v={act?.[k]} /></div>
+                    </Campo>
                   ))}
                 </div>
               ) : <Valor v={null} />}
@@ -205,7 +209,10 @@ function Caracterizacion({ ficha }: { ficha: Ficha }) {
             </Campo>
           )
         }
-        return <Campo key={c.clave} titulo={c.titulo} iso={c.iso}><Valor v={ficha[c.clave]} /><Fuente texto={f[c.clave]} /></Campo>
+        const v = ficha[c.clave]
+        const inicial = Array.isArray(v) ? v.map((x) => (typeof x === 'string' ? x : JSON.stringify(x))).join('\n') : typeof v === 'string' ? v : ''
+        const lista = !['objetivo', 'alcance', 'evaluacion', 'mejora'].includes(c.clave)
+        return <Campo key={c.clave} titulo={c.titulo} iso={c.iso} clave={c.clave} inicial={inicial} ayuda={lista ? 'Un renglón por elemento.' : undefined}><Valor v={v} /><Fuente texto={f[c.clave]} /></Campo>
       })}
       {brechas.length > 0 && (
         <section className="grid gap-1.5 rounded-xl bg-acento-50 p-3">
@@ -217,7 +224,7 @@ function Caracterizacion({ ficha }: { ficha: Ficha }) {
   )
 }
 
-function Campo({ titulo, iso, children }: { titulo: string; iso: string; children: ReactNode }) {
+function CampoVista({ titulo, iso, children }: { titulo: string; iso: string; children: ReactNode }) {
   return (
     <section className="grid gap-1.5">
       <h3 className="flex items-baseline gap-2 font-mono text-[11px] uppercase tracking-wider text-marca-500">{titulo}{iso && <span className="normal-case tracking-normal text-marca-400">ISO {iso}</span>}</h3>
@@ -226,8 +233,22 @@ function Campo({ titulo, iso, children }: { titulo: string; iso: string; childre
   )
 }
 
-function Indicadores({ ficha }: { ficha: Ficha }) {
+function Indicadores({ ficha, refProceso, editable }: { ficha: Ficha; refProceso: string; editable: boolean }) {
   const xs = ficha.indicadores ?? []
+  const inicial = xs.map((i) => [i.nombre, i.formula ?? '', i.meta ?? '', i.frecuencia ?? ''].join(' | ')).join('\n')
+  if (editable) {
+    return (
+      <div className="p-5">
+        <EditorCampo refProceso={refProceso} clave="indicadores" titulo="Indicadores" inicial={inicial} ayuda="Un indicador por renglón: nombre | fórmula | meta | frecuencia.">
+          <TablaIndicadores xs={xs} />
+        </EditorCampo>
+      </div>
+    )
+  }
+  return <TablaIndicadores xs={xs} />
+}
+
+function TablaIndicadores({ xs }: { xs: NonNullable<Ficha['indicadores']> }) {
   if (!xs.length) return <p className="p-5 text-sm text-marca-500">Sin indicadores definidos. Se definen con el dueño del proceso: fórmula, meta y frecuencia.</p>
   return (
     <div className="overflow-x-auto p-5">
@@ -241,7 +262,34 @@ function Indicadores({ ficha }: { ficha: Ficha }) {
   )
 }
 
-/** La ficha de siempre (Datos, PHVA, Ciclo, Relaciones, Línea de tiempo, Aprobaciones…): aquí se edita y se envía. */
+type PasoFlujo = { orden: number; nombre: string; decision: string; comentario: string | null; decidido_en: string | null }
+
+/** Las aprobaciones de las versiones de la caracterización. */
+async function AprobacionesProceso({ ids }: { ids: string[] }) {
+  const supabase = await createClient()
+  const { data } = ids.length
+    ? await supabase.schema('flujo').from('solicitud').select('id, titulo, estado, creado_en, paso(orden, nombre, decision, comentario, decidido_en)').eq('tipo_objeto', 'proceso').in('objeto_id', ids).order('creado_en', { ascending: false })
+    : { data: [] }
+  if (!data?.length) return <p className="p-5 text-sm text-marca-500">Sin aprobaciones todavía. Cada versión de la caracterización que se envía queda registrada aquí con sus firmas.</p>
+  const ESTADO: Record<string, string> = { en_curso: 'En curso', aprobada: 'Aprobada', rechazada: 'Rechazada', devuelta: 'Devuelta', cancelada: 'Cancelada' }
+  return (
+    <div className="grid gap-3 p-5">
+      {data.map((s) => (
+        <div key={s.id} className="grid gap-2 rounded-xl border border-[var(--borde)] p-4 text-[13px]">
+          <div className="flex flex-wrap items-center justify-between gap-2"><b>{s.titulo}</b><Chip tono={s.estado === 'aprobada' ? 'ok' : s.estado === 'en_curso' ? 'sugerido' : 'sin'}>{ESTADO[s.estado] ?? s.estado}</Chip></div>
+          <ol className="grid gap-1">
+            {[...((s as unknown as { paso: PasoFlujo[] }).paso ?? [])].sort((a, b) => a.orden - b.orden).map((x) => (
+              <li key={x.orden}>{x.orden} · {x.nombre} <span className="text-marca-500">· {x.decision}{x.decidido_en ? ` el ${x.decidido_en.slice(0, 10).split('-').reverse().join('/')}` : ''}</span>{x.comentario ? <span className="text-marca-500"> «{x.comentario}»</span> : null}</li>
+            ))}
+          </ol>
+          {s.estado === 'en_curso' && <Link className="underline" href="/sistema/bandeja">Se decide en la Bandeja de quien aprueba</Link>}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/** La ficha de siempre: queda solo para mover, renombrar o crear subprocesos (Herramientas, quien edita). */
 async function FichaCompleta({ sesion, ref_ }: { sesion: Awaited<ReturnType<typeof requerirPermiso>>; ref_: string }) {
   const ficha = await fichaProceso(sesion, ref_)
   if (!ficha) notFound()

@@ -97,3 +97,81 @@ export async function enviarDocumento(documento: string, version: string, motivo
   revalidatePath('/sistema/bandeja')
   return { ok: 'Enviado a revisión: le llega al dueño del proceso en su bandeja.' }
 }
+
+// ── La caracterización del proceso, editada en su página (28-nov-2026) ──────
+
+const CAMPOS_TEXTO = new Set(['objetivo', 'alcance', 'evaluacion', 'mejora', 'estado_hoy', 'dueno'])
+const CAMPOS_LISTA = new Set(['proveedores', 'entradas', 'salidas', 'clientes', 'recursos', 'responsabilidades', 'riesgos', 'oportunidades', 'criterios', 'brechas'])
+const FASES = new Set(['planificar', 'hacer', 'verificar', 'actuar'])
+
+/** El borrador abierto del proceso, o uno nuevo desde la vigente (`sgc.nuevo_borrador`). */
+async function borradorProceso(ref: string) {
+  const supabase = await createClient()
+  const sgc = supabase.schema('sgc')
+  const { data: id, error } = await sgc.rpc('nuevo_borrador', { p_ref: ref })
+  if (error || !id) return { error: mensaje(error) }
+  const { data } = await sgc.from('proceso').select('id, ficha, estado, version').eq('id', id as string).maybeSingle()
+  if (!data) return { error: 'No se encontró el borrador.' }
+  if (data.estado !== 'borrador') return { error: 'Este proceso tiene una versión en revisión: espera la decisión antes de cambiarlo.' }
+  return { supabase, b: data }
+}
+
+/** Guarda un campo de la caracterización en el borrador. Listas: un renglón por elemento. Indicadores: «nombre | fórmula | meta | frecuencia». */
+export async function guardarCampoProceso(ref: string, clave: string, texto: string): Promise<Resultado> {
+  const sesion = await requerirPermiso('sistema:procesos')
+  if (!puede(sesion, 'sistema:procesos', 'editar')) return { error: 'No tienes permiso para editar procesos.' }
+  if (!UUID.test(ref)) return { error: 'Proceso no válido.' }
+  if (texto.length > 20_000) return { error: 'El texto es demasiado largo.' }
+  const r = await borradorProceso(ref)
+  if ('error' in r) return { error: r.error }
+  const ficha = { ...((r.b.ficha ?? {}) as Record<string, unknown>) }
+  const lineas = texto.replace(/\r/g, '').split('\n').map((l) => l.replace(/^\s*[-•·]\s*/, '').trim()).filter(Boolean)
+  const [campo, sub] = clave.split('.')
+  if (CAMPOS_TEXTO.has(clave)) ficha[clave] = texto.trim() || null
+  else if (CAMPOS_LISTA.has(clave)) ficha[clave] = lineas.length ? lineas : null
+  else if (campo === 'actividades' && FASES.has(sub)) {
+    const act = (ficha.actividades && !Array.isArray(ficha.actividades) ? { ...(ficha.actividades as Record<string, unknown>) } : {}) as Record<string, string[]>
+    act[sub] = lineas
+    ficha.actividades = act
+  } else if (clave === 'indicadores') {
+    ficha.indicadores = lineas.map((l) => {
+      const [nombre, formula, meta, frecuencia] = l.split('|').map((x) => x.trim() || null)
+      return { nombre, formula, meta, frecuencia }
+    })
+  } else return { error: 'Ese campo no se edita aquí.' }
+  const fuentes = { ...((ficha.fuentes ?? {}) as Record<string, string>) }
+  fuentes[campo] = `Editado en la plataforma por ${sesion.perfil.nombre_completo ?? sesion.email} el ${new Date().toISOString().slice(0, 10).split('-').reverse().join('/')}`
+  ficha.fuentes = fuentes
+  const { error } = await r.supabase.schema('sgc').from('proceso').update({ ficha: ficha as Json }).eq('id', r.b.id).eq('estado', 'borrador')
+  if (error) return { error: mensaje(error) }
+  revalidatePath(`/sistema/nucleo/procesos/${ref}`)
+  return { ok: 'Guardado en el borrador.' }
+}
+
+/** Envía el borrador de la caracterización a la ruta de aprobación de los procesos. */
+export async function enviarCaracterizacion(ref: string, motivo: string): Promise<Resultado> {
+  const sesion = await requerirPermiso('sistema:procesos')
+  if (!puede(sesion, 'sistema:procesos', 'editar')) return { error: 'No tienes permiso para editar procesos.' }
+  if (!UUID.test(ref)) return { error: 'Proceso no válido.' }
+  const supabase = await createClient()
+  const sgc = supabase.schema('sgc')
+  const { data: b } = await sgc.from('proceso').select('id, version').eq('ref', ref).is('escenario_id', null).eq('estado', 'borrador').maybeSingle()
+  if (!b) return { error: 'No hay un borrador abierto.' }
+  if (motivo.trim()) await sgc.from('proceso').update({ nota: motivo.trim().slice(0, 1000) }).eq('id', b.id).eq('estado', 'borrador')
+  const { error } = await sgc.rpc('enviar_proceso', { p_id: b.id })
+  if (error) return { error: mensaje(error) }
+  revalidatePath(`/sistema/nucleo/procesos/${ref}`)
+  return { ok: `Versión ${b.version} enviada a revisión: le llega a quien aprueba en su bandeja.` }
+}
+
+export async function descartarCaracterizacion(ref: string): Promise<Resultado> {
+  const sesion = await requerirPermiso('sistema:procesos')
+  if (!puede(sesion, 'sistema:procesos', 'eliminar')) return { error: 'Descartar un borrador pide el permiso de eliminar procesos.' }
+  if (!UUID.test(ref)) return { error: 'Proceso no válido.' }
+  const supabase = await createClient()
+  const { error, count } = await supabase.schema('sgc').from('proceso').delete({ count: 'exact' }).eq('ref', ref).is('escenario_id', null).eq('estado', 'borrador')
+  if (error) return { error: mensaje(error) }
+  if (!count) return { error: 'No hay un borrador que descartar.' }
+  revalidatePath(`/sistema/nucleo/procesos/${ref}`)
+  return { ok: 'Borrador descartado. Rige la versión vigente.' }
+}
