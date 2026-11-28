@@ -23,7 +23,7 @@ export function Chip({ tono = 'gris', children }: { tono?: string; children: Rea
 
 export function ChipEstadoDoc({ d }: { d: { estado: string; version: string | null } }) {
   const tono = d.estado === 'vigente' ? 'ok' : d.estado === 'borrador' ? 'borrador' : 'gris'
-  return <Chip tono={tono}>{ETIQUETA_ESTADO_DOC[d.estado] ?? d.estado}{d.estado === 'vigente' && d.version && /^d/.test(d.version) ? ` · v${d.version}` : ''}</Chip>
+  return <Chip tono={tono}>{ETIQUETA_ESTADO_DOC[d.estado] ?? d.estado}{d.estado === 'vigente' && d.version && /^[0-9]/.test(d.version) ? ` · v${d.version}` : ''}</Chip>
 }
 
 /** Un macroproceso en el mapa: cuántos procesos tienen documentos (confirmados en verde, sugeridos en ámbar). */
