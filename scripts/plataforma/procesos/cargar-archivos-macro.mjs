@@ -44,7 +44,9 @@ for (const f of (await readdir(carpeta)).filter((x) => x.endsWith('.json')).sort
   }
   // Sin id (documento dado de alta por la revisión): se busca por el archivo de origen entre los archivos del documento.
   if (!t.documento_id) {
-    const { data: candidatos } = await sgc.from('documento').select('id, codigo, titulo').contains('archivos', [t.archivo])
+    // Por el título de su documento; si no, por la ruta (en el literal de arreglo de PostgREST la barra invertida va doble).
+    let { data: candidatos } = t.titulo_documento ? await sgc.from('documento').select('id, codigo, titulo').eq('titulo', t.titulo_documento) : { data: [] }
+    if (!candidatos?.length) ({ data: candidatos } = await sgc.from('documento').select('id, codigo, titulo').contains('archivos', [t.archivo.split(String.fromCharCode(92)).join(String.fromCharCode(92, 92))]))
     const c = (candidatos ?? []).find((x) => !t.codigo || x.codigo === t.codigo) ?? candidatos?.[0]
     if (!c) { console.warn(`Sin documento para ${t.archivo}`); continue }
     t.documento_id = c.id

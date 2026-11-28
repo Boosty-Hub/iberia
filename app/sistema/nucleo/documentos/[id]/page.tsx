@@ -109,6 +109,11 @@ export default async function DocumentoPage({ params, searchParams }: PageProps<
                   )
                   return editable ? <EditorSeccion key={`${lectura.id}-${i}`} documento={id} indice={i} seccion={s}>{cuerpo}</EditorSeccion> : <div key={i}>{cuerpo}</div>
                 })
+              ) : datos.registros.length ? (
+                <div className="rounded-xl border border-[var(--borde)] bg-marca-50 px-4 py-3 text-[13px] text-marca-600">
+                  Este documento no tiene un texto propio: lo que trae son <b>{datos.registros.length} registros llenos</b>, transcritos en la plataforma.{' '}
+                  <Link className="font-semibold underline" href={`/sistema/nucleo/documentos/${id}?p=registros`}>Ver los registros</Link>
+                </div>
               ) : (
                 <>
                   <div className="rounded-xl border border-[var(--borde)] bg-marca-50 px-4 py-3 text-[13px] text-marca-600">

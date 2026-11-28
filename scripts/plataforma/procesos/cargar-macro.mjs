@@ -112,7 +112,17 @@ for (const [i, d] of documentos.entries()) {
     if (revisar) continue
     const { data: ex } = await sgc.from('documento_proceso').select('id, proceso_ref, rol, estado').eq('documento_id', id)
     const mismo = ex?.find((e) => e.proceso_ref === p.ref)
-    if (mismo) continue
+    if (mismo) {
+      // Ya estaba como «también» y la revisión lo hace principal: se cambian los papeles (si nadie confirmó el principal).
+      if (t.rol === 'principal' && mismo.rol === 'tambien') {
+        const prin = ex?.find((e) => e.rol === 'principal' && e.estado !== 'descartado')
+        if (!prin || prin.estado === 'sugerido') {
+          if (prin) await sgc.from('documento_proceso').update({ rol: 'tambien' }).eq('id', prin.id)
+          await sgc.from('documento_proceso').update({ rol: 'principal', origen: ORIGEN, razon: `${NOTA}: ${(d.en_inventario?.nota_inventario ?? d.nota ?? '').slice(0, 400)}` }).eq('id', mismo.id)
+        }
+      }
+      continue
+    }
     if (t.rol === 'principal') {
       const prin = ex?.find((e) => e.rol === 'principal' && e.estado !== 'descartado')
       if (prin && prin.estado === 'sugerido') {
