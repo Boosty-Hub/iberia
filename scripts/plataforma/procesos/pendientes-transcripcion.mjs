@@ -17,12 +17,19 @@ const { data: procs } = await sgc.from('proceso').select('ref, codigo_informe').
 const refs = procs.filter((p) => p.codigo_informe === macro || (p.codigo_informe ?? '').startsWith(`${macro}.`)).map((p) => p.ref)
 const { data: en } = await sgc.from('documento_proceso').select('documento_id').in('proceso_ref', refs).neq('estado', 'descartado')
 const ids = [...new Set(en.map((e) => e.documento_id))]
-const [{ data: docs }, { data: vs }, { data: rs }, { data: as }] = await Promise.all([
-  sgc.from('documento').select('id, codigo, titulo, tipo_yy, archivos').in('id', ids),
-  sgc.from('documento_version').select('documento_id, archivo_ruta').in('documento_id', ids),
-  sgc.from('documento_registro').select('documento_id, archivo_ruta').in('documento_id', ids),
-  sgc.from('documento_archivo').select('documento_id, nombre, transcripcion').in('documento_id', ids),
-])
+// Por tandas: con cientos de ids la dirección de la consulta pasa del largo que acepta PostgREST.
+const docs = [], vs = [], rs = [], as = []
+for (let i = 0; i < ids.length; i += 150) {
+  const t = ids.slice(i, i + 150)
+  const r = await Promise.all([
+    sgc.from('documento').select('id, codigo, titulo, tipo_yy, archivos').in('id', t),
+    sgc.from('documento_version').select('documento_id, archivo_ruta').in('documento_id', t),
+    sgc.from('documento_registro').select('documento_id, archivo_ruta').in('documento_id', t),
+    sgc.from('documento_archivo').select('documento_id, nombre, transcripcion').in('documento_id', t),
+  ])
+  for (const x of r) if (x.error) throw x.error
+  docs.push(...r[0].data); vs.push(...r[1].data); rs.push(...r[2].data); as.push(...r[3].data)
+}
 const barra = String.fromCharCode(92)
 const nombre = (r) => r.split(barra).pop().split('/').pop()
 const lista = []

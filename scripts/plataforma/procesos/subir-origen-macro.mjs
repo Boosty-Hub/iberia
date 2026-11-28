@@ -36,10 +36,12 @@ const { data: procs } = await db.schema('sgc').from('proceso').select('ref, codi
 const refs = procs.filter((p) => p.codigo_informe === macro || (p.codigo_informe ?? '').startsWith(`${macro}.`)).map((p) => p.ref)
 const { data: enlaces } = await db.schema('sgc').from('documento_proceso').select('documento_id').in('proceso_ref', refs).neq('estado', 'descartado')
 const ids = [...new Set(enlaces.map((e) => e.documento_id))].filter((id) => !altas.some((a) => a.id === id))
-const { data: inventario } = ids.length ? await db.schema('sgc').from('documento').select('id, codigo, titulo, archivos, datos_sensibles').in('id', ids) : { data: [] }
+// Por tandas: con cientos de ids la dirección de la consulta pasa del largo que acepta PostgREST.
+const enTandas = async (xs, f) => { const out = []; for (let i = 0; i < xs.length; i += 150) { const { data, error: e } = await f(xs.slice(i, i + 150)); if (e) throw e; out.push(...data) } return out }
+const inventario = await enTandas(ids, (t) => db.schema('sgc').from('documento').select('id, codigo, titulo, archivos, datos_sensibles').in('id', t))
 const docs = [...altas, ...inventario]
 // Lo ya disponible no se vuelve a subir; lo que la carga grande ya convirtió (manifiesto + pdf-final) se reusa.
-const { data: hechos } = await db.schema('sgc').from('documento_archivo').select('documento_id, huella, estado').in('documento_id', docs.map((d) => d.id))
+const hechos = await enTandas(docs.map((d) => d.id), (t) => db.schema('sgc').from('documento_archivo').select('documento_id, huella, estado').in('documento_id', t))
 const yaDisponible = new Set((hechos ?? []).filter((h) => h.estado === 'disponible').map((h) => `${h.documento_id}|${h.huella}`))
 const CARGA = path.resolve('plataforma/_trabajo/documentos-pdf')
 const manifiesto = existsSync(path.join(CARGA, 'manifiesto.json')) ? JSON.parse(await readFile(path.join(CARGA, 'manifiesto.json'), 'utf8')) : []
