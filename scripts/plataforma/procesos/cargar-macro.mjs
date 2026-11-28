@@ -74,9 +74,33 @@ const altaNecesaria = (d) => {
 const acciones = { altas: [], enlaces: [], versiones: [], borradores: [] }
 const docDeEntrada = new Map() // índice de la entrada → id del documento
 
+// Un documento que la clasificación automática puso en este macroproceso y la revisión manda a otro: su enlace
+// sugerido aquí se mueve allá (o se descarta si allá ya estaba). Lo confirmado por una persona no se toca.
+const refsMacro = new Set(procs.filter((p) => enMacro(p.codigo_informe)).map((p) => p.ref))
+async function moverFuera(d) {
+  const id = d.en_inventario?.id
+  const destino = procPorCodigo.get(d.proceso)
+  if (!id || !destino) return
+  const quedan = new Set((d.tambien ?? []).map((c) => procPorCodigo.get(c)?.ref).filter(Boolean))
+  const { data: ex } = await sgc.from('documento_proceso').select('id, proceso_ref, rol, estado').eq('documento_id', id)
+  const razon = `${NOTA}: ${(d.en_inventario?.nota_inventario ?? d.nota ?? '').slice(0, 400)}`
+  for (const e of ex ?? []) {
+    if (!refsMacro.has(e.proceso_ref) || e.estado !== 'sugerido' || quedan.has(e.proceso_ref)) continue
+    acciones.enlaces.push({ id, codigo: d.proceso, rol: e.rol, movido: true })
+    if (revisar) continue
+    const enDestino = ex.find((x) => x.proceso_ref === destino.ref && x.estado !== 'descartado')
+    if (e.rol === 'principal' && !enDestino) {
+      await sgc.from('documento_proceso').update({ proceso_ref: destino.ref, origen: ORIGEN, razon }).eq('id', e.id)
+      continue
+    }
+    await sgc.from('documento_proceso').update({ estado: 'descartado', origen: ORIGEN, razon }).eq('id', e.id)
+    if (e.rol === 'principal' && enDestino?.rol === 'tambien' && enDestino.estado === 'sugerido') await sgc.from('documento_proceso').update({ rol: 'principal', origen: ORIGEN, razon }).eq('id', enDestino.id)
+  }
+}
+
 let n = 0
 for (const [i, d] of documentos.entries()) {
-  if (!enMacro(d.proceso)) continue
+  if (!enMacro(d.proceso)) { await moverFuera(d); continue }
   const estado = ESTADO(d.estado)
   if (!estado) continue // nunca elaborado: va como brecha de la caracterización
   const proc = procPorCodigo.get(d.proceso)
