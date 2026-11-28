@@ -7275,6 +7275,7 @@ export type Database = {
           pdf_ruta: string | null
           pdf_tamano: number | null
           tamano_original: number | null
+          transcripcion: string | null
         }
         Insert: {
           actualizado_en?: string
@@ -7290,6 +7291,7 @@ export type Database = {
           pdf_ruta?: string | null
           pdf_tamano?: number | null
           tamano_original?: number | null
+          transcripcion?: string | null
         }
         Update: {
           actualizado_en?: string
@@ -7305,6 +7307,7 @@ export type Database = {
           pdf_ruta?: string | null
           pdf_tamano?: number | null
           tamano_original?: number | null
+          transcripcion?: string | null
         }
         Relationships: [
           {

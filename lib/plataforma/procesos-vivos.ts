@@ -203,7 +203,7 @@ export async function leerDocumentoVivo(supabase: Cliente, id: string) {
     sgc.from('documento').select('id, codigo, titulo, tipo_yy, estado, version, fecha, proceso_ref, perimetro, datos_sensibles, alias').eq('id', id).maybeSingle(),
     sgc.from('documento_version').select('id, numero, etiqueta, fecha, estado, contenido, origen, motivo, creado_por, creado_en, vigente_desde, archivo_ruta').eq('documento_id', id).order('numero', { ascending: false }),
     sgc.from('documento_proceso').select('id, proceso_ref, rol, estado, confianza, razon').eq('documento_id', id).neq('estado', 'descartado'),
-    sgc.from('documento_archivo').select('id, nombre, formato, estado, paginas').eq('documento_id', id).order('orden'),
+    sgc.from('documento_archivo').select('id, nombre, formato, estado, paginas, transcripcion').eq('documento_id', id).order('orden'),
     sgc.from('documento_registro').select('id, titulo, fecha, contenido, archivo_ruta, nota, editado_en').eq('documento_id', id).order('fecha', { ascending: false, nullsFirst: false }),
   ])
   if (!doc) return null

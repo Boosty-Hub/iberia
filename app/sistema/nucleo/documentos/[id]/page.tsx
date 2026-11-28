@@ -221,7 +221,10 @@ function Registros({ registros, id, editar, enlaceDe, archivos }: { registros: {
   )
 }
 
-function Origen({ archivos, id, elegido, transcritoEn }: { archivos: { id: string; nombre: string; formato: string; estado: string; paginas: number | null }[]; id: string; elegido: string | null; transcritoEn: Map<string, { texto: string; href: string }> }) {
+function Origen({ archivos, id, elegido, transcritoEn: base }: { archivos: { id: string; nombre: string; formato: string; estado: string; paginas: number | null; transcripcion: string | null }[]; id: string; elegido: string | null; transcritoEn: Map<string, { texto: string; href: string }> }) {
+  // Las copias de algo ya transcrito dicen a qué equivalen.
+  const transcritoEn = new Map(base)
+  for (const a of archivos) if (!transcritoEn.has(a.nombre) && a.transcripcion?.startsWith('Mismo contenido')) transcritoEn.set(a.nombre, { texto: 'Mismo contenido que lo ya transcrito (copia de otro archivo)', href: '?p=versiones' })
   if (!archivos.length) return <p className="p-5 text-sm text-marca-500">Este documento no tiene archivos de origen cargados.</p>
   const ver = archivos.find((a) => a.id === elegido && a.estado === 'disponible') ?? archivos.find((a) => a.estado === 'disponible') ?? null
   return (

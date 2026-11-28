@@ -29,10 +29,26 @@ const contenido = (t) => ({
   secciones: (t.secciones ?? []).map((s) => ({ titulo: s.titulo ?? '', bloques: (s.bloques ?? []).filter((b) => b && b.tipo) })),
 })
 const cuenta = { version: 0, registro: 0, duplicado: 0, sin_texto: 0, ya: 0 }
+const cargados = []
 for (const f of (await readdir(carpeta)).filter((x) => x.endsWith('.json')).sort((a, b) => parseInt(a) - parseInt(b))) {
   const t = JSON.parse(await readFile(path.join(carpeta, f), 'utf8'))
   cuenta[t.clase] = (cuenta[t.clase] ?? 0) + 1
-  if (t.clase !== 'version' && t.clase !== 'registro') { console.log(`${t.codigo} · ${path.basename(t.archivo ?? '')} → ${t.clase}: ${t.nota ?? ''}`); continue }
+  if (t.clase !== 'version' && t.clase !== 'registro') {
+    console.log(`${t.codigo} · ${path.basename(t.archivo ?? '')} → ${t.clase}: ${t.nota ?? ''}`)
+    // La copia de algo ya transcrito: se anota en su archivo, para que «Archivo de origen» diga dónde está su contenido.
+    if (!revisar && t.documento_id && t.archivo) {
+      const texto = t.clase === 'duplicado' ? `Mismo contenido que lo ya transcrito: ${t.nota ?? ''}` : `No se pudo leer: ${t.nota ?? ''}`
+      await sgc.from('documento_archivo').update({ transcripcion: texto.slice(0, 500) }).eq('documento_id', t.documento_id).eq('nombre', path.basename(t.archivo.replace(/\\/g, '/')))
+    }
+    continue
+  }
+  // Sin id (documento dado de alta por la revisión): se busca por el archivo de origen entre los archivos del documento.
+  if (!t.documento_id) {
+    const { data: candidatos } = await sgc.from('documento').select('id, codigo, titulo').contains('archivos', [t.archivo])
+    const c = (candidatos ?? []).find((x) => !t.codigo || x.codigo === t.codigo) ?? candidatos?.[0]
+    if (!c) { console.warn(`Sin documento para ${t.archivo}`); continue }
+    t.documento_id = c.id
+  }
   if (t.clase === 'registro') {
     const { data: ya } = await sgc.from('documento_registro').select('id').eq('documento_id', t.documento_id).eq('archivo_ruta', t.archivo).maybeSingle()
     if (ya) { cuenta.ya++; continue }
@@ -46,6 +62,7 @@ for (const f of (await readdir(carpeta)).filter((x) => x.endsWith('.json')).sort
     if ((vs ?? []).some((v) => v.archivo_ruta === t.archivo)) { cuenta.ya++; continue }
     const numero = Math.max(0, ...(vs ?? []).map((v) => v.numero)) + 1
     console.log(`${t.codigo} · versión ${numero} «${t.titulo}»`)
+    cargados.push(t.documento_id)
     if (!revisar) {
       const { error } = await sgc.from('documento_version').insert({
         documento_id: t.documento_id, numero, etiqueta: [t.version ? `Versión ${t.version}` : null, fecha(t.fecha)?.slice(0, 4)].filter(Boolean).join(' · ') || path.basename(t.archivo).slice(0, 80),
@@ -53,6 +70,18 @@ for (const f of (await readdir(carpeta)).filter((x) => x.endsWith('.json')).sort
       })
       if (error) throw new Error(`${f}: ${error.message}`)
     }
+  }
+}
+// Un documento activo que solo quedó con versiones históricas: la más nueva pasa a «transcripción por validar».
+if (!revisar) {
+  const ids = [...new Set(cargados)]
+  for (const id of ids) {
+    const { data: d } = await sgc.from('documento').select('estado').eq('id', id).maybeSingle()
+    if (!d || !['vigente', 'sin_determinar', 'borrador'].includes(d.estado)) continue
+    const { data: vs } = await sgc.from('documento_version').select('id, estado, fecha, numero').eq('documento_id', id)
+    if (!vs?.length || vs.some((v) => ['transcripcion', 'vigente', 'borrador', 'en_revision'].includes(v.estado))) continue
+    const ult = vs.sort((a, b) => (b.fecha ?? '').localeCompare(a.fecha ?? '') || b.numero - a.numero)[0]
+    await sgc.from('documento_version').update({ estado: 'transcripcion' }).eq('id', ult.id)
   }
 }
 console.log(JSON.stringify(cuenta), revisar ? '(revisión: no se escribió nada)' : 'Listo.')
