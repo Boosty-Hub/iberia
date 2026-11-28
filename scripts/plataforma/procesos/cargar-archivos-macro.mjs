@@ -21,7 +21,7 @@ const revisar = argv.includes('--revisar')
 const produccion = opc('--destino') === 'produccion'
 if (produccion && !argv.includes('--confirmo')) throw new Error('Para producción hace falta --confirmo')
 const sgc = createClient(produccion ? process.env.NEXT_PUBLIC_SUPABASE_URL : process.env.SUPABASE_PRUEBAS_URL, produccion ? process.env.SUPABASE_SECRET_KEY : process.env.SUPABASE_PRUEBAS_SECRET_KEY, { auth: { persistSession: false } }).schema('sgc')
-const carpeta = path.resolve('plataforma/propuestas/macros', macro, 'archivos')
+const carpeta = opc('--carpeta') ? path.resolve(opc('--carpeta')) : path.resolve('plataforma/propuestas/macros', macro, 'archivos')
 
 const fecha = (f) => (/^\d{4}-\d{2}-\d{2}$/.test(f ?? '') ? f : null)
 const contenido = (t) => ({
@@ -33,15 +33,6 @@ const cargados = []
 for (const f of (await readdir(carpeta)).filter((x) => x.endsWith('.json')).sort((a, b) => parseInt(a) - parseInt(b))) {
   const t = JSON.parse(await readFile(path.join(carpeta, f), 'utf8'))
   cuenta[t.clase] = (cuenta[t.clase] ?? 0) + 1
-  if (t.clase !== 'version' && t.clase !== 'registro') {
-    console.log(`${t.codigo} · ${path.basename(t.archivo ?? '')} → ${t.clase}: ${t.nota ?? ''}`)
-    // La copia de algo ya transcrito: se anota en su archivo, para que «Archivo de origen» diga dónde está su contenido.
-    if (!revisar && t.documento_id && t.archivo) {
-      const texto = t.clase === 'duplicado' ? `Mismo contenido que lo ya transcrito: ${t.nota ?? ''}` : `No se pudo leer: ${t.nota ?? ''}`
-      await sgc.from('documento_archivo').update({ transcripcion: texto.slice(0, 500) }).eq('documento_id', t.documento_id).eq('nombre', path.basename(t.archivo.replace(/\\/g, '/')))
-    }
-    continue
-  }
   // Sin id (documento dado de alta por la revisión): se busca por el archivo de origen entre los archivos del documento.
   if (!t.documento_id) {
     // Por el título de su documento; si no, por la ruta (en el literal de arreglo de PostgREST la barra invertida va doble).
@@ -50,6 +41,15 @@ for (const f of (await readdir(carpeta)).filter((x) => x.endsWith('.json')).sort
     const c = (candidatos ?? []).find((x) => !t.codigo || x.codigo === t.codigo) ?? candidatos?.[0]
     if (!c) { console.warn(`Sin documento para ${t.archivo}`); continue }
     t.documento_id = c.id
+  }
+  if (t.clase !== 'version' && t.clase !== 'registro') {
+    console.log(`${t.codigo} · ${path.basename(t.archivo ?? '')} → ${t.clase}: ${t.nota ?? ''}`)
+    // La copia de algo ya transcrito: se anota en su archivo, para que «Archivo de origen» diga dónde está su contenido.
+    if (!revisar && t.documento_id && t.archivo) {
+      const texto = t.clase === 'duplicado' ? `Mismo contenido que lo ya transcrito: ${t.nota ?? ''}` : `No se pudo leer: ${t.nota ?? ''}`
+      await sgc.from('documento_archivo').update({ transcripcion: texto.slice(0, 500) }).eq('documento_id', t.documento_id).eq('nombre', path.basename(t.archivo.replace(/\\/g, '/')))
+    }
+    continue
   }
   if (t.clase === 'registro') {
     const { data: ya } = await sgc.from('documento_registro').select('id').eq('documento_id', t.documento_id).eq('archivo_ruta', t.archivo).maybeSingle()

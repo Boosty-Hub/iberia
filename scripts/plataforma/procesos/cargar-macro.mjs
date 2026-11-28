@@ -164,7 +164,19 @@ function entradaDe(t) {
 const porDoc = new Map()
 for (const t of transcripciones) {
   const i = entradaDe(t)
-  if (i == null) { console.warn('Transcripción sin documento:', t.archivo); continue }
+  if (i == null) {
+    // Un documento de otro macroproceso que también aplica aquí: se busca en el inventario por su código (y su título).
+    // Antes se saltaba, y el documento quedaba «pendiente de transcribir» aunque la revisión ya lo había transcrito.
+    const cod = (t.codigo ?? '').split(' ')[0]
+    if (!/^II-[\d-]+$/.test(cod)) { console.warn('Transcripción sin documento:', t.archivo); continue }
+    const { data: cands } = await sgc.from('documento').select('id, titulo, estado').eq('codigo', cod)
+    const c = (cands ?? []).find((x) => norm(x.titulo).includes(norm(t.titulo).split(' ').slice(0, 3).join(' '))) ?? (cands?.length === 1 ? cands[0] : null)
+    if (!c) { console.warn('Transcripción sin documento:', t.archivo); continue }
+    console.log(`También aplica aquí: ${cod} ${c.titulo}`)
+    if (!porDoc.has(c.id)) porDoc.set(c.id, { entrada: { estado: c.estado === 'obsoleto' ? 'obsoleto' : 'vigente' }, ts: [] })
+    porDoc.get(c.id).ts.push(t)
+    continue
+  }
   const id = docDeEntrada.get(i)
   if (!porDoc.has(id)) porDoc.set(id, { entrada: documentos[i], ts: [] })
   porDoc.get(id).ts.push(t)
