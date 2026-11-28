@@ -10,7 +10,8 @@ import { createClient } from '@/lib/supabase/server'
 import { BOTON_CABECERA, CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
 import { FichaObjeto } from '@/components/sistema/ui/ficha-objeto'
 import { Chip, EscaleraDocumentos } from '@/components/sistema/procesos/vivos'
-import { BandaCaracterizacion, BotonConfirmarTodos, EditorCampo } from '@/components/sistema/procesos/vivos-cliente'
+import { AccionesEstructura, BandaCaracterizacion, BotonConfirmarTodos, DesplegarTodo, EditorCampo } from '@/components/sistema/procesos/vivos-cliente'
+import { diferencias } from '@/lib/plataforma/comparar-texto'
 
 export const metadata: Metadata = { title: 'Proceso · Procesos' }
 
@@ -71,7 +72,15 @@ export default async function ProcesoPage({ params, searchParams }: PageProps<'/
         migas={migas.map((m) => (m.href ? m : { etiqueta: m.etiqueta }))}
         acciones={
           <>
-            {editar && <Link href={`/sistema/nucleo/procesos/${ref}?vista=ficha`} className={BOTON_CABECERA} title="Renombrar, mover o crear un subproceso">Mover o renombrar</Link>}
+            {editar && p.nivel > 0 && (
+              <AccionesEstructura
+                refProceso={ref}
+                nombre={p.nombre}
+                padre={p.padre}
+                opciones={mapa.procesos.filter((x) => x.nivel === p.nivel - 1 && x.ref !== ref).map((x) => ({ ref: x.ref, etiqueta: `${x.codigo} ${x.nombre}` }))}
+                puedeCrear={puede(sesion, 'sistema:procesos', 'crear') && p.nivel < 3}
+              />
+            )}
             <Link href={`/sistema/nucleo/procesos/${ref}/imprimir`} className={BOTON_CABECERA}>Imprimir</Link>
             <Link href="/sistema/nucleo/procesos/herramientas" className={BOTON_CABECERA}>Herramientas del SGC</Link>
           </>
@@ -112,7 +121,7 @@ export default async function ProcesoPage({ params, searchParams }: PageProps<'/
               {propuesta?.estado === 'en_revision' && (
                 <div className="rounded-xl bg-[#e8f0fa] px-4 py-3 text-[13px] text-[#2c5d9c]"><b>Versión {propuesta.version} en revisión.</b> {propuesta.nota ?? ''} Se decide en la Bandeja de quien aprueba.</div>
               )}
-              {!propuesta && editar && <p className="text-[12.5px] text-marca-500">Pasa el mouse sobre un campo para editarlo: el cambio abre un borrador que se envía a revisión.</p>}
+              {!propuesta && editar && <p className="text-[12.5px] text-marca-500">Toca «Editar» en cualquier campo: el cambio abre una versión nueva (borrador) que se envía a revisión; la vigente no se borra.</p>}
               <Caracterizacion ficha={ficha} refProceso={ref} editable={editar && propuesta?.estado !== 'en_revision'} />
             </div>
             <div className="grid content-start gap-2">
@@ -147,7 +156,8 @@ export default async function ProcesoPage({ params, searchParams }: PageProps<'/
                 <Chip tono={v.estado === 'vigente' ? 'ok' : v.estado === 'borrador' || v.estado === 'en_revision' ? 'sugerido' : 'gris'}>{v.estado.replace('_', ' ')}</Chip>
               </div>
             ))}
-            <p className="text-[12.5px] text-marca-500">Cada cambio aprobado crea una versión nueva; la anterior queda reemplazada.</p>
+            <p className="text-[12.5px] text-marca-500">Cada edición va a una versión nueva (borrador) y la vigente no se toca; al aprobarse, la anterior queda reemplazada y se conserva aquí.</p>
+            {propuesta && <CambiosCaracterizacion antes={(vigente?.ficha ?? {}) as Ficha} despues={(propuesta.ficha ?? {}) as Ficha} vAntes={vigente?.version ?? null} vDespues={propuesta.version} />}
           </div>
         )}
       </section>
@@ -185,7 +195,8 @@ function Caracterizacion({ ficha, refProceso, editable }: { ficha: Ficha; refPro
   }
   const brechas = Array.isArray(ficha.brechas) ? (ficha.brechas as string[]) : []
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-2" data-caracterizacion>
+      <DesplegarTodo />
       {typeof ficha.estado_hoy === 'string' && (
         <Campo titulo="Cómo se hace hoy" iso="" clave="estado_hoy" inicial={ficha.estado_hoy as string}><p className="max-w-[72ch] text-[14px] leading-relaxed">{ficha.estado_hoy}</p><Fuente texto={f.estado_hoy} /></Campo>
       )}
@@ -226,10 +237,14 @@ function Caracterizacion({ ficha, refProceso, editable }: { ficha: Ficha; refPro
 
 function CampoVista({ titulo, iso, children }: { titulo: string; iso: string; children: ReactNode }) {
   return (
-    <section className="grid gap-1.5">
-      <h3 className="flex items-baseline gap-2 font-mono text-[11px] uppercase tracking-wider text-marca-500">{titulo}{iso && <span className="normal-case tracking-normal text-marca-400">ISO {iso}</span>}</h3>
-      {children}
-    </section>
+    <details className="group/campo rounded-xl border border-[var(--borde)] bg-white" data-seccion-caracterizacion>
+      <summary className="flex cursor-pointer list-none items-baseline gap-2 py-2.5 pl-3 pr-28 font-mono text-[11px] uppercase tracking-wider text-marca-600 marker:hidden [&::-webkit-details-marker]:hidden">
+        <span aria-hidden className="inline-block transition group-open/campo:rotate-90">›</span>
+        <span>{titulo}</span>
+        {iso && <span className="normal-case tracking-normal text-marca-400">ISO {iso}</span>}
+      </summary>
+      <div className="grid gap-1.5 px-3 pb-3">{children}</div>
+    </details>
   )
 }
 
@@ -258,6 +273,36 @@ function TablaIndicadores({ xs }: { xs: NonNullable<Ficha['indicadores']> }) {
           <tr key={k} className="border-t border-[var(--borde)]"><td className="py-2 pr-3">{i.nombre}{i.fuente && <span className="block text-[11px] text-marca-500">↳ {i.fuente}</span>}</td><td className="pr-3 text-marca-500">{i.formula ?? 'por definir'}</td><td className="pr-3 text-marca-500">{i.meta ?? 'por definir'}</td><td className="text-marca-500">{i.frecuencia ?? 'por definir'}</td></tr>
         ))}</tbody>
       </table>
+    </div>
+  )
+}
+
+const TEXTO_CAMPO = (v: unknown): string => {
+  if (v == null) return ''
+  if (typeof v === 'string') return v
+  if (Array.isArray(v)) return v.map((x) => (typeof x === 'string' ? x : [x.nombre, x.formula, x.meta, x.frecuencia].filter(Boolean).join(' · ') || JSON.stringify(x))).join('\n')
+  if (typeof v === 'object') return Object.entries(v as Record<string, unknown>).map(([k, x]) => `${k}: ${TEXTO_CAMPO(x)}`).join('\n')
+  return String(v)
+}
+
+/** Qué cambia la propuesta frente a la vigente: cada campo distinto, con lo quitado y lo agregado. La vigente no se borra. */
+function CambiosCaracterizacion({ antes, despues, vAntes, vDespues }: { antes: Ficha; despues: Ficha; vAntes: number | null; vDespues: number }) {
+  const claves = ['estado_hoy', 'dueno', ...CAMPOS_CARACTERIZACION.map((c) => c.clave), 'brechas']
+  const titulo = (k: string) => CAMPOS_CARACTERIZACION.find((c) => c.clave === k)?.titulo ?? ({ estado_hoy: 'Cómo se hace hoy', dueno: 'Dueño del proceso', brechas: 'Brechas' } as Record<string, string>)[k] ?? k
+  const cambios = claves.map((k) => ({ k, a: TEXTO_CAMPO(antes[k]), d: TEXTO_CAMPO(despues[k]) })).filter((x) => x.a !== x.d)
+  return (
+    <div className="mt-2 grid gap-2" data-cambios-caracterizacion>
+      <div className="rounded-xl bg-[#e8f0fa] px-4 py-2.5 text-[13px] text-[#2c5d9c]">
+        Comparando {vAntes ? <b>v{vAntes} (vigente)</b> : 'la caracterización vacía'} → <b>v{vDespues} (propuesta)</b>. {cambios.length} campo(s) cambian.
+      </div>
+      {cambios.map((c) => (
+        <div key={c.k} className="overflow-hidden rounded-xl border border-[var(--borde)]">
+          <div className="bg-marca-50 px-3 py-2 text-[12.5px] font-semibold">{titulo(c.k)}</div>
+          <p className="whitespace-pre-wrap px-3 py-2.5 text-[13px] leading-relaxed">
+            {diferencias(c.a, c.d).map((t, j) => t.t === 'igual' ? <span key={j}>{t.x}</span> : t.t === 'quitado' ? <del key={j} className="rounded bg-acento-50 px-0.5 text-acento-700">{t.x}</del> : <ins key={j} className="rounded bg-[#e6f4ec] px-0.5 text-[#1f7a4d] no-underline">{t.x}</ins>)}
+          </p>
+        </div>
+      ))}
     </div>
   )
 }

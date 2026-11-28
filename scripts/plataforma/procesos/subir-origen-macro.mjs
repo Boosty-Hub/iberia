@@ -29,8 +29,22 @@ const BASE = path.resolve('Procesos Iberia')
 const TRABAJO = path.resolve('plataforma/_trabajo/origen-macros', macro)
 await mkdir(TRABAJO, { recursive: true })
 
-const { data: docs, error } = await db.schema('sgc').from('documento').select('id, codigo, titulo, archivos, datos_sensibles').like('nota', `Revisión a fondo del macroproceso ${macro}%`)
+// Los documentos del macroproceso: los dados de alta por su revisión y los del inventario enlazados a sus procesos.
+const { data: altas, error } = await db.schema('sgc').from('documento').select('id, codigo, titulo, archivos, datos_sensibles').like('nota', `Revisión a fondo del macroproceso ${macro}%`)
 if (error) throw error
+const { data: procs } = await db.schema('sgc').from('proceso').select('ref, codigo_informe').is('escenario_id', null).eq('estado', 'vigente')
+const refs = procs.filter((p) => p.codigo_informe === macro || (p.codigo_informe ?? '').startsWith(`${macro}.`)).map((p) => p.ref)
+const { data: enlaces } = await db.schema('sgc').from('documento_proceso').select('documento_id').in('proceso_ref', refs).neq('estado', 'descartado')
+const ids = [...new Set(enlaces.map((e) => e.documento_id))].filter((id) => !altas.some((a) => a.id === id))
+const { data: inventario } = ids.length ? await db.schema('sgc').from('documento').select('id, codigo, titulo, archivos, datos_sensibles').in('id', ids) : { data: [] }
+const docs = [...altas, ...inventario]
+// Lo ya disponible no se vuelve a subir; lo que la carga grande ya convirtió (manifiesto + pdf-final) se reusa.
+const { data: hechos } = await db.schema('sgc').from('documento_archivo').select('documento_id, huella, estado').in('documento_id', docs.map((d) => d.id))
+const yaDisponible = new Set((hechos ?? []).filter((h) => h.estado === 'disponible').map((h) => `${h.documento_id}|${h.huella}`))
+const CARGA = path.resolve('plataforma/_trabajo/documentos-pdf')
+const manifiesto = existsSync(path.join(CARGA, 'manifiesto.json')) ? JSON.parse(await readFile(path.join(CARGA, 'manifiesto.json'), 'utf8')) : []
+const pdfDeHuella = new Map(manifiesto.filter((a) => a.pdf).map((a) => [a.hash, path.join(CARGA, 'pdf-final', a.pdf)]))
+console.log(`${altas.length} dados de alta y ${inventario.length} del inventario`)
 const OFFICE = new Set(['.doc', '.docx', '.rtf', '.xls', '.xlsx', '.ppt', '.pptx'])
 const tareas = []
 for (const d of docs) {
@@ -40,8 +54,12 @@ for (const d of docs) {
     const bytes = await readFile(src)
     const huella = createHash('sha256').update(bytes).digest('hex')
     const ext = path.extname(ruta).toLowerCase()
+    if (yaDisponible.has(`${d.id}|${huella}`)) continue
     const t = { d, ruta, orden, huella, ext, tam: bytes.length, src, pdf: path.join(TRABAJO, `${huella.slice(0, 20)}.pdf`) }
+    const previo = pdfDeHuella.get(huella)
+    if (previo && existsSync(previo) && !existsSync(t.pdf) && !revisar) await copyFile(previo, t.pdf)
     if (d.datos_sensibles) t.estado = 'retenido'
+    else if (existsSync(t.pdf)) t.estado = 'disponible'
     else if (ext === '.pdf') { t.estado = 'disponible'; if (!revisar && !existsSync(t.pdf)) await copyFile(src, t.pdf) }
     else if (OFFICE.has(ext)) t.estado = 'convertir'
     else t.estado = 'sin_conversion'

@@ -73,22 +73,24 @@ export function ChipDoc({ d }: { d: DocEnlazado }) {
 /** La fila de un proceso dentro de su macroproceso (y sus subprocesos debajo). */
 export function FilaProceso({ p, mapa, sub = false }: { p: ProcesoMapa; mapa: Mapa; sub?: boolean }) {
   const ds = principales(activos(p.docs))
+  const sug = ds.filter((d) => d.enlace.estado === 'sugerido').length
   const e = estadoDocumental(p)
   const hijos = mapa.hijos(p.ref)
+  // Solo el proceso (Gabriel, 28-nov-2026: los documentos afuera confundían); el detalle, al entrar.
   return (
     <>
-      <div className={`grid grid-cols-1 gap-1 border-t border-[var(--borde)] px-4 py-3 sm:grid-cols-[64px_minmax(0,1fr)_120px] sm:gap-3 ${sub ? 'ml-4 border-l-2 sm:ml-[18px]' : ''}`} data-proceso={p.codigo}>
+      <Link
+        href={`/sistema/nucleo/procesos/${p.ref}`}
+        className={`group grid grid-cols-[52px_minmax(0,1fr)_auto] items-center gap-3 border-t border-[var(--borde)] px-4 py-3 hover:bg-marca-50 sm:grid-cols-[64px_minmax(0,1fr)_auto_auto] ${sub ? 'ml-4 border-l-2 sm:ml-[18px]' : ''}`}
+        data-proceso={p.codigo}
+      >
         <span className="font-mono text-[12.5px] text-marca-500">{p.codigo}</span>
-        <div className="grid min-w-0 gap-1.5">
-          <Link href={`/sistema/nucleo/procesos/${p.ref}`} className="font-semibold hover:text-acento-700">{p.nombre}</Link>
-          <div className="flex min-w-0 flex-wrap gap-1.5">
-            {ds.slice(0, 5).map((d) => <ChipDoc key={d.id} d={d} />)}
-            {ds.length > 5 && <Link href={`/sistema/nucleo/procesos/${p.ref}?p=documentos`} className="rounded-md border border-[var(--borde)] bg-marca-50 px-2 py-0.5 text-xs">+{ds.length - 5} más</Link>}
-            {!ds.length && <Link href={`/sistema/nucleo/procesos/${p.ref}`} className="rounded-lg border border-[var(--borde)] bg-white px-2.5 py-1 text-xs font-medium hover:bg-marca-50">✎ Documentar este proceso</Link>}
-          </div>
-        </div>
-        <span className="sm:justify-self-end"><Chip tono={e.tono}>{e.texto}</Chip></span>
-      </div>
+        <span className="min-w-0 font-semibold group-hover:text-acento-700">{p.nombre}</span>
+        <span className="hidden whitespace-nowrap text-[12px] text-marca-500 sm:block">
+          {ds.length ? `${ds.length} documento${ds.length === 1 ? '' : 's'}${sug ? ` · ${sug} por confirmar` : ''}` : ''}
+        </span>
+        <span className="flex items-center gap-2"><Chip tono={e.tono}>{e.texto}</Chip><span aria-hidden className="text-marca-400">›</span></span>
+      </Link>
       {hijos.map((h) => <FilaProceso key={h.ref} p={h} mapa={mapa} sub />)}
     </>
   )

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useMemo, useRef, useState, useTransition } from 'react'
-import { confirmarEnlace, confirmarEnlacesProceso, descartarBorrador, descartarCaracterizacion, descartarEnlace, enviarCaracterizacion, enviarDocumento, guardarCampoProceso, guardarSeccion } from '@/app/sistema/nucleo/procesos/acciones-vivos'
+import { confirmarEnlace, confirmarEnlacesProceso, descartarBorrador, descartarCaracterizacion, descartarEnlace, enviarCaracterizacion, enviarDocumento, guardarCampoProceso, guardarSeccion, crearSubproceso, moverProceso, renombrarProceso } from '@/app/sistema/nucleo/procesos/acciones-vivos'
 import type { Bloque, IndiceBusqueda, Seccion } from '@/lib/plataforma/procesos-vivos'
 
 const sinTildes = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
@@ -283,7 +283,7 @@ export function EditorCampo({ refProceso, clave, titulo, inicial, ayuda, childre
     return (
       <div className="group relative" data-campo={clave}>
         {children}
-        <button type="button" onClick={() => setEditando(true)} className="absolute right-0 top-0 rounded-md border border-[var(--borde)] bg-white px-2 py-0.5 text-[11.5px] font-medium text-marca-600 opacity-0 transition group-hover:opacity-100 focus:opacity-100">
+        <button type="button" onClick={() => setEditando(true)} className="absolute right-2 top-1.5 z-10 rounded-md border border-[var(--borde)] bg-white px-2 py-0.5 text-[11.5px] font-medium text-marca-700 hover:border-acento-200 hover:text-acento-700">
           ✎ Editar
         </button>
       </div>
@@ -320,7 +320,7 @@ export function BandaCaracterizacion({ refProceso, version, nota, puedeDescartar
   const router = useRouter()
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-oro-50 px-4 py-3 text-[13px] text-oro-900" data-propuesta-caracterizacion>
-      <span><b>Borrador de la caracterización (v{version}).</b> {nota ?? ''} Pasa el mouse sobre un campo para editarlo. Nadie más lo ve como vigente hasta que se apruebe.</span>
+      <span><b>Borrador de la caracterización (v{version}).</b> {nota ?? ''} Toca «Editar» en cualquier campo. La versión vigente sigue rigiendo hasta que esta se apruebe.</span>
       {!abierto ? (
         <span className="flex gap-2">
           {puedeDescartar && (
@@ -343,5 +343,84 @@ export function BandaCaracterizacion({ refProceso, version, nota, puedeDescartar
       {msg?.error && <p className="w-full text-xs text-acento-700">{msg.error}</p>}
       {msg?.ok && <p className="w-full text-xs">{msg.ok}</p>}
     </div>
+  )
+}
+
+
+/** Despliega o pliega todas las secciones de la caracterización. */
+export function DesplegarTodo() {
+  const [abiertas, setAbiertas] = useState(false)
+  return (
+    <div className="flex justify-end">
+      <button
+        type="button"
+        onClick={(e) => {
+          const raiz = (e.currentTarget as HTMLElement).closest('[data-caracterizacion]')
+          raiz?.querySelectorAll('details[data-seccion-caracterizacion]').forEach((d) => { (d as HTMLDetailsElement).open = !abiertas })
+          setAbiertas(!abiertas)
+        }}
+        className="rounded-md px-2 py-1 text-[12px] font-medium text-marca-600 hover:bg-marca-50"
+      >
+        {abiertas ? 'Plegar todo' : 'Desplegar todo'}
+      </button>
+    </div>
+  )
+}
+
+/** Renombrar, cambiar de dónde cuelga o crear un subproceso: en un cuadro de la página. Va al borrador, con aprobación. */
+export function AccionesEstructura({ refProceso, nombre, padre, opciones, puedeCrear }: { refProceso: string; nombre: string; padre: string | null; opciones: { ref: string; etiqueta: string }[]; puedeCrear: boolean }) {
+  const dialogo = useRef<HTMLDialogElement>(null)
+  const [nuevoNombre, setNuevoNombre] = useState(nombre)
+  const [nuevoPadre, setNuevoPadre] = useState(padre ?? '')
+  const [hijo, setHijo] = useState('')
+  const [pendiente, empezar] = useTransition()
+  const [msg, setMsg] = useState<{ error?: string; ok?: string } | null>(null)
+  const router = useRouter()
+  const correr = (f: () => Promise<{ error?: string; ok?: string }>) =>
+    empezar(async () => { const r = await f(); setMsg(r); if (!r.error) router.refresh() })
+  return (
+    <>
+      <button type="button" onClick={() => { setMsg(null); dialogo.current?.showModal() }} className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[var(--borde)] bg-white px-2.5 text-xs font-medium text-marca-800 hover:bg-marca-50">
+        Mover o renombrar
+      </button>
+      <dialog ref={dialogo} className="w-[min(520px,calc(100vw-32px))] rounded-2xl border border-[var(--borde)] p-0 backdrop:bg-black/30" data-acciones-estructura>
+        <div className="grid gap-4 p-5">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-base font-bold">Mover o renombrar</h2>
+            <button type="button" onClick={() => dialogo.current?.close()} className="rounded-md px-2 text-marca-500 hover:bg-marca-50" aria-label="Cerrar">✕</button>
+          </div>
+          <p className="text-[12.5px] text-marca-500">Cada cambio va a una versión nueva del proceso (borrador) y entra cuando se aprueba. La versión vigente no se toca.</p>
+          <label className="grid gap-1 text-[13px]">
+            <span className="font-medium">Nombre</span>
+            <span className="flex gap-2">
+              <input value={nuevoNombre} onChange={(e) => setNuevoNombre(e.target.value)} className="campo h-9 flex-1" />
+              <button type="button" disabled={pendiente || nuevoNombre.trim() === nombre} onClick={() => correr(() => renombrarProceso(refProceso, nuevoNombre))} className="btn-acento h-9 px-3 text-xs">Renombrar</button>
+            </span>
+          </label>
+          {opciones.length > 0 && (
+            <label className="grid gap-1 text-[13px]">
+              <span className="font-medium">Cuelga de</span>
+              <span className="flex gap-2">
+                <select value={nuevoPadre} onChange={(e) => setNuevoPadre(e.target.value)} className="campo h-9 min-w-0 flex-1">
+                  {opciones.map((o) => <option key={o.ref} value={o.ref}>{o.etiqueta}</option>)}
+                </select>
+                <button type="button" disabled={pendiente || nuevoPadre === (padre ?? '')} onClick={() => correr(() => moverProceso(refProceso, nuevoPadre))} className="btn-acento h-9 px-3 text-xs">Mover</button>
+              </span>
+            </label>
+          )}
+          {puedeCrear && (
+            <label className="grid gap-1 text-[13px]">
+              <span className="font-medium">Nuevo subproceso</span>
+              <span className="flex gap-2">
+                <input value={hijo} onChange={(e) => setHijo(e.target.value)} placeholder="Nombre del subproceso" className="campo h-9 flex-1" />
+                <button type="button" disabled={pendiente || hijo.trim().length < 3} onClick={() => correr(() => crearSubproceso(refProceso, hijo))} className="btn-acento h-9 px-3 text-xs">Crear</button>
+              </span>
+            </label>
+          )}
+          {msg?.error && <p className="text-xs text-acento-700">{msg.error}</p>}
+          {msg?.ok && <p className="text-xs text-[#1f7a4d]">{msg.ok}</p>}
+        </div>
+      </dialog>
+    </>
   )
 }

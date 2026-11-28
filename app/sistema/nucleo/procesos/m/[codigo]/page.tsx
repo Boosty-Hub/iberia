@@ -5,7 +5,7 @@ import { requerirPermiso } from '@/lib/auth'
 import { activos, estadoDocumental, leerMapa, principales } from '@/lib/plataforma/procesos-vivos'
 import { createClient } from '@/lib/supabase/server'
 import { BOTON_CABECERA, CabeceraModulo } from '@/components/sistema/ui/cabecera-modulo'
-import { Chip, ChipDoc, FilaProceso } from '@/components/sistema/procesos/vivos'
+import { Chip, FilaProceso } from '@/components/sistema/procesos/vivos'
 
 export const metadata: Metadata = { title: 'Macroproceso · Procesos' }
 
@@ -21,7 +21,6 @@ export default async function MacroprocesoPage({ params }: PageProps<'/sistema/n
   const ps = mapa.hijos(m.ref)
   const estados = ps.map((p) => estadoDocumental(p).tono)
   const n = (t: string) => estados.filter((x) => x === t).length
-  const propios = principales(activos(m.docs))
   const total = new Set([m, ...ps, ...ps.flatMap((p) => mapa.hijos(p.ref))].flatMap((p) => principales(activos(p.docs)).map((d) => d.id))).size
   return (
     <>
@@ -50,15 +49,6 @@ export default async function MacroprocesoPage({ params }: PageProps<'/sistema/n
             <Chip>{total} documentos</Chip>
           </div>
         </div>
-        {propios.length > 0 && (
-          <div className="grid gap-1.5 border-t border-[var(--borde)] bg-marca-50 px-4 py-3 sm:grid-cols-[64px_minmax(0,1fr)] sm:gap-3">
-            <span className="font-mono text-[12.5px] text-marca-500">{m.codigo}</span>
-            <div className="grid gap-1.5">
-              <b className="text-sm">Documentos del macroproceso completo</b>
-              <div className="flex flex-wrap gap-1.5">{propios.slice(0, 8).map((d) => <ChipDoc key={d.id} d={d} />)}{propios.length > 8 && <Link href={`/sistema/nucleo/procesos/${m.ref}?p=documentos`} className="rounded-md border border-[var(--borde)] bg-white px-2 py-0.5 text-xs">+{propios.length - 8} más</Link>}</div>
-            </div>
-          </div>
-        )}
         <div>{ps.map((p) => <FilaProceso key={p.ref} p={p} mapa={mapa} />)}</div>
       </section>
     </>

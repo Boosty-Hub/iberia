@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { puede, requerirPermiso } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import type { Json } from '@/lib/database.types'
+import { crearHijo } from '@/lib/plataforma/fichas/procesos'
 
 /**
  * Acciones del rediseño de Procesos (28-nov-2026): confirmar los enlaces sugeridos y editar un documento por
@@ -174,4 +175,50 @@ export async function descartarCaracterizacion(ref: string): Promise<Resultado> 
   if (!count) return { error: 'No hay un borrador que descartar.' }
   revalidatePath(`/sistema/nucleo/procesos/${ref}`)
   return { ok: 'Borrador descartado. Rige la versión vigente.' }
+}
+
+
+// ── Estructura: renombrar, mover y crear un subproceso (en el borrador, con aprobación) ──
+
+export async function renombrarProceso(ref: string, nombre: string): Promise<Resultado> {
+  const sesion = await requerirPermiso('sistema:procesos')
+  if (!puede(sesion, 'sistema:procesos', 'editar')) return { error: 'No tienes permiso para editar procesos.' }
+  if (!UUID.test(ref)) return { error: 'Proceso no válido.' }
+  if (nombre.trim().length < 3) return { error: 'El nombre necesita al menos tres letras.' }
+  const r = await borradorProceso(ref)
+  if ('error' in r) return { error: r.error }
+  const { error } = await r.supabase.schema('sgc').from('proceso').update({ nombre: nombre.trim().slice(0, 200) }).eq('id', r.b.id).eq('estado', 'borrador')
+  if (error) return { error: mensaje(error) }
+  revalidatePath(`/sistema/nucleo/procesos/${ref}`)
+  return { ok: 'Renombrado en el borrador. Rige cuando se apruebe.' }
+}
+
+export async function moverProceso(ref: string, padre: string): Promise<Resultado> {
+  const sesion = await requerirPermiso('sistema:procesos')
+  if (!puede(sesion, 'sistema:procesos', 'editar')) return { error: 'No tienes permiso para editar procesos.' }
+  if (!UUID.test(ref) || !UUID.test(padre)) return { error: 'Proceso no válido.' }
+  const supabase = await createClient()
+  const sgc = supabase.schema('sgc')
+  const [{ data: yo }, { data: p }] = await Promise.all([
+    sgc.from('proceso').select('nivel').eq('ref', ref).is('escenario_id', null).eq('estado', 'vigente').maybeSingle(),
+    sgc.from('proceso').select('nivel').eq('ref', padre).is('escenario_id', null).eq('estado', 'vigente').maybeSingle(),
+  ])
+  if (!yo || !p || p.nivel !== yo.nivel - 1) return { error: 'Solo puede colgar de un proceso del nivel de arriba.' }
+  const r = await borradorProceso(ref)
+  if ('error' in r) return { error: r.error }
+  const { error } = await sgc.from('proceso').update({ padre_ref: padre }).eq('id', r.b.id).eq('estado', 'borrador')
+  if (error) return { error: mensaje(error) }
+  revalidatePath('/sistema/nucleo/procesos', 'layout')
+  return { ok: 'Movido en el borrador. Rige cuando se apruebe.' }
+}
+
+export async function crearSubproceso(ref: string, nombre: string): Promise<Resultado> {
+  const sesion = await requerirPermiso('sistema:procesos')
+  if (!puede(sesion, 'sistema:procesos', 'crear')) return { error: 'No tienes permiso para crear procesos.' }
+  if (!UUID.test(ref)) return { error: 'Proceso no válido.' }
+  const supabase = await createClient()
+  const r = await crearHijo(supabase, ref, nombre)
+  if (r.error) return { error: r.error }
+  revalidatePath('/sistema/nucleo/procesos', 'layout')
+  return { ok: 'Subproceso creado como borrador: aparece cuando se apruebe.' }
 }

@@ -18,6 +18,10 @@ export function textoDe(bloques: Bloque[]): string {
   }).join('\n')
 }
 
+export function diferencias(a: string, b: string): Trozo[] {
+  return diffPalabras(a, b)
+}
+
 function diffPalabras(a: string, b: string): Trozo[] {
   const A = a.split(/(\s+)/).filter(Boolean)
   const B = b.split(/(\s+)/).filter(Boolean)
