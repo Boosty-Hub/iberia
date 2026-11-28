@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
   // El indicador flotante de desarrollo se sitúa abajo a la izquierda, justo
   // encima del pie de la barra lateral, y lo tapa.
   devIndicators: false,
+  // En esta máquina `localhost` junta las cookies de todas las apps locales y el navegador responde 431; se entra por
+  // 127.0.0.1. Sin permitirlo, Next bloquea sus recursos de desarrollo a ese origen y la página no se hidrata (los botones
+  // no hacen nada). Solo vale en `next dev`.
+  allowedDevOrigins: ['127.0.0.1'],
   // El certificado en imagen (`lib/certificado-imagen.tsx`) lee del disco la
   // letra y los logos. En Netlify la función no ve `public/` ni `assets/` si no
   // se le mete: sin esto, en producción no habría certificado que guardar.
