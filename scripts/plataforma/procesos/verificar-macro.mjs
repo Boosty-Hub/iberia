@@ -7,20 +7,40 @@
  *     archivo de origen), sin errores de la página. Deja capturas en plataforma/_trabajo/verificacion/<macro>/.
  *
  *   node --env-file=.env.local scripts/plataforma/procesos/verificar-macro.mjs --macro 1.3 [--base http://127.0.0.1:3005]
+ *   … --produccion --email <cuenta propia del equipo>   # solo lectura, contra portal.industriasiberia.com
  */
 import { mkdir } from 'node:fs/promises'
 import path from 'node:path'
 import { createClient } from '@supabase/supabase-js'
 import { chromium } from 'playwright'
-import { cookiesDePrueba, URL_PRUEBAS } from '../sesion-pruebas.mjs'
 
 const argv = process.argv.slice(2)
 const opc = (n) => (argv.includes(n) ? argv[argv.indexOf(n) + 1] : null)
 const macro = opc('--macro')
 if (!macro) throw new Error('Falta --macro')
-const BASE = opc('--base') ?? 'http://localhost:3005'
-const sgc = createClient(URL_PRUEBAS, process.env.SUPABASE_PRUEBAS_SECRET_KEY, { auth: { persistSession: false } }).schema('sgc')
-const SALIDA = path.resolve('plataforma/_trabajo/verificacion', macro)
+const PROD = argv.includes('--produccion')
+const BASE = opc('--base') ?? (PROD ? 'https://portal.industriasiberia.com' : 'http://localhost:3005')
+const URL_DB = PROD ? process.env.NEXT_PUBLIC_SUPABASE_URL : process.env.SUPABASE_PRUEBAS_URL
+const SECRETA = PROD ? process.env.SUPABASE_SECRET_KEY : process.env.SUPABASE_PRUEBAS_SECRET_KEY
+const PUBLICA = PROD ? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY : process.env.SUPABASE_PRUEBAS_PUBLISHABLE_KEY
+const EMAIL = opc('--email') ?? (PROD ? null : 'admin.pruebas@plataforma.local')
+if (!EMAIL) throw new Error('En producción, --email con una cuenta propia del equipo (nunca la de una persona de Iberia)')
+const sgc = createClient(URL_DB, SECRETA, { auth: { persistSession: false } }).schema('sgc')
+// La sesión se acuña con un enlace mágico (clave de servicio) y va como cookie; en producción no escribe nada.
+async function cookies(base) {
+  const admin = createClient(URL_DB, SECRETA, { auth: { persistSession: false } })
+  const anon = createClient(URL_DB, PUBLICA, { auth: { persistSession: false } })
+  const { data: enlace, error: e1 } = await admin.auth.admin.generateLink({ type: 'magiclink', email: EMAIL })
+  if (e1) throw e1
+  const { data: ver, error: e2 } = await anon.auth.verifyOtp({ token_hash: enlace.properties.hashed_token, type: 'magiclink' })
+  if (e2) throw e2
+  const ref = new URL(URL_DB).hostname.split('.')[0]
+  const valor = 'base64-' + Buffer.from(JSON.stringify(ver.session)).toString('base64url')
+  const L = 3180
+  const partes = valor.length <= L ? [{ name: `sb-${ref}-auth-token`, value: valor }] : Array.from({ length: Math.ceil(valor.length / L) }, (_, i) => ({ name: `sb-${ref}-auth-token.${i}`, value: valor.slice(i * L, (i + 1) * L) }))
+  return partes.map((x) => ({ ...x, domain: new URL(base).hostname, path: '/' }))
+}
+const SALIDA = path.resolve('plataforma/_trabajo/verificacion', PROD ? `produccion-${macro}` : macro)
 await mkdir(SALIDA, { recursive: true })
 let fallas = 0
 const ok = (c, m) => { console.log(`${c ? '✓' : '✗'} ${m}`); if (!c) fallas++ }
@@ -58,7 +78,7 @@ aviso(`${docs.length} documentos enlazados · ${vs.length} versiones · ${rs.len
 // ── Pantalla ─────────────────────────────────────────────────────────────────
 const nav = await chromium.launch()
 const ctx = await nav.newContext({ viewport: { width: 1440, height: 950 } })
-await ctx.addCookies(await cookiesDePrueba('admin', BASE))
+await ctx.addCookies(await cookies(BASE))
 const p = await ctx.newPage()
 const errores = []
 p.on('pageerror', (e) => errores.push(e.message))
