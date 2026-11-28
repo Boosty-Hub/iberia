@@ -32,6 +32,24 @@ entregable 2. El resto no se ha vuelto a revisar desde el 9, y lo que salió el 
 
 ---
 
+## 🟠 Procesos y documentos vivos (rediseño, desde el 28 de noviembre de 2026)
+
+Rama `procesos/rediseno`, solo en PRUEBAS (migración `20261128100000_documentos_vivos`). Se trabaja **macroproceso por
+macroproceso** y Gabriel aprueba cada uno antes de seguir. Plan, prototipo y revisión en `plataforma/propuestas/` (fuera de git).
+
+| Qué | De quién | Estado |
+|---|---|---|
+| Aprobar el macroproceso 1.1 (capturas por Telegram, 28-nov) y seguir con 1.2 | Gabriel | 🟠 esperando |
+| Las 6 preguntas de 1.1 a la Gerencia General (dueño de misión y política, versión 2024 perdida, plan estratégico, Junta Directiva, ISO 9001, dueño de 1.1.4) | Iberia vía Gabriel | 🟠 |
+| Las 12 preguntas del plan por macroproceso (Asesor Jurídico, Olympia, POP, Archivo Central, metrología, repuestos, crédito, maquila, código 81, códigos 21/22, codificación nueva) | Iberia vía Gabriel | 🟠 |
+| Aprobar la lista de macroprocesos propuesta (5 procesos nuevos, 6 que se mueven, 3 duplicados, retiro de II-14) y aplicarla al mapa | Gabriel | 🟠 «Como ya tenemos los 20 macroprocesos» (28-nov); los cambios de procesos se aplican al llegar a cada macroproceso |
+| Subir a Storage los PDF de los 16 documentos de 1.1 dados de alta (hoy solo están las rutas de origen) | Equipo Boosty | Pendiente (`cargar-documentos.mjs`) |
+| Probar de punta a punta la firma del flujo «Documento del SGC» (dueño → Calidad) con dos cuentas y la publicación de la versión | Equipo Boosty | Pendiente: `probar-documentos-vivos.mjs` llega hasta la solicitud |
+| Atar «Gestión de la Calidad» a un cargo (hoy: casilla «Aprobar cambios») y «Dueño del proceso» a la plaza dueña (hoy: jefe de la unidad dueña) | Equipo Boosty con Iberia | Pendiente |
+| Pasar a producción (migración, `cargar-enlaces.mjs` y `cargar-macro.mjs --destino produccion --confirmo`) | Con el OK de Gabriel | No antes |
+
+---
+
 ## 🔴 Lo que bloquea desde el 23 de octubre
 
 | Qué | De quién | Por qué bloquea |
