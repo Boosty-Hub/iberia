@@ -46,7 +46,7 @@ macroproceso** y Gabriel aprueba cada uno antes de seguir. Plan, prototipo y rev
 | Subir a Storage los PDF de los 16 documentos de 1.1 dados de alta (hoy solo están las rutas de origen) | Equipo Boosty | Pendiente (`cargar-documentos.mjs`) |
 | Probar de punta a punta la firma del flujo «Documento del SGC» (dueño → Calidad) con dos cuentas y la publicación de la versión | Equipo Boosty | Pendiente: `probar-documentos-vivos.mjs` llega hasta la solicitud |
 | Atar «Gestión de la Calidad» a un cargo (hoy: casilla «Aprobar cambios») y «Dueño del proceso» a la plaza dueña (hoy: jefe de la unidad dueña) | Equipo Boosty con Iberia | Pendiente |
-| Pasar a producción (migración, `cargar-enlaces.mjs` y `cargar-macro.mjs --destino produccion --confirmo`) | Con el OK de Gabriel | No antes |
+| ~~Pasar a producción~~ ✅ 28-nov («publica todo en main»): respaldo, 3 migraciones, 1.1–2.7 cargados y verificados en el sitio; `main` en `6e54fe2`. Lo que se termine después se pasa con `pasar-macros-produccion.sh` | — | |
 
 ---
 

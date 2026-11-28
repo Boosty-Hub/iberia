@@ -88,7 +88,9 @@ migración `20261128100000_documentos_vivos` y siguientes, `lib/plataforma/proce
   clasificación automática había puesto en I+D 154 enlaces que eran de Aseguramiento; el informe trae un 2.2.3 que no está en
   el mapa; varios documentos duplicados en la base (mismo archivo, dos ids). Con ~10 agentes a la vez el cupo de 5 horas se
   acabó dos veces: la sesión siguiente arranca limpia y con menos agentes simultáneos.
-- **Dónde quedamos**: rama `procesos/rediseno`, solo pruebas; producción sin tocar. Lo que falta, en `PENDIENTES.md`.
+- **En producción el 28/11** («publica todo en main»): respaldo `produccion-2026-11-28T13-12-30`, las 3 migraciones, 1.1–2.7
+  pasados con `pasar-macros-produccion.sh` (los ids de las altas se traducen por código y título) y verificados en el sitio;
+  `main` en `6e54fe2`. Lo que falta, en `PENDIENTES.md` y `plataforma/propuestas/macros/CONTINUAR.md`.
 
 ---
 
