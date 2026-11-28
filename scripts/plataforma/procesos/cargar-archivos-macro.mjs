@@ -12,6 +12,7 @@
 import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
 import { createClient } from '@supabase/supabase-js'
+import { resolutorDeIds } from './resolver-id.mjs'
 
 const argv = process.argv.slice(2)
 const opc = (n) => (argv.includes(n) ? argv[argv.indexOf(n) + 1] : null)
@@ -21,6 +22,7 @@ const revisar = argv.includes('--revisar')
 const produccion = opc('--destino') === 'produccion'
 if (produccion && !argv.includes('--confirmo')) throw new Error('Para producción hace falta --confirmo')
 const sgc = createClient(produccion ? process.env.NEXT_PUBLIC_SUPABASE_URL : process.env.SUPABASE_PRUEBAS_URL, produccion ? process.env.SUPABASE_SECRET_KEY : process.env.SUPABASE_PRUEBAS_SECRET_KEY, { auth: { persistSession: false } }).schema('sgc')
+const resolver = resolutorDeIds(sgc, produccion)
 const carpeta = opc('--carpeta') ? path.resolve(opc('--carpeta')) : path.resolve('plataforma/propuestas/macros', macro, 'archivos')
 
 const fecha = (f) => (/^\d{4}-\d{2}-\d{2}$/.test(f ?? '') ? f : null)
@@ -33,6 +35,8 @@ const cargados = []
 for (const f of (await readdir(carpeta)).filter((x) => x.endsWith('.json')).sort((a, b) => parseInt(a) - parseInt(b))) {
   const t = JSON.parse(await readFile(path.join(carpeta, f), 'utf8'))
   cuenta[t.clase] = (cuenta[t.clase] ?? 0) + 1
+  // En producción, el id de un documento dado de alta en pruebas se traduce por código y título.
+  if (t.documento_id) t.documento_id = await resolver(t.documento_id)
   // Sin id (documento dado de alta por la revisión): se busca por el archivo de origen entre los archivos del documento.
   if (!t.documento_id) {
     // Por el título de su documento; si no, por la ruta (en el literal de arreglo de PostgREST la barra invertida va doble).

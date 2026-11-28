@@ -21,6 +21,7 @@
 import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
 import { createClient } from '@supabase/supabase-js'
+import { resolutorDeIds } from './resolver-id.mjs'
 
 const argv = process.argv.slice(2)
 const opc = (n) => (argv.includes(n) ? argv[argv.indexOf(n) + 1] : null)
@@ -32,6 +33,7 @@ if (produccion && !argv.includes('--confirmo')) throw new Error('Para producció
 const url = produccion ? process.env.NEXT_PUBLIC_SUPABASE_URL : process.env.SUPABASE_PRUEBAS_URL
 const clave = produccion ? process.env.SUPABASE_SECRET_KEY : process.env.SUPABASE_PRUEBAS_SECRET_KEY
 const sgc = createClient(url, clave, { auth: { persistSession: false } }).schema('sgc')
+const resolver = resolutorDeIds(sgc, produccion)
 const carpeta = path.resolve('plataforma/propuestas/macros', macro)
 const leer = async (f) => JSON.parse(await readFile(path.join(carpeta, f), 'utf8'))
 const ORIGEN = `revision-macro-${macro}`
@@ -78,7 +80,7 @@ const docDeEntrada = new Map() // índice de la entrada → id del documento
 // sugerido aquí se mueve allá (o se descarta si allá ya estaba). Lo confirmado por una persona no se toca.
 const refsMacro = new Set(procs.filter((p) => enMacro(p.codigo_informe)).map((p) => p.ref))
 async function moverFuera(d) {
-  const id = d.en_inventario?.id
+  const id = await resolver(d.en_inventario?.id)
   const destino = procPorCodigo.get(d.proceso)
   if (!id || !destino) return
   const quedan = new Set((d.tambien ?? []).map((c) => procPorCodigo.get(c)?.ref).filter(Boolean))
@@ -105,8 +107,9 @@ for (const [i, d] of documentos.entries()) {
   if (!estado) continue // nunca elaborado: va como brecha de la caracterización
   const proc = procPorCodigo.get(d.proceso)
   if (!proc) { console.warn('Sin proceso en el mapa:', d.proceso, d.titulo); continue }
-  let id = d.en_inventario?.id ?? null
-  if (altaNecesaria(d)) {
+  // En producción, un id de pruebas (documento dado de alta allá) se traduce; si no aparece, se da de alta aquí.
+  let id = await resolver(d.en_inventario?.id ?? null)
+  if (altaNecesaria(d) || !id) {
     const conCodigo = d.codigo && /^II-[\d-]+$/.test(d.codigo.split(' ')[0])
     const codigo = conCodigo ? d.codigo.split(' ')[0] : `S/C-${macro}-${String(++n).padStart(2, '0')}`
     const titulo = d.titulo.trim().slice(0, 300)
