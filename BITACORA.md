@@ -61,7 +61,34 @@ Lo completo está en `PENDIENTES.md`. Aquí, lo urgente:
 > **Asistente de IA:** las siete fases, las ventanas de 5 horas y «Preguntar a la IA» **en producción desde el 26/11**
 > (sesión 61); Mis archivos, la Guía, la ventana flotante, el widget de soporte y 18 tutoriales con voz, también (sesión 62).
 > Correos por Resend con diseño desde el 27/11 (sesión 63). Falta lo de Iberia: la dirección de retorno nueva en Entra y
-> la prueba de Microsoft 365, y la plantilla de WhatsApp (`PENDIENTES.md`).
+> la prueba de Microsoft 365, y la plantilla de WhatsApp (`PENDIENTES.md`). **Procesos y documentos vivos**: en pruebas,
+> macroproceso por macroproceso (sesión 64).
+
+---
+
+## 27 y 28 de noviembre · Sesión 64 — Procesos y documentos vivos, macroproceso por macroproceso
+
+**Pedidos de Gabriel** (voz y Telegram): rediseñar «Organización y procesos» para que el contenido de los documentos del SGC
+viva en la plataforma, por secciones, editable, con versiones y aprobación, y escalonado desde el mapa (mapa → macroproceso →
+proceso → documento → versiones). Plan y prototipo antes de ejecutar (HTML por Telegram, no artefacto). Cómo funciona:
+migración `20261128100000_documentos_vivos` y siguientes, `lib/plataforma/procesos-vivos.ts`, `scripts/plataforma/procesos/`.
+
+- **Decidió Gabriel**: manda el mapa del informe (1.1–3.8; los códigos II-XX son solo del documento); se transcriben vigentes
+  y anteriores; aprueban el dueño del proceso y Gestión de la Calidad; el mapa solo con su buscador; sin «Documentación
+  controlada» aparte (todo amarrado al mapa); la caracterización se edita en la página y cada edición es versión nueva;
+  **todo archivo de origen queda transcrito en la plataforma, también los formatos llenos** («el archivo es soporte»). Tras
+  aprobar 1.1 y 1.2: «continúa con todos los demás, no te detengas; cuando termines uno verificas y sigues».
+- **Método**: por macroproceso, un agente revisa enlaces y caracterización (ISO 9001 4.4.1) y varios transcriben por lotes;
+  se carga con `cargar-macro`, `subir-origen-macro`, `cargar-archivos-macro`, y se cierra con `pendientes-transcripcion` en
+  0 y `verificar-macro` (base y pantallas). Paso a paso: `plataforma/propuestas/macros/CONTINUAR.md`.
+- **Hecho y verificado en pruebas**: 1.1, 1.2, 1.3, 2.1, 2.2, 2.3 (1.3: 862 archivos, 292 versiones, 234 registros, 33 altas;
+  119 métodos movidos a 2.4.2). **A medias** al cerrar: 2.4 (falta un lote), 2.5 y 2.7 (falta la transcripción), 2.6.
+- **LibreOffice instalado** (con OK de Gabriel) para leer y mostrar Visio y Publisher.
+- 🔴 **Encontrado**: con cientos de documentos, las consultas `.in()` pasaban del largo de PostgREST (ahora por tandas); la
+  clasificación automática había puesto en I+D 154 enlaces que eran de Aseguramiento; el informe trae un 2.2.3 que no está en
+  el mapa; varios documentos duplicados en la base (mismo archivo, dos ids). Con ~10 agentes a la vez el cupo de 5 horas se
+  acabó dos veces: la sesión siguiente arranca limpia y con menos agentes simultáneos.
+- **Dónde quedamos**: rama `procesos/rediseno`, solo pruebas; producción sin tocar. Lo que falta, en `PENDIENTES.md`.
 
 ---
 
@@ -433,58 +460,17 @@ listada. Todo, con dueño, en `PENDIENTES.md`.
 
 ---
 
-## 29 de octubre · Sesión 54 — el calendario, frente por frente y en PDF
+## 28 y 29 de octubre · Sesiones 53 y 54 — el calendario de la Fase 2 y New Iberia
 
-Dos pedidos de Gabriel por Telegram: que en «Los frentes en el tiempo» tocar un frente —Coordinación,
-Activación…— lo despliegue con el detalle de todo lo que tiene, y un PDF del calendario completo para
-mandárselo a Alberto por correo.
+Compactadas el 28/11; la versión larga: `git show 14657e4:BITACORA.md`. Gabriel pidió por Telegram una página con el calendario
+de todo lo que viene y, al día siguiente, desplegar cada frente y un PDF para Alberto. Cómo funciona: `AGENTS.md`, «El calendario».
 
-- **La línea de tiempo se despliega por frente**: una pista por actividad con su fecha, estado y
-  responsable; varios abiertos a la vez y «Ver todos en detalle». Las columnas se ensancharon (230 px
-  de rótulo, 820 px mínimo) para que el título se lea.
-- **El PDF sale de la base** (`scripts/documento-calendario.mjs`): portada, la línea de tiempo, cada
-  frente actividad por actividad, los 31 entregables e hitos, y la agenda mes a mes con el detalle de
-  cada una. 14 páginas: `documentos/2026-10-calendario-fase-2-y-new-iberia.pdf`. **Sin montos y sin la
-  `nota`** de las actividades, que es coordinación interna.
-- `mirar-calendario` comprueba ahora el despliegue (23 de 23 en Coordinación, 78 de 78 abiertos) y el
-  iPhone con un frente abierto: 11 comprobaciones, sin fallos.
-
-**Dónde quedamos**: en local, revisado a 1440 y en iPhone 14; el push a `main`, con el visto bueno de
-Gabriel.
-
----
-
-## 28 de octubre · Sesión 53 — el calendario de la Fase 2 y New Iberia
-
-Gabriel pidió, por Telegram, una página en el panel con el calendario de todo lo que viene. Pasó un
-HTML que ya traía las actividades, las dos propuestas de octubre (New Iberia y Fase 2 · Aliviar) y la
-transcripción de su conversación del 27 con el señor Carlos, en la que ordenaron quién hace qué y
-cuándo. **La transcripción no se cargó a la base.** Antes, `git pull` trajo la app de iPhone de
-Santiago (`e9090f7`) y hubo que correr `npm ci` por las dependencias de Capacitor.
-
-**Lo que se construyó** (cómo funciona, en `AGENTS.md`, «El calendario»):
-
-- **`/dashboard/calendario`**, en un grupo nuevo de la barra, «Fase 2 · New Iberia»: lo de los
-  próximos 14 días, los ocho frentes en la línea de tiempo y la agenda mes a mes, que se filtra por
-  frente y por responsable.
-- **La tabla `calendario_actividades`**, con las 78 actividades del HTML sembradas en la migración, y
-  la casilla `modulo:calendario` (ver y editar). Quien puede editar marca estado, fecha confirmada y
-  nota desde la fila.
-- `scripts/mirar-calendario.mjs` lo recorre: actualiza una fila, recarga, mira, la devuelve a como
-  estaba y mide el iPhone 14. Seis comprobaciones, sin fallos. `probar:supabase` mira la tabla nueva:
-  80.
-
-**Lo que se decidió:**
-
-- **En la base y no en el código**, porque Amanda coordina las agendas y va fijando cada fecha con
-  un área; el HTML ya preveía «editable por fila».
-- **La casilla, de fábrica, solo al equipo de Boosty** (rol Consultor). Amanda, Gabriel y Alberto son
-  administradores y la tienen sola; los roles de Iberia, si se les marca.
-- **Sin montos**, como Consumos: las dos propuestas los traen, y Alberto lee esta página. Tampoco va
-  lo personal de la conversación —los pagos al señor Carlos, la llamada a Benjamín Gómez—.
-
-**Dónde quedamos**: publicado en producción el mismo día con el visto bueno de Gabriel (`53158ba`),
-y revisado en línea con sesión. La migración ya estaba aplicada en Supabase.
+- **`/dashboard/calendario`** (grupo «Fase 2 · New Iberia»): próximos 14 días, los ocho frentes en la línea de tiempo (se
+  despliegan por actividad) y la agenda mes a mes; tabla `calendario_actividades` con 78 actividades y la casilla
+  `modulo:calendario`. PDF de 14 páginas desde la base (`scripts/documento-calendario.mjs`).
+- **Decidido**: en la base y no en el código (Amanda fija las fechas); la casilla de fábrica solo al equipo de Boosty; **sin
+  montos ni notas internas**, y nada de lo personal de la conversación del 27 con el señor Carlos (no se cargó a la base).
+- En producción el 28/10 (`53158ba`); el despliegue por frente y el PDF, con el visto bueno de Gabriel.
 
 ---
 

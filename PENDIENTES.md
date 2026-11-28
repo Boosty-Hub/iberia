@@ -39,7 +39,7 @@ macroproceso** y Gabriel aprueba cada uno antes de seguir. Plan, prototipo y rev
 
 | Qué | De quién | Estado |
 |---|---|---|
-| Aprobar el macroproceso 1.1 (capturas por Telegram, 28-nov) y seguir con 1.2 | Gabriel | 🟠 esperando |
+| **Seguir con todos los macroprocesos sin detenerse** (Gabriel, 28-nov). Hechos y verificados: 1.1, 1.2, 1.3, 2.1, 2.2, 2.3. A medias: 2.4 (falta 1 lote), 2.5 y 2.7 (revisión cargada, falta transcripción), 2.6 (todo). Faltan 2.8, 2.9 y 3.1–3.8. **Dónde quedamos y el método paso a paso: `plataforma/propuestas/macros/CONTINUAR.md`** | Equipo Boosty | 🟠 en curso |
 | Las 6 preguntas de 1.1 a la Gerencia General (dueño de misión y política, versión 2024 perdida, plan estratégico, Junta Directiva, ISO 9001, dueño de 1.1.4) | Iberia vía Gabriel | 🟠 |
 | Las 12 preguntas del plan por macroproceso (Asesor Jurídico, Olympia, POP, Archivo Central, metrología, repuestos, crédito, maquila, código 81, códigos 21/22, codificación nueva) | Iberia vía Gabriel | 🟠 |
 | Aprobar la lista de macroprocesos propuesta (5 procesos nuevos, 6 que se mueven, 3 duplicados, retiro de II-14) y aplicarla al mapa | Gabriel | 🟠 «Como ya tenemos los 20 macroprocesos» (28-nov); los cambios de procesos se aplican al llegar a cada macroproceso |
